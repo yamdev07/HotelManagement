@@ -1,0 +1,32 @@
+// Fonts
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Nunito");
+
+// Variables
+@import "variables";
+
+// Bootstrap
+@import "bootstrap/scss/bootstrap";
+
+// Toastr
+@import "toastr/toastr";
+
+// Select2
+@import "select2/dist/css/select2.css";
+
+// Datatable
+@import "datatables.net-bs5/css/dataTables.bootstrap5.css";
+
+// Font awesome
+@import "@fortawesome/fontawesome-free/css/all.css";
+
+// Custom scss
+@import "navbar";
+@import "notification";
+@import "progressindicatior";
+
+// DataTable styles
+@import "datatable";
+
+// Custom styles (must be last)
+@import "custom";
