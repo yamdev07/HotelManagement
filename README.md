@@ -264,11 +264,10 @@ This project is open-sourced software licensed under the [MIT license](https://o
 
 ## 👨‍💻 Developer
 
-**Wailan Tirajoh**
+**Yoann Yamd**
 
-- GitHub: [@WailanTirajoh](https://github.com/WailanTirajoh)
-- Instagram: [@tirajoh](https://www.instagram.com/tirajoh/)
-- Facebook: [tirajohw](https://www.facebook.com/tirajohw/)
+- GitHub: [@yamdev07](https://github.com/yamdev07)
+- Email: yoannyamd@gmail.com
 
 ---
 
