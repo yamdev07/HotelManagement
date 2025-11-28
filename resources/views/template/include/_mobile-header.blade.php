@@ -10,7 +10,7 @@
             <div class="brand-icon">
                 <i class="fas fa-hotel"></i>
             </div>
-            <span class="brand-text">Laravel Hotel</span>
+            <span class="brand-text">Le Cactus Hotel</span>
         </a>
 
         <!-- Profile & Notifications -->
@@ -152,7 +152,7 @@
                     <i class="fas fa-hotel"></i>
                 </div>
                 <div class="brand-text">
-                    <h4 class="mb-0">Laravel Hotel</h4>
+                    <h4 class="mb-0">Le Cactus Hotel</h4>
                 </div>
             </div>
 
