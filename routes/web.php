@@ -75,8 +75,21 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'index'])
+        ->name('profile.index');
 
+    Route::get('/profile/edit', [\App\Http\Controllers\ProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::put('/profile/update', [\App\Http\Controllers\ProfileController::class, 'update'])
+        ->name('profile.update');
+        
+    Route::post('/profile/update-info', [ProfileController::class, 'updateInfo'])->name('profile.update.info');
+
+    Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update.password');
+
+    Route::post('/profile/update-avatar', [ProfileController::class, 'updateAvatar'])->name('profile.update.avatar');
+    
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     Route::get('/mark-all-as-read', [NotificationsController::class, 'markAllAsRead'])->name('notification.markAllAsRead');
