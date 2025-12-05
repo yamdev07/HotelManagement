@@ -16,6 +16,7 @@ use App\Http\Controllers\TransactionRoomReservationController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,6 +74,8 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
     Route::view('/notification', 'notification.index')->name('notification.index');
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
