@@ -11,7 +11,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * Les attributs assignables en masse.
      *
      * @var array
      */
@@ -25,7 +25,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for arrays.
+     * Les attributs à cacher dans les tableaux.
      *
      * @var array
      */
@@ -35,7 +35,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be cast to native types.
+     * Les attributs à caster en types natifs.
      *
      * @var array
      */
@@ -43,22 +43,59 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function getAvatar()
+    /**
+     * Retourne le chemin complet de l'avatar de l'utilisateur.
+     * Si aucun avatar n'est défini ou le fichier est manquant, retourne l'avatar par défaut.
+     *
+     * @return string
+     */
+    public function getAvatar(): string
     {
+        // Si aucun avatar défini, utiliser l'avatar par défaut
         if (! $this->avatar) {
             return asset('img/default/default-user.jpg');
         }
 
-        return asset('img/user/'.$this->name.'-'.$this->id.'/'.$this->avatar);
+        // Le fichier est directement dans /public/img/user/
+        $fullPath = 'img/user/' . trim($this->avatar, '/');
+
+        if (file_exists(public_path($fullPath))) {
+            return asset($fullPath);
+        }
+
+        return asset('img/default/default-user.jpg');
     }
 
+
+    /**
+     * Relation One-to-One avec Customer.
+     */
     public function customer()
     {
         return $this->hasOne(Customer::class);
     }
 
-    public function isCustomer()
+    /**
+     * Vérifie si l'utilisateur est un client.
+     */
+    public function isCustomer(): bool
     {
         return $this->role === 'Customer';
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un admin ou super-admin.
+     */
+    public function isAdmin(): bool
+    {
+        return in_array($this->role, ['Admin', 'Super']);
+    }
+
+    /**
+     * Vérifie si l'utilisateur est super-admin.
+     */
+    public function isSuper(): bool
+    {
+        return $this->role === 'Super';
     }
 }
