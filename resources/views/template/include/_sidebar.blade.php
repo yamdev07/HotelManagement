@@ -1,14 +1,14 @@
 <div id="sidebar-wrapper" class="lh-sidebar">
     <div class="sidebar-content">
         <!-- Brand Header -->
-        <div class="sidebar-brand">
+        <a href="{{ route('dashboard.index') }}" class="sidebar-brand text-decoration-none d-flex align-items-center">
             <div class="brand-logo">
                 <i class="fas fa-hotel"></i>
             </div>
             <div class="brand-text">
                 <h4 class="mb-0">Le Cactus Hotel</h4>
             </div>
-        </div>
+        </a>
 
         <!-- User Profile Section -->
         <div class="sidebar-user">
@@ -229,7 +229,7 @@
 <style>
 .lh-sidebar {
     width: 280px;
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    background: linear-gradient(180deg, #064e3b 0%, #047857 100%);
     position: fixed;
     top: 0;
     left: 0;
@@ -258,7 +258,7 @@
 .brand-logo {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    background: linear-gradient(135deg, #22c55e, #16a34a);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -375,14 +375,14 @@
 .notification-icon {
     width: 24px;
     height: 24px;
-    background: rgba(59, 130, 246, 0.2);
+    background: rgba(34, 197, 94, 0.2);
+    color: #16a34a;    
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: 0.75rem;
     flex-shrink: 0;
-    color: #60a5fa;
     font-size: 0.7rem;
 }
 
@@ -510,14 +510,13 @@
 }
 .nav-item:not(.dropdown-nav):hover {
     color: white;
-    background: rgba(255, 255, 255, 0.08);
-    border-left-color: #3b82f6;
-}
+    background: rgba(34, 197, 94, 0.15); /* Vert clair transparent */
+    border-left-color: #22c55e; /* Vert clair */}
 
 .nav-item:not(.dropdown-nav).active {
     color: white;
-    background: rgba(59, 130, 246, 0.15);
-    border-left-color: #3b82f6;
+    background: rgba(5, 150, 105, 0.15);
+    border-left-color: #16a34a;
 }
 
 .nav-icon {
@@ -579,8 +578,8 @@
 
 .dropdown-nav.active .nav-toggle {
     color: white;
-    background: rgba(59, 130, 246, 0.15);
-    border-left-color: #3b82f6;
+    background: rgba(34, 197, 94, 0.15); /* Vert clair transparent */
+    border-left-color: #16a34a; /* Vert foncé */
 }
 
 .nav-arrow {
@@ -610,12 +609,12 @@
 
 .nav-subitem:hover {
     color: white;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(34, 197, 94, 0.05);
 }
 
 .nav-subitem.active {
-    color: #3b82f6;
-    background: rgba(59, 130, 246, 0.1);
+    color: #16a34a;
+    background: rgba(5, 150, 105, 0.1);
 }
 
 /* Sidebar Footer */
@@ -625,8 +624,8 @@
 }
 
 .quick-action-btn {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    border: none;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);    border: none;
     border-radius: 8px;
     font-weight: 600;
     font-size: 0.9rem;
@@ -635,6 +634,7 @@
 }
 
 .quick-action-btn:hover {
+    border-left-color: #22c55e;
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
