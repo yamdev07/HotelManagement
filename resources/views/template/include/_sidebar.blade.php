@@ -1,14 +1,14 @@
 <div id="sidebar-wrapper" class="lh-sidebar">
     <div class="sidebar-content">
         <!-- Brand Header -->
-        <div class="sidebar-brand">
+        <a href="{{ route('dashboard.index') }}" class="sidebar-brand text-decoration-none d-flex align-items-center">
             <div class="brand-logo">
                 <i class="fas fa-hotel"></i>
             </div>
             <div class="brand-text">
                 <h4 class="mb-0">Le Cactus Hotel</h4>
             </div>
-        </div>
+        </a>
 
         <!-- User Profile Section -->
         <div class="sidebar-user">
