@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class Facility extends Model
 {
     use HasFactory;
+
+    // Déclare les champs que tu veux rendre "mass assignable"
+    protected $fillable = [
+        'name',
+        'detail',
+        'icon',
+    ];
 }
