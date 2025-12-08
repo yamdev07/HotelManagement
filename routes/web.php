@@ -17,7 +17,7 @@ use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
-
+use App\Http\Controllers\ReportController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -77,6 +77,8 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
 
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'index'])
         ->name('profile.index');
+    
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
     Route::get('/profile/edit', [\App\Http\Controllers\ProfileController::class, 'edit'])
         ->name('profile.edit');

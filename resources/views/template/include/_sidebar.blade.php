@@ -183,7 +183,8 @@
                 <div class="nav-section">
                     <div class="nav-section-title">Analytics</div>
 
-                    <a href="#" class="nav-item">
+                    <a href="{{ route('reports.index') }}" class="nav-item">
+
                         <div class="nav-icon">
                             <i class="fas fa-chart-bar"></i>
                         </div>
