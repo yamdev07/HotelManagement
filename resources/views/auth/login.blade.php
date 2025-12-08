@@ -356,8 +356,8 @@
 
                 <div class="demo-info">
                     <h6><i class="fas fa-info-circle me-2"></i>Demo Account</h6>
-                    <p><strong>Email:</strong> wailantirajoh@gmail.com</p>
-                    <p><strong>Password:</strong> wailan</p>
+                    <p><strong>Email:</strong> yoannyamd@gmail.com</p>
+                    <p><strong>Password:</strong> 123456789</p>
                 </div>
             </div>
         </div>
