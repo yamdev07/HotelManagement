@@ -1,292 +1,253 @@
-@extends('layouts.app')
-
+@extends('template.master')
+@section('title', 'Restaurant - Commandes')
 @section('content')
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-                <h4 class="mb-sm-0">Gestion des Commandes</h4>
-                <div class="page-title-right">
-                    <ol class="breadcrumb m-0">
-                        <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Commandes Restaurant</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="mb-0">Gestion des Commandes</h3>
+    <div class="d-flex gap-2">
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newOrderModal">
+            <i class="fas fa-plus me-2"></i> Nouvelle Commande
+        </button>
     </div>
+</div>
 
-    <!-- Statistiques -->
-    <div class="row">
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="fw-medium text-muted mb-0">Commandes en attente</p>
-                            <h4 class="mt-2">{{ $pendingOrders ?? 0 }}</h4>
-                        </div>
-                        <div class="avatar-sm flex-shrink-0">
-                            <span class="avatar-title bg-warning-subtle text-warning rounded-circle fs-2">
-                                <i class="fas fa-clock"></i>
-                            </span>
-                        </div>
+<!-- Statistiques -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">En attente</h6>
+                        <h3 class="mb-0 text-warning">{{ $pendingOrders ?? 0 }}</h3>
                     </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="fw-medium text-muted mb-0">Commandes livrées</p>
-                            <h4 class="mt-2">{{ $deliveredOrders ?? 0 }}</h4>
-                        </div>
-                        <div class="avatar-sm flex-shrink-0">
-                            <span class="avatar-title bg-success-subtle text-success rounded-circle fs-2">
-                                <i class="fas fa-check-circle"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="fw-medium text-muted mb-0">Chiffre d'affaires (auj.)</p>
-                            <h4 class="mt-2">{{ number_format($todayRevenue ?? 0, 2) }} €</h4>
-                        </div>
-                        <div class="avatar-sm flex-shrink-0">
-                            <span class="avatar-title bg-primary-subtle text-primary rounded-circle fs-2">
-                                <i class="fas fa-euro-sign"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <p class="fw-medium text-muted mb-0">Commandes du mois</p>
-                            <h4 class="mt-2">{{ $monthlyOrders ?? 0 }}</h4>
-                        </div>
-                        <div class="avatar-sm flex-shrink-0">
-                            <span class="avatar-title bg-info-subtle text-info rounded-circle fs-2">
-                                <i class="fas fa-calendar-alt"></i>
-                            </span>
-                        </div>
+                    <div class="bg-warning bg-opacity-10 p-3 rounded">
+                        <i class="fas fa-clock fa-2x text-warning"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Filtres et Actions -->
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="card-title mb-0">Toutes les Commandes</h5>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#newOrderModal">
-                                <i class="fas fa-plus me-1"></i> Nouvelle Commande
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Livrées</h6>
+                        <h3 class="mb-0 text-success">{{ $deliveredOrders ?? 0 }}</h3>
+                    </div>
+                    <div class="bg-success bg-opacity-10 p-3 rounded">
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">CA (auj.)</h6>
+                        <h3 class="mb-0 text-primary">{{ number_format($todayRevenue ?? 0, 2) }} €</h3>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 p-3 rounded">
+                        <i class="fas fa-euro-sign fa-2x text-primary"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted mb-1">Mois</h6>
+                        <h3 class="mb-0 text-info">{{ $monthlyOrders ?? 0 }}</h3>
+                    </div>
+                    <div class="bg-info bg-opacity-10 p-3 rounded">
+                        <i class="fas fa-calendar-alt fa-2x text-info"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <!-- Filtres -->
+        <div class="p-3 border-bottom">
+            <div class="row">
+                <div class="col-md-3">
+                    <label class="form-label">Statut</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Tous les statuts</option>
+                        <option value="pending">En attente</option>
+                        <option value="preparing">En préparation</option>
+                        <option value="delivered">Livré</option>
+                        <option value="paid">Payé</option>
+                        <option value="cancelled">Annulé</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date de</label>
+                    <input type="date" class="form-control" id="dateFrom">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Date à</label>
+                    <input type="date" class="form-control" id="dateTo">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" id="applyFilters">
+                        <i class="fas fa-filter me-1"></i> Appliquer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table des commandes -->
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Client</th>
+                        <th>Chambre</th>
+                        <th>Menus</th>
+                        <th>Total</th>
+                        <th>Statut</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($orders as $order)
+                    <tr data-status="{{ $order->status }}">
+                        <td><strong>#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</strong></td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0 me-2">
+                                    <i class="fas fa-user-circle text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    {{ $order->customer_name ?? 'Client non spécifié' }}
+                                    @if($order->customer_phone)
+                                    <br><small class="text-muted">{{ $order->customer_phone }}</small>
+                                    @endif
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            @if($order->room_id)
+                            <span class="badge bg-info">Ch. {{ $order->room_number }}</span>
+                            @else
+                            <span class="text-muted">-</span>
+                            @endif
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-info view-items" 
+                                    data-order-id="{{ $order->id }}"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#orderDetailsModal">
+                                {{ $order->items_count ?? 0 }} article(s)
                             </button>
+                        </td>
+                        <td>
+                            <strong class="text-primary">{{ number_format($order->total, 2) }} €</strong>
+                        </td>
+                        <td>
+                            @php
+                                $statusColors = [
+                                    'pending' => 'warning',
+                                    'preparing' => 'info',
+                                    'delivered' => 'success',
+                                    'paid' => 'primary',
+                                    'cancelled' => 'danger'
+                                ];
+                                $statusLabels = [
+                                    'pending' => 'En attente',
+                                    'preparing' => 'En préparation',
+                                    'delivered' => 'Livré',
+                                    'paid' => 'Payé',
+                                    'cancelled' => 'Annulé'
+                                ];
+                            @endphp
+                            <span class="badge bg-{{ $statusColors[$order->status] ?? 'secondary' }}">
+                                {{ $statusLabels[$order->status] ?? $order->status }}
+                            </span>
+                        </td>
+                        <td>
+                            {{ $order->created_at->format('d/m/Y H:i') }}
+                        </td>
+                        <td>
                             <div class="dropdown">
-                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-download me-1"></i> Exporter
+                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#">Excel</a></li>
-                                    <li><a class="dropdown-item" href="#">PDF</a></li>
-                                    <li><a class="dropdown-item" href="#">CSV</a></li>
+                                    <li>
+                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#orderDetailsModal" data-order-id="{{ $order->id }}">
+                                            <i class="fas fa-eye me-2"></i> Détails
+                                        </a>
+                                    </li>
+                                    @if($order->status == 'pending')
+                                    <li>
+                                        <a class="dropdown-item change-status" href="#" data-order-id="{{ $order->id }}" data-status="preparing">
+                                            <i class="fas fa-play me-2"></i> Préparer
+                                        </a>
+                                    </li>
+                                    @endif
+                                    @if($order->status == 'preparing')
+                                    <li>
+                                        <a class="dropdown-item change-status" href="#" data-order-id="{{ $order->id }}" data-status="delivered">
+                                            <i class="fas fa-check me-2"></i> Livrer
+                                        </a>
+                                    </li>
+                                    @endif
+                                    @if(in_array($order->status, ['delivered', 'pending']))
+                                    <li>
+                                        <a class="dropdown-item change-status" href="#" data-order-id="{{ $order->id }}" data-status="paid">
+                                            <i class="fas fa-euro-sign me-2"></i> Marquer payé
+                                        </a>
+                                    </li>
+                                    @endif
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item text-danger cancel-order" href="#" data-order-id="{{ $order->id }}">
+                                            <i class="fas fa-times me-2"></i> Annuler
+                                        </a>
+                                    </li>
                                 </ul>
                             </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Filtres -->
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <label class="form-label">Statut</label>
-                            <select class="form-select" id="statusFilter">
-                                <option value="">Tous les statuts</option>
-                                <option value="pending">En attente</option>
-                                <option value="preparing">En préparation</option>
-                                <option value="delivered">Livré</option>
-                                <option value="paid">Payé</option>
-                                <option value="cancelled">Annulé</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Date de</label>
-                            <input type="date" class="form-control" id="dateFrom">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Date à</label>
-                            <input type="date" class="form-control" id="dateTo">
-                        </div>
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button class="btn btn-primary w-100" id="applyFilters">
-                                <i class="fas fa-filter me-1"></i> Appliquer
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="text-center py-5">
+                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
+                            <h4>Aucune commande trouvée</h4>
+                            <p class="text-muted">Aucune commande n'a été passée pour le moment.</p>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newOrderModal">
+                                <i class="fas fa-plus me-1"></i> Créer la première commande
                             </button>
-                        </div>
-                    </div>
-
-                    <!-- Table des commandes -->
-                    <div class="table-responsive">
-                        <table class="table table-hover table-centered mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>#</th>
-                                    <th>Client</th>
-                                    <th>Chambre</th>
-                                    <th>Menus</th>
-                                    <th>Total</th>
-                                    <th>Statut</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($orders as $order)
-                                <tr data-status="{{ $order->status }}">
-                                    <td><strong>#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</strong></td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="flex-shrink-0 me-2">
-                                                <i class="fas fa-user-circle text-primary"></i>
-                                            </div>
-                                            <div class="flex-grow-1">
-                                                {{ $order->customer_name ?? 'Client non spécifié' }}
-                                                @if($order->customer_phone)
-                                                <br><small class="text-muted">{{ $order->customer_phone }}</small>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        @if($order->room_id)
-                                        <span class="badge bg-info">Ch. {{ $order->room_number }}</span>
-                                        @else
-                                        <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <button class="btn btn-sm btn-outline-info view-items" 
-                                                data-order-id="{{ $order->id }}"
-                                                data-bs-toggle="modal" 
-                                                data-bs-target="#orderDetailsModal">
-                                            {{ $order->items_count ?? 0 }} article(s)
-                                        </button>
-                                    </td>
-                                    <td>
-                                        <strong class="text-primary">{{ number_format($order->total, 2) }} €</strong>
-                                    </td>
-                                    <td>
-                                        @php
-                                            $statusColors = [
-                                                'pending' => 'warning',
-                                                'preparing' => 'info',
-                                                'delivered' => 'success',
-                                                'paid' => 'primary',
-                                                'cancelled' => 'danger'
-                                            ];
-                                            $statusLabels = [
-                                                'pending' => 'En attente',
-                                                'preparing' => 'En préparation',
-                                                'delivered' => 'Livré',
-                                                'paid' => 'Payé',
-                                                'cancelled' => 'Annulé'
-                                            ];
-                                        @endphp
-                                        <span class="badge bg-{{ $statusColors[$order->status] ?? 'secondary' }}">
-                                            {{ $statusLabels[$order->status] ?? $order->status }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        {{ $order->created_at->format('d/m/Y H:i') }}
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </button>
-                                            <ul class="dropdown-menu">
-                                                <li>
-                                                    <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#orderDetailsModal" data-order-id="{{ $order->id }}">
-                                                        <i class="fas fa-eye me-2"></i> Détails
-                                                    </a>
-                                                </li>
-                                                @if($order->status == 'pending')
-                                                <li>
-                                                    <a class="dropdown-item change-status" href="#" data-order-id="{{ $order->id }}" data-status="preparing">
-                                                        <i class="fas fa-play me-2"></i> Préparer
-                                                    </a>
-                                                </li>
-                                                @endif
-                                                @if($order->status == 'preparing')
-                                                <li>
-                                                    <a class="dropdown-item change-status" href="#" data-order-id="{{ $order->id }}" data-status="delivered">
-                                                        <i class="fas fa-check me-2"></i> Livrer
-                                                    </a>
-                                                </li>
-                                                @endif
-                                                @if(in_array($order->status, ['delivered', 'pending']))
-                                                <li>
-                                                    <a class="dropdown-item change-status" href="#" data-order-id="{{ $order->id }}" data-status="paid">
-                                                        <i class="fas fa-euro-sign me-2"></i> Marquer payé
-                                                    </a>
-                                                </li>
-                                                @endif
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <a class="dropdown-item text-danger cancel-order" href="#" data-order-id="{{ $order->id }}">
-                                                        <i class="fas fa-times me-2"></i> Annuler
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="8" class="text-center py-5">
-                                        <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                                        <h4>Aucune commande trouvée</h4>
-                                        <p class="text-muted">Aucune commande n'a été passée pour le moment.</p>
-                                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newOrderModal">
-                                            <i class="fas fa-plus me-1"></i> Créer la première commande
-                                        </button>
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <!-- Pagination -->
-                    @if($orders->hasPages())
-                    <div class="row mt-4">
-                        <div class="col-12">
-                            {{ $orders->links() }}
-                        </div>
-                    </div>
-                    @endif
-                </div>
-            </div>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+
+        <!-- Pagination -->
+        @if($orders->hasPages())
+        <div class="p-3 border-top">
+            {{ $orders->links() }}
+        </div>
+        @endif
     </div>
 </div>
 
@@ -421,7 +382,7 @@
 </div>
 @endsection
 
-@push('scripts')
+@section('footer')
 <script>
 $(document).ready(function() {
     let items = [];
@@ -441,7 +402,12 @@ $(document).ready(function() {
     // Appliquer les filtres
     $('#applyFilters').click(function() {
         // Ici, vous pouvez implémenter le filtrage AJAX
-        alert('Filtrage à implémenter avec AJAX');
+        Swal.fire({
+            icon: 'info',
+            title: 'Filtrage',
+            text: 'Fonctionnalité à implémenter avec AJAX',
+            timer: 2000
+        });
     });
 
     // Afficher les détails de la commande
@@ -468,19 +434,41 @@ $(document).ready(function() {
         const orderId = $(this).data('order-id');
         const status = $(this).data('status');
         
-        if (confirm('Changer le statut de cette commande ?')) {
-            $.ajax({
-                url: `{{ route('restaurant.orders.update', '') }}/${orderId}`,
-                type: 'PUT',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    status: status
-                },
-                success: function(response) {
-                    location.reload();
-                }
-            });
-        }
+        Swal.fire({
+            title: 'Confirmer',
+            text: 'Changer le statut de cette commande ?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Oui, changer',
+            cancelButtonText: 'Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `{{ route('restaurant.orders.update', '') }}/${orderId}`,
+                    type: 'PUT',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        status: status
+                    },
+                    success: function(response) {
+                        Swal.fire(
+                            'Succès !',
+                            'Statut mis à jour avec succès.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function() {
+                        Swal.fire(
+                            'Erreur !',
+                            'Une erreur est survenue.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
     });
 
     // Annuler une commande
@@ -488,18 +476,41 @@ $(document).ready(function() {
         e.preventDefault();
         const orderId = $(this).data('order-id');
         
-        if (confirm('Êtes-vous sûr de vouloir annuler cette commande ?')) {
-            $.ajax({
-                url: `{{ route('restaurant.orders.cancel', '') }}/${orderId}`,
-                type: 'PUT',
-                data: {
-                    _token: '{{ csrf_token() }}'
-                },
-                success: function(response) {
-                    location.reload();
-                }
-            });
-        }
+        Swal.fire({
+            title: 'Êtes-vous sûr ?',
+            text: 'Cette commande sera annulée.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Oui, annuler',
+            cancelButtonText: 'Non',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `{{ route('restaurant.orders.cancel', '') }}/${orderId}`,
+                    type: 'PUT',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        Swal.fire(
+                            'Annulé !',
+                            'La commande a été annulée.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function() {
+                        Swal.fire(
+                            'Erreur !',
+                            'Une erreur est survenue.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
     });
 
     // Nouvelle commande - Logique
@@ -514,19 +525,26 @@ $(document).ready(function() {
         const quantity = parseInt($('#quantity').val());
         
         if (!menuSelect.val()) {
-            alert('Veuillez sélectionner un menu');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Attention',
+                text: 'Veuillez sélectionner un menu'
+            });
             return;
         }
         
         if (quantity < 1) {
-            alert('La quantité doit être au moins 1');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Attention',
+                text: 'La quantité doit être au moins 1'
+            });
             return;
         }
         
         const menuId = menuSelect.val();
         const menuName = menuSelect.find(':selected').data('name');
         const price = parseFloat(menuSelect.find(':selected').data('price'));
-        const itemTotal = price * quantity;
         
         // Vérifier si l'item existe déjà
         const existingItem = items.find(item => item.menu_id == menuId);
@@ -605,7 +623,11 @@ $(document).ready(function() {
     $('#newOrderForm').submit(function(e) {
         if (items.length === 0) {
             e.preventDefault();
-            alert('Veuillez ajouter au moins un menu à la commande');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Attention',
+                text: 'Veuillez ajouter au moins un menu à la commande'
+            });
             return;
         }
     });
@@ -618,20 +640,12 @@ $(document).ready(function() {
 </script>
 
 <style>
-.card-animate {
+.card {
     transition: transform 0.3s ease;
 }
 
-.card-animate:hover {
-    transform: translateY(-5px);
-}
-
-.avatar-title {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
+.card:hover {
+    transform: translateY(-2px);
 }
 
 .table tbody tr:hover {
@@ -646,10 +660,5 @@ $(document).ready(function() {
 #itemsTable input.form-control-sm {
     text-align: center;
 }
-
-.quantity-input::-webkit-inner-spin-button,
-.quantity-input::-webkit-outer-spin-button {
-    opacity: 1;
-}
 </style>
-@endpush
+@endsection

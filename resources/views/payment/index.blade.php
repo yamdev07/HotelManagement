@@ -16,6 +16,7 @@
                         <th scope="col">Action</th>
                     </tr>
                 </thead>
+                
                 <tbody>
                     @forelse ($payments as $payment)
                         <tr>
