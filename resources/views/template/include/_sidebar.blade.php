@@ -178,6 +178,35 @@
                         </div>
                     </div>
                 </div>
+                <!-- Restaurant Management -->
+                <div class="nav-item dropdown-nav {{ in_array(Route::currentRouteName(), ['restaurant.index', 'restaurant.create', 'restaurant.orders']) ? 'active' : '' }}">
+                    <div class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#restaurantSubmenu">
+                        <div class="nav-icon">
+                            <i class="fas fa-utensils"></i>
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Restaurant</div>
+                            <div class="nav-subtitle">Menus & Commandes</div>
+                        </div>
+                        <div class="nav-arrow">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+
+                    <div class="collapse" id="restaurantSubmenu">
+                        <div class="nav-submenu">
+                            <a href="{{ route('restaurant.index') }}" class="nav-subitem">
+                                <i class="fas fa-list me-2"></i>Menus
+                            </a>
+                            <a href="{{ route('restaurant.create') }}" class="nav-subitem">
+                                <i class="fas fa-plus me-2"></i>Ajouter un plat
+                            </a>
+                            <a href="{{ route('restaurant.orders') }}" class="nav-subitem">
+                                <i class="fas fa-receipt me-2"></i>Commandes
+                            </a>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Analytics -->
                 <div class="nav-section">

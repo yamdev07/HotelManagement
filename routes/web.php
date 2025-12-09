@@ -18,6 +18,7 @@ use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RestaurantController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -97,6 +98,8 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
     Route::get('/mark-all-as-read', [NotificationsController::class, 'markAllAsRead'])->name('notification.markAllAsRead');
 
     Route::get('/notification-to/{id}', [NotificationsController::class, 'routeTo'])->name('notification.routeTo');
+
+    
 });
 
 // Login routes
@@ -112,6 +115,27 @@ Route::group(['middleware' => 'guest'], function () {
     Route::get('/reset-password/{token}', fn (string $token) => view('auth.reset-password', ['token' => $token]))
         ->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+});
+
+// Restaurant Module
+Route::prefix('restaurant')->name('restaurant.')->group(function () {
+    
+    // Menus
+    Route::get('/', [RestaurantController::class, 'index'])->name('index');
+    Route::get('/create', [RestaurantController::class, 'create'])->name('create');
+    Route::post('/store', [RestaurantController::class, 'store'])->name('store');
+    Route::delete('/menus/{id}', [RestaurantController::class, 'destroy'])->name('menus.destroy');
+    
+    // Commandes
+    Route::get('/orders', [RestaurantController::class, 'orders'])->name('orders');
+    Route::get('/orders/{id}', [RestaurantController::class, 'showOrder'])->name('orders.show');
+    Route::post('/orders/store', [RestaurantController::class, 'storeOrder'])->name('orders.store');
+    Route::put('/orders/{id}', [RestaurantController::class, 'updateOrder'])->name('orders.update');
+    Route::put('/orders/{id}/cancel', [RestaurantController::class, 'cancelOrder'])->name('orders.cancel');
+    
+    // API pour AJAX
+    Route::get('/api/customers', [RestaurantController::class, 'getCustomers'])->name('api.customers');
+    Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
 });
 
 Route::redirect('/', '/dashboard');
