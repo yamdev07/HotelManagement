@@ -19,6 +19,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestaurantController;
+// AJOUTEZ cette ligne :
+use App\Http\Controllers\FrontendController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -29,6 +32,39 @@ use App\Http\Controllers\RestaurantController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+// ==================== ROUTES FRONTEND (Site Vitrine) ====================
+// Ces routes doivent être DÉFINIES AVANT les autres
+
+// Page d'accueil du site vitrine (accessible à tous)
+Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
+
+// Autres pages du site vitrine
+Route::get('/chambres', [FrontendController::class, 'rooms'])->name('frontend.rooms');
+Route::get('/chambre/{id}', [FrontendController::class, 'roomDetails'])->name('frontend.room.details');
+Route::get('/restaurant-vitrine', [FrontendController::class, 'restaurant'])->name('frontend.restaurant');
+Route::get('/services', [FrontendController::class, 'services'])->name('frontend.services');
+Route::get('/contact', [FrontendController::class, 'contact'])->name('frontend.contact');
+Route::post('/restaurant/reservation', [FrontendController::class, 'restaurantReservationStore'])
+        ->name('restaurant.reservation.store');
+
+// ==================== ROUTES D'AUTHENTIFICATION ====================
+// Login routes
+Route::view('/login', 'auth.login')->name('login.index');
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+// Forgot Password routes
+Route::group(['middleware' => 'guest'], function () {
+    Route::get('/forgot-password', fn () => view('auth.passwords.email'))->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
+
+    // Reset Password routes
+    Route::get('/reset-password/{token}', fn (string $token) => view('auth.reset-password', ['token' => $token]))
+        ->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
+});
+
+// ==================== ROUTES BACKEND (Dashboard) ====================
 
 Route::group(['middleware' => ['auth', 'checkRole:Super']], function () {
     Route::resource('user', UserController::class);
@@ -66,6 +102,15 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
 });
 
 Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], function () {
+    // Redirection du dashboard (accessible seulement aux utilisateurs connectés)
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+    
+    // Vous pouvez aussi ajouter une redirection pour les utilisateurs connectés
+    // qui vont sur la page d'accueil :
+    Route::get('/home', function () {
+        return redirect()->route('dashboard.index');
+    })->name('home');
+    
     Route::get('/activity-log', [ActivityController::class, 'index'])->name('activity-log.index');
     Route::get('/activity-log/all', [ActivityController::class, 'all'])->name('activity-log.all');
     Route::resource('user', UserController::class)->only([
@@ -73,8 +118,6 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
     ]);
 
     Route::view('/notification', 'notification.index')->name('notification.index');
-
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
 
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'index'])
         ->name('profile.index');
@@ -98,27 +141,10 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
     Route::get('/mark-all-as-read', [NotificationsController::class, 'markAllAsRead'])->name('notification.markAllAsRead');
 
     Route::get('/notification-to/{id}', [NotificationsController::class, 'routeTo'])->name('notification.routeTo');
-
-    
 });
 
-// Login routes
-Route::view('/login', 'auth.login')->name('login.index');
-Route::post('/login', [AuthController::class, 'login'])->name('login');
-
-// Forgot Password routes
-Route::group(['middleware' => 'guest'], function () {
-    Route::get('/forgot-password', fn () => view('auth.passwords.email'))->name('password.request');
-    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
-
-    // Reset Password routes
-    Route::get('/reset-password/{token}', fn (string $token) => view('auth.reset-password', ['token' => $token]))
-        ->name('password.reset');
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
-});
-
-// Restaurant Module
-Route::prefix('restaurant')->name('restaurant.')->group(function () {
+// Restaurant Module (Backend)
+Route::middleware(['auth', 'checkRole:Super,Admin,Customer'])->prefix('restaurant')->name('restaurant.')->group(function () {
     
     // Menus
     Route::get('/', [RestaurantController::class, 'index'])->name('index');
@@ -138,4 +164,10 @@ Route::prefix('restaurant')->name('restaurant.')->group(function () {
     Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
 });
 
-Route::redirect('/', '/dashboard');
+// SUPPRIMEZ ou COMMENTEZ cette ligne :
+// Route::redirect('/', '/dashboard');
+
+// À la place, vous pouvez ajouter :
+Route::get('/admin', function () {
+    return redirect()->route('dashboard.index');
+});
