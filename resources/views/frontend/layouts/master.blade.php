@@ -18,20 +18,23 @@
     <!-- Styles personnalisés -->
     <style>
         :root {
-            --primary-color: #c29a5c;
-            --secondary-color: #1a3c5e;
-            --light-color: #f8f9fa;
-            --dark-color: #212529;
+            --primary-color: #4CAF50; /* Vert principal */
+            --secondary-color: #81C784; /* Vert secondaire */
+            --light-color: #F1F8E9; /* Vert très clair */
+            --dark-color: #2E7D32; /* Vert foncé */
+            --accent-color: #C8E6C9; /* Vert accent */
         }
         
         body {
             font-family: 'Montserrat', sans-serif;
-            color: var(--dark-color);
+            color: #333;
+            background-color: var(--light-color);
         }
         
         h1, h2, h3, h4, h5, h6 {
             font-family: 'Playfair Display', serif;
             font-weight: 700;
+            color: var(--dark-color);
         }
         
         .bg-primary-custom {
@@ -49,18 +52,19 @@
         }
         
         .btn-primary-custom:hover {
-            background-color: #b08a4c;
-            border-color: #b08a4c;
+            background-color: #388E3C;
+            border-color: #388E3C;
         }
         
         .navbar-brand {
             font-family: 'Playfair Display', serif;
             font-size: 1.8rem;
             font-weight: 700;
+            color: var(--dark-color) !important;
         }
         
         .hero-section {
-            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+            background: linear-gradient(rgba(76, 175, 80, 0.8), rgba(76, 175, 80, 0.8)), 
                         url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
             background-size: cover;
             background-position: center;
@@ -72,14 +76,18 @@
             transition: transform 0.3s ease;
             border: none;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
         }
         
         .room-card:hover {
             transform: translateY(-10px);
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
         }
         
         .footer {
-            background-color: var(--secondary-color);
+            background-color: var(--dark-color);
             color: white;
         }
         
@@ -91,7 +99,61 @@
         }
         
         .social-icons a:hover {
+            color: var(--secondary-color);
+        }
+        
+        .nav-link {
+            color: var(--dark-color) !important;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+        }
+        
+        .btn-outline-primary-custom {
             color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-outline-primary-custom:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+        
+        /* Styles pour les formulaires */
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.25rem rgba(129, 199, 132, 0.25);
+        }
+        
+        /* Cartes et conteneurs */
+        .card {
+            border: 1px solid rgba(76, 175, 80, 0.1);
+            background-color: white;
+        }
+        
+        .card-header {
+            background-color: var(--accent-color);
+            border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+        }
+        
+        /* Tables */
+        .table-hover tbody tr:hover {
+            background-color: var(--accent-color);
+        }
+        
+        /* Alertes */
+        .alert-success {
+            background-color: var(--accent-color);
+            border-color: var(--secondary-color);
+            color: var(--dark-color);
+        }
+        
+        /* Badges */
+        .badge.bg-primary {
+            background-color: var(--primary-color) !important;
         }
     </style>
     
@@ -101,7 +163,7 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
         <div class="container">
-            <a class="navbar-brand text-primary-custom" href="{{ route('frontend.home') }}">
+            <a class="navbar-brand" href="{{ route('frontend.home') }}">
                 <i class="fas fa-hotel me-2"></i>Luxury Palace
             </a>
 
