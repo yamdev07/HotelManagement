@@ -19,7 +19,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestaurantController;
-// AJOUTEZ cette ligne :
 use App\Http\Controllers\FrontendController;
 
 /*
@@ -44,9 +43,28 @@ Route::get('/chambres', [FrontendController::class, 'rooms'])->name('frontend.ro
 Route::get('/chambre/{id}', [FrontendController::class, 'roomDetails'])->name('frontend.room.details');
 Route::get('/restaurant-vitrine', [FrontendController::class, 'restaurant'])->name('frontend.restaurant');
 Route::get('/services', [FrontendController::class, 'services'])->name('frontend.services');
+
+// Routes de contact
 Route::get('/contact', [FrontendController::class, 'contact'])->name('frontend.contact');
+Route::post('/contact/submit', [FrontendController::class, 'contactSubmit'])->name('frontend.contact.submit');
+
+// Traitement du formulaire de contact
+// Route::post('/contact/submit', function (\Illuminate\Http\Request $request) {
+//     // Validation
+//     $request->validate([
+//         'name' => 'required|string|max:255',
+//         'email' => 'required|email|max:255',
+//         'subject' => 'required|string|max:255',
+//         'message' => 'required|string|min:10',
+//     ]);
+    
+//     // Message de succès
+//     return back()->with('success', 'Merci pour votre message ! Nous vous répondrons dans les plus brefs délais.');
+// })->name('frontend.contact.submit');
+
+// Route de réservation restaurant
 Route::post('/restaurant/reservation', [FrontendController::class, 'restaurantReservationStore'])
-        ->name('restaurant.reservation.store');
+    ->name('restaurant.reservation.store');
 
 // ==================== ROUTES D'AUTHENTIFICATION ====================
 // Login routes
