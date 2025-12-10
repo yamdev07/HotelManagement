@@ -9,9 +9,21 @@
                         <h1 class="h3 text-gradient mb-1">Welcome back, {{ auth()->user()->name }}!</h1>
                         <p class="text-muted mb-0">Here's what's happening at your hotel today</p>
                     </div>
-                    <div class="text-end">
-                        <div class="text-muted small">{{ now()->format('l, F j, Y') }}</div>
-                        <div class="fw-bold">{{ now()->format('g:i A') }}</div>
+                    <div class="d-flex align-items-center gap-3">
+                        <!-- Bouton Site Vitrine -->
+                        <a href="{{ route('frontend.home') }}" 
+                           class="btn btn-outline-info btn-sm" 
+                           target="_blank"
+                           data-bs-toggle="tooltip" 
+                           title="Voir le site public">
+                            <i class="fas fa-external-link-alt me-1"></i>
+                            Voir le site
+                        </a>
+                        
+                        <div class="text-end">
+                            <div class="text-muted small">{{ now()->format('l, F j, Y') }}</div>
+                            <div class="fw-bold">{{ now()->format('g:i A') }}</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -86,6 +98,15 @@
                             <small class="text-muted">Current hotel occupancy - {{ now()->format('l, F j, Y') }}</small>
                         </div>
                         <div class="d-flex gap-2">
+                            <!-- Ajoutez aussi ici si vous voulez -->
+                            <a href="{{ route('frontend.home') }}" 
+                               class="btn btn-outline-info btn-sm" 
+                               target="_blank"
+                               data-bs-toggle="tooltip" 
+                               title="Voir le site public">
+                                <i class="fas fa-external-link-alt me-1"></i>
+                                Site
+                            </a>
                             <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="tooltip" title="Export">
                                 <i class="fas fa-download"></i>
                             </button>

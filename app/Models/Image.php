@@ -19,8 +19,28 @@ class Image extends Model
         return $this->belongsTo(Room::class);
     }
 
+    // CORRIGEZ CETTE MÉTHODE :
     public function getRoomImage()
     {
-        return asset('img/room/'.$this->room->number.'/'.$this->url);
+        // Si l'URL commence par http:// ou https://, utilisez-la directement
+        if (str_starts_with($this->url, 'http://') || str_starts_with($this->url, 'https://')) {
+            return $this->url;
+        }
+        
+        // Sinon, supposez que c'est un chemin dans storage
+        // Enlève le 'storage/' s'il est déjà présent au début
+        $url = ltrim($this->url, '/');
+        if (str_starts_with($url, 'storage/')) {
+            return asset($url);
+        }
+        
+        // Par défaut, ajoute 'storage/'
+        return asset('storage/' . $url);
+    }
+    
+    // Méthode alternative plus simple
+    public function getImageUrl()
+    {
+        return $this->getRoomImage(); // Utilise la même logique
     }
 }
