@@ -102,4 +102,38 @@ class FrontendController extends Controller
             'message' => 'Réservation envoyée avec succès !'
         ]);
     }
+
+    public function contactSubmit(Request $request)
+    {
+        // Validation des données
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'subject' => 'required|string|max:255',
+            'message' => 'required|string|min:10',
+            'newsletter' => 'nullable|boolean',
+        ]);
+
+        try {
+            // Ici, vous pouvez :
+            // 1. Envoyer un email
+            // Mail::to('contact@luxurypalace.com')->send(new ContactFormMail($validated));
+            
+            // 2. Sauvegarder dans la base de données
+            // $contact = \App\Models\ContactMessage::create($validated);
+            
+            // 3. Retourner avec un message de succès
+            return redirect()->back()->with([
+                'success' => 'Votre message a été envoyé avec succès ! Nous vous répondrons dans les plus brefs délais.',
+                'status' => 'success'
+            ]);
+            
+        } catch (\Exception $e) {
+            return redirect()->back()->with([
+                'error' => 'Une erreur est survenue lors de l\'envoi de votre message. Veuillez réessayer.',
+                'status' => 'error'
+            ])->withInput();
+        }
+    }
 }

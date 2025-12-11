@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Hôtel de luxe - Réservez votre séjour dans notre établissement 5 étoiles">
-    <title>@yield('title', 'Hôtel Luxury Palace')</title>
+    <title>@yield('title', 'Hôtel Cactus Palace')</title>
     
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -164,7 +164,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
         <div class="container">
             <a class="navbar-brand" href="{{ route('frontend.home') }}">
-                <i class="fas fa-hotel me-2"></i>Luxury Palace
+                <i class="fas fa-hotel me-2"></i>cactushotel Palace
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -241,16 +241,16 @@
                 
                 <div class="col-lg-4 mb-4">
                     <h5 class="mb-3">Contact</h5>
-                    <p><i class="fas fa-map-marker-alt me-2"></i> 123 Avenue des Champs-Élysées, 75008 Paris</p>
-                    <p><i class="fas fa-phone me-2"></i> +33 1 23 45 67 89</p>
-                    <p><i class="fas fa-envelope me-2"></i> contact@luxurypalace.com</p>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> fidjrossé Bénin Cotonou</p>
+                    <p><i class="fas fa-phone me-2"></i> +229 019000000</p>
+                    <p><i class="fas fa-envelope me-2"></i> contact@cactushotel.com</p>
                 </div>
             </div>
             
             <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
             
             <div class="text-center">
-                <p class="mb-0">&copy; {{ date('Y') }} Luxury Palace. Tous droits réservés.</p>
+                <p class="mb-0">&copy; {{ date('Y') }} Cactus Palace. Tous droits réservés.</p>
             </div>
         </div>
     </footer>

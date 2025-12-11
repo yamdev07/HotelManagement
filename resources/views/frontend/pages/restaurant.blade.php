@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Restaurant Gastronomique - Luxury Palace')
+@section('title', 'Restaurant Gastronomique - cactus Palace')
 
 @section('content')
     <!-- Hero Section -->
