@@ -51,27 +51,50 @@ class CustomerController extends Controller
         return redirect('customer')->with('success', 'customer '.$customer->name.' udpated!');
     }
 
-    public function destroy(Customer $customer, ImageRepositoryInterface $imageRepository)
-    {
-        try {
-            $user = User::find($customer->user->id);
-            $avatar_path = public_path('img/user/'.$user->name.'-'.$user->id);
-
-            $customer->delete();
+   public function destroy(Customer $customer, ImageRepositoryInterface $imageRepository)
+{
+    try {
+        // Sauvegarde du nom pour le message
+        $customerName = $customer->name;
+        
+        // Vérifiez et supprimez l'avatar si le user existe
+        if ($customer->user) {
+            $user = $customer->user;
+            $avatar_path = public_path('img/user/' . $user->name . '-' . $user->id);
+            
+            // Supprimez l'avatar s'il existe
+            if (file_exists($avatar_path) && is_dir($avatar_path)) {
+                try {
+                    $imageRepository->destroy($avatar_path);
+                } catch (\Exception $e) {
+                    \Log::warning('Could not delete avatar: ' . $e->getMessage());
+                }
+            }
+            
+            // Supprimez l'utilisateur
             $user->delete();
-
-            if (is_dir($avatar_path)) {
-                $imageRepository->destroy($avatar_path);
-            }
-
-            return redirect('customer')->with('success', 'Customer '.$customer->name.' deleted!');
-        } catch (\Exception $e) {
-            $errorMessage = '';
-            if ($e->errorInfo[0] == '23000') {
-                $errorMessage = 'Data still connected to other tables';
-            }
-
-            return redirect('customer')->with('failed', 'Customer '.$customer->name.' cannot be deleted! '.$errorMessage);
         }
+        
+        // Supprimez le customer
+        $customer->delete();
+        
+        return redirect('customer')->with('success', 'Customer ' . $customerName . ' deleted!');
+        
+    } catch (\Exception $e) {
+        \Log::error('Delete customer error: ' . $e->getMessage());
+        
+        // Message d'erreur plus détaillé
+        $errorDetails = '';
+        
+        if (str_contains($e->getMessage(), 'foreign key constraint')) {
+            $errorDetails = 'This customer has related records (transactions, payments, etc.). Delete those first.';
+        } elseif (isset($e->errorInfo[0]) && $e->errorInfo[0] == '23000') {
+            $errorDetails = 'This customer has related records in other tables.';
+        } else {
+            $errorDetails = $e->getMessage();
+        }
+        
+        return redirect('customer')->with('failed', 'Cannot delete customer! ' . $errorDetails);
     }
+}
 }
