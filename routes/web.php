@@ -189,3 +189,26 @@ Route::middleware(['auth', 'checkRole:Super,Admin,Customer'])->prefix('restauran
 Route::get('/admin', function () {
     return redirect()->route('dashboard.index');
 });
+
+// Dans web.php (temporairement)
+Route::get('/test-delete-customer/{id}', function($id) {
+    try {
+        $customer = \App\Models\Customer::find($id);
+        if (!$customer) {
+            return 'Customer not found';
+        }
+        
+        $customerName = $customer->name;
+        
+        if ($customer->user) {
+            $customer->user->delete();
+        }
+        
+        $customer->delete();
+        
+        return redirect('customer')->with('success', 'Test delete successful: ' . $customerName);
+        
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+})->name('test.delete.customer');
