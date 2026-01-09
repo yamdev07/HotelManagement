@@ -15,10 +15,11 @@
             background: white;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border: 2px solid #28a745; /* Bordure verte */
         }
 
         .invoice-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); /* Dégradé vert */
             color: white;
             padding: 30px;
             border-radius: 10px 10px 0 0;
@@ -27,21 +28,22 @@
         .section-title {
             font-size: 16px;
             font-weight: bold;
-            color: #333;
-            border-bottom: 2px solid #667eea;
+            color: #28a745; /* Vert pour les titres */
+            border-bottom: 2px solid #28a745;
             padding-bottom: 8px;
             margin-bottom: 20px;
         }
 
         .info-box {
-            background: #f8f9fa;
+            background: #f8fff9; /* Fond vert très clair */
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 20px;
+            border-left: 4px solid #28a745; /* Bordure gauche verte */
         }
 
         .total-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); /* Dégradé vert */
             color: white;
             border-radius: 8px;
             padding: 20px;
@@ -84,25 +86,61 @@
         }
 
         .btn-print {
-            background: #667eea;
+            background: #28a745; /* Vert */
             color: white;
             border: none;
         }
 
         .btn-print:hover {
-            background: #5a67d8;
+            background: #1e7e34;
             transform: translateY(-2px);
         }
 
         .btn-pdf {
-            background: #e53e3e;
+            background: #28a745; /* Vert également */
             color: white;
             border: none;
         }
 
         .btn-pdf:hover {
-            background: #c53030;
+            background: #1e7e34;
             transform: translateY(-2px);
+        }
+
+        /* Style spécifique pour les lignes vertes */
+        .table thead th {
+            background-color: #28a745 !important;
+            color: white !important;
+            border-color: #28a745 !important;
+        }
+
+        .table-bordered {
+            border-color: #28a745 !important;
+        }
+
+        .table-bordered th,
+        .table-bordered td {
+            border-color: #dee2e6;
+        }
+
+        /* Badge vert pour le statut */
+        .status-available {
+            background: #28a745;
+            color: white;
+        }
+
+        /* Couleurs des montants */
+        .text-primary {
+            color: #28a745 !important;
+        }
+
+        .text-success {
+            color: #28a745 !important;
+        }
+
+        /* Border top pour les séparateurs */
+        .border-top {
+            border-top-color: #28a745 !important;
         }
 
         /* Styles pour l'impression */
@@ -122,6 +160,7 @@
                 width: 100%;
                 box-shadow: none;
                 border-radius: 0;
+                border: 1px solid #28a745;
             }
             
             .action-buttons, .btn-print, .btn-pdf {
@@ -131,11 +170,19 @@
             .invoice-header {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+                background: #28a745 !important;
             }
             
             .total-box {
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
+                background: #28a745 !important;
+            }
+            
+            .table thead th {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                background-color: #28a745 !important;
             }
             
             .no-print {
@@ -198,15 +245,15 @@
         <div class="p-3 border-bottom">
             <div class="row">
                 <div class="col-md-6">
-                    <h6 class="mb-2" style="font-weight: bold;">SIP HOTEL</h6>
+                    <h6 class="mb-2" style="font-weight: bold; color: #28a745;">SIP HOTEL</h6>
                     <p class="mb-1" style="font-size: 14px;">123 Avenue de l'Hôtel</p>
                     <p class="mb-1" style="font-size: 14px;">75000 Paris, France</p>
                     <p class="mb-0" style="font-size: 14px;">Tél : +33 1 23 45 67 89</p>
                 </div>
                 <div class="col-md-6 text-right">
-                    <p class="mb-1" style="font-size: 14px;">SIRET : 123 456 789 00012</p>
-                    <p class="mb-1" style="font-size: 14px;">TVA : FR 12 345 678 901</p>
-                    <p class="mb-0" style="font-size: 14px;">Email : contact@siphotel.com</p>
+                    <p class="mb-1" style="font-size: 14px; color: #28a745;"><strong>SIRET :</strong> 123 456 789 00012</p>
+                    <p class="mb-1" style="font-size: 14px; color: #28a745;"><strong>TVA :</strong> FR 12 345 678 901</p>
+                    <p class="mb-0" style="font-size: 14px; color: #28a745;"><strong>Email :</strong> contact@siphotel.com</p>
                 </div>
             </div>
         </div>
@@ -218,18 +265,18 @@
                 <div class="col-md-6">
                     <h6 class="section-title">CLIENT</h6>
                     <div class="info-box">
-                        <p class="mb-2"><strong>ID Client :</strong> {{ $payment->transaction->customer->id }}</p>
-                        <p class="mb-2"><strong>Nom :</strong> {{ $payment->transaction->customer->name }}</p>
-                        <p class="mb-2"><strong>Profession :</strong> {{ $payment->transaction->customer->job }}</p>
-                        <p class="mb-0"><strong>Adresse :</strong> {{ $payment->transaction->customer->address }}</p>
+                        <p class="mb-2"><strong style="color: #28a745;">ID Client :</strong> {{ $payment->transaction->customer->id }}</p>
+                        <p class="mb-2"><strong style="color: #28a745;">Nom :</strong> {{ $payment->transaction->customer->name }}</p>
+                        <p class="mb-2"><strong style="color: #28a745;">Profession :</strong> {{ $payment->transaction->customer->job }}</p>
+                        <p class="mb-0"><strong style="color: #28a745;">Adresse :</strong> {{ $payment->transaction->customer->address }}</p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <h6 class="section-title">PÉRIODE DE SÉJOUR</h6>
                     <div class="info-box">
-                        <p class="mb-2"><strong>Arrivée :</strong> {{ Helper::dateDayFormat($payment->transaction->check_in) }}</p>
-                        <p class="mb-2"><strong>Départ :</strong> {{ Helper::dateDayFormat($payment->transaction->check_out) }}</p>
-                        <p class="mb-0"><strong>Durée :</strong> {{ $payment->transaction->getDateDifferenceWithPlural() }}</p>
+                        <p class="mb-2"><strong style="color: #28a745;">Arrivée :</strong> {{ Helper::dateDayFormat($payment->transaction->check_in) }}</p>
+                        <p class="mb-2"><strong style="color: #28a745;">Départ :</strong> {{ Helper::dateDayFormat($payment->transaction->check_out) }}</p>
+                        <p class="mb-0"><strong style="color: #28a745;">Durée :</strong> {{ $payment->transaction->getDateDifferenceWithPlural() }}</p>
                     </div>
                 </div>
             </div>
@@ -241,10 +288,10 @@
                     <table class="table table-bordered">
                         <thead class="thead-light">
                             <tr>
-                                <th>Description</th>
-                                <th class="text-center">Prix/Jour</th>
-                                <th class="text-center">Jours</th>
-                                <th class="text-right">Total</th>
+                                <th style="background-color: #28a745 !important; color: white !important;">Description</th>
+                                <th class="text-center" style="background-color: #28a745 !important; color: white !important;">Prix/Jour</th>
+                                <th class="text-center" style="background-color: #28a745 !important; color: white !important;">Jours</th>
+                                <th class="text-right" style="background-color: #28a745 !important; color: white !important;">Total</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -252,7 +299,7 @@
                                 <td>Chambre {{ $payment->transaction->room->number }} - {{ $payment->transaction->room->type->name }}</td>
                                 <td class="text-center">{{ Helper::convertToRupiah($payment->transaction->room->price) }}</td>
                                 <td class="text-center">{{ $payment->transaction->getDateDifferenceWithPlural() }}</td>
-                                <td class="text-right font-weight-bold">{{ Helper::convertToRupiah($payment->transaction->getTotalPrice()) }}</td>
+                                <td class="text-right font-weight-bold" style="color: #28a745;">{{ Helper::convertToRupiah($payment->transaction->getTotalPrice()) }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -266,25 +313,25 @@
                     <div class="col-md-3">
                         <div class="info-box text-center">
                             <p class="mb-1 text-muted">Total Séjour</p>
-                            <p class="mb-0 amount text-primary">{{ Helper::convertToRupiah($payment->transaction->getTotalPrice()) }}</p>
+                            <p class="mb-0 amount" style="color: #28a745;">{{ Helper::convertToRupiah($payment->transaction->getTotalPrice()) }}</p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="info-box text-center">
                             <p class="mb-1 text-muted">Acompte Requis</p>
-                            <p class="mb-0 amount">{{ Helper::convertToRupiah($payment->transaction->getMinimumDownPayment()) }}</p>
+                            <p class="mb-0 amount" style="color: #28a745;">{{ Helper::convertToRupiah($payment->transaction->getMinimumDownPayment()) }}</p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="info-box text-center">
                             <p class="mb-1 text-muted">Montant Payé</p>
-                            <p class="mb-0 amount text-success">{{ Helper::convertToRupiah($payment->price) }}</p>
+                            <p class="mb-0 amount" style="color: #28a745;">{{ Helper::convertToRupiah($payment->price) }}</p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="info-box text-center">
                             <p class="mb-1 text-muted">Total Payé à ce jour</p>
-                            <p class="mb-0 amount">{{ Helper::convertToRupiah($payment->transaction->getTotalPayment()) }}</p>
+                            <p class="mb-0 amount" style="color: #28a745;">{{ Helper::convertToRupiah($payment->transaction->getTotalPayment()) }}</p>
                         </div>
                     </div>
                 </div>
@@ -313,11 +360,11 @@
             </div>
 
             <!-- Notes -->
-            <div class="mt-4 p-3 border rounded">
+            <div class="mt-4 p-3 border rounded" style="border-color: #28a745 !important;">
                 <h6 class="section-title mb-3">INFORMATIONS IMPORTANTES</h6>
                 <div class="row">
                     <div class="col-md-6">
-                        <p class="small mb-2"><strong>Conditions de paiement :</strong></p>
+                        <p class="small mb-2"><strong style="color: #28a745;">Conditions de paiement :</strong></p>
                         <ul class="small pl-3 mb-0">
                             <li>Acompte minimum de 30% à la réservation</li>
                             <li>Solde à régler à l'arrivée ou au départ</li>
@@ -325,7 +372,7 @@
                         </ul>
                     </div>
                     <div class="col-md-6">
-                        <p class="small mb-2"><strong>Moyens de paiement acceptés :</strong></p>
+                        <p class="small mb-2"><strong style="color: #28a745;">Moyens de paiement acceptés :</strong></p>
                         <ul class="small pl-3 mb-0">
                             <li>Espèces (€)</li>
                             <li>Carte bancaire</li>
@@ -342,12 +389,12 @@
             <div class="row">
                 <div class="col-md-6">
                     <p class="small text-muted mb-0">
-                        <strong>Signature et cachet :</strong><br>
-                        <span style="margin-top: 50px; display: inline-block;">_________________________</span>
+                        <strong style="color: #28a745;">Signature et cachet :</strong><br>
+                        <span style="margin-top: 50px; display: inline-block; border-top: 1px solid #28a745; padding-top: 10px;">_________________________</span>
                     </p>
                 </div>
                 <div class="col-md-6 text-right">
-                    <p class="small text-muted mb-0">
+                    <p class="small mb-0" style="color: #28a745;">
                         Merci de votre confiance.<br>
                         Nous vous souhaitons un agréable séjour !
                     </p>
@@ -355,7 +402,7 @@
             </div>
             <div class="row mt-3">
                 <div class="col-12 text-center">
-                    <p class="small text-muted mb-0">
+                    <p class="small mb-0" style="color: #28a745;">
                         SIP Hotel • 123 Avenue de l'Hôtel • 75000 Paris • Tél : +33 1 23 45 67 89 • contact@siphotel.com
                     </p>
                 </div>
@@ -399,7 +446,7 @@ function downloadPDF() {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background: rgba(0,0,0,0.8);
+        background: rgba(40, 167, 69, 0.9);
         color: white;
         padding: 20px 30px;
         border-radius: 10px;
