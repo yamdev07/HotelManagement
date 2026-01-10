@@ -24,11 +24,6 @@
             color: #084298;
         }
         
-        .status-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-        
         .action-buttons {
             display: flex;
             gap: 5px;
@@ -38,7 +33,7 @@
         .btn-action {
             width: 32px;
             height: 32px;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             border-radius: 6px;
@@ -48,28 +43,23 @@
             cursor: pointer;
         }
         
-        .btn-action:hover {
+        .btn-action:hover:not(.disabled) {
             transform: translateY(-2px);
-            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .btn-pay { background-color: #d1e7dd; color: #0f5132; }
+        .btn-pay:hover:not(.disabled) { background-color: #c1dfd1; }
+        
         .btn-edit { background-color: #cff4fc; color: #055160; }
+        .btn-edit:hover:not(.disabled) { background-color: #bee4ec; }
+        
         .btn-delete { background-color: #f8d7da; color: #842029; }
-        .btn-view { background-color: #e2e3e5; color: #383d41; }
+        .btn-delete:hover:not(.disabled) { background-color: #e8c7ca; }
         
         .table-responsive {
             max-height: 600px;
             overflow-y: auto;
-        }
-        
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #495057;
-            border-left: 4px solid #0d6efd;
-            padding-left: 10px;
-            margin-bottom: 15px;
         }
         
         .price-cfa {
@@ -86,6 +76,30 @@
         .btn-action.disabled {
             background-color: #e9ecef;
             color: #6c757d;
+            border-color: #dee2e6;
+        }
+        
+        .debug-info {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .route-test {
+            display: none; /* Cacher en production */
+        }
+        
+        .test-links {
+            background-color: #f8f9fa;
+            border-left: 4px solid #0d6efd;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        
+        .test-links a {
+            font-size: 12px;
+            margin-right: 10px;
         }
     </style>
 
@@ -123,6 +137,52 @@
             </div>
         </div>
 
+        <!-- Messages de session -->
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+        
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        <!-- TESTS DE DEBUG (uniquement en développement local) -->
+        @if(app()->environment('local') && $transactions->isNotEmpty())
+            <div class="test-links">
+                <strong><i class="fas fa-bug me-2"></i>Debug Mode</strong>
+                <div class="mt-2">
+                    @php
+                        $testTransaction = $transactions->first();
+                    @endphp
+                    <small class="text-muted me-3">Test Transaction ID: {{ $testTransaction->id }}</small>
+                    <a href="{{ route('transaction.edit', $testTransaction->id) }}" 
+                       class="badge bg-primary text-decoration-none" target="_blank">
+                        Test Route avec ID
+                    </a>
+                    <a href="{{ route('transaction.edit', $testTransaction) }}" 
+                       class="badge bg-success text-decoration-none" target="_blank">
+                        Test Route avec objet
+                    </a>
+                    <a href="{{ route('transaction.edit', ['transaction' => $testTransaction->id]) }}" 
+                       class="badge bg-info text-decoration-none" target="_blank">
+                        Test Route param nommé
+                    </a>
+                    <a href="/transaction/{{ $testTransaction->id }}/edit" 
+                       class="badge bg-warning text-decoration-none" target="_blank">
+                        URL Directe
+                    </a>
+                </div>
+            </div>
+        @endif
+
         <!-- Réservations Actives -->
         <div class="row mb-4">
             <div class="col-12">
@@ -157,14 +217,21 @@
                                 <tbody>
                                     @forelse ($transactions as $transaction)
                                         @php
-                                            $totalPrice = $transaction->getTotalPrice();
-                                            $totalPayment = $transaction->getTotalPayment();
+                                            // CORRECTION : Ajout de ?? 0 pour éviter les erreurs null
+                                            $totalPrice = $transaction->getTotalPrice() ?? 0;
+                                            $totalPayment = $transaction->getTotalPayment() ?? 0;
                                             $remaining = $totalPrice - $totalPayment;
                                             $isFullyPaid = $remaining <= 0;
                                             $checkOutDate = \Carbon\Carbon::parse($transaction->check_out);
                                             $isExpired = $checkOutDate->isPast();
                                             $statusClass = $isFullyPaid ? 'status-completed' : ($isExpired ? 'status-expired' : 'status-active');
                                             $statusText = $isFullyPaid ? 'Payé' : ($isExpired ? 'Expiré' : 'Active');
+                                            
+                                            // Vérification des permissions
+                                            $canEdit = in_array(auth()->user()->role, ['Super', 'Admin']);
+                                            
+                                            // CORRECTION : URL directe simplifiée
+                                            $editUrlDirect = $canEdit ? "/transaction/" . $transaction->id . "/edit" : '#';
                                         @endphp
                                         
                                         <tr>
@@ -174,7 +241,10 @@
                                                 <div class="d-flex align-items-center">
                                                     <img src="{{ $transaction->customer->user->getAvatar() }}" 
                                                          class="rounded-circle me-2" width="30" height="30">
-                                                    {{ $transaction->customer->name }}
+                                                    <div>
+                                                        <div>{{ $transaction->customer->name }}</div>
+                                                        <small class="text-muted">{{ $transaction->customer->phone ?? '' }}</small>
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td>
@@ -213,19 +283,22 @@
                                                         <i class="fas fa-money-bill-wave-alt"></i>
                                                     </a>
                                                     
-                                                    <!-- Voir Détails -->
-                                                    <a class="btn-action btn-view"
-                                                       href="{{ route('transaction.show', $transaction->id) }}"
-                                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Voir détails">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                    
-                                                    <!-- Modifier (ACTIVE POUR RÉSERVATIONS ACTIVES) -->
-                                                    <a class="btn-action btn-edit"
-                                                       href="{{ route('transaction.edit', $transaction->id) }}"
-                                                       data-bs-toggle="tooltip" data-bs-placement="top" title="Modifier">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
+                                                    <!-- Modifier - CORRECTION : URL directe simplifiée -->
+                                                    @if($canEdit)
+                                                        <a class="btn-action btn-edit"
+                                                           href="{{ $editUrlDirect }}"
+                                                           data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                           title="Modifier"
+                                                           data-transaction-id="{{ $transaction->id }}">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                    @else
+                                                        <span class="btn-action btn-edit disabled"
+                                                              data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                              title="Modification réservée aux administrateurs">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    @endif
                                                     
                                                     <!-- Supprimer -->
                                                     <button type="button" class="btn-action btn-delete delete-reservation-btn"
@@ -297,13 +370,18 @@
                                 <tbody>
                                     @forelse ($transactionsExpired as $transaction)
                                         @php
-                                            $totalPrice = $transaction->getTotalPrice();
-                                            $totalPayment = $transaction->getTotalPayment();
+                                            // CORRECTION : Ajout de ?? 0 pour éviter les erreurs null
+                                            $totalPrice = $transaction->getTotalPrice() ?? 0;
+                                            $totalPayment = $transaction->getTotalPayment() ?? 0;
                                             $remaining = $totalPrice - $totalPayment;
                                             $isFullyPaid = $remaining <= 0;
-                                            $checkOutDate = \Carbon\Carbon::parse($transaction->check_out);
-                                            $isExpired = $checkOutDate->isPast();
-                                            $canEdit = !$isExpired || auth()->user()->role === 'admin';
+                                            $statusClass = $isFullyPaid ? 'status-completed' : 'status-expired';
+                                            $statusText = $isFullyPaid ? 'Payé' : 'Impayé';
+                                            
+                                            // Vérification des permissions
+                                            $canEdit = in_array(auth()->user()->role, ['Super', 'Admin']);
+                                            // URL directe pour éviter les erreurs de route
+                                            $editUrlDirect = $canEdit ? "/transaction/" . $transaction->id . "/edit" : '#';
                                         @endphp
                                         
                                         <tr>
@@ -332,8 +410,8 @@
                                                 {{ $isFullyPaid ? '-' : Helper::formatCFA($remaining) }}
                                             </td>
                                             <td>
-                                                <span class="status-badge {{ $isFullyPaid ? 'status-completed' : 'status-expired' }}">
-                                                    {{ $isFullyPaid ? 'Payé' : 'Impayé' }}
+                                                <span class="status-badge {{ $statusClass }}">
+                                                    {{ $statusText }}
                                                 </span>
                                             </td>
                                             <td>
@@ -345,19 +423,20 @@
                                                        title="{{ $isFullyPaid ? 'Déjà payé' : 'Payer dette' }}">
                                                         <i class="fas fa-money-bill-wave-alt"></i>
                                                     </a>
-                                            
-                                                    <!-- Modifier (conditionnel pour expirées) -->
+                                                    
+                                                    <!-- Modifier (si autorisé) -->
                                                     @if($canEdit)
                                                         <a class="btn-action btn-edit"
-                                                           href="{{ route('transaction.edit', $transaction->id) }}"
+                                                           href="{{ $editUrlDirect }}"
                                                            data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                           title="Modifier">
+                                                           title="Modifier (réservation expirée)"
+                                                           data-transaction-id="{{ $transaction->id }}">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                     @else
                                                         <span class="btn-action btn-edit disabled"
                                                               data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                              title="Modification impossible pour les réservations expirées">
+                                                              title="Modification réservée aux administrateurs">
                                                             <i class="fas fa-edit"></i>
                                                         </span>
                                                     @endif
@@ -419,7 +498,7 @@
         </div>
     </div>
 
-    <!-- Formulaire de suppression masqué (un seul pour toutes les réservations) -->
+    <!-- Formulaire de suppression masqué -->
     <form id="delete-form" method="POST" class="d-none">
         @csrf
         @method('DELETE')
@@ -470,7 +549,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (result.isConfirmed) {
                     // Préparer et soumettre le formulaire de suppression
                     const deleteForm = document.getElementById('delete-form');
-                    deleteForm.action = '/transaction/' + transactionId;
+                    deleteForm.action = '{{ url("transaction") }}/' + transactionId;
                     deleteForm.querySelector('#transaction-id-input').value = transactionId;
                     deleteForm.submit();
                     
@@ -487,17 +566,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Auto-scroll vers la section si paramètre d'URL
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.has('section')) {
-        const section = urlParams.get('section');
-        if (section === 'expired') {
-            const expiredSection = document.querySelector('.row:last-child');
-            if (expiredSection) {
-                expiredSection.scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-    }
+    // Debug des liens d'édition (uniquement en développement)
+    @if(app()->environment('local'))
+        console.log('=== TRANSACTION SYSTEM LOADED ===');
+        console.log('User:', '{{ auth()->user()->name ?? "Guest" }}');
+        console.log('Role:', '{{ auth()->user()->role ?? "None" }}');
+        console.log('Route transaction.edit exists:', {{ Route::has('transaction.edit') ? 'true' : 'false' }});
+        
+        // Vérifier les liens d'édition
+        document.querySelectorAll('.btn-edit').forEach((link, index) => {
+            console.log(`Edit Link ${index + 1}:`, link.href);
+        });
+        
+        // Tester toutes les URLs possibles
+        @if($transactions->isNotEmpty())
+            const testId = {{ $transactions->first()->id }};
+            console.log('Test ID:', testId);
+            console.log('Direct URL:', '/transaction/' + testId + '/edit');
+            
+            // Tester la route avec fetch
+            fetch('/test-route/' + testId)
+                .then(response => response.json())
+                .then(data => console.log('Route test result:', data))
+                .catch(error => console.error('Route test error:', error));
+        @endif
+    @endif
+    
+    // Ajouter un événement pour déboguer les clics sur les liens d'édition
+    document.querySelectorAll('.btn-edit').forEach(link => {
+        link.addEventListener('click', function(e) {
+            @if(app()->environment('local'))
+                console.log('Edit clicked:', this.href);
+                console.log('Transaction ID:', this.getAttribute('data-transaction-id'));
+            @endif
+        });
+    });
 });
 </script>
 @endsection

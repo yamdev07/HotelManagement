@@ -35,6 +35,7 @@ class Transaction extends Model
         return $this->belongsTo(Room::class);
     }
 
+    // GARDER payment() au singulier
     public function payment()
     {
         return $this->hasMany(Payment::class);
@@ -58,6 +59,7 @@ class Transaction extends Model
 
     public function getTotalPayment()
     {
+        // Garder la logique existante
         $totalPayment = 0;
         foreach ($this->payment as $payment) {
             $totalPayment += $payment->price;

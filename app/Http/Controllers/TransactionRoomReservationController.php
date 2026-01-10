@@ -118,13 +118,29 @@ class TransactionRoomReservationController extends Controller
 
         $superAdmins = User::where('role', 'Super')->get();
 
+        // CORRECTION : Gestion des erreurs Pusher
         foreach ($superAdmins as $superAdmin) {
             $message = 'Reservation added by '.$customer->name;
-            event(new NewReservationEvent($message, $superAdmin));
+            
+            // Solution 1: Envelopper dans try-catch pour éviter l'arrêt de l'application
+            try {
+                event(new NewReservationEvent($message, $superAdmin));
+            } catch (\Illuminate\Broadcasting\BroadcastException $e) {
+                // Log l'erreur mais continue l'exécution
+                \Log::warning('Broadcasting error for reservation: ' . $e->getMessage());
+                \Log::info('Reservation created successfully, but broadcasting failed.');
+            }
+            
+            // Les notifications par email/database fonctionneront toujours
             $superAdmin->notify(new NewRoomReservationDownPayment($transaction, $payment));
         }
 
-        event(new RefreshDashboardEvent('Someone reserved a room'));
+        // Également pour RefreshDashboardEvent
+        try {
+            event(new RefreshDashboardEvent('Someone reserved a room'));
+        } catch (\Illuminate\Broadcasting\BroadcastException $e) {
+            \Log::warning('RefreshDashboardEvent broadcasting error: ' . $e->getMessage());
+        }
 
         return redirect()->route('transaction.index')
             ->with('success', 'Room '.$room->number.' has been reservated by '.$customer->name);

@@ -58,10 +58,12 @@ Route::group(['middleware' => 'guest'], function () {
 
 // ==================== ROUTES BACKEND (Dashboard) ====================
 
+// Routes accessibles uniquement aux Super Admins
 Route::group(['middleware' => ['auth', 'checkRole:Super']], function () {
     Route::resource('user', UserController::class);
 });
 
+// Routes accessibles aux Super Admins et Admins
 Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
     // Images
     Route::post('/room/{room}/image/upload', [ImageController::class, 'store'])->name('image.store');
@@ -84,29 +86,45 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
     Route::resource('room', RoomController::class);
     Route::resource('roomstatus', RoomStatusController::class);
     
-    // TRANSACTIONS - Routes complètes avec CRUD
-    Route::resource('transaction', TransactionController::class)->except(['store', 'create']);
-    
-    // Routes supplémentaires pour transactions
-    Route::get('/transaction/{transaction}/cancel', [TransactionController::class, 'cancel'])->name('transaction.cancel');
-    Route::get('/transaction/{transaction}/invoice', [TransactionController::class, 'invoice'])->name('transaction.invoice');
-    Route::get('/transaction/{transaction}/history', [TransactionController::class, 'history'])->name('transaction.history');
-    Route::get('/transaction/export/{type}', [TransactionController::class, 'export'])->name('transaction.export');
+    // TRANSACTIONS - Routes CRUD complètes (CORRECTION APPLIQUÉE)
+    Route::prefix('transaction')->name('transaction.')->group(function () {
+        Route::get('/', [TransactionController::class, 'index'])->name('index');
+        Route::get('/create', [TransactionController::class, 'create'])->name('create');
+        Route::post('/', [TransactionController::class, 'store'])->name('store');
+        Route::get('/{transaction}', [TransactionController::class, 'show'])->name('show'); // DÉPLACÉ ICI POUR LES ADMINS
+        Route::get('/{transaction}/edit', [TransactionController::class, 'edit'])->name('edit'); // CORRECTION : utilisation de {transaction} au lieu de {id}
+        Route::put('/{transaction}', [TransactionController::class, 'update'])->name('update');
+        Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->name('destroy');
+        
+        // Routes supplémentaires
+        Route::get('/{transaction}/cancel', [TransactionController::class, 'cancel'])->name('cancel');
+        Route::get('/{transaction}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
+        Route::get('/{transaction}/history', [TransactionController::class, 'history'])->name('history');
+        Route::get('/export/{type}', [TransactionController::class, 'export'])->name('export');
+        
+        // Routes AJAX/API
+        Route::get('/{transaction}/check-availability', [TransactionController::class, 'checkAvailability'])->name('checkAvailability');
+        Route::put('/{transaction}/update-status', [TransactionController::class, 'updateStatus'])->name('updateStatus');
+        Route::get('/{id}/details', [TransactionController::class, 'showDetails'])->name('showDetails');
+    });
     
     Route::resource('facility', FacilityController::class);
 
     // Paiements
+    Route::prefix('transaction/{transaction}/payment')->name('transaction.payment.')->group(function () {
+        Route::get('/create', [PaymentController::class, 'create'])->name('create');
+        Route::post('/store', [PaymentController::class, 'store'])->name('store');
+    });
+    
     Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
     Route::get('/payment/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payment.invoice');
-    Route::get('/transaction/{transaction}/payment/create', [PaymentController::class, 'create'])->name('transaction.payment.create');
-    Route::post('/transaction/{transaction}/payment/store', [PaymentController::class, 'store'])->name('transaction.payment.store');
 
     // Charts
     Route::get('/get-dialy-guest-chart-data', [ChartController::class, 'dailyGuestPerMonth']);
     Route::get('/get-dialy-guest/{year}/{month}/{day}', [ChartController::class, 'dailyGuest'])->name('chart.dailyGuest');
 });
 
-// Routes accessibles à tous les utilisateurs authentifiés
+// Routes accessibles à tous les utilisateurs authentifiés (Super, Admin, Customer)
 Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
@@ -119,7 +137,7 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
     Route::get('/activity-log/all', [ActivityController::class, 'all'])->name('activity-log.all');
     
     // User profile (view only)
-    Route::resource('user', UserController::class)->only(['show']);
+    Route::get('/user/{user}', [UserController::class, 'show'])->name('user.show');
     
     // Notifications
     Route::view('/notification', 'notification.index')->name('notification.index');
@@ -127,12 +145,14 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
     Route::get('/notification-to/{id}', [NotificationsController::class, 'routeTo'])->name('notification.routeTo');
     
     // Profile management
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
-    Route::post('/profile/update-info', [ProfileController::class, 'updateInfo'])->name('profile.update.info');
-    Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update.password');
-    Route::post('/profile/update-avatar', [ProfileController::class, 'updateAvatar'])->name('profile.update.avatar');
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [ProfileController::class, 'index'])->name('index');
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
+        Route::put('/update', [ProfileController::class, 'update'])->name('update');
+        Route::post('/update-info', [ProfileController::class, 'updateInfo'])->name('update.info');
+        Route::post('/update-password', [ProfileController::class, 'updatePassword'])->name('update.password');
+        Route::post('/update-avatar', [ProfileController::class, 'updateAvatar'])->name('update.avatar');
+    });
     
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
@@ -142,27 +162,29 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
     
     // TRANSACTIONS - Routes accessibles aux clients pour voir leurs réservations
     Route::get('/my-reservations', [TransactionController::class, 'myReservations'])->name('transaction.myReservations');
-    Route::get('/transaction/{transaction}/view', [TransactionController::class, 'show'])->name('transaction.show.public');
-});
-
-// Restaurant Module (Backend)
-Route::middleware(['auth', 'checkRole:Super,Admin,Customer'])->prefix('restaurant')->name('restaurant.')->group(function () {
-    // Menus
-    Route::get('/', [RestaurantController::class, 'index'])->name('index');
-    Route::get('/create', [RestaurantController::class, 'create'])->name('create');
-    Route::post('/store', [RestaurantController::class, 'store'])->name('store');
-    Route::delete('/menus/{id}', [RestaurantController::class, 'destroy'])->name('menus.destroy');
     
-    // Commandes
-    Route::get('/orders', [RestaurantController::class, 'orders'])->name('orders');
-    Route::get('/orders/{id}', [RestaurantController::class, 'showOrder'])->name('orders.show');
-    Route::post('/orders/store', [RestaurantController::class, 'storeOrder'])->name('orders.store');
-    Route::put('/orders/{id}', [RestaurantController::class, 'updateOrder'])->name('orders.update');
-    Route::put('/orders/{id}/cancel', [RestaurantController::class, 'cancelOrder'])->name('orders.cancel');
+    // SHOW transaction pour les clients (séparé de la route admin)
+    Route::get('/my-transaction/{transaction}', [TransactionController::class, 'show'])->name('transaction.show.customer');
     
-    // API pour AJAX
-    Route::get('/api/customers', [RestaurantController::class, 'getCustomers'])->name('api.customers');
-    Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
+    // RESTAURANT MODULE - Accessible à tous les utilisateurs connectés
+    Route::prefix('restaurant')->name('restaurant.')->group(function () {
+        // Menus
+        Route::get('/', [RestaurantController::class, 'index'])->name('index');
+        Route::get('/create', [RestaurantController::class, 'create'])->name('create');
+        Route::post('/store', [RestaurantController::class, 'store'])->name('store');
+        Route::delete('/menus/{id}', [RestaurantController::class, 'destroy'])->name('menus.destroy');
+        
+        // Commandes
+        Route::get('/orders', [RestaurantController::class, 'orders'])->name('orders');
+        Route::get('/orders/{id}', [RestaurantController::class, 'showOrder'])->name('orders.show');
+        Route::post('/orders', [RestaurantController::class, 'storeOrder'])->name('orders.store');
+        Route::put('/orders/{id}', [RestaurantController::class, 'updateOrder'])->name('orders.update');
+        Route::put('/orders/{id}/cancel', [RestaurantController::class, 'cancelOrder'])->name('orders.cancel');
+        
+        // API pour AJAX
+        Route::get('/api/customers', [RestaurantController::class, 'getCustomers'])->name('api.customers');
+        Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
+    });
 });
 
 // Routes d'administration
@@ -192,3 +214,23 @@ Route::get('/test-delete-customer/{id}', function($id) {
         return 'Error: ' . $e->getMessage();
     }
 })->name('test.delete.customer');
+
+// ==================== ROUTES POUR DEBUG ET TEST ====================
+if (env('APP_DEBUG', false)) {
+    Route::get('/test-route/{id}', function($id) {
+        return response()->json([
+            'id' => $id,
+            'route_exists' => Route::has('transaction.edit'),
+            'url' => route('transaction.edit', $id),
+            'all_routes' => collect(Route::getRoutes())->map(function($route) {
+                return [
+                    'uri' => $route->uri(),
+                    'name' => $route->getName(),
+                    'methods' => $route->methods(),
+                ];
+            })->filter(function($route) {
+                return str_contains($route['uri'], 'transaction');
+            })->values()
+        ]);
+    })->name('test.route');
+}
