@@ -110,9 +110,10 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
         Route::put('/{transaction}', [TransactionController::class, 'update'])->name('update');
         Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->name('destroy');
         
-        // Routes supplémentaires
-        Route::post('/{transaction}/cancel', [TransactionController::class, 'cancel'])->name('cancel'); // CHANGÉ: POST au lieu de GET
-        Route::post('/{transaction}/restore', [TransactionController::class, 'restore'])->name('restore'); // NOUVELLE ROUTE
+        // CORRECTION ICI : POST changé en DELETE pour correspondre au formulaire
+        Route::delete('/{transaction}/cancel', [TransactionController::class, 'cancel'])->name('cancel');
+        
+        Route::post('/{transaction}/restore', [TransactionController::class, 'restore'])->name('restore');
         Route::get('/{transaction}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
         Route::get('/{transaction}/history', [TransactionController::class, 'history'])->name('history');
         Route::get('/export/{type}', [TransactionController::class, 'export'])->name('export');
@@ -125,12 +126,31 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
     
     Route::resource('facility', FacilityController::class);
 
-    // Paiements
+    // PAIEMENTS - ROUTES COMPLÈTES (y compris annulation/restauration)
+    Route::prefix('payments')->name('payments.')->group(function () {
+        // Liste des paiements avec filtres
+        Route::get('/', [PaymentController::class, 'index'])->name('index');
+        
+        // Annuler un paiement
+        Route::delete('/{payment}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
+        
+        // Restaurer un paiement annulé/expiré
+        Route::post('/{payment}/restore', [PaymentController::class, 'restore'])->name('restore');
+        
+        // Marquer comme expiré (pour API)
+        Route::post('/{payment}/expire', [PaymentController::class, 'markAsExpired'])->name('expire');
+        
+        // Facture/reçu
+        Route::get('/{payment}/invoice', [PaymentController::class, 'invoice'])->name('invoice');
+    });
+
+    // Paiements pour les transactions (routes existantes maintenues)
     Route::prefix('transaction/{transaction}/payment')->name('transaction.payment.')->group(function () {
         Route::get('/create', [PaymentController::class, 'create'])->name('create');
         Route::post('/store', [PaymentController::class, 'store'])->name('store');
     });
     
+    // Alias pour la compatibilité (consulter la liste des paiements)
     Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
     Route::get('/payment/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payment.invoice');
 

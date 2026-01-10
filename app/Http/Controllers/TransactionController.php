@@ -56,8 +56,18 @@ class TransactionController extends Controller
      */
     public function show(Transaction $transaction)
     {
-        // Récupérer tous les paiements associés
-        $payments = $transaction->payments()->orderBy('created_at', 'desc')->get();
+        // Récupérer les paiements (corriger la relation)
+        try {
+            $payments = $transaction->payment()->orderBy('created_at', 'desc')->get();
+        } catch (\Exception $e) {
+            // Si la relation s'appelle 'payment' au singulier
+            $payments = $transaction->payment()->orderBy('created_at', 'desc')->get();
+        }
+        
+        // Calculer le nombre de nuits
+        $checkIn = \Carbon\Carbon::parse($transaction->check_in);
+        $checkOut = \Carbon\Carbon::parse($transaction->check_out);
+        $nights = $checkIn->diffInDays($checkOut);
         
         // Calculer les totaux
         $totalPrice = $transaction->getTotalPrice();
@@ -65,8 +75,8 @@ class TransactionController extends Controller
         $remaining = $totalPrice - $totalPayment;
         
         // Déterminer le statut
-        $checkOutDate = Carbon::parse($transaction->check_out);
-        $checkInDate = Carbon::parse($transaction->check_in);
+        $checkOutDate = \Carbon\Carbon::parse($transaction->check_out);
+        $checkInDate = \Carbon\Carbon::parse($transaction->check_in);
         $isExpired = $checkOutDate->isPast();
         $isFullyPaid = $remaining <= 0;
         
@@ -75,17 +85,18 @@ class TransactionController extends Controller
         
         // Vérifier si la réservation peut être annulée
         $canCancel = $this->canCancelReservation($transaction);
-
+        
         return view('transaction.show', [
             'transaction' => $transaction,
             'payments' => $payments,
+            'nights' => $nights,
             'totalPrice' => $totalPrice,
             'totalPayment' => $totalPayment,
             'remaining' => $remaining,
+            'isExpired' => $isExpired,
+            'isFullyPaid' => $isFullyPaid,
             'status' => $status,
-            'canCancel' => $canCancel,
-            'customer' => $transaction->customer,
-            'room' => $transaction->room,
+            'canCancel' => $canCancel
         ]);
     }
 

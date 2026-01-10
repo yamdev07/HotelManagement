@@ -92,6 +92,16 @@
         .cancelled-row:hover {
             background-color: #f1f3f4;
         }
+        
+        .btn-outline-cancel {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .btn-outline-cancel:hover {
+            background-color: #dc3545;
+            color: white;
+        }
     </style>
 
     <div class="container-fluid">
@@ -178,6 +188,8 @@
                     <div class="d-flex gap-2">
                         <span class="status-badge status-active">Actives</span>
                         <span class="status-badge status-cancelled">Annulées</span>
+                        <span class="status-badge status-expired">Expirées</span>
+                        <span class="status-badge status-completed">Payées</span>
                     </div>
                 </div>
                 
@@ -185,7 +197,7 @@
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
-                                <thead class="table-light">
+                                <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                     <tr>
                                         <th>#</th>
                                         <th>ID</th>
@@ -244,6 +256,11 @@
                                             
                                             // Vérifier si on peut payer
                                             $canPay = !$isCancelled && !$isFullyPaid && ($isAdmin || $isOwnReservation);
+                                            
+                                            // Calcul du nombre de nuits
+                                            $checkIn = \Carbon\Carbon::parse($transaction->check_in);
+                                            $checkOut = \Carbon\Carbon::parse($transaction->check_out);
+                                            $nights = $checkIn->diffInDays($checkOut);
                                         @endphp
                                         
                                         <tr class="{{ $isCancelled ? 'cancelled-row' : '' }}">
@@ -252,7 +269,8 @@
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <img src="{{ $transaction->customer->user->getAvatar() }}" 
-                                                         class="rounded-circle me-2" width="30" height="30">
+                                                         class="rounded-circle me-2" width="30" height="30" 
+                                                         alt="{{ $transaction->customer->name }}">
                                                     <div>
                                                         <div>{{ $transaction->customer->name }}</div>
                                                         <small class="text-muted">{{ $transaction->customer->phone ?? '' }}</small>
@@ -264,14 +282,9 @@
                                                     {{ $transaction->room->number }}
                                                 </span>
                                             </td>
-                                            <td>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</td>
+                                            <td>{{ $checkIn->format('d/m/Y') }}</td>
+                                            <td>{{ $checkOut->format('d/m/Y') }}</td>
                                             <td>
-                                                @php
-                                                    $checkIn = \Carbon\Carbon::parse($transaction->check_in);
-                                                    $checkOut = \Carbon\Carbon::parse($transaction->check_out);
-                                                    $nights = $checkIn->diffInDays($checkOut);
-                                                @endphp
                                                 <span class="badge bg-secondary">
                                                     {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}
                                                 </span>
@@ -284,7 +297,7 @@
                                             </td>
                                             <td class="price-cfa {{ $isFullyPaid ? 'text-success' : 'text-danger' }}">
                                                 @if($isFullyPaid)
-                                                    -
+                                                    <span class="badge bg-success">Soldé</span>
                                                 @else
                                                     {{ number_format($remaining, 0, ',', ' ') }} CFA
                                                 @endif
@@ -296,7 +309,7 @@
                                                 @if($transaction->cancelled_at && $isCancelled)
                                                     <br>
                                                     <small class="text-muted">
-                                                        {{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y') }}
+                                                        Annulée le {{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y') }}
                                                     </small>
                                                 @endif
                                             </td>
@@ -313,7 +326,7 @@
                                                     @else
                                                         <span class="btn-action btn-pay disabled"
                                                               data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                              title="{{ $isFullyPaid ? 'Déjà payé' : ($isCancelled ? 'Réservation annulée' : 'Non autorisé') }}">
+                                                              title="{{ $isFullyPaid ? 'Déjà payé' : ($isCancelled ? 'Réservation annulée' : ($isExpired ? 'Réservation expirée' : 'Non autorisé')) }}">
                                                             <i class="fas fa-money-bill-wave-alt"></i>
                                                         </span>
                                                     @endif
@@ -323,7 +336,7 @@
                                                         <a class="btn-action btn-edit"
                                                            href="{{ $editUrl }}"
                                                            data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                           title="Modifier">
+                                                           title="Modifier la réservation">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                     @else
@@ -338,19 +351,20 @@
                                                     @if($canCancel)
                                                         <button type="button" class="btn-action btn-cancel cancel-reservation-btn"
                                                                 data-transaction-id="{{ $transaction->id }}"
-                                                                data-transaction-number="{{ $transaction->id }}"
+                                                                data-transaction-number="#{{ $transaction->id }}"
                                                                 data-customer-name="{{ $transaction->customer->name }}"
                                                                 data-bs-toggle="tooltip" data-bs-placement="top" 
                                                                 title="Annuler la réservation">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
-                                                    @elseif($isAdmin && !$isCancelled)
+                                                    @elseif($isAdmin && !$isCancelled && !$isExpired)
                                                         <span class="btn-action btn-cancel disabled"
                                                               data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                              title="{{ $isExpired ? 'Réservation déjà expirée' : 'Non autorisé' }}">
+                                                              title="Non autorisé">
                                                             <i class="fas fa-ban"></i>
                                                         </span>
                                                     @endif
+                                                    
                                                 </div>
                                             </td>
                                         </tr>
@@ -360,6 +374,11 @@
                                                 <i class="fas fa-bed fa-2x text-muted mb-3"></i>
                                                 <h5>Aucune Réservation Active</h5>
                                                 <p class="text-muted">Aucune réservation active trouvée</p>
+                                                @if($isAdmin)
+                                                    <a href="#" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                                        <i class="fas fa-plus me-2"></i>Créer une réservation
+                                                    </a>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforelse
@@ -393,7 +412,7 @@
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
-                                <thead class="table-light">
+                                <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                     <tr>
                                         <th>#</th>
                                         <th>ID</th>
@@ -435,6 +454,11 @@
                                             }
                                             
                                             $canPay = !$isCancelled && !$isFullyPaid && ($isAdmin || $isOwnReservation);
+                                            
+                                            // Calcul du nombre de nuits
+                                            $checkIn = \Carbon\Carbon::parse($transaction->check_in);
+                                            $checkOut = \Carbon\Carbon::parse($transaction->check_out);
+                                            $nights = $checkIn->diffInDays($checkOut);
                                         @endphp
                                         
                                         <tr class="{{ $isCancelled ? 'cancelled-row' : '' }}">
@@ -446,14 +470,9 @@
                                                     {{ $transaction->room->number }}
                                                 </span>
                                             </td>
-                                            <td>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</td>
-                                            <td>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</td>
+                                            <td>{{ $checkIn->format('d/m/Y') }}</td>
+                                            <td>{{ $checkOut->format('d/m/Y') }}</td>
                                             <td>
-                                                @php
-                                                    $checkIn = \Carbon\Carbon::parse($transaction->check_in);
-                                                    $checkOut = \Carbon\Carbon::parse($transaction->check_out);
-                                                    $nights = $checkIn->diffInDays($checkOut);
-                                                @endphp
                                                 <span class="badge bg-secondary">
                                                     {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}
                                                 </span>
@@ -466,7 +485,7 @@
                                             </td>
                                             <td class="price-cfa {{ $isFullyPaid ? 'text-success' : 'text-danger' }}">
                                                 @if($isFullyPaid)
-                                                    -
+                                                    <span class="badge bg-success">Soldé</span>
                                                 @else
                                                     {{ number_format($remaining, 0, ',', ' ') }} CFA
                                                 @endif
@@ -475,6 +494,12 @@
                                                 <span class="status-badge {{ $statusClass }}">
                                                     {{ $statusText }}
                                                 </span>
+                                                @if($transaction->cancelled_at && $isCancelled)
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        Annulée le {{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y') }}
+                                                    </small>
+                                                @endif
                                             </td>
                                             <td>
                                                 <div class="action-buttons">
@@ -483,7 +508,7 @@
                                                         <a class="btn-action btn-pay"
                                                            href="{{ route('transaction.payment.create', $transaction) }}"
                                                            data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                           title="Payer la dette">
+                                                           title="Payer la dette restante">
                                                             <i class="fas fa-money-bill-wave-alt"></i>
                                                         </a>
                                                     @elseif(!$isFullyPaid && !$isCancelled)
@@ -492,6 +517,16 @@
                                                               title="{{ $isAdmin ? 'Dette impayée' : 'Non autorisé' }}">
                                                             <i class="fas fa-money-bill-wave-alt"></i>
                                                         </span>
+                                                    @endif
+                                                    
+                                                    <!-- Voir détails -->
+                                                    @if($isAdmin || $isOwnReservation)
+                                                        <a class="btn-action" style="background-color: #e2e3e5; color: #383d41;"
+                                                           href="{{ route('transaction.show', $transaction) }}"
+                                                           data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                           title="Voir les détails">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
                                                     @endif
                                                 </div>
                                             </td>
@@ -510,6 +545,13 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Pagination pour les anciennes réservations -->
+                @if(method_exists($transactionsExpired, 'hasPages') && $transactionsExpired->hasPages())
+                    <div class="mt-3">
+                        {{ $transactionsExpired->onEachSide(1)->links('template.paginationlinks') }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -542,85 +584,157 @@
     </div>
 
     <!-- Formulaire d'annulation masqué -->
-    <form id="cancel-form" method="POST" class="d-none">
+    <form id="cancel-form" method="POST" action="{{ route('transaction.cancel', 0) }}" class="d-none">
         @csrf
+        @method('DELETE')
         <input type="hidden" name="transaction_id" id="cancel-transaction-id-input">
-        <textarea name="cancel_reason" id="cancel-reason-input" class="d-none"></textarea>
+        <input type="hidden" name="cancel_reason" id="cancel-reason-input">
     </form>
 @endsection
 
 @section('footer')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// Initialiser les tooltips Bootstrap
+// VERSION CORRIGÉE - SANS BOOTSTRAP JS
 document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+    console.log('=== SYSTÈME D\'ANNULATION INITIALISÉ ===');
     
-    // Gérer l'annulation des réservations
-    document.querySelectorAll('.cancel-reservation-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
+    // DÉSACTIVÉ: Les tooltips Bootstrap (cause l'erreur)
+    // var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    // var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    //     return new bootstrap.Tooltip(tooltipTriggerEl);
+    // });
+    
+    // Gérer l'annulation des réservations - VERSION SIMPLIFIÉE
+    function attachCancelEvents() {
+        const cancelButtons = document.querySelectorAll('.cancel-reservation-btn');
+        console.log(`Trouvé ${cancelButtons.length} bouton(s) d'annulation`);
+        
+        cancelButtons.forEach(button => {
+            // Cloner le bouton pour supprimer les anciens événements
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
             
-            const transactionId = this.getAttribute('data-transaction-id');
-            const transactionNumber = this.getAttribute('data-transaction-number');
-            const customerName = this.getAttribute('data-customer-name');
-            
-            // Demander la raison de l'annulation
-            Swal.fire({
-                title: 'Annuler la réservation',
-                html: `
-                    <div class="text-left">
-                        <p>Veuillez confirmer l'annulation de cette réservation :</p>
-                        <p><strong>Réservation #:</strong> ${transactionNumber}</p>
-                        <p><strong>Client :</strong> ${customerName}</p>
-                        <div class="alert alert-info mt-2">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <small>Si des paiements ont été effectués, un remboursement automatique sera créé.</small>
+            // Attacher le nouvel événement
+            newButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const transactionId = this.getAttribute('data-transaction-id');
+                const transactionNumber = this.getAttribute('data-transaction-number');
+                const customerName = this.getAttribute('data-customer-name');
+                
+                console.log(`Annulation demandée: ${transactionNumber} (ID: ${transactionId})`);
+                
+                Swal.fire({
+                    title: 'Annuler la réservation ?',
+                    html: `
+                        <div style="text-align: left;">
+                            <p>Confirmez l'annulation de :</p>
+                            <div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                                <strong>${transactionNumber}</strong><br>
+                                <small>Client: ${customerName}</small>
+                            </div>
+                            <div style="margin-top: 15px;">
+                                <label>Raison (optionnelle) :</label>
+                                <textarea id="cancelReason" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" 
+                                          rows="3" placeholder="Pourquoi annuler cette réservation ?"></textarea>
+                            </div>
                         </div>
-                        <div class="form-group mt-3">
-                            <label for="cancelReason" class="form-label">Raison de l'annulation (optionnel) :</label>
-                            <textarea id="cancelReason" class="form-control" rows="3" 
-                                      placeholder="Ex: Changement de plans, annulation client, etc."></textarea>
-                        </div>
-                    </div>
-                `,
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#f0ad4e',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Oui, annuler la réservation',
-                cancelButtonText: 'Non, garder',
-                reverseButtons: true,
-                focusCancel: true,
-                preConfirm: () => {
-                    const reason = document.getElementById('cancelReason').value;
-                    return { reason: reason };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const reason = result.value.reason || '';
-                    
-                    // Préparer et soumettre le formulaire d'annulation
-                    const cancelForm = document.getElementById('cancel-form');
-                    cancelForm.action = '{{ url("transaction") }}/' + transactionId + '/cancel';
-                    cancelForm.querySelector('#cancel-transaction-id-input').value = transactionId;
-                    cancelForm.querySelector('#cancel-reason-input').value = reason;
-                    cancelForm.submit();
-                }
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: '<i class="fas fa-ban me-2"></i> Oui, annuler',
+                    cancelButtonText: '<i class="fas fa-times me-2"></i> Non, garder',
+                    reverseButtons: true,
+                    focusCancel: true,
+                    preConfirm: () => {
+                        return {
+                            reason: document.getElementById('cancelReason').value
+                        };
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const reason = result.value.reason || '';
+                        
+                        // Afficher message de chargement
+                        Swal.fire({
+                            title: 'Traitement en cours...',
+                            text: 'Annulation de la réservation',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        
+                        // Préparer le formulaire
+                        setTimeout(() => {
+                            const form = document.getElementById('cancel-form');
+                            if (!form) {
+                                console.error('Formulaire d\'annulation non trouvé !');
+                                Swal.fire('Erreur', 'Formulaire non trouvé', 'error');
+                                return;
+                            }
+                            
+                            // Mettre à jour l'action
+                            const newAction = `/transaction/${transactionId}/cancel`;
+                            form.action = newAction;
+                            
+                            // Remplir les champs
+                            document.getElementById('cancel-transaction-id-input').value = transactionId;
+                            document.getElementById('cancel-reason-input').value = reason;
+                            
+                            console.log('Soumission vers:', newAction);
+                            form.submit();
+                        }, 500);
+                    }
+                });
             });
+            
+            // Visualiser que le bouton est actif
+            newButton.style.cursor = 'pointer';
+            newButton.style.border = '2px solid #28a745';
+            newButton.title = 'Cliquez pour annuler cette réservation';
         });
-    });
+    }
     
-    // Debug en mode développement
-    @if(config('app.debug'))
-        console.log('=== TRANSACTION SYSTEM LOADED ===');
-        console.log('User:', '{{ auth()->user()->name ?? "Guest" }}');
-        console.log('Role:', '{{ auth()->user()->role ?? "None" }}');
-        console.log('Is Admin:', {{ in_array(auth()->user()->role, ['Super', 'Admin']) ? 'true' : 'false' }});
+    // Attacher les événements
+    attachCancelEvents();
+    
+    // Si pas de réservations, afficher le modal
+    @if($transactions->count() == 0 && in_array(auth()->user()->role, ['Super', 'Admin']))
+        setTimeout(() => {
+            const modalElement = document.getElementById('staticBackdrop');
+            if (modalElement) {
+                // Utiliser jQuery ou méthode simple
+                $('#staticBackdrop').modal('show');
+            }
+        }, 1000);
     @endif
+    
+    // Debug
+    @if(config('app.debug'))
+        console.log('Réservations actives:', {{ $transactions->count() }});
+        console.log('Réservations expirées:', {{ $transactionsExpired->count() }});
+    @endif
+    
+    // Message final
+    console.log('✅ Système d\'annulation prêt !');
+    console.log('👉 Cliquez sur un bouton jaune (🚫) pour tester');
 });
 </script>
+
+<!-- Style pour visualiser les boutons actifs -->
+<style>
+.cancel-reservation-btn {
+    transition: all 0.2s ease;
+}
+.cancel-reservation-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+</style>
 @endsection
