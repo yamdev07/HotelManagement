@@ -33,41 +33,17 @@ use App\Http\Controllers\FrontendController;
 */
 
 // ==================== ROUTES FRONTEND (Site Vitrine) ====================
-// Ces routes doivent être DÉFINIES AVANT les autres
-
-// Page d'accueil du site vitrine (accessible à tous)
 Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
-
-// Autres pages du site vitrine
 Route::get('/chambres', [FrontendController::class, 'rooms'])->name('frontend.rooms');
 Route::get('/chambre/{id}', [FrontendController::class, 'roomDetails'])->name('frontend.room.details');
 Route::get('/restaurant-vitrine', [FrontendController::class, 'restaurant'])->name('frontend.restaurant');
 Route::get('/services', [FrontendController::class, 'services'])->name('frontend.services');
-
-// Routes de contact
 Route::get('/contact', [FrontendController::class, 'contact'])->name('frontend.contact');
 Route::post('/contact/submit', [FrontendController::class, 'contactSubmit'])->name('frontend.contact.submit');
-
-// Traitement du formulaire de contact
-// Route::post('/contact/submit', function (\Illuminate\Http\Request $request) {
-//     // Validation
-//     $request->validate([
-//         'name' => 'required|string|max:255',
-//         'email' => 'required|email|max:255',
-//         'subject' => 'required|string|max:255',
-//         'message' => 'required|string|min:10',
-//     ]);
-    
-//     // Message de succès
-//     return back()->with('success', 'Merci pour votre message ! Nous vous répondrons dans les plus brefs délais.');
-// })->name('frontend.contact.submit');
-
-// Route de réservation restaurant
 Route::post('/restaurant/reservation', [FrontendController::class, 'restaurantReservationStore'])
     ->name('restaurant.reservation.store');
 
 // ==================== ROUTES D'AUTHENTIFICATION ====================
-// Login routes
 Route::view('/login', 'auth.login')->name('login.index');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
@@ -75,8 +51,6 @@ Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::group(['middleware' => 'guest'], function () {
     Route::get('/forgot-password', fn () => view('auth.passwords.email'))->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
-
-    // Reset Password routes
     Route::get('/reset-password/{token}', fn (string $token) => view('auth.reset-password', ['token' => $token]))
         ->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
@@ -89,9 +63,11 @@ Route::group(['middleware' => ['auth', 'checkRole:Super']], function () {
 });
 
 Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
+    // Images
     Route::post('/room/{room}/image/upload', [ImageController::class, 'store'])->name('image.store');
     Route::delete('/image/{image}', [ImageController::class, 'destroy'])->name('image.destroy');
 
+    // Réservations - Processus étape par étape
     Route::name('transaction.reservation.')->group(function () {
         Route::get('/createIdentity', [TransactionRoomReservationController::class, 'createIdentity'])->name('createIdentity');
         Route::get('/pickFromCustomer', [TransactionRoomReservationController::class, 'pickFromCustomer'])->name('pickFromCustomer');
@@ -102,68 +78,75 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
         Route::post('/{customer}/{room}/payDownPayment', [TransactionRoomReservationController::class, 'payDownPayment'])->name('payDownPayment');
     });
 
+    // CRUD Resources
     Route::resource('customer', CustomerController::class);
     Route::resource('type', TypeController::class);
     Route::resource('room', RoomController::class);
     Route::resource('roomstatus', RoomStatusController::class);
-    Route::resource('transaction', TransactionController::class);
+    
+    // TRANSACTIONS - Routes complètes avec CRUD
+    Route::resource('transaction', TransactionController::class)->except(['store', 'create']);
+    
+    // Routes supplémentaires pour transactions
+    Route::get('/transaction/{transaction}/cancel', [TransactionController::class, 'cancel'])->name('transaction.cancel');
+    Route::get('/transaction/{transaction}/invoice', [TransactionController::class, 'invoice'])->name('transaction.invoice');
+    Route::get('/transaction/{transaction}/history', [TransactionController::class, 'history'])->name('transaction.history');
+    Route::get('/transaction/export/{type}', [TransactionController::class, 'export'])->name('transaction.export');
+    
     Route::resource('facility', FacilityController::class);
 
+    // Paiements
     Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
     Route::get('/payment/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payment.invoice');
-
     Route::get('/transaction/{transaction}/payment/create', [PaymentController::class, 'create'])->name('transaction.payment.create');
     Route::post('/transaction/{transaction}/payment/store', [PaymentController::class, 'store'])->name('transaction.payment.store');
 
+    // Charts
     Route::get('/get-dialy-guest-chart-data', [ChartController::class, 'dailyGuestPerMonth']);
     Route::get('/get-dialy-guest/{year}/{month}/{day}', [ChartController::class, 'dailyGuest'])->name('chart.dailyGuest');
 });
 
+// Routes accessibles à tous les utilisateurs authentifiés
 Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], function () {
-    // Redirection du dashboard (accessible seulement aux utilisateurs connectés)
+    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
-    
-    // Vous pouvez aussi ajouter une redirection pour les utilisateurs connectés
-    // qui vont sur la page d'accueil :
     Route::get('/home', function () {
         return redirect()->route('dashboard.index');
     })->name('home');
     
+    // Activity Log
     Route::get('/activity-log', [ActivityController::class, 'index'])->name('activity-log.index');
     Route::get('/activity-log/all', [ActivityController::class, 'all'])->name('activity-log.all');
-    Route::resource('user', UserController::class)->only([
-        'show',
-    ]);
-
-    Route::view('/notification', 'notification.index')->name('notification.index');
-
-    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'index'])
-        ->name('profile.index');
     
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-
-    Route::get('/profile/edit', [\App\Http\Controllers\ProfileController::class, 'edit'])
-        ->name('profile.edit');
-
-    Route::put('/profile/update', [\App\Http\Controllers\ProfileController::class, 'update'])
-        ->name('profile.update');
-        
+    // User profile (view only)
+    Route::resource('user', UserController::class)->only(['show']);
+    
+    // Notifications
+    Route::view('/notification', 'notification.index')->name('notification.index');
+    Route::get('/mark-all-as-read', [NotificationsController::class, 'markAllAsRead'])->name('notification.markAllAsRead');
+    Route::get('/notification-to/{id}', [NotificationsController::class, 'routeTo'])->name('notification.routeTo');
+    
+    // Profile management
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/update-info', [ProfileController::class, 'updateInfo'])->name('profile.update.info');
-
     Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.update.password');
-
     Route::post('/profile/update-avatar', [ProfileController::class, 'updateAvatar'])->name('profile.update.avatar');
     
+    // Reports
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    
+    // Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-    Route::get('/mark-all-as-read', [NotificationsController::class, 'markAllAsRead'])->name('notification.markAllAsRead');
-
-    Route::get('/notification-to/{id}', [NotificationsController::class, 'routeTo'])->name('notification.routeTo');
+    
+    // TRANSACTIONS - Routes accessibles aux clients pour voir leurs réservations
+    Route::get('/my-reservations', [TransactionController::class, 'myReservations'])->name('transaction.myReservations');
+    Route::get('/transaction/{transaction}/view', [TransactionController::class, 'show'])->name('transaction.show.public');
 });
 
 // Restaurant Module (Backend)
 Route::middleware(['auth', 'checkRole:Super,Admin,Customer'])->prefix('restaurant')->name('restaurant.')->group(function () {
-    
     // Menus
     Route::get('/', [RestaurantController::class, 'index'])->name('index');
     Route::get('/create', [RestaurantController::class, 'create'])->name('create');
@@ -182,15 +165,12 @@ Route::middleware(['auth', 'checkRole:Super,Admin,Customer'])->prefix('restauran
     Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
 });
 
-// SUPPRIMEZ ou COMMENTEZ cette ligne :
-// Route::redirect('/', '/dashboard');
-
-// À la place, vous pouvez ajouter :
+// Routes d'administration
 Route::get('/admin', function () {
     return redirect()->route('dashboard.index');
-});
+})->name('admin');
 
-// Dans web.php (temporairement)
+// Routes de test (à supprimer en production)
 Route::get('/test-delete-customer/{id}', function($id) {
     try {
         $customer = \App\Models\Customer::find($id);
