@@ -15,11 +15,11 @@
             background: white;
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            border: 2px solid #28a745; /* Bordure verte */
+            border: 2px solid #28a745;
         }
 
         .invoice-header {
-            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); /* Dégradé vert */
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
             color: white;
             padding: 30px;
             border-radius: 10px 10px 0 0;
@@ -28,22 +28,22 @@
         .section-title {
             font-size: 16px;
             font-weight: bold;
-            color: #28a745; /* Vert pour les titres */
+            color: #28a745;
             border-bottom: 2px solid #28a745;
             padding-bottom: 8px;
             margin-bottom: 20px;
         }
 
         .info-box {
-            background: #f8fff9; /* Fond vert très clair */
+            background: #f8fff9;
             border-radius: 8px;
             padding: 15px;
             margin-bottom: 20px;
-            border-left: 4px solid #28a745; /* Bordure gauche verte */
+            border-left: 4px solid #28a745;
         }
 
         .total-box {
-            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); /* Dégradé vert */
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
             color: white;
             border-radius: 8px;
             padding: 20px;
@@ -72,7 +72,6 @@
             font-size: 18px;
         }
 
-        /* Boutons d'action */
         .action-buttons {
             margin-bottom: 20px;
             text-align: center;
@@ -86,7 +85,7 @@
         }
 
         .btn-print {
-            background: #28a745; /* Vert */
+            background: #28a745;
             color: white;
             border: none;
         }
@@ -97,7 +96,7 @@
         }
 
         .btn-pdf {
-            background: #28a745; /* Vert également */
+            background: #28a745;
             color: white;
             border: none;
         }
@@ -107,7 +106,6 @@
             transform: translateY(-2px);
         }
 
-        /* Style spécifique pour les lignes vertes */
         .table thead th {
             background-color: #28a745 !important;
             color: white !important;
@@ -123,13 +121,11 @@
             border-color: #dee2e6;
         }
 
-        /* Badge vert pour le statut */
         .status-available {
             background: #28a745;
             color: white;
         }
 
-        /* Couleurs des montants */
         .text-primary {
             color: #28a745 !important;
         }
@@ -138,7 +134,6 @@
             color: #28a745 !important;
         }
 
-        /* Border top pour les séparateurs */
         .border-top {
             border-top-color: #28a745 !important;
         }
@@ -199,6 +194,12 @@
                 size: A4;
             }
         }
+        
+        /* Style pour l'affichage des montants en CFA */
+        .currency {
+            font-size: 14px;
+            font-weight: normal;
+        }
     </style>
     
     <!-- Bibliothèque pour générer le PDF -->
@@ -247,13 +248,13 @@
                 <div class="col-md-6">
                     <h6 class="mb-2" style="font-weight: bold; color: #28a745;">SIP HOTEL</h6>
                     <p class="mb-1" style="font-size: 14px;">123 Avenue de l'Hôtel</p>
-                    <p class="mb-1" style="font-size: 14px;">75000 Paris, France</p>
-                    <p class="mb-0" style="font-size: 14px;">Tél : +33 1 23 45 67 89</p>
+                    <p class="mb-1" style="font-size: 14px;">Abidjan, Côte d'Ivoire</p>
+                    <p class="mb-0" style="font-size: 14px;">Tél : +225 27 22 44 55 66</p>
                 </div>
                 <div class="col-md-6 text-right">
-                    <p class="mb-1" style="font-size: 14px; color: #28a745;"><strong>SIRET :</strong> 123 456 789 00012</p>
-                    <p class="mb-1" style="font-size: 14px; color: #28a745;"><strong>TVA :</strong> FR 12 345 678 901</p>
-                    <p class="mb-0" style="font-size: 14px; color: #28a745;"><strong>Email :</strong> contact@siphotel.com</p>
+                    <p class="mb-1" style="font-size: 14px; color: #28a745;"><strong>RCCM :</strong> CI-ABJ-2024-B-12345</p>
+                    <p class="mb-1" style="font-size: 14px; color: #28a745;"><strong>NIF :</strong> 12345678X</p>
+                    <p class="mb-0" style="font-size: 14px; color: #28a745;"><strong>Email :</strong> contact@siphotel.ci</p>
                 </div>
             </div>
         </div>
@@ -297,9 +298,13 @@
                         <tbody>
                             <tr>
                                 <td>Chambre {{ $payment->transaction->room->number }} - {{ $payment->transaction->room->type->name }}</td>
-                                <td class="text-center">{{ Helper::convertToRupiah($payment->transaction->room->price) }}</td>
+                                <td class="text-center">
+                                    {{ Helper::formatCFA($payment->transaction->room->price) }}
+                                </td>
                                 <td class="text-center">{{ $payment->transaction->getDateDifferenceWithPlural() }}</td>
-                                <td class="text-right font-weight-bold" style="color: #28a745;">{{ Helper::convertToRupiah($payment->transaction->getTotalPrice()) }}</td>
+                                <td class="text-right font-weight-bold" style="color: #28a745;">
+                                    {{ Helper::formatCFA($payment->transaction->getTotalPrice()) }}
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -313,25 +318,33 @@
                     <div class="col-md-3">
                         <div class="info-box text-center">
                             <p class="mb-1 text-muted">Total Séjour</p>
-                            <p class="mb-0 amount" style="color: #28a745;">{{ Helper::convertToRupiah($payment->transaction->getTotalPrice()) }}</p>
+                            <p class="mb-0 amount" style="color: #28a745;">
+                                {{ Helper::formatCFA($payment->transaction->getTotalPrice()) }}
+                            </p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="info-box text-center">
                             <p class="mb-1 text-muted">Acompte Requis</p>
-                            <p class="mb-0 amount" style="color: #28a745;">{{ Helper::convertToRupiah($payment->transaction->getMinimumDownPayment()) }}</p>
+                            <p class="mb-0 amount" style="color: #28a745;">
+                                {{ Helper::formatCFA($payment->transaction->getMinimumDownPayment()) }}
+                            </p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="info-box text-center">
                             <p class="mb-1 text-muted">Montant Payé</p>
-                            <p class="mb-0 amount" style="color: #28a745;">{{ Helper::convertToRupiah($payment->price) }}</p>
+                            <p class="mb-0 amount" style="color: #28a745;">
+                                {{ Helper::formatCFA($payment->price) }}
+                            </p>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="info-box text-center">
                             <p class="mb-1 text-muted">Total Payé à ce jour</p>
-                            <p class="mb-0 amount" style="color: #28a745;">{{ Helper::convertToRupiah($payment->transaction->getTotalPayment()) }}</p>
+                            <p class="mb-0 amount" style="color: #28a745;">
+                                {{ Helper::formatCFA($payment->transaction->getTotalPayment()) }}
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -346,9 +359,14 @@
                     </div>
                     <div class="col-md-6 text-right">
                         <h2 class="mb-1">
-                            {{ $payment->transaction->getTotalPrice() - $payment->transaction->getTotalPayment() <= 0 ? 
-                               Helper::convertToRupiah(0) : 
-                               Helper::convertToRupiah($payment->transaction->getTotalPrice() - $payment->transaction->getTotalPayment()) }}
+                            @php
+                                $balance = $payment->transaction->getTotalPrice() - $payment->transaction->getTotalPayment();
+                            @endphp
+                            @if($balance <= 0)
+                                {{ Helper::formatCFA(0) }}
+                            @else
+                                {{ Helper::formatCFA($balance) }}
+                            @endif
                         </h2>
                         <p class="mb-0 opacity-75">
                             {{ $payment->transaction->getTotalPrice() - $payment->transaction->getTotalPayment() <= 0 ? 
@@ -374,11 +392,16 @@
                     <div class="col-md-6">
                         <p class="small mb-2"><strong style="color: #28a745;">Moyens de paiement acceptés :</strong></p>
                         <ul class="small pl-3 mb-0">
-                            <li>Espèces (€)</li>
+                            <li>Espèces (FCFA)</li>
                             <li>Carte bancaire</li>
                             <li>Virement bancaire</li>
-                            <li>Chèque (uniquement pour les résidents français)</li>
+                            <li>Mobile money (Orange Money, Moov Money)</li>
                         </ul>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <p class="small mb-0"><strong style="color: #28a745;">Note :</strong> Tous les montants sont exprimés en Francs CFA (FCFA)</p>
                     </div>
                 </div>
             </div>
@@ -403,7 +426,7 @@
             <div class="row mt-3">
                 <div class="col-12 text-center">
                     <p class="small mb-0" style="color: #28a745;">
-                        SIP Hotel • 123 Avenue de l'Hôtel • 75000 Paris • Tél : +33 1 23 45 67 89 • contact@siphotel.com
+                        SIP Hotel • 123 Avenue de l'Hôtel • Abidjan, Côte d'Ivoire • Tél : +225 27 22 44 55 66 • contact@siphotel.ci
                     </p>
                 </div>
             </div>
