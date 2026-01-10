@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Room;
 use App\Models\Payment;
 use App\Repositories\Interface\TransactionRepositoryInterface;
+use App\Helpers\Helper; // Ajout de l'import Helper
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -50,13 +51,16 @@ class TransactionController extends Controller
         return redirect()->route('transaction.index');
     }
 
-    // /**
-    //  * Afficher les détails d'une transaction
-    //  */
+    /**
+     * Afficher les détails d'une transaction
+     */
     // public function show(Transaction $transaction)
     // {
-    //     // Récupérer les paiements associés
-    //     $payments = $transaction->payments()->orderBy('created_at', 'desc')->get();
+    //     // Récupérer le paiement associé (au singulier - hasOne)
+    //     $payment = $transaction->payment; // Pas besoin de () pour hasOne
+        
+    //     // Pour avoir une collection (même si c'est hasOne)
+    //     $payments = $transaction->payment ? collect([$transaction->payment]) : collect();
         
     //     // Calculer les totaux
     //     $totalPrice = $transaction->getTotalPrice();
@@ -72,7 +76,8 @@ class TransactionController extends Controller
 
     //     return view('transaction.show', [
     //         'transaction' => $transaction,
-    //         'payments' => $payments,
+    //         'payment' => $payment, // ← variable au singulier
+    //         'payments' => $payments, // ← collection
     //         'totalPrice' => $totalPrice,
     //         'totalPayment' => $totalPayment,
     //         'remaining' => $remaining,
@@ -81,12 +86,16 @@ class TransactionController extends Controller
     //         'room' => $transaction->room,
     //     ]);
     // }
-
     /**
      * Afficher le formulaire d'édition d'une transaction
      */
     public function edit(Transaction $transaction)
     {
+        // Vérifier les permissions (Super/Admin seulement)
+        if (!in_array(auth()->user()->role, ['Super', 'Admin'])) {
+            abort(403, 'Accès non autorisé. Seuls les Super Admins et Admins peuvent modifier les réservations.');
+        }
+        
         // Vérifier si la transaction peut être modifiée
         $checkOutDate = Carbon::parse($transaction->check_out);
         $isExpired = $checkOutDate->isPast();
@@ -96,17 +105,11 @@ class TransactionController extends Controller
                 ->with('failed', 'Impossible de modifier une réservation expirée.');
         }
         
-        // Récupérer les chambres disponibles
-        $rooms = Room::where('room_status_id', 1)->get(); // Chambres avec statut "Available"
+        // Charger les relations nécessaires pour la vue d'édition
+        $transaction->load(['customer.user', 'room.type', 'room.roomStatus', 'payment']);
         
-        // Récupérer tous les clients
-        $customers = Customer::with('user')->get();
-        
-        return view('transaction.edit', [
-            'transaction' => $transaction,
-            'rooms' => $rooms,
-            'customers' => $customers,
-        ]);
+        // Retourner simplement la transaction
+        return view('transaction.edit', compact('transaction'));
     }
 
     /**
@@ -114,6 +117,11 @@ class TransactionController extends Controller
      */
     public function update(Request $request, Transaction $transaction)
     {
+        // Vérifier les permissions
+        if (!in_array(auth()->user()->role, ['Super', 'Admin'])) {
+            abort(403, 'Accès non autorisé');
+        }
+        
         // Vérifier si la transaction peut être modifiée
         $checkOutDate = Carbon::parse($transaction->check_out);
         $isExpired = $checkOutDate->isPast();
@@ -123,17 +131,12 @@ class TransactionController extends Controller
                 ->with('failed', 'Impossible de modifier une réservation expirée.');
         }
         
-        // Validation
+        // Validation - SEULEMENT les dates et notes
         $validator = Validator::make($request->all(), [
-            'customer_id' => 'required|exists:customers,id',
-            'room_id' => 'required|exists:rooms,id',
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
+            'notes' => 'nullable|string|max:500',
         ], [
-            'customer_id.required' => 'Veuillez sélectionner un client',
-            'customer_id.exists' => 'Le client sélectionné n\'existe pas',
-            'room_id.required' => 'Veuillez sélectionner une chambre',
-            'room_id.exists' => 'La chambre sélectionnée n\'existe pas',
             'check_in.required' => 'La date d\'arrivée est requise',
             'check_in.date' => 'La date d\'arrivée doit être une date valide',
             'check_out.required' => 'La date de départ est requise',
@@ -148,12 +151,11 @@ class TransactionController extends Controller
         }
         
         // Vérifier si la chambre est disponible pour les nouvelles dates
-        $roomId = $request->room_id;
         $checkIn = $request->check_in;
         $checkOut = $request->check_out;
         
         // Vérifier les conflits de réservation (sauf la transaction courante)
-        $conflictingTransaction = Transaction::where('room_id', $roomId)
+        $conflictingTransaction = Transaction::where('room_id', $transaction->room_id)
             ->where('id', '!=', $transaction->id)
             ->where(function($query) use ($checkIn, $checkOut) {
                 $query->whereBetween('check_in', [$checkIn, $checkOut])
@@ -171,25 +173,48 @@ class TransactionController extends Controller
                 ->withInput();
         }
         
-        // Mettre à jour la transaction
-        $transaction->update($validator->validated());
+        // Sauvegarder les anciennes valeurs pour le message de confirmation
+        $oldCheckIn = $transaction->check_in;
+        $oldCheckOut = $transaction->check_out;
+        $oldPrice = $transaction->getTotalPrice();
         
-        // Mettre à jour le statut de la chambre si nécessaire
-        $room = Room::find($roomId);
-        if ($room && $room->room_status_id == 1) { // Si disponible
-            $room->update(['room_status_id' => 2]); // Passer à "Occupied"
-        }
+        // Mettre à jour UNIQUEMENT les dates et notes
+        $transaction->update([
+            'check_in' => $checkIn,
+            'check_out' => $checkOut,
+            'notes' => $request->notes ?? $transaction->notes,
+        ]);
         
-        // Si l'ancienne chambre est différente, la marquer comme disponible
-        if ($transaction->room_id != $roomId) {
-            $oldRoom = Room::find($transaction->room_id);
-            if ($oldRoom) {
-                $oldRoom->update(['room_status_id' => 1]); // "Available"
+        // Calculer le nouveau prix
+        $newPrice = $transaction->getTotalPrice();
+        
+        // Préparer le message de succès
+        $message = "Réservation #{$transaction->id} mise à jour avec succès.";
+        
+        if ($oldCheckIn != $checkIn || $oldCheckOut != $checkOut) {
+            $message .= " Dates modifiées de " . 
+                       Carbon::parse($oldCheckIn)->format('d/m/Y') . " - " . 
+                       Carbon::parse($oldCheckOut)->format('d/m/Y') . " à " . 
+                       Carbon::parse($checkIn)->format('d/m/Y') . " - " . 
+                       Carbon::parse($checkOut)->format('d/m/Y') . ".";
+            
+            if ($oldPrice != $newPrice) {
+                // Utiliser Helper si disponible, sinon formater manuellement
+                $oldPriceFormatted = class_exists('App\Helpers\Helper') ? 
+                    Helper::formatCFA($oldPrice) : 
+                    number_format($oldPrice, 0, ',', ' ') . ' CFA';
+                    
+                $newPriceFormatted = class_exists('App\Helpers\Helper') ? 
+                    Helper::formatCFA($newPrice) : 
+                    number_format($newPrice, 0, ',', ' ') . ' CFA';
+                    
+                $message .= " Nouveau total: " . $newPriceFormatted . 
+                            " (ancien: " . $oldPriceFormatted . ")";
             }
         }
         
         return redirect()->route('transaction.index')
-            ->with('success', 'Réservation #' . $transaction->id . ' modifiée avec succès !');
+            ->with('success', $message);
     }
 
     /**
@@ -198,8 +223,14 @@ class TransactionController extends Controller
     public function destroy(Transaction $transaction)
     {
         try {
+            // Vérifier les permissions
+            if (!in_array(auth()->user()->role, ['Super', 'Admin'])) {
+                abort(403, 'Accès non autorisé');
+            }
+            
             $transactionId = $transaction->id;
             $roomId = $transaction->room_id;
+            $customerName = $transaction->customer->name;
             
             // Supprimer tous les paiements associés
             Payment::where('transaction_id', $transaction->id)->delete();
@@ -221,7 +252,7 @@ class TransactionController extends Controller
             }
             
             return redirect()->route('transaction.index')
-                ->with('success', 'Réservation #' . $transactionId . ' supprimée avec succès !');
+                ->with('success', "Réservation #{$transactionId} pour {$customerName} supprimée avec succès !");
                 
         } catch (\Exception $e) {
             \Log::error('Erreur suppression transaction: ' . $e->getMessage());
@@ -231,11 +262,23 @@ class TransactionController extends Controller
     }
 
     /**
-     * Annuler une réservation (soft delete optionnel)
+     * Annuler une réservation
      */
     public function cancel(Transaction $transaction)
     {
         try {
+            // Vérifier les permissions
+            if (!in_array(auth()->user()->role, ['Super', 'Admin'])) {
+                abort(403, 'Accès non autorisé');
+            }
+            
+            // Vérifier si la transaction peut être annulée
+            $checkInDate = Carbon::parse($transaction->check_in);
+            if ($checkInDate->isPast()) {
+                return redirect()->route('transaction.index')
+                    ->with('failed', 'Impossible d\'annuler une réservation déjà commencée.');
+            }
+            
             // Marquer comme annulée (si vous avez un champ status)
             if (in_array('status', $transaction->getFillable())) {
                 $transaction->update(['status' => 'cancelled']);
@@ -279,11 +322,24 @@ class TransactionController extends Controller
      */
     public function invoice(Transaction $transaction)
     {
-        // Cette méthode peut rediriger vers PaymentController::invoice
-        // ou gérer directement la génération de facture
+        // Récupérer le premier paiement ou créer une facture à partir de la transaction
+        $payment = $transaction->payments()->first();
         
-        return redirect()->route('payment.invoice', ['payment' => $transaction->payments()->first()])
-            ->with('info', 'Redirection vers la facture');
+        if ($payment) {
+            return redirect()->route('payment.invoice', ['payment' => $payment]);
+        } else {
+            // Si aucun paiement, afficher une facture vierge
+            $totalPrice = $transaction->getTotalPrice();
+            $customer = $transaction->customer;
+            $room = $transaction->room;
+            
+            return view('transaction.invoice', [
+                'transaction' => $transaction,
+                'totalPrice' => $totalPrice,
+                'customer' => $customer,
+                'room' => $room,
+            ]);
+        }
     }
 
     /**
@@ -304,8 +360,8 @@ class TransactionController extends Controller
     }
 
     /**
- * Afficher les réservations d'un client (pour les clients)
- */
+     * Afficher les réservations d'un client (pour les clients)
+     */
     public function myReservations(Request $request)
     {
         // Si l'utilisateur est un client, ne montrer que ses réservations
@@ -318,13 +374,13 @@ class TransactionController extends Controller
             }
             
             $transactions = Transaction::where('customer_id', $customer->id)
-                ->with(['room', 'room.type', 'room.roomStatus'])
+                ->with(['room', 'room.type', 'room.roomStatus', 'payments'])
                 ->orderBy('check_in', 'desc')
                 ->paginate(10);
                 
             $transactionsExpired = Transaction::where('customer_id', $customer->id)
                 ->where('check_out', '<', Carbon::now())
-                ->with(['room', 'room.type', 'room.roomStatus'])
+                ->with(['room', 'room.type', 'room.roomStatus', 'payments'])
                 ->orderBy('check_out', 'desc')
                 ->paginate(10);
         } else {
@@ -340,4 +396,82 @@ class TransactionController extends Controller
         ]);
     }
 
+    /**
+     * Afficher les détails d'une transaction en format compact
+     */
+    public function showDetails(Request $request, $id)
+    {
+        $transaction = Transaction::with(['customer.user', 'room.type', 'payments'])
+            ->findOrFail($id);
+            
+        return view('transaction.details-modal', compact('transaction'));
+    }
+
+    /**
+     * Vérifier la disponibilité d'une chambre pour modification
+     */
+    public function checkAvailability(Request $request, Transaction $transaction)
+    {
+        $request->validate([
+            'check_in' => 'required|date',
+            'check_out' => 'required|date|after:check_in',
+        ]);
+        
+        $checkIn = $request->check_in;
+        $checkOut = $request->check_out;
+        
+        // Vérifier les conflits de réservation
+        $conflictingTransaction = Transaction::where('room_id', $transaction->room_id)
+            ->where('id', '!=', $transaction->id)
+            ->where(function($query) use ($checkIn, $checkOut) {
+                $query->whereBetween('check_in', [$checkIn, $checkOut])
+                      ->orWhereBetween('check_out', [$checkIn, $checkOut])
+                      ->orWhere(function($q) use ($checkIn, $checkOut) {
+                          $q->where('check_in', '<', $checkIn)
+                            ->where('check_out', '>', $checkOut);
+                      });
+            })
+            ->exists();
+        
+        return response()->json([
+            'available' => !$conflictingTransaction,
+            'message' => $conflictingTransaction ? 
+                'Chambre non disponible pour ces dates' : 
+                'Chambre disponible'
+        ]);
+    }
+
+    /**
+     * Mettre à jour le statut d'une transaction
+     */
+    public function updateStatus(Request $request, Transaction $transaction)
+    {
+        if (!in_array(auth()->user()->role, ['Super', 'Admin'])) {
+            abort(403, 'Accès non autorisé');
+        }
+        
+        $request->validate([
+            'status' => 'required|in:active,cancelled,completed',
+        ]);
+        
+        // Vérifier si le statut peut être changé
+        if ($request->status == 'cancelled') {
+            $checkInDate = Carbon::parse($transaction->check_in);
+            if ($checkInDate->isPast()) {
+                return redirect()->back()
+                    ->with('failed', 'Impossible d\'annuler une réservation déjà commencée.');
+            }
+            
+            // Libérer la chambre si annulation
+            $room = $transaction->room;
+            if ($room) {
+                $room->update(['room_status_id' => 1]); // Available
+            }
+        }
+        
+        $transaction->update(['status' => $request->status]);
+        
+        return redirect()->back()
+            ->with('success', 'Statut de la réservation mis à jour avec succès.');
+    }
 }
