@@ -69,15 +69,29 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
     Route::post('/room/{room}/image/upload', [ImageController::class, 'store'])->name('image.store');
     Route::delete('/image/{image}', [ImageController::class, 'destroy'])->name('image.destroy');
 
+    // ROUTE RACCOURCIE POUR CRÉATION RAPIDE (Alias)
+    Route::get('/createIdentity', function () {
+        return redirect()->route('transaction.reservation.createIdentity');
+    })->name('quick.createIdentity');
+
     // Réservations - Processus étape par étape
-    Route::name('transaction.reservation.')->group(function () {
+    Route::prefix('transaction/reservation')->name('transaction.reservation.')->group(function () {
         Route::get('/createIdentity', [TransactionRoomReservationController::class, 'createIdentity'])->name('createIdentity');
         Route::get('/pickFromCustomer', [TransactionRoomReservationController::class, 'pickFromCustomer'])->name('pickFromCustomer');
+        
+        // Route AJAX pour vérifier l'email
+        Route::post('/search-by-email', [TransactionRoomReservationController::class, 'searchByEmail'])
+            ->name('searchByEmail');
+        
         Route::post('/storeCustomer', [TransactionRoomReservationController::class, 'storeCustomer'])->name('storeCustomer');
         Route::get('/{customer}/viewCountPerson', [TransactionRoomReservationController::class, 'viewCountPerson'])->name('viewCountPerson');
         Route::get('/{customer}/chooseRoom', [TransactionRoomReservationController::class, 'chooseRoom'])->name('chooseRoom');
         Route::get('/{customer}/{room}/{from}/{to}/confirmation', [TransactionRoomReservationController::class, 'confirmation'])->name('confirmation');
         Route::post('/{customer}/{room}/payDownPayment', [TransactionRoomReservationController::class, 'payDownPayment'])->name('payDownPayment');
+        
+        // Nouvelle route pour voir les réservations d'un client
+        Route::get('/customer/{customer}/reservations', [TransactionRoomReservationController::class, 'showCustomerReservations'])
+            ->name('customerReservations');
     });
 
     // CRUD Resources
@@ -86,18 +100,20 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
     Route::resource('room', RoomController::class);
     Route::resource('roomstatus', RoomStatusController::class);
     
-    // TRANSACTIONS - Routes CRUD complètes (CORRECTION APPLIQUÉE)
+    // TRANSACTIONS - Routes CRUD complètes
     Route::prefix('transaction')->name('transaction.')->group(function () {
         Route::get('/', [TransactionController::class, 'index'])->name('index');
         Route::get('/create', [TransactionController::class, 'create'])->name('create');
         Route::post('/', [TransactionController::class, 'store'])->name('store');
-        Route::get('/{transaction}', [TransactionController::class, 'show'])->name('show'); // DÉPLACÉ ICI POUR LES ADMINS
-        Route::get('/{transaction}/edit', [TransactionController::class, 'edit'])->name('edit'); // CORRECTION : utilisation de {transaction} au lieu de {id}
+        Route::get('/{transaction}', [TransactionController::class, 'show'])->name('show');
+        Route::get('/{transaction}/edit', [TransactionController::class, 'edit'])->name('edit');
         Route::put('/{transaction}', [TransactionController::class, 'update'])->name('update');
         Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->name('destroy');
         
-        // Routes supplémentaires
-        Route::get('/{transaction}/cancel', [TransactionController::class, 'cancel'])->name('cancel');
+        // CORRECTION ICI : POST changé en DELETE pour correspondre au formulaire
+        Route::delete('/{transaction}/cancel', [TransactionController::class, 'cancel'])->name('cancel');
+        
+        Route::post('/{transaction}/restore', [TransactionController::class, 'restore'])->name('restore');
         Route::get('/{transaction}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
         Route::get('/{transaction}/history', [TransactionController::class, 'history'])->name('history');
         Route::get('/export/{type}', [TransactionController::class, 'export'])->name('export');
@@ -110,12 +126,31 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
     
     Route::resource('facility', FacilityController::class);
 
-    // Paiements
+    // PAIEMENTS - ROUTES COMPLÈTES (y compris annulation/restauration)
+    Route::prefix('payments')->name('payments.')->group(function () {
+        // Liste des paiements avec filtres
+        Route::get('/', [PaymentController::class, 'index'])->name('index');
+        
+        // Annuler un paiement
+        Route::delete('/{payment}/cancel', [PaymentController::class, 'cancel'])->name('cancel');
+        
+        // Restaurer un paiement annulé/expiré
+        Route::post('/{payment}/restore', [PaymentController::class, 'restore'])->name('restore');
+        
+        // Marquer comme expiré (pour API)
+        Route::post('/{payment}/expire', [PaymentController::class, 'markAsExpired'])->name('expire');
+        
+        // Facture/reçu
+        Route::get('/{payment}/invoice', [PaymentController::class, 'invoice'])->name('invoice');
+    });
+
+    // Paiements pour les transactions (routes existantes maintenues)
     Route::prefix('transaction/{transaction}/payment')->name('transaction.payment.')->group(function () {
         Route::get('/create', [PaymentController::class, 'create'])->name('create');
         Route::post('/store', [PaymentController::class, 'store'])->name('store');
     });
     
+    // Alias pour la compatibilité (consulter la liste des paiements)
     Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
     Route::get('/payment/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payment.invoice');
 
@@ -192,31 +227,30 @@ Route::get('/admin', function () {
     return redirect()->route('dashboard.index');
 })->name('admin');
 
-// Routes de test (à supprimer en production)
-Route::get('/test-delete-customer/{id}', function($id) {
-    try {
-        $customer = \App\Models\Customer::find($id);
-        if (!$customer) {
-            return 'Customer not found';
-        }
-        
-        $customerName = $customer->name;
-        
-        if ($customer->user) {
-            $customer->user->delete();
-        }
-        
-        $customer->delete();
-        
-        return redirect('customer')->with('success', 'Test delete successful: ' . $customerName);
-        
-    } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage();
-    }
-})->name('test.delete.customer');
-
 // ==================== ROUTES POUR DEBUG ET TEST ====================
 if (env('APP_DEBUG', false)) {
+    Route::get('/test-delete-customer/{id}', function($id) {
+        try {
+            $customer = \App\Models\Customer::find($id);
+            if (!$customer) {
+                return 'Customer not found';
+            }
+            
+            $customerName = $customer->name;
+            
+            if ($customer->user) {
+                $customer->user->delete();
+            }
+            
+            $customer->delete();
+            
+            return redirect('customer')->with('success', 'Test delete successful: ' . $customerName);
+            
+        } catch (\Exception $e) {
+            return 'Error: ' . $e->getMessage();
+        }
+    })->name('test.delete.customer');
+    
     Route::get('/test-route/{id}', function($id) {
         return response()->json([
             'id' => $id,
@@ -233,4 +267,43 @@ if (env('APP_DEBUG', false)) {
             })->values()
         ]);
     })->name('test.route');
+    
+    // Route pour tester la recherche AJAX
+    Route::get('/test-email-check/{email}', function($email) {
+        $customer = \App\Models\Customer::where('email', $email)->first();
+        if ($customer) {
+            return response()->json([
+                'exists' => true,
+                'customer' => [
+                    'name' => $customer->name,
+                    'email' => $customer->email,
+                    'phone' => $customer->phone,
+                    'reservation_count' => $customer->transactions()->count(),
+                ]
+            ]);
+        }
+        return response()->json(['exists' => false]);
+    });
+    
+    // Route pour lister toutes les routes
+    Route::get('/debug-routes', function() {
+        $routes = collect(Route::getRoutes())->map(function($route) {
+            return [
+                'method' => implode('|', $route->methods()),
+                'uri' => $route->uri(),
+                'name' => $route->getName(),
+                'action' => $route->getActionName(),
+            ];
+        });
+        
+        return response()->json($routes);
+    });
 }
+
+// ==================== ROUTES FALLBACK (SANS VUE 404) ====================
+Route::fallback(function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard.index')->with('error', 'Page non trouvée.');
+    }
+    return redirect()->route('login.index')->with('error', 'Page non trouvée. Veuillez vous connecter.');
+});

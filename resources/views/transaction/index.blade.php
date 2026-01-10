@@ -24,6 +24,11 @@
             color: #084298;
         }
         
+        .status-cancelled {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+        
         .action-buttons {
             display: flex;
             gap: 5px;
@@ -54,8 +59,8 @@
         .btn-edit { background-color: #cff4fc; color: #055160; }
         .btn-edit:hover:not(.disabled) { background-color: #bee4ec; }
         
-        .btn-delete { background-color: #f8d7da; color: #842029; }
-        .btn-delete:hover:not(.disabled) { background-color: #e8c7ca; }
+        .btn-cancel { background-color: #fff3cd; color: #856404; }
+        .btn-cancel:hover:not(.disabled) { background-color: #ffeaa7; }
         
         .table-responsive {
             max-height: 600px;
@@ -79,27 +84,23 @@
             border-color: #dee2e6;
         }
         
-        .debug-info {
-            font-size: 12px;
-            color: #6c757d;
-            margin-top: 5px;
-        }
-        
-        .route-test {
-            display: none; /* Cacher en production */
-        }
-        
-        .test-links {
+        .cancelled-row {
+            opacity: 0.7;
             background-color: #f8f9fa;
-            border-left: 4px solid #0d6efd;
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 5px;
         }
         
-        .test-links a {
-            font-size: 12px;
-            margin-right: 10px;
+        .cancelled-row:hover {
+            background-color: #f1f3f4;
+        }
+        
+        .btn-outline-cancel {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        .btn-outline-cancel:hover {
+            background-color: #dc3545;
+            color: white;
         }
     </style>
 
@@ -122,6 +123,15 @@
                             <i class="fas fa-history me-2"></i>Historique
                         </a>
                     </span>
+                    
+                    <!-- Mes Réservations (pour les clients) -->
+                    @if(auth()->user()->role === 'Customer')
+                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="Mes Réservations">
+                            <a href="{{ route('transaction.myReservations') }}" class="btn btn-outline-info">
+                                <i class="fas fa-bed me-2"></i>Mes Réservations
+                            </a>
+                        </span>
+                    @endif
                 </div>
             </div>
             
@@ -133,6 +143,11 @@
                     <button class="btn btn-outline-dark" type="submit">
                         <i class="fas fa-search"></i>
                     </button>
+                    @if(request()->has('search'))
+                        <a href="{{ route('transaction.index') }}" class="btn btn-outline-danger ms-2">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    @endif
                 </form>
             </div>
         </div>
@@ -146,40 +161,19 @@
             </div>
         @endif
         
-        @if(session('error'))
+        @if(session('error') || session('failed'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-circle me-2"></i>
-                {{ session('error') }}
+                {{ session('error') ?? session('failed') }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
-
-        <!-- TESTS DE DEBUG (uniquement en développement local) -->
-        @if(app()->environment('local') && $transactions->isNotEmpty())
-            <div class="test-links">
-                <strong><i class="fas fa-bug me-2"></i>Debug Mode</strong>
-                <div class="mt-2">
-                    @php
-                        $testTransaction = $transactions->first();
-                    @endphp
-                    <small class="text-muted me-3">Test Transaction ID: {{ $testTransaction->id }}</small>
-                    <a href="{{ route('transaction.edit', $testTransaction->id) }}" 
-                       class="badge bg-primary text-decoration-none" target="_blank">
-                        Test Route avec ID
-                    </a>
-                    <a href="{{ route('transaction.edit', $testTransaction) }}" 
-                       class="badge bg-success text-decoration-none" target="_blank">
-                        Test Route avec objet
-                    </a>
-                    <a href="{{ route('transaction.edit', ['transaction' => $testTransaction->id]) }}" 
-                       class="badge bg-info text-decoration-none" target="_blank">
-                        Test Route param nommé
-                    </a>
-                    <a href="/transaction/{{ $testTransaction->id }}/edit" 
-                       class="badge bg-warning text-decoration-none" target="_blank">
-                        URL Directe
-                    </a>
-                </div>
+        
+        @if(session('info'))
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle me-2"></i>
+                {{ session('info') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
 
@@ -188,17 +182,22 @@
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0">
-                        <i class="fas fa-users me-2"></i>Clients Actuels
+                        <i class="fas fa-users me-2"></i>Réservations Actives
                         <span class="badge bg-primary">{{ $transactions->count() }}</span>
                     </h5>
-                    <span class="status-badge status-active">Actives</span>
+                    <div class="d-flex gap-2">
+                        <span class="status-badge status-active">Actives</span>
+                        <span class="status-badge status-cancelled">Annulées</span>
+                        <span class="status-badge status-expired">Expirées</span>
+                        <span class="status-badge status-completed">Payées</span>
+                    </div>
                 </div>
                 
                 <div class="card">
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
-                                <thead class="table-light">
+                                <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                     <tr>
                                         <th>#</th>
                                         <th>ID</th>
@@ -217,30 +216,61 @@
                                 <tbody>
                                     @forelse ($transactions as $transaction)
                                         @php
-                                            // CORRECTION : Ajout de ?? 0 pour éviter les erreurs null
-                                            $totalPrice = $transaction->getTotalPrice() ?? 0;
-                                            $totalPayment = $transaction->getTotalPayment() ?? 0;
+                                            // Calcul des montants
+                                            $totalPrice = $transaction->getTotalPrice();
+                                            $totalPayment = $transaction->getTotalPayment();
                                             $remaining = $totalPrice - $totalPayment;
+                                            
+                                            // Vérifier le statut
+                                            $isCancelled = $transaction->status == 'cancelled';
                                             $isFullyPaid = $remaining <= 0;
                                             $checkOutDate = \Carbon\Carbon::parse($transaction->check_out);
                                             $isExpired = $checkOutDate->isPast();
-                                            $statusClass = $isFullyPaid ? 'status-completed' : ($isExpired ? 'status-expired' : 'status-active');
-                                            $statusText = $isFullyPaid ? 'Payé' : ($isExpired ? 'Expiré' : 'Active');
+                                            
+                                            // Déterminer le statut
+                                            if ($isCancelled) {
+                                                $statusClass = 'status-cancelled';
+                                                $statusText = 'Annulée';
+                                            } elseif ($isFullyPaid) {
+                                                $statusClass = 'status-completed';
+                                                $statusText = 'Payé';
+                                            } elseif ($isExpired) {
+                                                $statusClass = 'status-expired';
+                                                $statusText = 'Expiré';
+                                            } else {
+                                                $statusClass = 'status-active';
+                                                $statusText = 'Active';
+                                            }
                                             
                                             // Vérification des permissions
-                                            $canEdit = in_array(auth()->user()->role, ['Super', 'Admin']);
+                                            $isAdmin = in_array(auth()->user()->role, ['Super', 'Admin']);
+                                            $isCustomer = auth()->user()->role === 'Customer';
+                                            $customerId = auth()->user()->customer->id ?? null;
+                                            $isOwnReservation = $isCustomer && $transaction->customer_id == $customerId;
                                             
-                                            // CORRECTION : URL directe simplifiée
-                                            $editUrlDirect = $canEdit ? "/transaction/" . $transaction->id . "/edit" : '#';
+                                            // URL pour l'édition
+                                            $editUrl = $isAdmin ? route('transaction.edit', $transaction) : '#';
+                                            
+                                            // Vérifier si la réservation peut être annulée
+                                            $canCancel = $isAdmin && !$isCancelled && !$isExpired;
+                                            
+                                            // Vérifier si on peut payer
+                                            $canPay = !$isCancelled && !$isFullyPaid && ($isAdmin || $isOwnReservation);
+                                            
+                                            // Calcul du nombre de nuits
+                                            $checkIn = \Carbon\Carbon::parse($transaction->check_in);
+                                            $checkOut = \Carbon\Carbon::parse($transaction->check_out);
+                                            $nights = $checkIn->diffInDays($checkOut);
                                         @endphp
                                         
-                                        <tr>
+                                        <tr class="{{ $isCancelled ? 'cancelled-row' : '' }}">
                                             <td>{{ ($transactions->currentpage() - 1) * $transactions->perpage() + $loop->index + 1 }}</td>
                                             <td><strong>#{{ $transaction->id }}</strong></td>
                                             <td>
                                                 <div class="d-flex align-items-center">
                                                     <img src="{{ $transaction->customer->user->getAvatar() }}" 
-                                                         class="rounded-circle me-2" width="30" height="30">
+                                                         class="rounded-circle me-2" width="30" height="30" 
+                                                         alt="{{ $transaction->customer->name }}">
                                                     <div>
                                                         <div>{{ $transaction->customer->name }}</div>
                                                         <small class="text-muted">{{ $transaction->customer->phone ?? '' }}</small>
@@ -252,63 +282,89 @@
                                                     {{ $transaction->room->number }}
                                                 </span>
                                             </td>
-                                            <td>{{ Helper::dateFormat($transaction->check_in) }}</td>
-                                            <td>{{ Helper::dateFormat($transaction->check_out) }}</td>
+                                            <td>{{ $checkIn->format('d/m/Y') }}</td>
+                                            <td>{{ $checkOut->format('d/m/Y') }}</td>
                                             <td>
                                                 <span class="badge bg-secondary">
-                                                    {{ $transaction->getDateDifferenceWithPlural($transaction->check_in, $transaction->check_out) }}
+                                                    {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}
                                                 </span>
                                             </td>
                                             <td class="price-cfa">
-                                                {{ Helper::formatCFA($totalPrice) }}
+                                                {{ number_format($totalPrice, 0, ',', ' ') }} CFA
                                             </td>
                                             <td class="price-cfa">
-                                                {{ Helper::formatCFA($totalPayment) }}
+                                                {{ number_format($totalPayment, 0, ',', ' ') }} CFA
                                             </td>
                                             <td class="price-cfa {{ $isFullyPaid ? 'text-success' : 'text-danger' }}">
-                                                {{ $isFullyPaid ? '-' : Helper::formatCFA($remaining) }}
+                                                @if($isFullyPaid)
+                                                    <span class="badge bg-success">Soldé</span>
+                                                @else
+                                                    {{ number_format($remaining, 0, ',', ' ') }} CFA
+                                                @endif
                                             </td>
                                             <td>
                                                 <span class="status-badge {{ $statusClass }}">
                                                     {{ $statusText }}
                                                 </span>
+                                                @if($transaction->cancelled_at && $isCancelled)
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        Annulée le {{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y') }}
+                                                    </small>
+                                                @endif
                                             </td>
                                             <td>
                                                 <div class="action-buttons">
                                                     <!-- Paiement -->
-                                                    <a class="btn-action btn-pay {{ $isFullyPaid ? 'disabled' : '' }}"
-                                                       href="{{ $isFullyPaid ? '#' : route('transaction.payment.create', ['transaction' => $transaction->id]) }}"
-                                                       data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                       title="{{ $isFullyPaid ? 'Déjà payé' : 'Payer' }}">
-                                                        <i class="fas fa-money-bill-wave-alt"></i>
-                                                    </a>
-                                                    
-                                                    <!-- Modifier - CORRECTION : URL directe simplifiée -->
-                                                    @if($canEdit)
-                                                        <a class="btn-action btn-edit"
-                                                           href="{{ $editUrlDirect }}"
+                                                    @if($canPay)
+                                                        <a class="btn-action btn-pay"
+                                                           href="{{ route('transaction.payment.create', $transaction) }}"
                                                            data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                           title="Modifier"
-                                                           data-transaction-id="{{ $transaction->id }}">
+                                                           title="Effectuer un paiement">
+                                                            <i class="fas fa-money-bill-wave-alt"></i>
+                                                        </a>
+                                                    @else
+                                                        <span class="btn-action btn-pay disabled"
+                                                              data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                              title="{{ $isFullyPaid ? 'Déjà payé' : ($isCancelled ? 'Réservation annulée' : ($isExpired ? 'Réservation expirée' : 'Non autorisé')) }}">
+                                                            <i class="fas fa-money-bill-wave-alt"></i>
+                                                        </span>
+                                                    @endif
+                                                    
+                                                    <!-- Modifier -->
+                                                    @if($isAdmin && !$isCancelled && !$isExpired)
+                                                        <a class="btn-action btn-edit"
+                                                           href="{{ $editUrl }}"
+                                                           data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                           title="Modifier la réservation">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
                                                     @else
                                                         <span class="btn-action btn-edit disabled"
                                                               data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                              title="Modification réservée aux administrateurs">
+                                                              title="{{ $isAdmin ? ($isCancelled ? 'Réservation annulée' : ($isExpired ? 'Réservation expirée' : 'Non autorisé')) : 'Modification réservée aux administrateurs' }}">
                                                             <i class="fas fa-edit"></i>
                                                         </span>
                                                     @endif
                                                     
-                                                    <!-- Supprimer -->
-                                                    <button type="button" class="btn-action btn-delete delete-reservation-btn"
-                                                            data-transaction-id="{{ $transaction->id }}"
-                                                            data-transaction-number="{{ $transaction->id }}"
-                                                            data-customer-name="{{ $transaction->customer->name }}"
-                                                            data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                            title="Supprimer">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
+                                                    <!-- Annuler -->
+                                                    @if($canCancel)
+                                                        <button type="button" class="btn-action btn-cancel cancel-reservation-btn"
+                                                                data-transaction-id="{{ $transaction->id }}"
+                                                                data-transaction-number="#{{ $transaction->id }}"
+                                                                data-customer-name="{{ $transaction->customer->name }}"
+                                                                data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                                title="Annuler la réservation">
+                                                            <i class="fas fa-ban"></i>
+                                                        </button>
+                                                    @elseif($isAdmin && !$isCancelled && !$isExpired)
+                                                        <span class="btn-action btn-cancel disabled"
+                                                              data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                              title="Non autorisé">
+                                                            <i class="fas fa-ban"></i>
+                                                        </span>
+                                                    @endif
+                                                    
                                                 </div>
                                             </td>
                                         </tr>
@@ -317,7 +373,12 @@
                                             <td colspan="12" class="text-center py-4">
                                                 <i class="fas fa-bed fa-2x text-muted mb-3"></i>
                                                 <h5>Aucune Réservation Active</h5>
-                                                <p class="text-muted">Aucun client ne séjourne actuellement</p>
+                                                <p class="text-muted">Aucune réservation active trouvée</p>
+                                                @if($isAdmin)
+                                                    <a href="#" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                                                        <i class="fas fa-plus me-2"></i>Créer une réservation
+                                                    </a>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforelse
@@ -351,7 +412,7 @@
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
-                                <thead class="table-light">
+                                <thead class="table-light" style="position: sticky; top: 0; z-index: 1;">
                                     <tr>
                                         <th>#</th>
                                         <th>ID</th>
@@ -370,21 +431,37 @@
                                 <tbody>
                                     @forelse ($transactionsExpired as $transaction)
                                         @php
-                                            // CORRECTION : Ajout de ?? 0 pour éviter les erreurs null
-                                            $totalPrice = $transaction->getTotalPrice() ?? 0;
-                                            $totalPayment = $transaction->getTotalPayment() ?? 0;
+                                            $totalPrice = $transaction->getTotalPrice();
+                                            $totalPayment = $transaction->getTotalPayment();
                                             $remaining = $totalPrice - $totalPayment;
-                                            $isFullyPaid = $remaining <= 0;
-                                            $statusClass = $isFullyPaid ? 'status-completed' : 'status-expired';
-                                            $statusText = $isFullyPaid ? 'Payé' : 'Impayé';
                                             
-                                            // Vérification des permissions
-                                            $canEdit = in_array(auth()->user()->role, ['Super', 'Admin']);
-                                            // URL directe pour éviter les erreurs de route
-                                            $editUrlDirect = $canEdit ? "/transaction/" . $transaction->id . "/edit" : '#';
+                                            $isCancelled = $transaction->status == 'cancelled';
+                                            $isFullyPaid = $remaining <= 0;
+                                            $isAdmin = in_array(auth()->user()->role, ['Super', 'Admin']);
+                                            $isCustomer = auth()->user()->role === 'Customer';
+                                            $customerId = auth()->user()->customer->id ?? null;
+                                            $isOwnReservation = $isCustomer && $transaction->customer_id == $customerId;
+                                            
+                                            if ($isCancelled) {
+                                                $statusClass = 'status-cancelled';
+                                                $statusText = 'Annulée';
+                                            } elseif ($isFullyPaid) {
+                                                $statusClass = 'status-completed';
+                                                $statusText = 'Payé';
+                                            } else {
+                                                $statusClass = 'status-expired';
+                                                $statusText = 'Expiré';
+                                            }
+                                            
+                                            $canPay = !$isCancelled && !$isFullyPaid && ($isAdmin || $isOwnReservation);
+                                            
+                                            // Calcul du nombre de nuits
+                                            $checkIn = \Carbon\Carbon::parse($transaction->check_in);
+                                            $checkOut = \Carbon\Carbon::parse($transaction->check_out);
+                                            $nights = $checkIn->diffInDays($checkOut);
                                         @endphp
                                         
-                                        <tr>
+                                        <tr class="{{ $isCancelled ? 'cancelled-row' : '' }}">
                                             <td>{{ $loop->iteration }}</td>
                                             <td><strong>#{{ $transaction->id }}</strong></td>
                                             <td>{{ $transaction->customer->name }}</td>
@@ -393,63 +470,64 @@
                                                     {{ $transaction->room->number }}
                                                 </span>
                                             </td>
-                                            <td>{{ Helper::dateFormat($transaction->check_in) }}</td>
-                                            <td>{{ Helper::dateFormat($transaction->check_out) }}</td>
+                                            <td>{{ $checkIn->format('d/m/Y') }}</td>
+                                            <td>{{ $checkOut->format('d/m/Y') }}</td>
                                             <td>
                                                 <span class="badge bg-secondary">
-                                                    {{ $transaction->getDateDifferenceWithPlural($transaction->check_in, $transaction->check_out) }}
+                                                    {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}
                                                 </span>
                                             </td>
                                             <td class="price-cfa">
-                                                {{ Helper::formatCFA($totalPrice) }}
+                                                {{ number_format($totalPrice, 0, ',', ' ') }} CFA
                                             </td>
                                             <td class="price-cfa">
-                                                {{ Helper::formatCFA($totalPayment) }}
+                                                {{ number_format($totalPayment, 0, ',', ' ') }} CFA
                                             </td>
                                             <td class="price-cfa {{ $isFullyPaid ? 'text-success' : 'text-danger' }}">
-                                                {{ $isFullyPaid ? '-' : Helper::formatCFA($remaining) }}
+                                                @if($isFullyPaid)
+                                                    <span class="badge bg-success">Soldé</span>
+                                                @else
+                                                    {{ number_format($remaining, 0, ',', ' ') }} CFA
+                                                @endif
                                             </td>
                                             <td>
                                                 <span class="status-badge {{ $statusClass }}">
                                                     {{ $statusText }}
                                                 </span>
+                                                @if($transaction->cancelled_at && $isCancelled)
+                                                    <br>
+                                                    <small class="text-muted">
+                                                        Annulée le {{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y') }}
+                                                    </small>
+                                                @endif
                                             </td>
                                             <td>
                                                 <div class="action-buttons">
-                                                    <!-- Paiement (si impayé) -->
-                                                    <a class="btn-action btn-pay {{ $isFullyPaid ? 'disabled' : '' }}"
-                                                       href="{{ $isFullyPaid ? '#' : route('transaction.payment.create', ['transaction' => $transaction->id]) }}"
-                                                       data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                       title="{{ $isFullyPaid ? 'Déjà payé' : 'Payer dette' }}">
-                                                        <i class="fas fa-money-bill-wave-alt"></i>
-                                                    </a>
-                                                    
-                                                    <!-- Modifier (si autorisé) -->
-                                                    @if($canEdit)
-                                                        <a class="btn-action btn-edit"
-                                                           href="{{ $editUrlDirect }}"
+                                                    <!-- Paiement pour dette -->
+                                                    @if($canPay)
+                                                        <a class="btn-action btn-pay"
+                                                           href="{{ route('transaction.payment.create', $transaction) }}"
                                                            data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                           title="Modifier (réservation expirée)"
-                                                           data-transaction-id="{{ $transaction->id }}">
-                                                            <i class="fas fa-edit"></i>
+                                                           title="Payer la dette restante">
+                                                            <i class="fas fa-money-bill-wave-alt"></i>
                                                         </a>
-                                                    @else
-                                                        <span class="btn-action btn-edit disabled"
+                                                    @elseif(!$isFullyPaid && !$isCancelled)
+                                                        <span class="btn-action btn-pay disabled"
                                                               data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                              title="Modification réservée aux administrateurs">
-                                                            <i class="fas fa-edit"></i>
+                                                              title="{{ $isAdmin ? 'Dette impayée' : 'Non autorisé' }}">
+                                                            <i class="fas fa-money-bill-wave-alt"></i>
                                                         </span>
                                                     @endif
                                                     
-                                                    <!-- Supprimer -->
-                                                    <button type="button" class="btn-action btn-delete delete-reservation-btn"
-                                                            data-transaction-id="{{ $transaction->id }}"
-                                                            data-transaction-number="{{ $transaction->id }}"
-                                                            data-customer-name="{{ $transaction->customer->name }}"
-                                                            data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                            title="Supprimer">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
+                                                    <!-- Voir détails -->
+                                                    @if($isAdmin || $isOwnReservation)
+                                                        <a class="btn-action" style="background-color: #e2e3e5; color: #383d41;"
+                                                           href="{{ route('transaction.show', $transaction) }}"
+                                                           data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                           title="Voir les détails">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
@@ -467,6 +545,13 @@
                         </div>
                     </div>
                 </div>
+                
+                <!-- Pagination pour les anciennes réservations -->
+                @if(method_exists($transactionsExpired, 'hasPages') && $transactionsExpired->hasPages())
+                    <div class="mt-3">
+                        {{ $transactionsExpired->onEachSide(1)->links('template.paginationlinks') }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -498,109 +583,158 @@
         </div>
     </div>
 
-    <!-- Formulaire de suppression masqué -->
-    <form id="delete-form" method="POST" class="d-none">
+    <!-- Formulaire d'annulation masqué -->
+    <form id="cancel-form" method="POST" action="{{ route('transaction.cancel', 0) }}" class="d-none">
         @csrf
         @method('DELETE')
-        <input type="hidden" name="transaction_id" id="transaction-id-input">
+        <input type="hidden" name="transaction_id" id="cancel-transaction-id-input">
+        <input type="hidden" name="cancel_reason" id="cancel-reason-input">
     </form>
 @endsection
 
 @section('footer')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// Initialiser les tooltips Bootstrap
+// VERSION CORRIGÉE - SANS BOOTSTRAP JS
 document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+    console.log('=== SYSTÈME D\'ANNULATION INITIALISÉ ===');
     
-    // Gérer la suppression des réservations
-    document.querySelectorAll('.delete-reservation-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
+    // DÉSACTIVÉ: Les tooltips Bootstrap (cause l'erreur)
+    // var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    // var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+    //     return new bootstrap.Tooltip(tooltipTriggerEl);
+    // });
+    
+    // Gérer l'annulation des réservations - VERSION SIMPLIFIÉE
+    function attachCancelEvents() {
+        const cancelButtons = document.querySelectorAll('.cancel-reservation-btn');
+        console.log(`Trouvé ${cancelButtons.length} bouton(s) d'annulation`);
+        
+        cancelButtons.forEach(button => {
+            // Cloner le bouton pour supprimer les anciens événements
+            const newButton = button.cloneNode(true);
+            button.parentNode.replaceChild(newButton, button);
             
-            const transactionId = this.getAttribute('data-transaction-id');
-            const transactionNumber = this.getAttribute('data-transaction-number');
-            const customerName = this.getAttribute('data-customer-name');
-            
-            Swal.fire({
-                title: 'Confirmer la suppression',
-                html: `
-                    <div class="text-left">
-                        <p>Êtes-vous sûr de vouloir supprimer cette réservation ?</p>
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle me-2"></i>
-                            <strong>Attention :</strong> Cette action est irréversible !
+            // Attacher le nouvel événement
+            newButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const transactionId = this.getAttribute('data-transaction-id');
+                const transactionNumber = this.getAttribute('data-transaction-number');
+                const customerName = this.getAttribute('data-customer-name');
+                
+                console.log(`Annulation demandée: ${transactionNumber} (ID: ${transactionId})`);
+                
+                Swal.fire({
+                    title: 'Annuler la réservation ?',
+                    html: `
+                        <div style="text-align: left;">
+                            <p>Confirmez l'annulation de :</p>
+                            <div style="background: #fff3cd; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                                <strong>${transactionNumber}</strong><br>
+                                <small>Client: ${customerName}</small>
+                            </div>
+                            <div style="margin-top: 15px;">
+                                <label>Raison (optionnelle) :</label>
+                                <textarea id="cancelReason" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;" 
+                                          rows="3" placeholder="Pourquoi annuler cette réservation ?"></textarea>
+                            </div>
                         </div>
-                        <p><strong>Réservation #:</strong> ${transactionNumber}</p>
-                        <p><strong>Client :</strong> ${customerName}</p>
-                    </div>
-                `,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Oui, supprimer',
-                cancelButtonText: 'Annuler',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Préparer et soumettre le formulaire de suppression
-                    const deleteForm = document.getElementById('delete-form');
-                    deleteForm.action = '{{ url("transaction") }}/' + transactionId;
-                    deleteForm.querySelector('#transaction-id-input').value = transactionId;
-                    deleteForm.submit();
-                    
-                    // Afficher un message de succès
-                    Swal.fire({
-                        title: 'Suppression en cours...',
-                        text: 'La réservation est en cours de suppression',
-                        icon: 'info',
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                }
+                    `,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: '<i class="fas fa-ban me-2"></i> Oui, annuler',
+                    cancelButtonText: '<i class="fas fa-times me-2"></i> Non, garder',
+                    reverseButtons: true,
+                    focusCancel: true,
+                    preConfirm: () => {
+                        return {
+                            reason: document.getElementById('cancelReason').value
+                        };
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const reason = result.value.reason || '';
+                        
+                        // Afficher message de chargement
+                        Swal.fire({
+                            title: 'Traitement en cours...',
+                            text: 'Annulation de la réservation',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                        
+                        // Préparer le formulaire
+                        setTimeout(() => {
+                            const form = document.getElementById('cancel-form');
+                            if (!form) {
+                                console.error('Formulaire d\'annulation non trouvé !');
+                                Swal.fire('Erreur', 'Formulaire non trouvé', 'error');
+                                return;
+                            }
+                            
+                            // Mettre à jour l'action
+                            const newAction = `/transaction/${transactionId}/cancel`;
+                            form.action = newAction;
+                            
+                            // Remplir les champs
+                            document.getElementById('cancel-transaction-id-input').value = transactionId;
+                            document.getElementById('cancel-reason-input').value = reason;
+                            
+                            console.log('Soumission vers:', newAction);
+                            form.submit();
+                        }, 500);
+                    }
+                });
             });
-        });
-    });
-    
-    // Debug des liens d'édition (uniquement en développement)
-    @if(app()->environment('local'))
-        console.log('=== TRANSACTION SYSTEM LOADED ===');
-        console.log('User:', '{{ auth()->user()->name ?? "Guest" }}');
-        console.log('Role:', '{{ auth()->user()->role ?? "None" }}');
-        console.log('Route transaction.edit exists:', {{ Route::has('transaction.edit') ? 'true' : 'false' }});
-        
-        // Vérifier les liens d'édition
-        document.querySelectorAll('.btn-edit').forEach((link, index) => {
-            console.log(`Edit Link ${index + 1}:`, link.href);
-        });
-        
-        // Tester toutes les URLs possibles
-        @if($transactions->isNotEmpty())
-            const testId = {{ $transactions->first()->id }};
-            console.log('Test ID:', testId);
-            console.log('Direct URL:', '/transaction/' + testId + '/edit');
             
-            // Tester la route avec fetch
-            fetch('/test-route/' + testId)
-                .then(response => response.json())
-                .then(data => console.log('Route test result:', data))
-                .catch(error => console.error('Route test error:', error));
-        @endif
+            // Visualiser que le bouton est actif
+            newButton.style.cursor = 'pointer';
+            newButton.style.border = '2px solid #28a745';
+            newButton.title = 'Cliquez pour annuler cette réservation';
+        });
+    }
+    
+    // Attacher les événements
+    attachCancelEvents();
+    
+    // Si pas de réservations, afficher le modal
+    @if($transactions->count() == 0 && in_array(auth()->user()->role, ['Super', 'Admin']))
+        setTimeout(() => {
+            const modalElement = document.getElementById('staticBackdrop');
+            if (modalElement) {
+                // Utiliser jQuery ou méthode simple
+                $('#staticBackdrop').modal('show');
+            }
+        }, 1000);
     @endif
     
-    // Ajouter un événement pour déboguer les clics sur les liens d'édition
-    document.querySelectorAll('.btn-edit').forEach(link => {
-        link.addEventListener('click', function(e) {
-            @if(app()->environment('local'))
-                console.log('Edit clicked:', this.href);
-                console.log('Transaction ID:', this.getAttribute('data-transaction-id'));
-            @endif
-        });
-    });
+    // Debug
+    @if(config('app.debug'))
+        console.log('Réservations actives:', {{ $transactions->count() }});
+        console.log('Réservations expirées:', {{ $transactionsExpired->count() }});
+    @endif
+    
+    // Message final
+    console.log('✅ Système d\'annulation prêt !');
+    console.log('👉 Cliquez sur un bouton jaune (🚫) pour tester');
 });
 </script>
+
+<!-- Style pour visualiser les boutons actifs -->
+<style>
+.cancel-reservation-btn {
+    transition: all 0.2s ease;
+}
+.cancel-reservation-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+</style>
 @endsection

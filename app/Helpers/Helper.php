@@ -154,6 +154,9 @@ class Helper
     /**
      * Calculer la différence de jours entre deux dates
      */
+    /**
+ * Calculer la différence de jours entre deux dates
+ */
     public static function getDateDifference($check_in, $check_out)
     {
         if (empty($check_in) || empty($check_out)) {
@@ -164,8 +167,16 @@ class Helper
             $check_in = Carbon::parse($check_in);
             $check_out = Carbon::parse($check_out);
             
-            return $check_out->diffInDays($check_in);
+            // CORRECTION ICI : check_in -> check_out (pas check_out -> check_in)
+            return $check_in->diffInDays($check_out);
+            
         } catch (\Exception $e) {
+            // Log l'erreur pour debug
+            \Log::error('Erreur dans getDateDifference:', [
+                'check_in' => $check_in,
+                'check_out' => $check_out,
+                'error' => $e->getMessage()
+            ]);
             return 0;
         }
     }
