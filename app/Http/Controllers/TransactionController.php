@@ -24,9 +24,12 @@ class TransactionController extends Controller
      */
     public function index(Request $request)
     {
+        // Récupérer les transactions ACTIVES (pas annulées, pas terminées)
         $transactions = $this->transactionRepository->getTransaction($request);
+        
+        // Récupérer les transactions EXPIRÉES ou ANCIENNES (incluant les annulées)
         $transactionsExpired = $this->transactionRepository->getTransactionExpired($request);
-
+        
         return view('transaction.index', [
             'transactions' => $transactions,
             'transactionsExpired' => $transactionsExpired,
@@ -56,17 +59,16 @@ class TransactionController extends Controller
      */
     public function show(Transaction $transaction)
     {
-        // Récupérer les paiements (corriger la relation)
+        // Récupérer les paiements
         try {
             $payments = $transaction->payment()->orderBy('created_at', 'desc')->get();
         } catch (\Exception $e) {
-            // Si la relation s'appelle 'payment' au singulier
             $payments = $transaction->payment()->orderBy('created_at', 'desc')->get();
         }
         
         // Calculer le nombre de nuits
-        $checkIn = \Carbon\Carbon::parse($transaction->check_in);
-        $checkOut = \Carbon\Carbon::parse($transaction->check_out);
+        $checkIn = Carbon::parse($transaction->check_in);
+        $checkOut = Carbon::parse($transaction->check_out);
         $nights = $checkIn->diffInDays($checkOut);
         
         // Calculer les totaux
@@ -74,14 +76,14 @@ class TransactionController extends Controller
         $totalPayment = $transaction->getTotalPayment();
         $remaining = $totalPrice - $totalPayment;
         
-        // Déterminer le statut
-        $checkOutDate = \Carbon\Carbon::parse($transaction->check_out);
-        $checkInDate = \Carbon\Carbon::parse($transaction->check_in);
+        // Déterminer le statut (depuis la base de données)
+        $status = $transaction->status;
+        
+        // Calculer les états pour information
+        $checkOutDate = Carbon::parse($transaction->check_out);
+        $checkInDate = Carbon::parse($transaction->check_in);
         $isExpired = $checkOutDate->isPast();
         $isFullyPaid = $remaining <= 0;
-        
-        // Utiliser le statut de la transaction s'il existe, sinon calculer
-        $status = $transaction->status ?? ($isFullyPaid ? 'paid' : ($isExpired ? 'expired' : 'active'));
         
         // Vérifier si la réservation peut être annulée
         $canCancel = $this->canCancelReservation($transaction);
@@ -280,21 +282,270 @@ class TransactionController extends Controller
     }
 
     /**
-     * Annuler une réservation
+     * Mettre à jour le statut d'une transaction
+     */
+    public function updateStatus(Request $request, Transaction $transaction)
+    {
+        // Vérifier les permissions
+        if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Reception'])) {
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Accès non autorisé'], 403);
+            }
+            abort(403, 'Accès non autorisé. Seuls le personnel peut changer les statuts.');
+        }
+        
+        // Validation
+        $request->validate([
+            'status' => 'required|in:reservation,active,completed,cancelled,no_show',
+            'cancel_reason' => 'nullable|string|max:500',
+        ]);
+        
+        $oldStatus = $transaction->status;
+        $newStatus = $request->status;
+        
+        try {
+            DB::beginTransaction();
+            
+            // Préparer les données de mise à jour
+            $updateData = ['status' => $newStatus];
+            
+            // Gérer l'annulation
+            if ($newStatus === 'cancelled') {
+                $updateData['cancelled_at'] = Carbon::now();
+                $updateData['cancelled_by'] = auth()->id();
+                $updateData['cancel_reason'] = $request->cancel_reason;
+                
+                // Libérer la chambre si elle est occupée
+                if ($transaction->room && $transaction->room->room_status_id == 2) {
+                    $transaction->room->update(['room_status_id' => 1]); // Available
+                }
+            } 
+            // Si on réactive une réservation annulée
+            elseif ($oldStatus === 'cancelled' && $newStatus !== 'cancelled') {
+                $updateData['cancelled_at'] = null;
+                $updateData['cancelled_by'] = null;
+                $updateData['cancel_reason'] = null;
+            }
+            
+            // Gérer le passage de réservation à actif (arrivée du client)
+            if ($oldStatus === 'reservation' && $newStatus === 'active') {
+                // Marquer la chambre comme occupée
+                if ($transaction->room) {
+                    $transaction->room->update(['room_status_id' => 2]); // Occupied
+                }
+            }
+            
+            // Gérer le passage d'actif à terminé (départ du client)
+            if ($oldStatus === 'active' && $newStatus === 'completed') {
+                // Libérer la chambre
+                if ($transaction->room) {
+                    $transaction->room->update(['room_status_id' => 1]); // Available
+                }
+            }
+            
+            // Mettre à jour la transaction
+            $transaction->update($updateData);
+            
+            // Journaliser l'action
+            \Log::info('Statut de réservation modifié', [
+                'transaction_id' => $transaction->id,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'changed_by' => auth()->id(),
+                'changed_by_name' => auth()->user()->name,
+                'customer_id' => $transaction->customer_id,
+                'room_id' => $transaction->room_id,
+                'reason' => $request->cancel_reason,
+            ]);
+            
+            DB::commit();
+            
+            // Réponse pour AJAX
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Statut mis à jour avec succès',
+                    'new_status' => $newStatus,
+                    'new_status_label' => $this->getStatusLabel($newStatus),
+                    'transaction_id' => $transaction->id
+                ]);
+            }
+            
+            // Message personnalisé selon le changement
+            $message = $this->getStatusChangeMessage($oldStatus, $newStatus);
+            
+            if ($newStatus === 'cancelled' && $request->cancel_reason) {
+                $message .= " - Raison : " . $request->cancel_reason;
+            }
+            
+            return redirect()->back()
+                ->with('success', $message);
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Erreur mise à jour statut: ' . $e->getMessage());
+            
+            if ($request->ajax()) {
+                return response()->json(['error' => 'Erreur lors de la mise à jour'], 500);
+            }
+            
+            return redirect()->back()
+                ->with('failed', 'Erreur lors de la mise à jour du statut: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Obtenir le message de changement de statut
+     */
+    private function getStatusChangeMessage($oldStatus, $newStatus)
+    {
+        $messages = [
+            'reservation' => [
+                'active' => 'Client marqué comme arrivé à l\'hôtel',
+                'cancelled' => 'Réservation annulée',
+                'no_show' => 'Client marqué comme No Show',
+            ],
+            'active' => [
+                'completed' => 'Client marqué comme parti (séjour terminé)',
+                'cancelled' => 'Séjour annulé pendant le séjour',
+                'reservation' => 'Retour à l\'état réservation',
+            ],
+            'completed' => [
+                'active' => 'Séjour réactivé',
+                'cancelled' => 'Séjour marqué comme annulé',
+                'reservation' => 'Séjour changé en réservation',
+            ],
+            'cancelled' => [
+                'active' => 'Réservation réactivée (client arrivé)',
+                'reservation' => 'Réservation réactivée',
+                'completed' => 'Réservation marquée comme terminée',
+            ],
+        ];
+        
+        return $messages[$oldStatus][$newStatus] 
+            ?? "Statut changé de '{$this->getStatusLabel($oldStatus)}' à '{$this->getStatusLabel($newStatus)}'";
+    }
+
+    /**
+     * Obtenir le label d'un statut
+     */
+    private function getStatusLabel($status)
+    {
+        $labels = [
+            'reservation' => 'Réservation',
+            'active' => 'Dans l\'hôtel',
+            'completed' => 'Séjour terminé',
+            'cancelled' => 'Annulée',
+            'no_show' => 'No Show',
+        ];
+        
+        return $labels[$status] ?? ucfirst($status);
+    }
+
+    /**
+     * Action rapide : Marquer comme arrivé
+     */
+    public function markAsArrived(Transaction $transaction)
+    {
+        if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Reception'])) {
+            abort(403, 'Accès non autorisé');
+        }
+        
+        try {
+            // Vérifier que c'est bien une réservation
+            if ($transaction->status !== 'reservation') {
+                return redirect()->back()
+                    ->with('failed', 'Seule une réservation peut être marquée comme arrivée');
+            }
+            
+            DB::beginTransaction();
+            
+            // Marquer la chambre comme occupée
+            if ($transaction->room) {
+                $transaction->room->update(['room_status_id' => 2]); // Occupied
+            }
+            
+            // Mettre à jour le statut
+            $transaction->update([
+                'status' => 'active',
+            ]);
+            
+            DB::commit();
+            
+            return redirect()->back()
+                ->with('success', 'Client marqué comme arrivé à l\'hôtel');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Erreur marquage arrivée: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('failed', 'Erreur : ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Action rapide : Marquer comme parti
+     */
+    public function markAsDeparted(Transaction $transaction)
+    {
+        if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Reception'])) {
+            abort(403, 'Accès non autorisé');
+        }
+        
+        try {
+            // Vérifier que le client est dans l'hôtel
+            if ($transaction->status !== 'active') {
+                return redirect()->back()
+                    ->with('failed', 'Seul un client dans l\'hôtel peut être marqué comme parti');
+            }
+            
+            DB::beginTransaction();
+            
+            // Libérer la chambre
+            if ($transaction->room) {
+                $transaction->room->update(['room_status_id' => 1]); // Available
+            }
+            
+            // Mettre à jour le statut
+            $transaction->update([
+                'status' => 'completed',
+            ]);
+            
+            DB::commit();
+            
+            return redirect()->back()
+                ->with('success', 'Client marqué comme parti (séjour terminé)');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Erreur marquage départ: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('failed', 'Erreur : ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Annuler une réservation (ancienne méthode - gardée pour compatibilité)
      */
     public function cancel(Request $request, Transaction $transaction)
     {
         try {
             // Vérifier les permissions
             if (!in_array(auth()->user()->role, ['Super', 'Admin'])) {
-                return redirect()->route('transaction.show', $transaction)
+                return redirect()->route('transaction.index')
                     ->with('failed', 'Accès non autorisé. Seuls les administrateurs peuvent annuler des réservations.');
             }
             
             // Vérifier si la réservation peut être annulée
             if (!$this->canCancelReservation($transaction)) {
-                return redirect()->route('transaction.show', $transaction)
+                return redirect()->route('transaction.index')
                     ->with('failed', 'Cette réservation ne peut pas être annulée.');
+            }
+            
+            // Validation de la raison si fournie
+            if ($request->has('cancel_reason') && strlen($request->cancel_reason) > 500) {
+                return redirect()->route('transaction.index')
+                    ->with('failed', 'La raison de l\'annulation ne doit pas dépasser 500 caractères.');
             }
             
             DB::beginTransaction();
@@ -304,64 +555,62 @@ class TransactionController extends Controller
                 'status' => 'cancelled',
                 'cancelled_at' => Carbon::now(),
                 'cancelled_by' => auth()->id(),
-                'cancellation_reason' => $request->cancel_reason ?? null,
+                'cancel_reason' => $request->cancel_reason ?? null,
             ]);
             
-            // Libérer la chambre
+            // Libérer la chambre si occupée
             $room = $transaction->room;
-            if ($room) {
-                // Vérifier s'il y a d'autres réservations actives pour cette chambre
-                $hasOtherActiveReservations = Transaction::where('room_id', $room->id)
-                    ->where('id', '!=', $transaction->id)
-                    ->where('status', '!=', 'cancelled')
-                    ->where(function($query) {
-                        $query->whereNull('check_out')
-                            ->orWhere('check_out', '>', Carbon::now());
-                    })
-                    ->exists();
-                
-                if (!$hasOtherActiveReservations && $room->room_status_id == 2) { // Occupied
-                    $room->update(['room_status_id' => 1]); // Available
-                }
+            if ($room && $room->room_status_id == 2) { // Occupied
+                $room->update(['room_status_id' => 1]); // Available
             }
             
-            // Optionnel: Créer un remboursement si des paiements ont été effectués
+            // Créer un remboursement si des paiements ont été effectués
             $totalPaid = $transaction->getTotalPayment();
             if ($totalPaid > 0) {
-                Payment::create([
-                    'transaction_id' => $transaction->id,
-                    'amount' => -$totalPaid,
-                    'payment_method' => 'refund',
-                    'reference' => 'REFUND-' . $transaction->id . '-' . time(),
-                    'status' => 'completed',
-                    'notes' => 'Remboursement suite à annulation' . 
-                              ($request->cancel_reason ? " - Raison: " . $request->cancel_reason : ''),
-                    'created_by' => auth()->id(),
-                ]);
+                $existingRefund = Payment::where('transaction_id', $transaction->id)
+                    ->where('payment_method', 'refund')
+                    ->first();
+                
+                if (!$existingRefund) {
+                    Payment::create([
+                        'transaction_id' => $transaction->id,
+                        'price' => -$totalPaid,
+                        'payment_method' => 'refund',
+                        'reference' => 'REFUND-' . $transaction->id . '-' . time(),
+                        'status' => 'completed',
+                        'notes' => 'Remboursement suite à annulation' . 
+                                ($request->cancel_reason ? " - Raison: " . $request->cancel_reason : ''),
+                        'created_by' => auth()->id(),
+                    ]);
+                }
             }
             
             DB::commit();
             
-            // Journalisation de l'action
+            // Journalisation
             \Log::info('Réservation annulée', [
                 'transaction_id' => $transaction->id,
                 'cancelled_by' => auth()->id(),
                 'customer_id' => $transaction->customer_id,
                 'room_id' => $transaction->room_id,
                 'total_refunded' => $totalPaid,
-                'reason' => $request->cancel_reason
+                'reason' => $request->cancel_reason,
             ]);
             
-            return redirect()->route('transaction.show', $transaction)
-                ->with('success', 'Réservation #' . $transaction->id . ' annulée avec succès' . 
-                       ($totalPaid > 0 ? ' (remboursement effectué)' : ''));
+            $successMessage = "Réservation #{$transaction->id} annulée avec succès.";
+            
+            if ($request->cancel_reason) {
+                $successMessage .= " Raison: " . $request->cancel_reason;
+            }
+            
+            return redirect()->route('transaction.index')
+                ->with('success', $successMessage);
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Erreur lors de l\'annulation de la réservation: ' . $e->getMessage());
-            
-            return redirect()->route('transaction.show', $transaction)
-                ->with('failed', 'Erreur lors de l\'annulation : ' . $e->getMessage());
+            \Log::error('Erreur lors de l\'annulation: ' . $e->getMessage());
+            return redirect()->route('transaction.index')
+                ->with('failed', 'Erreur lors de l\'annulation.');
         }
     }
 
@@ -396,23 +645,18 @@ class TransactionController extends Controller
 
     /**
      * Générer une facture pour une transaction
-     * Redirige vers la facture du paiement
      */
     public function invoice(Transaction $transaction)
     {
-        // Récupérer tous les paiements
         $payments = $transaction->payment()->orderBy('created_at')->get();
         
-        // Si aucun paiement, rediriger vers la création de paiement
         if ($payments->isEmpty()) {
             return redirect()->route('transaction.payment.create', $transaction)
                 ->with('error', 'Aucun paiement trouvé. Veuillez d\'abord effectuer un paiement pour générer une facture.');
         }
         
-        // Prendre le dernier paiement pour afficher sa facture
         $lastPayment = $payments->last();
         
-        // Rediriger vers la facture du paiement
         return redirect()->route('payment.invoice', $lastPayment->id);
     }
 
@@ -431,7 +675,6 @@ class TransactionController extends Controller
      */
     public function myReservations(Request $request)
     {
-        // Si l'utilisateur est un client
         if (auth()->user()->role === 'Customer') {
             $customer = Customer::where('user_id', auth()->id())->first();
             
@@ -451,7 +694,6 @@ class TransactionController extends Controller
                 ->orderBy('check_out', 'desc')
                 ->paginate(10);
         } else {
-            // Pour les admins
             $transactions = $this->transactionRepository->getTransaction($request);
             $transactionsExpired = $this->transactionRepository->getTransactionExpired($request);
         }
@@ -487,7 +729,6 @@ class TransactionController extends Controller
         $checkIn = $request->check_in;
         $checkOut = $request->check_out;
         
-        // Vérifier les conflits de réservation
         $conflictingTransaction = Transaction::where('room_id', $transaction->room_id)
             ->where('id', '!=', $transaction->id)
             ->where('status', '!=', 'cancelled')
@@ -510,51 +751,15 @@ class TransactionController extends Controller
     }
 
     /**
-     * Mettre à jour le statut d'une transaction
-     */
-    public function updateStatus(Request $request, Transaction $transaction)
-    {
-        if (!in_array(auth()->user()->role, ['Super', 'Admin'])) {
-            abort(403, 'Accès non autorisé');
-        }
-        
-        $request->validate([
-            'status' => 'required|in:active,cancelled,completed',
-        ]);
-        
-        // Vérifier si le statut peut être changé
-        if ($request->status == 'cancelled') {
-            $checkInDate = Carbon::parse($transaction->check_in);
-            if ($checkInDate->isPast()) {
-                return redirect()->back()
-                    ->with('failed', 'Impossible d\'annuler une réservation déjà commencée.');
-            }
-            
-            // Libérer la chambre si annulation
-            $room = $transaction->room;
-            if ($room) {
-                $room->update(['room_status_id' => 1]); // Available
-            }
-        }
-        
-        $transaction->update(['status' => $request->status]);
-        
-        return redirect()->back()
-            ->with('success', 'Statut de la réservation mis à jour avec succès.');
-    }
-
-    /**
      * Restaurer une réservation annulée
      */
     public function restore(Transaction $transaction)
     {
         try {
-            // Vérifier les permissions
             if (!in_array(auth()->user()->role, ['Super', 'Admin'])) {
                 abort(403, 'Accès non autorisé');
             }
             
-            // Vérifier si la transaction est annulée
             if ($transaction->status != 'cancelled') {
                 return redirect()->back()
                     ->with('failed', 'Cette réservation n\'est pas annulée.');
@@ -562,28 +767,17 @@ class TransactionController extends Controller
             
             DB::beginTransaction();
             
-            // Restaurer la transaction
             $transaction->update([
-                'status' => 'active',
+                'status' => 'reservation',
                 'cancelled_at' => null,
                 'cancelled_by' => null,
-                'cancellation_reason' => null,
+                'cancel_reason' => null,
             ]);
             
             // Annuler le remboursement s'il existe
             Payment::where('transaction_id', $transaction->id)
                 ->where('payment_method', 'refund')
                 ->delete();
-            
-            // Marquer la chambre comme occupée si la réservation est en cours
-            $room = $transaction->room;
-            $checkIn = Carbon::parse($transaction->check_in);
-            $checkOut = Carbon::parse($transaction->check_out);
-            $now = Carbon::now();
-            
-            if ($room && $checkIn <= $now && $checkOut > $now) {
-                $room->update(['room_status_id' => 2]); // Occupied
-            }
             
             DB::commit();
             
@@ -606,7 +800,6 @@ class TransactionController extends Controller
         $transactions = $this->transactionRepository->getTransaction($request);
         $transactionsExpired = $this->transactionRepository->getTransactionExpired($request);
         
-        // Logique d'exportation ici
         return redirect()->route('transaction.index')
             ->with('info', 'Fonction d\'exportation à implémenter');
     }

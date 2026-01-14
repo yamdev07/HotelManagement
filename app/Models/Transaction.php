@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\Carbon;
 
 class Transaction extends Model
 {
@@ -18,7 +19,7 @@ class Transaction extends Model
         'room_id',
         'check_in',
         'check_out',
-        'status', // 'active', 'completed', 'cancelled', 'expired'
+        'status', // 'reservation', 'active', 'completed', 'cancelled', 'no_show'
         'person_count',
         'total_price',
         'total_payment',
@@ -36,11 +37,12 @@ class Transaction extends Model
         'total_payment' => 'decimal:2',
     ];
 
-    // Constantes pour les statuts
+    // Constantes pour les statuts (NOUVEAUX)
+    const STATUS_RESERVATION = 'reservation';
     const STATUS_ACTIVE = 'active';
     const STATUS_COMPLETED = 'completed';
     const STATUS_CANCELLED = 'cancelled';
-    const STATUS_EXPIRED = 'expired';
+    const STATUS_NO_SHOW = 'no_show';
 
     /**
      * Relation avec l'utilisateur (créateur)
@@ -67,7 +69,7 @@ class Transaction extends Model
     }
 
     /**
-     * Relation avec les paiements (AU SINGULIER - garder pour compatibilité)
+     * Relation avec les paiements
      */
     public function payment()
     {
@@ -75,7 +77,7 @@ class Transaction extends Model
     }
 
     /**
-     * Relation avec les paiements (AU PLURIEL - nouvelle relation)
+     * Relation avec les paiements (alias)
      */
     public function payments()
     {
@@ -91,11 +93,27 @@ class Transaction extends Model
     }
 
     /**
-     * Scope pour les transactions actives
+     * Scope pour les réservations (futures)
+     */
+    public function scopeReservation($query)
+    {
+        return $query->where('status', self::STATUS_RESERVATION);
+    }
+
+    /**
+     * Scope pour les transactions actives (dans l'hôtel)
      */
     public function scopeActive($query)
     {
         return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    /**
+     * Scope pour les transactions terminées
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', self::STATUS_COMPLETED);
     }
 
     /**
@@ -107,19 +125,231 @@ class Transaction extends Model
     }
 
     /**
-     * Scope pour les transactions expirées
+     * Scope pour les no show
      */
-    public function scopeExpired($query)
+    public function scopeNoShow($query)
     {
-        return $query->where('status', self::STATUS_EXPIRED);
+        return $query->where('status', self::STATUS_NO_SHOW);
     }
 
     /**
-     * Scope pour les transactions complétées
+     * Vérifier si c'est une réservation (pas encore arrivé)
      */
-    public function scopeCompleted($query)
+    public function isReservation()
     {
-        return $query->where('status', self::STATUS_COMPLETED);
+        return $this->status === self::STATUS_RESERVATION;
+    }
+
+    /**
+     * Vérifier si le client est dans l'hôtel
+     */
+    public function isActive()
+    {
+        return $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * Vérifier si le séjour est terminé
+     */
+    public function isCompleted()
+    {
+        return $this->status === self::STATUS_COMPLETED;
+    }
+
+    /**
+     * Vérifier si annulé
+     */
+    public function isCancelled()
+    {
+        return $this->status === self::STATUS_CANCELLED;
+    }
+
+    /**
+     * Vérifier si no show
+     */
+    public function isNoShow()
+    {
+        return $this->status === self::STATUS_NO_SHOW;
+    }
+
+    /**
+     * Vérifier si le séjour est en cours (dates actuelles)
+     */
+    public function isOngoing()
+    {
+        $now = Carbon::now();
+        return $now->between(
+            Carbon::parse($this->check_in), 
+            Carbon::parse($this->check_out)
+        ) && $this->isActive();
+    }
+
+    /**
+     * Vérifier si le séjour est à venir
+     */
+    public function isUpcoming()
+    {
+        return Carbon::parse($this->check_in)->isFuture() && 
+               ($this->isReservation() || $this->isActive());
+    }
+
+    /**
+     * Vérifier si le séjour est passé
+     */
+    public function isPast()
+    {
+        return Carbon::parse($this->check_out)->isPast() && 
+               ($this->isActive() || $this->isReservation());
+    }
+
+    /**
+     * Mettre à jour le statut automatiquement selon les dates
+     */
+    public function autoUpdateStatus()
+    {
+        $now = Carbon::now();
+        $checkIn = Carbon::parse($this->check_in);
+        $checkOut = Carbon::parse($this->check_out);
+
+        // Ne pas toucher aux statuts annulés ou no_show
+        if ($this->isCancelled() || $this->isNoShow()) {
+            return $this->status;
+        }
+
+        $newStatus = $this->status;
+
+        if ($checkOut->isPast()) {
+            $newStatus = self::STATUS_COMPLETED;
+        } elseif ($checkIn->isPast() && $checkOut->isFuture()) {
+            $newStatus = self::STATUS_ACTIVE;
+        } elseif ($checkIn->isFuture()) {
+            $newStatus = self::STATUS_RESERVATION;
+        }
+
+        if ($newStatus !== $this->status) {
+            $this->update(['status' => $newStatus]);
+            
+            // Gérer l'état de la chambre
+            $this->updateRoomStatus($newStatus);
+        }
+
+        return $newStatus;
+    }
+
+    /**
+     * Changer manuellement le statut avec logique métier
+     */
+    public function changeStatus($newStatus, $userId = null, $reason = null)
+    {
+        $oldStatus = $this->status;
+        
+        // Préparer les données de mise à jour
+        $updateData = ['status' => $newStatus];
+        
+        // Gérer l'annulation
+        if ($newStatus === self::STATUS_CANCELLED) {
+            $updateData['cancelled_at'] = Carbon::now();
+            $updateData['cancelled_by'] = $userId;
+            $updateData['cancel_reason'] = $reason;
+        } 
+        // Si on réactive une réservation annulée
+        elseif ($oldStatus === self::STATUS_CANCELLED && $newStatus !== self::STATUS_CANCELLED) {
+            $updateData['cancelled_at'] = null;
+            $updateData['cancelled_by'] = null;
+            $updateData['cancel_reason'] = null;
+        }
+        
+        // Mettre à jour
+        $this->update($updateData);
+        
+        // Mettre à jour l'état de la chambre
+        $this->updateRoomStatus($newStatus);
+        
+        return [
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
+            'changed_at' => Carbon::now()
+        ];
+    }
+
+    /**
+     * Mettre à jour l'état de la chambre selon le statut
+     */
+    private function updateRoomStatus($status)
+    {
+        if (!$this->room) {
+            return;
+        }
+
+        switch ($status) {
+            case self::STATUS_ACTIVE:
+                // Chambre occupée
+                $this->room->update(['room_status_id' => 2]); // Occupied
+                break;
+                
+            case self::STATUS_COMPLETED:
+            case self::STATUS_CANCELLED:
+            case self::STATUS_NO_SHOW:
+            case self::STATUS_RESERVATION:
+                // Chambre disponible (sauf si d'autres réservations)
+                $hasOtherActiveReservations = Transaction::where('room_id', $this->room_id)
+                    ->where('id', '!=', $this->id)
+                    ->where('status', self::STATUS_ACTIVE)
+                    ->exists();
+                
+                if (!$hasOtherActiveReservations) {
+                    $this->room->update(['room_status_id' => 1]); // Available
+                }
+                break;
+        }
+    }
+
+    /**
+     * Obtenir le label du statut pour l'affichage
+     */
+    public function getStatusLabelAttribute()
+    {
+        $labels = [
+            self::STATUS_RESERVATION => 'Réservation',
+            self::STATUS_ACTIVE => 'Dans l\'hôtel',
+            self::STATUS_COMPLETED => 'Séjour terminé',
+            self::STATUS_CANCELLED => 'Annulée',
+            self::STATUS_NO_SHOW => 'No Show',
+        ];
+        
+        return $labels[$this->status] ?? ucfirst($this->status);
+    }
+
+    /**
+     * Obtenir la couleur du statut
+     */
+    public function getStatusColorAttribute()
+    {
+        $colors = [
+            self::STATUS_RESERVATION => 'warning',    // Jaune/orange
+            self::STATUS_ACTIVE => 'success',         // Vert
+            self::STATUS_COMPLETED => 'info',         // Bleu
+            self::STATUS_CANCELLED => 'danger',       // Rouge
+            self::STATUS_NO_SHOW => 'secondary',      // Gris
+        ];
+        
+        return $colors[$this->status] ?? 'secondary';
+    }
+
+    /**
+     * Obtenir l'icône du statut
+     */
+    public function getStatusIconAttribute()
+    {
+        $icons = [
+            self::STATUS_RESERVATION => 'fa-calendar-check',
+            self::STATUS_ACTIVE => 'fa-bed',
+            self::STATUS_COMPLETED => 'fa-check-circle',
+            self::STATUS_CANCELLED => 'fa-times-circle',
+            self::STATUS_NO_SHOW => 'fa-user-slash',
+        ];
+        
+        return $icons[$this->status] ?? 'fa-circle';
     }
 
     /**
@@ -217,60 +447,11 @@ class Transaction extends Model
     }
 
     /**
-     * Vérifier si la transaction est annulée
-     */
-    public function isCancelled()
-    {
-        return $this->status === self::STATUS_CANCELLED;
-    }
-
-    /**
-     * Vérifier si la transaction est expirée
-     */
-    public function isExpired()
-    {
-        if ($this->status === self::STATUS_EXPIRED) {
-            return true;
-        }
-        
-        // Vérifier si la date de check_out est passée
-        return now()->greaterThan($this->check_out);
-    }
-
-    /**
-     * Vérifier si la transaction est active
-     */
-    public function isActive()
-    {
-        return $this->status === self::STATUS_ACTIVE && !$this->isExpired();
-    }
-
-    /**
-     * Annuler la transaction
+     * Annuler la transaction (méthode héritée)
      */
     public function cancel($userId, $reason = null)
     {
-        $this->update([
-            'status' => self::STATUS_CANCELLED,
-            'cancelled_at' => now(),
-            'cancelled_by' => $userId,
-            'cancel_reason' => $reason
-        ]);
-
-        // Libérer la chambre
-        $this->room()->update(['status' => 'available']);
-
-        // Annuler tous les paiements en attente
-        $this->payments()
-            ->where('status', Payment::STATUS_PENDING)
-            ->update([
-                'status' => Payment::STATUS_CANCELLED,
-                'cancelled_at' => now(),
-                'cancelled_by' => $userId,
-                'cancel_reason' => 'Transaction annulée: ' . ($reason ?? 'Non spécifié')
-            ]);
-
-        return true;
+        return $this->changeStatus(self::STATUS_CANCELLED, $userId, $reason);
     }
 
     /**
@@ -279,30 +460,11 @@ class Transaction extends Model
     public function restoreTransaction()
     {
         $this->update([
-            'status' => self::STATUS_ACTIVE,
+            'status' => self::STATUS_RESERVATION,
             'cancelled_at' => null,
             'cancelled_by' => null,
             'cancel_reason' => null
         ]);
-
-        // Réserver la chambre
-        $this->room()->update(['status' => 'occupied']);
-
-        return true;
-    }
-
-    /**
-     * Marquer comme expirée
-     */
-    public function markAsExpired()
-    {
-        $this->update([
-            'status' => self::STATUS_EXPIRED,
-            'cancelled_at' => now()
-        ]);
-
-        // Libérer la chambre
-        $this->room()->update(['status' => 'available']);
 
         return true;
     }
@@ -320,43 +482,12 @@ class Transaction extends Model
     }
 
     /**
-     * Obtenir le statut formaté
-     */
-    public function getStatusTextAttribute()
-    {
-        if ($this->isCancelled()) {
-            return 'Annulée';
-        } elseif ($this->isExpired()) {
-            return 'Expirée';
-        } elseif ($this->isFullyPaid()) {
-            return 'Payée';
-        } else {
-            return 'Active';
-        }
-    }
-
-    /**
-     * Obtenir la classe CSS pour le statut
-     */
-    public function getStatusClassAttribute()
-    {
-        if ($this->isCancelled()) {
-            return 'danger';
-        } elseif ($this->isExpired()) {
-            return 'secondary';
-        } elseif ($this->isFullyPaid()) {
-            return 'success';
-        } else {
-            return 'primary';
-        }
-    }
-
-    /**
      * Vérifier si la transaction peut être annulée
      */
     public function canBeCancelled()
     {
-        return $this->isActive() && !$this->isCancelled() && !$this->isExpired();
+        // Seulement les réservations peuvent être annulées
+        return $this->isReservation() && !$this->isCancelled();
     }
 
     /**
@@ -364,7 +495,7 @@ class Transaction extends Model
      */
     public function canBeRestored()
     {
-        return $this->isCancelled() && !$this->isExpired();
+        return $this->isCancelled();
     }
 
     /**
@@ -402,6 +533,36 @@ class Transaction extends Model
     }
 
     /**
+     * Obtenir les statuts disponibles avec leurs labels
+     */
+    public static function getStatusOptions()
+    {
+        return [
+            self::STATUS_RESERVATION => 'Réservation (pas encore arrivé)',
+            self::STATUS_ACTIVE => 'Dans l\'hôtel (séjour en cours)',
+            self::STATUS_COMPLETED => 'Séjour terminé (est parti)',
+            self::STATUS_CANCELLED => 'Annulée',
+            self::STATUS_NO_SHOW => 'No Show (pas venu)',
+        ];
+    }
+
+    /**
+     * Obtenir la classe CSS pour le badge
+     */
+    public function getStatusBadgeClassAttribute()
+    {
+        $classes = [
+            self::STATUS_RESERVATION => 'badge bg-warning',
+            self::STATUS_ACTIVE => 'badge bg-success',
+            self::STATUS_COMPLETED => 'badge bg-info',
+            self::STATUS_CANCELLED => 'badge bg-danger',
+            self::STATUS_NO_SHOW => 'badge bg-secondary',
+        ];
+        
+        return $classes[$this->status] ?? 'badge bg-secondary';
+    }
+
+    /**
      * Boot du modèle
      */
     protected static function boot()
@@ -416,25 +577,23 @@ class Transaction extends Model
                 $transaction->total_price = $room_price * $day;
             }
             
-            // Définir le statut par défaut
+            // Définir le statut par défaut (réservation si check_in est futur)
             if (!$transaction->status) {
-                $transaction->status = self::STATUS_ACTIVE;
+                $checkIn = Carbon::parse($transaction->check_in);
+                $transaction->status = $checkIn->isFuture() 
+                    ? self::STATUS_RESERVATION 
+                    : self::STATUS_ACTIVE;
             }
         });
 
-        // Lors de la sauvegarde, réserver la chambre
-        static::saved(function ($transaction) {
-            if ($transaction->isActive()) {
-                $transaction->room()->update(['status' => 'occupied']);
+        // Mettre à jour automatiquement le statut selon les dates
+        static::saving(function ($transaction) {
+            // Ne pas mettre à jour automatiquement si c'est une annulation ou no show
+            if ($transaction->isCancelled() || $transaction->isNoShow()) {
+                return;
             }
-        });
-
-        // Lorsqu'une transaction est annulée ou expirée, libérer la chambre
-        static::updated(function ($transaction) {
-            if ($transaction->isDirty('status') && 
-                ($transaction->isCancelled() || $transaction->isExpired())) {
-                $transaction->room()->update(['status' => 'available']);
-            }
+            
+            $transaction->autoUpdateStatus();
         });
     }
 }
