@@ -67,8 +67,7 @@ return [
     |
     */
 
-    'timezone' => 'Asia/Jayapura',
-
+    'timezone' => 'Africa/Lagos',
     /*
     |--------------------------------------------------------------------------
     | Application Locale Configuration
