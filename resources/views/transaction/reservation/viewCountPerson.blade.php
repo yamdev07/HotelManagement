@@ -19,8 +19,7 @@
                                             How many person?
                                         </label>
                                         <input type="text" class="form-control @error('count_person') is-invalid @enderror"
-                                            id="
-                                                count_person" name="count_person" value="{{ old('count_person') }}">
+                                            id="count_person" name="count_person" value="{{ old('count_person') }}">
                                         @error('count_person')
                                             <div class="text-danger mt-1">
                                                 {{ $message }}
@@ -29,8 +28,7 @@
                                         <label for="check_in" class="form-label">
                                             From
                                         </label>
-                                        <input type="date" class="form-control @error('check_in') is-invalid @enderror" id="
-                                                check_in" name="check_in" value="{{ old('check_in') }}">
+                                        <input type="date" class="form-control @error('check_in') is-invalid @enderror" id="check_in" name="check_in" value="{{ old('check_in') }}">
                                         @error('check_in')
                                             <div class="text-danger mt-1">
                                                 {{ $message }}
@@ -39,8 +37,7 @@
                                         <label for="check_out" class="form-label">
                                             Until
                                         </label>
-                                        <input type="date" class="form-control @error('check_out') is-invalid @enderror" id="
-                                                check_out" name="check_out" value="{{ old('check_out') }}">
+                                        <input type="date" class="form-control @error('check_out') is-invalid @enderror" id="check_out" name="check_out" value="{{ old('check_out') }}">
                                         @error('check_out')
                                             <div class="text-danger mt-1">
                                                 {{ $message }}

@@ -9,14 +9,14 @@
             font-weight: 600;
         }
         
+        .status-reservation {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        
         .status-active {
             background-color: #d1e7dd;
             color: #0f5132;
-        }
-        
-        .status-expired {
-            background-color: #f8d7da;
-            color: #842029;
         }
         
         .status-completed {
@@ -27,6 +27,11 @@
         .status-cancelled {
             background-color: #e9ecef;
             color: #495057;
+        }
+        
+        .status-no_show {
+            background-color: #6c757d;
+            color: #ffffff;
         }
         
         .action-buttons {
@@ -62,6 +67,12 @@
         .btn-cancel { background-color: #fff3cd; color: #856404; }
         .btn-cancel:hover:not(.disabled) { background-color: #ffeaa7; }
         
+        .btn-arrived { background-color: #28a745; color: white; }
+        .btn-arrived:hover:not(.disabled) { background-color: #218838; }
+        
+        .btn-departed { background-color: #17a2b8; color: white; }
+        .btn-departed:hover:not(.disabled) { background-color: #138496; }
+        
         .table-responsive {
             max-height: 600px;
             overflow-y: auto;
@@ -93,14 +104,55 @@
             background-color: #f1f3f4;
         }
         
-        .btn-outline-cancel {
-            color: #dc3545;
-            border-color: #dc3545;
+        .status-select {
+            max-width: 120px;
+            font-size: 0.85rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #ced4da;
+            background-color: white;
         }
         
-        .btn-outline-cancel:hover {
+        .status-select:focus {
+            outline: none;
+            border-color: #86b7fe;
+            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .status-form {
+            display: inline-block;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .badge-reservation {
+            background-color: #ffc107;
+            color: #000;
+        }
+        
+        .badge-active {
+            background-color: #198754;
+            color: #fff;
+        }
+        
+        .badge-completed {
+            background-color: #0dcaf0;
+            color: #fff;
+        }
+        
+        .badge-cancelled {
             background-color: #dc3545;
-            color: white;
+            color: #fff;
+        }
+        
+        .badge-no_show {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        
+        .form-select-sm {
+            font-size: 0.875rem;
+            padding: 0.25rem 2rem 0.25rem 0.5rem;
         }
     </style>
 
@@ -182,14 +234,15 @@
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0">
-                        <i class="fas fa-users me-2"></i>Réservations Actives
+                        <i class="fas fa-users me-2"></i>Gestion des Réservations
                         <span class="badge bg-primary">{{ $transactions->count() }}</span>
                     </h5>
                     <div class="d-flex gap-2">
-                        <span class="status-badge status-active">Actives</span>
-                        <span class="status-badge status-cancelled">Annulées</span>
-                        <span class="status-badge status-expired">Expirées</span>
-                        <span class="status-badge status-completed">Payées</span>
+                        <span class="badge badge-reservation">📅 Réservation</span>
+                        <span class="badge badge-active">🏨 Dans l'hôtel</span>
+                        <span class="badge badge-completed">✅ Terminé</span>
+                        <span class="badge badge-cancelled">❌ Annulée</span>
+                        <span class="badge badge-no_show">👤 No Show</span>
                     </div>
                 </div>
                 
@@ -221,29 +274,14 @@
                                             $totalPayment = $transaction->getTotalPayment();
                                             $remaining = $totalPrice - $totalPayment;
                                             
-                                            // Vérifier le statut
-                                            $isCancelled = $transaction->status == 'cancelled';
-                                            $isFullyPaid = $remaining <= 0;
-                                            $checkOutDate = \Carbon\Carbon::parse($transaction->check_out);
-                                            $isExpired = $checkOutDate->isPast();
-                                            
-                                            // Déterminer le statut
-                                            if ($isCancelled) {
-                                                $statusClass = 'status-cancelled';
-                                                $statusText = 'Annulée';
-                                            } elseif ($isFullyPaid) {
-                                                $statusClass = 'status-completed';
-                                                $statusText = 'Payé';
-                                            } elseif ($isExpired) {
-                                                $statusClass = 'status-expired';
-                                                $statusText = 'Expiré';
-                                            } else {
-                                                $statusClass = 'status-active';
-                                                $statusText = 'Active';
-                                            }
+                                            // Déterminer le statut depuis la base
+                                            $status = $transaction->status;
+                                            $statusText = $transaction->status_label;
+                                            $statusClass = 'status-' . $status;
+                                            $badgeClass = 'badge-' . $status;
                                             
                                             // Vérification des permissions
-                                            $isAdmin = in_array(auth()->user()->role, ['Super', 'Admin']);
+                                            $isAdmin = in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']);
                                             $isCustomer = auth()->user()->role === 'Customer';
                                             $customerId = auth()->user()->customer->id ?? null;
                                             $isOwnReservation = $isCustomer && $transaction->customer_id == $customerId;
@@ -252,18 +290,22 @@
                                             $editUrl = $isAdmin ? route('transaction.edit', $transaction) : '#';
                                             
                                             // Vérifier si la réservation peut être annulée
-                                            $canCancel = $isAdmin && !$isCancelled && !$isExpired;
+                                            $canCancel = $isAdmin && !in_array($status, ['cancelled', 'no_show', 'completed']);
                                             
                                             // Vérifier si on peut payer
-                                            $canPay = !$isCancelled && !$isFullyPaid && ($isAdmin || $isOwnReservation);
+                                            $canPay = !in_array($status, ['cancelled', 'no_show']) && !($remaining <= 0) && ($isAdmin || $isOwnReservation);
                                             
                                             // Calcul du nombre de nuits
                                             $checkIn = \Carbon\Carbon::parse($transaction->check_in);
                                             $checkOut = \Carbon\Carbon::parse($transaction->check_out);
                                             $nights = $checkIn->diffInDays($checkOut);
+                                            
+                                            // Vérifier si on peut marquer comme arrivé/départ
+                                            $canMarkArrived = $isAdmin && $status == 'reservation';
+                                            $canMarkDeparted = $isAdmin && $status == 'active';
                                         @endphp
                                         
-                                        <tr class="{{ $isCancelled ? 'cancelled-row' : '' }}">
+                                        <tr class="{{ in_array($status, ['cancelled', 'no_show']) ? 'cancelled-row' : '' }}">
                                             <td>{{ ($transactions->currentpage() - 1) * $transactions->perpage() + $loop->index + 1 }}</td>
                                             <td><strong>#{{ $transaction->id }}</strong></td>
                                             <td>
@@ -295,18 +337,40 @@
                                             <td class="price-cfa">
                                                 {{ number_format($totalPayment, 0, ',', ' ') }} CFA
                                             </td>
-                                            <td class="price-cfa {{ $isFullyPaid ? 'text-success' : 'text-danger' }}">
-                                                @if($isFullyPaid)
+                                            <td class="price-cfa {{ $remaining <= 0 ? 'text-success' : 'text-danger' }}">
+                                                @if($remaining <= 0)
                                                     <span class="badge bg-success">Soldé</span>
                                                 @else
                                                     {{ number_format($remaining, 0, ',', ' ') }} CFA
                                                 @endif
                                             </td>
                                             <td>
-                                                <span class="status-badge {{ $statusClass }}">
-                                                    {{ $statusText }}
-                                                </span>
-                                                @if($transaction->cancelled_at && $isCancelled)
+                                                @if($isAdmin)
+                                                    <!-- COMBO BOX POUR ADMIN -->
+                                                    <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST" class="status-form">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <select name="status" class="form-control form-select-sm status-select" onchange="this.form.submit()">
+                                                            <option value="reservation" {{ $status == 'reservation' ? 'selected' : '' }} 
+                                                                    class="text-warning">📅 Réservation</option>
+                                                            <option value="active" {{ $status == 'active' ? 'selected' : '' }}
+                                                                    class="text-success">🏨 Dans l'hôtel</option>
+                                                            <option value="completed" {{ $status == 'completed' ? 'selected' : '' }}
+                                                                    class="text-info">✅ Séjour terminé</option>
+                                                            <option value="cancelled" {{ $status == 'cancelled' ? 'selected' : '' }}
+                                                                    class="text-danger">❌ Annulée</option>
+                                                            <option value="no_show" {{ $status == 'no_show' ? 'selected' : '' }}
+                                                                    class="text-secondary">👤 No Show</option>
+                                                        </select>
+                                                    </form>
+                                                @else
+                                                    <!-- BADGE POUR LES CLIENTS -->
+                                                    <span class="badge {{ $badgeClass }}">
+                                                        {{ $statusText }}
+                                                    </span>
+                                                @endif
+                                                
+                                                @if($transaction->cancelled_at && $status == 'cancelled')
                                                     <br>
                                                     <small class="text-muted">
                                                         Annulée le {{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y') }}
@@ -326,13 +390,37 @@
                                                     @else
                                                         <span class="btn-action btn-pay disabled"
                                                               data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                              title="{{ $isFullyPaid ? 'Déjà payé' : ($isCancelled ? 'Réservation annulée' : ($isExpired ? 'Réservation expirée' : 'Non autorisé')) }}">
+                                                              title="{{ $remaining <= 0 ? 'Déjà payé' : (in_array($status, ['cancelled', 'no_show']) ? 'Réservation annulée/no show' : 'Non autorisé') }}">
                                                             <i class="fas fa-money-bill-wave-alt"></i>
                                                         </span>
                                                     @endif
                                                     
+                                                    <!-- Marquer comme arrivé -->
+                                                    @if($canMarkArrived)
+                                                        <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <button type="submit" class="btn-action btn-arrived"
+                                                                    data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                                    title="Marquer comme arrivé">
+                                                                <i class="fas fa-sign-in-alt"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                    
+                                                    <!-- Marquer comme parti -->
+                                                    @if($canMarkDeparted)
+                                                        <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <button type="submit" class="btn-action btn-departed"
+                                                                    data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                                    title="Marquer comme parti">
+                                                                <i class="fas fa-sign-out-alt"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
+                                                    
                                                     <!-- Modifier -->
-                                                    @if($isAdmin && !$isCancelled && !$isExpired)
+                                                    @if($isAdmin && !in_array($status, ['cancelled', 'no_show', 'completed']))
                                                         <a class="btn-action btn-edit"
                                                            href="{{ $editUrl }}"
                                                            data-bs-toggle="tooltip" data-bs-placement="top" 
@@ -342,7 +430,7 @@
                                                     @else
                                                         <span class="btn-action btn-edit disabled"
                                                               data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                              title="{{ $isAdmin ? ($isCancelled ? 'Réservation annulée' : ($isExpired ? 'Réservation expirée' : 'Non autorisé')) : 'Modification réservée aux administrateurs' }}">
+                                                              title="{{ $isAdmin ? 'Réservation non modifiable' : 'Modification réservée aux administrateurs' }}">
                                                             <i class="fas fa-edit"></i>
                                                         </span>
                                                     @endif
@@ -357,7 +445,7 @@
                                                                 title="Annuler la réservation">
                                                             <i class="fas fa-ban"></i>
                                                         </button>
-                                                    @elseif($isAdmin && !$isCancelled && !$isExpired)
+                                                    @elseif($isAdmin && !in_array($status, ['cancelled', 'no_show']))
                                                         <span class="btn-action btn-cancel disabled"
                                                               data-bs-toggle="tooltip" data-bs-placement="top" 
                                                               title="Non autorisé">
@@ -372,9 +460,9 @@
                                         <tr>
                                             <td colspan="12" class="text-center py-4">
                                                 <i class="fas fa-bed fa-2x text-muted mb-3"></i>
-                                                <h5>Aucune Réservation Active</h5>
+                                                <h5>Aucune Réservation Trouvée</h5>
                                                 <p class="text-muted">Aucune réservation active trouvée</p>
-                                                @if($isAdmin)
+                                                @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
                                                     <a href="#" class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                                                         <i class="fas fa-plus me-2"></i>Créer une réservation
                                                     </a>
@@ -397,7 +485,7 @@
             </div>
         </div>
 
-        <!-- Réservations Expirées/Anciennes -->
+        <!-- Réservations Anciennes/Expirées -->
         <div class="row">
             <div class="col-12">
                 <div class="d-flex justify-content-between align-items-center mb-3">
@@ -405,7 +493,7 @@
                         <i class="fas fa-history me-2"></i>Anciennes Réservations
                         <span class="badge bg-secondary">{{ $transactionsExpired->count() }}</span>
                     </h5>
-                    <span class="status-badge status-expired">Expirées</span>
+                    <small class="text-muted">Réservations terminées ou expirées</small>
                 </div>
                 
                 <div class="card">
@@ -435,25 +523,18 @@
                                             $totalPayment = $transaction->getTotalPayment();
                                             $remaining = $totalPrice - $totalPayment;
                                             
-                                            $isCancelled = $transaction->status == 'cancelled';
-                                            $isFullyPaid = $remaining <= 0;
-                                            $isAdmin = in_array(auth()->user()->role, ['Super', 'Admin']);
+                                            // Déterminer le statut depuis la base
+                                            $status = $transaction->status;
+                                            $statusText = $transaction->status_label;
+                                            $statusClass = 'status-' . $status;
+                                            $badgeClass = 'badge-' . $status;
+                                            
+                                            $isAdmin = in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']);
                                             $isCustomer = auth()->user()->role === 'Customer';
                                             $customerId = auth()->user()->customer->id ?? null;
                                             $isOwnReservation = $isCustomer && $transaction->customer_id == $customerId;
                                             
-                                            if ($isCancelled) {
-                                                $statusClass = 'status-cancelled';
-                                                $statusText = 'Annulée';
-                                            } elseif ($isFullyPaid) {
-                                                $statusClass = 'status-completed';
-                                                $statusText = 'Payé';
-                                            } else {
-                                                $statusClass = 'status-expired';
-                                                $statusText = 'Expiré';
-                                            }
-                                            
-                                            $canPay = !$isCancelled && !$isFullyPaid && ($isAdmin || $isOwnReservation);
+                                            $canPay = !in_array($status, ['cancelled', 'no_show']) && !($remaining <= 0) && ($isAdmin || $isOwnReservation);
                                             
                                             // Calcul du nombre de nuits
                                             $checkIn = \Carbon\Carbon::parse($transaction->check_in);
@@ -461,7 +542,7 @@
                                             $nights = $checkIn->diffInDays($checkOut);
                                         @endphp
                                         
-                                        <tr class="{{ $isCancelled ? 'cancelled-row' : '' }}">
+                                        <tr class="{{ in_array($status, ['cancelled', 'no_show']) ? 'cancelled-row' : '' }}">
                                             <td>{{ $loop->iteration }}</td>
                                             <td><strong>#{{ $transaction->id }}</strong></td>
                                             <td>{{ $transaction->customer->name }}</td>
@@ -483,18 +564,18 @@
                                             <td class="price-cfa">
                                                 {{ number_format($totalPayment, 0, ',', ' ') }} CFA
                                             </td>
-                                            <td class="price-cfa {{ $isFullyPaid ? 'text-success' : 'text-danger' }}">
-                                                @if($isFullyPaid)
+                                            <td class="price-cfa {{ $remaining <= 0 ? 'text-success' : 'text-danger' }}">
+                                                @if($remaining <= 0)
                                                     <span class="badge bg-success">Soldé</span>
                                                 @else
                                                     {{ number_format($remaining, 0, ',', ' ') }} CFA
                                                 @endif
                                             </td>
                                             <td>
-                                                <span class="status-badge {{ $statusClass }}">
+                                                <span class="badge {{ $badgeClass }}">
                                                     {{ $statusText }}
                                                 </span>
-                                                @if($transaction->cancelled_at && $isCancelled)
+                                                @if($transaction->cancelled_at && $status == 'cancelled')
                                                     <br>
                                                     <small class="text-muted">
                                                         Annulée le {{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y') }}
@@ -511,7 +592,7 @@
                                                            title="Payer la dette restante">
                                                             <i class="fas fa-money-bill-wave-alt"></i>
                                                         </a>
-                                                    @elseif(!$isFullyPaid && !$isCancelled)
+                                                    @elseif($remaining > 0 && !in_array($status, ['cancelled', 'no_show']))
                                                         <span class="btn-action btn-pay disabled"
                                                               data-bs-toggle="tooltip" data-bs-placement="top" 
                                                               title="{{ $isAdmin ? 'Dette impayée' : 'Non autorisé' }}">
@@ -528,6 +609,20 @@
                                                             <i class="fas fa-eye"></i>
                                                         </a>
                                                     @endif
+                                                    
+                                                    <!-- Restaurer si annulée -->
+                                                    @if($isAdmin && $status == 'cancelled')
+                                                        <form action="{{ route('transaction.restore', $transaction) }}" method="POST" class="d-inline">
+                                                            @csrf
+                                                            <button type="submit" class="btn-action" 
+                                                                    style="background-color: #20c997; color: white;"
+                                                                    data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                                    title="Restaurer la réservation"
+                                                                    onclick="return confirm('Restaurer cette réservation ?')">
+                                                                <i class="fas fa-undo"></i>
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 </div>
                                             </td>
                                         </tr>
@@ -536,7 +631,7 @@
                                             <td colspan="12" class="text-center py-4">
                                                 <i class="fas fa-history fa-2x text-muted mb-3"></i>
                                                 <h5>Aucune Ancienne Réservation</h5>
-                                                <p class="text-muted">Aucune réservation expirée dans l'historique</p>
+                                                <p class="text-muted">Aucune réservation dans l'historique</p>
                                             </td>
                                         </tr>
                                     @endforelse
@@ -595,27 +690,18 @@
 @section('footer')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-// VERSION CORRIGÉE - SANS BOOTSTRAP JS
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== SYSTÈME D\'ANNULATION INITIALISÉ ===');
+    console.log('=== SYSTÈME DE GESTION DES RÉSERVATIONS INITIALISÉ ===');
     
-    // DÉSACTIVÉ: Les tooltips Bootstrap (cause l'erreur)
-    // var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    // var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-    //     return new bootstrap.Tooltip(tooltipTriggerEl);
-    // });
-    
-    // Gérer l'annulation des réservations - VERSION SIMPLIFIÉE
+    // Gérer l'annulation des réservations
     function attachCancelEvents() {
         const cancelButtons = document.querySelectorAll('.cancel-reservation-btn');
         console.log(`Trouvé ${cancelButtons.length} bouton(s) d'annulation`);
         
         cancelButtons.forEach(button => {
-            // Cloner le bouton pour supprimer les anciens événements
             const newButton = button.cloneNode(true);
             button.parentNode.replaceChild(newButton, button);
             
-            // Attacher le nouvel événement
             newButton.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -693,37 +779,68 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             });
-            
-            // Visualiser que le bouton est actif
-            newButton.style.cursor = 'pointer';
-            newButton.style.border = '2px solid #28a745';
-            newButton.title = 'Cliquez pour annuler cette réservation';
         });
     }
     
     // Attacher les événements
     attachCancelEvents();
     
+    // Gérer les changements de statut (confirmation)
+    const statusSelects = document.querySelectorAll('.status-select');
+    statusSelects.forEach(select => {
+        select.addEventListener('change', function(e) {
+            const newStatus = this.value;
+            const oldStatus = this.options[this.selectedIndex].dataset.oldStatus || this.value;
+            
+            // Mapper les valeurs aux labels
+            const statusLabels = {
+                'reservation': '📅 Réservation',
+                'active': '🏨 Dans l\'hôtel',
+                'completed': '✅ Séjour terminé',
+                'cancelled': '❌ Annulée',
+                'no_show': '👤 No Show'
+            };
+            
+            const oldLabel = statusLabels[oldStatus] || oldStatus;
+            const newLabel = statusLabels[newStatus] || newStatus;
+            
+            // Confirmation pour certains changements
+            if (newStatus === 'cancelled') {
+                if (!confirm(`⚠️ Êtes-vous sûr de vouloir annuler cette réservation ?\n\nStatut: ${oldLabel} → ${newLabel}`)) {
+                    this.value = oldStatus;
+                    return false;
+                }
+            } else if (newStatus === 'no_show') {
+                if (!confirm(`⚠️ Marquer comme "No Show" ?\n\nLe client ne s'est pas présenté.\nStatut: ${oldLabel} → ${newLabel}`)) {
+                    this.value = oldStatus;
+                    return false;
+                }
+            }
+            
+            // Soumettre automatiquement
+            this.form.submit();
+        });
+    });
+    
     // Si pas de réservations, afficher le modal
-    @if($transactions->count() == 0 && in_array(auth()->user()->role, ['Super', 'Admin']))
+    @if($transactions->count() == 0 && in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
         setTimeout(() => {
             const modalElement = document.getElementById('staticBackdrop');
             if (modalElement) {
-                // Utiliser jQuery ou méthode simple
-                $('#staticBackdrop').modal('show');
+                // Utiliser jQuery si disponible
+                if (typeof jQuery !== 'undefined') {
+                    $('#staticBackdrop').modal('show');
+                } else {
+                    // Fallback vanilla JS
+                    const modal = new bootstrap.Modal(modalElement);
+                    modal.show();
+                }
             }
         }, 1000);
     @endif
     
-    // Debug
-    @if(config('app.debug'))
-        console.log('Réservations actives:', {{ $transactions->count() }});
-        console.log('Réservations expirées:', {{ $transactionsExpired->count() }});
-    @endif
-    
     // Message final
-    console.log('✅ Système d\'annulation prêt !');
-    console.log('👉 Cliquez sur un bouton jaune (🚫) pour tester');
+    console.log('✅ Système de gestion des statuts prêt !');
 });
 </script>
 
@@ -735,6 +852,15 @@ document.addEventListener('DOMContentLoaded', function() {
 .cancel-reservation-btn:hover {
     transform: scale(1.1);
     box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+.btn-arrived, .btn-departed {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
 }
 </style>
 @endsection

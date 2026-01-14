@@ -100,7 +100,7 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
     Route::resource('room', RoomController::class);
     Route::resource('roomstatus', RoomStatusController::class);
     
-    // TRANSACTIONS - Routes CRUD complètes
+    // TRANSACTIONS - Routes CRUD complètes avec NOUVEAUX STATUTS
     Route::prefix('transaction')->name('transaction.')->group(function () {
         Route::get('/', [TransactionController::class, 'index'])->name('index');
         Route::get('/create', [TransactionController::class, 'create'])->name('create');
@@ -110,17 +110,31 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
         Route::put('/{transaction}', [TransactionController::class, 'update'])->name('update');
         Route::delete('/{transaction}', [TransactionController::class, 'destroy'])->name('destroy');
         
-        // CORRECTION ICI : POST changé en DELETE pour correspondre au formulaire
+        // Annulation
         Route::delete('/{transaction}/cancel', [TransactionController::class, 'cancel'])->name('cancel');
         
+        // Restauration
         Route::post('/{transaction}/restore', [TransactionController::class, 'restore'])->name('restore');
+        
+        // Facture
         Route::get('/{transaction}/invoice', [TransactionController::class, 'invoice'])->name('invoice');
+        
+        // Historique
         Route::get('/{transaction}/history', [TransactionController::class, 'history'])->name('history');
+        
+        // Export
         Route::get('/export/{type}', [TransactionController::class, 'export'])->name('export');
+        
+        // === NOUVELLES ROUTES POUR LA GESTION DES STATUTS ===
+        // Mise à jour via combo box (statut complet)
+        Route::put('/{transaction}/update-status', [TransactionController::class, 'updateStatus'])->name('updateStatus');
+        
+        // Actions rapides
+        Route::post('/{transaction}/arrived', [TransactionController::class, 'markAsArrived'])->name('mark-arrived');
+        Route::post('/{transaction}/departed', [TransactionController::class, 'markAsDeparted'])->name('mark-departed');
         
         // Routes AJAX/API
         Route::get('/{transaction}/check-availability', [TransactionController::class, 'checkAvailability'])->name('checkAvailability');
-        Route::put('/{transaction}/update-status', [TransactionController::class, 'updateStatus'])->name('updateStatus');
         Route::get('/{id}/details', [TransactionController::class, 'showDetails'])->name('showDetails');
     });
     
@@ -201,6 +215,10 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
     // SHOW transaction pour les clients (séparé de la route admin)
     Route::get('/my-transaction/{transaction}', [TransactionController::class, 'show'])->name('transaction.show.customer');
     
+    // === ROUTES POUR LES STATUTS ACCESSIBLES AUX CLIENTS ===
+    // Les clients peuvent voir leurs réservations mais pas changer le statut
+    // Seuls Super, Admin, Reception peuvent changer les statuts
+    
     // RESTAURANT MODULE - Accessible à tous les utilisateurs connectés
     Route::prefix('restaurant')->name('restaurant.')->group(function () {
         // Menus
@@ -219,6 +237,27 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
         // API pour AJAX
         Route::get('/api/customers', [RestaurantController::class, 'getCustomers'])->name('api.customers');
         Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
+    });
+});
+
+// Routes accessibles au personnel de réception (en plus des admins)
+Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Reception']], function () {
+    // === ROUTES POUR LA GESTION DES STATUTS (RÉCEPTION) ===
+    Route::prefix('transaction')->name('transaction.')->group(function () {
+        // Actions rapides de réception
+        Route::post('/{transaction}/check-in', function($transaction) {
+            // Redirige vers mark-arrived
+            return app(TransactionController::class)->markAsArrived($transaction);
+        })->name('check-in');
+        
+        Route::post('/{transaction}/check-out', function($transaction) {
+            // Redirige vers mark-departed
+            return app(TransactionController::class)->markAsDeparted($transaction);
+        })->name('check-out');
+        
+        // Vue spéciale pour la réception (dashboard réception)
+        Route::get('/reception/today', [TransactionController::class, 'index'])->name('reception.today')
+            ->defaults('view', 'reception'); // Paramètre pour la vue
     });
 });
 
@@ -297,6 +336,29 @@ if (env('APP_DEBUG', false)) {
         });
         
         return response()->json($routes);
+    });
+    
+    // Route pour tester les statuts
+    Route::get('/test-status/{id}', function($id) {
+        $transaction = \App\Models\Transaction::find($id);
+        if (!$transaction) {
+            return 'Transaction not found';
+        }
+        
+        return response()->json([
+            'id' => $transaction->id,
+            'status' => $transaction->status,
+            'status_label' => $transaction->status_label,
+            'status_color' => $transaction->status_color,
+            'status_icon' => $transaction->status_icon,
+            'check_in' => $transaction->check_in,
+            'check_out' => $transaction->check_out,
+            'is_reservation' => $transaction->isReservation(),
+            'is_active' => $transaction->isActive(),
+            'is_completed' => $transaction->isCompleted(),
+            'is_cancelled' => $transaction->isCancelled(),
+            'can_be_cancelled' => $transaction->canBeCancelled(),
+        ]);
     });
 }
 
