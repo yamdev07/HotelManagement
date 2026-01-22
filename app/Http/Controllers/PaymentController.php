@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Repositories\Interface\PaymentRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class PaymentController extends Controller
 {
@@ -20,31 +21,15 @@ class PaymentController extends Controller
     public function index(Request $request)
     {
         $query = Payment::with(['transaction.customer', 'transaction.room.type', 'user', 'cancelledByUser'])
-            ->orderBy('id', 'DESC');
+            ->orderBy('created_at', 'DESC');
 
         // Filtres
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        if ($request->filled('type')) {
-            switch ($request->type) {
-                case 'active': 
-                    $query->whereIn('status', ['pending', 'completed']);
-                    break;
-                case 'cancelled': 
-                    $query->where('status', 'cancelled');
-                    break;
-                case 'expired': 
-                    $query->where('status', 'expired');
-                    break;
-                case 'completed': 
-                    $query->where('status', 'completed');
-                    break;
-                case 'pending': 
-                    $query->where('status', 'pending');
-                    break;
-            }
+        if ($request->filled('method')) {
+            $query->where('payment_method', $request->method);
         }
 
         if ($request->filled('search')) {
@@ -52,6 +37,8 @@ class PaymentController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('id', 'LIKE', "%{$search}%")
                   ->orWhere('reference', 'LIKE', "%{$search}%")
+                  ->orWhere('check_number', 'LIKE', "%{$search}%")
+                  ->orWhere('mobile_money_number', 'LIKE', "%{$search}%")
                   ->orWhereHas('transaction.customer', function($q) use ($search) {
                       $q->where('name', 'LIKE', "%{$search}%");
                   })
@@ -61,21 +48,34 @@ class PaymentController extends Controller
             });
         }
 
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
         $payments = $query->paginate(20);
         
         // Statistiques
         $stats = [
             'total' => Payment::count(),
-            'active' => Payment::whereIn('status', ['pending', 'completed'])->count(),
-            'cancelled' => Payment::where('status', 'cancelled')->count(),
-            'expired' => Payment::where('status', 'expired')->count(),
-            'completed' => Payment::where('status', 'completed')->count(),
-            'pending' => Payment::where('status', 'pending')->count(),
+            'total_amount' => Payment::where('status', Payment::STATUS_COMPLETED)->sum('amount'),
+            'today' => Payment::whereDate('created_at', today())->count(),
+            'today_amount' => Payment::whereDate('created_at', today())->where('status', Payment::STATUS_COMPLETED)->sum('amount'),
+            'cash' => Payment::where('payment_method', Payment::METHOD_CASH)->where('status', Payment::STATUS_COMPLETED)->count(),
+            'card' => Payment::where('payment_method', Payment::METHOD_CARD)->where('status', Payment::STATUS_COMPLETED)->count(),
+            'transfer' => Payment::where('payment_method', Payment::METHOD_TRANSFER)->where('status', Payment::STATUS_COMPLETED)->count(),
+            'mobile_money' => Payment::where('payment_method', Payment::METHOD_MOBILE_MONEY)->where('status', Payment::STATUS_COMPLETED)->count(),
+            'fedapay' => Payment::where('payment_method', Payment::METHOD_FEDAPAY)->where('status', Payment::STATUS_COMPLETED)->count(),
+            'check' => Payment::where('payment_method', Payment::METHOD_CHECK)->where('status', Payment::STATUS_COMPLETED)->count(),
         ];
 
         return view('payment.index', [
             'payments' => $payments,
-            'stats' => $stats
+            'stats' => $stats,
+            'paymentMethods' => Payment::getPaymentMethods(),
         ]);
     }
 
@@ -84,8 +84,22 @@ class PaymentController extends Controller
      */
     public function create(Transaction $transaction)
     {
+        // Vérifier si la transaction peut recevoir un paiement
+        if ($transaction->getRemainingPayment() <= 0) {
+            return redirect()->route('transaction.show', $transaction)
+                ->with('error', 'Cette transaction est déjà entièrement payée.');
+        }
+
+        if (in_array($transaction->status, ['cancelled', 'no_show'])) {
+            return redirect()->route('transaction.show', $transaction)
+                ->with('error', 'Impossible d\'effectuer un paiement sur une transaction annulée.');
+        }
+
         return view('transaction.payment.create', [
             'transaction' => $transaction,
+            'paymentMethods' => Payment::getPaymentMethods(),
+            'mobileMoneyProviders' => Payment::getMobileMoneyProviders(),
+            'cardTypes' => Payment::getCardTypes(),
         ]);
     }
 
@@ -94,41 +108,234 @@ class PaymentController extends Controller
      */
     public function store(Transaction $transaction, Request $request)
     {
-        $insufficient = $transaction->getTotalPrice() - $transaction->getTotalPayment();
+        $remainingPayment = $transaction->getRemainingPayment();
         
-        $request->validate([
-            'payment' => 'required|numeric|lte:'.$insufficient,
-            'payment_method' => 'required|in:cash,card,transfer,mobile_money',
-            'notes' => 'nullable|string|max:500',
+        // Validation des règles de base
+        $validator = Validator::make($request->all(), [
+            'amount' => [
+                'required',
+                'numeric',
+                'min:100',
+                'max:' . $remainingPayment,
+                function ($attribute, $value, $fail) {
+                    if ($value <= 0) {
+                        $fail('Le montant doit être supérieur à 0.');
+                    }
+                },
+            ],
+            'payment_method' => 'required|in:cash,card,transfer,mobile_money,fedapay,check',
             'reference' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:500',
+        ], [
+            'amount.max' => 'Le montant ne peut pas dépasser le solde restant de :max CFA.',
+            'amount.min' => 'Le montant minimum est de :min CFA.',
         ]);
+
+        // Validation conditionnelle selon la méthode de paiement
+        if ($request->payment_method === Payment::METHOD_CARD) {
+            $validator->addRules([
+                'card_last_four' => 'required|string|size:4|regex:/^[0-9]{4}$/',
+                'card_type' => 'required|in:visa,mastercard,amex',
+            ]);
+        }
+
+        if ($request->payment_method === Payment::METHOD_CHECK) {
+            $validator->addRules([
+                'check_number' => 'required|string|max:50',
+                'bank_name' => 'required|string|max:100',
+            ]);
+        }
+
+        if ($request->payment_method === Payment::METHOD_TRANSFER) {
+            $validator->addRules([
+                'bank_name' => 'required|string|max:100',
+                'account_number' => 'required|string|max:50',
+            ]);
+        }
+
+        if ($request->payment_method === Payment::METHOD_MOBILE_MONEY) {
+            $validator->addRules([
+                'mobile_money_provider' => 'required|in:moov_money,mtn_money,flooz,orange_money',
+                'mobile_money_number' => 'required|string|max:20',
+            ]);
+        }
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         try {
             DB::beginTransaction();
 
-            // Créer le paiement via le repository
-            $payment = $this->paymentRepository->store($request, $transaction, 'Payment');
-            
-            // Mettre à jour le statut du paiement
-            if ($payment) {
-                $payment->update([
-                    'status' => 'completed',
-                    'payment_method' => $request->payment_method,
-                    'notes' => $request->notes,
-                    'reference' => $request->reference,
-                ]);
+            // Préparer les données du paiement
+            $paymentData = [
+                'user_id' => auth()->id(),
+                'transaction_id' => $transaction->id,
+                'amount' => $request->amount,
+                'payment_method' => $request->payment_method,
+                'status' => Payment::STATUS_COMPLETED,
+                'notes' => $request->notes,
+                'reference' => $request->reference ?? $this->generatePaymentReference($request->payment_method),
+            ];
+
+            // Ajouter les données spécifiques à la méthode
+            switch ($request->payment_method) {
+                case Payment::METHOD_CARD:
+                    $paymentData['card_last_four'] = $request->card_last_four;
+                    $paymentData['card_type'] = $request->card_type;
+                    break;
+                    
+                case Payment::METHOD_CHECK:
+                    $paymentData['check_number'] = $request->check_number;
+                    $paymentData['bank_name'] = $request->bank_name;
+                    break;
+                    
+                case Payment::METHOD_TRANSFER:
+                    $paymentData['bank_name'] = $request->bank_name;
+                    $paymentData['account_number'] = $request->account_number;
+                    break;
+                    
+                case Payment::METHOD_MOBILE_MONEY:
+                    $paymentData['mobile_money_provider'] = $request->mobile_money_provider;
+                    $paymentData['mobile_money_number'] = $request->mobile_money_number;
+                    break;
             }
+
+            // Créer le paiement
+            $payment = Payment::create($paymentData);
+
+            // Mettre à jour le statut de paiement de la transaction
+            $transaction->updatePaymentStatus();
+            
+            // ⭐ IMPORTANT : Rafraîchir l'instance pour avoir les données mises à jour
+            $transaction->refresh();
+            
+            // Vérifier le statut de paiement maintenant que la transaction est à jour
+            $isFullyPaid = $transaction->isFullyPaid();
+            $newRemaining = $transaction->getRemainingPayment();
+
+            // Journalisation
+            activity()
+                ->performedOn($payment)
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'amount' => $request->amount,
+                    'method' => $request->payment_method,
+                    'transaction_id' => $transaction->id,
+                    'customer' => $transaction->customer->name,
+                    'fully_paid' => $isFullyPaid,
+                    'remaining' => $newRemaining,
+                ])
+                ->log('Nouveau paiement enregistré');
 
             DB::commit();
 
-            return redirect()->route('transaction.index')
-                ->with('success', 'Paiement de ' . Helpers::convertToRupiah($request->payment) . ' enregistré avec succès pour la chambre ' . $transaction->room->number);
+            // Préparer le message de succès
+            $successMessage = $this->generateSuccessMessage($payment, $isFullyPaid, $newRemaining);
+
+            return redirect()->route('transaction.show', $transaction)
+                ->with('success', $successMessage);
 
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            \Log::error('Erreur enregistrement paiement: ' . $e->getMessage(), [
+                'transaction_id' => $transaction->id,
+                'user_id' => auth()->id(),
+                'request' => $request->all(),
+            ]);
+
             return redirect()->back()
-                ->with('error', 'Erreur lors de l\'enregistrement du paiement : ' . $e->getMessage());
+                ->with('error', 'Erreur lors de l\'enregistrement du paiement: ' . $e->getMessage())
+                ->withInput();
         }
+    }
+
+    /**
+     * Générer une référence de paiement
+     */
+    private function generatePaymentReference($method)
+    {
+        $prefixes = [
+            Payment::METHOD_CASH => 'PAY-CASH',
+            Payment::METHOD_CARD => 'PAY-CARD',
+            Payment::METHOD_TRANSFER => 'PAY-TRANSFER',
+            Payment::METHOD_MOBILE_MONEY => 'PAY-MOMO',
+            Payment::METHOD_FEDAPAY => 'FDP',
+            Payment::METHOD_CHECK => 'PAY-CHECK',
+        ];
+
+        $prefix = $prefixes[$method] ?? 'PAY';
+        return $prefix . '-' . time() . rand(100, 999);
+    }
+
+    /**
+     * Générer le message de succès
+     */
+    private function generateSuccessMessage(Payment $payment, bool $isFullyPaid, $remaining)
+    {
+        $methodLabels = [
+            Payment::METHOD_CASH => 'en espèces',
+            Payment::METHOD_CARD => 'par carte bancaire',
+            Payment::METHOD_TRANSFER => 'par virement bancaire',
+            Payment::METHOD_MOBILE_MONEY => 'par Mobile Money',
+            Payment::METHOD_FEDAPAY => 'par Fedapay',
+            Payment::METHOD_CHECK => 'par chèque',
+        ];
+
+        $methodLabel = $methodLabels[$payment->payment_method] ?? $payment->payment_method;
+
+        $successMessage = sprintf(
+            '<div class="alert alert-success alert-dismissible fade show" role="alert">'
+            . '<div class="d-flex align-items-center">'
+            . '<i class="fas fa-check-circle me-3 fs-4"></i>'
+            . '<div>'
+            . '<h5 class="alert-heading mb-1">✅ Paiement enregistré avec succès</h5>'
+            . '<p class="mb-1">Montant : <strong>%s CFA</strong> %s</p>',
+            number_format($payment->amount, 0, ',', ' '),
+            $methodLabel
+        );
+
+        if ($payment->reference) {
+            $successMessage .= sprintf('<small class="text-muted d-block">Référence : %s</small>', $payment->reference);
+        }
+
+        if ($isFullyPaid) {
+            $successMessage .= '<div class="mt-2 alert alert-success py-2 border-0 mb-0">'
+                . '<i class="fas fa-check-circle me-2"></i>'
+                . '<strong>Transaction entièrement payée !</strong> Le séjour peut maintenant être marqué comme terminé.'
+                . '</div>';
+        } else {
+            $successMessage .= sprintf(
+                '<div class="mt-2 alert alert-info py-2 border-0 mb-0">'
+                . '<i class="fas fa-info-circle me-2"></i>'
+                . 'Solde restant : <strong>%s CFA</strong>'
+                . '</div>',
+                number_format($remaining, 0, ',', ' ')
+            );
+        }
+
+        $successMessage .= '</div>'
+            . '</div>'
+            . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>'
+            . '</div>';
+
+        return $successMessage;
+    }
+
+    /**
+     * Afficher les détails d'un paiement
+     */
+    public function show(Payment $payment)
+    {
+        $payment->load(['transaction.customer', 'transaction.room.type', 'user', 'cancelledByUser']);
+        
+        return view('payment.show', [
+            'payment' => $payment,
+            'paymentMethods' => Payment::getPaymentMethods(),
+        ]);
     }
 
     /**
@@ -137,36 +344,27 @@ class PaymentController extends Controller
     public function cancel(Request $request, Payment $payment)
     {
         $request->validate([
-            'cancel_reason' => 'nullable|string|max:500'
+            'cancel_reason' => 'required|string|max:500'
         ]);
 
         // Vérifier si le paiement peut être annulé
-        if ($payment->status === 'cancelled') {
-            return redirect()->back()->with('error', 'Ce paiement est déjà annulé.');
-        }
-
-        if ($payment->status === 'expired') {
-            return redirect()->back()->with('error', 'Ce paiement est expiré.');
+        if (!$payment->canBeCancelled()) {
+            return redirect()->back()->with('error', 'Ce paiement ne peut pas être annulé.');
         }
 
         try {
             DB::beginTransaction();
 
-            // Mettre à jour le statut du paiement
-            $payment->update([
-                'status' => 'cancelled',
-                'cancelled_at' => now(),
-                'cancelled_by' => auth()->id(),
-                'cancel_reason' => $request->cancel_reason
-            ]);
+            // Annuler le paiement
+            $payment->cancel(auth()->id(), $request->cancel_reason);
 
-            // Recalculer le total payé pour la transaction
-            $transaction = $payment->transaction;
-            if ($transaction) {
-                $transaction->updatePaymentStatus();
+            // Recalculer le total de la transaction
+            if ($payment->transaction) {
+                $payment->transaction->updatePaymentStatus();
+                $payment->transaction->refresh(); // ⭐ Ajout de refresh()
             }
 
-            // Log d'activité
+            // Journalisation
             activity()
                 ->performedOn($payment)
                 ->causedBy(auth()->user())
@@ -180,8 +378,79 @@ class PaymentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            \Log::error('Erreur annulation paiement: ' . $e->getMessage(), [
+                'payment_id' => $payment->id,
+                'user_id' => auth()->id(),
+            ]);
+
             return redirect()->back()
-                ->with('error', 'Erreur lors de l\'annulation : ' . $e->getMessage());
+                ->with('error', 'Erreur lors de l\'annulation: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Rembourser un paiement
+     */
+    public function refund(Request $request, Payment $payment)
+    {
+        $request->validate([
+            'cancel_reason' => 'required|string|max:500'
+        ]);
+
+        // Vérifier si le paiement peut être remboursé
+        if (!$payment->canBeRefunded()) {
+            return redirect()->back()->with('error', 'Ce paiement ne peut pas être remboursé.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Créer un paiement de remboursement (montant négatif)
+            $refundPayment = Payment::create([
+                'user_id' => auth()->id(),
+                'transaction_id' => $payment->transaction_id,
+                'amount' => -$payment->amount,
+                'payment_method' => Payment::METHOD_REFUND,
+                'status' => Payment::STATUS_COMPLETED,
+                'reference' => 'REFUND-' . ($payment->reference ?? 'PAY-' . $payment->id),
+                'notes' => 'Remboursement: ' . $request->cancel_reason,
+            ]);
+
+            // Marquer le paiement original comme remboursé
+            $payment->markAsRefunded(auth()->id(), $request->cancel_reason);
+
+            // Recalculer le total de la transaction
+            if ($payment->transaction) {
+                $payment->transaction->updatePaymentStatus();
+                $payment->transaction->refresh(); // ⭐ Ajout de refresh()
+            }
+
+            // Journalisation
+            activity()
+                ->performedOn($payment)
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'cancel_reason' => $request->cancel_reason,
+                    'refund_payment_id' => $refundPayment->id,
+                ])
+                ->log('Paiement remboursé');
+
+            DB::commit();
+
+            return redirect()->route('payments.index')
+                ->with('success', 'Paiement remboursé avec succès.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('Erreur remboursement paiement: ' . $e->getMessage(), [
+                'payment_id' => $payment->id,
+                'user_id' => auth()->id(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Erreur lors du remboursement: ' . $e->getMessage());
         }
     }
 
@@ -191,8 +460,8 @@ class PaymentController extends Controller
     public function restore(Payment $payment)
     {
         // Vérifier si le paiement peut être restauré
-        if (!in_array($payment->status, ['cancelled', 'expired'])) {
-            return redirect()->back()->with('error', 'Seuls les paiements annulés ou expirés peuvent être restaurés.');
+        if (!$payment->canBeRestored()) {
+            return redirect()->back()->with('error', 'Ce paiement ne peut pas être restauré.');
         }
 
         try {
@@ -200,20 +469,15 @@ class PaymentController extends Controller
 
             $oldStatus = $payment->status;
 
-            $payment->update([
-                'status' => 'completed',
-                'cancelled_at' => null,
-                'cancelled_by' => null,
-                'cancel_reason' => null
-            ]);
+            $payment->restorePayment();
 
-            // Recalculer le total payé
-            $transaction = $payment->transaction;
-            if ($transaction) {
-                $transaction->updatePaymentStatus();
+            // Recalculer le total de la transaction
+            if ($payment->transaction) {
+                $payment->transaction->updatePaymentStatus();
+                $payment->transaction->refresh(); // ⭐ Ajout de refresh()
             }
 
-            // Log d'activité
+            // Journalisation
             activity()
                 ->performedOn($payment)
                 ->causedBy(auth()->user())
@@ -227,52 +491,14 @@ class PaymentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            \Log::error('Erreur restauration paiement: ' . $e->getMessage(), [
+                'payment_id' => $payment->id,
+                'user_id' => auth()->id(),
+            ]);
+
             return redirect()->back()
-                ->with('error', 'Erreur lors de la restauration : ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Marquer un paiement comme expiré (API)
-     */
-    public function markAsExpired(Payment $payment)
-    {
-        if ($payment->status !== 'pending') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Seuls les paiements en attente peuvent être marqués comme expirés.'
-            ], 400);
-        }
-
-        try {
-            DB::beginTransaction();
-
-            $payment->update([
-                'status' => 'expired',
-                'cancelled_at' => now(),
-                'cancelled_by' => auth()->id(),
-                'cancel_reason' => 'Paiement expiré automatiquement'
-            ]);
-
-            // Recalculer le total payé
-            $transaction = $payment->transaction;
-            if ($transaction) {
-                $transaction->updatePaymentStatus();
-            }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Paiement marqué comme expiré.'
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur : ' . $e->getMessage()
-            ], 500);
+                ->with('error', 'Erreur lors de la restauration: ' . $e->getMessage());
         }
     }
 
@@ -282,7 +508,7 @@ class PaymentController extends Controller
     public function invoice(Payment $payment)
     {
         try {
-            // Charger toutes les relations nécessaires pour la facture
+            // Charger toutes les relations nécessaires
             $payment->load([
                 'transaction' => function($query) {
                     $query->with([
@@ -302,15 +528,10 @@ class PaymentController extends Controller
                 return redirect()->back()->with('error', 'Transaction non trouvée pour ce paiement.');
             }
             
-            if (!$payment->transaction->customer) {
-                return redirect()->back()->with('error', 'Client non trouvé pour cette transaction.');
-            }
+            // Recalculer les totaux avec les données fraîches
+            $payment->transaction->updatePaymentStatus();
+            $payment->transaction->refresh(); // ⭐ Ajout de refresh()
             
-            if (!$payment->transaction->room) {
-                return redirect()->back()->with('error', 'Chambre non trouvée pour cette transaction.');
-            }
-            
-            // Calculer les totaux
             $totalPrice = $payment->transaction->getTotalPrice();
             $totalPayment = $payment->transaction->getTotalPayment();
             $remaining = $totalPrice - $totalPayment;
@@ -323,7 +544,6 @@ class PaymentController extends Controller
             ]);
             
         } catch (\Exception $e) {
-            // Log l'erreur pour debugging
             \Log::error('Erreur génération facture: ' . $e->getMessage(), [
                 'payment_id' => $payment->id,
                 'error' => $e->getTraceAsString()
@@ -334,49 +554,73 @@ class PaymentController extends Controller
     }
 
     /**
-     * Marquer automatiquement les paiements en attente comme expirés
-     * (À exécuter via une tâche cron)
+     * Exporter les paiements
      */
-    public function expirePendingPayments()
+    public function export(Request $request)
     {
-        try {
-            // Récupérer les paiements en attente depuis plus de 24h
-            $expiredPayments = Payment::where('status', 'pending')
-                ->where('created_at', '<', now()->subHours(24))
-                ->get();
+        $query = Payment::with(['transaction.customer', 'user'])
+            ->orderBy('created_at', 'DESC');
 
-            $count = 0;
-            
-            foreach ($expiredPayments as $payment) {
-                DB::beginTransaction();
-                
-                $payment->update([
-                    'status' => 'expired',
-                    'cancelled_at' => now(),
-                    'cancelled_by' => 1, // ID de l'utilisateur système
-                    'cancel_reason' => 'Paiement expiré automatiquement (délai dépassé)'
-                ]);
-                
-                // Recalculer le total payé
-                $transaction = $payment->transaction;
-                if ($transaction) {
-                    $transaction->updatePaymentStatus();
-                }
-                
-                DB::commit();
-                $count++;
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => $count . ' paiement(s) marqué(s) comme expiré(s).'
-            ]);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur : ' . $e->getMessage()
-            ], 500);
+        // Appliquer les filtres
+        if ($request->filled('method')) {
+            $query->where('payment_method', $request->method);
         }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        $payments = $query->get();
+
+        // Générer le CSV
+        $csv = fopen('php://temp', 'w');
+        
+        // En-têtes
+        fputcsv($csv, [
+            'ID',
+            'Date',
+            'Référence',
+            'Client',
+            'Transaction ID',
+            'Montant (CFA)',
+            'Méthode',
+            'Statut',
+            'Référence paiement',
+            'Créé par',
+            'Notes'
+        ]);
+
+        // Données
+        foreach ($payments as $payment) {
+            fputcsv($csv, [
+                $payment->id,
+                $payment->created_at->format('d/m/Y H:i'),
+                $payment->reference,
+                $payment->transaction->customer->name ?? 'N/A',
+                $payment->transaction_id,
+                number_format($payment->amount, 0, ',', ' '),
+                $payment->payment_method_label,
+                $payment->status_text,
+                $payment->reference,
+                $payment->user->name ?? 'N/A',
+                $payment->notes ?? ''
+            ]);
+        }
+
+        rewind($csv);
+        $csvData = stream_get_contents($csv);
+        fclose($csv);
+
+        return response($csvData)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="paiements_' . date('Y-m-d') . '.csv"');
     }
 }

@@ -20,6 +20,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\CashierSessionController; // Nouveau contrôleur
 
 /*
 |--------------------------------------------------------------------------
@@ -133,7 +134,13 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
         Route::post('/{transaction}/arrived', [TransactionController::class, 'markAsArrived'])->name('mark-arrived');
         Route::post('/{transaction}/departed', [TransactionController::class, 'markAsDeparted'])->name('mark-departed');
         
-        // Routes AJAX/API
+        // Routes AJAX/API pour la vérification de paiement
+        Route::get('/{transaction}/check-payment', [TransactionController::class, 'checkPaymentStatus'])
+            ->name('check-payment');
+        Route::get('/{transaction}/can-complete', [TransactionController::class, 'checkIfCanComplete'])
+            ->name('can-complete');
+        
+        // Routes AJAX/API existantes
         Route::get('/{transaction}/check-availability', [TransactionController::class, 'checkAvailability'])->name('checkAvailability');
         Route::get('/{id}/details', [TransactionController::class, 'showDetails'])->name('showDetails');
     });
@@ -171,6 +178,28 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
     // Charts
     Route::get('/get-dialy-guest-chart-data', [ChartController::class, 'dailyGuestPerMonth']);
     Route::get('/get-dialy-guest/{year}/{month}/{day}', [ChartController::class, 'dailyGuest'])->name('chart.dailyGuest');
+    
+    // ==================== NOUVELLES ROUTES : GESTION DES CAISSES ====================
+    Route::prefix('cashier')->name('cashier.')->group(function () {
+        // Sessions de caisse
+        Route::get('/sessions', [CashierSessionController::class, 'index'])->name('sessions.index');
+        Route::get('/sessions/create', [CashierSessionController::class, 'create'])->name('sessions.create');
+        Route::post('/sessions', [CashierSessionController::class, 'store'])->name('sessions.store');
+        Route::get('/sessions/{cashierSession}', [CashierSessionController::class, 'show'])->name('sessions.show');
+        Route::put('/sessions/{cashierSession}/close', [CashierSessionController::class, 'close'])->name('sessions.close');
+        Route::delete('/sessions/{cashierSession}', [CashierSessionController::class, 'destroy'])->name('sessions.destroy');
+        
+        // Rapport de caisse
+        Route::get('/report/{cashierSession}', [CashierSessionController::class, 'report'])->name('sessions.report');
+        Route::get('/daily-report', [CashierSessionController::class, 'dailyReport'])->name('daily-report');
+        
+        // Dashboard caisse
+        Route::get('/dashboard', [CashierSessionController::class, 'dashboard'])->name('dashboard');
+        
+        // API pour AJAX
+        Route::get('/current-session', [CashierSessionController::class, 'getCurrentSession'])->name('current-session');
+        Route::get('/session-summary', [CashierSessionController::class, 'sessionSummary'])->name('session-summary');
+    });
 });
 
 // Routes accessibles à tous les utilisateurs authentifiés (Super, Admin, Customer)
@@ -258,6 +287,19 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Reception']], func
         // Vue spéciale pour la réception (dashboard réception)
         Route::get('/reception/today', [TransactionController::class, 'index'])->name('reception.today')
             ->defaults('view', 'reception'); // Paramètre pour la vue
+    });
+    
+    // ==================== ROUTES CAISSE POUR LA RÉCEPTION ====================
+    Route::prefix('cashier')->name('cashier.')->group(function () {
+        // Gestion des sessions pour la réception
+        Route::get('/open-session', [CashierSessionController::class, 'openSession'])->name('open-session');
+        Route::post('/start-session', [CashierSessionController::class, 'startSession'])->name('start-session');
+        Route::post('/close-session/{cashierSession}', [CashierSessionController::class, 'closeSession'])->name('close-session');
+        Route::get('/my-sessions', [CashierSessionController::class, 'mySessions'])->name('my-sessions');
+        Route::get('/session-report/{cashierSession}', [CashierSessionController::class, 'sessionReport'])->name('session-report');
+        
+        // Dashboard réception avec caisse
+        Route::get('/reception-dashboard', [CashierSessionController::class, 'receptionDashboard'])->name('reception-dashboard');
     });
 });
 
@@ -358,6 +400,40 @@ if (env('APP_DEBUG', false)) {
             'is_completed' => $transaction->isCompleted(),
             'is_cancelled' => $transaction->isCancelled(),
             'can_be_cancelled' => $transaction->canBeCancelled(),
+            'is_fully_paid' => $transaction->isFullyPaid(),
+            'total_price' => $transaction->getTotalPrice(),
+            'total_paid' => $transaction->getTotalPayment(),
+            'remaining' => $transaction->getRemainingPayment(),
+        ]);
+    });
+    
+    // Route pour tester la commande automatique
+    Route::get('/test-auto-status', function() {
+        \Artisan::call('transactions:update-statuses');
+        return response()->json([
+            'output' => \Artisan::output(),
+            'success' => true
+        ]);
+    })->name('test.auto-status');
+    
+    // Route pour tester la validation de paiement
+    Route::get('/test-payment-validation/{id}', function($id) {
+        $transaction = \App\Models\Transaction::find($id);
+        if (!$transaction) {
+            return response()->json(['error' => 'Transaction not found'], 404);
+        }
+        
+        return response()->json([
+            'transaction_id' => $transaction->id,
+            'can_complete' => $transaction->isFullyPaid(),
+            'total_price' => $transaction->getTotalPrice(),
+            'total_paid' => $transaction->getTotalPayment(),
+            'remaining' => $transaction->getRemainingPayment(),
+            'payment_rate' => $transaction->getPaymentRate(),
+            'test_scenarios' => [
+                'should_block_completed' => !$transaction->isFullyPaid() && $transaction->status === 'active',
+                'should_allow_completed' => $transaction->isFullyPaid() && $transaction->status === 'active',
+            ]
         ]);
     });
 }

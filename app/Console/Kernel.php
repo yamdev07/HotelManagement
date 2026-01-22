@@ -23,7 +23,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')->hourly();
+        // Exécute la commande tous les jours à 01:00 du matin
+        $schedule->command('transactions:update-statuses')->dailyAt('01:00');
     }
 
     /**
@@ -37,4 +38,5 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
+    
 }

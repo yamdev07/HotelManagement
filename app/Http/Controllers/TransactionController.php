@@ -303,6 +303,83 @@ class TransactionController extends Controller
         $oldStatus = $transaction->status;
         $newStatus = $request->status;
         
+        // ====================================================================
+        // VÉRIFICATION CRITIQUE 1 : Bloquer "completed" si non payé
+        // ====================================================================
+        if ($newStatus === 'completed' && !$transaction->isFullyPaid()) {
+            $remaining = $transaction->getRemainingPayment();
+            $formattedRemaining = number_format($remaining, 0, ',', ' ') . ' CFA';
+            
+            if ($request->ajax()) {
+                return response()->json([
+                    'error' => 'Paiement incomplet',
+                    'message' => 'Impossible de marquer comme séjour terminé. Solde restant : ' . $formattedRemaining,
+                    'remaining' => $remaining,
+                    'formatted_remaining' => $formattedRemaining
+                ], 422);
+            }
+            
+            return redirect()
+                ->back()
+                ->with('error', 
+                    '❌ <strong>Paiement incomplet !</strong><br>' .
+                    'Impossible de marquer le séjour comme terminé.<br>' .
+                    '<div class="mt-2 p-2 bg-danger text-white rounded">' .
+                    '<i class="fas fa-exclamation-triangle me-2"></i>' .
+                    'Solde restant dû : <strong>' . $formattedRemaining . '</strong>' .
+                    '</div>' .
+                    '<div class="mt-2">' .
+                    '<a href="' . route('transaction.payment.create', $transaction) . '" class="btn btn-sm btn-warning">' .
+                    '<i class="fas fa-money-bill-wave me-1"></i>Régler maintenant' .
+                    '</a>' .
+                    '</div>'
+                );
+        }
+        
+        // ====================================================================
+        // VÉRIFICATION CRITIQUE 2 : Empêcher le retour à "reservation" si check_in passé
+        // ====================================================================
+        if ($newStatus === 'reservation') {
+            $checkInDate = Carbon::parse($transaction->check_in);
+            if ($checkInDate->isPast()) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'error' => 'Date dépassée',
+                        'message' => 'Impossible de revenir à "Réservation", la date d\'arrivée est déjà passée.'
+                    ], 422);
+                }
+                
+                return redirect()
+                    ->back()
+                    ->with('error', 
+                        '❌ <strong>Date d\'arrivée dépassée !</strong><br>' .
+                        'Impossible de revenir au statut "Réservation" car la date d\'arrivée (' . 
+                        $checkInDate->format('d/m/Y') . ') est déjà passée.'
+                    );
+            }
+        }
+        
+        // ====================================================================
+        // VÉRIFICATION CRITIQUE 3 : Demander une raison pour annulation
+        // ====================================================================
+        if ($newStatus === 'cancelled' && empty($request->cancel_reason)) {
+            // Si c'est une requête AJAX, retourner une erreur
+            if ($request->ajax()) {
+                return response()->json([
+                    'error' => 'Raison requise',
+                    'message' => 'Veuillez fournir une raison pour l\'annulation.'
+                ], 422);
+            }
+            
+            // Sinon, rediriger avec erreur
+            return redirect()
+                ->back()
+                ->with('error', 'Veuillez fournir une raison pour l\'annulation.');
+        }
+        
+        // ====================================================================
+        // LOGIQUE DE MISE À JOUR
+        // ====================================================================
         try {
             DB::beginTransaction();
             
@@ -319,12 +396,38 @@ class TransactionController extends Controller
                 if ($transaction->room && $transaction->room->room_status_id == 2) {
                     $transaction->room->update(['room_status_id' => 1]); // Available
                 }
+                
+                // Créer un remboursement si des paiements ont été effectués
+                $totalPaid = $transaction->getTotalPayment();
+                if ($totalPaid > 0) {
+                    $existingRefund = Payment::where('transaction_id', $transaction->id)
+                        ->where('payment_method', 'refund')
+                        ->first();
+                    
+                    if (!$existingRefund) {
+                        Payment::create([
+                            'transaction_id' => $transaction->id,
+                            'price' => -$totalPaid,
+                            'payment_method' => 'refund',
+                            'reference' => 'REFUND-' . $transaction->id . '-' . time(),
+                            'status' => 'completed',
+                            'notes' => 'Remboursement suite à annulation' . 
+                                    ($request->cancel_reason ? " - Raison: " . $request->cancel_reason : ''),
+                            'created_by' => auth()->id(),
+                        ]);
+                    }
+                }
             } 
             // Si on réactive une réservation annulée
             elseif ($oldStatus === 'cancelled' && $newStatus !== 'cancelled') {
                 $updateData['cancelled_at'] = null;
                 $updateData['cancelled_by'] = null;
                 $updateData['cancel_reason'] = null;
+                
+                // Annuler le remboursement s'il existe
+                Payment::where('transaction_id', $transaction->id)
+                    ->where('payment_method', 'refund')
+                    ->delete();
             }
             
             // Gérer le passage de réservation à actif (arrivée du client)
@@ -337,16 +440,51 @@ class TransactionController extends Controller
             
             // Gérer le passage d'actif à terminé (départ du client)
             if ($oldStatus === 'active' && $newStatus === 'completed') {
+                // Vérifier une seconde fois le paiement (sécurité supplémentaire)
+                if (!$transaction->isFullyPaid()) {
+                    DB::rollBack();
+                    $remaining = $transaction->getRemainingPayment();
+                    
+                    if ($request->ajax()) {
+                        return response()->json([
+                            'error' => 'Paiement incomplet',
+                            'message' => 'Le paiement n\'est pas complet. Solde restant : ' . 
+                                    number_format($remaining, 0, ',', ' ') . ' CFA'
+                        ], 422);
+                    }
+                    
+                    return redirect()
+                        ->back()
+                        ->with('error', 
+                            '❌ <strong>Erreur de sécurité : Paiement incomplet !</strong><br>' .
+                            'Le système a détecté que le paiement n\'est pas complet alors que le statut était sur le point d\'être changé.' .
+                            '<br>Solde restant : <strong>' . number_format($remaining, 0, ',', ' ') . ' CFA</strong>'
+                        );
+                }
+                
                 // Libérer la chambre
                 if ($transaction->room) {
                     $transaction->room->update(['room_status_id' => 1]); // Available
                 }
+                
+                // Journaliser le départ avec paiement complet
+                \Log::info('Client parti avec paiement complet', [
+                    'transaction_id' => $transaction->id,
+                    'customer_id' => $transaction->customer_id,
+                    'room_id' => $transaction->room_id,
+                    'total_paid' => $transaction->getTotalPayment(),
+                    'total_price' => $transaction->getTotalPrice(),
+                    'departure_date' => Carbon::now()->format('Y-m-d H:i:s'),
+                    'processed_by' => auth()->id()
+                ]);
             }
             
             // Mettre à jour la transaction
             $transaction->update($updateData);
             
-            // Journaliser l'action
+            // ====================================================================
+            // JOURNALISATION DÉTAILLÉE
+            // ====================================================================
             \Log::info('Statut de réservation modifié', [
                 'transaction_id' => $transaction->id,
                 'old_status' => $oldStatus,
@@ -354,28 +492,67 @@ class TransactionController extends Controller
                 'changed_by' => auth()->id(),
                 'changed_by_name' => auth()->user()->name,
                 'customer_id' => $transaction->customer_id,
+                'customer_name' => $transaction->customer->name,
                 'room_id' => $transaction->room_id,
+                'room_number' => $transaction->room->number ?? 'N/A',
+                'check_in' => $transaction->check_in->format('Y-m-d'),
+                'check_out' => $transaction->check_out->format('Y-m-d'),
+                'total_price' => $transaction->getTotalPrice(),
+                'total_paid' => $transaction->getTotalPayment(),
+                'remaining_balance' => $transaction->getRemainingPayment(),
+                'is_fully_paid' => $transaction->isFullyPaid(),
+                'change_timestamp' => Carbon::now()->format('Y-m-d H:i:s'),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
                 'reason' => $request->cancel_reason,
+                'additional_info' => [
+                    'payment_verified' => ($newStatus === 'completed') ? $transaction->isFullyPaid() : 'N/A',
+                    'room_status_change' => $transaction->room->room_status_id ?? 'N/A',
+                    'nights' => $transaction->getNightsAttribute()
+                ]
             ]);
             
             DB::commit();
+            
+            // ====================================================================
+            // RÉPONSE AU CLIENT
+            // ====================================================================
             
             // Réponse pour AJAX
             if ($request->ajax()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Statut mis à jour avec succès',
+                    'message' => $this->getStatusChangeMessage($oldStatus, $newStatus),
                     'new_status' => $newStatus,
                     'new_status_label' => $this->getStatusLabel($newStatus),
-                    'transaction_id' => $transaction->id
+                    'new_status_color' => $this->getStatusColor($newStatus),
+                    'transaction_id' => $transaction->id,
+                    'is_fully_paid' => $transaction->isFullyPaid(),
+                    'remaining_balance' => $transaction->getRemainingPayment(),
+                    'formatted_remaining' => number_format($transaction->getRemainingPayment(), 0, ',', ' ') . ' CFA',
+                    'timestamp' => Carbon::now()->format('d/m/Y H:i:s')
                 ]);
             }
             
             // Message personnalisé selon le changement
             $message = $this->getStatusChangeMessage($oldStatus, $newStatus);
             
+            // Ajouter des informations supplémentaires selon le statut
             if ($newStatus === 'cancelled' && $request->cancel_reason) {
                 $message .= " - Raison : " . $request->cancel_reason;
+            }
+            
+            if ($newStatus === 'completed') {
+                $message .= " - Paiement complet vérifié ✓";
+                
+                // Ajouter un message de succès spécial pour les départs
+                \Session::flash('departure_success', [
+                    'title' => 'Départ enregistré avec succès',
+                    'message' => 'Le client est marqué comme parti et la chambre a été libérée.',
+                    'transaction_id' => $transaction->id,
+                    'room_number' => $transaction->room->number ?? 'N/A',
+                    'customer_name' => $transaction->customer->name
+                ]);
             }
             
             return redirect()->back()
@@ -383,15 +560,85 @@ class TransactionController extends Controller
                 
         } catch (\Exception $e) {
             DB::rollBack();
-            \Log::error('Erreur mise à jour statut: ' . $e->getMessage());
+            
+            // Journalisation d'erreur détaillée
+            \Log::error('Erreur mise à jour statut transaction', [
+                'transaction_id' => $transaction->id,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'stack_trace' => $e->getTraceAsString(),
+                'user_id' => auth()->id(),
+                'timestamp' => Carbon::now()->format('Y-m-d H:i:s')
+            ]);
             
             if ($request->ajax()) {
-                return response()->json(['error' => 'Erreur lors de la mise à jour'], 500);
+                return response()->json([
+                    'error' => 'Erreur système',
+                    'message' => 'Une erreur est survenue lors de la mise à jour du statut.',
+                    'debug' => config('app.debug') ? $e->getMessage() : null
+                ], 500);
             }
             
             return redirect()->back()
-                ->with('failed', 'Erreur lors de la mise à jour du statut: ' . $e->getMessage());
+                ->with('failed', 
+                    '❌ <strong>Erreur système</strong><br>' .
+                    'Une erreur est survenue lors de la mise à jour du statut.<br>' .
+                    (config('app.debug') ? '<small>' . $e->getMessage() . '</small>' : '')
+                );
         }
+    }
+
+    /**
+     * Obtenir la couleur CSS d'un statut
+     */
+    private function getStatusColor($status)
+    {
+        $colors = [
+            'reservation' => 'warning',
+            'active' => 'success', 
+            'completed' => 'info',
+            'cancelled' => 'danger',
+            'no_show' => 'secondary'
+        ];
+        
+        return $colors[$status] ?? 'secondary';
+    }
+
+    /**
+     * Vérifier si une transaction peut être marquée comme terminée
+     */
+    public function checkIfCanComplete(Transaction $transaction)
+    {
+        $canComplete = $transaction->isFullyPaid();
+        $remaining = $transaction->getRemainingPayment();
+        
+        return response()->json([
+            'can_complete' => $canComplete,
+            'remaining' => $remaining,
+            'formatted_remaining' => number_format($remaining, 0, ',', ' ') . ' CFA',
+            'total_price' => $transaction->getTotalPrice(),
+            'total_paid' => $transaction->getTotalPayment(),
+            'payment_rate' => $transaction->getPaymentRate(),
+            'status' => $transaction->status,
+            'check_out_date' => $transaction->check_out->format('Y-m-d'),
+            'is_check_out_past' => $transaction->check_out->isPast()
+        ]);
+    }
+
+    /**
+     * Route pour vérifier rapidement le statut de paiement (AJAX)
+     */
+    public function checkPaymentStatus(Transaction $transaction)
+    {
+        return response()->json([
+            'is_fully_paid' => $transaction->isFullyPaid(),
+            'remaining_balance' => $transaction->getRemainingPayment(),
+            'formatted_remaining' => number_format($transaction->getRemainingPayment(), 0, ',', ' ') . ' CFA',
+            'can_check_out' => $transaction->isFullyPaid() && $transaction->status === 'active'
+        ]);
     }
 
     /**

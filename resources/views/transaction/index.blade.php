@@ -154,6 +154,40 @@
             font-size: 0.875rem;
             padding: 0.25rem 2rem 0.25rem 0.5rem;
         }
+        
+        /* NOUVEAU : Styles pour les séjours terminés mais non payés */
+        .unpaid-departure-alert {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        
+        .unpaid-departure-alert .alert-link {
+            font-weight: 600;
+            color: #856404;
+        }
+        
+        /* NOUVEAU : Style pour les options désactivées */
+        select option:disabled {
+            color: #6c757d;
+            background-color: #f8f9fa;
+        }
+        
+        /* NOUVEAU : Style pour les montants impayés */
+        .unpaid-amount {
+            font-weight: 700;
+            color: #dc3545;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes unpaid-pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
     </style>
 
     <div class="container-fluid">
@@ -175,6 +209,15 @@
                             <i class="fas fa-history me-2"></i>Historique
                         </a>
                     </span>
+                    
+                    <!-- Test auto-statuts (DEBUG) -->
+                    @if(env('APP_DEBUG', false) && in_array(auth()->user()->role, ['Super', 'Admin']))
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" title="Tester les mises à jour automatiques">
+                        <a href="{{ route('test.auto-status') }}" class="btn btn-outline-warning" target="_blank">
+                            <i class="fas fa-cogs me-2"></i>Test Auto
+                        </a>
+                    </span>
+                    @endif
                     
                     <!-- Mes Réservations (pour les clients) -->
                     @if(auth()->user()->role === 'Customer')
@@ -208,7 +251,7 @@
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="fas fa-check-circle me-2"></i>
-                {{ session('success') }}
+                {!! session('success') !!}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
@@ -216,7 +259,7 @@
         @if(session('error') || session('failed'))
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-circle me-2"></i>
-                {{ session('error') ?? session('failed') }}
+                {!! session('error') ?? session('failed') !!}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
@@ -224,7 +267,23 @@
         @if(session('info'))
             <div class="alert alert-info alert-dismissible fade show" role="alert">
                 <i class="fas fa-info-circle me-2"></i>
-                {{ session('info') }}
+                {!! session('info') !!}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        @endif
+
+        <!-- Message spécial pour les départs réussis -->
+        @if(session('departure_success'))
+            @php $departure = session('departure_success'); @endphp
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <strong>{{ $departure['title'] }}</strong><br>
+                {{ $departure['message'] }}
+                <div class="mt-2 small">
+                    Transaction: #{{ $departure['transaction_id'] }} | 
+                    Chambre: {{ $departure['room_number'] }} | 
+                    Client: {{ $departure['customer_name'] }}
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         @endif
@@ -240,9 +299,10 @@
                     <div class="d-flex gap-2">
                         <span class="badge badge-reservation">📅 Réservation</span>
                         <span class="badge badge-active">🏨 Dans l'hôtel</span>
-                        <span class="badge badge-completed">✅ Terminé</span>
+                        <span class="badge badge-completed">✅ Terminé (payé)</span>
                         <span class="badge badge-cancelled">❌ Annulée</span>
                         <span class="badge badge-no_show">👤 No Show</span>
+                        <span class="badge bg-warning">⚠️ Terminé mais impayé</span>
                     </div>
                 </div>
                 
@@ -273,6 +333,7 @@
                                             $totalPrice = $transaction->getTotalPrice();
                                             $totalPayment = $transaction->getTotalPayment();
                                             $remaining = $totalPrice - $totalPayment;
+                                            $isFullyPaid = $remaining <= 0;
                                             
                                             // Déterminer le statut depuis la base
                                             $status = $transaction->status;
@@ -293,7 +354,7 @@
                                             $canCancel = $isAdmin && !in_array($status, ['cancelled', 'no_show', 'completed']);
                                             
                                             // Vérifier si on peut payer
-                                            $canPay = !in_array($status, ['cancelled', 'no_show']) && !($remaining <= 0) && ($isAdmin || $isOwnReservation);
+                                            $canPay = !in_array($status, ['cancelled', 'no_show']) && !$isFullyPaid && ($isAdmin || $isOwnReservation);
                                             
                                             // Calcul du nombre de nuits
                                             $checkIn = \Carbon\Carbon::parse($transaction->check_in);
@@ -303,6 +364,10 @@
                                             // Vérifier si on peut marquer comme arrivé/départ
                                             $canMarkArrived = $isAdmin && $status == 'reservation';
                                             $canMarkDeparted = $isAdmin && $status == 'active';
+                                            
+                                            // NOUVEAU : Vérifier si séjour terminé mais non payé
+                                            $isPastDue = $checkOut->isPast() && $status == 'active' && !$isFullyPaid;
+                                            $canMarkCompleted = $isAdmin && $status == 'active' && $isFullyPaid;
                                         @endphp
                                         
                                         <tr class="{{ in_array($status, ['cancelled', 'no_show']) ? 'cancelled-row' : '' }}">
@@ -337,26 +402,45 @@
                                             <td class="price-cfa">
                                                 {{ number_format($totalPayment, 0, ',', ' ') }} CFA
                                             </td>
-                                            <td class="price-cfa {{ $remaining <= 0 ? 'text-success' : 'text-danger' }}">
-                                                @if($remaining <= 0)
+                                            <td class="price-cfa {{ $isFullyPaid ? 'text-success' : 'text-danger unpaid-amount' }}">
+                                                @if($isFullyPaid)
                                                     <span class="badge bg-success">Soldé</span>
                                                 @else
                                                     {{ number_format($remaining, 0, ',', ' ') }} CFA
+                                                    @if($isPastDue)
+                                                        <br><small class="text-danger">⚠️ Départ dépassé</small>
+                                                    @endif
                                                 @endif
                                             </td>
                                             <td>
                                                 @if($isAdmin)
-                                                    <!-- COMBO BOX POUR ADMIN -->
-                                                    <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST" class="status-form">
+                                                    <!-- COMBO BOX POUR ADMIN AVEC VALIDATION DE PAIEMENT -->
+                                                    <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST" class="status-form" id="status-form-{{ $transaction->id }}">
                                                         @csrf
                                                         @method('PUT')
-                                                        <select name="status" class="form-control form-select-sm status-select" onchange="this.form.submit()">
+                                                        <select name="status" class="form-control form-select-sm status-select" 
+                                                                id="status-select-{{ $transaction->id }}"
+                                                                data-transaction-id="{{ $transaction->id }}"
+                                                                data-is-fully-paid="{{ $isFullyPaid ? 'true' : 'false' }}"
+                                                                data-remaining="{{ $remaining }}"
+                                                                data-old-status="{{ $status }}">
                                                             <option value="reservation" {{ $status == 'reservation' ? 'selected' : '' }} 
                                                                     class="text-warning">📅 Réservation</option>
                                                             <option value="active" {{ $status == 'active' ? 'selected' : '' }}
                                                                     class="text-success">🏨 Dans l'hôtel</option>
-                                                            <option value="completed" {{ $status == 'completed' ? 'selected' : '' }}
-                                                                    class="text-info">✅ Séjour terminé</option>
+                                                            
+                                                            <!-- Option "completed" conditionnelle -->
+                                                            <option value="completed" 
+                                                                    {{ $status == 'completed' ? 'selected' : '' }}
+                                                                    class="text-info"
+                                                                    {{ !$isFullyPaid ? 'disabled' : '' }}
+                                                                    data-can-complete="{{ $isFullyPaid ? 'true' : 'false' }}">
+                                                                ✅ Séjour terminé
+                                                                @if(!$isFullyPaid)
+                                                                    (Solde: {{ number_format($remaining, 0, ',', ' ') }} CFA)
+                                                                @endif
+                                                            </option>
+                                                            
                                                             <option value="cancelled" {{ $status == 'cancelled' ? 'selected' : '' }}
                                                                     class="text-danger">❌ Annulée</option>
                                                             <option value="no_show" {{ $status == 'no_show' ? 'selected' : '' }}
@@ -367,6 +451,9 @@
                                                     <!-- BADGE POUR LES CLIENTS -->
                                                     <span class="badge {{ $badgeClass }}">
                                                         {{ $statusText }}
+                                                        @if($isPastDue)
+                                                            <i class="fas fa-exclamation-triangle ms-1"></i>
+                                                        @endif
                                                     </span>
                                                 @endif
                                                 
@@ -375,6 +462,17 @@
                                                     <small class="text-muted">
                                                         Annulée le {{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y') }}
                                                     </small>
+                                                @endif
+                                                
+                                                <!-- NOUVEAU : Afficher un message pour les séjours terminés mais non payés -->
+                                                @if($isPastDue)
+                                                    <div class="unpaid-departure-alert mt-1">
+                                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                                        Séjour terminé mais <strong>impayé</strong>
+                                                        <a href="{{ route('transaction.payment.create', $transaction) }}" class="alert-link ms-2">
+                                                            <i class="fas fa-money-bill-wave me-1"></i>Régler maintenant
+                                                        </a>
+                                                    </div>
                                                 @endif
                                             </td>
                                             <td>
@@ -390,7 +488,7 @@
                                                     @else
                                                         <span class="btn-action btn-pay disabled"
                                                               data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                              title="{{ $remaining <= 0 ? 'Déjà payé' : (in_array($status, ['cancelled', 'no_show']) ? 'Réservation annulée/no show' : 'Non autorisé') }}">
+                                                              title="{{ $isFullyPaid ? 'Déjà payé' : (in_array($status, ['cancelled', 'no_show']) ? 'Réservation annulée/no show' : 'Non autorisé') }}">
                                                             <i class="fas fa-money-bill-wave-alt"></i>
                                                         </span>
                                                     @endif
@@ -407,16 +505,18 @@
                                                         </form>
                                                     @endif
                                                     
-                                                    <!-- Marquer comme parti -->
+                                                    <!-- Marquer comme parti (AVEC VÉRIFICATION DE PAIEMENT) -->
                                                     @if($canMarkDeparted)
-                                                        <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
-                                                            @csrf
-                                                            <button type="submit" class="btn-action btn-departed"
-                                                                    data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                                    title="Marquer comme parti">
-                                                                <i class="fas fa-sign-out-alt"></i>
-                                                            </button>
-                                                        </form>
+                                                        <button type="button" class="btn-action btn-departed mark-departed-btn"
+                                                                data-transaction-id="{{ $transaction->id }}"
+                                                                data-is-fully-paid="{{ $isFullyPaid ? 'true' : 'false' }}"
+                                                                data-remaining="{{ $remaining }}"
+                                                                data-form-action="{{ route('transaction.mark-departed', $transaction) }}"
+                                                                data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                                title="{{ $isFullyPaid ? 'Marquer comme parti' : 'Impossible : paiement incomplet' }}"
+                                                                {{ !$isFullyPaid ? 'disabled' : '' }}>
+                                                            <i class="fas fa-sign-out-alt"></i>
+                                                        </button>
                                                     @endif
                                                     
                                                     <!-- Modifier -->
@@ -522,6 +622,7 @@
                                             $totalPrice = $transaction->getTotalPrice();
                                             $totalPayment = $transaction->getTotalPayment();
                                             $remaining = $totalPrice - $totalPayment;
+                                            $isFullyPaid = $remaining <= 0;
                                             
                                             // Déterminer le statut depuis la base
                                             $status = $transaction->status;
@@ -534,7 +635,7 @@
                                             $customerId = auth()->user()->customer->id ?? null;
                                             $isOwnReservation = $isCustomer && $transaction->customer_id == $customerId;
                                             
-                                            $canPay = !in_array($status, ['cancelled', 'no_show']) && !($remaining <= 0) && ($isAdmin || $isOwnReservation);
+                                            $canPay = !in_array($status, ['cancelled', 'no_show']) && !$isFullyPaid && ($isAdmin || $isOwnReservation);
                                             
                                             // Calcul du nombre de nuits
                                             $checkIn = \Carbon\Carbon::parse($transaction->check_in);
@@ -564,8 +665,8 @@
                                             <td class="price-cfa">
                                                 {{ number_format($totalPayment, 0, ',', ' ') }} CFA
                                             </td>
-                                            <td class="price-cfa {{ $remaining <= 0 ? 'text-success' : 'text-danger' }}">
-                                                @if($remaining <= 0)
+                                            <td class="price-cfa {{ $isFullyPaid ? 'text-success' : 'text-danger unpaid-amount' }}">
+                                                @if($isFullyPaid)
                                                     <span class="badge bg-success">Soldé</span>
                                                 @else
                                                     {{ number_format($remaining, 0, ',', ' ') }} CFA
@@ -574,6 +675,9 @@
                                             <td>
                                                 <span class="badge {{ $badgeClass }}">
                                                     {{ $statusText }}
+                                                    @if(!$isFullyPaid && $status == 'completed')
+                                                        <i class="fas fa-exclamation-triangle ms-1" title="Anomalie : marqué comme terminé mais impayé"></i>
+                                                    @endif
                                                 </span>
                                                 @if($transaction->cancelled_at && $status == 'cancelled')
                                                     <br>
@@ -691,7 +795,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('=== SYSTÈME DE GESTION DES RÉSERVATIONS INITIALISÉ ===');
+    console.log('=== SYSTÈME DE GESTION DES RÉSERVATIONS AVEC VALIDATION PAIEMENT ===');
     
     // Gérer l'annulation des réservations
     function attachCancelEvents() {
@@ -782,45 +886,317 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Attacher les événements
-    attachCancelEvents();
-    
-    // Gérer les changements de statut (confirmation)
-    const statusSelects = document.querySelectorAll('.status-select');
-    statusSelects.forEach(select => {
-        select.addEventListener('change', function(e) {
-            const newStatus = this.value;
-            const oldStatus = this.options[this.selectedIndex].dataset.oldStatus || this.value;
+    // ======================================================
+    // GÉRER LES CHANGEMENTS DE STATUT AVEC VÉRIFICATION PAIEMENT
+    // ======================================================
+    function attachStatusChangeEvents() {
+        const statusSelects = document.querySelectorAll('.status-select');
+        console.log(`Trouvé ${statusSelects.length} sélecteur(s) de statut`);
+        
+        statusSelects.forEach(select => {
+            // Stocker l'ancienne valeur
+            const originalValue = select.value;
+            const transactionId = select.getAttribute('data-transaction-id');
+            const isFullyPaid = select.getAttribute('data-is-fully-paid') === 'true';
+            const remaining = parseFloat(select.getAttribute('data-remaining')) || 0;
             
-            // Mapper les valeurs aux labels
-            const statusLabels = {
-                'reservation': '📅 Réservation',
-                'active': '🏨 Dans l\'hôtel',
-                'completed': '✅ Séjour terminé',
-                'cancelled': '❌ Annulée',
-                'no_show': '👤 No Show'
-            };
-            
-            const oldLabel = statusLabels[oldStatus] || oldStatus;
-            const newLabel = statusLabels[newStatus] || newStatus;
-            
-            // Confirmation pour certains changements
-            if (newStatus === 'cancelled') {
-                if (!confirm(`⚠️ Êtes-vous sûr de vouloir annuler cette réservation ?\n\nStatut: ${oldLabel} → ${newLabel}`)) {
-                    this.value = oldStatus;
+            select.addEventListener('change', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const newStatus = this.value;
+                const selectedOption = this.options[this.selectedIndex];
+                const oldStatus = this.getAttribute('data-old-status');
+                const canComplete = selectedOption.getAttribute('data-can-complete') === 'true';
+                
+                console.log(`Changement de statut demandé: Transaction #${transactionId}, ${oldStatus} → ${newStatus}`);
+                
+                // Mapper les valeurs aux labels
+                const statusLabels = {
+                    'reservation': '📅 Réservation',
+                    'active': '🏨 Dans l\'hôtel',
+                    'completed': '✅ Séjour terminé',
+                    'cancelled': '❌ Annulée',
+                    'no_show': '👤 No Show'
+                };
+                
+                const oldLabel = statusLabels[oldStatus] || oldStatus;
+                const newLabel = statusLabels[newStatus] || newStatus;
+                
+                // ==============================================
+                // VÉRIFICATION 1 : Bloquer "completed" si non payé
+                // ==============================================
+                if (newStatus === 'completed' && !canComplete) {
+                    // Bloquer et afficher un message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Paiement incomplet',
+                        html: `
+                            <div class="text-start">
+                                <p><strong>Impossible de marquer comme "Séjour terminé"</strong></p>
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Solde restant : ${remaining.toLocaleString('fr-FR')} CFA</strong>
+                                </div>
+                                <p class="mb-3">Veuillez d'abord compléter le paiement avant de marquer le séjour comme terminé.</p>
+                                <div class="d-grid gap-2">
+                                    <a href="/transaction/${transactionId}/payment/create" class="btn btn-warning">
+                                        <i class="fas fa-money-bill-wave me-2"></i>Régler maintenant
+                                    </a>
+                                    <button type="button" class="btn btn-secondary" onclick="Swal.close()">
+                                        <i class="fas fa-times me-2"></i>Annuler
+                                    </button>
+                                </div>
+                            </div>
+                        `,
+                        confirmButtonText: false,
+                        showCancelButton: false,
+                        allowOutsideClick: true
+                    });
+                    
+                    // Revenir à l'ancienne valeur
+                    this.value = originalValue;
                     return false;
                 }
-            } else if (newStatus === 'no_show') {
-                if (!confirm(`⚠️ Marquer comme "No Show" ?\n\nLe client ne s'est pas présenté.\nStatut: ${oldLabel} → ${newLabel}`)) {
-                    this.value = oldStatus;
+                
+                // ==============================================
+                // VÉRIFICATION 2 : Confirmation pour "cancelled"
+                // ==============================================
+                if (newStatus === 'cancelled') {
+                    e.preventDefault();
+                    
+                    Swal.fire({
+                        title: 'Annuler cette réservation ?',
+                        html: `
+                            <div class="text-start">
+                                <p>Confirmez l'annulation :</p>
+                                <div class="alert alert-warning">
+                                    <strong>Statut : ${oldLabel} → ${newLabel}</strong><br>
+                                    <small>Transaction #${transactionId}</small>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Raison (optionnelle) :</label>
+                                    <textarea id="cancelReasonInput" class="form-control" rows="3" 
+                                              placeholder="Pourquoi annuler cette réservation ?"></textarea>
+                                </div>
+                            </div>
+                        `,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: '<i class="fas fa-ban me-2"></i> Oui, annuler',
+                        cancelButtonText: '<i class="fas fa-times me-2"></i> Non, garder',
+                        reverseButtons: true,
+                        focusCancel: true,
+                        preConfirm: () => {
+                            return {
+                                reason: document.getElementById('cancelReasonInput').value
+                            };
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const reason = result.value.reason || '';
+                            
+                            // Ajouter le champ de raison au formulaire
+                            const form = document.getElementById(`status-form-${transactionId}`);
+                            if (form) {
+                                // Créer un champ caché pour la raison
+                                const reasonInput = document.createElement('input');
+                                reasonInput.type = 'hidden';
+                                reasonInput.name = 'cancel_reason';
+                                reasonInput.value = reason;
+                                form.appendChild(reasonInput);
+                                
+                                // Soumettre le formulaire
+                                console.log(`Soumission annulation avec raison: ${reason}`);
+                                form.submit();
+                            }
+                        } else {
+                            // Annuler : revenir à l'ancienne valeur
+                            this.value = originalValue;
+                        }
+                    });
+                    
                     return false;
                 }
-            }
-            
-            // Soumettre automatiquement
-            this.form.submit();
+                
+                // ==============================================
+                // VÉRIFICATION 3 : Confirmation pour "no_show"
+                // ==============================================
+                if (newStatus === 'no_show') {
+                    if (!confirm(`⚠️ Marquer comme "No Show" ?\n\nLe client ne s'est pas présenté.\nStatut: ${oldLabel} → ${newLabel}`)) {
+                        this.value = originalValue;
+                        return false;
+                    }
+                }
+                
+                // ==============================================
+                // VÉRIFICATION 4 : Confirmation pour "completed" (si payé)
+                // ==============================================
+                if (newStatus === 'completed' && canComplete) {
+                    if (!confirm(`✅ Marquer comme "Séjour terminé" ?\n\nLe paiement est complet.\nStatut: ${oldLabel} → ${newLabel}`)) {
+                        this.value = originalValue;
+                        return false;
+                    }
+                }
+                
+                // ==============================================
+                // SOUMETTRE LE FORMULAIRE
+                // ==============================================
+                console.log(`Soumission du formulaire pour transaction #${transactionId}`);
+                const form = document.getElementById(`status-form-${transactionId}`);
+                if (form) {
+                    form.submit();
+                }
+            });
         });
-    });
+    }
+    
+    // ======================================================
+    // GÉRER LES BOUTONS "MARQUER COMME PARTI" (Boutons rapides)
+    // ======================================================
+    function attachDepartButtonsEvents() {
+        const departButtons = document.querySelectorAll('.mark-departed-btn');
+        console.log(`Trouvé ${departButtons.length} bouton(s) "Marquer comme parti"`);
+        
+        departButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const transactionId = this.getAttribute('data-transaction-id');
+                const isFullyPaid = this.getAttribute('data-is-fully-paid') === 'true';
+                const remaining = parseFloat(this.getAttribute('data-remaining')) || 0;
+                const formAction = this.getAttribute('data-form-action');
+                
+                console.log(`Départ demandé: Transaction #${transactionId}, Payé: ${isFullyPaid}`);
+                
+                if (!isFullyPaid) {
+                    // Bloquer et afficher un message
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Paiement incomplet',
+                        html: `
+                            <div class="text-start">
+                                <p><strong>Impossible de marquer comme parti</strong></p>
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Solde restant : ${remaining.toLocaleString('fr-FR')} CFA</strong>
+                                </div>
+                                <p class="mb-3">Le client ne peut pas partir sans avoir réglé l'intégralité du séjour.</p>
+                                <div class="d-grid gap-2">
+                                    <a href="/transaction/${transactionId}/payment/create" class="btn btn-warning">
+                                        <i class="fas fa-money-bill-wave me-2"></i>Régler maintenant
+                                    </a>
+                                    <button type="button" class="btn btn-secondary" onclick="Swal.close()">
+                                        <i class="fas fa-times me-2"></i>Annuler
+                                    </button>
+                                </div>
+                            </div>
+                        `,
+                        confirmButtonText: false,
+                        showCancelButton: false,
+                        allowOutsideClick: true
+                    });
+                    return false;
+                }
+                
+                // Confirmation pour le départ
+                Swal.fire({
+                    title: 'Confirmer le départ',
+                    html: `
+                        <div class="text-start">
+                            <p>Marquer le client comme parti ?</p>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Paiement complet vérifié ✓</strong><br>
+                                <small>Transaction #${transactionId}</small>
+                            </div>
+                            <p>Cette action :</p>
+                            <ul class="text-start">
+                                <li>Marquera le séjour comme "terminé"</li>
+                                <li>Libérera la chambre</li>
+                                <li>Enregistrera l'heure de départ</li>
+                            </ul>
+                        </div>
+                    `,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#17a2b8',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: '<i class="fas fa-sign-out-alt me-2"></i> Oui, marquer comme parti',
+                    cancelButtonText: '<i class="fas fa-times me-2"></i> Annuler',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Créer un formulaire dynamique pour soumettre
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = formAction;
+                        form.style.display = 'none';
+                        
+                        // Ajouter le token CSRF
+                        const csrfToken = document.createElement('input');
+                        csrfToken.type = 'hidden';
+                        csrfToken.name = '_token';
+                        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        form.appendChild(csrfToken);
+                        
+                        // Ajouter au body et soumettre
+                        document.body.appendChild(form);
+                        console.log(`Soumission départ pour transaction #${transactionId}`);
+                        form.submit();
+                    }
+                });
+            });
+        });
+    }
+    
+    // ======================================================
+    // INITIALISATION
+    // ======================================================
+    function initializeSystem() {
+        console.log('Initialisation du système de gestion des réservations...');
+        
+        // Attacher les événements
+        attachCancelEvents();
+        attachStatusChangeEvents();
+        attachDepartButtonsEvents();
+        
+        // Vérifier s'il y a des séjours terminés mais non payés
+        const unpaidAlerts = document.querySelectorAll('.unpaid-departure-alert');
+        if (unpaidAlerts.length > 0) {
+            console.log(`⚠️ ${unpaidAlerts.length} séjour(s) terminé(s) mais non payé(s) détecté(s)`);
+            
+            // Optionnel : Afficher une notification globale
+            if (unpaidAlerts.length >= 3) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Séjours impayés',
+                    html: `
+                        <div class="text-start">
+                            <p><strong>${unpaidAlerts.length} séjour(s) terminé(s) mais non payé(s)</strong></p>
+                            <p class="small">Ces clients sont partis sans avoir réglé l'intégralité de leur séjour.</p>
+                            <div class="mt-3">
+                                <a href="/payment" class="btn btn-sm btn-warning">
+                                    <i class="fas fa-history me-2"></i>Voir l'historique des paiements
+                                </a>
+                            </div>
+                        </div>
+                    `,
+                    confirmButtonText: 'Compris',
+                    confirmButtonColor: '#ffc107',
+                    showCancelButton: false,
+                    allowOutsideClick: true
+                });
+            }
+        }
+        
+        console.log('✅ Système de gestion des statuts avec validation de paiement prêt !');
+    }
+    
+    // Démarrer l'initialisation
+    initializeSystem();
     
     // Si pas de réservations, afficher le modal
     @if($transactions->count() == 0 && in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
@@ -838,9 +1214,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }, 1000);
     @endif
-    
-    // Message final
-    console.log('✅ Système de gestion des statuts prêt !');
 });
 </script>
 
@@ -861,6 +1234,16 @@ document.addEventListener('DOMContentLoaded', function() {
     0% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.4); }
     70% { box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
     100% { box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+}
+
+/* Animation pour les montants impayés */
+.unpaid-amount {
+    animation: unpaid-pulse 2s infinite;
+}
+@keyframes unpaid-pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
 }
 </style>
 @endsection

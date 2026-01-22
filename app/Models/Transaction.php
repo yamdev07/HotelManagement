@@ -395,25 +395,15 @@ class Transaction extends Model
     }
 
     /**
-     * Calculer le total des paiements
+     * Calculer le total des paiements COMPLÉTÉS (TOUJOURS recalculer)
      */
     public function getTotalPayment()
     {
-        // Si le total des paiements est déjà stocké, l'utiliser
-        if ($this->total_payment) {
-            return $this->total_payment;
-        }
-
-        // Calculer le total des paiements COMPLÉTÉS uniquement
-        $totalPayment = $this->payments()
+        // TOUJOURS recalculer depuis la base de données
+        // Inclure uniquement les paiements avec status "completed"
+        return $this->payments()
             ->where('status', Payment::STATUS_COMPLETED)
             ->sum('amount');
-
-        // Stocker pour éviter de recalculer
-        $this->total_payment = $totalPayment;
-        $this->save();
-
-        return $totalPayment;
     }
 
     /**
@@ -470,11 +460,11 @@ class Transaction extends Model
     }
 
     /**
-     * Recalculer et mettre à jour le statut des paiements
+     * Recalculer et mettre à jour le statut des paiements en cache
      */
     public function updatePaymentStatus()
     {
-        $totalPaid = $this->getTotalPayment();
+        $totalPaid = $this->getTotalPayment(); // Cela recalculera correctement
         $this->total_payment = $totalPaid;
         $this->save();
 
