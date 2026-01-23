@@ -1,757 +1,731 @@
-<div id="sidebar-wrapper" class="lh-sidebar">
-    <div class="sidebar-content">
-        <!-- Brand Header -->
-        <a href="{{ route('dashboard.index') }}" class="sidebar-brand text-decoration-none d-flex align-items-center">
-            <div class="brand-logo">
-                <i class="fas fa-hotel"></i>
-            </div>
-            <div class="brand-text">
-                <h4 class="mb-0">Le Cactus Hotel</h4>
-            </div>
-        </a>
+<!-- Sidebar -->
+<aside id="sidebar" class="sidebar">
 
-        <!-- User Profile Section -->
-        <div class="sidebar-user">
-            <div class="user-avatar">
-                <img src="{{ auth()->user()->getAvatar() }}" alt="User Avatar" class="rounded-circle">
+    <!-- Logo -->
+    <a href="{{ route('dashboard.index') }}" class="sidebar-logo">
+        <div class="d-flex align-items-center">
+            <!-- Remplacez l'image par votre logo -->
+            <div class="brand-icon">
+                <i class="fas fa-hotel"></i> <!-- Icône FontAwesome -->
             </div>
-            <div class="user-info">
-                <div class="user-name">{{ auth()->user()->name }}</div>
-                <div class="user-role">{{ auth()->user()->role }}</div>
-            </div>
-            <div class="user-actions">
-                <div class="dropdown">
-                    <button class="btn btn-link dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-ellipsis-v"></i>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <a class="dropdown-item" href="{{ route('profile.index') }}">
-                            <i class="fas fa-user me-2"></i>Profile
-                        </a>
-
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                            <a class="dropdown-item" href="{{ route('logout') }}"
-                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                <i class="fas fa-sign-out-alt me-2"></i>Logout
-                            </a>
-                            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                @csrf
-                            </form>
-                        </li>
-                    </ul>
-                </div>
+            <div class="brand-text ms-2">
+                <span class="brand-name">Hotel Management</span>
+                <small class="brand-subtitle d-block">Gestion Hôtelière</small>
             </div>
         </div>
+        <button id="toggle-sidebar" class="btn btn-icon">
+            <i class="fas fa-bars"></i> <!-- Icône FontAwesome -->
+        </button>
+    </a>
 
-        <!-- Notifications Section -->
-        <div class="sidebar-notifications">
-            <div class="notifications-header">
-                <div class="notifications-title">
-                    <i class="fas fa-bell me-2"></i>
-                    Notifications
-                    @if (auth()->user()->unreadNotifications()->count() > 0)
-                        <span class="notification-badge">{{ auth()->user()->unreadNotifications()->count() }}</span>
-                    @endif
-                </div>
-            </div>
-            <div class="notifications-content">
-                @forelse (auth()->user()->unreadNotifications()->latest()->limit(3)->get() as $notification)
-                    <a href="{{ route('notification.routeTo', ['id' => $notification->id]) }}" class="notification-item">
-                        <div class="notification-icon">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <div class="notification-text">
-                            <div class="notification-message">{{ Str::limit($notification->data['message'] ?? 'New notification', 40) }}</div>
-                            <div class="notification-time">{{ $notification->created_at->diffForHumans() }}</div>
-                        </div>
-                    </a>
-                @empty
-                    <div class="notification-empty">
-                        <i class="fas fa-bell-slash"></i>
-                        <span>No new notifications</span>
-                    </div>
-                @endforelse
+    <!-- Sidebar Inner -->
+    <div class="sidebar-inner">
 
-                @if (auth()->user()->unreadNotifications()->count() > 3)
-                    <div class="notifications-footer">
-                        <a href="{{ route('notification.index') }}" class="view-all-notifications">
-                            View all ({{ auth()->user()->unreadNotifications()->count() }})
-                        </a>
-                    </div>
-                @endif
-            </div>
+        <!-- Sidebar Header -->
+        <div class="sidebar-header">
+            <button id="toggle-sidebar-sm" class="btn btn-icon">
+                <i class="fas fa-bars"></i> <!-- Icône FontAwesome -->
+            </button>
         </div>
 
-        <!-- Navigation Menu -->
-        <nav class="sidebar-nav">
-            <!-- Dashboard -->
-            <div class="nav-section">
-                <div class="nav-section-title">Overview</div>
-                <a href="{{ route('dashboard.index') }}"
-                   class="nav-item {{ in_array(Route::currentRouteName(), ['dashboard.index', 'chart.dailyGuest']) ? 'active' : '' }}">
-                    <div class="nav-icon">
-                        <i class="fas fa-chart-pie"></i>
-                    </div>
-                    <div class="nav-content">
-                        <div class="nav-title">Dashboard</div>
-                        <div class="nav-subtitle">Analytics & Overview</div>
-                    </div>
-                </a>
-            </div>
+        <!-- Sidebar Body -->
+        <div class="sidebar-body">
 
-            @if (auth()->user()->role == 'Super' || auth()->user()->role == 'Admin')
-                <!-- Operations -->
+            <!-- Navigation Menu -->
+            <nav class="nav-menu">
+
+                <!-- Dashboard -->
                 <div class="nav-section">
-                    <div class="nav-section-title">Operations</div>
-
-                    <!-- Transactions -->
-                    <a href="{{ route('transaction.index') }}"
-                       class="nav-item {{ in_array(Route::currentRouteName(), ['payment.index', 'transaction.index', 'transaction.reservation.createIdentity', 'transaction.reservation.pickFromCustomer', 'transaction.reservation.usersearch', 'transaction.reservation.storeCustomer', 'transaction.reservation.viewCountPerson', 'transaction.reservation.chooseRoom', 'transaction.reservation.confirmation', 'transaction.reservation.payDownPayment']) ? 'active' : '' }}">
+                    <div class="nav-section-title">Dashboard</div>
+                    
+                    <a href="{{ route('dashboard.index') }}" 
+                       class="nav-item {{ Route::currentRouteName() == 'dashboard.index' ? 'active' : '' }}">
                         <div class="nav-icon">
-                            <i class="fas fa-credit-card"></i>
+                            <i class="fas fa-chart-pie"></i> <!-- Icône FontAwesome -->
                         </div>
                         <div class="nav-content">
-                            <div class="nav-title">Transactions</div>
-                            <div class="nav-subtitle">Bookings & Payments</div>
+                            <div class="nav-title">Dashboard</div>
+                            <div class="nav-subtitle">Analytique & Vue d'ensemble</div>
                         </div>
                     </a>
-
-                    <!-- Room Management -->
-                    <div class="nav-item dropdown-nav {{ in_array(Route::currentRouteName(), ['room.index', 'room.show', 'room.create', 'room.edit', 'type.index', 'type.create', 'type.edit', 'roomstatus.index', 'roomstatus.create', 'roomstatus.edit', 'facility.index', 'facility.create', 'facility.edit']) ? 'active' : '' }}">
-                        <div class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#roomSubmenu">
-                            <div class="nav-icon">
-                                <i class="fas fa-bed"></i>
-                            </div>
-                            <div class="nav-content">
-                                <div class="nav-title">Room Management</div>
-                                <div class="nav-subtitle">Rooms, Types & Status</div>
-                            </div>
-                            <div class="nav-arrow">
-                                <i class="fas fa-chevron-down"></i>
-                            </div>
-                        </div>
-                        <div class="collapse {{ in_array(Route::currentRouteName(), ['room.index', 'room.show', 'room.create', 'room.edit', 'type.index', 'type.create', 'type.edit', 'roomstatus.index', 'roomstatus.create', 'roomstatus.edit', 'facility.index', 'facility.create', 'facility.edit']) ? 'show' : '' }} w-100" id="roomSubmenu">
-                            <div class="nav-submenu">
-                                <a href="{{ route('room.index') }}" class="nav-subitem {{ in_array(Route::currentRouteName(), ['room.index', 'room.show', 'room.create', 'room.edit']) ? 'active' : '' }}">
-                                    <i class="fas fa-door-open me-2"></i>Rooms
-                                </a>
-                                <a href="{{ route('type.index') }}" class="nav-subitem {{ in_array(Route::currentRouteName(), ['type.index', 'type.create', 'type.edit']) ? 'active' : '' }}">
-                                    <i class="fas fa-list me-2"></i>Room Types
-                                </a>
-                                <a href="{{ route('roomstatus.index') }}" class="nav-subitem {{ in_array(Route::currentRouteName(), ['roomstatus.index', 'roomstatus.create', 'roomstatus.edit']) ? 'active' : '' }}">
-                                    <i class="fas fa-toggle-on me-2"></i>Room Status
-                                </a>
-                                <a href="{{ route('facility.index') }}" class="nav-subitem {{ in_array(Route::currentRouteName(), ['facility.index', 'facility.create', 'facility.edit']) ? 'active' : '' }}">
-                                    <i class="fas fa-concierge-bell me-2"></i>Facilities
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Customer & User Management -->
-                    <div class="nav-item dropdown-nav {{ in_array(Route::currentRouteName(), ['customer.index', 'customer.create', 'customer.edit', 'user.index', 'user.create', 'user.edit']) ? 'active' : '' }}">
-                        <div class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#userSubmenu">
-                            <div class="nav-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="nav-content">
-                                <div class="nav-title">User Management</div>
-                                <div class="nav-subtitle">Customers & Staff</div>
-                            </div>
-                            <div class="nav-arrow">
-                                <i class="fas fa-chevron-down"></i>
-                            </div>
-                        </div>
-                        <div class="collapse {{ in_array(Route::currentRouteName(), ['customer.index', 'customer.create', 'customer.edit', 'user.index', 'user.create', 'user.edit']) ? 'show' : '' }} w-100" id="userSubmenu">
-                            <div class="nav-submenu">
-                                <a href="{{ route('customer.index') }}" class="nav-subitem {{ in_array(Route::currentRouteName(), ['customer.index', 'customer.create', 'customer.edit']) ? 'active' : '' }}">
-                                    <i class="fas fa-user-friends me-2"></i>Customers
-                                </a>
-                                @if (auth()->user()->role == 'Super')
-                                    <a href="{{ route('user.index') }}" class="nav-subitem {{ in_array(Route::currentRouteName(), ['user.index', 'user.create', 'user.edit']) ? 'active' : '' }}">
-                                        <i class="fas fa-user-cog me-2"></i>Staff Users
-                                    </a>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
                 </div>
-                <!-- Restaurant Management -->
-                <div class="nav-item dropdown-nav {{ in_array(Route::currentRouteName(), ['restaurant.index', 'restaurant.create', 'restaurant.orders']) ? 'active' : '' }}">
-                    <div class="nav-toggle" data-bs-toggle="collapse" data-bs-target="#restaurantSubmenu">
+
+                <!-- Opérations -->
+                @if (auth()->user()->role == 'Super' || auth()->user()->role == 'Admin' || auth()->user()->role == 'Reception')
+                <div class="nav-section">
+                    <div class="nav-section-title">Opérations</div>
+
+                    <!-- Check-in & Disponibilité -->
+                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
+                        <!-- Check-in -->
+                        @php
+                            $currentRoute = Route::currentRouteName() ?? '';
+                            $isCheckinActive = in_array($currentRoute, ['checkin.index', 'checkin.search', 'checkin.show', 'checkin.direct']);
+                        @endphp
+                        
+                        @if(Route::has('checkin.index'))
+                            <a href="{{ route('checkin.index') }}"
+                               class="nav-item {{ $isCheckinActive ? 'active' : '' }}">
+                                <div class="nav-icon">
+                                    <i class="fas fa-door-open"></i> <!-- Icône FontAwesome -->
+                                </div>
+                                <div class="nav-content">
+                                    <div class="nav-title">Check-in</div>
+                                    <div class="nav-subtitle">Enregistrement clients</div>
+                                </div>
+                            </a>
+                        @else
+                            <!-- Fallback si route n'existe pas -->
+                            <a href="#" 
+                               class="nav-item {{ $isCheckinActive ? 'active' : '' }}"
+                               onclick="alert('Module check-in en cours de développement'); return false;">
+                                <div class="nav-icon">
+                                    <i class="fas fa-door-open"></i> <!-- Icône FontAwesome -->
+                                </div>
+                                <div class="nav-content">
+                                    <div class="nav-title">Check-in</div>
+                                    <div class="nav-subtitle">Bientôt disponible</div>
+                                </div>
+                            </a>
+                        @endif
+
+                        <!-- Disponibilité -->
+                        @if(Route::has('availability.calendar'))
+                        <a href="{{ route('availability.calendar') }}"
+                           class="nav-item {{ str_contains(Route::currentRouteName(), 'availability.') ? 'active' : '' }}">
+                            <div class="nav-icon">
+                                <i class="fas fa-calendar-alt"></i> <!-- Icône FontAwesome -->
+                            </div>
+                            <div class="nav-content">
+                                <div class="nav-title">Disponibilité</div>
+                                <div class="nav-subtitle">Calendrier & Inventaire</div>
+                            </div>
+                        </a>
+                        @endif
+
+                        <!-- Réservations Rapides -->
+                        @if(Route::has('transaction.reservation.createIdentity') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                        <a href="{{ route('transaction.reservation.createIdentity') }}"
+                           class="nav-item {{ Route::currentRouteName() == 'transaction.reservation.createIdentity' ? 'active' : '' }}">
+                            <div class="nav-icon">
+                                <i class="fas fa-plus-circle"></i> <!-- Icône FontAwesome -->
+                            </div>
+                            <div class="nav-content">
+                                <div class="nav-title">Nouvelle Réservation</div>
+                                <div class="nav-subtitle">Création rapide</div>
+                            </div>
+                        </a>
+                        @endif
+                    @endif
+
+                    <!-- Caisse -->
+                    @if(Route::has('cashier.dashboard'))
+                    <a href="{{ route('cashier.dashboard') }}"
+                       class="nav-item {{ str_contains(Route::currentRouteName(), 'cashier.') ? 'active' : '' }}">
                         <div class="nav-icon">
-                            <i class="fas fa-utensils"></i>
+                            <i class="fas fa-cash-register"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Caisse</div>
+                            <div class="nav-subtitle">Sessions & Transactions</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    <!-- Restaurant -->
+                    @if(Route::has('restaurant.index'))
+                    <a href="{{ route('restaurant.index') }}"
+                       class="nav-item {{ str_contains(Route::currentRouteName(), 'restaurant.') ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-utensils"></i> <!-- Icône FontAwesome -->
                         </div>
                         <div class="nav-content">
                             <div class="nav-title">Restaurant</div>
                             <div class="nav-subtitle">Menus & Commandes</div>
                         </div>
-                        <div class="nav-arrow">
-                            <i class="fas fa-chevron-down"></i>
-                        </div>
-                    </div>
-
-                    <div class="collapse" id="restaurantSubmenu">
-                        <div class="nav-submenu">
-                            <a href="{{ route('restaurant.index') }}" class="nav-subitem">
-                                <i class="fas fa-list me-2"></i>Menus
-                            </a>
-                            <a href="{{ route('restaurant.create') }}" class="nav-subitem">
-                                <i class="fas fa-plus me-2"></i>Ajouter un plat
-                            </a>
-                            <a href="{{ route('restaurant.orders') }}" class="nav-subitem">
-                                <i class="fas fa-receipt me-2"></i>Commandes
-                            </a>
-                        </div>
-                    </div>
+                    </a>
+                    @endif
                 </div>
+                @endif
 
-                <!-- Analytics -->
+                <!-- Gestion -->
+                @if (auth()->user()->role == 'Super' || auth()->user()->role == 'Admin')
                 <div class="nav-section">
-                    <div class="nav-section-title">Analytics</div>
+                    <div class="nav-section-title">Gestion</div>
 
-                    <a href="{{ route('reports.index') }}" class="nav-item">
-
+                    <!-- Transactions -->
+                    @if(Route::has('transaction.index'))
+                    <a href="{{ route('transaction.index') }}"
+                       class="nav-item {{ str_contains(Route::currentRouteName(), 'transaction.') && !str_contains(Route::currentRouteName(), 'transaction.reservation.') ? 'active' : '' }}">
                         <div class="nav-icon">
-                            <i class="fas fa-chart-bar"></i>
+                            <i class="fas fa-shopping-bag"></i> <!-- Icône FontAwesome -->
                         </div>
                         <div class="nav-content">
-                            <div class="nav-title">Reports</div>
-                            <div class="nav-subtitle">Financial & Analytics</div>
+                            <div class="nav-title">Transactions</div>
+                            <div class="nav-subtitle">Réservations & Séjours</div>
                         </div>
                     </a>
+                    @endif
+
+                    <!-- Clients -->
+                    @if(Route::has('customer.index'))
+                    <a href="{{ route('customer.index') }}"
+                       class="nav-item {{ Route::currentRouteName() == 'customer.index' ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-users"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Clients</div>
+                            <div class="nav-subtitle">Gestion des clients</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    <!-- Chambres -->
+                    @if(Route::has('room.index'))
+                    <a href="{{ route('room.index') }}"
+                       class="nav-item {{ Route::currentRouteName() == 'room.index' ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-bed"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Chambres</div>
+                            <div class="nav-subtitle">Gestion des chambres</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    <!-- Types de Chambres -->
+                    @if(Route::has('type.index'))
+                    <a href="{{ route('type.index') }}"
+                       class="nav-item {{ Route::currentRouteName() == 'type.index' ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-layer-group"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Types de Chambres</div>
+                            <div class="nav-subtitle">Catégories & Tarifs</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    <!-- Équipements -->
+                    @if(Route::has('facility.index'))
+                    <a href="{{ route('facility.index') }}"
+                       class="nav-item {{ Route::currentRouteName() == 'facility.index' ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-tools"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Équipements</div>
+                            <div class="nav-subtitle">Services & Commodités</div>
+                        </div>
+                    </a>
+                    @endif
                 </div>
+                @endif
+
+                <!-- Nettoyage -->
+                @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping']))
+                <div class="nav-section">
+                    <div class="nav-section-title">Nettoyage</div>
+
+                    <!-- Femmes de Chambre -->
+                    @if(Route::has('housekeeping.index'))
+                    <a href="{{ route('housekeeping.index') }}"
+                       class="nav-item {{ str_contains(Route::currentRouteName(), 'housekeeping.') ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-broom"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Femmes de Chambre</div>
+                            <div class="nav-subtitle">Nettoyage & Maintenance</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    <!-- Statuts des Chambres -->
+                    @if(Route::has('roomstatus.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                    <a href="{{ route('roomstatus.index') }}"
+                       class="nav-item {{ Route::currentRouteName() == 'roomstatus.index' ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-flag"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Statuts Chambres</div>
+                            <div class="nav-subtitle">États & Couleurs</div>
+                        </div>
+                    </a>
+                    @endif
+                </div>
+                @endif
 
                 <!-- Administration -->
+                @if (auth()->user()->role == 'Super' || auth()->user()->role == 'Admin')
                 <div class="nav-section">
                     <div class="nav-section-title">Administration</div>
 
-                    <a href="#" class="nav-item">
+                    <!-- Utilisateurs -->
+                    @if(Route::has('user.index') && auth()->user()->role == 'Super')
+                    <a href="{{ route('user.index') }}"
+                       class="nav-item {{ Route::currentRouteName() == 'user.index' ? 'active' : '' }}">
                         <div class="nav-icon">
-                            <i class="fas fa-cogs"></i>
+                            <i class="fas fa-user-cog"></i> <!-- Icône FontAwesome -->
                         </div>
                         <div class="nav-content">
-                            <div class="nav-title">Settings</div>
-                            <div class="nav-subtitle">System Configuration</div>
+                            <div class="nav-title">Utilisateurs</div>
+                            <div class="nav-subtitle">Gestion des comptes</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    <!-- Rapports -->
+                    @if(Route::has('reports.index'))
+                    <a href="{{ route('reports.index') }}"
+                       class="nav-item {{ Route::currentRouteName() == 'reports.index' ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-file-alt"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Rapports</div>
+                            <div class="nav-subtitle">Analyses & Statistiques</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    <!-- Journal d'Activité -->
+                    @if(Route::has('activity-log.index'))
+                    <a href="{{ route('activity-log.index') }}"
+                       class="nav-item {{ Route::currentRouteName() == 'activity-log.index' ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-history"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Journal</div>
+                            <div class="nav-subtitle">Activités système</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    <!-- Paiements -->
+                    @if(Route::has('payments.index'))
+                    <a href="{{ route('payments.index') }}"
+                       class="nav-item {{ str_contains(Route::currentRouteName(), 'payments.') || str_contains(Route::currentRouteName(), 'payment.') ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-credit-card"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Paiements</div>
+                            <div class="nav-subtitle">Transactions financières</div>
+                        </div>
+                    </a>
+                    @endif
+                </div>
+                @endif
+
+                <!-- Mon Compte -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Mon Compte</div>
+
+                    <!-- Profil -->
+                    @if(Route::has('profile.index'))
+                    <a href="{{ route('profile.index') }}"
+                       class="nav-item {{ str_contains(Route::currentRouteName(), 'profile.') ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-user"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Profil</div>
+                            <div class="nav-subtitle">Mes informations</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    <!-- Mes Réservations (pour clients) -->
+                    @if(auth()->user()->role == 'Customer' && Route::has('transaction.myReservations'))
+                    <a href="{{ route('transaction.myReservations') }}"
+                       class="nav-item {{ Route::currentRouteName() == 'transaction.myReservations' ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-book"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Mes Réservations</div>
+                            <div class="nav-subtitle">Historique</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    <!-- Notifications -->
+                    @if(Route::has('notification.index'))
+                    <a href="{{ route('notification.index') }}"
+                       class="nav-item {{ Route::currentRouteName() == 'notification.index' ? 'active' : '' }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-bell"></i> <!-- Icône FontAwesome -->
+                            @if(auth()->user()->unreadNotifications->count() > 0)
+                            <span class="nav-badge">{{ auth()->user()->unreadNotifications->count() }}</span>
+                            @endif
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Notifications</div>
+                            <div class="nav-subtitle">Alertes & Messages</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    <!-- Déconnexion -->
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                        @csrf
+                    </form>
+                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                       class="nav-item">
+                        <div class="nav-icon">
+                            <i class="fas fa-sign-out-alt"></i> <!-- Icône FontAwesome -->
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Déconnexion</div>
+                            <div class="nav-subtitle">Quitter la session</div>
                         </div>
                     </a>
                 </div>
-            @endif
-        </nav>
 
-        <!-- Quick Actions -->
-        <div class="sidebar-footer">
-            <a href="{{ route('transaction.reservation.createIdentity') }}" class="btn btn-primary w-100 quick-action-btn">
-                <i class="fas fa-plus me-2"></i>
-                New Reservation
-            </a>
+            </nav>
+
         </div>
-    </div>
 
-    <!-- Mobile Toggle Button -->
-    <button class="sidebar-toggle d-lg-none" id="sidebar-toggle">
-        <i class="fas fa-bars"></i>
-    </button>
-</div>
+        <!-- Sidebar Footer -->
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    @if(auth()->user()->avatar)
+                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}">
+                    @else
+                        <div class="avatar-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    @endif
+                </div>
+                <div class="user-info">
+                    <div class="user-name">{{ auth()->user()->name }}</div>
+                    <div class="user-role">
+                        @switch(auth()->user()->role)
+                            @case('Super')
+                                <span class="badge bg-danger">Super Admin</span>
+                                @break
+                            @case('Admin')
+                                <span class="badge bg-primary">Administrateur</span>
+                                @break
+                            @case('Reception')
+                                <span class="badge bg-success">Réception</span>
+                                @break
+                            @case('Housekeeping')
+                                <span class="badge bg-warning">Femme de Chambre</span>
+                                @break
+                            @case('Customer')
+                                <span class="badge bg-info">Client</span>
+                                @break
+                            @default
+                                <span class="badge bg-secondary">{{ auth()->user()->role }}</span>
+                        @endswitch
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</aside>
 
 <style>
-.lh-sidebar {
+.sidebar {
     width: 280px;
     background: linear-gradient(180deg, #064e3b 0%, #047857 100%);
+    color: #fff;
     position: fixed;
-    top: 0;
     left: 0;
+    top: 0;
     height: 100vh;
     z-index: 1000;
-    overflow: hidden;
     transition: all 0.3s ease;
+    overflow-y: auto;
 }
 
-.sidebar-content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 0;
-}
-
-/* Brand Section */
-.sidebar-brand {
+.sidebar-logo {
     display: flex;
     align-items: center;
-    padding: 1.5rem 1.25rem;
+    justify-content: space-between;
+    padding: 20px 24px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.2rem;
 }
 
-.brand-logo {
-    width: 48px;
-    height: 48px;
+.brand-icon {
+    width: 40px;
+    height: 40px;
     background: linear-gradient(135deg, #22c55e, #16a34a);
-    border-radius: 12px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 1.5rem;
-    margin-right: 1rem;
 }
 
-.brand-text h4 {
-    color: white;
-    font-weight: 700;
-    font-size: 1.1rem;
-}
-
-.brand-text small {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.75rem;
-}
-
-/* User Profile Section */
-.sidebar-user {
-    display: flex;
-    align-items: center;
-    padding: 1rem 1.25rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.03);
-}
-
-.user-avatar img {
-    width: 40px;
-    height: 40px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-.user-info {
-    margin-left: 0.75rem;
+.brand-text {
     flex: 1;
 }
 
-.user-name {
-    color: white;
-    font-weight: 600;
-    font-size: 0.9rem;
+.brand-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    display: block;
     line-height: 1.2;
 }
 
-.user-role {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.75rem;
+.brand-subtitle {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 400;
 }
 
-.user-actions .btn {
-    color: rgba(255, 255, 255, 0.6);
-    border: none;
-    padding: 0.25rem 0.5rem;
-}
-
-.user-actions .btn:hover {
-    color: white;
+#toggle-sidebar {
     background: rgba(255, 255, 255, 0.1);
-}
-
-/* Notifications Section */
-.sidebar-notifications {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.02);
-}
-
-.notifications-header {
-    padding: 1rem 1.25rem 0.5rem;
-}
-
-.notifications-title {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.85rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-}
-
-.notification-badge {
-    background: #ef4444;
-    color: white;
-    font-size: 0.7rem;
-    font-weight: 700;
-    padding: 0.125rem 0.375rem;
-    border-radius: 10px;
-    margin-left: auto;
-}
-
-.notifications-content {
-    max-height: 200px;
-    overflow-y: auto;
-}
-
-.notification-item {
-    display: flex;
-    align-items: flex-start;
-    padding: 0.75rem 1.25rem;
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border-left: 3px solid transparent;
-}
-
-.notification-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-left-color: #3b82f6;
-    color: white;
-    text-decoration: none;
-}
-
-.notification-icon {
-    width: 24px;
-    height: 24px;
-    background: rgba(34, 197, 94, 0.2);
-    color: #16a34a;    
-    border-radius: 50%;
+    border: none;
+    color: #fff;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 0.75rem;
-    flex-shrink: 0;
-    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.notification-text {
-    flex: 1;
-    min-width: 0;
-}
-
-.notification-message {
-    font-size: 0.8rem;
-    line-height: 1.3;
-    margin-bottom: 0.25rem;
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.notification-time {
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.5);
-}
-
-.notification-empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 1.5rem 1.25rem;
-    color: rgba(255, 255, 255, 0.5);
-    text-align: center;
-}
-
-.notification-empty i {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    opacity: 0.7;
-}
-
-.notification-empty span {
-    font-size: 0.8rem;
-}
-
-.notifications-footer {
-    padding: 0.5rem 1.25rem 1rem;
-    text-align: center;
-}
-
-.view-all-notifications {
-    color: #60a5fa;
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.view-all-notifications:hover {
-    color: #3b82f6;
-    text-decoration: none;
-}
-
-/* Scrollbar for notifications */
-.notifications-content::-webkit-scrollbar {
-    width: 3px;
-}
-
-.notifications-content::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.notifications-content::-webkit-scrollbar-thumb {
+#toggle-sidebar:hover {
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
 }
 
-.notifications-content::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+.sidebar-inner {
+    padding: 20px 0;
 }
 
-/* Navigation */
-.sidebar-nav {
-    flex: 1;
-    padding: 0.5rem 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+.sidebar-header {
+    display: none;
+    padding: 0 24px 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Scrollbar Styling for Navigation Only */
-.sidebar-nav::-webkit-scrollbar {
-    width: 4px;
+.sidebar-body {
+    padding: 0;
 }
 
-.sidebar-nav::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
-}
-
-.sidebar-nav::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+.nav-menu {
+    padding: 0;
 }
 
 .nav-section {
-    margin-bottom: 1.5rem;
+    margin-bottom: 24px;
 }
 
 .nav-section-title {
-    color: rgba(255, 255, 255, 0.5);
     font-size: 0.75rem;
-    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    padding: 0.5rem 1.25rem;
-    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0 24px 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .nav-item {
     display: flex;
     align-items: center;
-    padding: 0.875rem 1.25rem;
+    padding: 12px 24px;
     color: rgba(255, 255, 255, 0.8);
     text-decoration: none;
-    transition: all 0.3s ease;
-    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
     position: relative;
+    border-left: 3px solid transparent;
 }
-.nav-item:not(.dropdown-nav):hover {
-    color: white;
-    background: rgba(34, 197, 94, 0.15); /* Vert clair transparent */
-    border-left-color: #22c55e; /* Vert clair */}
 
-.nav-item:not(.dropdown-nav).active {
-    color: white;
+.nav-item:hover {
+    color: #fff;
+    background: rgba(34, 197, 94, 0.15);
+    border-left-color: #22c55e;
+}
+
+.nav-item.active {
+    color: #fff;
     background: rgba(5, 150, 105, 0.15);
     border-left-color: #16a34a;
 }
 
 .nav-icon {
-    width: 24px;
-    height: 24px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 0.875rem;
+    margin-right: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
     font-size: 1rem;
-    flex-shrink: 0;
 }
 
-.nav-content {
-    flex: 1;
-    min-width: 0;
+.nav-item.active .nav-icon {
+    background: rgba(5, 150, 105, 0.2);
+    color: #16a34a;
 }
 
 .nav-title {
-    font-weight: 600;
-    font-size: 0.9rem;
-    line-height: 1.2;
-    margin-bottom: 0.125rem;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #fff;
 }
 
 .nav-subtitle {
     font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.5);
-    line-height: 1.2;
+    margin-top: 2px;
 }
 
-.dropdown-nav {
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-}
-
-/* Dropdown Navigation */
-.dropdown-nav .nav-toggle {
-    display: flex;
-    align-items: center;
-    padding: 0.875rem 1.25rem;
-    color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
-    transition: all 0.3s ease;
-    border-left: 3px solid transparent;
-    cursor: pointer;
-    width: 100%;
-    background: none;
-    border: none;
-    text-align: left;
-}
-
-.dropdown-nav .nav-toggle:hover {
+.nav-badge {
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #ef4444;
     color: white;
-    background: rgba(255, 255, 255, 0.08);
-    border-left-color: #3b82f6;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
 }
 
-.dropdown-nav.active .nav-toggle {
-    color: white;
-    background: rgba(34, 197, 94, 0.15); /* Vert clair transparent */
-    border-left-color: #16a34a; /* Vert foncé */
-}
-
-.nav-arrow {
-    width: 20px;
-    display: flex;
-    justify-content: center;
-    transition: transform 0.3s ease;
-}
-
-.nav-toggle[aria-expanded="true"] .nav-arrow {
-    transform: rotate(180deg);
-}
-
-.nav-submenu {
-    padding: 0.5rem 0;
-}
-
-.nav-subitem {
-    display: flex;
-    align-items: center;
-    padding: 0.5rem 1.25rem 0.5rem 3.5rem;
-    color: rgba(255, 255, 255, 0.7);
-    text-decoration: none;
-    font-size: 0.85rem;
-    transition: all 0.3s ease;
-}
-
-.nav-subitem:hover {
-    color: white;
-    background: rgba(34, 197, 94, 0.05);
-}
-
-.nav-subitem.active {
-    color: #16a34a;
-    background: rgba(5, 150, 105, 0.1);
-}
-
-/* Sidebar Footer */
 .sidebar-footer {
-    padding: 1.25rem;
+    padding: 20px 24px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.quick-action-btn {
+.user-profile {
+    display: flex;
+    align-items: center;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
     background: linear-gradient(135deg, #22c55e, #16a34a);
-    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);    border: none;
-    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.user-info {
+    flex: 1;
+}
+
+.user-name {
+    color: #fff;
     font-weight: 600;
     font-size: 0.9rem;
-    padding: 0.75rem 1rem;
-    transition: all 0.3s ease;
+    line-height: 1.2;
 }
 
-.quick-action-btn:hover {
-    border-left-color: #22c55e;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+.user-role .badge {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
 }
 
-/* Mobile Toggle */
-.sidebar-toggle {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    background: #1e293b;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0.75rem;
-    font-size: 1.1rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    z-index: 1001;
+/* Badge colors */
+.bg-danger { background: #dc2626; }
+.bg-primary { background: #3b82f6; }
+.bg-success { background: #10b981; }
+.bg-warning { background: #f59e0b; }
+.bg-info { background: #06b6d4; }
+.bg-secondary { background: #64748b; }
+
+/* Scrollbar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
 }
 
-.lh-sidebar {
-    width: var(--bs-offcanvas-width);
+.sidebar::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-@media (min-width: 992px) {
-    /* body.sidebar-layout {
-        margin-left: 280px;
-    } */
-    .lh-sidebar {
-        width: 280px;
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
     }
-
-    .sidebar-toggle {
-        display: none;
+    
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    
+    .sidebar-header {
+        display: block;
     }
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle dropdown toggles and state persistence
-    const dropdownToggles = document.querySelectorAll('.nav-toggle[data-bs-toggle="collapse"]');
-
-    dropdownToggles.forEach(toggle => {
-        const targetId = toggle.getAttribute('data-bs-target');
-        const targetElement = document.querySelector(targetId);
-        const arrow = toggle.querySelector('.nav-arrow');
-
-        // Set initial state based on whether submenu is shown (server-side rendered)
-        if (targetElement && targetElement.classList.contains('show')) {
-            toggle.setAttribute('aria-expanded', 'true');
-            if (arrow) {
-                arrow.style.transform = 'rotate(180deg)';
-            }
-        } else {
-            toggle.setAttribute('aria-expanded', 'false');
-            if (arrow) {
-                arrow.style.transform = 'rotate(0deg)';
-            }
+    // Toggle sidebar on mobile
+    const sidebar = document.getElementById('sidebar');
+    const toggleSidebar = document.getElementById('toggle-sidebar');
+    const toggleSidebarSm = document.getElementById('toggle-sidebar-sm');
+    
+    if (toggleSidebar) {
+        toggleSidebar.addEventListener('click', function() {
+            sidebar.classList.toggle('collapsed');
+        });
+    }
+    
+    if (toggleSidebarSm) {
+        toggleSidebarSm.addEventListener('click', function() {
+            sidebar.classList.toggle('show');
+        });
+    }
+    
+    // Close sidebar when clicking outside on mobile
+    document.addEventListener('click', function(event) {
+        if (window.innerWidth < 768 && sidebar && !sidebar.contains(event.target) && 
+            toggleSidebarSm && !toggleSidebarSm.contains(event.target)) {
+            sidebar.classList.remove('show');
         }
-
-        // Handle click events for manual toggle
-        toggle.addEventListener('click', function(e) {
-            e.preventDefault();
-
-            // Get or create Bootstrap Collapse instance
-            const collapse = bootstrap.Collapse.getOrCreateInstance(targetElement, {
-                toggle: false
-            });
-
-            // Toggle the collapse
-            collapse.toggle();
-        });
-
-        // Listen to Bootstrap collapse events to update aria and arrow
-        targetElement.addEventListener('shown.bs.collapse', function() {
-            toggle.setAttribute('aria-expanded', 'true');
-            if (arrow) {
-                arrow.style.transform = 'rotate(180deg)';
-            }
-        });
-
-        targetElement.addEventListener('hidden.bs.collapse', function() {
-            toggle.setAttribute('aria-expanded', 'false');
-            if (arrow) {
-                arrow.style.transform = 'rotate(0deg)';
-            }
-        });
     });
 });
 </script>

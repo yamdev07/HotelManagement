@@ -137,9 +137,11 @@
                                       id="reservationForm">
                                     @csrf
                                     
-                                    <input type="hidden" name="check_in" value="{{ $stayFrom }}">
-                                    <input type="hidden" name="check_out" value="{{ $stayUntil }}">
-                                    <input type="hidden" name="downPayment" id="downPaymentInput" value="0">
+                                    <!-- CHAMPS CACHÉS OBLIGATOIRES -->
+                                        <input type="hidden" name="check_in" value="{{ $stayFrom }}">
+                                        <input type="hidden" name="check_out" value="{{ $stayUntil }}">
+                                        <input type="hidden" name="downPayment" id="downPaymentHidden" value="0">
+                                        <input type="hidden" name="person_count" value="1">
                                     
                                     <div class="payment-options mb-4">
                                         <div class="form-check">
@@ -168,7 +170,7 @@
                                             <div class="payment-details">
                                                 <div class="mt-3">
                                                     <label for="deposit_amount" class="form-label">
-                                                        Montant de l'acompte (optionnel)
+                                                        Montant de l'acompte
                                                     </label>
                                                     <div class="input-group">
                                                         <span class="input-group-text">FCFA</span>
@@ -176,7 +178,7 @@
                                                                class="form-control" 
                                                                id="deposit_amount" 
                                                                name="deposit_amount"
-                                                               value="0"
+                                                               value="{{ $downPayment }}"
                                                                min="0"
                                                                max="{{ $totalPrice }}"
                                                                step="100"
@@ -336,7 +338,7 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const reservationForm = document.getElementById('reservationForm');
-    const downPaymentInput = document.getElementById('downPaymentInput');
+    const downPaymentHidden = document.getElementById('downPaymentHidden');
     const depositAmountInput = document.getElementById('deposit_amount');
     const paymentSummary = document.getElementById('paymentSummary');
     const summaryText = document.getElementById('summaryText');
@@ -348,6 +350,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Calculer le prix total
     const totalPrice = {{ $room->price * $dayDifference }};
+    const recommendedDeposit = {{ $downPayment }};
     
     // Formater la monnaie en FCFA
     function formatCurrency(amount) {
@@ -366,21 +369,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 paymentAmount = 0;
                 summary = 'Réservation sans acompte';
                 showDetails = false;
-                downPaymentInput.value = 0;
+                downPaymentHidden.value = 0;
                 break;
                 
             case 'pay_deposit':
                 paymentAmount = parseFloat(depositAmountInput.value) || 0;
                 summary = 'Acompte optionnel';
                 showDetails = paymentAmount > 0;
-                downPaymentInput.value = paymentAmount;
+                downPaymentHidden.value = paymentAmount;
                 break;
                 
             case 'pay_full':
                 paymentAmount = totalPrice;
                 summary = 'Paiement complet';
                 showDetails = true;
-                downPaymentInput.value = paymentAmount;
+                downPaymentHidden.value = paymentAmount;
                 break;
         }
         
@@ -422,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
         depositAmountInput.disabled = selectedOption !== 'pay_deposit';
         
         if (selectedOption === 'pay_deposit' && !depositAmountInput.value) {
-            depositAmountInput.value = {{ $downPayment }};
+            depositAmountInput.value = recommendedDeposit;
         } else if (selectedOption === 'pay_full') {
             depositAmountInput.value = totalPrice;
         } else if (selectedOption === 'reserve_only') {
@@ -446,6 +449,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Validation du formulaire
     reservationForm.addEventListener('submit', function(e) {
+        console.log('=== FORM SUBMISSION DEBUG ===');
+        console.log('Form action:', this.action);
+        console.log('Form method:', this.method);
+        console.log('CSRF token:', document.querySelector('input[name="_token"]')?.value);
+        console.log('Check in:', document.querySelector('input[name="check_in"]')?.value);
+        console.log('Check out:', document.querySelector('input[name="check_out"]')?.value);
+        console.log('Down payment:', downPaymentHidden.value);
+        console.log('Payment option:', document.querySelector('input[name="payment_option"]:checked')?.value);
+        console.log('Terms accepted:', termsCheckbox.checked);
+        console.log('===========================');
+        
         if (!termsCheckbox.checked) {
             e.preventDefault();
             alert('Vous devez accepter les conditions générales.');
@@ -466,6 +480,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Afficher l'état de chargement
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Traitement en cours...';
         submitBtn.disabled = true;
+        
+        // La soumission continue normalement
     });
     
     // Mise à jour initiale

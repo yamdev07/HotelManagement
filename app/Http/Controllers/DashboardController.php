@@ -11,62 +11,90 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // 1. Récupérer les transactions ACTIVES (clients actuellement dans l'hôtel)
-        $transactions = Transaction::with(['customer.user', 'room.type', 'payment']) // 'payment' pas 'payments'
-            ->where([
-                ['check_in', '<=', Carbon::now()],
-                ['check_out', '>=', Carbon::now()],
-                // ['status', '=', 'active'] // DÉCOMMENTEZ si vous avez un champ status
-            ])
-            ->orderBy('check_out', 'ASC')
-            ->orderBy('id', 'DESC')
+        // DEBUG: Vérifier ce qu'il y a en base
+        \Log::info('=== DASHBOARD DEBUG START ===');
+        
+        // 1. Récupérer TOUTES les transactions pour debug
+        $allTransactions = Transaction::with(['customer.user', 'room.type', 'payment'])
+            ->orderBy('check_in', 'asc')
             ->get();
-
-        // 2. Récupérer les arrivées d'aujourd'hui (pour debug)
+        
+        \Log::info('Total transactions in DB: ' . $allTransactions->count());
+        foreach ($allTransactions as $t) {
+            \Log::info('Transaction ' . $t->id . ': ' . 
+                    ($t->customer->name ?? 'N/A') . ' - ' .
+                    'Status: ' . $t->status . ' - ' .
+                    'Dates: ' . $t->check_in . ' to ' . $t->check_out . ' - ' .
+                    'Price: ' . $t->total_price);
+        }
+        
+        // 2. Récupérer les transactions ACTIVES (selon votre logique métier)
+        $transactions = Transaction::with(['customer.user', 'room.type', 'payment'])
+            ->where(function($query) {
+                // Option A: Clients actuellement dans l'hôtel (dates actuelles)
+                $query->where([
+                    ['check_in', '<=', Carbon::now()],
+                    ['check_out', '>=', Carbon::now()],
+                ]);
+                
+                // Option B: OU les réservations futures (statut 'reservation')
+                $query->orWhere('status', 'reservation');
+                
+                // Option C: OU les séjours actifs (statut 'active')
+                $query->orWhere('status', 'active');
+            })
+            ->whereNotIn('status', ['cancelled', 'completed', 'no_show']) // Exclure les statuts terminaux
+            ->orderBy('check_in', 'asc')
+            ->orderBy('id', 'desc')
+            ->get();
+        
+        \Log::info('Transactions displayed on dashboard: ' . $transactions->count());
+        
+        // 3. Récupérer les arrivées d'aujourd'hui
         $todayArrivals = Transaction::with(['customer.user', 'room.type', 'payment'])
             ->whereDate('check_in', Carbon::today())
+            ->whereNotIn('status', ['cancelled', 'no_show'])
             ->get();
-
-        // 3. Compter les statistiques pour les cartes
+        
+        // 4. Statistiques
         $stats = [
-            'activeGuests' => $transactions->count(),
+            'activeGuests' => $transactions->where('status', 'active')->count(),
+            'reservations' => $transactions->where('status', 'reservation')->count(),
             'pendingPayments' => 0,
             'urgentPayments' => 0,
             'completedToday' => 0,
-            'todayArrivals' => $todayArrivals->count() // Pour debug
+            'todayArrivals' => $todayArrivals->count()
         ];
-
-        // Calculer les paiements en attente et urgents
+        
+        // Calculer les paiements
         foreach ($transactions as $transaction) {
-            // Calculer le solde
             $balance = $this->calculateBalance($transaction);
             
             if ($balance > 0) {
                 $stats['pendingPayments']++;
                 
-                // Vérifier si c'est urgent (check-out aujourd'hui ou demain)
                 $checkOut = Carbon::parse($transaction->check_out);
                 $now = Carbon::now();
                 
-                // Si check-out dans moins de 24h
                 if ($checkOut->diffInHours($now) <= 24) {
                     $stats['urgentPayments']++;
                 }
             }
             
-            // Vérifier les réservations terminées aujourd'hui
             if (Carbon::parse($transaction->check_out)->isToday()) {
                 $stats['completedToday']++;
             }
         }
-
+        
+        \Log::info('Dashboard stats: ' . json_encode($stats));
+        \Log::info('=== DASHBOARD DEBUG END ===');
+        
         return view('dashboard.index', [
             'transactions' => $transactions,
-            'todayArrivals' => $todayArrivals, // Pour debug
+            'todayArrivals' => $todayArrivals,
             'stats' => $stats
         ]);
     }
-
     /**
      * Calculer le solde d'une transaction
      */

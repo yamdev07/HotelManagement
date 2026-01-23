@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class Transaction extends Model
 {
@@ -26,7 +27,16 @@ class Transaction extends Model
         'cancelled_at',
         'cancelled_by',
         'cancel_reason',
-        'notes'
+        'notes',
+        // NOUVEAUX CHAMPS POUR CHECK-IN
+        'actual_check_in',
+        'actual_check_out',
+        // 'adults',    // RETIRÉ - n'existe pas en base de données
+        // 'children',  // RETIRÉ - n'existe pas en base de données
+        'special_requests',
+        'id_type',
+        'id_number',
+        'nationality',
     ];
 
     protected $casts = [
@@ -35,14 +45,24 @@ class Transaction extends Model
         'cancelled_at' => 'datetime',
         'total_price' => 'decimal:2',
         'total_payment' => 'decimal:2',
+        'actual_check_in' => 'datetime',
+        'actual_check_out' => 'datetime',
+        // 'adults' => 'integer',      // RETIRÉ
+        // 'children' => 'integer',    // RETIRÉ
     ];
 
-    // Constantes pour les statuts (NOUVEAUX)
+    // Constantes pour les statuts
     const STATUS_RESERVATION = 'reservation';
     const STATUS_ACTIVE = 'active';
     const STATUS_COMPLETED = 'completed';
     const STATUS_CANCELLED = 'cancelled';
     const STATUS_NO_SHOW = 'no_show';
+
+    // Types de pièces d'identité
+    const ID_TYPE_PASSPORT = 'passeport';
+    const ID_TYPE_CNI = 'cni';
+    const ID_TYPE_DRIVER_LICENSE = 'permis';
+    const ID_TYPE_OTHER = 'autre';
 
     /**
      * Relation avec l'utilisateur (créateur)
@@ -133,6 +153,35 @@ class Transaction extends Model
     }
 
     /**
+     * Scope pour les réservations à venir (arrivées du jour)
+     */
+    public function scopeUpcomingToday($query)
+    {
+        $today = Carbon::today();
+        return $query->where('status', self::STATUS_RESERVATION)
+            ->whereDate('check_in', '<=', $today)
+            ->whereDate('check_in', '>=', $today->copy()->subDays(1));
+    }
+
+    /**
+     * Scope pour les séjours en cours
+     */
+    public function scopeCurrentlyInHotel($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    /**
+     * Scope pour les réservations dépassées non arrivées
+     */
+    public function scopeOverdueNoShow($query)
+    {
+        return $query->where('status', self::STATUS_RESERVATION)
+            ->where('check_in', '<', Carbon::now())
+            ->where('check_out', '>', Carbon::now()->subHours(2));
+    }
+
+    /**
      * Vérifier si c'est une réservation (pas encore arrivé)
      */
     public function isReservation()
@@ -203,6 +252,22 @@ class Transaction extends Model
     }
 
     /**
+     * Vérifier si le check-in a été effectué
+     */
+    public function isCheckedIn()
+    {
+        return !is_null($this->actual_check_in);
+    }
+
+    /**
+     * Vérifier si le check-out a été effectué
+     */
+    public function isCheckedOut()
+    {
+        return !is_null($this->actual_check_out);
+    }
+
+    /**
      * Mettre à jour le statut automatiquement selon les dates
      */
     public function autoUpdateStatus()
@@ -234,6 +299,107 @@ class Transaction extends Model
         }
 
         return $newStatus;
+    }
+
+    /**
+     * Effectuer le check-in
+     */
+    public function checkIn($userId, $data = [])
+    {
+        DB::beginTransaction();
+        
+        try {
+            // Mettre à jour les informations de check-in
+            $updateData = [
+                'status' => self::STATUS_ACTIVE,
+                'actual_check_in' => now(),
+                'special_requests' => $data['special_requests'] ?? $this->special_requests,
+                'id_type' => $data['id_type'] ?? $this->id_type,
+                'id_number' => $data['id_number'] ?? $this->id_number,
+                'nationality' => $data['nationality'] ?? $this->nationality,
+                // Note: adults et children n'existent pas dans la BD, utilisez person_count
+                'person_count' => $data['person_count'] ?? $this->person_count ?? 1,
+            ];
+
+            // Si changement de chambre
+            if (isset($data['new_room_id']) && $data['new_room_id'] != $this->room_id) {
+                $updateData['room_id'] = $data['new_room_id'];
+                // Libérer l'ancienne chambre
+                $this->room->update(['room_status_id' => 1]); // Available
+            }
+
+            $this->update($updateData);
+            
+            // Mettre la chambre comme occupée
+            $this->room->update(['room_status_id' => 2]); // Occupied
+            
+            // Journalisation
+            activity()
+                ->performedOn($this)
+                ->causedBy($userId)
+                ->withProperties($data)
+                ->log('Check-in effectué');
+            
+            DB::commit();
+            
+            return [
+                'success' => true,
+                'transaction' => $this->fresh()
+            ];
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Effectuer le check-out
+     */
+    public function checkOut($userId)
+    {
+        // Vérifier si le séjour est entièrement payé
+        if (!$this->isFullyPaid()) {
+            return [
+                'success' => false,
+                'error' => 'Le client doit d\'abord régler le solde avant de partir'
+            ];
+        }
+
+        DB::beginTransaction();
+        
+        try {
+            $this->update([
+                'status' => self::STATUS_COMPLETED,
+                'actual_check_out' => now()
+            ]);
+            
+            // Mettre à jour l'état de la chambre
+            $this->updateRoomStatus(self::STATUS_COMPLETED);
+            
+            // Journalisation
+            activity()
+                ->performedOn($this)
+                ->causedBy($userId)
+                ->log('Check-out effectué');
+            
+            DB::commit();
+            
+            return [
+                'success' => true,
+                'transaction' => $this->fresh()
+            ];
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
     }
 
     /**
@@ -321,6 +487,34 @@ class Transaction extends Model
     }
 
     /**
+     * Obtenir le label du type de pièce d'identité
+     */
+    public function getIdTypeLabelAttribute()
+    {
+        $labels = [
+            self::ID_TYPE_PASSPORT => 'Passeport',
+            self::ID_TYPE_CNI => 'Carte Nationale d\'Identité',
+            self::ID_TYPE_DRIVER_LICENSE => 'Permis de Conduire',
+            self::ID_TYPE_OTHER => 'Autre',
+        ];
+        
+        return $labels[$this->id_type] ?? $this->id_type;
+    }
+
+    /**
+     * Obtenir la liste des types de pièces d'identité
+     */
+    public static function getIdTypeOptions()
+    {
+        return [
+            self::ID_TYPE_PASSPORT => 'Passeport',
+            self::ID_TYPE_CNI => 'Carte Nationale d\'Identité',
+            self::ID_TYPE_DRIVER_LICENSE => 'Permis de Conduire',
+            self::ID_TYPE_OTHER => 'Autre',
+        ];
+    }
+
+    /**
      * Obtenir la couleur du statut
      */
     public function getStatusColorAttribute()
@@ -392,6 +586,31 @@ class Transaction extends Model
     public function getNightsAttribute()
     {
         return Helper::getDateDifference($this->check_in, $this->check_out);
+    }
+
+    /**
+     * Obtenir le nombre total de personnes
+     */
+    public function getTotalPersonsAttribute()
+    {
+        // Utilisez person_count car adults et children n'existent pas
+        return $this->person_count ?? 1;
+    }
+
+    /**
+     * Obtenir la durée du séjour en heures
+     */
+    public function getStayDurationHours()
+    {
+        if ($this->actual_check_in && $this->actual_check_out) {
+            return $this->actual_check_in->diffInHours($this->actual_check_out);
+        }
+        
+        if ($this->actual_check_in) {
+            return $this->actual_check_in->diffInHours(now());
+        }
+        
+        return 0;
     }
 
     /**
@@ -489,6 +708,22 @@ class Transaction extends Model
     }
 
     /**
+     * Vérifier si la transaction peut être checkée-in
+     */
+    public function canBeCheckedIn()
+    {
+        return $this->isReservation() && !$this->isCancelled() && !$this->isNoShow();
+    }
+
+    /**
+     * Vérifier si la transaction peut être checkée-out
+     */
+    public function canBeCheckedOut()
+    {
+        return $this->isActive() && $this->isFullyPaid();
+    }
+
+    /**
      * Calculer l'acompte minimum
      */
     public function getMinimumDownPayment()
@@ -520,6 +755,26 @@ class Transaction extends Model
     public function getFormattedRemainingPaymentAttribute()
     {
         return number_format($this->getRemainingPayment(), 0, ',', ' ') . ' CFA';
+    }
+
+    /**
+     * Formater la date de check-in réel
+     */
+    public function getFormattedActualCheckInAttribute()
+    {
+        return $this->actual_check_in ? 
+            $this->actual_check_in->format('d/m/Y H:i') : 
+            'Non checkée-in';
+    }
+
+    /**
+     * Formater la date de check-out réel
+     */
+    public function getFormattedActualCheckOutAttribute()
+    {
+        return $this->actual_check_out ? 
+            $this->actual_check_out->format('d/m/Y H:i') : 
+            'Non checkée-out';
     }
 
     /**
@@ -573,6 +828,11 @@ class Transaction extends Model
                 $transaction->status = $checkIn->isFuture() 
                     ? self::STATUS_RESERVATION 
                     : self::STATUS_ACTIVE;
+            }
+
+            // Valeur par défaut pour person_count
+            if (!$transaction->person_count) {
+                $transaction->person_count = 1;
             }
         });
 

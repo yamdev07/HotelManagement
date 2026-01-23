@@ -120,6 +120,7 @@ class TransactionRoomReservationController extends Controller
             ->route('transaction.reservation.viewCountPerson', ['customer' => $customer->id])
             ->with('success', $message);
     }
+
     /**
      * Afficher le formulaire pour saisir les dates de séjour
      */
@@ -196,15 +197,6 @@ class TransactionRoomReservationController extends Controller
         ]);
     }
 
-    /**
-     * Payer l'acompte et finaliser la réservation
-     */
-    /**
- * Finaliser la réservation avec ou sans acompte
- */
-    /**
- * Finaliser la réservation avec ou sans acompte
- */
     public function payDownPayment(
         Customer $customer,
         Room $room,
@@ -212,27 +204,53 @@ class TransactionRoomReservationController extends Controller
         TransactionRepositoryInterface $transactionRepository,
         PaymentRepositoryInterface $paymentRepository
     ) {
+        \Log::info('🔵 =========== PAYDOWNPAYMENT START ===========');
+        \Log::info('🔵 Customer: ' . $customer->id . ' - ' . $customer->name);
+        \Log::info('🔵 Room: ' . $room->id . ' - ' . $room->number . ' - Prix: ' . $room->price);
+        \Log::info('🔵 Request data:', $request->all());
+        \Log::info('🔵 Auth user: ' . (auth()->check() ? auth()->id() . ' - ' . auth()->user()->name : 'NOT LOGGED IN'));
+        
+        // ⭐ CORRECTION 1 : Ajouter person_count si manquant
+        if (!$request->has('person_count') || empty($request->person_count)) {
+            $request->merge(['person_count' => 1]);
+            \Log::info('🔵 person_count manquant, fixé à 1');
+        }
+        
+        // ⭐ CORRECTION 2 : Vérifier que les dates existent
+        if (!$request->has('check_in') || !$request->has('check_out')) {
+            \Log::error('❌ Dates manquantes dans la requête');
+            return redirect()->back()
+                ->with('error', 'Les dates de séjour sont requises.')
+                ->withInput();
+        }
+        
         // Calculer la durée du séjour
         $dayDifference = Helper::getDateDifference($request->check_in, $request->check_out);
         $totalPrice = $room->price * $dayDifference;
         
-        // Validation - downPayment peut être 0 pour réservation sans acompte
-        $request->validate([
+        \Log::info('🔵 Calcul: ' . $dayDifference . ' jours, prix total: ' . $totalPrice);
+        
+        // Validation
+        $validated = $request->validate([
             'downPayment' => 'nullable|numeric|min:0|max:' . $totalPrice,
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
+            'person_count' => 'required|integer|min:1',
         ]);
-
+        
+        \Log::info('🔵 Validation réussie');
+        
         // Vérifier si la chambre est déjà occupée
         $occupiedRoomId = $this->getOccupiedRoomID($request->check_in, $request->check_out);
         $occupiedRoomIdInArray = $occupiedRoomId->toArray();
-
+        
         if (in_array($room->id, $occupiedRoomIdInArray)) {
+            \Log::warning('❌ Chambre déjà occupée: ' . $room->id);
             return redirect()->back()
                 ->with('failed', 'Désolé, la chambre ' . $room->number . ' est déjà occupée pour les dates sélectionnées.')
                 ->withInput();
         }
-
+        
         // Vérifier si le client a déjà une réservation aux mêmes dates
         $hasConflict = $customer->transactions()
             ->where(function($query) use ($request) {
@@ -243,90 +261,130 @@ class TransactionRoomReservationController extends Controller
                             ->where('check_out', '>=', $request->check_out);
                     });
             })
+            ->where('status', '!=', 'cancelled')
             ->exists();
-
+        
         if ($hasConflict) {
+            \Log::warning('❌ Conflit de dates pour le client: ' . $customer->id);
             return redirect()->back()
                 ->with('warning', 'Vous avez déjà une réservation pendant ces dates.')
                 ->withInput();
         }
-
+        
         try {
+            \Log::info('🔵 Création de la transaction...');
+            
+            // ⭐ CORRECTION 3 : Préparer les données pour debug
+            $transactionData = [
+                'customer_id' => $customer->id,
+                'room_id' => $room->id,
+                'check_in' => $request->check_in,
+                'check_out' => $request->check_out,
+                'person_count' => $request->person_count,
+                'days' => $dayDifference,
+                'room_price' => $room->price,
+                'total_price' => $totalPrice,
+            ];
+            
+            \Log::info('🔵 Données de transaction:', $transactionData);
+            
             // Créer la transaction
             $transaction = $transactionRepository->store($request, $customer, $room);
             
-            // Récupérer le montant de l'acompte (peut être 0)
+            \Log::info('✅ Transaction créée avec ID: ' . $transaction->id, [
+                'transaction_id' => $transaction->id,
+                'customer_id' => $transaction->customer_id,
+                'room_id' => $transaction->room_id,
+                'check_in' => $transaction->check_in,
+                'check_out' => $transaction->check_out,
+                'status' => $transaction->status,
+                'total_price' => $transaction->total_price,
+                'person_count' => $transaction->person_count,
+            ]);
+            
+            // Gestion du paiement
             $downPayment = $request->downPayment ?? 0;
             
-            // Créer un paiement SEULEMENT si downPayment > 0
             if ($downPayment > 0) {
                 $status = ($downPayment == $totalPrice) ? 'Full Payment' : 'Down Payment';
-                $payment = $paymentRepository->store($request, $transaction, $status);
-            }
-
-            // Notifier les administrateurs
-            $superAdmins = User::where('role', 'Super')->get();
-            
-            // Calculer le nombre total de réservations après l'ajout
-            $totalReservations = $customer->transactions()->count();
-            
-            // Message personnalisé selon le type de paiement
-            if ($downPayment == 0) {
-                $notificationMessage = 'Nouvelle réservation sans acompte par ' . $customer->name;
-            } elseif ($downPayment == $totalPrice) {
-                $notificationMessage = 'Réservation entièrement payée par ' . $customer->name;
-            } else {
-                $notificationMessage = 'Nouvelle réservation avec acompte de ' . number_format($downPayment, 0, ',', ' ') . ' FCFA par ' . $customer->name;
-            }
-            $notificationMessage .= ' (Client a maintenant ' . $totalReservations . ' réservation(s))';
-
-            foreach ($superAdmins as $superAdmin) {
-                // Gestion des événements avec try-catch
-                try {
-                    event(new NewReservationEvent($notificationMessage, $superAdmin));
-                } catch (\Illuminate\Broadcasting\BroadcastException $e) {
-                    Log::warning('Erreur de diffusion pour la réservation: ' . $e->getMessage());
-                }
+                \Log::info('🔵 Création paiement: ' . $status . ' - Montant: ' . $downPayment);
                 
-                // Notification par email seulement si paiement effectué
-                if ($downPayment > 0 && isset($payment)) {
-                    $superAdmin->notify(new NewRoomReservationDownPayment($transaction, $payment));
-                }
-            }
-
-            // Événement de rafraîchissement du dashboard
-            try {
-                event(new RefreshDashboardEvent('Nouvelle réservation ajoutée'));
-            } catch (\Illuminate\Broadcasting\BroadcastException $e) {
-                Log::warning('Erreur de diffusion RefreshDashboardEvent: ' . $e->getMessage());
-            }
-
-            // Message de succès personnalisé
-            if ($downPayment == 0) {
-                $successMessage = 'Chambre ' . $room->number . ' réservée pour ' . $customer->name . ' (sans acompte)';
-            } elseif ($downPayment == $totalPrice) {
-                $successMessage = 'Chambre ' . $room->number . ' entièrement payée et réservée pour ' . $customer->name;
-            } else {
-                $successMessage = 'Chambre ' . $room->number . ' réservée pour ' . $customer->name . ' avec un acompte de ' . number_format($downPayment, 0, ',', ' ') . ' FCFA';
+                $payment = $paymentRepository->store($request, $transaction, $status);
+                
+                \Log::info('✅ Paiement créé avec ID: ' . ($payment->id ?? 'N/A'), [
+                    'payment_id' => $payment->id ?? null,
+                    'amount' => $downPayment,
+                    'payment_method' => $payment->payment_method ?? null,
+                ]);
             }
             
-            // Ajouter une note si c'est une réservation supplémentaire
-            if ($totalReservations > 1) {
-                $successMessage .= ' (Client a maintenant ' . $totalReservations . ' réservation(s))';
+            // Message de succès
+            $successMessage = 'Chambre ' . $room->number . ' réservée pour ' . $customer->name;
+            if ($downPayment > 0) {
+                $successMessage .= ' avec acompte de ' . number_format($downPayment, 0, ',', ' ') . ' FCFA';
             }
-
-            // REDIRECTION VERS LE DASHBOARD
-            return redirect()->route('dashboard.index')
-                ->with('success', $successMessage);
-
-        } catch (\Exception $e) {
-            Log::error('Erreur de réservation: ' . $e->getMessage());
+            
+            \Log::info('✅ Réservation réussie! Message: ' . $successMessage);
+            
+            // Vérifier les routes disponibles
+            \Log::info('🔵 Vérification des routes...');
+            \Log::info('Route dashboard.index: ' . (\Route::has('dashboard.index') ? 'EXISTE' : 'N\'EXISTE PAS'));
+            \Log::info('Route home: ' . (\Route::has('home') ? 'EXISTE' : 'N\'EXISTE PAS'));
+            \Log::info('Route dashboard: ' . (\Route::has('dashboard') ? 'EXISTE' : 'N\'EXISTE PAS'));
+            
+            // Redirection
+            if (\Route::has('dashboard.index')) {
+                $redirectTo = route('dashboard.index');
+                \Log::info('🔵 Redirection vers dashboard.index: ' . $redirectTo);
+            } elseif (\Route::has('dashboard')) {
+                $redirectTo = route('dashboard');
+                \Log::info('🔵 Redirection vers dashboard: ' . $redirectTo);
+            } elseif (\Route::has('home')) {
+                $redirectTo = route('home');
+                \Log::info('🔵 Redirection vers home: ' . $redirectTo);
+            } else {
+                $redirectTo = '/dashboard';
+                \Log::info('🔵 Redirection vers /dashboard (URL directe)');
+            }
+            
+            // Déclencher les événements
+            try {
+                event(new NewReservationEvent($transaction));
+                event(new RefreshDashboardEvent());
+                \Log::info('✅ Événements déclenchés avec succès');
+            } catch (\Exception $e) {
+                \Log::warning('⚠️ Impossible de déclencher les événements: ' . $e->getMessage());
+            }
+            
+            \Log::info('🔵 =========== PAYDOWNPAYMENT SUCCESS ===========');
+            
+            return redirect($redirectTo)
+                ->with('success', $successMessage)
+                ->with('transaction_id', $transaction->id);
+                
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('❌ Erreur de validation: ' . json_encode($e->errors()));
+            throw $e;
+            
+        } catch (\Illuminate\Database\QueryException $qe) {
+            \Log::error('❌ Erreur de base de données: ' . $qe->getMessage());
+            \Log::error('❌ SQL: ' . $qe->getSql());
+            \Log::error('❌ Bindings: ' . json_encode($qe->getBindings()));
+            
             return redirect()->back()
-                ->with('error', 'Une erreur est survenue lors du traitement de la réservation. Veuillez réessayer.')
+                ->with('error', 'Erreur de base de données: ' . $qe->getMessage())
+                ->withInput();
+                
+        } catch (\Exception $e) {
+            \Log::error('❌ Erreur de réservation: ' . $e->getMessage());
+            \Log::error('❌ File: ' . $e->getFile() . ' Line: ' . $e->getLine());
+            \Log::error('❌ Stack trace: ' . $e->getTraceAsString());
+            
+            return redirect()->back()
+                ->with('error', 'Une erreur est survenue lors du traitement de la réservation: ' . $e->getMessage())
                 ->withInput();
         }
     }
-
     /**
      * Obtenir les IDs des chambres occupées pour une période donnée
      */

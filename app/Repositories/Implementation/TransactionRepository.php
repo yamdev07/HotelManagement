@@ -12,15 +12,80 @@ class TransactionRepository implements TransactionRepositoryInterface
 {
     public function store($request, Customer $customer, Room $room)
     {
-        return Transaction::create([
-            'user_id' => auth()->user()->id,
-            'customer_id' => $customer->id,
-            'room_id' => $room->id,
-            'check_in' => $request->check_in,
-            'check_out' => $request->check_out,
-            'status' => 'reservation', // Nouveau statut par défaut
-            'person_count' => $request->person_count ?? 1,
-        ]);
+        \Log::info('🔵 === TRANSACTION REPOSITORY STORE ===');
+        \Log::info('🔵 Customer: ' . $customer->id);
+        \Log::info('🔵 Room: ' . $room->id);
+        \Log::info('🔵 Request keys:', array_keys($request->all()));
+        
+        try {
+            // DEBUG détaillé
+            \Log::info('🔵 Form data received:', [
+                'check_in' => $request->check_in,
+                'check_out' => $request->check_out,
+                'person_count' => $request->person_count,
+                'has_person_count' => $request->has('person_count'),
+                'all_data' => $request->all(),
+            ]);
+            
+            // ⭐ CORRECTION : Définir person_count par défaut
+            $personCount = $request->person_count ?? 1;
+            
+            // Si c'est null, vide ou "NOT SET"
+            if (empty($personCount) || $personCount === "NOT SET") {
+                $personCount = 1;
+                \Log::warning('⚠️ person_count manquant, utilisation de la valeur par défaut: 1');
+            }
+            
+            // Calculs
+            $checkIn = \Carbon\Carbon::parse($request->check_in);
+            $checkOut = \Carbon\Carbon::parse($request->check_out);
+            $days = $checkOut->diffInDays($checkIn);
+            if ($days == 0) $days = 1;
+            
+            $totalPrice = $room->price * $days;
+            
+            \Log::info('🔵 Calcul: ' . $days . ' jours, ' . $personCount . ' pers, prix: ' . $totalPrice);
+            
+            // Données de la transaction
+            $data = [
+                'user_id' => auth()->check() ? auth()->id() : 1,
+                'customer_id' => $customer->id,
+                'room_id' => $room->id,
+                'check_in' => $request->check_in,
+                'check_out' => $request->check_out,
+                'status' => 'reservation',
+                'person_count' => $personCount,
+                'total_price' => $totalPrice,
+                'adults' => $personCount,
+                'children' => 0,
+                'notes' => $request->notes ?? null,
+            ];
+            
+            \Log::info('🔵 Transaction data to create:', $data);
+            
+            // ⭐ TEST DIRECT avec try-catch interne
+            try {
+                $transaction = Transaction::create($data);
+                \Log::info('✅ Transaction créée ID: ' . $transaction->id);
+                \Log::info('🔵 Transaction details:', $transaction->toArray());
+                
+                return $transaction;
+                
+            } catch (\Illuminate\Database\QueryException $qe) {
+                \Log::error('❌ QueryException: ' . $qe->getMessage());
+                \Log::error('❌ SQL: ' . $qe->getSql());
+                \Log::error('❌ Bindings: ' . json_encode($qe->getBindings()));
+                throw $qe;
+            }
+            
+        } catch (\Exception $e) {
+            \Log::error('❌ ERREUR TransactionRepository: ' . $e->getMessage());
+            \Log::error('❌ File: ' . $e->getFile() . ' Line: ' . $e->getLine());
+            \Log::error('❌ Trace: ' . $e->getTraceAsString());
+            
+            // Relancer avec message amélioré
+            throw new \Exception('Erreur création transaction: ' . $e->getMessage() . ' (person_count=' . ($request->person_count ?? 'null') . ')');
+        }
     }
 
     /**

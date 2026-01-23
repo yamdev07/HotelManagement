@@ -425,27 +425,75 @@
 
 @section('footer')
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Tooltips
-        var tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-        tooltips.map(function (el) {
-            return new bootstrap.Tooltip(el)
+    // Attendre que Bootstrap soit chargé
+    function initDashboardScripts() {
+        // Vérifier que Bootstrap est disponible ET que Tooltip existe
+        if (typeof bootstrap === 'undefined' || typeof bootstrap.Tooltip === 'undefined') {
+            console.warn('Bootstrap non chargé, nouvelle tentative dans 100ms...');
+            setTimeout(initDashboardScripts, 100);
+            return;
+        }
+        
+        console.log('Initialisation des scripts du dashboard...');
+        
+        // 1. Initialiser les tooltips
+        var tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var initializedTooltips = tooltips.map(function (el) {
+            try {
+                return new bootstrap.Tooltip(el);
+            } catch (e) {
+                console.error('Erreur initialisation tooltip:', e);
+                return null;
+            }
+        }).filter(function(tooltip) {
+            return tooltip !== null;
         });
-    });
+        
+        console.log(initializedTooltips.length + ' tooltip(s) initialisé(s) sur ' + tooltips.length + ' trouvé(s)');
+        
+        // 2. Initialiser les toasts si présents
+        var toasts = [].slice.call(document.querySelectorAll('.toast'));
+        if (toasts.length > 0 && typeof bootstrap.Toast !== 'undefined') {
+            toasts.forEach(function (el) {
+                try {
+                    new bootstrap.Toast(el);
+                } catch (e) {
+                    console.error('Erreur initialisation toast:', e);
+                }
+            });
+            console.log(toasts.length + ' toast(s) initialisé(s)');
+        }
+        
+        // 3. Initialiser les popovers si présents
+        var popovers = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+        if (popovers.length > 0 && typeof bootstrap.Popover !== 'undefined') {
+            popovers.forEach(function (el) {
+                try {
+                    new bootstrap.Popover(el);
+                } catch (e) {
+                    console.error('Erreur initialisation popover:', e);
+                }
+            });
+            console.log(popovers.length + ' popover(s) initialisé(s)');
+        }
+    }
 
+    // Fonction confirmDelete (peut rester car n'utilise pas Bootstrap)
     function confirmDelete(url) {
-        if (confirm('Delete this transaction? This cannot be undone.')) {
+        if (confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) {
             var form = document.createElement('form');
             form.method = 'POST';
             form.action = url;
             form.style.display = 'none';
             
+            // CSRF Token
             var csrfToken = document.createElement('input');
             csrfToken.type = 'hidden';
             csrfToken.name = '_token';
             csrfToken.value = '{{ csrf_token() }}';
             form.appendChild(csrfToken);
             
+            // Méthode DELETE
             var methodField = document.createElement('input');
             methodField.type = 'hidden';
             methodField.name = '_method';
@@ -456,6 +504,32 @@
             form.submit();
         }
     }
+
+    // Exposer la fonction globalement (si utilisée dans des onclick inline)
+    window.confirmDelete = confirmDelete;
+
+    // Démarrer l'initialisation quand le DOM est prêt
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initDashboardScripts);
+    } else {
+        // DOM déjà chargé
+        initDashboardScripts();
+    }
+    
+    // Fallback : si après 3 secondes Bootstrap n'est toujours pas chargé
+    setTimeout(function() {
+        if (typeof bootstrap === 'undefined') {
+            console.error('Bootstrap toujours non chargé après 3 secondes');
+            // Optionnel : recharger Bootstrap manuellement
+            var script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';
+            script.onload = function() {
+                console.log('Bootstrap chargé manuellement');
+                initDashboardScripts();
+            };
+            document.head.appendChild(script);
+        }
+    }, 3000);
 </script>
 @endsection
 

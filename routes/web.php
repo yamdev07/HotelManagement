@@ -20,7 +20,10 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\FrontendController;
-use App\Http\Controllers\CashierSessionController; // Nouveau contrôleur
+use App\Http\Controllers\CashierSessionController;
+use App\Http\Controllers\AvailabilityController;
+use App\Http\Controllers\CheckInController;
+use App\Http\Controllers\HousekeepingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -267,10 +270,56 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
         Route::get('/api/customers', [RestaurantController::class, 'getCustomers'])->name('api.customers');
         Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
     });
+    
+    // ==================== ROUTES POUR LA DISPONIBILITÉ DES CHAMBRES ====================
+    // ACCESSIBLE À TOUS LES UTILISATEURS CONNECTÉS
+    Route::prefix('availability')->name('availability.')->group(function () {
+        // Calendrier des disponibilités
+        Route::get('/calendar', [AvailabilityController::class, 'calendar'])->name('calendar');
+        
+        // Recherche de disponibilité par période
+        Route::get('/search', [AvailabilityController::class, 'search'])->name('search');
+        
+        // Inventaire des chambres
+        Route::get('/inventory', [AvailabilityController::class, 'inventory'])->name('inventory');
+        
+        // Dashboard de disponibilité
+        Route::get('/dashboard', [AvailabilityController::class, 'dashboard'])->name('dashboard');
+        
+        // Détail d'une chambre
+        Route::get('/room/{room}', [AvailabilityController::class, 'roomDetail'])->name('room.detail');
+        
+        // API pour vérifier disponibilité (AJAX)
+        Route::get('/check', [AvailabilityController::class, 'checkAvailability'])->name('check');
+    });
 });
+
+// ==================== ROUTES POUR LA DISPONIBILITÉ ET CHECK-IN AVANCÉ ====================
 
 // Routes accessibles au personnel de réception (en plus des admins)
 Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Reception']], function () {
+    // === ROUTES POUR LE CHECK-IN AVANCÉ ===
+    Route::prefix('checkin')->name('checkin.')->group(function () {
+        // Dashboard check-in
+        Route::get('/', [CheckInController::class, 'index'])->name('index');
+        
+        // Recherche de réservations
+        Route::get('/search', [CheckInController::class, 'search'])->name('search');
+        
+        // Check-in direct (sans réservation)
+        Route::get('/direct', [CheckInController::class, 'directCheckIn'])->name('direct');
+        
+        // Check-in d'une réservation spécifique
+        Route::get('/{transaction}', [CheckInController::class, 'show'])->name('show');
+        Route::post('/{transaction}', [CheckInController::class, 'store'])->name('store');
+        
+        // Check-in rapide
+        Route::post('/{transaction}/quick', [CheckInController::class, 'quickCheckIn'])->name('quick');
+        
+        // Vérification de disponibilité (AJAX)
+        Route::get('/availability/check', [CheckInController::class, 'checkAvailability'])->name('availability');
+    });
+    
     // === ROUTES POUR LA GESTION DES STATUTS (RÉCEPTION) ===
     Route::prefix('transaction')->name('transaction.')->group(function () {
         // Actions rapides de réception
@@ -300,6 +349,61 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Reception']], func
         
         // Dashboard réception avec caisse
         Route::get('/reception-dashboard', [CashierSessionController::class, 'receptionDashboard'])->name('reception-dashboard');
+    });
+    
+    // === ROUTES HOUSEKEEPING SPÉCIFIQUES À LA RÉCEPTION ===
+    Route::prefix('housekeeping')->name('housekeeping.')->group(function () {
+        // Export des disponibilités (seulement pour réception)
+        Route::post('/export', [HousekeepingController::class, 'export'])->name('export');
+        
+        // Gestion avancée du nettoyage
+        Route::post('/{room}/assign-cleaner', [HousekeepingController::class, 'assignCleaner'])->name('assign-cleaner');
+        Route::post('/{room}/update-priority', [HousekeepingController::class, 'updatePriority'])->name('update-priority');
+    });
+});
+
+// Routes accessibles aux femmes de chambre
+Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Housekeeping']], function () {
+    Route::prefix('housekeeping')->name('housekeeping.')->group(function () {
+        // Dashboard femmes de chambre
+        Route::get('/', [HousekeepingController::class, 'index'])->name('index');
+        
+        // Chambres à nettoyer
+        Route::get('/to-clean', [HousekeepingController::class, 'toClean'])->name('to-clean');
+        
+        // Marquer comme en nettoyage
+        Route::post('/{room}/start-cleaning', [HousekeepingController::class, 'startCleaning'])->name('start-cleaning');
+        
+        // Marquer comme nettoyée
+        Route::post('/{room}/mark-cleaned', [HousekeepingController::class, 'markCleaned'])->name('mark-cleaned');
+        
+        // Marquer comme à inspecter
+        Route::post('/{room}/mark-inspection', [HousekeepingController::class, 'markInspection'])->name('mark-inspection');
+        
+        // Marquer comme en maintenance
+        Route::post('/{room}/mark-maintenance', [HousekeepingController::class, 'markMaintenance'])->name('mark-maintenance');
+        
+        // Rapports de nettoyage
+        Route::get('/reports', [HousekeepingController::class, 'reports'])->name('reports');
+        
+        // Rapport quotidien
+        Route::get('/daily-report', [HousekeepingController::class, 'dailyReport'])->name('daily-report');
+        
+        // Interface mobile/simplifiée pour femmes de chambre
+        Route::get('/mobile', [HousekeepingController::class, 'mobile'])->name('mobile');
+        
+        // Liste rapide des chambres par statut
+        Route::get('/quick-list/{status}', [HousekeepingController::class, 'quickList'])->name('quick-list');
+        
+        // Scanner QR code (pour mobile)
+        Route::get('/scan', [HousekeepingController::class, 'scan'])->name('scan');
+        Route::post('/scan/process', [HousekeepingController::class, 'processScan'])->name('scan.process');
+        
+        // Statistiques pour femmes de chambre
+        Route::get('/stats', [HousekeepingController::class, 'stats'])->name('stats');
+        
+        // Planning de nettoyage
+        Route::get('/schedule', [HousekeepingController::class, 'schedule'])->name('schedule');
     });
 });
 
@@ -434,6 +538,56 @@ if (env('APP_DEBUG', false)) {
                 'should_block_completed' => !$transaction->isFullyPaid() && $transaction->status === 'active',
                 'should_allow_completed' => $transaction->isFullyPaid() && $transaction->status === 'active',
             ]
+        ]);
+    });
+    
+    // Route pour tester la disponibilité
+    Route::get('/test-availability/{roomId}', function($roomId) {
+        $room = \App\Models\Room::find($roomId);
+        if (!$room) {
+            return response()->json(['error' => 'Room not found'], 404);
+        }
+        
+        $checkIn = now()->format('Y-m-d');
+        $checkOut = now()->addDays(2)->format('Y-m-d');
+        
+        return response()->json([
+            'room_id' => $room->id,
+            'room_number' => $room->number,
+            'check_in' => $checkIn,
+            'check_out' => $checkOut,
+            'is_available' => $room->isAvailableForPeriod($checkIn, $checkOut),
+            'room_status' => $room->room_status_id,
+            'is_occupied_today' => $room->isOccupiedOnDate(now()),
+            'next_available_date' => $room->next_available_date,
+            'available_periods' => $room->getAvailablePeriods(now(), now()->addDays(30), 1)
+        ]);
+    });
+    
+    // Route pour tester le check-in
+    Route::get('/test-checkin/{transactionId}', function($transactionId) {
+        $transaction = \App\Models\Transaction::find($transactionId);
+        if (!$transaction) {
+            return response()->json(['error' => 'Transaction not found'], 404);
+        }
+        
+        return response()->json([
+            'transaction_id' => $transaction->id,
+            'customer' => $transaction->customer->name,
+            'room' => $transaction->room->number,
+            'check_in_date' => $transaction->check_in->format('Y-m-d'),
+            'check_out_date' => $transaction->check_out->format('Y-m-d'),
+            'status' => $transaction->status,
+            'can_be_checked_in' => $transaction->canBeCheckedIn(),
+            'can_be_checked_out' => $transaction->canBeCheckedOut(),
+            'is_fully_paid' => $transaction->isFullyPaid(),
+            'actual_check_in' => $transaction->actual_check_in,
+            'actual_check_out' => $transaction->actual_check_out,
+            'room_availability' => $transaction->room->isAvailableForPeriod(
+                $transaction->check_in,
+                $transaction->check_out,
+                $transaction->id
+            )
         ]);
     });
 }
