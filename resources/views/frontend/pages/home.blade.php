@@ -8,8 +8,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 mx-auto text-center">
-                    <h1 class="display-4 mb-4">Bienvenue au Luxury Palace</h1>
-                    <p class="lead mb-4">Découvrez le luxe absolu dans notre hôtel 5 étoiles</p>
+                    <h1 class="display-4 mb-4">Bienvenue au Cactus Palace</h1>
+                    <p class="lead mb-4">Découvrez le luxe absolu dans notre hôtel 5 étoiles au cœur de Cotonou</p>
                     <a href="{{ route('frontend.rooms') }}" class="btn btn-primary-custom btn-lg me-2">
                         <i class="fas fa-bed me-1"></i> Voir nos chambres
                     </a>
@@ -116,8 +116,8 @@
                             @endif
                             
                             <div class="d-flex justify-content-between align-items-center mt-3">
-                                <span class="h5 text-primary-custom mb-0">
-                                    {{ number_format($room->price, 0, ',', ' ') }} FCFA / nuit
+                                <span class="h5 mb-0" style="color: #4CAF50;">
+                                    {{ number_format($room->price, 0) }} Fcfa / nuit
                                 </span>
                                 <a href="{{ route('frontend.room.details', $room->id) }}" class="btn btn-primary-custom">
                                     <i class="fas fa-eye me-1"></i> Détails
@@ -177,8 +177,8 @@
                                     <img src="https://randomuser.me/api/portraits/women/32.jpg" alt="Client" class="img-fluid">
                                 </div>
                                 <div>
-                                    <h6 class="mb-0 text-primary-custom">Marie Dubois</h6>
-                                    <small class="text-muted">Client régulier</small>
+                                    <h6 class="mb-0" style="color: #2E7D32;">Marie Dubois</h6>
+                                    <small class="text-muted">Cotonou, Bénin</small>
                                 </div>
                             </div>
                             <p class="card-text text-muted">
@@ -203,8 +203,8 @@
                                     <img src="https://randomuser.me/api/portraits/men/54.jpg" alt="Client" class="img-fluid">
                                 </div>
                                 <div>
-                                    <h6 class="mb-0 text-primary-custom">Thomas Martin</h6>
-                                    <small class="text-muted">Voyage d'affaires</small>
+                                    <h6 class="mb-0" style="color: #2E7D32;">Thomas Martin</h6>
+                                    <small class="text-muted">Cotonou, Bénin</small>
                                 </div>
                             </div>
                             <p class="card-text text-muted">
@@ -229,8 +229,8 @@
                                     <img src="https://randomuser.me/api/portraits/women/67.jpg" alt="Client" class="img-fluid">
                                 </div>
                                 <div>
-                                    <h6 class="mb-0 text-primary-custom">Sophie Lambert</h6>
-                                    <small class="text-muted">Vacances en famille</small>
+                                    <h6 class="mb-0" style="color: #2E7D32;">Sophie Lambert</h6>
+                                    <small class="text-muted">Cotonou, Bénin</small>
                                 </div>
                             </div>
                             <p class="card-text text-muted">

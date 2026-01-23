@@ -215,7 +215,7 @@
                                 
                                 <div class="text-center mb-4">
                                     <div class="display-4" style="color: #4CAF50;">
-                                        {{ number_format($room->price, 0, ',', ' ') }} FCFA
+                                        {{ number_format($room->price, 0) }} Fcfa
                                     </div>
                                     <small class="text-muted">par nuit</small>
                                 </div>
@@ -361,7 +361,7 @@
                             
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="h4 mb-0" style="color: #4CAF50;">
-                                    {{ number_format($relatedRoom->price, 0, ',', ' ') }} FCFA
+                                    {{ number_format($relatedRoom->price, 0) }} Fcfa
                                 </span>
                                 <a href="{{ route('frontend.room.details', $relatedRoom->id) }}" 
                                    class="btn" 
