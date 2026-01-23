@@ -407,6 +407,14 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Housekeeping']], f
         
         // Planning de nettoyage
         Route::get('/schedule', [HousekeepingController::class, 'schedule'])->name('schedule');
+        
+        // MAINTENANCE - routes manquantes
+        Route::get('/maintenance', [HousekeepingController::class, 'maintenance'])->name('maintenance');
+        Route::get('/inspections', [HousekeepingController::class, 'inspections'])->name('inspections');
+        Route::post('/{room}/complete-inspection', [HousekeepingController::class, 'completeInspection'])->name('complete-inspection');
+        Route::get('/monthly-stats', [HousekeepingController::class, 'monthlyStats'])->name('monthly-stats');
+        Route::get('/{room}/maintenance-form', [HousekeepingController::class, 'showMaintenanceForm'])->name('maintenance-form');
+        Route::post('/{room}/end-maintenance', [HousekeepingController::class, 'endMaintenance'])->name('end-maintenance');
     });
 });
 

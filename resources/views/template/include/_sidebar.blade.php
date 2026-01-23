@@ -89,16 +89,16 @@
                             </a>
                         @endif
 
-                        <!-- Disponibilité -->
-                        @if(Route::has('availability.calendar'))
-                        <a href="{{ route('availability.calendar') }}"
-                           class="nav-item {{ str_contains(Route::currentRouteName(), 'availability.') ? 'active' : '' }}">
+                        <!-- APRÈS -->
+                        @if(Route::has('availability.dashboard'))
+                        <a href="{{ route('availability.dashboard') }}"
+                        class="nav-item {{ str_contains(Route::currentRouteName(), 'availability.') ? 'active' : '' }}">
                             <div class="nav-icon">
-                                <i class="fas fa-calendar-alt"></i> <!-- Icône FontAwesome -->
+                                <i class="fas fa-tachometer-alt"></i> <!-- Icône changée pour dashboard -->
                             </div>
                             <div class="nav-content">
                                 <div class="nav-title">Disponibilité</div>
-                                <div class="nav-subtitle">Calendrier & Inventaire</div>
+                                <div class="nav-subtitle">Dashboard & Inventaire</div> <!-- Texte modifié -->
                             </div>
                         </a>
                         @endif
