@@ -291,6 +291,9 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
         
         // API pour vérifier disponibilité (AJAX)
         Route::get('/check', [AvailabilityController::class, 'checkAvailability'])->name('check');
+        
+        // AJOUTEZ CETTE ROUTE POUR L'EXPORT
+        Route::post('/export', [AvailabilityController::class, 'export'])->name('export');
     });
 });
 
