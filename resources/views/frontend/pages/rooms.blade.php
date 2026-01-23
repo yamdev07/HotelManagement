@@ -56,11 +56,11 @@
                         </label>
                         <select class="form-select" id="priceRange" style="border: 1px solid #C8E6C9;">
                             <option value="">Tous les prix</option>
-                            <option value="0-100">Moins de 100€</option>
-                            <option value="100-200">100€ - 200€</option>
-                            <option value="200-300">200€ - 300€</option>
-                            <option value="300-500">300€ - 500€</option>
-                            <option value="500+">Plus de 500€</option>
+                            <option value="0-100">Moins de 100Fcfa</option>
+                            <option value="100-200">100Fcfa - 200Fcfa</option>
+                            <option value="200-300">200Fcfa - 300Fcfa</option>
+                            <option value="300-500">300Fcfa - 500Fcfa</option>
+                            <option value="500+">Plus de 500Fcfa</option>
                         </select>
                     </div>
                 </div>
@@ -148,7 +148,7 @@
                             <div class="d-flex justify-content-between align-items-center mt-4">
                                 <div>
                                     <span class="h4 mb-0" style="color: #4CAF50;">
-                                        {{ number_format($room->price, 0) }} €
+                                        {{ number_format($room->price, 0) }} Fcfa
                                     </span>
                                     <small class="text-muted d-block">par nuit</small>
                                 </div>
@@ -192,7 +192,7 @@
             @if($rooms->hasPages())
             <div class="mt-5 pt-4">
                 <nav aria-label="Navigation des chambres">
-                    {{ $rooms->onEachSide(1)->links('vendor.pagination.custom') }}
+                    {{ $rooms->onEachSide(1)->links() }}
                 </nav>
             </div>
             @endif

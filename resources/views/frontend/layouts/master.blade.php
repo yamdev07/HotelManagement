@@ -218,8 +218,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <h4 class="mb-3">Luxury Palace</h4>
-                    <p>Un hôtel 5 étoiles offrant des services exceptionnels dans un cadre luxueux et paisible.</p>
+                    <h4 class="mb-3">Cactus Palace</h4>
+                    <p>Un hôtel offrant des services exceptionnels dans un cadre luxueux et paisible.</p>
                     <div class="social-icons mt-3">
                         <a href="#"><i class="fab fa-facebook"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
@@ -241,8 +241,8 @@
                 
                 <div class="col-lg-4 mb-4">
                     <h5 class="mb-3">Contact</h5>
-                    <p><i class="fas fa-map-marker-alt me-2"></i> fidjrossé Bénin Cotonou</p>
-                    <p><i class="fas fa-phone me-2"></i> +229 019000000</p>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Haie Vive à côté de Sobaa, Cotonou, Bénin</p>
+                    <p><i class="fas fa-phone me-2"></i> +229 01900000</p>
                     <p><i class="fas fa-envelope me-2"></i> contact@cactushotel.com</p>
                 </div>
             </div>

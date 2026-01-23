@@ -8,8 +8,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 mx-auto text-center">
-                    <h1 class="display-4 mb-4">Bienvenue au Luxury Palace</h1>
-                    <p class="lead mb-4">Découvrez le luxe absolu dans notre hôtel 5 étoiles au cœur de Paris</p>
+                    <h1 class="display-4 mb-4">Bienvenue au Cactus Palace</h1>
+                    <p class="lead mb-4">Découvrez le luxe absolu dans notre hôtel 5 étoiles au cœur de Cotonou</p>
                     <a href="{{ route('frontend.rooms') }}" class="btn btn-primary-custom btn-lg me-2">
                         <i class="fas fa-bed me-1"></i> Voir nos chambres
                     </a>
@@ -125,7 +125,7 @@
                             
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <span class="h5 mb-0" style="color: #4CAF50;">
-                                    {{ number_format($room->price, 0) }} € / nuit
+                                    {{ number_format($room->price, 0) }} Fcfa / nuit
                                 </span>
                                 <a href="{{ route('frontend.room.details', $room->id) }}" class="btn" style="background-color: #4CAF50; border-color: #4CAF50; color: white;">
                                     <i class="fas fa-eye me-1"></i> Détails
@@ -187,7 +187,7 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-0" style="color: #2E7D32;">Marie Dubois</h6>
-                                    <small class="text-muted">Paris, France</small>
+                                    <small class="text-muted">Cotonou, Bénin</small>
                                 </div>
                             </div>
                             <p class="card-text" style="color: #616161;">
@@ -213,7 +213,7 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-0" style="color: #2E7D32;">Thomas Martin</h6>
-                                    <small class="text-muted">Lyon, France</small>
+                                    <small class="text-muted">Cotonou, Bénin</small>
                                 </div>
                             </div>
                             <p class="card-text" style="color: #616161;">
@@ -239,7 +239,7 @@
                                 </div>
                                 <div>
                                     <h6 class="mb-0" style="color: #2E7D32;">Sophie Lambert</h6>
-                                    <small class="text-muted">Bordeaux, France</small>
+                                    <small class="text-muted">Cotonou, Bénin</small>
                                 </div>
                             </div>
                             <p class="card-text" style="color: #616161;">
