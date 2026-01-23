@@ -26,66 +26,57 @@
     <!-- Section de filtres -->
     <section class="py-4" style="background-color: #E8F5E9;">
         <div class="container">
-            <form action="{{ route('frontend.rooms') }}" method="GET" id="filterForm">
-                <div class="row g-3 align-items-center">
-                    <div class="col-lg-3">
-                        <div class="form-group">
-                            <label for="type" class="form-label" style="color: #2E7D32; font-weight: 500;">
-                                <i class="fas fa-filter me-2"></i>Type de chambre
-                            </label>
-                            <select class="form-select" id="type" name="type" style="border: 1px solid #C8E6C9;">
-                                <option value="">Tous les types</option>
-                                @foreach($types as $type)
-                                    <option value="{{ $type->id }}" {{ request('type') == $type->id ? 'selected' : '' }}>
-                                        {{ $type->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+            <div class="row g-3 align-items-center">
+                <div class="col-lg-3">
+                    <div class="form-group">
+                        <label for="roomType" class="form-label" style="color: #2E7D32; font-weight: 500;">
+                            <i class="fas fa-filter me-2"></i>Type de chambre
+                        </label>
+                        <select class="form-select" id="roomType" style="border: 1px solid #C8E6C9;">
+                            <option value="">Tous les types</option>
+                            <option value="standard">Chambre Standard</option>
+                            <option value="deluxe">Chambre Deluxe</option>
+                            <option value="suite">Suite</option>
+                            <option value="presidentielle">Suite Présidentielle</option>
+                        </select>
                     </div>
-                    
-                    <div class="col-lg-3">
-                        <div class="form-group">
-                            <label for="capacity" class="form-label" style="color: #2E7D32; font-weight: 500;">
-                                <i class="fas fa-users me-2"></i>Capacité
-                            </label>
-                            <select class="form-select" id="capacity" name="capacity" style="border: 1px solid #C8E6C9;">
-                                <option value="">Toute capacité</option>
-                                <option value="1" {{ request('capacity') == 1 ? 'selected' : '' }}>1 personne</option>
-                                <option value="2" {{ request('capacity') == 2 ? 'selected' : '' }}>2 personnes</option>
-                                <option value="3" {{ request('capacity') == 3 ? 'selected' : '' }}>3 personnes</option>
-                                <option value="4" {{ request('capacity') == 4 ? 'selected' : '' }}>4 personnes</option>
-                                <option value="5" {{ request('capacity') == 5 ? 'selected' : '' }}>5+ personnes</option>
-                            </select>
-                        </div>
+                </div>
+                
+                <div class="col-lg-3">
+                    <div class="form-group">
+                        <label for="capacity" class="form-label" style="color: #2E7D32; font-weight: 500;">
+                            <i class="fas fa-users me-2"></i>Capacité
+                        </label>
+                        <select class="form-select" id="capacity" style="border: 1px solid #C8E6C9;">
+                            <option value="">Toute capacité</option>
+                            <option value="1">1 personne</option>
+                            <option value="2">2 personnes</option>
+                            <option value="3">3 personnes</option>
+                            <option value="4">4+ personnes</option>
+                        </select>
                     </div>
-                    
-                    <div class="col-lg-3">
-                        <div class="form-group">
-                            <label for="price_range" class="form-label" style="color: #2E7D32; font-weight: 500;">
-                                <i class="fas fa-money-bill me-2"></i>Budget/nuit (FCFA)
-                            </label>
-                            <select class="form-select" id="price_range" name="price_range" style="border: 1px solid #C8E6C9;">
-                                <option value="">Tous les prix</option>
-                                <option value="0-50000" {{ request('price_range') == '0-50000' ? 'selected' : '' }}>Moins de 50 000 FCFA</option>
-                                <option value="50000-100000" {{ request('price_range') == '50000-100000' ? 'selected' : '' }}>50 000 - 100 000 FCFA</option>
-                                <option value="100000-150000" {{ request('price_range') == '100000-150000' ? 'selected' : '' }}>100 000 - 150 000 FCFA</option>
-                                <option value="150000-200000" {{ request('price_range') == '150000-200000' ? 'selected' : '' }}>150 000 - 200 000 FCFA</option>
-                                <option value="200000+" {{ request('price_range') == '200000+' ? 'selected' : '' }}>Plus de 200 000 FCFA</option>
-                            </select>
-                        </div>
+                </div>
+                
+                <div class="col-lg-3">
+                    <div class="form-group">
+                        <label for="priceRange" class="form-label" style="color: #2E7D32; font-weight: 500;">
+                            <i class="fas fa-euro-sign me-2"></i>Budget/nuit
+                        </label>
+                        <select class="form-select" id="priceRange" style="border: 1px solid #C8E6C9;">
+                            <option value="">Tous les prix</option>
+                            <option value="0-100">Moins de 100Fcfa</option>
+                            <option value="100-200">100Fcfa - 200Fcfa</option>
+                            <option value="200-300">200Fcfa - 300Fcfa</option>
+                            <option value="300-500">300Fcfa - 500Fcfa</option>
+                            <option value="500+">Plus de 500Fcfa</option>
+                        </select>
                     </div>
-                    
-                    <div class="col-lg-3 text-lg-end">
-                        <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn" style="background-color: #4CAF50; border-color: #4CAF50; color: white; padding: 10px 20px;">
-                                <i class="fas fa-search me-2"></i>Filtrer
-                            </button>
-                            <a href="{{ route('frontend.rooms') }}" class="btn" style="background-color: #FF9800; border-color: #FF9800; color: white; padding: 10px 20px;">
-                                <i class="fas fa-redo me-2"></i>Réinitialiser
-                            </a>
-                        </div>
-                    </div>
+                </div>
+                
+                <div class="col-lg-3 text-lg-end">
+                    <button class="btn mt-4" style="background-color: #4CAF50; border-color: #4CAF50; color: white; padding: 10px 30px;">
+                        <i class="fas fa-search me-2"></i>Filtrer
+                    </button>
                 </div>
             </form>
         </div>
@@ -177,7 +168,7 @@
                             <div class="d-flex justify-content-between align-items-center mt-4">
                                 <div>
                                     <span class="h4 mb-0" style="color: #4CAF50;">
-                                        {{ number_format($room->price, 0, ',', ' ') }} FCFA
+                                        {{ number_format($room->price, 0) }} Fcfa
                                     </span>
                                     <small class="text-muted d-block">par nuit</small>
                                 </div>
@@ -230,7 +221,7 @@
             @if($rooms->hasPages())
             <div class="mt-5 pt-4">
                 <nav aria-label="Navigation des chambres">
-                    {{ $rooms->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
+                    {{ $rooms->onEachSide(1)->links() }}
                 </nav>
             </div>
             @endif

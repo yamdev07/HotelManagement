@@ -49,8 +49,8 @@
                             </div>
                             <h4 style="color: #2E7D32;">Adresse</h4>
                             <p class="text-muted mb-0">
-                                fidjrossé<br>
-                                fidjossé, Cotonou, Bénin<br>
+                                Haie Vive<br>
+                                Haie Vive à côté de Sobaa, Cotonou, Bénin<br>
                             </p>
                         </div>
                     </div>
@@ -243,7 +243,7 @@
         <div class="container">
             <div class="text-center mb-5">
                 <h2 style="color: #2E7D32;">Notre emplacement</h2>
-                <p class="text-muted">Venez nous rendre visite au cœur de Paris</p>
+                <p class="text-muted">Venez nous rendre visite au cœur de Cotonou</p>
             </div>
             
             <div class="card border-0 shadow-sm overflow-hidden">
@@ -288,7 +288,7 @@
                             </h5>
                             <ul class="list-unstyled text-muted">
                                 <li><i class="fas fa-circle fa-xs me-2" style="color: #4CAF50;"></i>Lignes : 73, 83, 93</li>
-                                <li><i class="fas fa-circle fa-xs me-2" style="color: #4CAF50;"></i>Arrêt : Champs-Élysées - Clemenceau</li>
+                                <li><i class="fas fa-circle fa-xs me-2" style="color: #4CAF50;"></i>Arrêt : Porto-Novo - Bénin</li>
                                 <li><i class="fas fa-circle fa-xs me-2" style="color: #4CAF50;"></i>Noctilien : N11, N24</li>
                             </ul>
                         </div>
@@ -358,8 +358,8 @@
                             </h2>
                             <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body" style="background-color: #F9FDF8;">
-                                    <p>Oui, le Luxury Palace accepte les animaux de compagnie (chiens et chats) jusqu'à 8kg.</p>
-                                    <p>Des frais supplémentaires de 50€ par nuit sont appliqués. Un lit et des gamelles sont fournis sur demande.</p>
+                                    <p>Oui, le Cactus Palace accepte les animaux de compagnie (chiens et chats) jusqu'à 8kg.</p>
+                                    <p>Des frais supplémentaires de 50Fcfa par nuit sont appliqués. Un lit et des gamelles sont fournis sur demande.</p>
                                 </div>
                             </div>
                         </div>
@@ -378,7 +378,7 @@
                             </h2>
                             <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body" style="background-color: #F9FDF8;">
-                                    <p>Oui, nous proposons un service de navette privée depuis les aéroports de Paris (Charles de Gaulle, Orly et Le Bourget).</p>
+                                    <p>Oui, nous proposons un service de navette privée depuis l'aéroport de Cotonou.</p>
                                     <p>Le service doit être réservé au minimum 48 heures à l'avance. Des véhicules de luxe (Berline, Van) sont disponibles.</p>
                                 </div>
                             </div>
@@ -399,7 +399,7 @@
                             <div id="faq4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                                 <div class="accordion-body" style="background-color: #F9FDF8;">
                                     <p>Nous acceptons les cartes de crédit suivantes : Visa, MasterCard, American Express.</p>
-                                    <p>Les paiements en espèces (en euros) sont également acceptés, ainsi que les virements bancaires pour les réservations de groupes.</p>
+                                    <p>Les paiements en espèces (en fcfa) sont également acceptés, ainsi que les virements bancaires pour les réservations de groupes.</p>
                                 </div>
                             </div>
                         </div>

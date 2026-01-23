@@ -14,7 +14,7 @@ class AddStatusToPaymentsTable extends Migration
     public function up()
     {
         Schema::table('payments', function (Blueprint $table) {
-            $table->string('status');
+            $table->string('status')->default('completed');
         });
     }
 
