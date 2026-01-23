@@ -277,26 +277,68 @@ class CheckInController extends Controller
     public function search(Request $request)
     {
         $search = $request->search;
+        $perPage = $request->get('per_page', 10);
+        $dateFilter = $request->get('date_filter', 'all'); // all, today, tomorrow, this_week
         
-        $reservations = Transaction::with(['customer', 'room.type', 'room.roomStatus'])
-            ->where('status', 'reservation')
-            ->where(function($query) use ($search) {
+        $query = Transaction::with(['customer', 'room.type', 'room.roomStatus'])
+            ->where('status', 'reservation');
+        
+        // Recherche par texte
+        if ($search) {
+            $query->where(function($query) use ($search) {
                 $query->whereHas('customer', function($q) use ($search) {
                     $q->where('name', 'LIKE', "%{$search}%")
                     ->orWhere('email', 'LIKE', "%{$search}%")
-                    ->orWhere('address', 'LIKE', "%{$search}%") // Recherche par adresse
-                    ->orWhere('job', 'LIKE', "%{$search}%");    // Recherche par métier
+                    ->orWhere('phone', 'LIKE', "%{$search}%");
                 })
                 ->orWhereHas('room', function($q) use ($search) {
                     $q->where('number', 'LIKE', "%{$search}%");
                 })
-                ->orWhere('id', 'LIKE', "%{$search}%");
-            })
-            ->orderBy('check_in')
-            ->limit(20)
-            ->get();
+                ->orWhere('reference', 'LIKE', "%{$search}%");
+            });
+        }
         
-        return view('checkin.search', compact('reservations', 'search'));
+        // Filtre par date
+        if ($dateFilter !== 'all') {
+            $today = Carbon::today();
+            
+            switch ($dateFilter) {
+                case 'today':
+                    $query->whereDate('check_in', $today);
+                    break;
+                case 'tomorrow':
+                    $query->whereDate('check_in', $today->addDay());
+                    break;
+                case 'this_week':
+                    $query->whereBetween('check_in', [$today, $today->copy()->endOfWeek()]);
+                    break;
+                case 'next_week':
+                    $query->whereBetween('check_in', [$today->copy()->addWeek()->startOfWeek(), $today->copy()->addWeek()->endOfWeek()]);
+                    break;
+            }
+        }
+        
+        // Filtre par type de chambre
+        if ($request->has('room_type_id')) {
+            $query->whereHas('room', function($q) use ($request) {
+                $q->where('type_id', $request->room_type_id);
+            });
+        }
+        
+        $reservations = $query->orderBy('check_in', 'asc')
+            ->paginate($perPage)
+            ->appends($request->except('page'));
+        
+        // Pour les filtres dans la vue
+        $roomTypes = \App\Models\Type::orderBy('name')->get();
+        
+        return view('checkin.search', compact(
+            'reservations', 
+            'search', 
+            'perPage', 
+            'dateFilter',
+            'roomTypes'
+        ));
     }
     /**
      * Check-in direct (sans réservation)
