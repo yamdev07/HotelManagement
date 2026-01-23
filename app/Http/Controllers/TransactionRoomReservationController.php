@@ -9,13 +9,13 @@ use App\Http\Requests\ChooseRoomRequest;
 use App\Models\Customer;
 use App\Models\Room;
 use App\Models\Transaction;
-use App\Models\User;
-use App\Notifications\NewRoomReservationDownPayment;
 use App\Repositories\Interface\CustomerRepositoryInterface;
 use App\Repositories\Interface\PaymentRepositoryInterface;
 use App\Repositories\Interface\ReservationRepositoryInterface;
 use App\Repositories\Interface\TransactionRepositoryInterface;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -26,22 +26,7 @@ class TransactionRoomReservationController extends Controller
     ) {}
 
     /**
-     * Afficher la liste des clients existants
-     */
-    public function pickFromCustomer(Request $request, CustomerRepositoryInterface $customerRepository)
-    {
-        $customers = $customerRepository->get($request);
-        $customersCount = $customerRepository->count($request);
-
-        return view('transaction.reservation.pickFromCustomer', [
-            'customers' => $customers,
-            'customersCount' => $customersCount,
-        ]);
-    }
-
-    /**
      * Afficher le formulaire de création d'identité
-     * Permet d'entrer un email qui peut être utilisé pour plusieurs réservations
      */
     public function createIdentity()
     {
@@ -52,14 +37,13 @@ class TransactionRoomReservationController extends Controller
 
     /**
      * Enregistrer ou mettre à jour un client
-     * Un email peut être utilisé pour plusieurs réservations
      */
     public function storeCustomer(Request $request)
     {
-        // Validation SANS identity_type et identity_number
+        // Validation
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email', // PAS unique - permet plusieurs clients avec même email
+            'email' => 'required|email',
             'phone' => 'required|string|max:20',
             'gender' => 'required|in:Male,Female,Other',
             'address' => 'nullable|string',
@@ -68,13 +52,13 @@ class TransactionRoomReservationController extends Controller
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Rechercher un client avec le même email ET même nom (pour éviter les doublons exacts)
+        // Rechercher un client avec le même email ET même nom
         $existingCustomer = Customer::where('email', $validated['email'])
                                     ->where('name', $validated['name'])
                                     ->first();
         
         if ($existingCustomer) {
-            // Client existant - mettre à jour les informations
+            // Mettre à jour le client existant
             $updateData = [
                 'phone' => $validated['phone'],
                 'gender' => $validated['gender'],
@@ -85,7 +69,6 @@ class TransactionRoomReservationController extends Controller
             
             // Gérer l'avatar si fourni
             if ($request->hasFile('avatar')) {
-                // Supprimer l'ancien avatar si existe
                 if ($existingCustomer->avatar && Storage::exists($existingCustomer->avatar)) {
                     Storage::delete($existingCustomer->avatar);
                 }
@@ -97,15 +80,18 @@ class TransactionRoomReservationController extends Controller
             $existingCustomer->update($updateData);
             $customer = $existingCustomer;
             
-            // Compter les réservations existantes
-            $reservationCount = $customer->transactions()->count();
-            $message = 'Customer information updated: ' . $customer->name . ' (already has ' . $reservationCount . ' reservation(s))';
+            $message = 'Informations client mises à jour : ' . $customer->name;
         } else {
-            // Nouveau client (même email mais nom différent)
-            $customerData = $validated;
+            // Récupérer l'utilisateur connecté
+            $user = auth()->user();
+            if (!$user) {
+                return redirect()->route('login')
+                    ->with('error', 'Vous devez être connecté pour créer un client');
+            }
             
-            // Ajouter user_id (utilisateur connecté ou valeur par défaut)
-            $customerData['user_id'] = auth()->id() ?? 1; // 1 pour admin par défaut si pas connecté
+            // Créer un nouveau client avec l'utilisateur connecté
+            $customerData = $validated;
+            $customerData['user_id'] = $user->id; // Utilisateur connecté
             
             if ($request->hasFile('avatar')) {
                 $avatarPath = $request->file('avatar')->store('avatars', 'public');
@@ -113,7 +99,7 @@ class TransactionRoomReservationController extends Controller
             }
             
             $customer = Customer::create($customerData);
-            $message = 'New customer created: ' . $customer->name;
+            $message = 'Nouveau client créé par ' . $user->name . ' : ' . $customer->name;
         }
 
         return redirect()
@@ -126,7 +112,6 @@ class TransactionRoomReservationController extends Controller
      */
     public function viewCountPerson(Customer $customer)
     {
-        // Vérifier si le client a déjà des réservations
         $existingReservations = $customer->transactions()->count();
         
         return view('transaction.reservation.viewCountPerson', [
@@ -150,25 +135,12 @@ class TransactionRoomReservationController extends Controller
         $rooms = $this->reservationRepository->getUnocuppiedroom($request, $occupiedRoomId);
         $roomsCount = $this->reservationRepository->countUnocuppiedroom($request, $occupiedRoomId);
 
-        // Vérifier si le client a déjà une réservation pendant cette période
-        $hasExistingBooking = $customer->transactions()
-            ->where(function($query) use ($stayFrom, $stayUntil) {
-                $query->whereBetween('check_in', [$stayFrom, $stayUntil])
-                      ->orWhereBetween('check_out', [$stayFrom, $stayUntil])
-                      ->orWhere(function($q) use ($stayFrom, $stayUntil) {
-                          $q->where('check_in', '<=', $stayFrom)
-                            ->where('check_out', '>=', $stayUntil);
-                      });
-            })
-            ->exists();
-
         return view('transaction.reservation.chooseRoom', [
             'customer' => $customer,
             'rooms' => $rooms,
             'stayFrom' => $stayFrom,
             'stayUntil' => $stayUntil,
             'roomsCount' => $roomsCount,
-            'hasExistingBooking' => $hasExistingBooking,
             'occupiedRoomIds' => $occupiedRoomId,
         ]);
     }
@@ -183,7 +155,6 @@ class TransactionRoomReservationController extends Controller
         $dayDifference = Helper::getDateDifference($stayFrom, $stayUntil);
         $downPayment = ($price * $dayDifference) * 0.15;
         
-        // Vérifier si c'est une réservation supplémentaire
         $existingReservationsCount = $customer->transactions()->count();
 
         return view('transaction.reservation.confirmation', [
@@ -197,196 +168,501 @@ class TransactionRoomReservationController extends Controller
         ]);
     }
 
+    /**
+     * Traiter le paiement et créer la réservation
+     */
     public function payDownPayment(
         Customer $customer,
         Room $room,
         Request $request,
-        TransactionRepositoryInterface $transactionRepository,
-        PaymentRepositoryInterface $paymentRepository
+        TransactionRepositoryInterface $transactionRepository = null,
+        PaymentRepositoryInterface $paymentRepository = null
     ) {
-        \Log::info('🔵 =========== PAYDOWNPAYMENT START ===========');
-        \Log::info('🔵 Customer: ' . $customer->id . ' - ' . $customer->name);
-        \Log::info('🔵 Room: ' . $room->id . ' - ' . $room->number . ' - Prix: ' . $room->price);
-        \Log::info('🔵 Request data:', $request->all());
-        \Log::info('🔵 Auth user: ' . (auth()->check() ? auth()->id() . ' - ' . auth()->user()->name : 'NOT LOGGED IN'));
+        \Log::info('🚀 ============ DÉBUT RÉSERVATION ============');
+        \Log::info('📋 Client: ' . $customer->id . ' - ' . $customer->name);
+        \Log::info('🏨 Chambre: ' . $room->id . ' - ' . $room->number);
+        \Log::info('📅 Dates: ' . ($request->check_in ?? 'N/A') . ' → ' . ($request->check_out ?? 'N/A'));
+        \Log::info('💰 Acompte: ' . ($request->downPayment ?? 0) . ' FCFA');
         
-        // ⭐ CORRECTION 1 : Ajouter person_count si manquant
-        if (!$request->has('person_count') || empty($request->person_count)) {
-            $request->merge(['person_count' => 1]);
-            \Log::info('🔵 person_count manquant, fixé à 1');
+        // ============ DEBUG COMPLET UTILISATEUR ============
+        \Log::info('🔍 DEBUG UTILISATEUR CONNECTÉ:');
+        \Log::info('auth()->check(): ' . (auth()->check() ? 'true' : 'false'));
+        \Log::info('auth()->id(): ' . auth()->id());
+        
+        if (auth()->user()) {
+            \Log::info('auth()->user():', [
+                'id' => auth()->user()->id,
+                'name' => auth()->user()->name,
+                'email' => auth()->user()->email,
+                'role' => auth()->user()->role,
+            ]);
+        } else {
+            \Log::warning('⚠️ auth()->user() retourne NULL');
         }
         
-        // ⭐ CORRECTION 2 : Vérifier que les dates existent
-        if (!$request->has('check_in') || !$request->has('check_out')) {
-            \Log::error('❌ Dates manquantes dans la requête');
-            return redirect()->back()
-                ->with('error', 'Les dates de séjour sont requises.')
-                ->withInput();
+        \Log::info('Session ID: ' . session()->getId());
+        
+        // ============ GESTION UTILISATEUR CONNECTÉ ============
+        $user = auth()->user();
+        $userId = null;
+        
+        if ($user) {
+            $userId = $user->id;
+            \Log::info('✅ Utilisateur connecté trouvé:');
+            \Log::info('   ID: ' . $userId);
+            \Log::info('   Nom: ' . $user->name);
+            \Log::info('   Email: ' . $user->email);
+            \Log::info('   Rôle: ' . $user->role);
+        } else {
+            \Log::warning('⚠️ Aucun utilisateur connecté, recherche d\'un admin...');
+            
+            // Rechercher un admin
+            $admin = \App\Models\User::whereIn('role', ['Super', 'Admin'])->first();
+            if ($admin) {
+                $userId = $admin->id;
+                $user = $admin;
+                \Log::info('✅ Admin trouvé pour substitution:');
+                \Log::info('   ID: ' . $userId);
+                \Log::info('   Nom: ' . $admin->name);
+                \Log::info('   Email: ' . $admin->email);
+                \Log::info('   Rôle: ' . $admin->role);
+            } else {
+                // Prendre le premier utilisateur
+                $firstUser = \App\Models\User::first();
+                if ($firstUser) {
+                    $userId = $firstUser->id;
+                    $user = $firstUser;
+                    \Log::info('✅ Premier utilisateur trouvé pour substitution:');
+                    \Log::info('   ID: ' . $userId);
+                    \Log::info('   Nom: ' . $firstUser->name);
+                    \Log::info('   Email: ' . $firstUser->email);
+                    \Log::info('   Rôle: ' . $firstUser->role);
+                } else {
+                    \Log::error('❌ AUCUN UTILISATEUR DANS LA BASE DE DONNÉES');
+                    return redirect()->route('login')
+                        ->with('error', 'Erreur système: Aucun utilisateur trouvé dans la base de données. Veuillez contacter l\'administrateur.');
+                }
+            }
         }
         
-        // Calculer la durée du séjour
-        $dayDifference = Helper::getDateDifference($request->check_in, $request->check_out);
-        $totalPrice = $room->price * $dayDifference;
-        
-        \Log::info('🔵 Calcul: ' . $dayDifference . ' jours, prix total: ' . $totalPrice);
-        
-        // Validation
-        $validated = $request->validate([
-            'downPayment' => 'nullable|numeric|min:0|max:' . $totalPrice,
-            'check_in' => 'required|date',
-            'check_out' => 'required|date|after:check_in',
-            'person_count' => 'required|integer|min:1',
-        ]);
-        
-        \Log::info('🔵 Validation réussie');
-        
-        // Vérifier si la chambre est déjà occupée
-        $occupiedRoomId = $this->getOccupiedRoomID($request->check_in, $request->check_out);
-        $occupiedRoomIdInArray = $occupiedRoomId->toArray();
-        
-        if (in_array($room->id, $occupiedRoomIdInArray)) {
-            \Log::warning('❌ Chambre déjà occupée: ' . $room->id);
-            return redirect()->back()
-                ->with('failed', 'Désolé, la chambre ' . $room->number . ' est déjà occupée pour les dates sélectionnées.')
-                ->withInput();
+        // S'assurer que userId n'est jamais null
+        if (!$userId) {
+            \Log::error('❌ userId est NULL après toutes les vérifications');
+            $userId = 1; // Fallback absolu
+            \Log::info('🔧 userId forcé à: ' . $userId);
         }
         
-        // Vérifier si le client a déjà une réservation aux mêmes dates
-        $hasConflict = $customer->transactions()
-            ->where(function($query) use ($request) {
-                $query->whereBetween('check_in', [$request->check_in, $request->check_out])
-                    ->orWhereBetween('check_out', [$request->check_in, $request->check_out])
-                    ->orWhere(function($q) use ($request) {
-                        $q->where('check_in', '<=', $request->check_in)
-                            ->where('check_out', '>=', $request->check_out);
-                    });
-            })
-            ->where('status', '!=', 'cancelled')
-            ->exists();
-        
-        if ($hasConflict) {
-            \Log::warning('❌ Conflit de dates pour le client: ' . $customer->id);
-            return redirect()->back()
-                ->with('warning', 'Vous avez déjà une réservation pendant ces dates.')
-                ->withInput();
-        }
+        \Log::info('🔑 User ID final qui sera utilisé: ' . $userId);
+        \Log::info('👤 Nom utilisateur final: ' . ($user->name ?? 'Inconnu'));
         
         try {
-            \Log::info('🔵 Création de la transaction...');
+            // ============ VALIDATION ============
+            \Log::info('🔵 Validation des données...');
             
-            // ⭐ CORRECTION 3 : Préparer les données pour debug
-            $transactionData = [
-                'customer_id' => $customer->id,
-                'room_id' => $room->id,
-                'check_in' => $request->check_in,
-                'check_out' => $request->check_out,
-                'person_count' => $request->person_count,
-                'days' => $dayDifference,
-                'room_price' => $room->price,
-                'total_price' => $totalPrice,
-            ];
-            
-            \Log::info('🔵 Données de transaction:', $transactionData);
-            
-            // Créer la transaction
-            $transaction = $transactionRepository->store($request, $customer, $room);
-            
-            \Log::info('✅ Transaction créée avec ID: ' . $transaction->id, [
-                'transaction_id' => $transaction->id,
-                'customer_id' => $transaction->customer_id,
-                'room_id' => $transaction->room_id,
-                'check_in' => $transaction->check_in,
-                'check_out' => $transaction->check_out,
-                'status' => $transaction->status,
-                'total_price' => $transaction->total_price,
-                'person_count' => $transaction->person_count,
+            $validator = \Validator::make($request->all(), [
+                'check_in' => 'required|date',
+                'check_out' => 'required|date|after:check_in',
+                'downPayment' => 'nullable|numeric|min:0',
+                'person_count' => 'nullable|integer|min:1|max:' . $room->capacity,
+                'payment_method' => 'nullable|string|in:cash,card,mobile_money',
+            ], [
+                'check_in.required' => 'La date d\'arrivée est obligatoire',
+                'check_out.required' => 'La date de départ est obligatoire',
+                'check_out.after' => 'La date de départ doit être après la date d\'arrivée',
+                'person_count.max' => 'Le nombre de personnes ne peut pas dépasser la capacité de la chambre (' . $room->capacity . ')',
             ]);
             
-            // Gestion du paiement
-            $downPayment = $request->downPayment ?? 0;
-            
-            if ($downPayment > 0) {
-                $status = ($downPayment == $totalPrice) ? 'Full Payment' : 'Down Payment';
-                \Log::info('🔵 Création paiement: ' . $status . ' - Montant: ' . $downPayment);
-                
-                $payment = $paymentRepository->store($request, $transaction, $status);
-                
-                \Log::info('✅ Paiement créé avec ID: ' . ($payment->id ?? 'N/A'), [
-                    'payment_id' => $payment->id ?? null,
-                    'amount' => $downPayment,
-                    'payment_method' => $payment->payment_method ?? null,
-                ]);
+            if ($validator->fails()) {
+                \Log::error('❌ Validation échouée:', $validator->errors()->toArray());
+                return redirect()->back()
+                    ->withErrors($validator)
+                    ->withInput();
             }
             
-            // Message de succès
-            $successMessage = 'Chambre ' . $room->number . ' réservée pour ' . $customer->name;
-            if ($downPayment > 0) {
-                $successMessage .= ' avec acompte de ' . number_format($downPayment, 0, ',', ' ') . ' FCFA';
+            $validated = $validator->validated();
+            
+            // ============ CALCULS ============
+            \Log::info('🔵 Calcul des durées et prix...');
+            
+            $checkIn = Carbon::parse($validated['check_in']);
+            $checkOut = Carbon::parse($validated['check_out']);
+            $days = $checkIn->diffInDays($checkOut);
+            if ($days == 0) $days = 1;
+            
+            $totalPrice = $room->price * $days;
+            $downPayment = $validated['downPayment'] ?? 0;
+            $personCount = $validated['person_count'] ?? 1;
+            $paymentMethod = $validated['payment_method'] ?? 'cash';
+            
+            \Log::info("📊 Détails calculés:");
+            \Log::info("   - Nuits: {$days} jour(s)");
+            \Log::info("   - Personnes: {$personCount}");
+            \Log::info("   - Prix total: " . number_format($totalPrice, 0, ',', ' ') . " FCFA");
+            \Log::info("   - Acompte: " . number_format($downPayment, 0, ',', ' ') . " FCFA");
+            \Log::info("   - Méthode de paiement: {$paymentMethod}");
+            
+            // Vérifier l'acompte
+            if ($downPayment > $totalPrice) {
+                \Log::warning("❌ Acompte trop élevé: {$downPayment} > {$totalPrice}");
+                return redirect()->back()
+                    ->with('error', 'L\'acompte ne peut pas dépasser le prix total')
+                    ->withInput();
             }
             
-            \Log::info('✅ Réservation réussie! Message: ' . $successMessage);
+            // ============ VÉRIFIER DISPONIBILITÉ ============
+            \Log::info('🔵 Vérification disponibilité chambre...');
+            $isOccupied = $this->isRoomOccupied($room->id, $checkIn, $checkOut);
             
-            // Vérifier les routes disponibles
-            \Log::info('🔵 Vérification des routes...');
-            \Log::info('Route dashboard.index: ' . (\Route::has('dashboard.index') ? 'EXISTE' : 'N\'EXISTE PAS'));
-            \Log::info('Route home: ' . (\Route::has('home') ? 'EXISTE' : 'N\'EXISTE PAS'));
-            \Log::info('Route dashboard: ' . (\Route::has('dashboard') ? 'EXISTE' : 'N\'EXISTE PAS'));
-            
-            // Redirection
-            if (\Route::has('dashboard.index')) {
-                $redirectTo = route('dashboard.index');
-                \Log::info('🔵 Redirection vers dashboard.index: ' . $redirectTo);
-            } elseif (\Route::has('dashboard')) {
-                $redirectTo = route('dashboard');
-                \Log::info('🔵 Redirection vers dashboard: ' . $redirectTo);
-            } elseif (\Route::has('home')) {
-                $redirectTo = route('home');
-                \Log::info('🔵 Redirection vers home: ' . $redirectTo);
-            } else {
-                $redirectTo = '/dashboard';
-                \Log::info('🔵 Redirection vers /dashboard (URL directe)');
+            if ($isOccupied) {
+                \Log::error('❌ Chambre déjà occupée pour ces dates');
+                return redirect()->back()
+                    ->with('error', 'Cette chambre n\'est plus disponible pour les dates sélectionnées. Veuillez choisir d\'autres dates ou une autre chambre.')
+                    ->withInput();
             }
             
-            // Déclencher les événements
+            // ============ CRÉATION DE LA TRANSACTION ============
+            \Log::info('🔵 Création de la réservation...');
+            
+            DB::beginTransaction();
+            
             try {
-                event(new NewReservationEvent($transaction));
-                event(new RefreshDashboardEvent());
-                \Log::info('✅ Événements déclenchés avec succès');
+                // ============ VÉRIFIER/AJOUTER COLONNE NOTES ============
+                \Log::info('🔧 Vérification colonne notes dans transactions...');
+                try {
+                    // Vérifier si la colonne notes existe
+                    $columns = DB::select("SHOW COLUMNS FROM transactions LIKE 'notes'");
+                    if (empty($columns)) {
+                        DB::statement('ALTER TABLE transactions ADD COLUMN notes TEXT NULL');
+                        \Log::info('✅ Colonne notes ajoutée à la table transactions');
+                    } else {
+                        \Log::info('✅ Colonne notes existe déjà');
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('⚠️ Erreur vérification colonne notes: ' . $e->getMessage());
+                }
+                
+                // ============ CRÉATION TRANSACTION ============
+                \Log::info('🔵 Création de la transaction avec colonnes existantes...');
+                
+                // Données avec SEULEMENT les colonnes qui existent dans votre table transactions
+                $transactionData = [
+                    'user_id' => $userId,
+                    'customer_id' => $customer->id,
+                    'room_id' => $room->id,
+                    'check_in' => $checkIn,
+                    'check_out' => $checkOut,
+                    'person_count' => $personCount,
+                    'total_price' => $totalPrice,
+                    'total_payment' => $downPayment, // ✅ Votre colonne s'appelle total_payment
+                    'status' => 'reservation',
+                    'notes' => sprintf(
+                        'Réservation créée par %s | %d nuit(s) | %s FCFA/nuit | Acompte: %s FCFA | Méthode: %s',
+                        $user->name ?? 'Système',
+                        $days,
+                        number_format($room->price, 0, ',', ' '),
+                        number_format($downPayment, 0, ',', ' '),
+                        $paymentMethod
+                    ),
+                    'checkin_notes' => json_encode([
+                        'agent' => $user->name ?? 'Système',
+                        'nights' => $days,
+                        'price_per_night' => $room->price,
+                        'room_type' => $room->type->name ?? 'Standard',
+                        'payment_method' => $paymentMethod,
+                        'down_payment' => $downPayment,
+                        'total_amount' => $totalPrice,
+                        'created_at' => now()->toDateTimeString(),
+                    ]),
+                ];
+                
+                \Log::info('📋 Données transaction (colonnes existantes):', $transactionData);
+                
+                // Créer la transaction
+                $transaction = null;
+                if ($transactionRepository && method_exists($transactionRepository, 'store')) {
+                    try {
+                        $transaction = $transactionRepository->store($request, $customer, $room);
+                        \Log::info('✅ Transaction créée via Repository - ID: ' . $transaction->id);
+                    } catch (\Exception $e) {
+                        \Log::warning('⚠️ Erreur avec repository, création directe: ' . $e->getMessage());
+                        $transaction = Transaction::create($transactionData);
+                        \Log::info('✅ Transaction créée directement (fallback) - ID: ' . $transaction->id);
+                    }
+                } else {
+                    $transaction = Transaction::create($transactionData);
+                    \Log::info('✅ Transaction créée directement - ID: ' . $transaction->id);
+                }
+                
+                // Vérifier que la transaction a bien été créée
+                if (!$transaction) {
+                    throw new \Exception('Échec de la création de la transaction');
+                }
+                
+                // ============ CRÉATION DU PAIEMENT (si acompte) ============
+                if ($downPayment > 0) {
+                    \Log::info("💰 Création du paiement: " . number_format($downPayment, 0, ',', ' ') . " FCFA");
+                    
+                    try {
+                        // Votre table payments a les colonnes : id, user_id, transaction_id, amount, payment_method, notes, reference, created_at, updated_at, status, cancelled_at, cancelled_by, cancel_reason, deleted_at
+                        
+                        $paymentData = [
+                            'user_id' => $userId,
+                            'transaction_id' => $transaction->id,
+                            'amount' => $downPayment, // ✅ Votre colonne s'appelle 'amount' pas 'price'
+                            'payment_method' => $paymentMethod,
+                            'reference' => 'PAY-' . $transaction->id . '-' . time(),
+                            'status' => 'completed', // Défaut est 'pending', mais pour acompte on met 'completed'
+                            'notes' => sprintf(
+                                'Acompte réservation | Agent: %s | Client: %s | Chambre: %s | Nuits: %d',
+                                $user->name ?? 'Système',
+                                $customer->name,
+                                $room->number,
+                                $days
+                            ),
+                        ];
+                        
+                        \Log::info('📋 Données paiement (colonnes existantes):', $paymentData);
+                        
+                        // Essayer avec le repository
+                        if ($paymentRepository) {
+                            try {
+                                if (method_exists($paymentRepository, 'create')) {
+                                    $payment = $paymentRepository->create($paymentData);
+                                    \Log::info('✅ Paiement créé via create() - ID: ' . ($payment->id ?? 'N/A'));
+                                } elseif (method_exists($paymentRepository, 'store')) {
+                                    // Créer une requête simulée
+                                    $mockRequest = new \Illuminate\Http\Request();
+                                    $mockRequest->merge([
+                                        'amount' => $downPayment,
+                                        'payment_method' => $paymentMethod,
+                                        'notes' => 'Acompte réservation',
+                                        'reference' => $paymentData['reference'],
+                                    ]);
+                                    $payment = $paymentRepository->store($mockRequest, $transaction, 'Acompte');
+                                    \Log::info('✅ Paiement créé via store() - ID: ' . ($payment->id ?? 'N/A'));
+                                } else {
+                                    $payment = \App\Models\Payment::create($paymentData);
+                                    \Log::info('✅ Paiement créé directement (repository non fonctionnel) - ID: ' . $payment->id);
+                                }
+                            } catch (\Exception $repoError) {
+                                \Log::warning('⚠️ Erreur avec repository, création directe: ' . $repoError->getMessage());
+                                $payment = \App\Models\Payment::create($paymentData);
+                                \Log::info('✅ Paiement créé directement (fallback) - ID: ' . $payment->id);
+                            }
+                        } else {
+                            $payment = \App\Models\Payment::create($paymentData);
+                            \Log::info('✅ Paiement créé directement (sans repo) - ID: ' . $payment->id);
+                        }
+                        
+                    } catch (\Exception $e) {
+                        \Log::warning('⚠️ Erreur création paiement: ' . $e->getMessage());
+                        \Log::warning('⚠️ Détail: ' . $e->getFile() . ':' . $e->getLine());
+                        // Continuer même si le paiement échoue - la réservation est déjà créée
+                    }
+                }
+                
+                // ============ MISE À JOUR STATUT CHAMBRE ============
+                try {
+                    // Vérifier si la colonne room_status_id existe dans la table rooms
+                    $roomColumns = DB::select("SHOW COLUMNS FROM rooms LIKE 'room_status_id'");
+                    if (!empty($roomColumns)) {
+                        $room->update(['room_status_id' => 2]); // 2 = Réservée
+                        \Log::info('✅ Statut chambre mis à jour: Réservée');
+                    } else {
+                        \Log::info('ℹ️ Colonne room_status_id non trouvée dans la table rooms');
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('⚠️ Erreur mise à jour statut chambre: ' . $e->getMessage());
+                }
+                
+                // ============ ÉVÉNEMENTS ============
+                try {
+                    if (class_exists(NewReservationEvent::class)) {
+                        event(new NewReservationEvent($transaction, $user->name ?? 'Système'));
+                        \Log::info('✅ Événement NewReservationEvent envoyé');
+                    }
+                    if (class_exists(RefreshDashboardEvent::class)) {
+                        event(new RefreshDashboardEvent());
+                        \Log::info('✅ Événement RefreshDashboardEvent envoyé');
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('⚠️ Erreur lors de l\'envoi des événements: ' . $e->getMessage());
+                }
+                
+                // ============ CONFIRMATION ============
+                DB::commit();
+                \Log::info('✅ Transaction BDD confirmée avec succès');
+                
+                // ============ MESSAGE DE SUCCÈS PERSONNALISÉ ============
+                $successMessage = $this->buildSuccessMessageWithUser(
+                    $transaction, 
+                    $customer, 
+                    $room, 
+                    $checkIn, 
+                    $checkOut, 
+                    $days, 
+                    $totalPrice, 
+                    $downPayment, 
+                    $user
+                );
+                
+                \Log::info('🎊 RÉSERVATION RÉUSSIE par ' . ($user->name ?? 'Système') . ' - ID: ' . $transaction->id);
+                \Log::info('🚀 ============ FIN PROCESSUS RÉSERVATION ============');
+                
+                // ============ REDIRECTION ============
+                return redirect()->route('transaction.show', $transaction)
+                    ->with('success', $successMessage)
+                    ->with('transaction_id', $transaction->id)
+                    ->with('agent_name', $user->name ?? 'Système');
+                    
             } catch (\Exception $e) {
-                \Log::warning('⚠️ Impossible de déclencher les événements: ' . $e->getMessage());
+                DB::rollBack();
+                \Log::error('❌ Erreur pendant la transaction BDD: ' . $e->getMessage());
+                \Log::error('❌ Stack trace: ' . $e->getTraceAsString());
+                
+                // Log supplémentaire pour debug SQL
+                if ($e instanceof \Illuminate\Database\QueryException) {
+                    \Log::error('❌ SQL Error Code: ' . $e->getCode());
+                    \Log::error('❌ SQL Error Message: ' . $e->getMessage());
+                    \Log::error('❌ SQL Query: ' . $e->getSql());
+                    \Log::error('❌ SQL Bindings: ' . json_encode($e->getBindings()));
+                    
+                    // Message d'erreur spécifique
+                    if (strpos($e->getMessage(), 'Column not found') !== false) {
+                        preg_match("/Column not found.*'([^']+)'/", $e->getMessage(), $matches);
+                        $column = $matches[1] ?? 'inconnue';
+                        \Log::error('❌ Colonne manquante: ' . $column);
+                    }
+                }
+                
+                return redirect()->back()
+                    ->with('error', 'Erreur lors de la création de la réservation: ' . $e->getMessage())
+                    ->withInput();
             }
             
-            \Log::info('🔵 =========== PAYDOWNPAYMENT SUCCESS ===========');
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('❌ Erreur base de données: ' . $e->getMessage());
+            \Log::error('❌ SQL Error Code: ' . $e->getCode());
+            \Log::error('❌ SQL Query: ' . $e->getSql());
+            \Log::error('❌ SQL Bindings: ' . json_encode($e->getBindings()));
             
-            return redirect($redirectTo)
-                ->with('success', $successMessage)
-                ->with('transaction_id', $transaction->id);
-                
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('❌ Erreur de validation: ' . json_encode($e->errors()));
-            throw $e;
+            // Détection d'erreurs spécifiques
+            $errorMessage = 'Erreur de base de données lors de la réservation.';
             
-        } catch (\Illuminate\Database\QueryException $qe) {
-            \Log::error('❌ Erreur de base de données: ' . $qe->getMessage());
-            \Log::error('❌ SQL: ' . $qe->getSql());
-            \Log::error('❌ Bindings: ' . json_encode($qe->getBindings()));
+            if (strpos($e->getMessage(), 'Column not found') !== false) {
+                preg_match("/Column not found.*'([^']+)'/", $e->getMessage(), $matches);
+                $column = $matches[1] ?? 'inconnue';
+                $errorMessage = "Erreur: La colonne '{$column}' n'existe pas dans la table. Veuillez exécuter: ALTER TABLE transactions ADD COLUMN notes TEXT NULL;";
+            } elseif (strpos($e->getMessage(), 'doesn\'t have a default value') !== false) {
+                $field = $this->extractFieldName($e->getMessage());
+                $errorMessage = "Erreur: Le champ '{$field}' est requis.";
+            }
             
             return redirect()->back()
-                ->with('error', 'Erreur de base de données: ' . $qe->getMessage())
+                ->with('error', $errorMessage)
                 ->withInput();
                 
         } catch (\Exception $e) {
-            \Log::error('❌ Erreur de réservation: ' . $e->getMessage());
-            \Log::error('❌ File: ' . $e->getFile() . ' Line: ' . $e->getLine());
+            \Log::error('❌ Erreur générale réservation: ' . $e->getMessage());
             \Log::error('❌ Stack trace: ' . $e->getTraceAsString());
             
             return redirect()->back()
-                ->with('error', 'Une erreur est survenue lors du traitement de la réservation: ' . $e->getMessage())
+                ->with('error', 'Erreur lors de la réservation: ' . $e->getMessage())
                 ->withInput();
         }
     }
     /**
-     * Obtenir les IDs des chambres occupées pour une période donnée
+     * Construire le message de succès avec l'utilisateur
+     */
+    private function buildSuccessMessageWithUser($transaction, $customer, $room, $checkIn, $checkOut, $days, $totalPrice, $downPayment, $user)
+    {
+        $message = '<div class="alert alert-success border-0">';
+        $message .= '<div class="d-flex align-items-center mb-3">';
+        $message .= '<i class="fas fa-check-circle fa-2x me-3 text-success"></i>';
+        $message .= '<div>';
+        $message .= '<h5 class="alert-heading mb-1">✅ Réservation confirmée !</h5>';
+        $message .= '<p class="mb-0"><small>Réservée par <strong>' . $user->name . '</strong></small></p>';
+        $message .= '</div>';
+        $message .= '</div>';
+        
+        $message .= '<div class="row">';
+        $message .= '<div class="col-md-6">';
+        $message .= '<p><strong><i class="fas fa-user me-2"></i>Client:</strong> ' . $customer->name . '</p>';
+        $message .= '<p><strong><i class="fas fa-bed me-2"></i>Chambre:</strong> ' . $room->number . ' (' . ($room->type->name ?? 'Standard') . ')</p>';
+        $message .= '<p><strong><i class="fas fa-calendar-alt me-2"></i>Période:</strong> ' . $checkIn->format('d/m/Y') . ' → ' . $checkOut->format('d/m/Y') . '</p>';
+        $message .= '<p><strong><i class="fas fa-moon me-2"></i>Durée:</strong> ' . $days . ' nuit' . ($days > 1 ? 's' : '') . '</p>';
+        $message .= '</div>';
+        
+        $message .= '<div class="col-md-6">';
+        $message .= '<p><strong><i class="fas fa-receipt me-2"></i>Prix total:</strong> ' . number_format($totalPrice, 0, ',', ' ') . ' FCFA</p>';
+        
+        if ($downPayment > 0) {
+            $remaining = $totalPrice - $downPayment;
+            $message .= '<p class="text-success"><strong><i class="fas fa-money-bill-wave me-2"></i>Acompte payé:</strong> ' . number_format($downPayment, 0, ',', ' ') . ' FCFA</p>';
+            if ($remaining > 0) {
+                $message .= '<p class="text-warning"><strong><i class="fas fa-balance-scale me-2"></i>Solde à régler:</strong> ' . number_format($remaining, 0, ',', ' ') . ' FCFA</p>';
+            } else {
+                $message .= '<p class="text-success"><strong><i class="fas fa-check-double me-2"></i>✅ Paiement complet</strong></p>';
+            }
+        } else {
+            $message .= '<p class="text-info"><strong><i class="fas fa-clock me-2"></i>À régler à l\'arrivée:</strong> ' . number_format($totalPrice, 0, ',', ' ') . ' FCFA</p>';
+        }
+        
+        $message .= '</div>';
+        $message .= '</div>';
+        
+        $message .= '<hr class="my-3">';
+        $message .= '<div class="text-center">';
+        $message .= '<small class="text-muted">';
+        $message .= '<i class="fas fa-hashtag me-1"></i>Référence: #TRX-' . $transaction->id . ' | ';
+        $message .= '<i class="fas fa-user-circle me-1"></i>Agent: ' . $user->name . ' | ';
+        $message .= '<i class="fas fa-calendar me-1"></i>Créé le: ' . now()->format('d/m/Y H:i');
+        $message .= '</small>';
+        $message .= '</div>';
+        $message .= '</div>';
+        
+        return $message;
+    }
+
+    /**
+     * Construire le message de succès (ancienne version)
+     */
+    private function buildSuccessMessage($transaction, $customer, $room, $checkIn, $checkOut, $days, $totalPrice, $downPayment)
+    {
+        return $this->buildSuccessMessageWithUser($transaction, $customer, $room, $checkIn, $checkOut, $days, $totalPrice, $downPayment, auth()->user());
+    }
+
+    /**
+     * Extraire le nom du champ à partir du message d'erreur SQL
+     */
+    private function extractFieldName($errorMessage)
+    {
+        if (preg_match("/Field '([^']+)' doesn't have a default value/", $errorMessage, $matches)) {
+            return $matches[1];
+        }
+        return 'inconnu';
+    }
+
+    /**
+     * Vérifier si une chambre est occupée
+     */
+    private function isRoomOccupied($roomId, $checkIn, $checkOut)
+    {
+        return Transaction::where('room_id', $roomId)
+            ->where('status', '!=', 'cancelled')
+            ->where(function($query) use ($checkIn, $checkOut) {
+                $query->whereBetween('check_in', [$checkIn, $checkOut])
+                      ->orWhereBetween('check_out', [$checkIn, $checkOut])
+                      ->orWhere(function($q) use ($checkIn, $checkOut) {
+                          $q->where('check_in', '<', $checkIn)
+                            ->where('check_out', '>', $checkOut);
+                      });
+            })
+            ->exists();
+    }
+
+    /**
+     * Obtenir les IDs des chambres occupées
      */
     private function getOccupiedRoomID($stayFrom, $stayUntil)
     {
@@ -395,66 +671,54 @@ class TransactionRoomReservationController extends Controller
                       ->orWhere([['check_in', '>=', $stayFrom], ['check_in', '<=', $stayUntil]])
                       ->orWhere([['check_out', '>=', $stayFrom], ['check_out', '<=', $stayUntil]]);
             })
-            ->where('status', '!=', 'cancelled') // Exclure les réservations annulées
+            ->where('status', '!=', 'cancelled')
             ->pluck('room_id')
             ->unique();
     }
 
     /**
-     * Rechercher un client par email (API pour AJAX)
+     * Rechercher un client par email (AJAX)
      */
     public function searchByEmail(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email'
-        ]);
-
-        // Rechercher TOUS les clients avec cet email
+        $request->validate(['email' => 'required|email']);
+        
         $customers = Customer::where('email', $request->email)->get();
         
-        if ($customers->count() > 0) {
-            // Calculer le total des réservations
-            $totalReservations = 0;
-            $customerDetails = [];
-            
-            foreach ($customers as $customer) {
-                $reservationCount = $customer->transactions()->count();
-                $totalReservations += $reservationCount;
-                
-                $customerDetails[] = [
-                    'id' => $customer->id,
-                    'name' => $customer->name,
-                    'phone' => $customer->phone,
-                    'reservation_count' => $reservationCount,
-                ];
-            }
-            
+        if ($customers->isEmpty()) {
             return response()->json([
-                'exists' => true,
-                'customers_count' => $customers->count(),
-                'total_reservations' => $totalReservations,
-                'customers' => $customerDetails,
-                'message' => 'Found ' . $customers->count() . ' customer(s) with this email'
+                'exists' => false,
+                'message' => 'Aucun client trouvé avec cet email'
             ]);
         }
-
+        
+        $customerDetails = $customers->map(function($customer) {
+            return [
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'phone' => $customer->phone,
+                'reservation_count' => $customer->transactions()->count(),
+            ];
+        });
+        
         return response()->json([
-            'exists' => false,
-            'message' => 'No customer found with this email'
+            'exists' => true,
+            'customers' => $customerDetails,
+            'message' => 'Trouvé ' . $customers->count() . ' client(s) avec cet email'
         ]);
     }
 
     /**
-     * Afficher les réservations existantes d'un client
+     * Afficher les réservations d'un client
      */
     public function showCustomerReservations(Customer $customer)
     {
         $reservations = $customer->transactions()
-            ->with(['room', 'room.type'])
-            ->orderBy('check_in', 'desc')
-            ->get();
-
-        return view('transaction.reservation.customerReservations', [
+            ->with(['room', 'room.type', 'payments'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+        
+        return view('transaction.reservation.customer-reservations', [
             'customer' => $customer,
             'reservations' => $reservations,
         ]);
