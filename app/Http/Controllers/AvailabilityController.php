@@ -622,17 +622,15 @@ class AvailabilityController extends Controller
         ];
     }
     
-    /**
-     * Dashboard de disponibilité optimisé
-     */
+
     public function dashboard()
     {
         try {
             $today = now();
             $tomorrow = $today->copy()->addDay();
             
-            // Statistiques globales en une seule requête
-            $stats = DB::table('rooms')
+            // Statistiques globales
+            $statsQuery = DB::table('rooms')
                 ->selectRaw('
                     COUNT(*) as total_rooms,
                     SUM(CASE WHEN room_status_id = 1 THEN 1 ELSE 0 END) as available_rooms,
@@ -648,9 +646,16 @@ class AvailabilityController extends Controller
                 ->distinct('room_id')
                 ->count('room_id');
             
-            $stats->occupied_rooms = $occupiedRooms;
-            $stats->occupancy_rate = $stats->total_rooms > 0 ? 
-                round(($occupiedRooms / $stats->total_rooms) * 100, 1) : 0;
+            // Convertir en tableau
+            $stats = [
+                'total_rooms' => $statsQuery->total_rooms ?? 0,
+                'available_rooms' => $statsQuery->available_rooms ?? 0,
+                'maintenance_rooms' => $statsQuery->maintenance_rooms ?? 0,
+                'cleaning_rooms' => $statsQuery->cleaning_rooms ?? 0,
+                'occupied_rooms' => $occupiedRooms,
+                'occupancy_rate' => ($statsQuery->total_rooms ?? 0) > 0 ? 
+                    round(($occupiedRooms / ($statsQuery->total_rooms ?? 1)) * 100, 1) : 0
+            ];
             
             // Arrivées des 3 prochains jours
             $upcomingArrivals = Transaction::with(['room.type', 'customer'])
@@ -676,10 +681,10 @@ class AvailabilityController extends Controller
             $availableNow = Room::where('room_status_id', 1)
                 ->whereNotIn('id', function($query) use ($today) {
                     $query->select('room_id')
-                          ->from('transactions')
-                          ->where('check_in', '<=', $today)
-                          ->where('check_out', '>=', $today)
-                          ->whereIn('status', ['active', 'reservation']);
+                        ->from('transactions')
+                        ->where('check_in', '<=', $today)
+                        ->where('check_out', '>=', $today)
+                        ->whereIn('status', ['active', 'reservation']);
                 })
                 ->with('type')
                 ->orderBy('type_id')
@@ -687,8 +692,8 @@ class AvailabilityController extends Controller
                 ->limit(15)
                 ->get();
             
-            // Chambres nécessitant attention
-            $attentionRooms = Room::whereIn('room_status_id', [2, 3, 4]) // Maintenance, Cleaning, Out of Service
+            // Chambres en maintenance/nettoyage - CORRECTION DU NOM DE VARIABLE
+            $unavailableRooms = Room::whereIn('room_status_id', [2, 3, 4]) // Maintenance, Cleaning, Out of Service
                 ->with(['type', 'roomStatus'])
                 ->orderBy('room_status_id')
                 ->orderBy('updated_at', 'desc')
@@ -698,8 +703,8 @@ class AvailabilityController extends Controller
             $occupancyByType = Type::with(['rooms' => function($query) {
                 $query->withCount(['transactions' => function($q) {
                     $q->where('check_in', '<=', now())
-                      ->where('check_out', '>=', now())
-                      ->whereIn('status', ['active', 'reservation']);
+                    ->where('check_out', '>=', now())
+                    ->whereIn('status', ['active', 'reservation']);
                 }]);
             }])->get()->map(function($type) {
                 $totalRooms = $type->rooms->count();
@@ -721,7 +726,7 @@ class AvailabilityController extends Controller
                 'upcomingArrivals',
                 'upcomingDepartures',
                 'availableNow',
-                'attentionRooms',
+                'unavailableRooms', // Utiliser le bon nom de variable
                 'occupancyByType',
                 'today',
                 'tomorrow'
