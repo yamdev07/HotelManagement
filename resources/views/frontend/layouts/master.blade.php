@@ -64,12 +64,29 @@
         }
         
         .hero-section {
-            background: linear-gradient(rgba(76, 175, 80, 0.8), rgba(76, 175, 80, 0.8)), 
-                        url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
             color: white;
-            padding: 150px 0;
+            padding: 180px 0;
+            position: relative;
+        }
+        
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+        
+        .hero-section .container {
+            position: relative;
+            z-index: 2;
         }
         
         .room-card {
@@ -155,6 +172,27 @@
         .badge.bg-primary {
             background-color: var(--primary-color) !important;
         }
+        
+        /* Boutons Hero Section */
+        .hero-section .btn-primary-custom {
+            background-color: #2E7D32;
+            border-color: #2E7D32;
+        }
+        
+        .hero-section .btn-primary-custom:hover {
+            background-color: #1B5E20;
+            border-color: #1B5E20;
+        }
+        
+        .hero-section .btn-outline-light {
+            border-color: white;
+            color: white;
+        }
+        
+        .hero-section .btn-outline-light:hover {
+            background-color: white;
+            color: var(--dark-color);
+        }
     </style>
     
     @stack('styles')
@@ -164,7 +202,7 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
         <div class="container">
             <a class="navbar-brand" href="{{ route('frontend.home') }}">
-                <i class="fas fa-hotel me-2"></i>cactushotel Palace
+                <i class="fas fa-hotel me-2"></i>Cactus Palace
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -218,7 +256,7 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-4 mb-4">
-                    <h4 class="mb-3">Luxury Palace</h4>
+                    <h4 class="mb-3">Cactus Palace</h4>
                     <p>Un hôtel 5 étoiles offrant des services exceptionnels dans un cadre luxueux et paisible.</p>
                     <div class="social-icons mt-3">
                         <a href="#"><i class="fab fa-facebook"></i></a>
@@ -240,17 +278,19 @@
                 </div>
                 
                 <div class="col-lg-4 mb-4">
-                    <h5 class="mb-3">Contact</h5>
-                    <p><i class="fas fa-map-marker-alt me-2"></i> fidjrossé Bénin Cotonou</p>
-                    <p><i class="fas fa-phone me-2"></i> +229 019000000</p>
+                    <h5 class="mb-3">Contact & Localisation</h5>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> Haie Vive, Cotonou, Bénin</p>
+                    <p><i class="fas fa-phone me-2"></i> +229 01 XX XX XX XX</p>
+                    <p><i class="fas fa-phone me-2"></i> +229 02 XX XX XX XX</p>
                     <p><i class="fas fa-envelope me-2"></i> contact@cactushotel.com</p>
+                    <p><i class="fas fa-envelope me-2"></i> reservation@cactushotel.com</p>
                 </div>
             </div>
             
             <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
             
             <div class="text-center">
-                <p class="mb-0">&copy; {{ date('Y') }} Cactus Palace. Tous droits réservés.</p>
+                <p class="mb-0">&copy; {{ date('Y') }} Cactus Palace - Haie Vive, Cotonou. Tous droits réservés.</p>
             </div>
         </div>
     </footer>

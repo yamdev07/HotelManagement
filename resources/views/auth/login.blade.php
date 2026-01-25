@@ -1,9 +1,9 @@
 @extends('template.auth')
-@section('title', 'Login')
+@section('title', 'Login - Cactus Hotel')
 @section('content')
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f8f9fa;
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
         }
@@ -17,348 +17,420 @@
         }
 
         .login-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(20px);
+            background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             width: 100%;
-            max-width: 450px;
-            animation: slideUp 0.6s ease-out;
+            max-width: 1000px;
+            display: flex;
+            min-height: 600px;
         }
 
-        .login-header {
-            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+        /* Côté gauche avec l'icône et présentation */
+        .login-left {
+            background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);
             color: white;
-            text-align: center;
-            padding: 3rem 2rem 2rem;
+            padding: 3rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
             position: relative;
+            overflow: hidden;
         }
 
-        .login-header::before {
+        .login-left::before {
             content: '';
             position: absolute;
-            bottom: -20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            top: -100px;
+            right: -100px;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
-            border: 4px solid rgba(255, 255, 255, 0.95);
         }
 
-        .logo-container {
-            width: 80px;
-            height: 80px;
-            background: white;
+        .login-left::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            left: -50px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+        }
+
+        .hotel-icon {
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .hotel-icon i {
+            font-size: 4rem;
+            color: white;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .hotel-name {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+
+        .hotel-slogan {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-bottom: 3rem;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .features-list li {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .features-list i {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin-right: 1rem;
+            font-size: 1.1rem;
         }
 
-        .logo-container i {
-            font-size: 2rem;
-            color: #2563eb;
+        /* Côté droit avec le formulaire */
+        .login-right {
+            flex: 1;
+            padding: 3rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
-        .login-body {
-            padding: 3rem 2rem 2rem;
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
         }
 
-        .form-floating {
+        .login-header h3 {
+            color: #2E7D32;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
             margin-bottom: 1.5rem;
+            position: relative;
         }
 
-        .form-floating .form-control {
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 1rem;
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #444;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 1px solid #ddd;
+            border-radius: 10px;
             font-size: 1rem;
             transition: all 0.3s ease;
-            background: rgba(248, 250, 252, 0.8);
+            background: #f8f9fa;
         }
 
-        .form-floating .form-control:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        .form-control:focus {
+            outline: none;
+            border-color: #2E7D32;
             background: white;
+            box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
         }
 
-        .form-floating label {
-            color: #64748b;
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 2.7rem;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .remember-forgot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+        }
+
+        .form-check-input {
+            margin-right: 0.5rem;
+            width: 18px;
+            height: 18px;
+            border-color: #ddd;
+        }
+
+        .form-check-input:checked {
+            background-color: #2E7D32;
+            border-color: #2E7D32;
+        }
+
+        .form-check-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .forgot-link {
+            color: #2E7D32;
+            text-decoration: none;
+            font-size: 0.9rem;
             font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-link:hover {
+            color: #1B5E20;
         }
 
         .btn-login {
-            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            background: linear-gradient(135deg, #2E7D32 0%, #4CAF50 100%);
+            color: white;
             border: none;
-            border-radius: 12px;
+            border-radius: 10px;
             padding: 1rem 2rem;
-            font-weight: 600;
             font-size: 1rem;
-            transition: all 0.3s ease;
+            font-weight: 600;
             width: 100%;
-            position: relative;
-            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
         }
 
         .btn-login:hover {
-            background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+            background: linear-gradient(135deg, #1B5E20 0%, #2E7D32 100%);
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 5px 15px rgba(46, 125, 50, 0.3);
         }
 
         .btn-login:active {
             transform: translateY(0);
         }
 
-        .btn-login.loading {
-            color: transparent;
-        }
-
-        .btn-spinner {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .btn-login.loading .btn-spinner {
-            opacity: 1;
-        }
-
-        .divider {
-            position: relative;
+        .login-divider {
             text-align: center;
             margin: 2rem 0;
+            position: relative;
         }
 
-        .divider::before {
+        .login-divider::before {
             content: '';
             position: absolute;
             top: 50%;
             left: 0;
             right: 0;
             height: 1px;
-            background: #e2e8f0;
+            background: #eee;
         }
 
-        .divider span {
-            background: rgba(255, 255, 255, 0.95);
+        .login-divider span {
+            background: white;
             padding: 0 1rem;
-            color: #64748b;
-            font-size: 0.875rem;
+            color: #666;
+            font-size: 0.85rem;
+            position: relative;
+            z-index: 1;
         }
 
-        .forgot-link {
-            color: #2563eb;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
-
-        .forgot-link:hover {
-            color: #1d4ed8;
-        }
-
-        .demo-info {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border-radius: 12px;
-            padding: 1rem;
+        .demo-credentials {
+            background: #f1f8e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 10px;
+            padding: 1.2rem;
             margin-top: 1.5rem;
-            border: 1px solid #e2e8f0;
         }
 
-        .demo-info h6 {
-            color: #475569;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
+        .demo-credentials h6 {
+            color: #2E7D32;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .demo-info p {
-            margin: 0;
-            font-size: 0.875rem;
-            color: #64748b;
+        .demo-credentials p {
+            margin: 0.3rem 0;
+            color: #424242;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes spin {
-            from {
-                transform: translate(-50%, -50%) rotate(0deg);
-            }
-            to {
-                transform: translate(-50%, -50%) rotate(360deg);
-            }
-        }
-
-        .floating-shapes {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            overflow: hidden;
-        }
-
-        .shape {
-            position: absolute;
-            opacity: 0.1;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        .shape:nth-child(1) {
-            top: 10%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .shape:nth-child(2) {
-            top: 20%;
-            right: 10%;
-            animation-delay: 2s;
-        }
-
-        .shape:nth-child(3) {
-            bottom: 10%;
-            left: 20%;
-            animation-delay: 4s;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-20px) rotate(10deg);
-            }
+        .demo-credentials strong {
+            color: #2E7D32;
+            min-width: 70px;
+            display: inline-block;
         }
 
         @media (max-width: 768px) {
-            .login-container {
-                padding: 1rem;
+            .login-card {
+                flex-direction: column;
+                max-width: 450px;
             }
 
-            .login-header {
-                padding: 2rem 1.5rem 1.5rem;
+            .login-left {
+                padding: 2rem;
             }
 
-            .login-body {
-                padding: 2rem 1.5rem 1.5rem;
+            .login-right {
+                padding: 2rem;
             }
         }
     </style>
 
-    <div class="floating-shapes">
-        <div class="shape">
-            <i class="fas fa-hotel" style="font-size: 3rem; color: white;"></i>
-        </div>
-        <div class="shape">
-            <i class="fas fa-bed" style="font-size: 2.5rem; color: white;"></i>
-        </div>
-        <div class="shape">
-            <i class="fas fa-key" style="font-size: 2rem; color: white;"></i>
-        </div>
-    </div>
-
     <div class="login-container">
         <div class="login-card">
-            <div class="login-header">
-                <div class="logo-container">
+            <!-- Côté gauche avec l'icône et présentation -->
+            <div class="login-left">
+                <div class="hotel-icon">
                     <i class="fas fa-hotel"></i>
+                    <div class="hotel-name">CACTUS HOTEL</div>
+                    <div class="hotel-slogan">Luxury & Comfort in Every Stay</div>
                 </div>
-                <h4 class="mb-2 fw-bold">Laravel Hotel</h4>
-                <p class="mb-0 opacity-75">Welcome back! Please sign in to continue.</p>
+
+                <ul class="features-list">
+                    <li>
+                        <i class="fas fa-shield-alt"></i>
+                        <div>
+                            <strong>Sécurité garantie</strong>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Vos données sont protégées</div>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-bolt"></i>
+                        <div>
+                            <strong>Accès rapide</strong>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Gérez votre hôtel en un clic</div>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="fas fa-headset"></i>
+                        <div>
+                            <strong>Support 24/7</strong>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">Assistance technique disponible</div>
+                        </div>
+                    </li>
+                </ul>
             </div>
 
-            <div class="login-body">
+            <!-- Côté droit avec le formulaire -->
+            <div class="login-right">
+                <div class="login-header">
+                    <h3>Welcome Back</h3>
+                    <p>Please sign in to access your dashboard</p>
+                </div>
+
                 <form id="form-login" action="/login" method="POST">
                     @csrf
 
-                    <div class="form-floating">
-                        <input type="email" id="email" name="email"
-                            class="form-control @error('email') is-invalid @enderror"
-                            placeholder="Enter your email"
-                            value="{{ old('email') }}" required autofocus>
-                        <label for="email">
-                            <i class="fas fa-envelope me-2"></i>Email Address
-                        </label>
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <div class="position-relative">
+                            <i class="fas fa-envelope input-icon"></i>
+                            <input type="email" id="email" name="email"
+                                class="form-control @error('email') is-invalid @enderror"
+                                placeholder="Enter your email"
+                                value="{{ old('email') }}" required autofocus>
+                        </div>
                         @error('email')
-                            <div class="invalid-feedback">
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">
                                 {{ $message }}
                             </div>
                         @enderror
                     </div>
 
-                    <div class="form-floating">
-                        <input type="password" id="password" name="password"
-                            class="form-control @error('password') is-invalid @enderror"
-                            placeholder="Enter your password" required>
-                        <label for="password">
-                            <i class="fas fa-lock me-2"></i>Password
-                        </label>
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="position-relative">
+                            <i class="fas fa-lock input-icon"></i>
+                            <input type="password" id="password" name="password"
+                                class="form-control @error('password') is-invalid @enderror"
+                                placeholder="Enter your password" required>
+                        </div>
                         @error('password')
-                            <div class="invalid-feedback">
+                            <div class="text-danger mt-1" style="font-size: 0.85rem;">
                                 {{ $message }}
                             </div>
                         @enderror
                     </div>
 
-                    <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                        <label class="form-check-label" for="remember">
-                            Remember me for 30 days
-                        </label>
-                    </div>
-
-                    <button id="btn_submit" class="btn btn-login text-white" type="submit">
-                        <span id="text_submit">
-                            <i class="fas fa-sign-in-alt me-2"></i>
-                            Sign In to Dashboard
-                        </span>
-                        <div class="btn-spinner"></div>
-                    </button>
-
-                    <div class="divider">
-                        <span>Need help?</span>
-                    </div>
-
-                    <div class="text-center">
+                    <div class="remember-forgot">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">
+                                Remember me
+                            </label>
+                        </div>
                         <a href="/forgot-password" class="forgot-link">
-                            <i class="fas fa-key me-1"></i>
-                            Forgot your password?
+                            Forgot Password?
                         </a>
                     </div>
-                </form>
 
-                <div class="demo-info">
-                    <h6><i class="fas fa-info-circle me-2"></i>Demo Account</h6>
-                    <p><strong>Email:</strong> yoannyamd@gmail.com</p>
-                    <p><strong>Password:</strong> 123456789</p>
-                </div>
+                    <button type="submit" class="btn-login">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sign In
+                    </button>
+
+                    <div class="login-divider">
+                        <span>Demo Access</span>
+                    </div>
+
+                    <div class="demo-credentials">
+                        <h6>
+                            <i class="fas fa-info-circle"></i>
+                            Test Account
+                        </h6>
+                        <p>
+                            <strong>Email:</strong>
+                            <span>yoannyamd@gmail.com</span>
+                        </p>
+                        <p>
+                            <strong>Password:</strong>
+                            <span>123456789</span>
+                        </p>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -366,30 +438,18 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('form-login');
-            const submitBtn = document.getElementById('btn_submit');
-            const textSubmit = document.getElementById('text_submit');
-
+            const submitBtn = form.querySelector('button[type="submit"]');
+            
             form.addEventListener('submit', function(e) {
-                submitBtn.classList.add('loading');
+                // Désactiver le bouton pendant la soumission
                 submitBtn.disabled = true;
-
-                // Reset after 10 seconds if no response
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
+                
+                // Réactiver après 3 secondes au cas où
                 setTimeout(() => {
-                    submitBtn.classList.remove('loading');
                     submitBtn.disabled = false;
-                }, 10000);
-            });
-
-            // Add floating animation to input focus
-            const inputs = document.querySelectorAll('.form-control');
-            inputs.forEach(input => {
-                input.addEventListener('focus', function() {
-                    this.parentElement.style.transform = 'translateY(-2px)';
-                });
-
-                input.addEventListener('blur', function() {
-                    this.parentElement.style.transform = 'translateY(0)';
-                });
+                    submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+                }, 3000);
             });
         });
     </script>

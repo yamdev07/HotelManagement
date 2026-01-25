@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use App\Models\Menu;
+use App\Models\Type; // <-- AJOUTEZ CET IMPORT
 use App\Models\RoomStatus;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,7 @@ class FrontendController extends Controller
     // Page d'accueil du site vitrine
     public function home()
     {
-        $featuredRooms = Room::with(['type', 'roomStatus', 'images']) // <-- CORRECTION: 'images' au pluriel
+        $featuredRooms = Room::with(['type', 'roomStatus', 'images'])
             ->where('room_status_id', 1) // Available
             ->limit(3)
             ->get();
@@ -20,23 +21,58 @@ class FrontendController extends Controller
         return view('frontend.pages.home', compact('featuredRooms'));
     }
 
-     // Liste des chambres
-    public function rooms()
+    // Liste des chambres
+    public function rooms(Request $request) // <-- AJOUTEZ Request $request
     {
-        $rooms = Room::with(['type', 'roomStatus', 'images']) // <-- CORRECTION: 'images' au pluriel
-            ->where('room_status_id', 1) // Available
-            ->paginate(9);
+        // Requête de base
+        $query = Room::with(['type', 'roomStatus', 'images'])
+            ->where('room_status_id', 1); // Available
+        
+        // Filtres (optionnels pour l'instant)
+        if ($request->filled('type')) {
+            $query->where('type_id', $request->type);
+        }
+        
+        if ($request->filled('capacity')) {
+            $query->where('capacity', $request->capacity);
+        }
+        
+        if ($request->filled('price_range')) {
+            $range = $request->price_range;
+            if ($range === '200000+') {
+                $query->where('price', '>=', 200000);
+            } else {
+                list($min, $max) = explode('-', $range);
+                $query->whereBetween('price', [(int)$min, (int)$max]);
+            }
+        }
+        
+        $rooms = $query->paginate(9);
+        
+        // Récupérer tous les types pour le filtre
+        $types = Type::all(); // <-- AJOUTEZ CETTE LIGNE
+        
+        // Calculer les statistiques
+        $totalRooms = Room::count();
+        $availableCount = Room::where('room_status_id', 1)->count();
+        $averageCapacity = Room::avg('capacity');
                 
-        return view('frontend.pages.rooms', compact('rooms'));
+        return view('frontend.pages.rooms', compact(
+            'rooms',
+            'types', // <-- AJOUTEZ CETTE VARIABLE
+            'totalRooms',
+            'availableCount',
+            'averageCapacity'
+        ));
     }
 
     // Détails d'une chambre
     public function roomDetails($id)
     {
-        $room = Room::with(['type', 'roomStatus', 'images', 'facilities']) // <-- CORRECTION: 'images' au pluriel
+        $room = Room::with(['type', 'roomStatus', 'images', 'facilities'])
             ->findOrFail($id);
                         
-        $relatedRooms = Room::with(['type', 'roomStatus', 'images']) // <-- CORRECTION: 'images' au pluriel
+        $relatedRooms = Room::with(['type', 'roomStatus', 'images'])
             ->where('type_id', $room->type_id)
             ->where('id', '!=', $room->id)
             ->where('room_status_id', 1) // Available
@@ -106,7 +142,7 @@ class FrontendController extends Controller
     public function contactSubmit(Request $request)
     {
         // Validation des données
-        $validated = $request->validate([
+        $validated = $request::validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'phone' => 'nullable|string|max:20',
