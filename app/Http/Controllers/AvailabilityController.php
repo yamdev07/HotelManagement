@@ -9,7 +9,6 @@ use App\Models\RoomStatus;
 use App\Models\Customer;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Illuminate\Support\Facades\DB;
 use App\Exports\AvailabilityExport;
 use App\Exports\CalendarExport;
@@ -124,7 +123,7 @@ class AvailabilityController extends Controller
                         'occupied' => $isOccupied,
                         'date' => $dateString,
                         'reservations' => $reservations,
-                        'reservation_count' => $reservations->count(), // AJOUT IMPORTANT
+                        'reservation_count' => $reservations->count(),
                         'css_class' => $cssClass,
                         'has_reservations' => $reservations->isNotEmpty()
                     ];
@@ -231,7 +230,7 @@ class AvailabilityController extends Controller
                                 'customer' => $transaction->customer->name ?? 'Client inconnu',
                                 'check_in' => $transaction->check_in->format('d/m/Y'),
                                 'check_out' => $transaction->check_out->format('d/m/Y'),
-                                'status' => $transaction->status_label ?? $transaction->status,
+                                'status' => $this->getStatusLabel($transaction->status),
                                 'status_class' => $this->getStatusClass($transaction->status)
                             ];
                         });
@@ -253,361 +252,227 @@ class AvailabilityController extends Controller
     }
     
     /**
-     * Afficher les conflits détaillés pour une chambre
+     * Afficher les conflits détaillés pour une chambre - VERSION CORRIGÉE
      */
-    public function showConflicts(Request $request, $roomId)
+    public function showConflicts(Request $request, $room)
     {
         try {
-            // Log pour debug
-            \Log::info('Show conflicts called', [
-                'room_id' => $roomId,
-                'check_in' => $request->get('check_in'),
-                'check_out' => $request->get('check_out')
+            // LOG de débogage
+            \Log::info('=== SHOW CONFLITS APPELÉ ===');
+            \Log::info('Paramètre room:', ['room' => $room]);
+            \Log::info('Tous les paramètres GET:', $request->all());
+            
+            // Vérifiez que l'ID est numérique
+            if (!is_numeric($room)) {
+                \Log::error('ID de chambre non numérique: ' . $room);
+                return redirect()->route('availability.search')
+                    ->with('error', 'ID de chambre invalide');
+            }
+            
+            // Récupérez les paramètres avec input() (fonctionne avec GET et POST)
+            $checkIn = $request->input('check_in');
+            $checkOut = $request->input('check_out');
+            $adults = $request->input('adults', 1);
+            $children = $request->input('children', 0);
+            
+            \Log::info('Paramètres extraits:', [
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
+                'adults' => $adults,
+                'children' => $children
             ]);
             
-            // Récupérer la chambre
-            $room = Room::with('type')->find($roomId);
+            // Validation basique des dates
+            if (!$checkIn || !$checkOut) {
+                \Log::warning('Dates manquantes, redirection vers search');
+                return redirect()->route('availability.search')
+                    ->with('error', 'Les dates de recherche sont requises')
+                    ->withInput($request->all());
+            }
+            
+            // Récupérez la chambre avec ses relations
+            $room = Room::with(['type', 'facilities', 'roomStatus'])->find($room);
             
             if (!$room) {
+                \Log::error('Chambre non trouvée avec ID: ' . $room);
                 return redirect()->route('availability.search')
-                    ->with('error', 'Chambre non trouvée (ID: ' . $roomId . ')');
+                    ->with('error', 'Chambre non trouvée')
+                    ->withInput($request->all());
             }
             
-            $checkIn = $request->get('check_in');
-            $checkOut = $request->get('check_out');
-            $adults = $request->get('adults', 1);
-            $children = $request->get('children', 0);
-            
-            if (!$checkIn || !$checkOut) {
+            // Parsez les dates avec validation
+            try {
+                $checkInDate = Carbon::parse($checkIn)->startOfDay();
+                $checkOutDate = Carbon::parse($checkOut)->startOfDay();
+                
+                if ($checkOutDate <= $checkInDate) {
+                    return redirect()->route('availability.search')
+                        ->with('error', 'La date de départ doit être après la date d\'arrivée')
+                        ->withInput($request->all());
+                }
+                
+                $nights = $checkInDate->diffInDays($checkOutDate);
+                
+            } catch (\Exception $e) {
+                \Log::error('Erreur de parsing des dates: ' . $e->getMessage());
                 return redirect()->route('availability.search')
-                    ->with('error', 'Les dates de recherche sont requises');
+                    ->with('error', 'Format de date invalide')
+                    ->withInput($request->all());
             }
             
-            $checkInDate = Carbon::parse($checkIn)->startOfDay();
-            $checkOutDate = Carbon::parse($checkOut)->startOfDay();
-            $nights = $checkInDate->diffInDays($checkOutDate);
-            
-            // Trouver les conflits
+            // Recherchez les conflits
             $conflicts = Transaction::where('room_id', $room->id)
                 ->whereIn('status', ['reservation', 'active'])
                 ->where(function($query) use ($checkInDate, $checkOutDate) {
                     $query->where(function($q) use ($checkInDate, $checkOutDate) {
                         $q->where('check_in', '<', $checkOutDate)
-                        ->where('check_out', '>', $checkInDate);
+                          ->where('check_out', '>', $checkInDate);
                     });
                 })
-                ->with(['customer', 'room.type'])
+                ->with(['customer:id,name,email,phone'])
                 ->orderBy('check_in')
                 ->get();
             
-            // Analyser les chevauchements
-            $conflictAnalysis = [];
+            \Log::info('Nombre de conflits trouvés: ' . $conflicts->count());
+            
+            // Analyse détaillée des conflits
+            $conflictAnalysis = collect();
             $totalOverlapDays = 0;
             
             foreach ($conflicts as $conflict) {
-                $overlapStart = max($checkInDate, $conflict->check_in);
-                $overlapEnd = min($checkOutDate, $conflict->check_out);
-                $overlapDays = $overlapStart->diffInDays($overlapEnd);
-                $totalOverlapDays += $overlapDays;
+                $overlapStart = max($checkInDate, $conflict->check_in->copy()->startOfDay());
+                $overlapEnd = min($checkOutDate, $conflict->check_out->copy()->startOfDay());
                 
-                $conflictAnalysis[] = [
-                    'transaction' => $conflict,
-                    'overlap_days' => $overlapDays,
-                    'overlap_start' => $overlapStart->format('Y-m-d'),
-                    'overlap_end' => $overlapEnd->format('Y-m-d'),
-                    'overlap_period' => $overlapStart->format('d/m/Y') . ' - ' . $overlapEnd->format('d/m/Y'),
-                    'remaining_days' => $conflict->check_out->diffInDays($checkInDate)
-                ];
+                if ($overlapStart < $overlapEnd) {
+                    $overlapDays = $overlapStart->diffInDays($overlapEnd);
+                    $totalOverlapDays += $overlapDays;
+                    
+                    $conflictAnalysis->push([
+                        'transaction' => $conflict,
+                        'overlap_days' => $overlapDays,
+                        'overlap_start' => $overlapStart->format('Y-m-d'),
+                        'overlap_end' => $overlapEnd->format('Y-m-d'),
+                        'overlap_period' => $overlapStart->format('d/m/Y') . ' - ' . $overlapEnd->format('d/m/Y'),
+                        'customer_name' => $conflict->customer->name ?? 'Client inconnu',
+                        'status_label' => $this->getStatusLabel($conflict->status),
+                        'status_color' => $this->getStatusColor($conflict->status)
+                    ]);
+                }
             }
             
-            // Trouver des dates alternatives
-            $suggestedDates = $this->findAlternativeDates($room, $checkInDate, $checkOutDate, $nights);
+            // Statistiques
+            $searchPeriodNights = $nights;
+            $overlapPercentage = $searchPeriodNights > 0 ? 
+                round(($totalOverlapDays / $searchPeriodNights) * 100, 1) : 0;
             
-            return view('availability.conflicts', [
+            // Calcul des prix
+            $searchTotalPrice = $room->price * $nights;
+            $availableNights = $searchPeriodNights - $totalOverlapDays;
+            
+            // Préparez les données pour la vue
+            $viewData = [
                 'room' => $room,
                 'conflicts' => $conflicts,
                 'conflictAnalysis' => $conflictAnalysis,
                 'totalOverlapDays' => $totalOverlapDays,
+                'overlapPercentage' => $overlapPercentage,
                 'checkIn' => $checkIn,
                 'checkOut' => $checkOut,
+                'checkInDate' => $checkInDate,
+                'checkOutDate' => $checkOutDate,
                 'nights' => $nights,
                 'adults' => $adults,
                 'children' => $children,
-                'suggestedDates' => $suggestedDates,
-                'checkInDate' => $checkInDate,
-                'checkOutDate' => $checkOutDate
-            ]);
-            
-        } catch (\Exception $e) {
-            \Log::error('Show conflicts error: ' . $e->getMessage());
-            return back()->with('error', 'Erreur lors du chargement des conflits: ' . $e->getMessage());
-        }
-    }
-    /**
-     * Réserver sans conflit
-     */
-    public function reserveWithoutConflict(Request $request)
-    {
-        try {
-            $request->validate([
-                'room_id' => 'required|exists:rooms,id',
-                'customer_id' => 'required|exists:customers,id',
-                'check_in' => 'required|date',
-                'check_out' => 'required|date|after:check_in',
-                'adults' => 'required|integer|min:1',
-                'children' => 'integer|min:0',
-            ]);
-            
-            $room = Room::findOrFail($request->room_id);
-            $checkIn = Carbon::parse($request->check_in)->startOfDay();
-            $checkOut = Carbon::parse($request->check_out)->startOfDay();
-            $nights = $checkIn->diffInDays($checkOut);
-            
-            // Vérifier qu'il n'y a pas de conflit
-            $hasConflict = Transaction::where('room_id', $room->id)
-                ->whereIn('status', ['reservation', 'active'])
-                ->where(function($query) use ($checkIn, $checkOut) {
-                    $query->where(function($q) use ($checkIn, $checkOut) {
-                        $q->where('check_in', '<', $checkOut)
-                          ->where('check_out', '>', $checkIn);
-                    });
-                })
-                ->exists();
-            
-            if ($hasConflict) {
-                return redirect()->route('availability.room.conflicts', [
-                    'room' => $room->id,
-                    'check_in' => $checkIn->format('Y-m-d'),
-                    'check_out' => $checkOut->format('Y-m-d'),
-                    'adults' => $request->adults,
-                    'children' => $request->children
-                ])->with('error', 'La chambre n\'est plus disponible pour ces dates');
-            }
-            
-            // Créer la transaction
-            $transaction = Transaction::create([
-                'room_id' => $room->id,
-                'customer_id' => $request->customer_id,
-                'check_in' => $checkIn,
-                'check_out' => $checkOut,
-                'adults' => $request->adults,
-                'children' => $request->children ?? 0,
-                'status' => 'reservation',
-                'reservation_number' => 'RES-' . strtoupper(uniqid()),
-                'total_price' => $room->price * $nights,
-                'paid_amount' => 0,
-                'remaining_amount' => $room->price * $nights,
-                'notes' => $request->notes ?? 'Réservation créée via disponibilité',
-                'created_by' => auth()->id()
-            ]);
-            
-            // Mettre à jour le statut de la chambre si nécessaire
-            if ($room->room_status_id == 1) { // Disponible
-                $room->update(['room_status_id' => 4]); // Réservée
-            }
-            
-            return redirect()->route('transactions.show', $transaction->id)
-                ->with('success', 'Réservation créée avec succès sans chevauchement');
-                
-        } catch (\Exception $e) {
-            \Log::error('Reserve without conflict error: ' . $e->getMessage());
-            return back()->with('error', 'Erreur lors de la création de la réservation');
-        }
-    }
-    
-    /**
-     * Trouver des dates alternatives
-     */
-    private function findAlternativeDates($room, $originalCheckIn, $originalCheckOut, $originalNights)
-    {
-        $suggestions = [];
-        $today = Carbon::today();
-        
-        // Chercher dans les 60 prochains jours
-        for ($i = 0; $i < 60; $i++) {
-            $startDate = $today->copy()->addDays($i);
-            
-            // Essayer différentes durées
-            $durations = [$originalNights, $originalNights + 1, $originalNights - 1, $originalNights + 2];
-            
-            foreach ($durations as $nights) {
-                if ($nights < 1) continue;
-                
-                $endDate = $startDate->copy()->addDays($nights);
-                
-                // Vérifier disponibilité
-                $isAvailable = !Transaction::where('room_id', $room->id)
-                    ->whereIn('status', ['reservation', 'active'])
-                    ->where(function($query) use ($startDate, $endDate) {
-                        $query->where(function($q) use ($startDate, $endDate) {
-                            $q->where('check_in', '<', $endDate)
-                              ->where('check_out', '>', $startDate);
-                        });
-                    })
-                    ->exists();
-                
-                if ($isAvailable) {
-                    $suggestions[] = [
-                        'check_in' => $startDate->format('Y-m-d'),
-                        'check_out' => $endDate->format('Y-m-d'),
-                        'nights' => $nights,
-                        'formatted_check_in' => $startDate->format('d/m/Y'),
-                        'formatted_check_out' => $endDate->format('d/m/Y'),
-                        'total_price' => $room->price * $nights
-                    ];
-                    
-                    if (count($suggestions) >= 6) {
-                        break 2;
-                    }
-                }
-            }
-        }
-        
-        return collect($suggestions);
-    }
-    
-   public function inventory()
-    {
-        try {
-            \Log::info('=== DÉBUT inventory() ===');
-            
-            // Test 1: Accès aux modèles de base
-            \Log::info('Test 1: Vérification des modèles');
-            $testRoom = \App\Models\Room::first();
-            $testType = \App\Models\Type::first();
-            \Log::info('Modèles OK - Room: ' . ($testRoom ? 'oui' : 'non') . ', Type: ' . ($testType ? 'oui' : 'non'));
-            
-            $today = now();
-            \Log::info('Date aujourd\'hui: ' . $today);
-            
-            // Test 2: Récupération des types de chambres
-            \Log::info('Test 2: Récupération roomTypes');
-            $roomTypes = Type::with(['rooms' => function($query) {
-                $query->with(['roomStatus']);
-            }])->get();
-            \Log::info('RoomTypes count: ' . $roomTypes->count());
-            
-            // Test 3: Chambres groupées par statut
-            \Log::info('Test 3: Récupération roomsByStatus');
-            $roomsByStatus = Room::with(['roomStatus', 'type'])
-                ->orderBy('room_status_id')
-                ->orderBy('number')
-                ->get()
-                ->groupBy('room_status_id');
-            \Log::info('RoomsByStatus count: ' . $roomsByStatus->count());
-            
-            // Test 4: Statistiques
-            \Log::info('Test 4: Calcul statistiques');
-            $totalRooms = Room::count();
-            $availableRooms = Room::where('room_status_id', 1)->count();
-            
-            $occupiedRooms = Transaction::where('check_in', '<=', $today)
-                ->where('check_out', '>=', $today)
-                ->whereIn('status', ['active', 'reservation'])
-                ->distinct('room_id')
-                ->count('room_id');
-            
-            $stats = [
-                'total_rooms' => $totalRooms,
-                'available_rooms' => $availableRooms,
-                'occupied_rooms' => $occupiedRooms,
-                'maintenance_rooms' => Room::where('room_status_id', 2)->count(),
-                'cleaning_rooms' => Room::where('room_status_id', 3)->count(),
-                'occupancy_rate' => $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100, 1) : 0
+                'totalGuests' => $adults + $children,
+                'searchTotalPrice' => $searchTotalPrice,
+                'formattedSearchPrice' => number_format($searchTotalPrice, 0, ',', ' ') . ' FCFA',
+                'roomPricePerNight' => $room->price,
+                'formattedRoomPrice' => number_format($room->price, 0, ',', ' ') . ' FCFA/nuit',
+                'availableNights' => $availableNights,
+                'roomCapacity' => $room->capacity,
+                'roomStatus' => $room->roomStatus->name ?? 'Inconnu',
+                'roomType' => $room->type->name ?? 'Standard'
             ];
             
-            \Log::info('Stats calculées: ' . json_encode($stats));
+            \Log::info('=== SUCCÈS - Données préparées pour la vue ===');
             
-            // Test 5: Arrivées/départs
-            \Log::info('Test 5: Arrivées et départs');
-            $todayArrivals = Transaction::with(['room', 'customer'])
-                ->where('status', 'reservation')
-                ->whereDate('check_in', $today)
-                ->orderBy('check_in')
-                ->get();
-            
-            $todayDepartures = Transaction::with(['room', 'customer'])
-                ->where('status', 'active')
-                ->whereDate('check_out', $today)
-                ->orderBy('check_out')
-                ->get();
-            
-            \Log::info('TodayArrivals: ' . $todayArrivals->count() . ', TodayDepartures: ' . $todayDepartures->count());
-            
-            // Test 6: Occupation par type
-            \Log::info('Test 6: Occupation par type');
-            $occupancyByType = [];
-            foreach ($roomTypes as $type) {
-                $typeRooms = $type->rooms;
-                $totalRoomsType = $typeRooms->count();
-                
-                // Compter les chambres occupées pour ce type
-                $occupiedTypeRooms = 0;
-                foreach ($typeRooms as $room) {
-                    // Vérifier si la chambre est occupée aujourd'hui
-                    $isOccupied = Transaction::where('room_id', $room->id)
-                        ->where('check_in', '<=', $today)
-                        ->where('check_out', '>=', $today)
-                        ->whereIn('status', ['active', 'reservation'])
-                        ->exists();
-                    
-                    if ($isOccupied) {
-                        $occupiedTypeRooms++;
-                    }
-                }
-                
-                $occupancyByType[$type->name] = [
-                    'occupied' => $occupiedTypeRooms,
-                    'percentage' => $totalRoomsType > 0 ? 
-                        round(($occupiedTypeRooms / $totalRoomsType) * 100, 1) : 0
-                ];
-            }
-            
-            \Log::info('OccupancyByType calculé');
-            
-            // Test 7: Transactions actives
-            \Log::info('Test 7: Transactions actives');
-            $activeTransactions = Transaction::where('check_in', '<=', $today)
-                ->where('check_out', '>=', $today)
-                ->whereIn('status', ['active', 'reservation'])
-                ->with(['room', 'customer'])
-                ->get();
-            
-            \Log::info('ActiveTransactions: ' . $activeTransactions->count());
-            
-            // Préparation des données pour la vue
-            \Log::info('Préparation des données pour la vue');
-            $data = compact(
-                'roomTypes',
-                'roomsByStatus',
-                'stats',
-                'todayArrivals',
-                'todayDepartures',
-                'occupancyByType',
-                'activeTransactions'
-            );
-            
-            \Log::info('=== FIN inventory() - Tout semble OK ===');
-            
-            return view('availability.inventory', $data);
+            return view('availability.conflicts', $viewData);
             
         } catch (\Exception $e) {
-            \Log::error('Inventory error: ' . $e->getMessage());
-            \Log::error('File: ' . $e->getFile());
-            \Log::error('Line: ' . $e->getLine());
+            \Log::error('ERREUR dans showConflicts: ' . $e->getMessage());
             \Log::error('Trace: ' . $e->getTraceAsString());
             
-            // Afficher l'erreur pour le débogage
-            return response()->json([
-                'error' => true,
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ]);
+            return redirect()->route('availability.search')
+                ->with('error', 'Une erreur est survenue: ' . $e->getMessage())
+                ->withInput($request->all());
         }
     }
+    
     /**
-     * Dashboard
+     * Version simplifiée pour test
+     */
+    public function showConflictsSimple(Request $request, $roomId)
+    {
+        return response()->json([
+            'success' => true,
+            'message' => 'Route de test fonctionnelle!',
+            'room_id' => $roomId,
+            'params_received' => $request->all(),
+            'route_name' => 'test.simple.conflicts',
+            'test_url' => url("/availability/room/{$roomId}/conflicts?" . http_build_query($request->all()))
+        ]);
+    }
+    
+    /**
+     * Obtenir le libellé du statut
+     */
+    private function getStatusLabel($status)
+    {
+        $labels = [
+            'reservation' => 'Réservation',
+            'active' => 'Actif',
+            'checked_out' => 'Départ',
+            'cancelled' => 'Annulé',
+            'no_show' => 'No-show'
+        ];
+        
+        return $labels[$status] ?? ucfirst($status);
+    }
+    
+    /**
+     * Obtenir la couleur du statut
+     */
+    private function getStatusColor($status)
+    {
+        $colors = [
+            'reservation' => 'warning',
+            'active' => 'success',
+            'checked_out' => 'info',
+            'cancelled' => 'danger',
+            'no_show' => 'secondary'
+        ];
+        
+        return $colors[$status] ?? 'secondary';
+    }
+    
+    /**
+     * Classe CSS pour le statut
+     */
+    private function getStatusClass($status)
+    {
+        $classes = [
+            'reservation' => 'badge bg-warning',
+            'active' => 'badge bg-success',
+            'checked_out' => 'badge bg-info',
+            'cancelled' => 'badge bg-danger',
+            'no_show' => 'badge bg-secondary'
+        ];
+        
+        return $classes[$status] ?? 'badge bg-secondary';
+    }
+    
+    /**
+     * Dashboard de disponibilité
      */
     public function dashboard()
     {
@@ -659,7 +524,7 @@ class AvailabilityController extends Controller
                     return $transaction->check_out->format('Y-m-d');
                 });
             
-            // Chambres disponibles
+            // Chambres disponibles maintenant
             $availableNow = Room::where('room_status_id', 1)
                 ->whereNotIn('id', function($query) use ($today) {
                     $query->select('room_id')
@@ -711,6 +576,107 @@ class AvailabilityController extends Controller
         } catch (\Exception $e) {
             \Log::error('Dashboard error: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors du chargement du dashboard');
+        }
+    }
+    
+    /**
+     * Inventaire des chambres
+     */
+    public function inventory()
+    {
+        try {
+            $today = now();
+            
+            // Récupération des types de chambres
+            $roomTypes = Type::with(['rooms' => function($query) {
+                $query->with(['roomStatus']);
+            }])->get();
+            
+            // Chambres groupées par statut
+            $roomsByStatus = Room::with(['roomStatus', 'type'])
+                ->orderBy('room_status_id')
+                ->orderBy('number')
+                ->get()
+                ->groupBy('room_status_id');
+            
+            // Statistiques
+            $totalRooms = Room::count();
+            $availableRooms = Room::where('room_status_id', 1)->count();
+            
+            $occupiedRooms = Transaction::where('check_in', '<=', $today)
+                ->where('check_out', '>=', $today)
+                ->whereIn('status', ['active', 'reservation'])
+                ->distinct('room_id')
+                ->count('room_id');
+            
+            $stats = [
+                'total_rooms' => $totalRooms,
+                'available_rooms' => $availableRooms,
+                'occupied_rooms' => $occupiedRooms,
+                'maintenance_rooms' => Room::where('room_status_id', 2)->count(),
+                'cleaning_rooms' => Room::where('room_status_id', 3)->count(),
+                'occupancy_rate' => $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100, 1) : 0
+            ];
+            
+            // Arrivées/départs
+            $todayArrivals = Transaction::with(['room', 'customer'])
+                ->where('status', 'reservation')
+                ->whereDate('check_in', $today)
+                ->orderBy('check_in')
+                ->get();
+            
+            $todayDepartures = Transaction::with(['room', 'customer'])
+                ->where('status', 'active')
+                ->whereDate('check_out', $today)
+                ->orderBy('check_out')
+                ->get();
+            
+            // Occupation par type
+            $occupancyByType = [];
+            foreach ($roomTypes as $type) {
+                $typeRooms = $type->rooms;
+                $totalRoomsType = $typeRooms->count();
+                
+                $occupiedTypeRooms = 0;
+                foreach ($typeRooms as $room) {
+                    $isOccupied = Transaction::where('room_id', $room->id)
+                        ->where('check_in', '<=', $today)
+                        ->where('check_out', '>=', $today)
+                        ->whereIn('status', ['active', 'reservation'])
+                        ->exists();
+                    
+                    if ($isOccupied) {
+                        $occupiedTypeRooms++;
+                    }
+                }
+                
+                $occupancyByType[$type->name] = [
+                    'occupied' => $occupiedTypeRooms,
+                    'percentage' => $totalRoomsType > 0 ? 
+                        round(($occupiedTypeRooms / $totalRoomsType) * 100, 1) : 0
+                ];
+            }
+            
+            // Transactions actives
+            $activeTransactions = Transaction::where('check_in', '<=', $today)
+                ->where('check_out', '>=', $today)
+                ->whereIn('status', ['active', 'reservation'])
+                ->with(['room', 'customer'])
+                ->get();
+            
+            return view('availability.inventory', compact(
+                'roomTypes',
+                'roomsByStatus',
+                'stats',
+                'todayArrivals',
+                'todayDepartures',
+                'occupancyByType',
+                'activeTransactions'
+            ));
+            
+        } catch (\Exception $e) {
+            \Log::error('Inventory error: ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors du chargement de l\'inventaire');
         }
     }
     
@@ -828,7 +794,6 @@ class AvailabilityController extends Controller
         return [
             'total_transactions' => $transactions->count(),
             'total_revenue' => $totalRevenue,
-            'total_revenue_30d' => $totalRevenue,
             'avg_stay_duration' => $avgStayDuration,
             'avg_daily_rate' => $totalNights > 0 ? 
                 round($totalRevenue / $totalNights, 0) : $room->price,
@@ -895,22 +860,6 @@ class AvailabilityController extends Controller
     }
     
     /**
-     * Classe CSS pour le statut
-     */
-    private function getStatusClass($status)
-    {
-        $classes = [
-            'reservation' => 'warning',
-            'active' => 'success',
-            'checked_out' => 'info',
-            'cancelled' => 'danger',
-            'no_show' => 'secondary'
-        ];
-        
-        return $classes[$status] ?? 'secondary';
-    }
-    
-    /**
      * Vérifier disponibilité (API)
      */
     public function checkAvailability(Request $request)
@@ -938,7 +887,7 @@ class AvailabilityController extends Controller
             
             $nights = $checkIn->diffInDays($checkOut);
             
-            // 1. Vérifier les chevauchements de réservations
+            // Vérifier les chevauchements
             $hasConflict = Transaction::where('room_id', $room->id)
                 ->when($request->exclude_transaction_id, function($query, $excludeId) {
                     $query->where('id', '!=', $excludeId);
@@ -952,10 +901,8 @@ class AvailabilityController extends Controller
                 })
                 ->exists();
             
-            // 2. Vérifier le statut de la chambre (1 = disponible)
             $roomAvailable = $room->room_status_id == 1;
             
-            // 3. Vérifier la capacité
             $guests = $request->get('guests', 1);
             $hasCapacity = $guests <= $room->capacity;
             
@@ -991,18 +938,6 @@ class AvailabilityController extends Controller
                 $response['reasons'] = [];
                 
                 if ($hasConflict) {
-                    $conflicts = Transaction::where('room_id', $room->id)
-                        ->whereIn('status', ['active', 'reservation'])
-                        ->where(function($query) use ($checkIn, $checkOut) {
-                            $query->where(function($q) use ($checkIn, $checkOut) {
-                                $q->where('check_in', '<', $checkOut)
-                                ->where('check_out', '>', $checkIn);
-                            });
-                        })
-                        ->with('customer')
-                        ->get();
-                    
-                    $response['conflicts'] = $conflicts;
                     $response['reasons'][] = 'Chambre déjà réservée pour cette période';
                 }
                 
@@ -1013,12 +948,6 @@ class AvailabilityController extends Controller
                 if (!$hasCapacity) {
                     $response['reasons'][] = 'Capacité insuffisante (' . $guests . ' > ' . $room->capacity . ')';
                 }
-                
-                // Trouver la prochaine disponibilité
-                $nextAvailable = $this->findNextAvailableDate($room, $checkIn);
-                if ($nextAvailable) {
-                    $response['next_available'] = $nextAvailable;
-                }
             }
             
             return response()->json($response);
@@ -1027,27 +956,6 @@ class AvailabilityController extends Controller
             \Log::error('Check availability error: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
         }
-    }
-
-    // AJOUTEZ CETTE MÉTHODE PRIVÉE :
-    private function findNextAvailableDate($room, $fromDate)
-    {
-        $nextBooking = Transaction::where('room_id', $room->id)
-            ->where('check_out', '>', $fromDate)
-            ->whereIn('status', ['active', 'reservation'])
-            ->orderBy('check_out')
-            ->first();
-        
-        if ($nextBooking) {
-            $nextAvailableDate = $nextBooking->check_out->copy()->addDay();
-            return [
-                'date' => $nextAvailableDate->format('Y-m-d'),
-                'formatted' => $nextAvailableDate->format('d/m/Y'),
-                'days_from_now' => now()->diffInDays($nextAvailableDate)
-            ];
-        }
-        
-        return null;
     }
     
     /**
@@ -1091,9 +999,9 @@ class AvailabilityController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
+    
     /**
-     * Export des données de disponibilité
+     * Export des données
      */
     public function export(Request $request)
     {
@@ -1114,16 +1022,13 @@ class AvailabilityController extends Controller
             
             switch ($exportType) {
                 case 'calendar':
-                    // Export du calendrier
                     $month = $request->month ?? now()->month;
                     $year = $request->year ?? now()->year;
                     
-                    // Récupérer les données du calendrier
                     $startDate = Carbon::create($year, $month, 1)->startOfDay();
                     $endDate = $startDate->copy()->endOfMonth()->endOfDay();
                     $daysInMonth = $startDate->daysInMonth;
                     
-                    // Générer les dates
                     $dates = [];
                     for ($day = 1; $day <= $daysInMonth; $day++) {
                         $date = Carbon::create($year, $month, $day);
@@ -1138,7 +1043,6 @@ class AvailabilityController extends Controller
                         ];
                     }
                     
-                    // Récupérer les chambres
                     $rooms = Room::with(['type', 'roomStatus', 'transactions' => function($query) use ($startDate, $endDate) {
                         $query->where(function($q) use ($startDate, $endDate) {
                             $q->where('check_in', '<=', $endDate)
@@ -1147,7 +1051,6 @@ class AvailabilityController extends Controller
                         ->whereIn('status', ['reservation', 'active']);
                     }])->orderBy('number')->get();
                     
-                    // Préparer les données du calendrier
                     $calendar = [];
                     foreach ($rooms as $room) {
                         $roomData = ['room' => $room, 'availability' => []];
@@ -1166,14 +1069,14 @@ class AvailabilityController extends Controller
                                 }
                             }
                             
-                            $status = 'D'; // Disponible par défaut
+                            $status = 'D';
                             if ($isOccupied) {
                                 $status = 'O';
-                            } elseif ($room->room_status_id == 2) { // Maintenance
+                            } elseif ($room->room_status_id == 2) {
                                 $status = 'M';
-                            } elseif ($room->room_status_id == 3) { // Nettoyage
+                            } elseif ($room->room_status_id == 3) {
                                 $status = 'N';
-                            } elseif ($room->room_status_id != 1) { // Autre indisponibilité
+                            } elseif ($room->room_status_id != 1) {
                                 $status = 'I';
                             }
                             
@@ -1192,10 +1095,8 @@ class AvailabilityController extends Controller
                     break;
                     
                 case 'inventory':
-                    // Export de l'inventaire
                     $today = now();
                     
-                    // Récupérer les données d'inventaire
                     $roomTypes = Type::with(['rooms' => function($query) {
                         $query->with(['roomStatus', 'currentTransaction.customer']);
                     }])->get();
@@ -1231,12 +1132,10 @@ class AvailabilityController extends Controller
                     $filename = 'inventaire-chambres-' . now()->format('Y-m-d-H-i') . '.' . $type;
                     break;
                     
-                default: // availability
-                    // Export des disponibilités
+                default:
                     $startDate = $request->start_date ? Carbon::parse($request->start_date) : now()->startOfDay();
                     $endDate = $request->end_date ? Carbon::parse($request->end_date) : now()->endOfDay();
                     
-                    // Ajuster les dates selon la période
                     switch ($period) {
                         case 'today':
                             $startDate = now()->startOfDay();
@@ -1252,7 +1151,6 @@ class AvailabilityController extends Controller
                             break;
                     }
                     
-                    // Récupérer les données
                     $rooms = Room::with(['type', 'roomStatus', 'transactions' => function($query) use ($startDate, $endDate) {
                         $query->where(function($q) use ($startDate, $endDate) {
                             $q->whereBetween('check_in', [$startDate, $endDate])
@@ -1265,14 +1163,12 @@ class AvailabilityController extends Controller
                         ->whereIn('status', ['active', 'checked_out', 'reservation']);
                     }])->get();
                     
-                    // Préparer les données pour l'export
                     $exportData = [];
                     foreach ($rooms as $room) {
                         $occupancyDays = 0;
                         $totalRevenue = 0;
                         
                         foreach ($room->transactions as $transaction) {
-                            // Calculer les jours d'occupation dans la période
                             $overlapStart = max($transaction->check_in, $startDate);
                             $overlapEnd = min($transaction->check_out, $endDate);
                             
@@ -1303,13 +1199,11 @@ class AvailabilityController extends Controller
                     break;
             }
             
-            // Selon le type d'export
             if ($type === 'excel') {
                 return Excel::download($export, $filename);
             } elseif ($type === 'csv') {
                 return Excel::download($export, $filename, \Maatwebsite\Excel\Excel::CSV);
             } else {
-                // PDF export - vous devrez créer une vue pour le PDF
                 $view = 'exports.' . $exportType;
                 $data = [
                     'data' => $exportData ?? [],
@@ -1330,7 +1224,7 @@ class AvailabilityController extends Controller
             return back()->with('error', 'Erreur lors de l\'export: ' . $e->getMessage());
         }
     }
-
+    
     /**
      * Obtenir les périodes disponibles pour une chambre
      */

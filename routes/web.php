@@ -616,6 +616,10 @@ if (env('APP_DEBUG', false)) {
             )
         ]);
     });
+
+    // Dans routes/web.php, ajoutez cette route (hors des groupes middleware pour test)
+    Route::get('/test-simple-conflicts/{room}', [AvailabilityController::class, 'showConflictsSimple'])
+        ->name('test.simple.conflicts');
 }
 
 // ==================== ROUTES FALLBACK (SANS VUE 404) ====================

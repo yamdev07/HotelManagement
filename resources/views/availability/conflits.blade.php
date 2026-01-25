@@ -9,16 +9,12 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    <h1 class="h2 fw-bold text-dark">
-                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
-                        Conflits de réservation
-                    </h1>
-                    <p class="text-muted mb-0">
-                        Chambre {{ $room->number }} - {{ $room->type->name ?? 'Standard' }}
-                    </p>
+                    <h1 class="h2 fw-bold text-dark">Conflits de réservation</h1>
+                    <p class="text-muted mb-0">Détails des réservations en conflit pour cette chambre</p>
                 </div>
-                <div class="d-flex gap-2">
-                    <a href="{{ route('availability.search') }}" class="btn btn-outline-secondary">
+                <div>
+                    <a href="{{ route('availability.search') }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}&adults={{ $adults }}&children={{ $children }}" 
+                       class="btn btn-outline-primary">
                         <i class="fas fa-arrow-left me-2"></i>
                         Retour à la recherche
                     </a>
@@ -27,109 +23,209 @@
         </div>
     </div>
 
-    <!-- Informations -->
+    <!-- Informations sur la chambre et la période -->
     <div class="row mb-4">
-        <div class="col-md-8">
-            <div class="card border-warning">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <h5 class="fw-bold mb-3">Détails de la recherche</h5>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <small class="text-muted">Période</small>
-                            <div class="fw-bold">{{ $nights }} nuit(s)</div>
+                    <h6 class="fw-bold text-primary mb-3">
+                        <i class="fas fa-bed me-2"></i>
+                        Informations chambre
+                    </h6>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                            <i class="fas fa-door-closed fs-4"></i>
                         </div>
-                        <div class="col-md-3">
-                            <small class="text-muted">Arrivée</small>
-                            <div class="fw-bold">{{ \Carbon\Carbon::parse($checkIn)->format('d/m/Y') }}</div>
-                        </div>
-                        <div class="col-md-3">
-                            <small class="text-muted">Départ</small>
-                            <div class="fw-bold">{{ \Carbon\Carbon::parse($checkOut)->format('d/m/Y') }}</div>
-                        </div>
-                        <div class="col-md-3">
-                            <small class="text-muted">Personnes</small>
-                            <div class="fw-bold">{{ $adults + $children }}</div>
+                        <div class="ms-3">
+                            <h5 class="fw-bold mb-0">Chambre {{ $room->number }}</h5>
+                            <span class="badge bg-primary">{{ $roomType }}</span>
                         </div>
                     </div>
-                    <div class="alert alert-warning mt-3">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Cette chambre n'est pas disponible pour les dates sélectionnées.
-                    </div>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-users text-muted me-2"></i>
+                            <small class="text-muted">Capacité: {{ $roomCapacity }} personnes</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-tag text-muted me-2"></i>
+                            <small class="text-muted">Prix/nuit: {{ $formattedRoomPrice }}</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-info-circle text-muted me-2"></i>
+                            <small class="text-muted">Statut: {{ $roomStatus }}</small>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-danger">
-                <div class="card-body text-center">
-                    <div class="text-danger mb-3">
-                        <i class="fas fa-ban fa-3x"></i>
+        
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h6 class="fw-bold text-primary mb-3">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        Période recherchée
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="alert alert-info">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-sign-in-alt fa-2x me-3 text-info"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Arrivée</small>
+                                        <strong>{{ \Carbon\Carbon::parse($checkIn)->format('d/m/Y') }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="alert alert-warning">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-sign-out-alt fa-2x me-3 text-warning"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Départ</small>
+                                        <strong>{{ \Carbon\Carbon::parse($checkOut)->format('d/m/Y') }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h5 class="fw-bold text-dark">Indisponible</h5>
-                    <p class="text-muted">
-                        <strong>{{ $conflicts->count() }}</strong> réservation(s) en conflit
-                    </p>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <div class="text-muted mb-1">Nuits</div>
+                                    <div class="fw-bold fs-4">{{ $nights }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <div class="text-muted mb-1">Prix total</div>
+                                    <div class="fw-bold fs-4 text-success">{{ $formattedSearchPrice }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <div class="text-muted mb-1">Personnes</div>
+                                    <div class="fw-bold fs-4">{{ $totalGuests }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Liste des conflits -->
-    @if($conflicts->count() > 0)
-    <div class="row">
+    <!-- Résumé des conflits -->
+    <div class="row mb-4">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-warning text-dark">
-                    <h5 class="fw-bold mb-0">
-                        <i class="fas fa-calendar-times me-2"></i>
-                        Réservations en conflit ({{ $conflicts->count() }})
-                    </h5>
+            @if($conflicts->count() > 0)
+            <div class="card border-0 shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>Réservations en conflit ({{ $conflicts->count() }})</strong>
+                        </div>
+                        <div class="badge bg-white text-danger">
+                            {{ $overlapPercentage }}% de chevauchement
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
+                    <div class="alert alert-warning">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-info-circle fa-2x me-3 mt-1"></i>
+                            <div>
+                                <h6 class="fw-bold mb-2">Attention !</h6>
+                                <p class="mb-2">
+                                    Cette chambre n'est pas disponible pour la période demandée 
+                                    car elle est déjà réservée pendant {{ $totalOverlapDays }} 
+                                    jour(s) sur les {{ $nights }} nuit(s) recherchées.
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Nuits disponibles:</strong> {{ $availableNights }} / {{ $nights }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Liste des réservations en conflit -->
                     <div class="table-responsive">
                         <table class="table table-hover">
-                            <thead>
+                            <thead class="table-light">
                                 <tr>
                                     <th>Client</th>
                                     <th>Arrivée</th>
                                     <th>Départ</th>
-                                    <th>Durée</th>
+                                    <th>Nuits</th>
                                     <th>Statut</th>
-                                    <th>N° Réservation</th>
+                                    <th>Chevauchement</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($conflicts as $reservation)
+                                @foreach($conflictAnalysis as $conflict)
                                 <tr>
                                     <td>
-                                        <div class="fw-bold">{{ $reservation->customer->name ?? 'Client inconnu' }}</div>
-                                        <small class="text-muted">{{ $reservation->customer->email ?? 'N/A' }}</small>
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                                                 style="width: 35px; height: 35px;">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                            <div class="ms-3">
+                                                <div class="fw-bold">{{ $conflict['customer_name'] }}</div>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td>
-                                        {{ $reservation->check_in->format('d/m/Y') }}
-                                        <br>
-                                        <small class="text-muted">14h00</small>
+                                        <div class="text-nowrap">
+                                            {{ \Carbon\Carbon::parse($conflict['transaction']->check_in)->format('d/m/Y') }}
+                                        </div>
                                     </td>
                                     <td>
-                                        {{ $reservation->check_out->format('d/m/Y') }}
-                                        <br>
-                                        <small class="text-muted">12h00</small>
+                                        <div class="text-nowrap">
+                                            {{ \Carbon\Carbon::parse($conflict['transaction']->check_out)->format('d/m/Y') }}
+                                        </div>
                                     </td>
                                     <td>
                                         <span class="badge bg-info">
-                                            {{ $reservation->check_in->diffInDays($reservation->check_out) }} nuit(s)
+                                            {{ $conflict['transaction']->check_in->diffInDays($conflict['transaction']->check_out) }} nuit(s)
                                         </span>
                                     </td>
                                     <td>
-                                        @if($reservation->status == 'reservation')
-                                            <span class="badge bg-warning">Réservation</span>
-                                        @elseif($reservation->status == 'active')
-                                            <span class="badge bg-success">En séjour</span>
-                                        @else
-                                            <span class="badge bg-secondary">{{ $reservation->status }}</span>
-                                        @endif
+                                        <span class="badge bg-{{ $conflict['status_color'] }}">
+                                            {{ $conflict['status_label'] }}
+                                        </span>
                                     </td>
                                     <td>
-                                        <code>{{ $reservation->reservation_number }}</code>
+                                        <div class="progress" style="height: 20px;">
+                                            @php
+                                                $percentage = ($conflict['overlap_days'] / $nights) * 100;
+                                            @endphp
+                                            <div class="progress-bar bg-danger" 
+                                                 role="progressbar" 
+                                                 style="width: {{ $percentage }}%"
+                                                 aria-valuenow="{{ $percentage }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                                {{ $conflict['overlap_days'] }} jour(s)
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ $conflict['overlap_period'] }}</small>
+                                    </td>
+                                    <td>
+                                        <a href="{{ route('transaction.show', $conflict['transaction']->id) }}" 
+                                           class="btn btn-sm btn-outline-primary"
+                                           target="_blank">
+                                            <i class="fas fa-external-link-alt me-1"></i>
+                                            Voir réservation
+                                        </a>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -138,118 +234,161 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    @endif
-
-    <!-- Suggestions de dates alternatives -->
-    @if($suggestedDates && $suggestedDates->count() > 0)
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card border-success">
+            @else
+            <div class="card border-0 shadow-sm border-success">
                 <div class="card-header bg-success text-white">
-                    <h5 class="fw-bold mb-0">
-                        <i class="fas fa-calendar-check me-2"></i>
-                        Dates alternatives suggérées
-                    </h5>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Aucun conflit détecté !</strong>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted mb-3">
-                        Voici d'autres périodes disponibles pour cette chambre :
-                    </p>
+                    <div class="text-center py-5">
+                        <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
+                        <h4 class="text-dark mb-3">Chambre disponible</h4>
+                        <p class="text-muted mb-4">
+                            Cette chambre est disponible pour la période demandée.
+                        </p>
+                        <a href="{{ route('transaction.reservation.createIdentity', [
+                            'room_id' => $room->id,
+                            'check_in' => $checkIn,
+                            'check_out' => $checkOut,
+                            'adults' => $adults,
+                            'children' => $children
+                        ]) }}" 
+                           class="btn btn-success btn-lg">
+                            <i class="fas fa-book me-2"></i>
+                            Réserver maintenant
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- Suggestions et alternatives -->
+    @if($conflicts->count() > 0)
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <strong>Suggestions</strong>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
                     <div class="row">
-                        @foreach($suggestedDates as $suggestion)
-                        <div class="col-md-4 mb-3">
-                            <div class="card border-success border-2">
-                                <div class="card-body text-center">
-                                    <small class="text-muted d-block">Disponible</small>
-                                    <div class="fw-bold">
-                                        {{ \Carbon\Carbon::parse($suggestion['check_in'])->format('d/m/Y') }}
-                                        <i class="fas fa-arrow-right mx-2"></i>
-                                        {{ \Carbon\Carbon::parse($suggestion['check_out'])->format('d/m/Y') }}
-                                    </div>
-                                    <small class="text-muted">
-                                        {{ $suggestion['nights'] }} nuit(s)
-                                    </small>
-                                    <div class="mt-2">
-                                        <a href="{{ route('availability.search', [
-                                            'check_in' => $suggestion['check_in'],
-                                            'check_out' => $suggestion['check_out'],
-                                            'adults' => $adults,
-                                            'children' => $children,
-                                            'room_type_id' => $room->type_id
-                                        ]) }}" 
-                                           class="btn btn-sm btn-success">
-                                            <i class="fas fa-check me-1"></i>
-                                            Sélectionner
-                                        </a>
-                                    </div>
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-body">
+                                    <h6 class="fw-bold text-primary mb-3">
+                                        <i class="fas fa-calendar-plus me-2"></i>
+                                        Changer les dates
+                                    </h6>
+                                    <p class="text-muted mb-3">
+                                        Essayez de modifier vos dates pour éviter les périodes de chevauchement.
+                                    </p>
+                                    <a href="{{ route('availability.search') }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}&adults={{ $adults }}&children={{ $children }}" 
+                                       class="btn btn-outline-primary">
+                                        <i class="fas fa-edit me-2"></i>
+                                        Modifier la recherche
+                                    </a>
                                 </div>
                             </div>
                         </div>
-                        @endforeach
+                        <div class="col-md-6">
+                            <div class="card border-info">
+                                <div class="card-body">
+                                    <h6 class="fw-bold text-info mb-3">
+                                        <i class="fas fa-exchange-alt me-2"></i>
+                                        Changer de chambre
+                                    </h6>
+                                    <p class="text-muted mb-3">
+                                        Consultez les autres chambres disponibles pour les mêmes dates.
+                                    </p>
+                                    <a href="{{ route('availability.search') }}" 
+                                       class="btn btn-outline-info">
+                                        <i class="fas fa-search me-2"></i>
+                                        Rechercher d'autres chambres
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     @endif
-
-    <!-- Actions -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="fw-bold mb-3">Que souhaitez-vous faire ?</h5>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="d-grid">
-                                <a href="{{ route('availability.search') }}" class="btn btn-outline-primary">
-                                    <i class="fas fa-search me-2"></i>
-                                    Nouvelle recherche
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="d-grid">
-                                <a href="{{ route('availability.search', [
-                                    'check_in' => $checkIn,
-                                    'check_out' => $checkOut,
-                                    'adults' => $adults,
-                                    'children' => $children
-                                ]) }}" 
-                                   class="btn btn-primary">
-                                    <i class="fas fa-bed me-2"></i>
-                                    Voir autres chambres
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="d-grid">
-                                <a href="{{ route('availability.calendar') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-calendar-alt me-2"></i>
-                                    Voir calendrier
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 @endsection
 
 @push('styles')
 <style>
-    .card.border-warning {
-        border-width: 2px;
+    .card.border-danger .card-header {
+        background: linear-gradient(135deg, #dc3545, #c82333) !important;
     }
-    .card.border-danger {
-        border-width: 2px;
+    
+    .card.border-success .card-header {
+        background: linear-gradient(135deg, #198754, #157347) !important;
     }
-    .card.border-success {
-        border-width: 2px;
+    
+    .progress {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        border-radius: 10px;
+        transition: width 0.6s ease;
+    }
+    
+    .badge {
+        font-size: 0.85em;
+        padding: 0.35em 0.65em;
+    }
+    
+    .table th {
+        border-top: none;
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+        color: #495057;
+    }
+    
+    .table td {
+        vertical-align: middle;
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation des barres de progression
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 300);
+        });
+        
+        // Confirmation avant de réserver
+        const reserveButton = document.querySelector('a[href*="reservation.createIdentity"]');
+        if (reserveButton) {
+            reserveButton.addEventListener('click', function(e) {
+                if (!confirm('Êtes-vous sûr de vouloir réserver cette chambre pour cette période ?')) {
+                    e.preventDefault();
+                }
+            });
+        }
+    });
+</script>
 @endpush
