@@ -14,8 +14,8 @@
                             {{ $payments->total() }} paiement(s) enregistré(s)
                         </span>
                         @php
-                            $totalAmount = $payments->sum('price');
-                            $todayAmount = $payments->where('created_at', '>=', now()->startOfDay())->sum('price');
+                            $totalAmount = $payments->sum('amount');
+                            $todayAmount = $payments->where('created_at', '>=', now()->startOfDay())->sum('amount');
                         @endphp
                         <span class="badge bg-success">
                             <i class="fas fa-coins me-1"></i>
@@ -205,7 +205,7 @@
                                     <!-- Détails du paiement -->
                                     <td class="py-3">
                                         <div class="mb-1">
-                                            <span class="fw-bold text-dark fs-5">{{ Helper::formatCFA($payment->price) }}</span>
+                                            <span class="fw-bold text-dark fs-5">{{ Helper::formatCFA($payment->amount) }}</span>
                                         </div>
                                         @if($payment->payment_method)
                                             <small class="text-muted">

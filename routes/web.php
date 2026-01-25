@@ -270,29 +270,44 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
         Route::get('/api/customers', [RestaurantController::class, 'getCustomers'])->name('api.customers');
         Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
     });
-    
-    // ==================== ROUTES POUR LA DISPONIBILITÉ DES CHAMBRES ====================
-    // ACCESSIBLE À TOUS LES UTILISATEURS CONNECTÉS
+});
+
+// ==================== ROUTES POUR LA DISPONIBILITÉ DES CHAMBRES ====================
+// ACCESSIBLE À TOUS LES UTILISATEURS CONNECTÉS
+Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], function () {
     Route::prefix('availability')->name('availability.')->group(function () {
-        // Calendrier des disponibilités
-        Route::get('/calendar', [AvailabilityController::class, 'calendar'])->name('calendar');
+        // Dashboard de disponibilité
+        Route::get('/dashboard', [AvailabilityController::class, 'dashboard'])->name('dashboard');
         
         // Recherche de disponibilité par période
         Route::get('/search', [AvailabilityController::class, 'search'])->name('search');
         
+        // Calendrier des disponibilités
+        Route::get('/calendar', [AvailabilityController::class, 'calendar'])->name('calendar');
+        
         // Inventaire des chambres
         Route::get('/inventory', [AvailabilityController::class, 'inventory'])->name('inventory');
-        
-        // Dashboard de disponibilité
-        Route::get('/dashboard', [AvailabilityController::class, 'dashboard'])->name('dashboard');
         
         // Détail d'une chambre
         Route::get('/room/{room}', [AvailabilityController::class, 'roomDetail'])->name('room.detail');
         
-        // API pour vérifier disponibilité (AJAX)
-        Route::get('/check', [AvailabilityController::class, 'checkAvailability'])->name('check');
+        // Conflits de réservation
+        Route::get('/room/{room}/conflicts', [AvailabilityController::class, 'showConflicts'])
+            ->name('room.conflicts');
         
-        // AJOUTEZ CETTE ROUTE POUR L'EXPORT
+        // Réserver sans conflit
+        Route::post('/reserve-without-conflict', [AvailabilityController::class, 'reserveWithoutConflict'])
+            ->name('reserve.without.conflict');
+        
+        // API pour vérifier disponibilité (AJAX)
+        Route::get('/check-availability', [AvailabilityController::class, 'checkAvailability'])
+            ->name('check.availability');
+            
+        // API pour détails cellule calendrier
+        Route::get('/calendar-cell-details', [AvailabilityController::class, 'calendarCellDetails'])
+            ->name('calendar.cell.details');
+            
+        // Export
         Route::post('/export', [AvailabilityController::class, 'export'])->name('export');
     });
 });

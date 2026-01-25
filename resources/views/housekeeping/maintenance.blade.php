@@ -69,11 +69,15 @@
                 <div class="card-body">
                     <h6 class="text-muted mb-3">Maintenance par raison</h6>
                     <div class="d-flex flex-wrap gap-2">
-                        @foreach($stats['maintenance_by_reason'] as $reason => $count)
-                        <span class="badge bg-light text-dark p-2">
-                            {{ $reason }}: <strong class="text-purple">{{ $count }}</strong>
-                        </span>
-                        @endforeach
+                        @if(isset($stats['maintenance_by_reason']) && count($stats['maintenance_by_reason']) > 0)
+                            @foreach($stats['maintenance_by_reason'] as $reason => $count)
+                            <span class="badge bg-light text-dark p-2">
+                                {{ $reason }}: <strong class="text-purple">{{ $count }}</strong>
+                            </span>
+                            @endforeach
+                        @else
+                            <span class="text-muted small">Aucune donnée disponible</span>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -317,7 +321,7 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('housekeeping.mark-maintenance', 0) }}" method="POST" id="addMaintenanceForm">
+                <form action="" method="POST" id="addMaintenanceForm">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
@@ -632,26 +636,52 @@ document.addEventListener('DOMContentLoaded', function() {
         addMaintenanceForm.addEventListener('submit', function(e) {
             const roomId = document.getElementById('room_select').value;
             const reason = document.getElementById('maintenance_reason').value;
+            const duration = document.getElementById('estimated_duration').value;
             
-            if (!roomId || !reason) {
+            if (!roomId || !reason || !duration) {
                 e.preventDefault();
                 alert('Veuillez remplir tous les champs obligatoires');
                 return false;
             }
             
-            // Mettre à jour l'action du formulaire avec l'ID de la chambre
-            const action = addMaintenanceForm.getAttribute('action').replace('/0', '/' + roomId);
+            if (duration < 1 || duration > 168) {
+                e.preventDefault();
+                alert('La durée estimée doit être entre 1 et 168 heures');
+                return false;
+            }
+            
+            // Construire l'URL correcte
+            const action = "{{ route('housekeeping.mark-maintenance', ':roomId') }}".replace(':roomId', roomId);
             addMaintenanceForm.setAttribute('action', action);
+            
+            // Confirmation
+            if (!confirm('Êtes-vous sûr de vouloir mettre cette chambre en maintenance ?')) {
+                e.preventDefault();
+                return false;
+            }
         });
     }
     
-    // Rafraîchissement automatique toutes les 60 secondes
+    // Auto-select "Autre" si on entre du texte dans le champ raison personnalisé
+    const maintenanceReasonSelect = document.getElementById('maintenance_reason');
+    const additionalNotes = document.getElementById('additional_notes');
+    
+    if (maintenanceReasonSelect && additionalNotes) {
+        additionalNotes.addEventListener('input', function() {
+            if (this.value.trim() !== '' && maintenanceReasonSelect.value === '') {
+                maintenanceReasonSelect.value = 'Autre';
+            }
+        });
+    }
+    
+    // Rafraîchissement automatique toutes les 2 minutes
     setTimeout(function() {
         window.location.reload();
-    }, 60000);
+    }, 120000);
     
-    // Afficher les statistiques
-    console.log('Maintenance: {{ $stats["total_maintenance"] }} chambres');
+    // Afficher les statistiques dans la console
+    console.log('Dashboard maintenance chargé');
+    console.log('Chambres en maintenance: {{ $stats["total_maintenance"] ?? 0 }}');
 });
 </script>
 @endpush

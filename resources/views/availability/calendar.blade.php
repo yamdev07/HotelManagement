@@ -104,10 +104,10 @@
         <div class="col-12">
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
-                    <form method="GET" class="row g-3">
+                    <form method="GET" class="row g-3" id="calendarFilterForm">
                         <div class="col-md-3">
                             <label class="form-label">Type de chambre</label>
-                            <select name="room_type" class="form-select" onchange="this.form.submit()">
+                            <select name="room_type" class="form-select">
                                 <option value="">Tous les types</option>
                                 @foreach($roomTypes as $type)
                                     <option value="{{ $type->id }}" {{ request('room_type') == $type->id ? 'selected' : '' }}>
@@ -117,12 +117,18 @@
                             </select>
                         </div>
                         <div class="col-md-3">
+                            <label class="form-label">Numéro de chambre</label>
+                            <input type="text" name="room_number" class="form-control" 
+                                   value="{{ request('room_number') }}"
+                                   placeholder="Ex: 101, 102...">
+                        </div>
+                        <div class="col-md-3">
                             <label class="form-label">Mois</label>
                             <input type="month" name="month_year" class="form-control" 
                                    value="{{ $year }}-{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}"
                                    onchange="this.form.submit()">
                         </div>
-                        <div class="col-md-6 d-flex align-items-end justify-content-end">
+                        <div class="col-md-3 d-flex align-items-end justify-content-end">
                             <button type="submit" class="btn btn-primary me-2">
                                 <i class="fas fa-filter me-2"></i>
                                 Filtrer
@@ -141,7 +147,7 @@
     <!-- Légende -->
     <div class="row mb-3">
         <div class="col-12">
-            <div class="d-flex flex-wrap gap-3">
+            <div class="d-flex flex-wrap gap-3 align-items-center">
                 <div class="d-flex align-items-center">
                     <div class="legend-square available me-2"></div>
                     <small class="text-muted">Disponible</small>
@@ -157,6 +163,16 @@
                 <div class="d-flex align-items-center">
                     <div class="legend-square today me-2"></div>
                     <small class="text-muted">Aujourd'hui</small>
+                </div>
+                <div class="d-flex align-items-center">
+                    <div class="badge bg-danger me-2">2+</div>
+                    <small class="text-muted">Conflit (multiple réservations)</small>
+                </div>
+                <div class="ms-auto">
+                    <small class="text-muted">
+                        <i class="fas fa-mouse-pointer me-1"></i>
+                        Cliquez sur une cellule pour les détails
+                    </small>
                 </div>
             </div>
         </div>
@@ -175,12 +191,20 @@
                                     <tr class="bg-light">
                                         <!-- Première colonne fixe -->
                                         <th class="text-center py-3 room-info-header" style="min-width: 250px; position: sticky; left: 0; z-index: 10; background: #f8f9fa;">
-                                            <div>Chambre / Date</div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span>Chambre / Date</span>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="scrollToToday()" title="Aller à aujourd'hui">
+                                                    <i class="fas fa-calendar-day"></i>
+                                                </button>
+                                            </div>
                                         </th>
                                         <!-- Colonnes de dates -->
                                         @foreach($dates as $dateString => $dateInfo)
-                                            <th class="text-center py-3 {{ $dateInfo['is_today'] ? 'today-column' : '' }} {{ $dateInfo['is_weekend'] ? 'weekend-column' : '' }}"
-                                                style="min-width: 80px; position: sticky; top: 0; z-index: 5; background: #f8f9fa;">
+                                            <th class="text-center py-3 date-header {{ $dateInfo['is_today'] ? 'today-column' : '' }} {{ $dateInfo['is_weekend'] ? 'weekend-column' : '' }}"
+                                                style="min-width: 80px; position: sticky; top: 0; z-index: 5; background: #f8f9fa;"
+                                                data-date="{{ $dateString }}"
+                                                onclick="scrollToDate('{{ $dateString }}')"
+                                                title="Cliquez pour centrer">
                                                 <div class="fw-bold">{{ $dateInfo['date']->format('d') }}</div>
                                                 <div class="small text-muted">{{ $dateInfo['day_name'] }}</div>
                                             </th>
@@ -198,49 +222,89 @@
                                         </tr>
                                     @else
                                         @foreach($calendar as $roomData)
-                                            <tr>
+                                            <tr class="room-row" data-room-number="{{ $roomData['room']->number }}">
                                                 <!-- Première colonne fixe -->
                                                 <td class="py-3 room-info-cell" style="min-width: 250px; position: sticky; left: 0; z-index: 9; background: #f8f9fa;">
                                                     <div class="d-flex align-items-center">
                                                         <div class="me-3">
                                                             <div class="room-number-badge">{{ $roomData['room']->number }}</div>
                                                         </div>
-                                                        <div>
+                                                        <div class="flex-grow-1">
                                                             <div class="fw-bold text-dark">{{ $roomData['room']->type->name ?? 'Type inconnu' }}</div>
                                                             <div class="small text-muted">
-                                                                Capacité: {{ $roomData['room']->capacity }} personne(s)
+                                                                <i class="fas fa-users me-1"></i>
+                                                                {{ $roomData['room']->capacity }} pers.
                                                             </div>
                                                             <div class="small text-muted">
-                                                                Prix: {{ number_format($roomData['room']->price, 0, ',', ' ') }} FCFA/nuit
+                                                                <i class="fas fa-money-bill me-1"></i>
+                                                                {{ number_format($roomData['room']->price, 0, ',', ' ') }} FCFA/nuit
                                                             </div>
+                                                            @if($roomData['room']->room_status_id != 1)
+                                                                <div class="small">
+                                                                    <span class="badge bg-secondary mt-1">
+                                                                        {{ $roomData['room']->roomStatus->name ?? 'Indisponible' }}
+                                                                    </span>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+                                                        <div class="ms-2">
+                                                            <a href="{{ route('availability.room.detail', $roomData['room']->id) }}" 
+                                                               class="btn btn-sm btn-outline-primary"
+                                                               title="Voir détails">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
                                                         </div>
                                                     </div>
                                                 </td>
-                                                <!-- Colonnes de dates -->
+                                               <!-- Colonnes de dates -->
                                                 @foreach($dates as $dateString => $dateInfo)
                                                     @php
                                                         $availability = $roomData['availability'][$dateString] ?? [
                                                             'occupied' => false,
                                                             'available' => true,
-                                                            'css_class' => 'available'
+                                                            'css_class' => 'available',
+                                                            'reservation_count' => 0,
+                                                            'can_reserve' => false, // false par défaut
+                                                            'has_reservations' => false
                                                         ];
+                                                        
+                                                        // S'assurer que toutes les clés existent
+                                                        $canReserve = $availability['can_reserve'] ?? false;
+                                                        $cssClass = $availability['css_class'] ?? 'available';
+                                                        $reservationCount = $availability['reservation_count'] ?? 0;
+                                                        $isOccupied = $availability['occupied'] ?? false;
                                                     @endphp
-                                                    <td class="text-center py-3 availability-cell 
-                                                        {{ $availability['css_class'] }} 
+                                                    
+                                                    <td class="text-center py-3 availability-cell
+                                                        {{ $cssClass }}
                                                         {{ $dateInfo['is_today'] ? 'today-cell' : '' }}
-                                                        {{ $dateInfo['is_weekend'] ? 'weekend-cell' : '' }}"
+                                                        {{ $dateInfo['is_weekend'] ? 'weekend-cell' : '' }}
+                                                        {{ $canReserve ? 'can-reserve' : 'cannot-reserve' }}"
                                                         style="min-width: 80px;"
                                                         data-bs-toggle="tooltip"
                                                         data-room-id="{{ $roomData['room']->id }}"
+                                                        data-room-number="{{ $roomData['room']->number }}"
+                                                        data-room-type="{{ $roomData['room']->type->name ?? '' }}"
+                                                        data-room-price="{{ $roomData['room']->price }}"
                                                         data-date="{{ $dateString }}"
+                                                        data-formatted-date="{{ $dateInfo['date']->format('d/m/Y') }}"
+                                                        data-is-occupied="{{ $isOccupied ? 'true' : 'false' }}"
+                                                        data-reservation-count="{{ $reservationCount }}"
+                                                        data-can-reserve="{{ $canReserve ? 'true' : 'false' }}"
                                                         title="{{ $dateInfo['date']->format('d/m/Y') }} - 
-                                                               Chambre {{ $roomData['room']->number }} - 
-                                                               {{ $availability['occupied'] ? 'Occupée' : 'Disponible' }}">
-                                                        @if($availability['occupied'])
+                                                            Chambre {{ $roomData['room']->number }} - 
+                                                            {{ $isOccupied ? 'Occupée' : 'Disponible' }}
+                                                            @if($reservationCount > 1)
+                                                            - ALERTE: {{ $reservationCount }} réservations!
+                                                            @endif">
+                                                        @if($isOccupied)
                                                             <i class="fas fa-user text-danger"></i>
-                                                            @if($availability['reservation_count'] > 1)
+                                                            @if($reservationCount > 1)
                                                                 <span class="small position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                                                    {{ $availability['reservation_count'] }}
+                                                                    {{ $reservationCount }}
+                                                                    @if($reservationCount > 2)
+                                                                        <i class="fas fa-exclamation ms-1"></i>
+                                                                    @endif
                                                                 </span>
                                                             @endif
                                                         @else
@@ -263,12 +327,18 @@
     <!-- Actions -->
     <div class="row mt-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                 <div>
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Cliquez sur une cellule pour voir les détails de réservation
-                    </small>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary" onclick="selectDateRange()">
+                            <i class="fas fa-calendar-range me-2"></i>
+                            Sélectionner période
+                        </button>
+                        <button type="button" class="btn btn-outline-info" onclick="checkAllAvailability()">
+                            <i class="fas fa-search me-2"></i>
+                            Vérifier disponibilité
+                        </button>
+                    </div>
                 </div>
                 <div class="d-flex gap-2">
                     <button class="btn btn-outline-primary" onclick="window.print()">
@@ -276,9 +346,10 @@
                         Imprimer
                     </button>
                     <a href="{{ route('availability.export', [
-                        'start_date' => $startDate->format('Y-m-d'),
-                        'end_date' => $endDate->format('Y-m-d'),
-                        'format' => 'excel'
+                        'type' => 'excel',
+                        'export_type' => 'calendar',
+                        'month' => $month,
+                        'year' => $year
                     ]) }}" class="btn btn-success">
                         <i class="fas fa-file-excel me-2"></i>
                         Exporter Excel
@@ -298,6 +369,7 @@
         -webkit-overflow-scrolling: touch;
         border-radius: 8px;
         border: 1px solid #dee2e6;
+        position: relative;
     }
     
     .availability-calendar {
@@ -361,14 +433,18 @@
         border-right: 1px solid #d3d6d8;
     }
     
-    .today-cell {
+    .availability-cell.today-cell {
         background-color: #fff3cd !important;
         border-left: 2px solid #ffc107 !important;
         border-right: 2px solid #ffc107 !important;
     }
     
-    .weekend-cell {
-        background-color: #f8f9fa;
+    .availability-cell.weekend-cell {
+        background-color: rgba(248, 249, 250, 0.7);
+    }
+    
+    .availability-cell.can-reserve:hover {
+        background-color: #cfe2ff !important;
     }
     
     .today-column {
@@ -382,6 +458,15 @@
     .weekend-column {
         background-color: #f8f9fa;
         font-weight: bold;
+    }
+    
+    .date-header {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .date-header:hover {
+        background-color: #e9ecef !important;
     }
     
     .legend-square {
@@ -435,14 +520,45 @@
         background: #555;
     }
     
+    /* Indicateur de défilement */
+    .scroll-indicator {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(13, 110, 253, 0.8);
+        color: white;
+        padding: 10px;
+        border-radius: 50%;
+        cursor: pointer;
+        z-index: 100;
+        transition: opacity 0.3s;
+    }
+    
+    .scroll-indicator:hover {
+        background: rgba(13, 110, 253, 1);
+    }
+    
+    /* Sélection de période */
+    .selected-period {
+        background-color: #cfe2ff !important;
+        border: 2px solid #0d6efd !important;
+    }
+    
+    .selected-start {
+        background-color: #0d6efd !important;
+        color: white !important;
+    }
+    
     @media print {
-        .btn, .legend-square, .availability-cell:hover {
+        .btn, .legend-square, .availability-cell:hover, .date-header, .scroll-indicator {
             display: none !important;
         }
         
         .calendar-container {
             overflow: visible !important;
             width: 100% !important;
+            border: none !important;
         }
         
         .table-responsive {
@@ -461,6 +577,11 @@
         .room-info-cell {
             min-width: 180px !important;
         }
+        
+        .availability-cell .badge {
+            font-size: 0.5rem;
+            padding: 1px 3px;
+        }
     }
     
     @media (max-width: 768px) {
@@ -478,6 +599,32 @@
             height: 30px;
             font-size: 0.8rem;
         }
+        
+        .date-header {
+            min-width: 60px !important;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .availability-cell {
+            min-width: 50px !important;
+            height: 50px !important;
+            font-size: 0.7rem;
+        }
+        
+        .room-info-cell {
+            min-width: 160px !important;
+        }
+        
+        th, td {
+            padding: 6px 3px !important;
+        }
+        
+        .room-number-badge {
+            width: 25px;
+            height: 25px;
+            font-size: 0.7rem;
+        }
     }
 </style>
 @endpush
@@ -489,182 +636,263 @@
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
             return new bootstrap.Tooltip(tooltipTriggerEl, {
-                trigger: 'hover'
+                trigger: 'hover',
+                placement: 'top'
             });
         });
+        
+        // Variables globales pour la sélection de période
+        window.selectedCells = [];
+        window.selectionMode = false;
+        window.selectionStart = null;
         
         // Gérer les clics sur les cellules du calendrier
         document.querySelectorAll('.availability-cell').forEach(function(cell) {
-            cell.addEventListener('click', function() {
-                const roomId = this.getAttribute('data-room-id');
-                const date = this.getAttribute('data-date');
-                
-                if (!roomId || !date) {
-                    console.error('Données manquantes pour la cellule');
-                    return;
+            cell.addEventListener('click', function(e) {
+                if (window.selectionMode) {
+                    // Mode sélection de période
+                    handlePeriodSelection(this);
+                } else {
+                    // Mode normal: afficher les détails
+                    const roomId = this.getAttribute('data-room-id');
+                    const date = this.getAttribute('data-date');
+                    const isOccupied = this.getAttribute('data-is-occupied') === 'true';
+                    
+                    if (!roomId || !date) {
+                        console.error('Données manquantes pour la cellule');
+                        return;
+                    }
+                    
+                    if (isOccupied) {
+                        showOccupancyDetails(roomId, date);
+                    } else {
+                        showAvailabilityDetails(roomId, date);
+                    }
                 }
-                
-                showAvailabilityDetails(roomId, date);
+            });
+            
+            // Ajouter un effet au survol
+            cell.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('selected-period')) {
+                    this.style.transform = 'scale(1.05)';
+                    this.style.zIndex = '2';
+                    this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+                }
+            });
+            
+            cell.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('selected-period')) {
+                    this.style.transform = '';
+                    this.style.zIndex = '';
+                    this.style.boxShadow = '';
+                }
             });
         });
         
-        // Gérer le clic sur les en-têtes de date pour un scroll fluide
-        document.querySelectorAll('.date-header').forEach(function(header, index) {
-            header.style.cursor = 'pointer';
+        // Gérer le clic sur les en-têtes de date
+        document.querySelectorAll('.date-header').forEach(function(header) {
             header.addEventListener('click', function() {
-                const dateCells = document.querySelectorAll(`.availability-cell:nth-child(${index + 2})`);
-                if (dateCells.length > 0) {
-                    dateCells[0].scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'nearest',
-                        inline: 'center'
-                    });
-                }
+                const date = this.getAttribute('data-date');
+                scrollToDate(date);
             });
         });
+        
+        // Filtrer les chambres par numéro
+        const roomNumberInput = document.querySelector('input[name="room_number"]');
+        if (roomNumberInput) {
+            roomNumberInput.addEventListener('input', function() {
+                filterRoomsByNumber(this.value);
+            });
+        }
         
         // Ajouter un indicateur de défilement
+        addScrollIndicator();
+        
+        // Détecter la largeur d'écran et ajuster
+        adjustForScreenSize();
+        window.addEventListener('resize', adjustForScreenSize);
+    });
+    
+    // ==================== FONCTIONS UTILITAIRES ====================
+    
+    function filterRoomsByNumber(roomNumber) {
+        const rows = document.querySelectorAll('.room-row');
+        const searchText = roomNumber.toLowerCase().trim();
+        
+        rows.forEach(row => {
+            const roomNum = row.getAttribute('data-room-number');
+            if (searchText === '' || roomNum.toLowerCase().includes(searchText)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    function scrollToDate(dateString) {
+        const targetCell = document.querySelector(`.availability-cell[data-date="${dateString}"]`);
+        if (targetCell) {
+            targetCell.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest',
+                inline: 'center'
+            });
+            
+            // Surligner temporairement
+            targetCell.classList.add('selected-period');
+            setTimeout(() => {
+                targetCell.classList.remove('selected-period');
+            }, 2000);
+        }
+    }
+    
+    function scrollToToday() {
+        const today = new Date().toISOString().split('T')[0];
+        scrollToDate(today);
+    }
+    
+    function addScrollIndicator() {
         const calendarContainer = document.querySelector('.calendar-container');
+        if (!calendarContainer) return;
+        
         const scrollIndicator = document.createElement('div');
         scrollIndicator.className = 'scroll-indicator d-none d-md-block';
         scrollIndicator.innerHTML = '<i class="fas fa-chevron-right"></i>';
-        scrollIndicator.style.cssText = `
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(13, 110, 253, 0.8);
-            color: white;
-            padding: 10px;
-            border-radius: 50%;
-            cursor: pointer;
-            z-index: 100;
-            transition: opacity 0.3s;
-        `;
         
-        if (calendarContainer) {
-            calendarContainer.style.position = 'relative';
-            calendarContainer.appendChild(scrollIndicator);
-            
-            scrollIndicator.addEventListener('click', function() {
-                calendarContainer.scrollBy({
-                    left: 200,
-                    behavior: 'smooth'
-                });
+        calendarContainer.style.position = 'relative';
+        calendarContainer.appendChild(scrollIndicator);
+        
+        scrollIndicator.addEventListener('click', function() {
+            calendarContainer.scrollBy({
+                left: 300,
+                behavior: 'smooth'
             });
-            
-            // Masquer l'indicateur quand on est à la fin
-            calendarContainer.addEventListener('scroll', function() {
-                const isAtEnd = this.scrollLeft + this.clientWidth >= this.scrollWidth - 10;
-                scrollIndicator.style.opacity = isAtEnd ? '0' : '1';
-                scrollIndicator.style.pointerEvents = isAtEnd ? 'none' : 'auto';
-            });
-        }
-    });
+        });
+        
+        // Masquer l'indicateur quand on est à la fin
+        calendarContainer.addEventListener('scroll', function() {
+            const isAtEnd = this.scrollLeft + this.clientWidth >= this.scrollWidth - 10;
+            scrollIndicator.style.opacity = isAtEnd ? '0' : '1';
+            scrollIndicator.style.pointerEvents = isAtEnd ? 'none' : 'auto';
+            scrollIndicator.style.display = isAtEnd ? 'none' : 'flex';
+        });
+        
+        // Initialiser l'état
+        scrollIndicator.style.opacity = '1';
+    }
     
-    function showAvailabilityDetails(roomId, date) {
-        // Afficher un loader
-        const modalBody = document.getElementById('detailsModalBody');
-        modalBody.innerHTML = `
-            <div class="text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Chargement...</span>
-                </div>
-                <p class="mt-3">Chargement des détails...</p>
-            </div>
-        `;
+    function adjustForScreenSize() {
+        const cells = document.querySelectorAll('.availability-cell');
+        const isMobile = window.innerWidth < 768;
         
-        // Afficher le modal
-        const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
-        modal.show();
-        
-        // Récupérer les données via AJAX
+        cells.forEach(cell => {
+            if (isMobile) {
+                cell.style.minWidth = '50px';
+                cell.style.height = '50px';
+                cell.style.fontSize = '0.7rem';
+            } else {
+                cell.style.minWidth = '80px';
+                cell.style.height = '80px';
+                cell.style.fontSize = '';
+            }
+        });
+    }
+    
+    // ==================== GESTION DES DÉTAILS ====================
+    
+    function showOccupancyDetails(roomId, date) {
         fetch(`/availability/calendar-cell-details?room_id=${roomId}&date=${date}`)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erreur réseau');
-                }
+                if (!response.ok) throw new Error('Erreur réseau');
                 return response.json();
             })
             .then(data => {
-                if (data.error) {
-                    throw new Error(data.message);
-                }
-                
-                // Créer le contenu du modal
                 let modalContent = `
                     <div class="p-3">
-                        <h5 class="fw-bold mb-3">Détails de disponibilité</h5>
-                        <div class="row">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-calendar-times text-danger me-2"></i>
+                            Chambre Occupée
+                        </h5>
+                        <div class="row mb-4">
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label text-muted">Chambre</label>
-                                    <div class="fw-bold d-flex align-items-center">
-                                        <span class="room-number-badge-sm me-2">${data.room.number}</span>
-                                        ${data.room.type} (${data.room.capacity} pers.)
+                                <div class="card border-danger border-2">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold">Informations Chambre</h6>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <span class="room-number-badge-sm me-3">${data.room.number}</span>
+                                            <div>
+                                                <div class="fw-bold">${data.room.type}</div>
+                                                <small class="text-muted">${data.room.capacity} personnes</small>
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Prix/nuit:</small>
+                                            <div class="fw-bold">${data.room.price} FCFA</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Date:</small>
+                                            <div class="fw-bold">${new Date(date).toLocaleDateString('fr-FR')}</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
-                                <div class="mb-3">
-                                    <label class="form-label text-muted">Date</label>
-                                    <div class="fw-bold">${data.date.formatted} (${data.date.day_name})</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="mb-3">
-                                    <label class="form-label text-muted">Statut</label>
-                                    <div>
-                                        <span class="badge bg-${data.status_class}">
-                                            ${data.status}
-                                        </span>
+                                <div class="card border-warning border-2">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold">Statut</h6>
+                                        <div class="mb-3">
+                                            <span class="badge bg-danger py-2 px-3">
+                                                <i class="fas fa-user me-2"></i>
+                                                Occupée
+                                            </span>
+                                        </div>
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            Cette chambre n'est pas disponible pour cette date.
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                 `;
                 
-                if (data.is_occupied && data.reservations && data.reservations.length > 0) {
+                if (data.reservations && data.reservations.length > 0) {
                     modalContent += `
-                        <div class="row">
-                            <div class="col-12">
-                                <h6 class="fw-bold mt-3 mb-2">
-                                    <i class="fas fa-calendar-check me-2"></i>
-                                    Réservations (${data.reservations.length})
-                                </h6>
-                                <div class="table-responsive">
-                                    <table class="table table-sm table-hover">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th>Client</th>
-                                                <th>Arrivée</th>
-                                                <th>Départ</th>
-                                                <th>Statut</th>
-                                                <th>Actions</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
+                        <h6 class="fw-bold mb-3">
+                            <i class="fas fa-list me-2"></i>
+                            Réservations (${data.reservations.length})
+                        </h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Client</th>
+                                        <th>Arrivée</th>
+                                        <th>Départ</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                     `;
                     
                     data.reservations.forEach(reservation => {
                         modalContent += `
                             <tr>
                                 <td>
-                                    <div class="fw-bold">${reservation.customer}</div>
-                                    <small class="text-muted">${reservation.guests} personne(s)</small>
+                                    <div class="fw-bold">${reservation.customer.name || 'Client'}</div>
+                                    <small class="text-muted">${reservation.customer.email || ''}</small>
                                 </td>
-                                <td>${reservation.check_in}</td>
-                                <td>${reservation.check_out}</td>
+                                <td>${new Date(reservation.check_in).toLocaleDateString('fr-FR')}</td>
+                                <td>${new Date(reservation.check_out).toLocaleDateString('fr-FR')}</td>
                                 <td>
-                                    <span class="badge bg-${reservation.status === 'active' ? 'success' : 'warning'}">
-                                        ${reservation.status_label}
+                                    <span class="badge ${reservation.status === 'active' ? 'bg-success' : 'bg-warning'}">
+                                        ${reservation.status === 'active' ? 'En séjour' : 'Réservée'}
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="/transactions/${reservation.id}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye"></i>
+                                    <a href="/transactions/${reservation.id}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                        <i class="fas fa-external-link-alt"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -672,91 +900,430 @@
                     });
                     
                     modalContent += `
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                                </tbody>
+                            </table>
                         </div>
                     `;
-                } else if (!data.is_occupied && data.room.room_status_id == 1) {
-                    modalContent += `
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="alert alert-success">
-                                    <i class="fas fa-check-circle me-2"></i>
-                                    Cette chambre est disponible pour cette date.
-                                    <div class="mt-2">
-                                        <strong>Prix:</strong> ${data.room.formatted_price || (data.room.price + ' CFA/nuit')}
-                                    </div>
-                                </div>
-                                <div class="d-grid gap-2">
-                                    <a href="{{ route('transaction.reservation.createIdentity') }}?room_id=${roomId}&check_in=${date}&check_out=${date}" 
-                                       class="btn btn-success">
-                                        <i class="fas fa-plus me-2"></i>
-                                        Créer une réservation
+                    
+                    if (data.reservations.length > 1) {
+                        modalContent += `
+                            <div class="alert alert-danger mt-3">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>ALERTE:</strong> ${data.reservations.length} réservations trouvées pour cette date!
+                                <div class="mt-2">
+                                    <a href="/availability/room/${roomId}/conflicts?date=${date}" class="btn btn-sm btn-danger">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Voir les conflits
                                     </a>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    }
                 }
                 
-                modalContent += `</div>`;
+                modalContent += `
+                        <div class="mt-4">
+                            <h6 class="fw-bold mb-3">Options</h6>
+                            <div class="d-grid gap-2">
+                                <a href="/availability/search?room_type_id=${data.room.type_id}" class="btn btn-outline-primary">
+                                    <i class="fas fa-search me-2"></i>
+                                    Chercher une autre chambre
+                                </a>
+                                <button class="btn btn-secondary" data-bs-dismiss="modal">
+                                    <i class="fas fa-times me-2"></i>
+                                    Fermer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
                 
-                modalBody.innerHTML = modalContent;
-                
-                // Réinitialiser les tooltips dans le modal
-                const modalTooltips = [].slice.call(modalBody.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                modalTooltips.forEach(function(tooltipEl) {
-                    new bootstrap.Tooltip(tooltipEl);
-                });
-                
+                showModal('Détails d\'occupation', modalContent);
             })
             .catch(error => {
                 console.error('Erreur:', error);
-                modalBody.innerHTML = `
+                showModal('Erreur', `
                     <div class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        Erreur lors de la récupération des détails: ${error.message}
+                        Erreur: ${error.message}
                     </div>
                     <div class="text-center mt-3">
-                        <button class="btn btn-primary" onclick="showAvailabilityDetails('${roomId}', '${date}')">
+                        <button class="btn btn-primary" onclick="showOccupancyDetails('${roomId}', '${date}')">
                             <i class="fas fa-redo me-2"></i>
                             Réessayer
                         </button>
                     </div>
-                `;
+                `);
             });
     }
-</script>
-
-<!-- Modal pour les détails -->
-<div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="detailsModalLabel">
-                    <i class="fas fa-calendar-alt me-2"></i>
-                    Détails de disponibilité
+    
+    function showAvailabilityDetails(roomId, date) {
+        fetch(`/availability/check-availability?room_id=${roomId}&check_in=${date}&check_out=${date}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Erreur réseau');
+                return response.json();
+            })
+            .then(data => {
+                let modalContent = `
+                    <div class="p-3">
+                        <h5 class="fw-bold mb-3">
+                            <i class="fas fa-calendar-check text-success me-2"></i>
+                            Chambre Disponible
+                        </h5>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card border-success border-2">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold">Informations Chambre</h6>
+                                        <div class="d-flex align-items-center mb-3">
+                                            <span class="room-number-badge-sm me-3">${data.room.number}</span>
+                                            <div>
+                                                <div class="fw-bold">${data.room.type}</div>
+                                                <small class="text-muted">${data.room.capacity} personnes</small>
+                                            </div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Prix/nuit:</small>
+                                            <div class="fw-bold">${data.room.price.toLocaleString()} FCFA</div>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted">Statut:</small>
+                                            <div>
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>
+                                                    Disponible
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border-primary border-2">
+                                    <div class="card-body">
+                                        <h6 class="fw-bold">Réservation</h6>
+                                        <div class="mb-3">
+                                            <label class="form-label">Date</label>
+                                            <div class="fw-bold">${new Date(date).toLocaleDateString('fr-FR')}</div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Prix total</label>
+                                            <div class="fw-bold text-success fs-4">${data.total_price.toLocaleString()} FCFA</div>
+                                        </div>
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            Cette chambre est disponible pour cette date.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <a href="/transaction/reservation/createIdentity?room_id=${roomId}&check_in=${date}&check_out=${date}" 
+                               class="btn btn-success btn-lg">
+                                <i class="fas fa-plus me-2"></i>
+                                Réserver cette chambre
+                            </a>
+                            <button type="button" class="btn btn-outline-primary" onclick="selectDateRangeFromCell('${roomId}', '${date}')">
+                                <i class="fas fa-calendar-range me-2"></i>
+                                Sélectionner une période
+                            </button>
+                            <a href="/availability/room/${roomId}" class="btn btn-outline-secondary">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Voir les détails de la chambre
+                            </a>
+                        </div>
+                    </div>
+                `;
+                
+                showModal('Chambre disponible', modalContent);
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                showModal('Erreur', `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Erreur: ${error.message}
+                    </div>
+                `);
+            });
+    }
+    
+    // ==================== SÉLECTION DE PÉRIODE ====================
+    
+    function selectDateRange() {
+        window.selectionMode = true;
+        window.selectedCells = [];
+        
+        showModal('Sélection de période', `
+            <div class="p-3">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-calendar-range me-2"></i>
+                    Sélectionner une période
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Mode sélection activé. Cliquez sur la première date, puis sur la dernière date.
+                </div>
+                <div class="mt-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Date d'arrivée</label>
+                                <input type="date" id="checkInDate" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">Date de départ</label>
+                                <input type="date" id="checkOutDate" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <button class="btn btn-primary w-100" onclick="applyDateSelection()">
+                            <i class="fas fa-check me-2"></i>
+                            Appliquer la sélection
+                        </button>
+                    </div>
+                </div>
             </div>
-            <div class="modal-body" id="detailsModalBody">
-                <!-- Contenu chargé dynamiquement -->
+        `);
+    }
+    
+    function selectDateRangeFromCell(roomId, startDate) {
+        window.selectionMode = true;
+        window.selectionStart = { roomId, date: startDate };
+        
+        showModal('Sélection de période', `
+            <div class="p-3">
+                <h5 class="fw-bold mb-3">
+                    <i class="fas fa-calendar-range me-2"></i>
+                    Sélectionner la date de départ
+                </h5>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Date d'arrivée: <strong>${new Date(startDate).toLocaleDateString('fr-FR')}</strong><br>
+                    Cliquez sur la date de départ dans le calendrier.
+                </div>
+                <div class="mt-3 text-center">
+                    <button class="btn btn-secondary" onclick="cancelSelection()">
+                        <i class="fas fa-times me-2"></i>
+                        Annuler
+                    </button>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times me-2"></i>
-                    Fermer
-                </button>
-                <a href="{{ route('availability.search') }}" class="btn btn-outline-primary">
-                    <i class="fas fa-search me-2"></i>
-                    Rechercher disponibilité
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
+        `);
+    }
+    
+    function handlePeriodSelection(cell) {
+        if (!window.selectionStart) {
+            // Première sélection
+            window.selectionStart = {
+                roomId: cell.getAttribute('data-room-id'),
+                date: cell.getAttribute('data-date'),
+                element: cell
+            };
+            cell.classList.add('selected-start');
+            
+            showModal('Sélection de période', `
+                <div class="p-3">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-calendar-range me-2"></i>
+                        Sélectionner la date de départ
+                    </h5>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Arrivée: <strong>${new Date(window.selectionStart.date).toLocaleDateString('fr-FR')}</strong><br>
+                        Chambre: <strong>${cell.getAttribute('data-room-number')}</strong><br>
+                        Cliquez sur la date de départ.
+                    </div>
+                </div>
+            `);
+        } else {
+            // Deuxième sélection (date de départ)
+            const roomId = cell.getAttribute('data-room-id');
+            const endDate = cell.getAttribute('data-date');
+            
+            if (roomId !== window.selectionStart.roomId) {
+                alert('Veuillez sélectionner la même chambre');
+                return;
+            }
+            
+            const startDate = new Date(window.selectionStart.date);
+            const endDateObj = new Date(endDate);
+            
+            if (endDateObj <= startDate) {
+                alert('La date de départ doit être après la date d\'arrivée');
+                resetSelection();
+                return;
+            }
+            
+            // Calculer le nombre de nuits
+            const nights = Math.ceil((endDateObj - startDate) / (1000 * 60 * 60 * 24));
+            
+            // Afficher la période sélectionnée
+            showModal('Période sélectionnée', `
+                <div class="p-3">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Période sélectionnée
+                    </h5>
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>Détails</h6>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Chambre:</small>
+                                        <div class="fw-bold">${cell.getAttribute('data-room-number')}</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Type:</small>
+                                        <div class="fw-bold">${cell.getAttribute('data-room-type')}</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Prix/nuit:</small>
+                                        <div class="fw-bold">${parseInt(cell.getAttribute('data-room-price')).toLocaleString()} FCFA</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h6>Période</h6>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Arrivée:</small>
+                                        <div class="fw-bold">${startDate.toLocaleDateString('fr-FR')}</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Départ:</small>
+                                        <div class="fw-bold">${endDateObj.toLocaleDateString('fr-FR')}</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Durée:</small>
+                                        <div class="fw-bold">${nights} nuit(s)</div>
+                                    </div>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Prix total:</small>
+                                        <div class="fw-bold text-success">${(parseInt(cell.getAttribute('data-room-price')) * nights).toLocaleString()} FCFA</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="/transaction/reservation/createIdentity?room_id=${roomId}&check_in=${window.selectionStart.date}&check_out=${endDate}" 
+                           class="btn btn-success btn-lg">
+                            <i class="fas fa-plus me-2"></i>
+                            Réserver cette période
+                        </a>
+                        <button class="btn btn-outline-secondary" onclick="resetSelection()">
+                            <i class="fas fa-redo me-2"></i>
+                            Sélectionner une autre période
+                        </button>
+                    </div>
+                </div>
+            `);
+            
+            resetSelection();
+        }
+    }
+    
+    function applyDateSelection() {
+        const checkIn = document.getElementById('checkInDate').value;
+        const checkOut = document.getElementById('checkOutDate').value;
+        
+        if (!checkIn || !checkOut) {
+            alert('Veuillez sélectionner les deux dates');
+            return;
+        }
+        
+        if (new Date(checkOut) <= new Date(checkIn)) {
+            alert('La date de départ doit être après la date d\'arrivée');
+            return;
+        }
+        
+        // Rediriger vers la recherche avec les dates
+        window.location.href = `/availability/search?check_in=${checkIn}&check_out=${checkOut}`;
+    }
+    
+    function cancelSelection() {
+        resetSelection();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('detailsModal'));
+        if (modal) modal.hide();
+    }
+    
+    function resetSelection() {
+        window.selectionMode = false;
+        window.selectionStart = null;
+        window.selectedCells = [];
+        
+        // Retirer les styles de sélection
+        document.querySelectorAll('.selected-start, .selected-period').forEach(el => {
+            el.classList.remove('selected-start', 'selected-period');
+        });
+    }
+    
+    function checkAllAvailability() {
+        const checkIn = prompt('Date d\'arrivée (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+        if (!checkIn) return;
+        
+        const checkOut = prompt('Date de départ (YYYY-MM-DD):', new Date(Date.now() + 86400000).toISOString().split('T')[0]);
+        if (!checkOut) return;
+        
+        if (new Date(checkOut) <= new Date(checkIn)) {
+            alert('La date de départ doit être après la date d\'arrivée');
+            return;
+        }
+        
+        window.location.href = `/availability/search?check_in=${checkIn}&check_out=${checkOut}`;
+    }
+    
+    // ==================== FONCTIONS MODAL ====================
+    
+    function showModal(title, content) {
+        // Créer ou réutiliser le modal
+        let modal = document.getElementById('detailsModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'detailsModal';
+            modal.className = 'modal fade';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="detailsModalBody"></div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        // Mettre à jour le contenu
+        document.getElementById('detailsModalBody').innerHTML = content;
+        modal.querySelector('.modal-title').textContent = title;
+        
+        // Afficher le modal
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+        
+        // Réinitialiser les tooltips dans le modal
+        const modalTooltips = [].slice.call(modal.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        modalTooltips.forEach(function(tooltipEl) {
+            new bootstrap.Tooltip(tooltipEl);
+        });
+    }
+</script>
 
 <!-- Style pour le badge de chambre dans le modal -->
 <style>
@@ -771,6 +1338,10 @@
         justify-content: center;
         font-weight: bold;
         font-size: 0.9rem;
+    }
+    
+    .modal-xl {
+        max-width: 90%;
     }
 </style>
 @endpush
