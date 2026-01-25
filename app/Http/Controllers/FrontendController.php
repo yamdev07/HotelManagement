@@ -12,7 +12,7 @@ class FrontendController extends Controller
     // Page d'accueil du site vitrine
     public function home()
     {
-        $featuredRooms = Room::with(['type', 'roomStatus', 'image']) // Notez 'image' au singulier
+        $featuredRooms = Room::with(['type', 'roomStatus', 'images']) // <-- CORRECTION: 'images' au pluriel
             ->where('room_status_id', 1) // Available
             ->limit(3)
             ->get();
@@ -23,8 +23,8 @@ class FrontendController extends Controller
      // Liste des chambres
     public function rooms()
     {
-        $rooms = Room::with(['type', 'roomStatus', 'image']) // Notez 'image' au singulier
-        ->where('room_status_id', 1) // Available
+        $rooms = Room::with(['type', 'roomStatus', 'images']) // <-- CORRECTION: 'images' au pluriel
+            ->where('room_status_id', 1) // Available
             ->paginate(9);
                 
         return view('frontend.pages.rooms', compact('rooms'));
@@ -33,10 +33,10 @@ class FrontendController extends Controller
     // Détails d'une chambre
     public function roomDetails($id)
     {
-        $room = Room::with(['type', 'roomStatus', 'image', 'facilities'])
+        $room = Room::with(['type', 'roomStatus', 'images', 'facilities']) // <-- CORRECTION: 'images' au pluriel
             ->findOrFail($id);
                         
-        $relatedRooms = Room::with(['type', 'roomStatus', 'image'])
+        $relatedRooms = Room::with(['type', 'roomStatus', 'images']) // <-- CORRECTION: 'images' au pluriel
             ->where('type_id', $room->type_id)
             ->where('id', '!=', $room->id)
             ->where('room_status_id', 1) // Available

@@ -283,7 +283,7 @@ class CheckInController extends Controller
         $query = Transaction::with(['customer', 'room.type', 'room.roomStatus'])
             ->where('status', 'reservation');
         
-        // Recherche par texte
+        // Recherche par texte - CORRECTION ICI
         if ($search) {
             $query->where(function($query) use ($search) {
                 $query->whereHas('customer', function($q) use ($search) {
@@ -293,8 +293,14 @@ class CheckInController extends Controller
                 })
                 ->orWhereHas('room', function($q) use ($search) {
                     $q->where('number', 'LIKE', "%{$search}%");
-                })
-                ->orWhere('reference', 'LIKE', "%{$search}%");
+                });
+                // SUPPRIMEZ cette ligne OU remplacez-la par un champ existant :
+                // ->orWhere('reference', 'LIKE', "%{$search}%");
+                
+                // Si vous avez un autre champ d'identification, utilisez-le :
+                // ->orWhere('id', 'LIKE', "%{$search}%");
+                // ->orWhere('booking_number', 'LIKE', "%{$search}%");
+                // ->orWhere('reservation_code', 'LIKE', "%{$search}%");
             });
         }
         

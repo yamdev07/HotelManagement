@@ -140,7 +140,15 @@
                                         </td>
                                         <td>{{ $arrival->check_in->format('H:i') }}</td>
                                         <td>
-                                            <a href="{{ route('checkin.show', $arrival->id) }}" 
+                                            @php
+                                                // Vérifier si la route checkin.show existe
+                                                try {
+                                                    $checkinRoute = route('checkin.show', $arrival->id);
+                                                } catch (\Exception $e) {
+                                                    $checkinRoute = "/checkin/{$arrival->id}";
+                                                }
+                                            @endphp
+                                            <a href="{{ $checkinRoute }}" 
                                                class="btn btn-sm btn-success">
                                                 <i class="fas fa-door-open me-1"></i>
                                                 Check-in
@@ -249,7 +257,7 @@
                                     <th class="py-3">Type de chambre</th>
                                     <th class="py-3 text-center">Total</th>
                                     <th class="py-3 text-center">Disponibles</th>
-                                    < class="py-3 text-center">Occupées</th>
+                                    <th class="py-3 text-center">Occupées</th> <!-- CORRIGÉ: balise <th> fermée -->
                                     <th class="py-3 text-center">Nettoyage</th>
                                     <th class="py-3 text-center">Maintenance</th>
                                     <th class="py-3 text-center">Taux d'occupation</th>
@@ -404,10 +412,7 @@
         font-size: 1rem;
     }
     
-    .card-header.bg-primary,
-    .card-header.bg-warning,
-    .card-header.bg-dark,
-    .card-header.bg-info {
+    .card-header.bg-primary {
         background: linear-gradient(135deg, var(--bs-primary), #0a58ca) !important;
     }
     
@@ -451,7 +456,7 @@
         // Rafraîchissement automatique toutes les 60 secondes
         setTimeout(function() {
             window.location.reload();
-        }, 60000);
+        }, 60000); 
         
         // Message de mise à jour
         console.log('Inventaire mis à jour: {{ now()->format("H:i:s") }}');

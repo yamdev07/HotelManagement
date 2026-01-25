@@ -223,7 +223,7 @@
             </div>
             @endif
 
-            <!-- Chambres non disponibles -->
+           <!-- Chambres non disponibles -->
             @if(count($unavailableRooms) > 0)
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-danger text-white">
@@ -253,37 +253,30 @@
                                             </span>
                                         </div>
                                         <div>
-                                            <button class="btn btn-sm btn-outline-danger" 
-                                                    type="button"
-                                                    data-bs-toggle="collapse" 
-                                                    data-bs-target="#conflicts{{ $room->id }}">
+                                            <!-- LIEN VERS LA PAGE DES CONFLITS -->
+                                            <a href="{{ route('availability.room.conflicts', [
+                                                'room' => $room->id,
+                                                'check_in' => $checkIn,
+                                                'check_out' => $checkOut,
+                                                'adults' => $adults,
+                                                'children' => $children
+                                            ]) }}" 
+                                            class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>
                                                 Voir conflits
-                                            </button>
+                                            </a>
                                         </div>
                                     </div>
                                     
-                                    <div class="collapse mt-3" id="conflicts{{ $room->id }}">
-                                        @if(isset($roomConflicts[$room->id]))
-                                        <div class="alert alert-warning">
-                                            <h6 class="alert-heading mb-2">
-                                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                                Réservations en conflit:
-                                            </h6>
-                                            <ul class="mb-0">
-                                                @foreach($roomConflicts[$room->id] as $conflict)
-                                                <li class="mb-1">
-                                                    <small>
-                                                        {{ $conflict->customer->name }}: 
-                                                        {{ $conflict->check_in->format('d/m/Y') }} - 
-                                                        {{ $conflict->check_out->format('d/m/Y') }}
-                                                        <span class="badge bg-info ms-2">{{ $conflict->status }}</span>
-                                                    </small>
-                                                </li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                        @endif
+                                    <!-- Afficher un aperçu des conflits si disponible -->
+                                    @if(isset($roomConflicts[$room->id]) && count($roomConflicts[$room->id]) > 0)
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            {{ count($roomConflicts[$room->id]) }} réservation(s) en conflit
+                                        </small>
                                     </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
