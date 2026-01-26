@@ -223,7 +223,7 @@
             </div>
             @endif
 
-           <!-- Chambres non disponibles -->
+            <!-- Chambres non disponibles -->
             @if(count($unavailableRooms) > 0)
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-danger text-white">
@@ -253,17 +253,19 @@
                                             </span>
                                         </div>
                                         <div>
-                                            <!-- LIEN VERS LA PAGE DES CONFLITS -->
-                                            <a href="{{ route('availability.room.conflicts', [
-                                                'room' => $room->id,
-                                                'check_in' => $checkIn,
-                                                'check_out' => $checkOut,
-                                                'adults' => $adults,
-                                                'children' => $children
-                                            ]) }}" 
+                                            <!-- Lien Voir conflits - Version corrigée -->
+                                            <a href="{{ route('availability.room.conflicts', $room->id) }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}&adults={{ $adults }}&children={{ $children }}" 
                                             class="btn btn-sm btn-outline-danger">
                                                 <i class="fas fa-exclamation-triangle me-1"></i>
                                                 Voir conflits
+                                            </a>
+
+                                            <!-- Lien de débogage (optionnel) -->
+                                            <a href="/test-simple-conflicts/{{ $room->id }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}" 
+                                            class="btn btn-sm btn-outline-info mt-1"
+                                            target="_blank">
+                                                <i class="fas fa-bug me-1"></i>
+                                                Test débogage
                                             </a>
                                         </div>
                                     </div>
@@ -277,6 +279,14 @@
                                         </small>
                                     </div>
                                     @endif
+
+                                    <!-- DEBUG: Afficher l'URL générée -->
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <i class="fas fa-code me-1"></i>
+                                            URL: {{ route('availability.room.conflicts', ['room' => $room->id]) }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}
+                                        </small>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -394,8 +394,8 @@
                                                 {{ $departure->room->type->name ?? 'N/A' }}
                                             </div>
                                             <div class="mt-1">
-                                                <a href="{{ route('transaction.reservation.show', $departure->id) }}" 
-                                                   class="btn btn-sm btn-outline-success">
+                                                <a href="{{ route('transaction.show', $departure->id) }}" 
+                                                    class="btn btn-sm btn-outline-success">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                             </div>

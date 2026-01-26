@@ -4,58 +4,27 @@ namespace App\Repositories\Interface;
 
 interface PaymentRepositoryInterface
 {
-    /**
-     * Créer un paiement à partir d'une requête (ancienne méthode)
-     */
     public function store($request, $transaction, string $status);
-    
-    /**
-     * Créer un paiement à partir d'un tableau de données
-     */
     public function create(array $data);
-    
-    /**
-     * Créer un paiement avec paramètres simplifiés
-     */
-    public function createPayment($transactionId, $amount, $method = 'cash', $notes = null);
-    
-    /**
-     * Récupérer les paiements d'une transaction
-     */
+    public function createPayment($transactionId, $amount, $method = 'cash', $description = null);
     public function getByTransaction($transactionId);
-    
-    /**
-     * Récupérer le total des paiements d'une transaction
-     */
+    public function getCompletedByTransaction($transactionId);
     public function getTotalByTransaction($transactionId);
-    
-    /**
-     * Créer un remboursement
-     */
     public function createRefund($transactionId, $amount, $reason = null);
-    
-    /**
-     * Mettre à jour le statut d'un paiement
-     */
-    public function updateStatus($paymentId, $status, $notes = null);
-    
-    /**
-     * Supprimer un paiement (annulation)
-     */
+    public function markAsRefunded($paymentId, $userId, $reason = null);
+    public function updateStatus($paymentId, $status, $description = null);
+    public function cancel($paymentId, $userId, $reason = null);
     public function delete($paymentId);
-    
-    /**
-     * Rechercher des paiements
-     */
     public function search($request);
-    
-    /**
-     * Paiements du jour
-     */
     public function getTodayPayments();
-    
-    /**
-     * Paiements par méthode
-     */
+    public function getTodayPaymentsAmount();
+    public function getTodayPaymentsCount();
     public function getPaymentsByMethod($startDate = null, $endDate = null);
+    public function getPaymentsByPeriod($startDate, $endDate);
+    public function getPaymentStats($startDate = null, $endDate = null);
+    public function getPaymentMethods();
+    public function isTransactionFullyPaid($transactionId, $transactionTotal);
+    public function getTransactionBalance($transactionId, $transactionTotal);
+    public function getByCashierSession($sessionId);
+    public function getTotalByCashierSession($sessionId);
 }

@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Schema;
 
 class CheckInController extends Controller
 {
@@ -80,10 +81,10 @@ class CheckInController extends Controller
             $transaction->id
         );
         
-        // Chambres alternatives si besoin
+        // Chambres alternatives si besoin - CORRECTION ICI : type_id au lieu de room_type_id
         $alternativeRooms = [];
-        if (!$isRoomAvailable) {
-            $alternativeRooms = Room::where('room_type_id', $transaction->room->room_type_id)
+        if (!$isRoomAvailable && $transaction->room->type_id) {
+            $alternativeRooms = Room::where('type_id', $transaction->room->type_id)
                 ->where('id', '!=', $transaction->room_id)
                 ->where('room_status_id', 1) // Available
                 ->get()
@@ -283,7 +284,7 @@ class CheckInController extends Controller
         $query = Transaction::with(['customer', 'room.type', 'room.roomStatus'])
             ->where('status', 'reservation');
         
-        // Recherche par texte - CORRECTION ICI
+        // Recherche par texte
         if ($search) {
             $query->where(function($query) use ($search) {
                 $query->whereHas('customer', function($q) use ($search) {
@@ -293,14 +294,8 @@ class CheckInController extends Controller
                 })
                 ->orWhereHas('room', function($q) use ($search) {
                     $q->where('number', 'LIKE', "%{$search}%");
-                });
-                // SUPPRIMEZ cette ligne OU remplacez-la par un champ existant :
-                // ->orWhere('reference', 'LIKE', "%{$search}%");
-                
-                // Si vous avez un autre champ d'identification, utilisez-le :
-                // ->orWhere('id', 'LIKE', "%{$search}%");
-                // ->orWhere('booking_number', 'LIKE', "%{$search}%");
-                // ->orWhere('reservation_code', 'LIKE', "%{$search}%");
+                })
+                ->orWhere('id', 'LIKE', "%{$search}%"); // Recherche par ID de transaction
             });
         }
         
@@ -324,7 +319,7 @@ class CheckInController extends Controller
             }
         }
         
-        // Filtre par type de chambre
+        // Filtre par type de chambre - CORRECTION ICI : type_id
         if ($request->has('room_type_id')) {
             $query->whereHas('room', function($q) use ($request) {
                 $q->where('type_id', $request->room_type_id);
@@ -335,7 +330,7 @@ class CheckInController extends Controller
             ->paginate($perPage)
             ->appends($request->except('page'));
         
-        // Pour les filtres dans la vue
+        // Pour les filtres dans la vue - CORRECTION ICI : utiliser le bon modèle
         $roomTypes = \App\Models\Type::orderBy('name')->get();
         
         return view('checkin.search', compact(
@@ -346,6 +341,7 @@ class CheckInController extends Controller
             'roomTypes'
         ));
     }
+    
     /**
      * Check-in direct (sans réservation)
      */
@@ -430,6 +426,130 @@ class CheckInController extends Controller
         }
         
         return response()->json($response);
+    }
+    
+    /**
+     * Traiter un check-in direct
+     */
+    public function processDirectCheckIn(Request $request)
+    {
+        $request->validate([
+            'room_id' => 'required|exists:rooms,id',
+            'check_in' => 'required|date',
+            'check_out' => 'required|date|after:check_in',
+            'customer_id' => 'nullable|exists:customers,id',
+            'customer_name' => 'required_without:customer_id|string|max:255',
+            'customer_email' => 'nullable|email|max:255',
+            'customer_phone' => 'nullable|string|max:50',
+            'adults' => 'required|integer|min:1|max:10',
+            'children' => 'nullable|integer|min:0|max:10',
+            'id_type' => 'required|string|in:passeport,cni,permis,autre',
+            'id_number' => 'required|string|max:50',
+            'nationality' => 'required|string|max:50',
+            'special_requests' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:500',
+        ]);
+        
+        DB::beginTransaction();
+        
+        try {
+            // Vérifier disponibilité de la chambre
+            $room = Room::findOrFail($request->room_id);
+            if (!$room->isAvailableForPeriod($request->check_in, $request->check_out)) {
+                throw new \Exception('La chambre n\'est pas disponible pour cette période.');
+            }
+            
+            // Créer ou récupérer le client
+            if ($request->customer_id) {
+                $customer = Customer::findOrFail($request->customer_id);
+            } else {
+                $customer = Customer::create([
+                    'name' => $request->customer_name,
+                    'email' => $request->customer_email,
+                    'phone' => $request->customer_phone,
+                ]);
+            }
+            
+            // Calculer le nombre de nuits et le prix total
+            $checkIn = Carbon::parse($request->check_in);
+            $checkOut = Carbon::parse($request->check_out);
+            $nights = $checkIn->diffInDays($checkOut);
+            $totalPrice = $room->price * $nights;
+            
+            // Créer la transaction
+            $transaction = Transaction::create([
+                'customer_id' => $customer->id,
+                'room_id' => $room->id,
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
+                'total_price' => $totalPrice,
+                'person_count' => $request->adults + ($request->children ?? 0),
+                'status' => 'reservation',
+                'created_by' => auth()->id(),
+            ]);
+            
+            // Préparer les données de check-in
+            $checkInData = [
+                'adults' => $request->adults,
+                'children' => $request->children ?? 0,
+                'id_type' => $request->id_type,
+                'id_number' => $request->id_number,
+                'nationality' => $request->nationality,
+                'special_requests' => $request->special_requests,
+                'notes' => $request->notes,
+            ];
+            
+            // Effectuer le check-in immédiatement
+            $result = $transaction->checkIn(auth()->id(), $checkInData);
+            
+            if (!$result['success']) {
+                throw new \Exception($result['error']);
+            }
+            
+            DB::commit();
+            
+            $message = '
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <div class="d-flex align-items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-check-circle fa-2x text-success"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h5 class="alert-heading mb-2">
+                            <i class="fas fa-user-plus me-2"></i>Check-in direct effectué !
+                        </h5>
+                        <div class="mb-2">
+                            <strong>' . $customer->name . '</strong> a été enregistré dans la chambre ' . $room->number . '.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Période :</strong> ' . $checkIn->format('d/m/Y') . ' - ' . $checkOut->format('d/m/Y') . '</p>
+                                <p class="mb-1"><strong>Nuits :</strong> ' . $nights . ' nuit' . ($nights > 1 ? 's' : '') . '</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Prix total :</strong> ' . number_format($totalPrice, 0, ',', ' ') . ' CFA</p>
+                                <p class="mb-1"><strong>Transaction :</strong> #' . $transaction->id . '</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>';
+            
+            return redirect()->route('checkin.index')
+                ->with('success', $message);
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('Erreur check-in direct: ' . $e->getMessage(), [
+                'user_id' => auth()->id(),
+                'request' => $request->all(),
+            ]);
+            
+            return back()->with('error', 'Erreur lors du check-in direct: ' . $e->getMessage())
+                ->withInput();
+        }
     }
     
     /**

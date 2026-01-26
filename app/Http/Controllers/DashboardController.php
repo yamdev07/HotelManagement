@@ -15,7 +15,7 @@ class DashboardController extends Controller
         \Log::info('=== DASHBOARD DEBUG START ===');
         
         // 1. Récupérer TOUTES les transactions pour debug
-        $allTransactions = Transaction::with(['customer.user', 'room.type', 'payment'])
+        $allTransactions = Transaction::with(['customer.user', 'room.type', 'payments'])
             ->orderBy('check_in', 'asc')
             ->get();
         
@@ -29,7 +29,7 @@ class DashboardController extends Controller
         }
         
         // 2. Récupérer les transactions ACTIVES (selon votre logique métier)
-        $transactions = Transaction::with(['customer.user', 'room.type', 'payment'])
+        $transactions = Transaction::with(['customer.user', 'room.type', 'payments'])
             ->where(function($query) {
                 // Option A: Clients actuellement dans l'hôtel (dates actuelles)
                 $query->where([
@@ -51,7 +51,7 @@ class DashboardController extends Controller
         \Log::info('Transactions displayed on dashboard: ' . $transactions->count());
         
         // 3. Récupérer les arrivées d'aujourd'hui
-        $todayArrivals = Transaction::with(['customer.user', 'room.type', 'payment'])
+        $todayArrivals = Transaction::with(['customer.user', 'room.type', 'payments'])
             ->whereDate('check_in', Carbon::today())
             ->whereNotIn('status', ['cancelled', 'no_show'])
             ->get();

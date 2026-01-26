@@ -5,6 +5,7 @@ namespace App\Repositories\Implementation;
 use App\Models\Payment;
 use App\Repositories\Interface\PaymentRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class PaymentRepository implements PaymentRepositoryInterface
 {
@@ -13,17 +14,29 @@ class PaymentRepository implements PaymentRepositoryInterface
      */
     public function store($request, $transaction, string $status)
     {
-        return Payment::create([
-            'user_id' => Auth()->id() ?? 1,
+        Log::info('PaymentRepository::store appelé', [
             'transaction_id' => $transaction->id,
-            'amount' => empty($request->downPayment) ? ($request->payment ?? 0) : $request->downPayment, // ✅ amount au lieu de price
-            'payment_method' => $request->payment_method ?? 'cash',
-            'reference' => $request->reference ?? ('PAY-' . $transaction->id . '-' . time()),
             'status' => $status,
-            'notes' => $status . ' - ' . ($request->notes ?? ''),
-            // 'payment_date' => now(), // ❌ Cette colonne n'existe pas chez vous
-            // 'created_by' => Auth()->id() ?? 1, // ❌ Cette colonne n'existe pas chez vous
+            'request_keys' => array_keys($request->all()),
+            'amount_in_request' => $request->amount ?? 'non défini',
+            'payment_method' => $request->payment_method ?? 'cash',
         ]);
+        
+        // Préparer les données avec les champs corrects
+        $paymentData = [
+            'user_id' => $transaction->customer_id ?? (auth()->id() ?? 1),
+            'created_by' => auth()->id() ?? 1,
+            'transaction_id' => $transaction->id,
+            'amount' => $request->amount,
+            'payment_method' => $request->payment_method ?? 'cash',
+            'status' => $status,
+            'reference' => $request->reference ?? $this->generateReference($request->payment_method ?? 'cash', $transaction->id),
+            'description' => ($request->description ?? $request->notes ?? '') . ($status ? ' - ' . $status : ''),
+        ];
+        
+        Log::info('Données de création du paiement', $paymentData);
+        
+        return Payment::create($paymentData);
     }
     
     /**
@@ -31,34 +44,40 @@ class PaymentRepository implements PaymentRepositoryInterface
      */
     public function create(array $data)
     {
+        Log::info('PaymentRepository::create appelé', $data);
+        
         return Payment::create([
-            'user_id' => $data['user_id'] ?? Auth()->id() ?? 1,
+            'user_id' => $data['user_id'] ?? (auth()->id() ?? 1),
+            'created_by' => $data['created_by'] ?? (auth()->id() ?? 1),
             'transaction_id' => $data['transaction_id'],
-            'amount' => $data['amount'], // ✅ amount au lieu de price
-            'payment_method' => $data['payment_method'] ?? 'cash',
-            'reference' => $data['reference'] ?? ('PAY-' . $data['transaction_id'] . '-' . time()),
-            'status' => $data['status'] ?? 'completed',
-            'notes' => $data['notes'] ?? null,
-            // 'payment_date' => $data['payment_date'] ?? now(), // ❌ Cette colonne n'existe pas
-            // 'created_by' => $data['created_by'] ?? Auth()->id() ?? 1, // ❌ Cette colonne n'existe pas
+            'amount' => $data['amount'],
+            'payment_method' => $data['payment_method'] ?? Payment::METHOD_CASH,
+            'reference' => $data['reference'] ?? $this->generateReference($data['payment_method'] ?? Payment::METHOD_CASH, $data['transaction_id']),
+            'status' => $data['status'] ?? Payment::STATUS_COMPLETED,
+            'description' => $data['description'] ?? $data['notes'] ?? null,
         ]);
     }
     
     /**
      * Créer un paiement avec paramètres simplifiés
      */
-    public function createPayment($transactionId, $amount, $method = 'cash', $notes = null)
+    public function createPayment($transactionId, $amount, $method = Payment::METHOD_CASH, $description = null)
     {
-        return Payment::create([
-            'user_id' => Auth()->id() ?? 1,
+        Log::info('PaymentRepository::createPayment appelé', [
             'transaction_id' => $transactionId,
-            'amount' => $amount, // ✅ amount au lieu de price
+            'amount' => $amount,
+            'method' => $method,
+        ]);
+        
+        return Payment::create([
+            'user_id' => auth()->id() ?? 1,
+            'created_by' => auth()->id() ?? 1,
+            'transaction_id' => $transactionId,
+            'amount' => $amount,
             'payment_method' => $method,
-            'reference' => 'PAY-' . $transactionId . '-' . time(),
-            'status' => 'completed',
-            'notes' => $notes,
-            // 'payment_date' => now(), // ❌ Cette colonne n'existe pas
-            // 'created_by' => Auth()->id() ?? 1, // ❌ Cette colonne n'existe pas
+            'reference' => $this->generateReference($method, $transactionId),
+            'status' => Payment::STATUS_COMPLETED,
+            'description' => $description,
         ]);
     }
     
@@ -67,7 +86,19 @@ class PaymentRepository implements PaymentRepositoryInterface
      */
     public function getByTransaction($transactionId)
     {
+        return Payment::with(['user', 'createdBy', 'cancelledByUser'])
+            ->where('transaction_id', $transactionId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+    
+    /**
+     * Récupérer les paiements complétés d'une transaction
+     */
+    public function getCompletedByTransaction($transactionId)
+    {
         return Payment::where('transaction_id', $transactionId)
+            ->where('status', Payment::STATUS_COMPLETED)
             ->orderBy('created_at', 'desc')
             ->get();
     }
@@ -78,8 +109,8 @@ class PaymentRepository implements PaymentRepositoryInterface
     public function getTotalByTransaction($transactionId)
     {
         return Payment::where('transaction_id', $transactionId)
-            ->where('status', 'completed')
-            ->sum('amount'); // ✅ sum('amount') au lieu de sum('price')
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->sum('amount');
     }
     
     /**
@@ -87,32 +118,72 @@ class PaymentRepository implements PaymentRepositoryInterface
      */
     public function createRefund($transactionId, $amount, $reason = null)
     {
-        return Payment::create([
-            'user_id' => Auth()->id() ?? 1,
+        Log::info('PaymentRepository::createRefund appelé', [
             'transaction_id' => $transactionId,
-            'amount' => -abs($amount), // ✅ amount au lieu de price (négatif pour remboursement)
-            'payment_method' => 'refund',
-            'reference' => 'REFUND-' . $transactionId . '-' . time(),
-            'status' => 'completed',
-            'notes' => 'Remboursement' . ($reason ? ' - ' . $reason : ''),
-            // 'payment_date' => now(), // ❌ Cette colonne n'existe pas
-            // 'created_by' => Auth()->id() ?? 1, // ❌ Cette colonne n'existe pas
+            'amount' => $amount,
+            'reason' => $reason,
         ]);
+        
+        return Payment::create([
+            'user_id' => auth()->id() ?? 1,
+            'created_by' => auth()->id() ?? 1,
+            'transaction_id' => $transactionId,
+            'amount' => -abs($amount),
+            'payment_method' => Payment::METHOD_REFUND,
+            'reference' => 'REFUND-' . $transactionId . '-' . time(),
+            'status' => Payment::STATUS_COMPLETED,
+            'description' => 'Remboursement' . ($reason ? ' - ' . $reason : ''),
+        ]);
+    }
+    
+    /**
+     * Marquer un paiement comme remboursé
+     */
+    public function markAsRefunded($paymentId, $userId, $reason = null)
+    {
+        $payment = Payment::findOrFail($paymentId);
+        
+        $payment->update([
+            'status' => Payment::STATUS_REFUNDED,
+            'cancelled_at' => now(),
+            'cancelled_by' => $userId,
+            'cancel_reason' => $reason ?? 'Remboursement',
+        ]);
+        
+        return $payment;
     }
     
     /**
      * Mettre à jour le statut d'un paiement
      */
-    public function updateStatus($paymentId, $status, $notes = null)
+    public function updateStatus($paymentId, $status, $description = null)
     {
         $payment = Payment::findOrFail($paymentId);
         
         $updateData = ['status' => $status];
-        if ($notes) {
-            $updateData['notes'] = $payment->notes . ' | ' . $notes;
+        if ($description) {
+            $updateData['description'] = ($payment->description ? $payment->description . ' | ' : '') . $description;
         }
         
         $payment->update($updateData);
+        
+        return $payment;
+    }
+    
+    /**
+     * Annuler un paiement
+     */
+    public function cancel($paymentId, $userId, $reason = null)
+    {
+        $payment = Payment::findOrFail($paymentId);
+        
+        $payment->update([
+            'status' => Payment::STATUS_CANCELLED,
+            'cancelled_at' => now(),
+            'cancelled_by' => $userId,
+            'cancel_reason' => $reason ?? 'Annulé par l\'utilisateur',
+            'description' => ($payment->description ? $payment->description . ' | ' : '') . 'Annulé le ' . now()->format('d/m/Y H:i'),
+        ]);
         
         return $payment;
     }
@@ -126,8 +197,11 @@ class PaymentRepository implements PaymentRepositoryInterface
         
         // Marquer comme annulé plutôt que supprimer
         $payment->update([
-            'status' => 'cancelled',
-            'notes' => $payment->notes . ' | Annulé le ' . now()->format('d/m/Y H:i'),
+            'status' => Payment::STATUS_CANCELLED,
+            'cancelled_at' => now(),
+            'cancelled_by' => auth()->id() ?? 1,
+            'cancel_reason' => 'Supprimé',
+            'description' => ($payment->description ? $payment->description . ' | ' : '') . 'Supprimé le ' . now()->format('d/m/Y H:i'),
         ]);
         
         return $payment;
@@ -138,7 +212,12 @@ class PaymentRepository implements PaymentRepositoryInterface
      */
     public function search($request)
     {
-        return Payment::with(['transaction', 'transaction.customer', 'user'])
+        return Payment::with([
+                'transaction.customer', 
+                'user', 
+                'createdBy', 
+                'cancelledByUser'
+            ])
             ->when($request->filled('reference'), function ($query) use ($request) {
                 $query->where('reference', 'like', '%' . $request->reference . '%');
             })
@@ -152,14 +231,19 @@ class PaymentRepository implements PaymentRepositoryInterface
                 $query->where('status', $request->status);
             })
             ->when($request->filled('date_from'), function ($query) use ($request) {
-                // Utiliser created_at au lieu de payment_date qui n'existe pas
                 $query->where('created_at', '>=', $request->date_from);
             })
             ->when($request->filled('date_to'), function ($query) use ($request) {
                 $query->where('created_at', '<=', $request->date_to);
             })
+            ->when($request->filled('user_id'), function ($query) use ($request) {
+                $query->where('user_id', $request->user_id);
+            })
+            ->when($request->filled('created_by'), function ($query) use ($request) {
+                $query->where('created_by', $request->created_by);
+            })
             ->orderBy('created_at', 'desc')
-            ->paginate(20);
+            ->paginate($request->per_page ?? 20);
     }
     
     /**
@@ -167,9 +251,29 @@ class PaymentRepository implements PaymentRepositoryInterface
      */
     public function getTodayPayments()
     {
-        return Payment::whereDate('created_at', today()) // ✅ created_at au lieu de payment_date
-            ->where('status', 'completed')
-            ->sum('amount'); // ✅ sum('amount') au lieu de sum('price')
+        return Payment::whereDate('created_at', today())
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->sum('amount');
+    }
+    
+    /**
+     * Montant des paiements du jour
+     */
+    public function getTodayPaymentsAmount()
+    {
+        return Payment::whereDate('created_at', today())
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->sum('amount');
+    }
+    
+    /**
+     * Nombre de paiements du jour
+     */
+    public function getTodayPaymentsCount()
+    {
+        return Payment::whereDate('created_at', today())
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->count();
     }
     
     /**
@@ -177,10 +281,9 @@ class PaymentRepository implements PaymentRepositoryInterface
      */
     public function getPaymentsByMethod($startDate = null, $endDate = null)
     {
-        $query = Payment::where('status', 'completed');
+        $query = Payment::where('status', Payment::STATUS_COMPLETED);
         
         if ($startDate) {
-            // Utiliser created_at au lieu de payment_date
             $query->where('created_at', '>=', $startDate);
         }
         
@@ -188,8 +291,130 @@ class PaymentRepository implements PaymentRepositoryInterface
             $query->where('created_at', '<=', $endDate);
         }
         
-        return $query->selectRaw('payment_method, SUM(amount) as total, COUNT(*) as count') // ✅ SUM(amount)
+        return $query->selectRaw('payment_method, SUM(amount) as total, COUNT(*) as count')
             ->groupBy('payment_method')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [
+                    $item->payment_method => [
+                        'total' => $item->total,
+                        'count' => $item->count,
+                        'label' => Payment::getPaymentMethods()[$item->payment_method]['label'] ?? $item->payment_method
+                    ]
+                ];
+            });
+    }
+    
+    /**
+     * Paiements par période
+     */
+    public function getPaymentsByPeriod($startDate, $endDate)
+    {
+        return Payment::with(['transaction.customer', 'user', 'createdBy'])
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->orderBy('created_at', 'desc')
             ->get();
+    }
+    
+    /**
+     * Statistiques de paiements
+     */
+    public function getPaymentStats($startDate = null, $endDate = null)
+    {
+        $query = Payment::query();
+        
+        if ($startDate) {
+            $query->where('created_at', '>=', $startDate);
+        }
+        
+        if ($endDate) {
+            $query->where('created_at', '<=', $endDate);
+        }
+        
+        $totalAmount = (clone $query)->where('status', Payment::STATUS_COMPLETED)->sum('amount');
+        $totalCount = (clone $query)->count();
+        $completedCount = (clone $query)->where('status', Payment::STATUS_COMPLETED)->count();
+        $pendingCount = (clone $query)->where('status', Payment::STATUS_PENDING)->count();
+        $cancelledCount = (clone $query)->where('status', Payment::STATUS_CANCELLED)->count();
+        
+        return [
+            'total_amount' => $totalAmount,
+            'total_count' => $totalCount,
+            'completed_count' => $completedCount,
+            'pending_count' => $pendingCount,
+            'cancelled_count' => $cancelledCount,
+            'completion_rate' => $totalCount > 0 ? round(($completedCount / $totalCount) * 100, 2) : 0,
+            'average_amount' => $completedCount > 0 ? round($totalAmount / $completedCount, 2) : 0,
+        ];
+    }
+    
+    /**
+     * Générer une référence
+     */
+    private function generateReference($method, $transactionId)
+    {
+        $prefixes = [
+            Payment::METHOD_CASH => 'CASH',
+            Payment::METHOD_CARD => 'CARD',
+            Payment::METHOD_TRANSFER => 'VIR',
+            Payment::METHOD_MOBILE_MONEY => 'MOMO',
+            Payment::METHOD_FEDAPAY => 'FDP',
+            Payment::METHOD_CHECK => 'CHQ',
+            Payment::METHOD_REFUND => 'REF',
+        ];
+        
+        $prefix = $prefixes[$method] ?? 'PAY';
+        $timestamp = time();
+        $random = rand(1000, 9999);
+        
+        return "{$prefix}-{$transactionId}-{$timestamp}-{$random}";
+    }
+    
+    /**
+     * Obtenir les méthodes de paiement disponibles
+     */
+    public function getPaymentMethods()
+    {
+        return Payment::getPaymentMethods();
+    }
+    
+    /**
+     * Vérifier si une transaction est entièrement payée
+     */
+    public function isTransactionFullyPaid($transactionId, $transactionTotal)
+    {
+        $totalPaid = $this->getTotalByTransaction($transactionId);
+        return $totalPaid >= $transactionTotal;
+    }
+    
+    /**
+     * Obtenir le solde restant d'une transaction
+     */
+    public function getTransactionBalance($transactionId, $transactionTotal)
+    {
+        $totalPaid = $this->getTotalByTransaction($transactionId);
+        return max(0, $transactionTotal - $totalPaid);
+    }
+    
+    /**
+     * Récupérer les paiements par session de caisse
+     */
+    public function getByCashierSession($sessionId)
+    {
+        return Payment::where('cashier_session_id', $sessionId)
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+    
+    /**
+     * Total des paiements par session de caisse
+     */
+    public function getTotalByCashierSession($sessionId)
+    {
+        return Payment::where('cashier_session_id', $sessionId)
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->sum('amount');
     }
 }

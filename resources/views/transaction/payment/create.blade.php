@@ -74,6 +74,49 @@
         font-size: 0.9em;
         padding: 5px 10px;
     }
+    
+    .debug-panel {
+        background: #f8f9fa;
+        border-left: 4px solid #6c757d;
+        padding: 15px;
+        border-radius: 5px;
+        font-family: 'Courier New', monospace;
+    }
+    
+    .debug-panel .debug-title {
+        font-size: 0.9em;
+        color: #6c757d;
+        margin-bottom: 8px;
+    }
+    
+    .debug-panel .debug-item {
+        font-size: 0.85em;
+        margin-bottom: 4px;
+    }
+    
+    .debug-panel .debug-value {
+        font-weight: bold;
+        color: #0d6efd;
+    }
+    
+    .payment-progress {
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    
+    .payment-progress .progress-bar {
+        transition: width 0.5s ease;
+    }
+    
+    #api-modal .modal-body pre {
+        max-height: 400px;
+        overflow: auto;
+    }
+    
+    .toast-container {
+        z-index: 9999;
+    }
 </style>
 
 <div class="container-fluid">
@@ -85,7 +128,12 @@
                         <i class="fas fa-money-bill-wave me-2"></i>
                         Paiement - Transaction #{{ $transaction->id }}
                     </h5>
-                    <div>
+                    <div class="d-flex align-items-center gap-2">
+                        @if(auth()->user()->isAdmin())
+                            <button type="button" class="btn btn-sm btn-outline-light" id="debug-toggle">
+                                <i class="fas fa-bug me-1"></i> Debug
+                            </button>
+                        @endif
                         <span class="badge bg-light text-dark">
                             <i class="fas fa-clock me-1"></i>
                             {{ now()->format('d/m/Y H:i') }}
@@ -94,6 +142,59 @@
                 </div>
                 
                 <div class="card-body">
+                    <!-- Debug panel (caché par défaut) -->
+                    @if(auth()->user()->isAdmin())
+                        <div class="debug-panel mb-4 d-none" id="debug-panel">
+                            <div class="debug-title">
+                                <i class="fas fa-code me-1"></i> Informations de débogage
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="debug-item">
+                                        Transaction ID: <span class="debug-value">#{{ $transaction->id }}</span>
+                                    </div>
+                                    <div class="debug-item">
+                                        Statut: <span class="debug-value">{{ $transaction->status }}</span>
+                                    </div>
+                                    <div class="debug-item">
+                                        Prix total (colonne): <span class="debug-value">{{ number_format($transaction->total_price, 0, ',', ' ') }} CFA</span>
+                                    </div>
+                                    <div class="debug-item">
+                                        Paiement total (colonne): <span class="debug-value">{{ number_format($transaction->total_payment, 0, ',', ' ') }} CFA</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="debug-item">
+                                        Prix total (calculé): <span class="debug-value" id="debug-total-price">{{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA</span>
+                                    </div>
+                                    <div class="debug-item">
+                                        Paiement total (calculé): <span class="debug-value" id="debug-total-payment">{{ number_format($transaction->getTotalPayment(), 0, ',', ' ') }} CFA</span>
+                                    </div>
+                                    <div class="debug-item">
+                                        Solde restant (calculé): <span class="debug-value" id="debug-remaining">{{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA</span>
+                                    </div>
+                                    <div class="debug-item">
+                                        Paiements (total/complétés): 
+                                        <span class="debug-value" id="debug-payment-count">
+                                            {{ $transaction->payments()->count() }} / {{ $transaction->payments()->where('status', 'completed')->count() }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-sm btn-outline-primary" id="refresh-debug">
+                                    <i class="fas fa-sync-alt me-1"></i> Actualiser
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-warning" id="force-sync">
+                                    <i class="fas fa-cogs me-1"></i> Forcer synchronisation
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-info" id="show-api">
+                                    <i class="fas fa-code me-1"></i> Voir API
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
                     <!-- Résumé de la transaction -->
                     <div class="transaction-summary p-4 mb-4">
                         <div class="row align-items-center">
@@ -141,16 +242,30 @@
                                 <div class="bg-white rounded p-3 text-dark">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>Total séjour:</span>
-                                        <strong>{{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA</strong>
+                                        <strong id="summary-total-price">{{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>Déjà payé:</span>
-                                        <strong class="text-success">{{ number_format($transaction->getTotalPayment(), 0, ',', ' ') }} CFA</strong>
+                                        <strong class="text-success" id="summary-total-payment">{{ number_format($transaction->getTotalPayment(), 0, ',', ' ') }} CFA</strong>
                                     </div>
+                                    
+                                    <!-- Barre de progression -->
+                                    <div class="mb-2">
+                                        <div class="payment-progress bg-light mb-1">
+                                            <div class="progress-bar bg-success" 
+                                                 id="payment-progress-bar"
+                                                 style="width: {{ $transaction->getPaymentRate() }}%">
+                                            </div>
+                                        </div>
+                                        <div class="small text-center">
+                                            <span id="payment-percentage-text">{{ number_format($transaction->getPaymentRate(), 1) }}%</span> payé
+                                        </div>
+                                    </div>
+                                    
                                     <hr class="my-2">
                                     <div class="d-flex justify-content-between">
                                         <span class="h5 mb-0">Reste à payer:</span>
-                                        <span class="h4 mb-0 text-danger fw-bold">
+                                        <span class="h4 mb-0 text-danger fw-bold" id="summary-remaining">
                                             {{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA
                                         </span>
                                     </div>
@@ -159,7 +274,7 @@
                         </div>
                     </div>
                     
-                    <!-- Formulaire de paiement -->
+                    <!-- Formulaire de paiement SIMPLIFIÉ -->
                     <form action="{{ route('transaction.payment.store', $transaction) }}" method="POST" id="payment-form">
                         @csrf
                         
@@ -175,7 +290,7 @@
                                             <label for="amount" class="form-label fw-bold">
                                                 Montant à payer (CFA)
                                                 <small class="text-muted d-block">
-                                                    Maximum: {{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA
+                                                    Maximum: <span id="max-amount">{{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA</span>
                                                 </small>
                                             </label>
                                             <div class="amount-input-wrapper">
@@ -187,7 +302,7 @@
                                                            class="form-control form-control-lg" 
                                                            id="amount" 
                                                            name="amount"
-                                                           min="0"
+                                                           min="100"
                                                            max="{{ $transaction->getRemainingPayment() }}"
                                                            step="100"
                                                            value="{{ min($transaction->getRemainingPayment(), max(1000, $transaction->getRemainingPayment())) }}"
@@ -205,10 +320,11 @@
                                         <!-- Boutons de montant rapide -->
                                         <div class="mb-3">
                                             <label class="form-label fw-bold">Montants rapides:</label>
-                                            <div class="d-flex flex-wrap gap-2">
+                                            <div class="d-flex flex-wrap gap-2" id="quick-amount-buttons">
                                                 @php
                                                     $remaining = $transaction->getRemainingPayment();
                                                     $quickAmounts = [
+                                                        min(1000, $remaining),
                                                         min(5000, $remaining),
                                                         min(10000, $remaining),
                                                         min(25000, $remaining),
@@ -219,22 +335,30 @@
                                                 @endphp
                                                 
                                                 @foreach($quickAmounts as $quickAmount)
-                                                    <button type="button" 
-                                                            class="btn btn-outline-primary quick-amount-btn"
-                                                            data-amount="{{ $quickAmount }}">
-                                                        {{ number_format($quickAmount, 0, ',', ' ') }} CFA
-                                                        @if($quickAmount == $remaining)
-                                                            <i class="fas fa-check ms-1"></i>
-                                                        @endif
-                                                    </button>
+                                                    @if($quickAmount >= 100)
+                                                        <button type="button" 
+                                                                class="btn btn-outline-primary quick-amount-btn"
+                                                                data-amount="{{ $quickAmount }}">
+                                                            {{ number_format($quickAmount, 0, ',', ' ') }} CFA
+                                                            @if($quickAmount == $remaining)
+                                                                <i class="fas fa-check ms-1"></i>
+                                                            @endif
+                                                        </button>
+                                                    @endif
                                                 @endforeach
                                             </div>
+                                        </div>
+                                        
+                                        <!-- Validation en temps réel -->
+                                        <div class="alert alert-warning d-none" id="amount-warning">
+                                            <i class="fas fa-exclamation-triangle me-2"></i>
+                                            <span id="warning-text"></span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             
-                            <!-- Section Méthode de paiement -->
+                            <!-- Section Méthode de paiement SIMPLIFIÉE -->
                             <div class="col-lg-8 mb-4">
                                 <div class="card">
                                     <div class="card-header bg-light">
@@ -256,8 +380,6 @@
                                                                    name="payment_method" 
                                                                    id="method_{{ $method }}" 
                                                                    value="{{ $method }}"
-                                                                   data-requires-reference="{{ $details['requires_reference'] ? 'true' : 'false' }}"
-                                                                   data-fields="{{ json_encode($details['fields']) }}"
                                                                    {{ $loop->first ? 'checked' : '' }}
                                                                    required>
                                                             <label class="form-check-label card-body text-center" 
@@ -276,142 +398,44 @@
                                             </div>
                                         </div>
                                         
-                                        <!-- Champs spécifiques à la méthode -->
+                                        <!-- Champs spécifiques à la méthode SIMPLIFIÉS -->
                                         <div id="method-specific-fields" class="method-fields">
                                             <h6 class="mb-3">
                                                 <i class="fas fa-info-circle me-2"></i>
                                                 Informations supplémentaires
-                                                <small id="method-instructions" class="text-muted ms-2"></small>
                                             </h6>
                                             
-                                            <!-- Référence générale -->
-                                            <div class="row mb-3" id="reference-field">
-                                                <div class="col-md-6">
-                                                    <label for="reference" class="form-label">
-                                                        <strong>Référence de transaction *</strong>
-                                                    </label>
-                                                    <input type="text" 
-                                                           class="form-control" 
-                                                           id="reference" 
-                                                           name="reference"
-                                                           placeholder="Ex: VIR20240115, CB123456, MM789012"
-                                                           value="PAY-{{ strtoupper(\App\Models\Payment::METHOD_CASH) }}-{{ time() }}">
-                                                    <div class="form-text">
-                                                        Identifiant unique pour tracer le paiement
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Champs pour carte bancaire -->
-                                            <div class="row mb-3 d-none" id="card-fields">
-                                                <div class="col-md-6">
-                                                    <label for="card_last_four" class="form-label">
-                                                        <strong>4 derniers chiffres de la carte *</strong>
-                                                    </label>
-                                                    <input type="text" 
-                                                           class="form-control" 
-                                                           id="card_last_four" 
-                                                           name="card_last_four"
-                                                           maxlength="4"
-                                                           placeholder="1234"
-                                                           pattern="[0-9]{4}">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="card_type" class="form-label">
-                                                        <strong>Type de carte *</strong>
-                                                    </label>
-                                                    <select class="form-select" id="card_type" name="card_type">
-                                                        <option value="">Sélectionnez...</option>
-                                                        @foreach(\App\Models\Payment::getCardTypes() as $value => $label)
-                                                            <option value="{{ $value }}">{{ $label }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Champs pour chèque -->
-                                            <div class="row mb-3 d-none" id="check-fields">
-                                                <div class="col-md-6">
-                                                    <label for="check_number" class="form-label">
-                                                        <strong>Numéro du chèque *</strong>
-                                                    </label>
-                                                    <input type="text" 
-                                                           class="form-control" 
-                                                           id="check_number" 
-                                                           name="check_number"
-                                                           placeholder="Ex: CHQ123456">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="check_bank_name" class="form-label">
-                                                        <strong>Banque émettrice *</strong>
-                                                    </label>
-                                                    <input type="text" 
-                                                           class="form-control" 
-                                                           id="check_bank_name" 
-                                                           name="bank_name"
-                                                           placeholder="Ex: Banque Atlantique">
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Champs pour virement -->
-                                            <div class="row mb-3 d-none" id="transfer-fields">
-                                                <div class="col-md-6">
-                                                    <label for="transfer_bank_name" class="form-label">
-                                                        <strong>Banque *</strong>
-                                                    </label>
-                                                    <input type="text" 
-                                                           class="form-control" 
-                                                           id="transfer_bank_name" 
-                                                           name="bank_name"
-                                                           placeholder="Ex: Banque Internationale">
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="account_number" class="form-label">
-                                                        <strong>Numéro de compte *</strong>
-                                                    </label>
-                                                    <input type="text" 
-                                                           class="form-control" 
-                                                           id="account_number" 
-                                                           name="account_number"
-                                                           placeholder="Ex: 0123456789">
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Champs pour Mobile Money -->
-                                            <div class="row mb-3 d-none" id="mobile-money-fields">
-                                                <div class="col-md-6">
-                                                    <label for="mobile_money_provider" class="form-label">
-                                                        <strong>Opérateur *</strong>
-                                                    </label>
-                                                    <select class="form-select" id="mobile_money_provider" name="mobile_money_provider">
-                                                        <option value="">Sélectionnez...</option>
-                                                        @foreach(\App\Models\Payment::getMobileMoneyProviders() as $value => $label)
-                                                            <option value="{{ $value }}">{{ $label }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <label for="mobile_money_number" class="form-label">
-                                                        <strong>Numéro mobile *</strong>
-                                                    </label>
-                                                    <input type="text" 
-                                                           class="form-control" 
-                                                           id="mobile_money_number" 
-                                                           name="mobile_money_number"
-                                                           placeholder="Ex: 97000000">
-                                                </div>
-                                            </div>
-                                            
-                                            <!-- Notes -->
+                                            <!-- Description -->
                                             <div class="mb-3">
-                                                <label for="notes" class="form-label">
-                                                    <strong>Notes (optionnel)</strong>
+                                                <label for="description" class="form-label">
+                                                    <strong>Description (optionnel)</strong>
                                                 </label>
                                                 <textarea class="form-control" 
-                                                          id="notes" 
-                                                          name="notes" 
+                                                          id="description" 
+                                                          name="description" 
                                                           rows="2"
-                                                          placeholder="Informations supplémentaires..."></textarea>
+                                                          placeholder="Informations sur le paiement..."></textarea>
+                                                <div class="form-text">
+                                                    Ex: "Paiement d'acompte", "Settlement de facture", etc.
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Référence automatique (cachée car générée automatiquement) -->
+                                            <input type="hidden" 
+                                                   id="reference" 
+                                                   name="reference"
+                                                   value="PAY-{{ strtoupper('cash') }}-{{ time() }}-{{ rand(1000, 9999) }}">
+                                            
+                                            <!-- Note sur la référence -->
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                Une référence de paiement sera générée automatiquement pour ce paiement.
+                                            </div>
+                                            
+                                            <!-- Validation des champs -->
+                                            <div class="alert alert-danger d-none" id="method-validation">
+                                                <i class="fas fa-exclamation-circle me-2"></i>
+                                                <span id="validation-text"></span>
                                             </div>
                                         </div>
                                     </div>
@@ -427,6 +451,9 @@
                                 </a>
                             </div>
                             <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-outline-warning" id="validate-form">
+                                    <i class="fas fa-check-circle me-2"></i>Valider
+                                </button>
                                 <button type="reset" class="btn btn-outline-danger">
                                     <i class="fas fa-redo me-2"></i>Réinitialiser
                                 </button>
@@ -443,37 +470,80 @@
     </div>
 </div>
 
+<!-- Modal pour les réponses API -->
+<div class="modal fade" id="api-modal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-code me-2"></i>Réponse API</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="api-response-content" class="bg-light p-3 rounded" style="max-height: 400px; overflow: auto;"></pre>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 @section('footer')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('=== INITIALISATION SYSTÈME DE PAIEMENT SIMPLIFIÉ ===');
+    
+    const transactionId = {{ $transaction->id }};
     const remaining = {{ $transaction->getRemainingPayment() }};
+    const totalPrice = {{ $transaction->getTotalPrice() }};
+    const totalPayment = {{ $transaction->getTotalPayment() }};
+    
+    // Éléments DOM
     const amountInput = document.getElementById('amount');
+    const descriptionInput = document.getElementById('description');
     const remainingAfter = document.getElementById('remaining-after');
     const paymentPercentage = document.getElementById('payment-percentage');
     const submitBtn = document.getElementById('submit-btn');
     const submitText = document.getElementById('submit-text');
-    const methodInstructions = document.getElementById('method-instructions');
+    const amountWarning = document.getElementById('amount-warning');
+    const warningText = document.getElementById('warning-text');
+    const paymentProgressBar = document.getElementById('payment-progress-bar');
+    const paymentPercentageText = document.getElementById('payment-percentage-text');
+    const paymentForm = document.getElementById('payment-form');
+    const referenceInput = document.getElementById('reference');
     
-    // Instructions pour chaque méthode
-    const methodInstructionsText = {
-        'cash': 'Paiement en espèces comptant',
-        'card': 'Saisissez les informations de la carte',
-        'transfer': 'Saisissez les informations de virement',
-        'mobile_money': 'Saisissez les informations Mobile Money',
-        'fedapay': 'Transaction Fedapay sécurisée',
-        'check': 'Saisissez les informations du chèque'
-    };
+    // Stocker l'état initial
+    let currentRemaining = remaining;
+    let paymentRate = (totalPayment / totalPrice) * 100;
     
     // Mettre à jour les calculs
     function updateCalculations() {
         const amount = parseFloat(amountInput.value) || 0;
-        const newRemaining = remaining - amount;
-        const percentage = (amount / remaining) * 100;
+        const newRemaining = currentRemaining - amount;
+        const newPaymentRate = ((totalPayment + amount) / totalPrice) * 100;
         
-        // Mettre à jour le reste après paiement
+        // Mettre à jour les éléments d'affichage
+        updateDisplay(amount, newRemaining, newPaymentRate);
+        
+        // Validation
+        validateAmount(amount);
+        
+        // Mettre à jour le bouton de soumission
+        updateSubmitButton(amount, newRemaining);
+        
+        console.log('Calculs mis à jour:', {
+            amount: amount,
+            newRemaining: newRemaining,
+            paymentRate: newPaymentRate,
+            currentRemaining: currentRemaining
+        });
+    }
+    
+    function updateDisplay(amount, newRemaining, newPaymentRate) {
+        // Texte reste après paiement
         if (newRemaining > 0) {
             remainingAfter.innerHTML = `
                 <span class="text-warning">
@@ -481,6 +551,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     Reste après paiement: <strong>${newRemaining.toLocaleString('fr-FR')} CFA</strong>
                 </span>
             `;
+            remainingAfter.className = 'fw-bold text-warning';
         } else if (newRemaining === 0) {
             remainingAfter.innerHTML = `
                 <span class="text-success">
@@ -488,22 +559,56 @@ document.addEventListener('DOMContentLoaded', function() {
                     <strong>Séjour entièrement payé !</strong>
                 </span>
             `;
+            remainingAfter.className = 'fw-bold text-success';
         } else {
             remainingAfter.innerHTML = '';
         }
         
-        // Mettre à jour le pourcentage
-        if (remaining > 0) {
-            paymentPercentage.innerHTML = `
-                Progression: <strong>${percentage.toFixed(1)}%</strong> du solde restant
-            `;
+        // Pourcentage
+        paymentPercentage.innerHTML = `
+            Progression: <strong>${newPaymentRate.toFixed(1)}%</strong> du total
+        `;
+        
+        // Barre de progression
+        paymentProgressBar.style.width = `${newPaymentRate}%`;
+        paymentPercentageText.textContent = `${newPaymentRate.toFixed(1)}%`;
+        
+        // Mettre à jour le maximum affiché
+        document.getElementById('max-amount').textContent = `${currentRemaining.toLocaleString('fr-FR')} CFA`;
+        
+        // Mettre à jour l'attribut max de l'input
+        amountInput.max = currentRemaining;
+    }
+    
+    function validateAmount(amount) {
+        amountWarning.classList.add('d-none');
+        
+        if (amount > currentRemaining) {
+            warningText.textContent = `Le montant dépasse le solde restant de ${currentRemaining.toLocaleString('fr-FR')} CFA`;
+            amountWarning.classList.remove('d-none');
+            amountInput.classList.add('is-invalid');
+            return false;
         }
         
-        // Mettre à jour le bouton de soumission
-        const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
-        const methodLabel = document.querySelector(`#method_${selectedMethod} + label .card-title`).textContent;
+        if (amount < 100) {
+            warningText.textContent = 'Le montant minimum est de 100 CFA';
+            amountWarning.classList.remove('d-none');
+            amountInput.classList.add('is-invalid');
+            return false;
+        }
         
-        if (amount === remaining) {
+        amountInput.classList.remove('is-invalid');
+        return true;
+    }
+    
+    function updateSubmitButton(amount, newRemaining) {
+        const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+        if (!selectedMethod) return;
+        
+        const method = selectedMethod.value;
+        const methodLabel = document.querySelector(`#method_${method} + label .card-title`).textContent;
+        
+        if (amount === currentRemaining || newRemaining === 0) {
             submitText.innerHTML = `<i class="fas fa-check me-2"></i>Régler l'intégralité (${methodLabel})`;
             submitBtn.className = 'btn btn-success btn-lg';
         } else if (amount > 0) {
@@ -518,9 +623,17 @@ document.addEventListener('DOMContentLoaded', function() {
     // Gérer les boutons de montant rapide
     document.querySelectorAll('.quick-amount-btn').forEach(button => {
         button.addEventListener('click', function() {
-            const amount = this.getAttribute('data-amount');
+            const amount = parseFloat(this.getAttribute('data-amount'));
             amountInput.value = amount;
             updateCalculations();
+            
+            // Animation de feedback
+            this.classList.add('btn-primary');
+            this.classList.remove('btn-outline-primary');
+            setTimeout(() => {
+                this.classList.remove('btn-primary');
+                this.classList.add('btn-outline-primary');
+            }, 300);
         });
     });
     
@@ -528,75 +641,51 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
         radio.addEventListener('change', function() {
             const method = this.value;
-            const requiresReference = this.getAttribute('data-requires-reference') === 'true';
-            const fields = JSON.parse(this.getAttribute('data-fields') || '[]');
             
-            // Mettre à jour les cartes actives
+            // Mettre en surbrillance la carte sélectionnée
             document.querySelectorAll('.method-card').forEach(card => {
                 card.classList.remove('active');
             });
             document.getElementById(`method-card-${method}`).classList.add('active');
             
-            // Mettre à jour les instructions
-            methodInstructions.textContent = methodInstructionsText[method] || '';
+            // Générer une nouvelle référence
+            let prefix = 'PAY-';
+            switch(method) {
+                case 'cash': prefix = 'CASH-'; break;
+                case 'card': prefix = 'CARD-'; break;
+                case 'transfer': prefix = 'VIR-'; break;
+                case 'mobile_money': prefix = 'MOMO-'; break;
+                case 'fedapay': prefix = 'FDP-'; break;
+                case 'check': prefix = 'CHQ-'; break;
+            }
+            referenceInput.value = `${prefix}${transactionId}-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
             
-            // Gérer la référence
-            const referenceField = document.getElementById('reference-field');
-            const referenceInput = document.getElementById('reference');
+            // Mettre à jour la description par défaut
+            const descriptions = {
+                'cash': 'Paiement en espèces comptant',
+                'card': 'Paiement par carte bancaire',
+                'transfer': 'Paiement par virement bancaire',
+                'mobile_money': 'Paiement par Mobile Money',
+                'fedapay': 'Paiement Fedapay',
+                'check': 'Paiement par chèque'
+            };
             
-            if (method === 'cash') {
-                referenceField.querySelector('.form-label strong').innerHTML = 'Référence (optionnel)';
-                referenceInput.required = false;
-                referenceInput.value = `PAY-CASH-${Date.now()}`;
-            } else {
-                referenceField.querySelector('.form-label strong').innerHTML = 'Référence de transaction *';
-                referenceInput.required = true;
-                
-                // Générer une référence appropriée
-                let prefix = 'PAY-';
-                switch(method) {
-                    case 'card': prefix = 'CB-'; break;
-                    case 'transfer': prefix = 'VIR-'; break;
-                    case 'mobile_money': prefix = 'MM-'; break;
-                    case 'fedapay': prefix = 'FDP-'; break;
-                    case 'check': prefix = 'CHQ-'; break;
-                }
-                referenceInput.value = `${prefix}${Date.now()}`;
+            if (!descriptionInput.value) {
+                descriptionInput.value = descriptions[method] || '';
             }
             
-            // Masquer tous les champs spécifiques
-            document.querySelectorAll('#method-specific-fields > .row').forEach(row => {
-                if (row.id !== 'reference-field') {
-                    row.classList.add('d-none');
-                }
-            });
-            
-            // Afficher les champs spécifiques à la méthode
-            fields.forEach(field => {
-                if (field === 'card_last_four' || field === 'card_type') {
-                    document.getElementById('card-fields').classList.remove('d-none');
-                } else if (field === 'check_number' || field === 'bank_name') {
-                    document.getElementById('check-fields').classList.remove('d-none');
-                } else if (field === 'bank_name' && method === 'transfer') {
-                    document.getElementById('transfer-fields').classList.remove('d-none');
-                } else if (field === 'mobile_money_provider' || field === 'mobile_money_number') {
-                    document.getElementById('mobile-money-fields').classList.remove('d-none');
-                }
-            });
-            
-            // Mettre à jour le texte du bouton
             updateCalculations();
         });
     });
     
-    // Validation du montant
+    // Validation du montant en temps réel
     amountInput.addEventListener('input', function() {
         let value = parseFloat(this.value) || 0;
         
-        // Limiter au maximum
-        if (value > remaining) {
-            value = remaining;
-            this.value = remaining;
+        // Limiter à currentRemaining
+        if (value > currentRemaining) {
+            value = currentRemaining;
+            this.value = currentRemaining;
         }
         
         // Minimum
@@ -609,139 +698,297 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Validation du formulaire
-    document.getElementById('payment-form').addEventListener('submit', function(e) {
+    document.getElementById('validate-form').addEventListener('click', function() {
+        const amount = parseFloat(amountInput.value) || 0;
+        const method = document.querySelector('input[name="payment_method"]:checked').value;
+        
+        let isValid = true;
+        let errors = [];
+        
+        // Validation du montant
+        if (amount <= 0) {
+            errors.push('Le montant doit être supérieur à 0 CFA');
+            isValid = false;
+        }
+        
+        if (amount > currentRemaining + 100) {
+            errors.push(`Le montant ne peut pas dépasser ${currentRemaining.toLocaleString('fr-FR')} CFA`);
+            isValid = false;
+        }
+        
+        // Afficher les résultats
+        if (isValid) {
+            const methodLabel = document.querySelector(`#method_${method} + label .card-title`).textContent;
+            Swal.fire({
+                title: '✅ Validation réussie',
+                html: `
+                    <div class="text-start">
+                        <p>Le formulaire est prêt à être soumis.</p>
+                        <div class="alert alert-success">
+                            <strong>Montant:</strong> ${amount.toLocaleString('fr-FR')} CFA<br>
+                            <strong>Méthode:</strong> ${methodLabel}<br>
+                            <strong>Reste à payer:</strong> ${(currentRemaining - amount).toLocaleString('fr-FR')} CFA
+                        </div>
+                    </div>
+                `,
+                icon: 'success',
+                confirmButtonText: 'Continuer'
+            });
+        } else {
+            Swal.fire({
+                title: '❌ Erreurs de validation',
+                html: errors.join('<br>'),
+                icon: 'error',
+                confirmButtonText: 'Corriger'
+            });
+        }
+    });
+    
+    // Gestionnaire de soumission
+    paymentForm.addEventListener('submit', async function(e) {
         e.preventDefault();
+        
+        console.log('=== TENTATIVE DE SOUMISSION SIMPLIFIÉE ===');
         
         const amount = parseFloat(amountInput.value) || 0;
         const method = document.querySelector('input[name="payment_method"]:checked').value;
-        const reference = document.getElementById('reference').value;
         
-        // Validation de base
-        if (amount <= 0) {
-            Swal.fire('Erreur', 'Le montant doit être supérieur à 0 CFA.', 'error');
-            amountInput.focus();
-            return false;
-        }
-        
-        if (amount > remaining) {
-            Swal.fire('Erreur', `Le montant ne peut pas dépasser ${remaining.toLocaleString('fr-FR')} CFA.`, 'error');
-            amountInput.focus();
-            return false;
-        }
-        
-        // Validation selon la méthode
-        let validationErrors = [];
-        
-        if (method !== 'cash' && (!reference || reference.trim() === '')) {
-            validationErrors.push('La référence est obligatoire pour ce type de paiement.');
-        }
-        
-        // Validation des champs spécifiques
-        if (method === 'card') {
-            const cardLastFour = document.getElementById('card_last_four').value;
-            const cardType = document.getElementById('card_type').value;
-            
-            if (!cardLastFour || cardLastFour.length !== 4 || !/^\d{4}$/.test(cardLastFour)) {
-                validationErrors.push('Les 4 derniers chiffres de la carte sont invalides.');
-            }
-            
-            if (!cardType) {
-                validationErrors.push('Veuillez sélectionner le type de carte.');
-            }
-        }
-        
-        if (method === 'check') {
-            const checkNumber = document.getElementById('check_number').value;
-            const bankName = document.getElementById('check_bank_name').value;
-            
-            if (!checkNumber || checkNumber.trim() === '') {
-                validationErrors.push('Le numéro du chèque est obligatoire.');
-            }
-            
-            if (!bankName || bankName.trim() === '') {
-                validationErrors.push('La banque émettrice est obligatoire.');
-            }
-        }
-        
-        if (method === 'transfer') {
-            const bankName = document.getElementById('transfer_bank_name').value;
-            const accountNumber = document.getElementById('account_number').value;
-            
-            if (!bankName || bankName.trim() === '') {
-                validationErrors.push('Le nom de la banque est obligatoire.');
-            }
-            
-            if (!accountNumber || accountNumber.trim() === '') {
-                validationErrors.push('Le numéro de compte est obligatoire.');
-            }
-        }
-        
-        if (method === 'mobile_money') {
-            const provider = document.getElementById('mobile_money_provider').value;
-            const number = document.getElementById('mobile_money_number').value;
-            
-            if (!provider) {
-                validationErrors.push('Veuillez sélectionner l\'opérateur Mobile Money.');
-            }
-            
-            if (!number || number.trim() === '') {
-                validationErrors.push('Le numéro mobile est obligatoire.');
-            }
-        }
-        
-        // Afficher les erreurs
-        if (validationErrors.length > 0) {
+        // Validation finale
+        if (amount <= 0 || amount > currentRemaining + 100) {
             Swal.fire({
+                title: '❌ Erreur',
+                text: `Montant invalide. Maximum: ${currentRemaining.toLocaleString('fr-FR')} CFA`,
                 icon: 'error',
-                title: 'Erreurs de validation',
-                html: '<ul class="text-start"><li>' + validationErrors.join('</li><li>') + '</li></ul>',
-                confirmButtonText: 'Corriger'
+                confirmButtonText: 'OK'
             });
             return false;
         }
         
-        // Confirmation
-        const methodLabel = document.querySelector(`#method_${method} + label .card-title`).textContent;
-        const message = amount === remaining 
-            ? `✅ Vous allez régler l'intégralité du séjour (${amount.toLocaleString('fr-FR')} CFA) par ${methodLabel}.<br><br>Confirmer le paiement ?`
-            : `Confirmer le paiement de <strong>${amount.toLocaleString('fr-FR')} CFA</strong> par ${methodLabel} ?`;
+        // Désactiver le bouton
+        const originalButtonContent = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Traitement...';
         
-        Swal.fire({
-            title: 'Confirmer le paiement',
-            html: message,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#198754',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="fas fa-check me-2"></i>Oui, enregistrer',
-            cancelButtonText: '<i class="fas fa-times me-2"></i>Annuler',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Afficher le chargement
-                Swal.fire({
-                    title: 'Traitement en cours...',
-                    text: 'Enregistrement du paiement',
+        try {
+            // Soumettre via AJAX
+            const formData = new FormData(this);
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+            
+            const response = await fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Succès - afficher le message et rediriger
+                console.log('Paiement réussi:', data);
+                
+                await Swal.fire({
+                    title: '✅ Succès',
+                    html: `
+                        <div class="text-start">
+                            <p>${data.message}</p>
+                            <div class="alert alert-success">
+                                <h5 class="mb-1">${data.data.payment.amount.toLocaleString('fr-FR')} CFA</h5>
+                                <small class="text-muted">${data.data.payment.method_label}</small>
+                                <div class="mt-2">
+                                    <small>Référence: ${data.data.payment.reference}</small>
+                                </div>
+                            </div>
+                            ${data.data.transaction.is_fully_paid ? 
+                                '<div class="alert alert-info mt-2"><i class="fas fa-trophy me-2"></i>Transaction entièrement payée !</div>' : 
+                                `<div class="alert alert-warning mt-2">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Solde restant: ${data.data.transaction.remaining.toLocaleString('fr-FR')} CFA
+                                </div>`
+                            }
+                        </div>
+                    `,
+                    icon: 'success',
+                    showCancelButton: false,
+                    confirmButtonText: 'Voir la transaction',
                     allowOutsideClick: false,
-                    showConfirmButton: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
+                    allowEscapeKey: false
                 });
                 
-                // Soumettre le formulaire
-                setTimeout(() => {
-                    document.getElementById('payment-form').submit();
-                }, 500);
+                // Redirection
+                window.location.href = `/transactions/${transactionId}`;
+                
+            } else {
+                // Erreur de validation ou autre
+                console.error('Erreur paiement:', data);
+                
+                let errorMessage = data.message || 'Une erreur est survenue';
+                
+                if (data.errors) {
+                    const errorList = Object.values(data.errors).flat().join('<br>');
+                    errorMessage = errorList;
+                }
+                
+                Swal.fire({
+                    title: '❌ Erreur',
+                    html: errorMessage,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                
+                // Réactiver le bouton
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalButtonContent;
             }
-        });
+            
+        } catch (error) {
+            console.error('Erreur réseau:', error);
+            
+            Swal.fire({
+                title: '❌ Erreur réseau',
+                text: 'Impossible de se connecter au serveur. Veuillez réessayer.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            
+            // Réactiver le bouton
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalButtonContent;
+        }
     });
     
+    // Fonctions de débogage
+    @if(auth()->user()->isAdmin())
+        // Toggle debug panel
+        document.getElementById('debug-toggle').addEventListener('click', function() {
+            const panel = document.getElementById('debug-panel');
+            panel.classList.toggle('d-none');
+            this.innerHTML = panel.classList.contains('d-none') 
+                ? '<i class="fas fa-bug me-1"></i> Debug'
+                : '<i class="fas fa-eye-slash me-1"></i> Cacher';
+        });
+        
+        // Rafraîchir les données de débogage
+        document.getElementById('refresh-debug').addEventListener('click', async function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>';
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch(`/api/transactions/${transactionId}/check-status`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Mettre à jour les valeurs de débogage
+                    document.getElementById('debug-total-price').textContent = 
+                        data.transaction.total_price.toLocaleString('fr-FR') + ' CFA';
+                    document.getElementById('debug-total-payment').textContent = 
+                        data.transaction.total_payment.toLocaleString('fr-FR') + ' CFA';
+                    document.getElementById('debug-remaining').textContent = 
+                        data.transaction.remaining.toLocaleString('fr-FR') + ' CFA';
+                    document.getElementById('debug-payment-count').textContent = 
+                        `${data.payments.total_count} / ${data.payments.completed_count}`;
+                    
+                    // Mettre à jour les valeurs principales
+                    currentRemaining = data.transaction.remaining;
+                    updateCalculations();
+                    
+                    Swal.fire('Succès', 'Données actualisées', 'success');
+                }
+            } catch (error) {
+                Swal.fire('Erreur', 'Impossible de rafraîchir', 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+        
+        // Forcer la synchronisation
+        document.getElementById('force-sync').addEventListener('click', async function() {
+            const result = await Swal.fire({
+                title: 'Synchroniser ?',
+                text: 'Recalculer tous les totaux',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Oui',
+                cancelButtonText: 'Non'
+            });
+            
+            if (result.isConfirmed) {
+                const btn = this;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>';
+                btn.disabled = true;
+                
+                try {
+                    const response = await fetch(`/api/transactions/${transactionId}/force-sync`);
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        Swal.fire('Succès', data.message, 'success');
+                        setTimeout(() => location.reload(), 1000);
+                    } else {
+                        throw new Error(data.error);
+                    }
+                } catch (error) {
+                    Swal.fire('Erreur', error.message, 'error');
+                } finally {
+                    btn.innerHTML = '<i class="fas fa-cogs me-1"></i> Synchroniser';
+                    btn.disabled = false;
+                }
+            }
+        });
+        
+        // Afficher les données API
+        document.getElementById('show-api').addEventListener('click', async function() {
+            try {
+                const response = await fetch(`/api/transactions/${transactionId}/check-status`);
+                const data = await response.json();
+                
+                document.getElementById('api-response-content').textContent = 
+                    JSON.stringify(data, null, 2);
+                
+                const modal = new bootstrap.Modal(document.getElementById('api-modal'));
+                modal.show();
+            } catch (error) {
+                Swal.fire('Erreur', 'Impossible de récupérer les données API', 'error');
+            }
+        });
+    @endif
+    
     // Initialiser
+    console.log('État initial:', {
+        transactionId: transactionId,
+        remaining: remaining,
+        totalPrice: totalPrice,
+        totalPayment: totalPayment,
+        paymentRate: paymentRate
+    });
+    
     updateCalculations();
     document.querySelector('input[name="payment_method"]:checked').dispatchEvent(new Event('change'));
     
-    console.log('Système de paiement initialisé. Solde restant:', remaining);
+    // Rafraîchissement périodique
+    setInterval(async () => {
+        try {
+            const response = await fetch(`/api/transactions/${transactionId}/check-status`);
+            const data = await response.json();
+            
+            if (data.success && data.transaction.remaining !== currentRemaining) {
+                console.log('Solde mis à jour:', {
+                    ancien: currentRemaining,
+                    nouveau: data.transaction.remaining
+                });
+                
+                currentRemaining = data.transaction.remaining;
+                updateCalculations();
+            }
+        } catch (error) {
+            console.warn('Erreur rafraîchissement:', error);
+        }
+    }, 30000);
 });
 </script>
 @endsection

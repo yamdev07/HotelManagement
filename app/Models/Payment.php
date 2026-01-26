@@ -12,20 +12,14 @@ class Payment extends Model
 
     protected $fillable = [
         'user_id',
+        'created_by',
         'transaction_id',
+        'cashier_session_id',
         'amount',
         'status',
         'payment_method',
-        'payment_method_details',
+        'description',
         'reference',
-        'check_number',
-        'card_last_four',
-        'card_type',
-        'mobile_money_provider',
-        'mobile_money_number',
-        'bank_name',
-        'account_number',
-        'notes',
         'cancelled_at',
         'cancelled_by',
         'cancel_reason'
@@ -34,7 +28,6 @@ class Payment extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'cancelled_at' => 'datetime',
-        'payment_method_details' => 'array',
     ];
 
     // Constantes pour les statuts
@@ -54,17 +47,6 @@ class Payment extends Model
     const METHOD_CHECK = 'check';
     const METHOD_REFUND = 'refund';
 
-    // Fournisseurs Mobile Money
-    const MOBILE_MONEY_MOOV = 'moov_money';
-    const MOBILE_MONEY_MTN = 'mtn_money';
-    const MOBILE_MONEY_FLOOZ = 'flooz';
-    const MOBILE_MONEY_ORANGE = 'orange_money';
-
-    // Types de cartes
-    const CARD_VISA = 'visa';
-    const CARD_MASTERCARD = 'mastercard';
-    const CARD_AMEX = 'amex';
-
     /**
      * Relation avec la transaction
      */
@@ -78,7 +60,15 @@ class Payment extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Relation avec l'utilisateur qui a créé l'enregistrement
+     */
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     /**
@@ -87,6 +77,14 @@ class Payment extends Model
     public function cancelledByUser()
     {
         return $this->belongsTo(User::class, 'cancelled_by');
+    }
+
+    /**
+     * Relation avec la session de caisse
+     */
+    public function cashierSession()
+    {
+        return $this->belongsTo(CashierSession::class, 'cashier_session_id');
     }
 
     /**
@@ -109,7 +107,7 @@ class Payment extends Model
                 'color' => 'primary',
                 'description' => 'Paiement par carte Visa/Mastercard',
                 'requires_reference' => true,
-                'fields' => ['card_last_four', 'card_type']
+                'fields' => []
             ],
             self::METHOD_TRANSFER => [
                 'label' => 'Virement bancaire',
@@ -117,7 +115,7 @@ class Payment extends Model
                 'color' => 'info',
                 'description' => 'Virement bancaire ou Western Union',
                 'requires_reference' => true,
-                'fields' => ['bank_name', 'account_number']
+                'fields' => []
             ],
             self::METHOD_MOBILE_MONEY => [
                 'label' => 'Mobile Money',
@@ -125,7 +123,7 @@ class Payment extends Model
                 'color' => 'warning',
                 'description' => 'Paiement mobile (Moov, MTN, etc.)',
                 'requires_reference' => true,
-                'fields' => ['mobile_money_provider', 'mobile_money_number']
+                'fields' => []
             ],
             self::METHOD_FEDAPAY => [
                 'label' => 'Fedapay',
@@ -141,33 +139,8 @@ class Payment extends Model
                 'color' => 'secondary',
                 'description' => 'Chèque bancaire',
                 'requires_reference' => true,
-                'fields' => ['check_number', 'bank_name']
+                'fields' => []
             ],
-        ];
-    }
-
-    /**
-     * Obtenir les fournisseurs Mobile Money
-     */
-    public static function getMobileMoneyProviders(): array
-    {
-        return [
-            self::MOBILE_MONEY_MOOV => 'Moov Money',
-            self::MOBILE_MONEY_MTN => 'MTN Money',
-            self::MOBILE_MONEY_FLOOZ => 'Flooz',
-            self::MOBILE_MONEY_ORANGE => 'Orange Money',
-        ];
-    }
-
-    /**
-     * Obtenir les types de cartes
-     */
-    public static function getCardTypes(): array
-    {
-        return [
-            self::CARD_VISA => 'Visa',
-            self::CARD_MASTERCARD => 'Mastercard',
-            self::CARD_AMEX => 'American Express',
         ];
     }
 
@@ -247,43 +220,6 @@ class Payment extends Model
     }
 
     /**
-     * Obtenir les détails de la méthode de paiement
-     */
-    public function getPaymentMethodDetailsAttribute($value)
-    {
-        if (is_string($value)) {
-            return json_decode($value, true) ?? [];
-        }
-        return $value ?? [];
-    }
-
-    /**
-     * Obtenir le fournisseur Mobile Money formaté
-     */
-    public function getMobileMoneyProviderTextAttribute(): ?string
-    {
-        if (!$this->mobile_money_provider) {
-            return null;
-        }
-        
-        $providers = self::getMobileMoneyProviders();
-        return $providers[$this->mobile_money_provider] ?? $this->mobile_money_provider;
-    }
-
-    /**
-     * Obtenir le type de carte formaté
-     */
-    public function getCardTypeTextAttribute(): ?string
-    {
-        if (!$this->card_type) {
-            return null;
-        }
-        
-        $types = self::getCardTypes();
-        return $types[$this->card_type] ?? $this->card_type;
-    }
-
-    /**
      * Obtenir le montant formaté
      */
     public function getFormattedAmountAttribute(): string
@@ -331,6 +267,53 @@ class Payment extends Model
     }
 
     /**
+     * Scope pour filtrer par statut
+     */
+    public function scopeByStatus($query, $status)
+    {
+        if ($status) {
+            return $query->where('status', $status);
+        }
+        return $query;
+    }
+
+    /**
+     * Scope pour filtrer par méthode de paiement
+     */
+    public function scopeByPaymentMethod($query, $method)
+    {
+        if ($method) {
+            return $query->where('payment_method', $method);
+        }
+        return $query;
+    }
+
+    /**
+     * Scope pour filtrer par période
+     */
+    public function scopeDateRange($query, $startDate, $endDate)
+    {
+        if ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate);
+        }
+        return $query;
+    }
+
+    /**
+     * Scope pour les paiements de la session courante
+     */
+    public function scopeCurrentSession($query, $sessionId)
+    {
+        if ($sessionId) {
+            return $query->where('cashier_session_id', $sessionId);
+        }
+        return $query;
+    }
+
+    /**
      * Boot du modèle
      */
     protected static function boot()
@@ -343,9 +326,14 @@ class Payment extends Model
                 $payment->reference = 'PAY-' . strtoupper($payment->payment_method) . '-' . time();
             }
             
-            // Par défaut, le statut est "completed" pour la plupart des paiements
+            // Par défaut, le statut est "pending" pour la plupart des paiements
             if (!$payment->status) {
-                $payment->status = self::STATUS_COMPLETED;
+                $payment->status = self::STATUS_PENDING;
+            }
+
+            // Si created_by n'est pas défini, utiliser l'utilisateur courant
+            if (!$payment->created_by && auth()->check()) {
+                $payment->created_by = auth()->id();
             }
         });
 
@@ -355,5 +343,33 @@ class Payment extends Model
                 $payment->transaction->updatePaymentStatus();
             }
         });
+    }
+
+    /**
+     * Obtenir le montant total des paiements pour une transaction
+     */
+    public static function getTotalForTransaction($transactionId)
+    {
+        return self::where('transaction_id', $transactionId)
+            ->where('status', self::STATUS_COMPLETED)
+            ->sum('amount');
+    }
+
+    /**
+     * Obtenir le solde dû pour une transaction
+     */
+    public static function getBalanceDue($transactionId, $transactionTotal)
+    {
+        $totalPaid = self::getTotalForTransaction($transactionId);
+        return max(0, $transactionTotal - $totalPaid);
+    }
+
+    /**
+     * Vérifier si une transaction est entièrement payée
+     */
+    public static function isTransactionFullyPaid($transactionId, $transactionTotal)
+    {
+        $balanceDue = self::getBalanceDue($transactionId, $transactionTotal);
+        return $balanceDue <= 0;
     }
 }
