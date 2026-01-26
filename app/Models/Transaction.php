@@ -9,6 +9,8 @@ use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\Payment;
+use Illuminate\Support\Facades\Log;
 
 class Transaction extends Model
 {
@@ -20,7 +22,7 @@ class Transaction extends Model
         'room_id',
         'check_in',
         'check_out',
-        'status', // 'reservation', 'active', 'completed', 'cancelled', 'no_show'
+        'status',
         'person_count',
         'total_price',
         'total_payment',
@@ -28,11 +30,8 @@ class Transaction extends Model
         'cancelled_by',
         'cancel_reason',
         'notes',
-        // NOUVEAUX CHAMPS POUR CHECK-IN
         'actual_check_in',
         'actual_check_out',
-        // 'adults',    // RETIRÉ - n'existe pas en base de données
-        // 'children',  // RETIRÉ - n'existe pas en base de données
         'special_requests',
         'id_type',
         'id_number',
@@ -47,8 +46,6 @@ class Transaction extends Model
         'total_payment' => 'decimal:2',
         'actual_check_in' => 'datetime',
         'actual_check_out' => 'datetime',
-        // 'adults' => 'integer',      // RETIRÉ
-        // 'children' => 'integer',    // RETIRÉ
     ];
 
     // Constantes pour les statuts
@@ -91,17 +88,17 @@ class Transaction extends Model
     /**
      * Relation avec les paiements
      */
-    public function payment()
+    public function payments()
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasMany(Payment::class)->orderBy('created_at', 'desc');
     }
 
     /**
-     * Relation avec les paiements (alias)
+     * Relation avec les paiements COMPLÉTÉS seulement
      */
-    public function payments()
+    public function completedPayments()
     {
-        return $this->hasMany(Payment::class);
+        return $this->hasMany(Payment::class)->where('status', 'completed');
     }
 
     /**
@@ -150,35 +147,6 @@ class Transaction extends Model
     public function scopeNoShow($query)
     {
         return $query->where('status', self::STATUS_NO_SHOW);
-    }
-
-    /**
-     * Scope pour les réservations à venir (arrivées du jour)
-     */
-    public function scopeUpcomingToday($query)
-    {
-        $today = Carbon::today();
-        return $query->where('status', self::STATUS_RESERVATION)
-            ->whereDate('check_in', '<=', $today)
-            ->whereDate('check_in', '>=', $today->copy()->subDays(1));
-    }
-
-    /**
-     * Scope pour les séjours en cours
-     */
-    public function scopeCurrentlyInHotel($query)
-    {
-        return $query->where('status', self::STATUS_ACTIVE);
-    }
-
-    /**
-     * Scope pour les réservations dépassées non arrivées
-     */
-    public function scopeOverdueNoShow($query)
-    {
-        return $query->where('status', self::STATUS_RESERVATION)
-            ->where('check_in', '<', Carbon::now())
-            ->where('check_out', '>', Carbon::now()->subHours(2));
     }
 
     /**
@@ -293,9 +261,6 @@ class Transaction extends Model
 
         if ($newStatus !== $this->status) {
             $this->update(['status' => $newStatus]);
-            
-            // Gérer l'état de la chambre
-            $this->updateRoomStatus($newStatus);
         }
 
         return $newStatus;
@@ -309,7 +274,6 @@ class Transaction extends Model
         DB::beginTransaction();
         
         try {
-            // Mettre à jour les informations de check-in
             $updateData = [
                 'status' => self::STATUS_ACTIVE,
                 'actual_check_in' => now(),
@@ -317,28 +281,14 @@ class Transaction extends Model
                 'id_type' => $data['id_type'] ?? $this->id_type,
                 'id_number' => $data['id_number'] ?? $this->id_number,
                 'nationality' => $data['nationality'] ?? $this->nationality,
-                // Note: adults et children n'existent pas dans la BD, utilisez person_count
                 'person_count' => $data['person_count'] ?? $this->person_count ?? 1,
             ];
 
-            // Si changement de chambre
             if (isset($data['new_room_id']) && $data['new_room_id'] != $this->room_id) {
                 $updateData['room_id'] = $data['new_room_id'];
-                // Libérer l'ancienne chambre
-                $this->room->update(['room_status_id' => 1]); // Available
             }
 
             $this->update($updateData);
-            
-            // Mettre la chambre comme occupée
-            $this->room->update(['room_status_id' => 2]); // Occupied
-            
-            // Journalisation
-            activity()
-                ->performedOn($this)
-                ->causedBy($userId)
-                ->withProperties($data)
-                ->log('Check-in effectué');
             
             DB::commit();
             
@@ -361,11 +311,19 @@ class Transaction extends Model
      */
     public function checkOut($userId)
     {
+        Log::info("Check-out transaction #{$this->id}", [
+            'transaction_id' => $this->id,
+            'total_price' => $this->total_price,
+            'total_payment' => $this->total_payment,
+            'remaining' => $this->getRemainingPayment(),
+        ]);
+
         // Vérifier si le séjour est entièrement payé
-        if (!$this->isFullyPaid()) {
+        $remaining = $this->getRemainingPayment();
+        if ($remaining > 100) {
             return [
                 'success' => false,
-                'error' => 'Le client doit d\'abord régler le solde avant de partir'
+                'error' => 'Solde restant: ' . number_format($remaining, 0, ',', ' ') . ' CFA'
             ];
         }
 
@@ -376,15 +334,6 @@ class Transaction extends Model
                 'status' => self::STATUS_COMPLETED,
                 'actual_check_out' => now()
             ]);
-            
-            // Mettre à jour l'état de la chambre
-            $this->updateRoomStatus(self::STATUS_COMPLETED);
-            
-            // Journalisation
-            activity()
-                ->performedOn($this)
-                ->causedBy($userId)
-                ->log('Check-out effectué');
             
             DB::commit();
             
@@ -403,71 +352,31 @@ class Transaction extends Model
     }
 
     /**
-     * Changer manuellement le statut avec logique métier
+     * Changer manuellement le statut
      */
     public function changeStatus($newStatus, $userId = null, $reason = null)
     {
         $oldStatus = $this->status;
         
-        // Préparer les données de mise à jour
         $updateData = ['status' => $newStatus];
         
-        // Gérer l'annulation
         if ($newStatus === self::STATUS_CANCELLED) {
             $updateData['cancelled_at'] = Carbon::now();
             $updateData['cancelled_by'] = $userId;
             $updateData['cancel_reason'] = $reason;
-        } 
-        // Si on réactive une réservation annulée
-        elseif ($oldStatus === self::STATUS_CANCELLED && $newStatus !== self::STATUS_CANCELLED) {
+        } elseif ($oldStatus === self::STATUS_CANCELLED && $newStatus !== self::STATUS_CANCELLED) {
             $updateData['cancelled_at'] = null;
             $updateData['cancelled_by'] = null;
             $updateData['cancel_reason'] = null;
         }
         
-        // Mettre à jour
         $this->update($updateData);
-        
-        // Mettre à jour l'état de la chambre
-        $this->updateRoomStatus($newStatus);
         
         return [
             'old_status' => $oldStatus,
             'new_status' => $newStatus,
             'changed_at' => Carbon::now()
         ];
-    }
-
-    /**
-     * Mettre à jour l'état de la chambre selon le statut
-     */
-    private function updateRoomStatus($status)
-    {
-        if (!$this->room) {
-            return;
-        }
-
-        switch ($status) {
-            case self::STATUS_ACTIVE:
-                // Chambre occupée
-                $this->room->update(['room_status_id' => 2]); // Occupied
-                break;
-                
-            case self::STATUS_COMPLETED:
-            case self::STATUS_CANCELLED:
-            case self::STATUS_NO_SHOW:
-            case self::STATUS_RESERVATION:
-                // Chambre disponible (sauf si d'autres réservations)
-                $hasOtherActiveReservations = Transaction::where('room_id', $this->room_id)
-                    ->where('id', '!=', $this->id)
-                    ->where('status', self::STATUS_ACTIVE)
-                    ->exists();
-                
-                if (!$hasOtherActiveReservations) {
-                    $this->room->update(['room_status_id' => 1]); // Available
-                }
-                break;
-        }
     }
 
     /**
@@ -520,11 +429,11 @@ class Transaction extends Model
     public function getStatusColorAttribute()
     {
         $colors = [
-            self::STATUS_RESERVATION => 'warning',    // Jaune/orange
-            self::STATUS_ACTIVE => 'success',         // Vert
-            self::STATUS_COMPLETED => 'info',         // Bleu
-            self::STATUS_CANCELLED => 'danger',       // Rouge
-            self::STATUS_NO_SHOW => 'secondary',      // Gris
+            self::STATUS_RESERVATION => 'warning',
+            self::STATUS_ACTIVE => 'success',
+            self::STATUS_COMPLETED => 'info',
+            self::STATUS_CANCELLED => 'danger',
+            self::STATUS_NO_SHOW => 'secondary',
         ];
         
         return $colors[$this->status] ?? 'secondary';
@@ -547,26 +456,30 @@ class Transaction extends Model
     }
 
     /**
-     * Calculer le prix total
+     * Calculer le prix total - MÉTHODE CORRIGÉE
      */
     public function getTotalPrice()
     {
-        // Si le prix total est déjà stocké, l'utiliser
-        if ($this->total_price) {
-            return $this->total_price;
+        if ($this->total_price && $this->total_price > 0) {
+            return (float) $this->total_price;
         }
 
-        // Sinon calculer
-        $day = Helper::getDateDifference($this->check_in, $this->check_out);
-        $room_price = $this->room->price;
+        try {
+            $day = Helper::getDateDifference($this->check_in, $this->check_out);
+            $room_price = $this->room ? $this->room->price : 0;
 
-        $total = $room_price * $day;
-        
-        // Stocker pour éviter de recalculer
-        $this->total_price = $total;
-        $this->save();
+            $total = $room_price * $day;
+            
+            if ($total > 0) {
+                $this->total_price = $total;
+                $this->saveQuietly();
+            }
 
-        return $total;
+            return (float) $total;
+        } catch (\Exception $e) {
+            Log::error("Erreur calcul prix total transaction #{$this->id}: " . $e->getMessage());
+            return 0;
+        }
     }
 
     /**
@@ -593,7 +506,6 @@ class Transaction extends Model
      */
     public function getTotalPersonsAttribute()
     {
-        // Utilisez person_count car adults et children n'existent pas
         return $this->person_count ?? 1;
     }
 
@@ -614,23 +526,53 @@ class Transaction extends Model
     }
 
     /**
-     * Calculer le total des paiements COMPLÉTÉS (TOUJOURS recalculer)
+     * Calculer le total des paiements COMPLÉTÉS - MÉTHODE CRITIQUE CORRIGÉE
      */
     public function getTotalPayment()
     {
-        // TOUJOURS recalculer depuis la base de données
-        // Inclure uniquement les paiements avec status "completed"
-        return $this->payments()
-            ->where('status', Payment::STATUS_COMPLETED)
-            ->sum('amount');
+        try {
+            // TOUJOURS calculer depuis la base pour garantir l'exactitude
+            $total = $this->completedPayments()->sum('amount');
+            
+            // Si la valeur stockée est différente, la mettre à jour
+            if (abs($total - (float)($this->total_payment ?? 0)) > 0.01) {
+                $this->total_payment = $total;
+                $this->saveQuietly();
+                
+                Log::info("Total paiement mis à jour pour transaction #{$this->id}", [
+                    'ancien' => $this->total_payment,
+                    'nouveau' => $total
+                ]);
+            }
+            
+            return (float) $total;
+            
+        } catch (\Exception $e) {
+            Log::error("Erreur calcul total paiement transaction #{$this->id}: " . $e->getMessage());
+            return (float) ($this->total_payment ?? 0);
+        }
     }
 
     /**
-     * Calculer le montant restant à payer
+     * Calculer le montant restant à payer - MÉTHODE CORRIGÉE
      */
     public function getRemainingPayment()
     {
-        return $this->getTotalPrice() - $this->getTotalPayment();
+        try {
+            $totalPrice = $this->getTotalPrice();
+            $totalPaid = $this->getTotalPayment();
+            
+            $remaining = $totalPrice - $totalPaid;
+            
+            // Assurer que le résultat est positif ou nul
+            $result = max(0, $remaining);
+            
+            return (float) $result;
+            
+        } catch (\Exception $e) {
+            Log::error("Erreur calcul solde transaction #{$this->id}: " . $e->getMessage());
+            return 0;
+        }
     }
 
     /**
@@ -641,22 +583,24 @@ class Transaction extends Model
         $totalPrice = $this->getTotalPrice();
         
         if ($totalPrice > 0) {
-            return ($this->getTotalPayment() / $totalPrice) * 100;
+            $rate = ($this->getTotalPayment() / $totalPrice) * 100;
+            return min(100, max(0, round($rate, 1)));
         }
         
         return 0;
     }
 
     /**
-     * Vérifier si la transaction est complètement payée
+     * Vérifier si la transaction est complètement payée - MÉTHODE CORRIGÉE
      */
     public function isFullyPaid()
     {
-        return $this->getRemainingPayment() <= 0;
+        $remaining = $this->getRemainingPayment();
+        return $remaining <= 100; // Tolérance de 100 CFA
     }
 
     /**
-     * Annuler la transaction (méthode héritée)
+     * Annuler la transaction
      */
     public function cancel($userId, $reason = null)
     {
@@ -679,15 +623,46 @@ class Transaction extends Model
     }
 
     /**
-     * Recalculer et mettre à jour le statut des paiements en cache
+     * Recalculer et mettre à jour le statut des paiements - MÉTHODE CRITIQUE
      */
     public function updatePaymentStatus()
     {
-        $totalPaid = $this->getTotalPayment(); // Cela recalculera correctement
-        $this->total_payment = $totalPaid;
-        $this->save();
-
-        return $totalPaid;
+        try {
+            Log::info("Mise à jour statut paiement transaction #{$this->id}");
+            
+            // Calculer le total des paiements COMPLÉTÉS
+            $totalPaid = $this->completedPayments()->sum('amount');
+            
+            // Vérifier les incohérences
+            $oldTotal = (float) ($this->total_payment ?? 0);
+            $diff = abs($totalPaid - $oldTotal);
+            
+            if ($diff > 1) {
+                Log::warning("Incohérence détectée transaction #{$this->id}", [
+                    'ancien_total' => $oldTotal,
+                    'nouveau_total' => $totalPaid,
+                    'différence' => $diff,
+                ]);
+            }
+            
+            // Mettre à jour
+            $this->total_payment = $totalPaid;
+            $this->save();
+            
+            // Forcer le rafraîchissement
+            $this->refresh();
+            
+            Log::info("Transaction #{$this->id} mise à jour", [
+                'total_payment' => $totalPaid,
+                'remaining' => $this->getRemainingPayment()
+            ]);
+            
+            return (float) $totalPaid;
+            
+        } catch (\Exception $e) {
+            Log::error("Erreur mise à jour statut paiement transaction #{$this->id}: " . $e->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -695,7 +670,6 @@ class Transaction extends Model
      */
     public function canBeCancelled()
     {
-        // Seulement les réservations peuvent être annulées
         return $this->isReservation() && !$this->isCancelled();
     }
 
@@ -729,8 +703,9 @@ class Transaction extends Model
     public function getMinimumDownPayment()
     {
         $dayDifference = Helper::getDateDifference($this->check_in, $this->check_out);
+        $total = $this->room->price * $dayDifference;
 
-        return ($this->room->price * $dayDifference) * 0.15;
+        return $total * 0.15;
     }
 
     /**
@@ -808,42 +783,94 @@ class Transaction extends Model
     }
 
     /**
-     * Boot du modèle
+     * Synchroniser manuellement les totaux - MÉTHODE IMPORTANTE
+     */
+    public function syncPaymentTotals()
+    {
+        DB::beginTransaction();
+        
+        try {
+            Log::info("Synchronisation manuelle transaction #{$this->id}");
+            
+            // Recalculer tous les totaux
+            $totalPrice = $this->getTotalPrice();
+            $totalPayment = $this->completedPayments()->sum('amount');
+            
+            // Sauvegarder les anciennes valeurs
+            $oldTotalPrice = $this->total_price;
+            $oldTotalPayment = $this->total_payment;
+            
+            // Mettre à jour
+            $this->total_price = $totalPrice;
+            $this->total_payment = $totalPayment;
+            $this->save();
+            
+            // Rafraîchir
+            $this->refresh();
+            
+            $result = [
+                'success' => true,
+                'message' => 'Transaction synchronisée avec succès',
+                'total_price' => [
+                    'old' => (float) $oldTotalPrice,
+                    'new' => (float) $totalPrice,
+                    'changed' => $totalPrice != $oldTotalPrice
+                ],
+                'total_payment' => [
+                    'old' => (float) $oldTotalPayment,
+                    'new' => (float) $totalPayment,
+                    'changed' => $totalPayment != $oldTotalPayment
+                ],
+                'remaining' => $this->getRemainingPayment(),
+                'payment_rate' => $this->getPaymentRate(),
+                'is_fully_paid' => $this->isFullyPaid()
+            ];
+            
+            Log::info("Synchronisation terminée", $result);
+            
+            DB::commit();
+            
+            return $result;
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("Erreur synchronisation transaction #{$this->id}: " . $e->getMessage());
+            
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'transaction_id' => $this->id
+            ];
+        }
+    }
+
+    /**
+     * Boot du modèle - VERSION SIMPLIFIÉE
      */
     protected static function boot()
     {
         parent::boot();
 
-        // Lors de la création, calculer et stocker le prix total
+        // Initialiser total_payment à 0 si null
         static::creating(function ($transaction) {
-            if (!$transaction->total_price) {
-                $day = Helper::getDateDifference($transaction->check_in, $transaction->check_out);
-                $room_price = $transaction->room->price ?? 0;
-                $transaction->total_price = $room_price * $day;
-            }
-            
-            // Définir le statut par défaut (réservation si check_in est futur)
-            if (!$transaction->status) {
-                $checkIn = Carbon::parse($transaction->check_in);
-                $transaction->status = $checkIn->isFuture() 
-                    ? self::STATUS_RESERVATION 
-                    : self::STATUS_ACTIVE;
-            }
-
-            // Valeur par défaut pour person_count
-            if (!$transaction->person_count) {
-                $transaction->person_count = 1;
+            if (!$transaction->total_payment) {
+                $transaction->total_payment = 0;
             }
         });
 
-        // Mettre à jour automatiquement le statut selon les dates
-        static::saving(function ($transaction) {
-            // Ne pas mettre à jour automatiquement si c'est une annulation ou no show
-            if ($transaction->isCancelled() || $transaction->isNoShow()) {
-                return;
-            }
-            
-            $transaction->autoUpdateStatus();
+        // Après création, forcer le calcul
+        static::created(function ($transaction) {
+            $transaction->updatePaymentStatus();
+        });
+    }
+    
+    /**
+     * Sauvegarde sans déclencher d'événements
+     */
+    public function saveQuietly(array $options = [])
+    {
+        return static::withoutEvents(function () use ($options) {
+            return $this->save($options);
         });
     }
 }

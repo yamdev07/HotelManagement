@@ -253,24 +253,19 @@
                                             </span>
                                         </div>
                                         <div>
-                                            <!-- Version corrigée avec http_build_query -->
-                                            <a href="{{ route('availability.room.conflicts', ['room' => $room->id]) . '?' . http_build_query([
-                                                'check_in' => $checkIn,
-                                                'check_out' => $checkOut,
-                                                'adults' => $adults,
-                                                'children' => $children
-                                            ]) }}" 
-                                            class="btn btn-sm btn-outline-danger"
-                                            target="_blank"> <!-- target="_blank" pour ouvrir dans un nouvel onglet pendant les tests -->
+                                            <!-- Lien Voir conflits - Version corrigée -->
+                                            <a href="{{ route('availability.room.conflicts', $room->id) }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}&adults={{ $adults }}&children={{ $children }}" 
+                                            class="btn btn-sm btn-outline-danger">
                                                 <i class="fas fa-exclamation-triangle me-1"></i>
                                                 Voir conflits
                                             </a>
 
-                                            <!-- Lien de test simple -->
-                                            <a href="{{ route('test.simple.conflicts', ['room' => $room->id]) }}?check_in={{ $checkIn }}" 
-                                            class="btn btn-sm btn-outline-info mt-1">
+                                            <!-- Lien de débogage (optionnel) -->
+                                            <a href="/test-simple-conflicts/{{ $room->id }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}" 
+                                            class="btn btn-sm btn-outline-info mt-1"
+                                            target="_blank">
                                                 <i class="fas fa-bug me-1"></i>
-                                                Test simple
+                                                Test débogage
                                             </a>
                                         </div>
                                     </div>
