@@ -166,12 +166,19 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
         
         // Facture/reçu
         Route::get('/{payment}/invoice', [PaymentController::class, 'invoice'])->name('invoice');
+        
+        // Export des paiements
+        Route::get('/export', [PaymentController::class, 'export'])->name('export');
     });
 
     // Paiements pour les transactions (routes existantes maintenues)
     Route::prefix('transaction/{transaction}/payment')->name('transaction.payment.')->group(function () {
         Route::get('/create', [PaymentController::class, 'create'])->name('create');
         Route::post('/store', [PaymentController::class, 'store'])->name('store');
+        
+        // API pour vérifier le statut
+        Route::get('/check-status', [PaymentController::class, 'checkTransactionStatus'])->name('check-status');
+        Route::get('/force-sync', [PaymentController::class, 'forceSync'])->name('force-sync');
     });
     
     // Alias pour la compatibilité (consulter la liste des paiements)
@@ -207,8 +214,15 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
 
 // Routes accessibles à tous les utilisateurs authentifiés (Super, Admin, Customer)
 Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], function () {
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+    // ==================== NOUVELLES ROUTES DASHBOARD ====================
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('index');
+        Route::get('/data', [DashboardController::class, 'getDashboardData'])->name('data');
+        Route::get('/stats', [DashboardController::class, 'updateStats'])->name('stats');
+        Route::get('/debug', [DashboardController::class, 'debug'])->name('debug');
+    });
+    
+    // Alias pour la route dashboard
     Route::get('/home', function () {
         return redirect()->route('dashboard.index');
     })->name('home');
@@ -321,11 +335,12 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Reception']], func
         // Dashboard check-in
         Route::get('/', [CheckInController::class, 'index'])->name('index');
         
-        // Recherche de réservations
+        // Recherche de réservations - CORRECTION ICI
         Route::get('/search', [CheckInController::class, 'search'])->name('search');
         
         // Check-in direct (sans réservation)
         Route::get('/direct', [CheckInController::class, 'directCheckIn'])->name('direct');
+        Route::post('/process-direct-checkin', [CheckInController::class, 'processDirectCheckIn'])->name('process-direct-checkin');
         
         // Check-in d'une réservation spécifique
         Route::get('/{transaction}', [CheckInController::class, 'show'])->name('show');
@@ -337,6 +352,9 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Reception']], func
         // Vérification de disponibilité (AJAX)
         Route::get('/availability/check', [CheckInController::class, 'checkAvailability'])->name('availability');
     });
+    
+    // Dashboard check-in spécifique (ajouté)
+    Route::get('/checkin-dashboard', [DashboardController::class, 'checkinDashboard'])->name('checkin.dashboard');
     
     // === ROUTES POUR LA GESTION DES STATUTS (RÉCEPTION) ===
     Route::prefix('transaction')->name('transaction.')->group(function () {
