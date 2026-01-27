@@ -17,7 +17,7 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         if (Auth::attempt($request->only('email', 'password'))) {
-            activity()->causedBy(auth()->user())->log('User logged into the portal'); // Log activity message
+            activity()->causedBy(auth()->user())->log('User logged into the portal');
 
             return redirect('dashboard')->with('success', 'Welcome '.auth()->user()->name);
         }
@@ -27,8 +27,17 @@ class AuthController extends Controller
 
     public function logout()
     {
+        // CORRECTION ICI : Sauvegardez le nom AVANT de déconnecter
         $name = auth()->user()->name;
+        
+        // Déconnexion complète
         Auth::logout();
+        
+        // Invalide la session (important!)
+        session()->invalidate();
+        
+        // Régénère le token CSRF
+        session()->regenerateToken();
 
         return redirect('login')->with('success', 'Logout success, goodbye '.$name);
     }
