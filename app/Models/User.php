@@ -98,4 +98,77 @@ class User extends Authenticatable
     {
         return $this->role === 'Super';
     }
+
+    // Après la méthode isSuper(), ajoute :
+
+    /**
+     * Relation avec les sessions de caisse
+     */
+    public function cashierSessions()
+    {
+        return $this->hasMany(CashierSession::class);
+    }
+
+    /**
+     * Retourne la session active de l'utilisateur
+     */
+    public function getActiveCashierSessionAttribute()
+    {
+        return $this->cashierSessions()
+            ->where('status', 'active')
+            ->first();
+    }
+
+    /**
+     * Vérifie si l'utilisateur peut démarrer une session
+     */
+    public function canStartSession(): bool
+    {
+        return !$this->activeCashierSession && 
+            in_array($this->role, ['Receptionist', 'Admin', 'Super', 'Cashier']);
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un réceptionniste
+     */
+    public function isReceptionist(): bool
+    {
+        return $this->role === 'Receptionist';
+    }
+
+    /**
+     * Vérifie si l'utilisateur est un caissier
+     */
+    public function isCashier(): bool
+    {
+        return $this->role === 'Cashier';
+    }
+
+    /**
+     * Vérifie si l'utilisateur a une session active
+     */
+    public function hasActiveSession(): bool
+    {
+        return $this->activeCashierSession !== null;
+    }
+
+    /**
+     * Les permissions de l'utilisateur
+     */
+    public function getPermissionsAttribute(): array
+    {
+        $permissions = [];
+        
+        if ($this->isSuper()) {
+            $permissions = ['all'];
+        } elseif ($this->isAdmin()) {
+            $permissions = ['manage_users', 'view_reports', 'manage_settings'];
+        } elseif ($this->isReceptionist() || $this->isCashier()) {
+            $permissions = ['manage_bookings', 'process_payments', 'view_cashier_dashboard'];
+        } elseif ($this->isCustomer()) {
+            $permissions = ['view_bookings', 'make_payments'];
+        }
+        
+        return $permissions;
+    }
 }
