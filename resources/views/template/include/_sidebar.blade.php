@@ -51,12 +51,12 @@
                 </div>
 
                 <!-- Opérations -->
-                @if (auth()->user()->role == 'Super' || auth()->user()->role == 'Admin' || auth()->user()->role == 'Reception')
+                @if (auth()->user()->role == 'Super' || auth()->user()->role == 'Admin' || auth()->user()->role == 'Receptionist')
                 <div class="nav-section">
                     <div class="nav-section-title">Opérations</div>
 
                     <!-- Check-in & Disponibilité -->
-                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
+                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                         <!-- Check-in -->
                         @php
                             $currentRoute = Route::currentRouteName() ?? '';
@@ -89,7 +89,7 @@
                             </a>
                         @endif
 
-                        <!-- APRÈS -->
+                        <!-- Disponibilité -->
                         @if(Route::has('availability.dashboard'))
                         <a href="{{ route('availability.dashboard') }}"
                         class="nav-item {{ str_contains(Route::currentRouteName(), 'availability.') ? 'active' : '' }}">
@@ -372,11 +372,11 @@
                     </a>
                     @endif
 
-                    <!-- Déconnexion -->
+                    <!-- DÉCONNEXION FONCTIONNELLE POUR TOUS -->
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                         @csrf
                     </form>
-                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                    <a href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit(); return false;"
                        class="nav-item">
                         <div class="nav-icon">
                             <i class="fas fa-sign-out-alt"></i> <!-- Icône FontAwesome -->
@@ -414,8 +414,8 @@
                             @case('Admin')
                                 <span class="badge bg-primary">Administrateur</span>
                                 @break
-                            @case('Reception')
-                                <span class="badge bg-success">Réception</span>
+                            @case('Receptionist')
+                                <span class="badge bg-success">Réceptionniste</span>
                                 @break
                             @case('Housekeeping')
                                 <span class="badge bg-warning">Femme de Chambre</span>
@@ -434,6 +434,7 @@
     </div>
 </aside>
 
+<!-- STYLES CSS -->
 <style>
 .sidebar {
     width: 280px;
@@ -548,6 +549,7 @@
     transition: all 0.2s ease;
     position: relative;
     border-left: 3px solid transparent;
+    cursor: pointer;
 }
 
 .nav-item:hover {
@@ -701,6 +703,7 @@
 }
 </style>
 
+<!-- SCRIPT POUR LA DÉCONNEXION -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Toggle sidebar on mobile
@@ -727,5 +730,44 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebar.classList.remove('show');
         }
     });
+
+    // Fonction de déconnexion améliorée
+    const logoutLink = document.querySelector('a[onclick*="logout-form"]');
+    if (logoutLink) {
+        logoutLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Afficher un message de confirmation
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                // Soumettre le formulaire
+                document.getElementById('logout-form').submit();
+                
+                // Désactiver le lien pendant 2 secondes pour éviter les doubles clics
+                logoutLink.style.opacity = '0.5';
+                logoutLink.style.pointerEvents = 'none';
+                
+                setTimeout(function() {
+                    logoutLink.style.opacity = '1';
+                    logoutLink.style.pointerEvents = 'auto';
+                }, 2000);
+            }
+        });
+    }
 });
 </script>
+
+<!-- ROUTE D'URGENCE POUR DÉCONNEXION (ajoutez dans routes/web.php) -->
+@php
+// Route temporaire pour déconnexion d'urgence - À AJOUTER DANS routes/web.php
+// Route::get('/logout-emergency', function() {
+//     \Illuminate\Support\Facades\Auth::logout();
+//     session()->invalidate();
+//     session()->regenerateToken();
+//     
+//     // Efface les cookies
+//     $response = redirect('/login')->with('success', 'Déconnexion d\'urgence réussie.');
+//     $response->headers->set('Clear-Site-Data', '"cache", "cookies", "storage", "executionContexts"');
+//     
+//     return $response;
+// })->name('logout.emergency');
+@endphp
