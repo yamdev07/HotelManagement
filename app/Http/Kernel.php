@@ -3,6 +3,9 @@
 namespace App\Http;
 
 use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\CheckAdminRestriction;
+use App\Http\Middleware\CheckReceptionistRestriction;
+use App\Http\Middleware\CheckHousekeepingReadOnly;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -63,6 +66,11 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        
+        // ==================== MIDDLEWARES PERSONNALISÉS ====================
         'checkRole' => CheckRole::class,
+        'admin.restrict' => CheckAdminRestriction::class,
+        'receptionist.restrict' => CheckReceptionistRestriction::class,
+        'housekeeping.readonly' => CheckHousekeepingReadOnly::class,
     ];
 }

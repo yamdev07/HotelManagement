@@ -1,276 +1,134 @@
-# Laravel Hotel
+# 🏨 Hotel Management System (Laravel)
 
-Laravel Hotel is an open-source web application built with laravel 8.0, enchanced with laravel reverb features to have realtime notification experience.
-
-Its now compatible with laravel 12
-
-## 🖼️ Screenshots
-
-
-
-## 🚀 Installation
-
-### Prerequisites
-
-- PHP 8.2+
-- Composer
-- Node.js & NPM
-- MySQL/MariaDB
-
-### Database Setup
-
-Create a new database:
-
-```bash
-mysql -u root -p
-```
-
-```sql
-CREATE DATABASE hotel_app;
-EXIT;
-```
-
-### Installation Steps
-
-1. **Clone & Configure**
-
-```bash
-git clone https://github.com/WailanTirajoh/Laravel-Hotel.git
-cd Laravel-Hotel
-cp .env.example .env
-```
-
-2. **Install Dependencies**
-
-```bash
-composer install
-npm install
-```
-
-3. **Generate Assets**
-
-```bash
-npm run build  # For production
-# OR
-npm run dev    # For development
-```
-
-4. **Setup Application**
-
-```bash
-php artisan key:generate
-php artisan migrate:fresh --seed
-```
-
-5. **Start Services**
-
-```bash
-# Terminal 1: Application Server
-php artisan serve
-
-# Terminal 2: Reverb Server (for real-time notifications)
-php artisan reverb:start
-```
-
-## 🔐 Demo Login
-
-Access the admin dashboard with seeded demo accounts:
-
-- **Email**: <demo@example.com>
-- **Password**: demo_pass
-
-> **Note**: Use the database seeders to create demo accounts, or check your `.env` file for configured test credentials.
-
-## 🏗️ Architecture & Features
-
-### 📊 Dashboard Modules
-
-#### **Dashboard**
-
-- Real-time guest statistics with animated counters
-- Monthly charts with Chart.js integration
-- Today's guest overview with table design
-- Quick action buttons for common tasks
-- Welcome message with current date/time
-
-#### **Transaction Management**
-
-- Complete reservation workflow with step-by-step process
-- Payment tracking with status badges
-- Down payment system (15% minimum)
-- Real-time email and push notifications
-- invoice generation
-
-#### **Customer Management**
-
-- CRUD operations with forms
-- Advanced search and pagination
-- Customer profile pages with activity history
-- Avatar integration with fallback images
-- Relationship tracking with transactions
-
-#### **Room Management**
-
-- Multi-level room management (Rooms, Types, Status, Facilities)
-- image galleries
-- Availability checking system
-- Capacity-based room recommendations
-- Status tracking with color-coded indicators
-
-#### **User Management** (Super Admin Only)
-
-- Role-based access control (Super, Admin, Customer)
-- User activity logging with Spatie ActivityLog
-- user profiles
-- Permission management
-
-### 🔔 Real-time Features
-
-- Reverb notifications for new reservations
-- Live dashboard updates
-- Push notifications for staff
-- Real-time payment status updates
-
-### 📱 UI Components
-
-#### **Modern Navigation**
-
-- Sleek sidebar with gradient background
-- Tooltip-enabled navigation icons
-- Dropdown menus with smooth animations
-- user profile dropdown
-
-#### **Enhanced Forms**
-
-- Floating labels with smooth transitions
-- validation styling
-- Select2 integration for dropdowns
-- Date pickers with modern styling
-
-#### **Data Visualization**
-
-- tables with hover effects
-- Chart.js integration for analytics
-- Progress bars and status indicators
-- badge system
-
-## 🎨 Design System
-
-### Color Palette
-
-- **Primary**: `#2563eb` (Blue)
-- **Success**: `#10b981` (Success Green)  
-- **Warning**: `#f59e0b` (Warning Amber)
-- **Danger**: `#ef4444` (Error Red)
-- **Light**: `#f8fafc` (Background Light)
-- **Dark**: `#1e293b` (Text Dark)
-
-### Typography
-
-- **Primary Font**: Inter (400, 500, 600, 700)
-- **Fallback**: Nunito, sans-serif
-- **Size Scale**: 0.875rem base with 1.6 line height
-
-### Components
-
-- **Cards**: 12px border radius with subtle shadows
-- **Buttons**: gradients with hover effects
-- **Forms**: Floating labels with focus states
-- **Tables**: Hover effects with styling
-
-## 📋 Business Logic
-
-### Reservation Workflow
-
-1. **Customer Registration**: Admin creates/selects customer profile
-2. **Room Selection**: System recommends available rooms based on:
-   - Date range availability
-   - Guest capacity requirements  
-   - Room type preferences
-3. **Confirmation**: Review booking details and pricing
-4. **Payment**: Minimum 15% down payment required
-5. **Check-in/Check-out**: Status tracking throughout stay
-
-### Payment System
-
-- Down payment calculation (15% minimum)
-- Balance tracking and payment completion
-- invoice generation
-- Payment history with status indicators
-
-### Notification System
-
-- Real-time Reverb notifications
-- Email notifications for important events
-- Push notifications for mobile devices
-- Activity logging for audit trails
-
-## 🗄️ Database Schema
-
-![ERD](https://github.com/WailanTirajoh/Laravel-Hotel/blob/main/erd.PNG?raw=true)
-
-### Key Relationships
-
-- **Users** → **Customers** (1:1)
-- **Customers** → **Transactions** (1:N)
-- **Rooms** → **Transactions** (1:N)  
-- **Transactions** → **Payments** (1:N)
-- **Rooms** → **Types** (N:1)
-- **Rooms** → **Status** (N:1)
-
-## 🔧 Technical Stack
-
-### Backend
-
-- **Laravel 12**: Latest PHP framework
-- **PHP 8.2+**: Modern PHP features
-- **MySQL**: Reliable database system
-- **Laravel Reverb**: WebSocket server
-- **Spatie Packages**: Activity logging and more
-
-### Frontend  
-
-- **Bootstrap 5**: Modern CSS framework
-- **Font Awesome 6**: icon set
-- **Chart.js 4**: Data visualization
-- **Select2**: Enhanced select dropdowns
-- **DataTables**: table management
-- **SweetAlert2**: Beautiful alerts and modals
-
-### Development Tools
-
-- **Vite**: Modern build tool
-- **Sass**: Advanced CSS preprocessing  
-- **Laravel Pint**: Code formatting
-- **PHPUnit**: Testing framework
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📄 License
-
-This project is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
-
-## 👨‍💻 Developer
-
-**Yoann Yamd**
-
-- GitHub: [@yamdev07](https://github.com/yamdev07)
-- Email: yoannyamd@gmail.com
+Application web de **gestion hôtelière** développée avec **Laravel**, destinée à gérer efficacement les opérations quotidiennes d’un hôtel : chambres, réservations, clients, paiements et facturation.
 
 ---
 
-### 🎯 Perfect for
+## ✨ Fonctionnalités
 
-- Hotel and hospitality management
-- Learning Laravel development
-- dashboard implementations
-- Real-time web application examples
-- Modern UI/UX design patterns
+### 🔐 Authentification & utilisateurs
+- Connexion / déconnexion sécurisée
+- Gestion des utilisateurs
+- Attribution de rôles (administrateur, réception, etc.)
 
-**Built with ❤️ using Laravel 12 and modern web technologies.**
+### 🛏️ Gestion des chambres
+- Création, modification et suppression de chambres
+- Gestion des types de chambres
+- Suivi de la disponibilité
+- Définition des tarifs par chambre
+
+### 📅 Réservations
+- Recherche de chambres disponibles par date (check-in / check-out)
+- Création et modification de réservations
+- Annulation de réservations
+- Historique des réservations
+
+### 👤 Gestion des clients
+- Enregistrement des clients
+- Association client ↔ réservation
+- Historique des séjours
+
+### 💳 Paiements & facturation
+- Enregistrement des paiements
+- Paiements partiels ou complets
+- Suivi des statuts de paiement
+- Génération de factures
+- Historique des transactions
+
+### 📊 Tableau de bord
+- Vue globale des activités de l’hôtel
+- Statistiques des réservations
+- Suivi des revenus
+- Taux d’occupation des chambres
+
+### ⚙️ Administration
+- Interface d’administration
+- CRUD complet sur les entités principales
+- Gestion centralisée des données
+- Sécurité et validation des formulaires
+
+---
+
+## 🧱 Technologies utilisées
+
+- **Laravel** (PHP Framework)
+- **Blade** (templating)
+- **Eloquent ORM**
+- **MySQL / MariaDB**
+- **Bootstrap / CSS**
+- **JavaScript**
+- **Vite**
+
+---
+
+## 📦 Installation
+
+### Prérequis
+- PHP >= 8.x
+- Composer
+- Node.js & npm
+- MySQL
+
+### Étapes
+
+```bash
+git clone https://github.com/yamdev07/HotelManagement.git
+cd HotelManagement
+composer install
+npm install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+npm run dev
+php artisan serve
+````
+Configurer la base de données dans le fichier .env avant de lancer les migrations.
+
+### 🗂️ Structure du projet
+````
+app/                → Logique métier
+routes/             → Routes web
+resources/views/    → Templates Blade
+database/migrations → Schéma de la base de données
+public/             → Fichiers publics
+````
+---
+
+### 🚧 Évolutions prévues
+
+- Module de gestion de caisse
+
+- Rapports financiers détaillés
+
+- Export PDF / Excel
+
+- Notifications avancées
+
+- API REST / Mobile
+
+---
+### 🤝 Contribution
+
+Les contributions sont les bienvenues !
+
+- Fork le projet
+
+- Crée une branche (feature/ma-fonctionnalite)
+
+- Commit tes changements
+
+- Ouvre une Pull Request
+
+--- 
+### 📄 Licence
+
+Projet sous licence Apache 2.0.
+
+---
+### 👨‍💻 Auteur
+
+Yoann Yamd
+Développeur Web & Logiciel
+📧 yoannyamd@gmail.com
+
+🌐 https://github.com/yamdev07
