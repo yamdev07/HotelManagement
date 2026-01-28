@@ -372,4 +372,6 @@ class Payment extends Model
         $balanceDue = self::getBalanceDue($transactionId, $transactionTotal);
         return $balanceDue <= 0;
     }
+
+    
 }

@@ -51,6 +51,35 @@ Route::post('/restaurant/reservation', [FrontendController::class, 'restaurantRe
 Route::view('/login', 'auth.login')->name('login.index');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 
+// ==================== ROUTE LOGOUT GLOBALE (ACCESSIBLE À TOUS LES UTILISATEURS) ====================
+// Cette route doit être accessible SANS middleware auth pour permettre aux utilisateurs déjà connectés de se déconnecter
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ==================== ROUTE LOGOUT URGENCE (GET - pour les problèmes) ====================
+// Accessible à tous les utilisateurs connectés
+Route::get('/logout-now', function() {
+    try {
+        $userName = auth()->check() ? auth()->user()->name : 'Utilisateur';
+        
+        // Déconnexion complète
+        \Illuminate\Support\Facades\Auth::logout();
+        
+        // Destruction totale de la session
+        session()->flush();
+        session()->invalidate();
+        session()->regenerateToken();
+        
+        // Effacement des cookies
+        \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('laravel_session'));
+        \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('XSRF-TOKEN'));
+        
+        return redirect('/login')->with('success', '✅ Déconnexion réussie. Au revoir ' . $userName . ' !');
+        
+    } catch (\Exception $e) {
+        return redirect('/login')->with('error', 'Erreur de déconnexion: ' . $e->getMessage());
+    }
+})->name('logout.now');
+
 // Forgot Password routes
 Route::group(['middleware' => 'guest'], function () {
     Route::get('/forgot-password', fn () => view('auth.passwords.email'))->name('password.request');
@@ -67,8 +96,8 @@ Route::group(['middleware' => ['auth', 'checkRole:Super']], function () {
     Route::resource('user', UserController::class);
 });
 
-// Routes accessibles aux Super Admins et Admins
-Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
+// Routes accessibles aux Super Admins et Admins (avec restriction pour Admin)
+Route::group(['middleware' => ['auth', 'checkRole:Super,Admin', 'admin.restrict']], function () {
     // Images
     Route::post('/room/{room}/image/upload', [ImageController::class, 'store'])->name('image.store');
     Route::delete('/image/{image}', [ImageController::class, 'destroy'])->name('image.destroy');
@@ -166,12 +195,19 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
         
         // Facture/reçu
         Route::get('/{payment}/invoice', [PaymentController::class, 'invoice'])->name('invoice');
+        
+        // Export des paiements
+        Route::get('/export', [PaymentController::class, 'export'])->name('export');
     });
 
     // Paiements pour les transactions (routes existantes maintenues)
     Route::prefix('transaction/{transaction}/payment')->name('transaction.payment.')->group(function () {
         Route::get('/create', [PaymentController::class, 'create'])->name('create');
         Route::post('/store', [PaymentController::class, 'store'])->name('store');
+        
+        // API pour vérifier le statut
+        Route::get('/check-status', [PaymentController::class, 'checkTransactionStatus'])->name('check-status');
+        Route::get('/force-sync', [PaymentController::class, 'forceSync'])->name('force-sync');
     });
     
     // Alias pour la compatibilité (consulter la liste des paiements)
@@ -205,15 +241,22 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin']], function () {
     });
 });
 
-// Routes accessibles à tous les utilisateurs authentifiés (Super, Admin, Customer)
-Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], function () {
-    // Dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard.index');
+// Routes accessibles à tous les utilisateurs authentifiés (Super, Admin, Customer, Housekeeping, Receptionist)
+Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer,Housekeeping,Receptionist', 'admin.restrict', 'housekeeping.readonly']], function () {
+    // ==================== NOUVELLES ROUTES DASHBOARD ====================
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('index');
+        Route::get('/data', [DashboardController::class, 'getDashboardData'])->name('data');
+        Route::get('/stats', [DashboardController::class, 'updateStats'])->name('stats');
+        Route::get('/debug', [DashboardController::class, 'debug'])->name('debug');
+    });
+    
+    // Alias pour la route dashboard
     Route::get('/home', function () {
         return redirect()->route('dashboard.index');
     })->name('home');
     
-    // Activity Log
+    // Activity Log (lecture seulement pour Housekeeping)
     Route::get('/activity-log', [ActivityController::class, 'index'])->name('activity-log.index');
     Route::get('/activity-log/all', [ActivityController::class, 'all'])->name('activity-log.all');
     
@@ -235,11 +278,8 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
         Route::post('/update-avatar', [ProfileController::class, 'updateAvatar'])->name('update.avatar');
     });
     
-    // Reports
+    // Reports (lecture seulement pour Housekeeping)
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-    
-    // Logout
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
     
     // TRANSACTIONS - Routes accessibles aux clients pour voir leurs réservations
     Route::get('/my-reservations', [TransactionController::class, 'myReservations'])->name('transaction.myReservations');
@@ -247,19 +287,15 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
     // SHOW transaction pour les clients (séparé de la route admin)
     Route::get('/my-transaction/{transaction}', [TransactionController::class, 'show'])->name('transaction.show.customer');
     
-    // === ROUTES POUR LES STATUTS ACCESSIBLES AUX CLIENTS ===
-    // Les clients peuvent voir leurs réservations mais pas changer le statut
-    // Seuls Super, Admin, Reception peuvent changer les statuts
-    
     // RESTAURANT MODULE - Accessible à tous les utilisateurs connectés
     Route::prefix('restaurant')->name('restaurant.')->group(function () {
-        // Menus
+        // Menus (Housekeeping: lecture seulement)
         Route::get('/', [RestaurantController::class, 'index'])->name('index');
         Route::get('/create', [RestaurantController::class, 'create'])->name('create');
         Route::post('/store', [RestaurantController::class, 'store'])->name('store');
         Route::delete('/menus/{id}', [RestaurantController::class, 'destroy'])->name('menus.destroy');
         
-        // Commandes
+        // Commandes (Housekeeping: lecture seulement)
         Route::get('/orders', [RestaurantController::class, 'orders'])->name('orders');
         Route::get('/orders/{id}', [RestaurantController::class, 'showOrder'])->name('orders.show');
         Route::post('/orders', [RestaurantController::class, 'storeOrder'])->name('orders.store');
@@ -273,8 +309,8 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
 });
 
 // ==================== ROUTES POUR LA DISPONIBILITÉ DES CHAMBRES ====================
-// ACCESSIBLE À TOUS LES UTILISATEURS CONNECTÉS
-Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], function () {
+// ACCESSIBLE À TOUS LES UTILISATEURS CONNECTÉS (lecture seulement pour Housekeeping)
+Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer,Housekeeping', 'admin.restrict', 'housekeeping.readonly']], function () {
     Route::prefix('availability')->name('availability.')->group(function () {
         // Dashboard de disponibilité
         Route::get('/dashboard', [AvailabilityController::class, 'dashboard'])->name('dashboard');
@@ -315,7 +351,7 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Customer']], funct
 // ==================== ROUTES POUR LA DISPONIBILITÉ ET CHECK-IN AVANCÉ ====================
 
 // Routes accessibles au personnel de réception (en plus des admins)
-Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Reception']], function () {
+Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Receptionist', 'receptionist.restrict', 'admin.restrict']], function () {
     // === ROUTES POUR LE CHECK-IN AVANCÉ ===
     Route::prefix('checkin')->name('checkin.')->group(function () {
         // Dashboard check-in
@@ -326,6 +362,7 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Reception']], func
         
         // Check-in direct (sans réservation)
         Route::get('/direct', [CheckInController::class, 'directCheckIn'])->name('direct');
+        Route::post('/process-direct-checkin', [CheckInController::class, 'processDirectCheckIn'])->name('process-direct-checkin');
         
         // Check-in d'une réservation spécifique
         Route::get('/{transaction}', [CheckInController::class, 'show'])->name('show');
@@ -338,22 +375,23 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Reception']], func
         Route::get('/availability/check', [CheckInController::class, 'checkAvailability'])->name('availability');
     });
     
+    // Dashboard check-in spécifique
+    Route::get('/checkin-dashboard', [DashboardController::class, 'checkinDashboard'])->name('checkin.dashboard');
+    
     // === ROUTES POUR LA GESTION DES STATUTS (RÉCEPTION) ===
     Route::prefix('transaction')->name('transaction.')->group(function () {
         // Actions rapides de réception
         Route::post('/{transaction}/check-in', function($transaction) {
-            // Redirige vers mark-arrived
             return app(TransactionController::class)->markAsArrived($transaction);
         })->name('check-in');
         
         Route::post('/{transaction}/check-out', function($transaction) {
-            // Redirige vers mark-departed
             return app(TransactionController::class)->markAsDeparted($transaction);
         })->name('check-out');
         
         // Vue spéciale pour la réception (dashboard réception)
         Route::get('/reception/today', [TransactionController::class, 'index'])->name('reception.today')
-            ->defaults('view', 'reception'); // Paramètre pour la vue
+            ->defaults('view', 'reception');
     });
     
     // ==================== ROUTES CAISSE POUR LA RÉCEPTION ====================
@@ -380,7 +418,7 @@ Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Reception']], func
     });
 });
 
-// Routes accessibles aux femmes de chambre
+// Routes accessibles au personnel housekeeping (accès complet au module housekeeping)
 Route::group(['middleware' => ['auth', 'checkRole:Super,Admin,Housekeeping']], function () {
     Route::prefix('housekeeping')->name('housekeeping.')->group(function () {
         // Dashboard femmes de chambre
@@ -617,10 +655,42 @@ if (env('APP_DEBUG', false)) {
         ]);
     });
 
+    // Route pour tester les permissions
+    Route::get('/test-permissions', function() {
+        $user = auth()->user();
+        
+        if (!$user) return "Non connecté";
+        
+        $tests = [
+            'admin_cannot_delete' => route('transaction.destroy', 1),
+            'receptionist_cannot_access_users' => route('user.index'),
+            'housekeeping_read_only' => route('room.edit', 1),
+        ];
+        
+        return view('test-permissions', [
+            'user' => $user,
+            'tests' => $tests
+        ]);
+    })->middleware('auth');
+    
     // Dans routes/web.php, ajoutez cette route (hors des groupes middleware pour test)
     Route::get('/test-simple-conflicts/{room}', [AvailabilityController::class, 'showConflictsSimple'])
         ->name('test.simple.conflicts');
 }
+
+// Route d'urgence de déconnexion
+Route::get('/force-logout-all', function() {
+    \Illuminate\Support\Facades\Auth::logout();
+    session()->flush();
+    session()->invalidate();
+    session()->regenerateToken();
+    
+    // Efface les cookies de session
+    \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('laravel_session'));
+    \Illuminate\Support\Facades\ookie::queue(\Illuminate\Support\Facades\Cookie::forget('XSRF-TOKEN'));
+    
+    return redirect('/login')->with('success', 'Déconnexion forcée réussie.');
+});
 
 // ==================== ROUTES FALLBACK (SANS VUE 404) ====================
 Route::fallback(function () {
