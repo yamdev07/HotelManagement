@@ -9,7 +9,7 @@
             <div class="row">
                 <div class="col-lg-8 mx-auto text-center">
                     <h1 class="display-4 mb-4">Bienvenue au Cactus Palace</h1>
-                    <p class="lead mb-4">Découvrez le luxe absolu dans notre hôtel 5 étoiles au cœur de Cotonou</p>
+                    <p class="lead mb-4">Découvrez le luxe absolu dans notre hôtel au cœur de Cotonou</p>
                     <a href="{{ route('frontend.rooms') }}" class="btn btn-primary-custom btn-lg me-2">
                         <i class="fas fa-bed me-1"></i> Voir nos chambres
                     </a>

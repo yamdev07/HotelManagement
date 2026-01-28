@@ -60,7 +60,7 @@
                 <div class="col-lg-3">
                     <div class="form-group">
                         <label for="priceRange" class="form-label" style="color: #2E7D32; font-weight: 500;">
-                            <i class="fas fa-euro-sign me-2"></i>Budget/nuit
+                            <i class="fas me-2">FCFA</i>Budget/nuit
                         </label>
                         <select class="form-select" id="priceRange" style="border: 1px solid #C8E6C9;">
                             <option value="">Tous les prix</option>
