@@ -809,4 +809,496 @@ class CashierSessionController extends Controller
         
         return round($totalMinutes / $sessions->count(), 1);
     }
+
+        /**
+     * VÉRIFIER SI UNE SESSION ACTIVE EST NÉCESSAIRE POUR UNE ACTION
+     */
+    public function requireActiveSession(Request $request)
+    {
+        $user = Auth::user();
+        $activeSession = $this->getActiveSession($user);
+        
+        if (!$activeSession) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Aucune session active. Veuillez démarrer une session.',
+                'redirect' => route('cashier.sessions.create')
+            ], 403);
+        }
+        
+        return response()->json([
+            'success' => true,
+            'session' => $activeSession
+        ]);
+    }
+
+    /**
+     * ASSOCIER AUTOMATIQUEMENT UNE TRANSACTION À LA SESSION ACTIVE
+     */
+    public function autoLinkTransactionToSession(Transaction $transaction)
+    {
+        $user = Auth::user();
+        $activeSession = $this->getActiveSession($user);
+        
+        if (!$activeSession) {
+            return [
+                'success' => false,
+                'message' => 'Aucune session active'
+            ];
+        }
+        
+        try {
+            // Associer la transaction à la session
+            $transaction->update([
+                'cashier_session_id' => $activeSession->id
+            ]);
+            
+            // Mettre à jour le solde si paiement associé
+            $totalPayment = $transaction->getTotalPayment();
+            if ($totalPayment > 0) {
+                $activeSession->current_balance += $totalPayment;
+                $activeSession->save();
+            }
+            
+            return [
+                'success' => true,
+                'message' => 'Transaction associée à la session #' . $activeSession->id
+            ];
+            
+        } catch (\Exception $e) {
+            \Log::error('Error linking transaction to session', [
+                'transaction_id' => $transaction->id,
+                'session_id' => $activeSession->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return [
+                'success' => false,
+                'message' => 'Erreur: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * RAPPORT DE CLÔTURE DÉTAILLÉ
+     */
+    public function detailedClosingReport(CashierSession $cashierSession)
+    {
+        $user = Auth::user();
+        
+        // Vérifier les permissions
+        if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
+            return redirect()->route('cashier.dashboard')
+                ->with('error', 'Accès non autorisé.');
+        }
+        
+        // Vérifier que la session est fermée
+        if ($cashierSession->status !== 'closed') {
+            return redirect()->route('cashier.sessions.show', $cashierSession)
+                ->with('error', 'La session doit être fermée pour générer le rapport.');
+        }
+        
+        try {
+            // Transactions de la session
+            $transactions = Transaction::where('cashier_session_id', $cashierSession->id)
+                ->with(['customer.user', 'room.type', 'payments'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            // Paiements de la session
+            $payments = Payment::where('cashier_session_id', $cashierSession->id)
+                ->with(['transaction.customer', 'user'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            // Analyse par méthode de paiement
+            $paymentMethodsAnalysis = [];
+            foreach ($payments->groupBy('payment_method') as $method => $methodPayments) {
+                $completedPayments = $methodPayments->where('status', Payment::STATUS_COMPLETED);
+                $refundedPayments = $methodPayments->where('status', Payment::STATUS_REFUNDED);
+                
+                $paymentMethodsAnalysis[$method] = [
+                    'total' => $completedPayments->sum('amount'),
+                    'refunded' => $refundedPayments->sum('amount'),
+                    'net' => $completedPayments->sum('amount') - abs($refundedPayments->sum('amount')),
+                    'count' => $completedPayments->count(),
+                    'refund_count' => $refundedPayments->count()
+                ];
+            }
+            
+            // Analyse par statut de transaction
+            $transactionStatusAnalysis = [
+                'total' => $transactions->count(),
+                'active' => $transactions->where('status', 'active')->count(),
+                'completed' => $transactions->where('status', 'completed')->count(),
+                'cancelled' => $transactions->where('status', 'cancelled')->count(),
+                'reservation' => $transactions->where('status', 'reservation')->count(),
+            ];
+            
+            // Analyse horaire
+            $hourlyAnalysis = [];
+            for ($hour = 0; $hour < 24; $hour++) {
+                $hourStart = $cashierSession->start_time->copy()->setHour($hour)->setMinute(0);
+                $hourEnd = $hourStart->copy()->addHour();
+                
+                $hourTransactions = $transactions->filter(function($transaction) use ($hourStart, $hourEnd) {
+                    return $transaction->created_at->between($hourStart, $hourEnd);
+                });
+                
+                $hourPayments = $payments->filter(function($payment) use ($hourStart, $hourEnd) {
+                    return $payment->created_at->between($hourStart, $hourEnd);
+                });
+                
+                $hourlyAnalysis[$hour] = [
+                    'hour' => sprintf('%02d:00', $hour),
+                    'transactions' => $hourTransactions->count(),
+                    'payments' => $hourPayments->count(),
+                    'revenue' => $hourPayments->where('status', Payment::STATUS_COMPLETED)->sum('amount'),
+                    'average_payment' => $hourPayments->count() > 0 ? 
+                        $hourPayments->where('status', Payment::STATUS_COMPLETED)->sum('amount') / $hourPayments->count() : 0
+                ];
+            }
+            
+            // Résumé financier
+            $financialSummary = [
+                'initial_balance' => $cashierSession->initial_balance,
+                'total_payments' => $payments->where('status', Payment::STATUS_COMPLETED)->sum('amount'),
+                'total_refunds' => abs($payments->where('status', Payment::STATUS_REFUNDED)->sum('amount')),
+                'theoretical_balance' => $cashierSession->theoretical_balance,
+                'final_balance' => $cashierSession->final_balance,
+                'balance_difference' => $cashierSession->balance_difference,
+                'net_revenue' => $payments->where('status', Payment::STATUS_COMPLETED)->sum('amount') 
+                    - abs($payments->where('status', Payment::STATUS_REFUNDED)->sum('amount'))
+            ];
+            
+            // Performance
+            $duration = $cashierSession->start_time->diff($cashierSession->end_time);
+            $performance = [
+                'duration_hours' => $duration->h + ($duration->i / 60),
+                'transactions_per_hour' => $duration->h > 0 ? 
+                    $transactions->count() / $duration->h : $transactions->count(),
+                'revenue_per_hour' => $duration->h > 0 ? 
+                    $financialSummary['net_revenue'] / $duration->h : $financialSummary['net_revenue'],
+                'payment_efficiency' => $transactions->count() > 0 ? 
+                    ($payments->count() / $transactions->count()) * 100 : 0
+            ];
+            
+            return view('cashier.sessions.detailed-report', [
+                'cashierSession' => $cashierSession,
+                'transactions' => $transactions,
+                'payments' => $payments,
+                'paymentMethodsAnalysis' => $paymentMethodsAnalysis,
+                'transactionStatusAnalysis' => $transactionStatusAnalysis,
+                'hourlyAnalysis' => $hourlyAnalysis,
+                'financialSummary' => $financialSummary,
+                'performance' => $performance,
+                'user' => $user
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error generating detailed report', [
+                'session_id' => $cashierSession->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return redirect()->route('cashier.sessions.show', $cashierSession)
+                ->with('error', 'Erreur lors de la génération du rapport: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * VERROUILLER/DÉVERROUILLER UNE SESSION (Admin seulement)
+     */
+    public function toggleLock(CashierSession $cashierSession, Request $request)
+    {
+        $user = Auth::user();
+        
+        if ($user->role !== 'Admin' && $user->role !== 'Super') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Action réservée aux administrateurs.'
+            ], 403);
+        }
+        
+        try {
+            $action = $request->get('action', 'lock');
+            $notes = $request->get('notes', '');
+            
+            if ($action === 'lock') {
+                $cashierSession->update([
+                    'status' => 'locked',
+                    'notes' => $cashierSession->notes . "\n[VERROUILLÉ par " . $user->name . " - " . now()->format('Y-m-d H:i:s') . "] " . $notes
+                ]);
+                
+                $message = 'Session verrouillée avec succès';
+            } else {
+                $cashierSession->update([
+                    'status' => 'closed',
+                    'notes' => $cashierSession->notes . "\n[DÉVERROUILLÉ par " . $user->name . " - " . now()->format('Y-m-d H:i:s') . "] " . $notes
+                ]);
+                
+                $message = 'Session déverrouillée avec succès';
+            }
+            
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'session' => $cashierSession
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * VÉRIFIER LA COHÉRENCE D'UNE SESSION
+     */
+    public function checkConsistency(CashierSession $cashierSession)
+    {
+        $user = Auth::user();
+        
+        if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé.'
+            ], 403);
+        }
+        
+        try {
+            $issues = [];
+            
+            // Vérifier les transactions sans paiements
+            $transactionsWithoutPayments = Transaction::where('cashier_session_id', $cashierSession->id)
+                ->whereDoesntHave('payments')
+                ->count();
+                
+            if ($transactionsWithoutPayments > 0) {
+                $issues[] = [
+                    'type' => 'warning',
+                    'message' => $transactionsWithoutPayments . ' transaction(s) sans paiement',
+                    'severity' => 'medium'
+                ];
+            }
+            
+            // Vérifier les paiements en attente
+            $pendingPayments = Payment::where('cashier_session_id', $cashierSession->id)
+                ->where('status', Payment::STATUS_PENDING)
+                ->count();
+                
+            if ($pendingPayments > 0) {
+                $issues[] = [
+                    'type' => 'warning',
+                    'message' => $pendingPayments . ' paiement(s) en attente',
+                    'severity' => 'low'
+                ];
+            }
+            
+            // Vérifier la cohérence des totaux
+            $calculatedTheoreticalBalance = $cashierSession->calculateTheoreticalBalance();
+            $balanceDifference = abs($calculatedTheoreticalBalance - $cashierSession->theoretical_balance);
+            
+            if ($balanceDifference > 1) { // Tolérance de 1 CFA
+                $issues[] = [
+                    'type' => 'error',
+                    'message' => 'Incohérence dans le solde théorique: Différence de ' . number_format($balanceDifference, 2) . ' CFA',
+                    'severity' => 'high'
+                ];
+            }
+            
+            // Vérifier la durée
+            if ($cashierSession->isActive()) {
+                $duration = $cashierSession->start_time->diffInHours(now());
+                if ($duration > 12) {
+                    $issues[] = [
+                        'type' => 'warning',
+                        'message' => 'Session active depuis ' . $duration . ' heures',
+                        'severity' => 'medium'
+                    ];
+                }
+            }
+            
+            return response()->json([
+                'success' => true,
+                'issues' => $issues,
+                'session' => $cashierSession,
+                'calculated_theoretical_balance' => $calculatedTheoreticalBalance,
+                'balance_difference' => $balanceDifference
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * EXPORTER LES TRANSACTIONS D'UNE SESSION
+     */
+    public function exportSessionTransactions(CashierSession $cashierSession, $format = 'excel')
+    {
+        $user = Auth::user();
+        
+        if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
+            return redirect()->route('cashier.dashboard')
+                ->with('error', 'Accès non autorisé.');
+        }
+        
+        try {
+            $transactions = Transaction::where('cashier_session_id', $cashierSession->id)
+                ->with(['customer.user', 'room.type', 'payments'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            $payments = Payment::where('cashier_session_id', $cashierSession->id)
+                ->with(['transaction.customer', 'user'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+            
+            // Pour Excel/CSV
+            if ($format === 'excel' || $format === 'csv') {
+                $data = [
+                    'session' => $cashierSession,
+                    'transactions' => $transactions,
+                    'payments' => $payments,
+                    'generated_at' => now()->format('Y-m-d H:i:s'),
+                    'generated_by' => $user->name
+                ];
+                
+                // Ici, normalement vous utiliseriez un package Excel comme Maatwebsite/Laravel-Excel
+                // Pour l'instant, on retourne une vue
+                return view('cashier.sessions.export', $data);
+            }
+            
+            // Pour PDF
+            if ($format === 'pdf') {
+                $data = [
+                    'session' => $cashierSession,
+                    'transactions' => $transactions,
+                    'payments' => $payments,
+                    'user' => $user
+                ];
+                
+                // Normalement, utiliser DomPDF ou un autre package
+                return view('cashier.sessions.pdf-export', $data);
+            }
+            
+            return redirect()->route('cashier.sessions.show', $cashierSession)
+                ->with('error', 'Format non supporté');
+                
+        } catch (\Exception $e) {
+            \Log::error('Error exporting session', [
+                'session_id' => $cashierSession->id,
+                'format' => $format,
+                'error' => $e->getMessage()
+            ]);
+            
+            return redirect()->route('cashier.sessions.show', $cashierSession)
+                ->with('error', 'Erreur lors de l\'export: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * TRANSFÉRER UNE SESSION À UN AUTRE RÉCEPTIONNISTE (Admin seulement)
+     */
+    public function transferSession(CashierSession $cashierSession, Request $request)
+    {
+        $user = Auth::user();
+        
+        if ($user->role !== 'Admin' && $user->role !== 'Super') {
+            return redirect()->route('cashier.dashboard')
+                ->with('error', 'Action réservée aux administrateurs.');
+        }
+        
+        $request->validate([
+            'new_user_id' => 'required|exists:users,id',
+            'reason' => 'required|string|max:500'
+        ]);
+        
+        $newUser = User::findOrFail($request->new_user_id);
+        
+        // Vérifier que le nouvel utilisateur a les droits
+        if (!in_array($newUser->role, ['Receptionist', 'Admin', 'Super', 'Cashier'])) {
+            return redirect()->back()
+                ->with('error', 'Le nouvel utilisateur n\'a pas les droits nécessaires.');
+        }
+        
+        DB::beginTransaction();
+        
+        try {
+            $oldUserId = $cashierSession->user_id;
+            
+            // Mettre à jour la session
+            $cashierSession->update([
+                'user_id' => $newUser->id,
+                'notes' => $cashierSession->notes . "\n[TRANSFÉRÉ de " . User::find($oldUserId)->name . " à " . $newUser->name . " - " . now()->format('Y-m-d H:i:s') . "] Raison: " . $request->reason
+            ]);
+            
+            DB::commit();
+            
+            \Log::info('Session transferred', [
+                'session_id' => $cashierSession->id,
+                'from_user' => $oldUserId,
+                'to_user' => $newUser->id,
+                'by_user' => $user->id
+            ]);
+            
+            return redirect()->route('cashier.sessions.show', $cashierSession)
+                ->with('success', 'Session transférée avec succès à ' . $newUser->name);
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Erreur lors du transfert: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * API: RÉCUPÉRER LA SESSION ACTIVE D'UN UTILISATEUR
+     */
+    public function getUserActiveSession($userId)
+    {
+        $currentUser = Auth::user();
+        
+        // Seuls les admins peuvent voir les sessions des autres
+        if ($currentUser->role !== 'Admin' && $currentUser->role !== 'Super' && $currentUser->id != $userId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Accès non autorisé.'
+            ], 403);
+        }
+        
+        try {
+            $session = CashierSession::where('user_id', $userId)
+                ->where('status', 'active')
+                ->first();
+                
+            if (!$session) {
+                return response()->json([
+                    'success' => true,
+                    'has_active_session' => false,
+                    'message' => 'Aucune session active'
+                ]);
+            }
+            
+            $session->load('user');
+            
+            return response()->json([
+                'success' => true,
+                'has_active_session' => true,
+                'session' => $session
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

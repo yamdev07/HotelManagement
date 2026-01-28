@@ -21,7 +21,11 @@ class CashierSession extends Model
         'end_time',
         'status',
         'notes',
-        'closing_notes'
+        'closing_notes',
+        'closed_by',
+        'verified_by',
+        'terminal_id',
+        'shift_type'
     ];
     
     protected $casts = [
@@ -34,9 +38,30 @@ class CashierSession extends Model
         'balance_difference' => 'decimal:2',
     ];
     
+    const STATUS_ACTIVE = 'active';
+    const STATUS_CLOSED = 'closed';
+    const STATUS_PENDING_REVIEW = 'pending_review';
+    const STATUS_VERIFIED = 'verified';
+    
+    const SHIFT_MORNING = 'morning';
+    const SHIFT_EVENING = 'evening';
+    const SHIFT_NIGHT = 'night';
+    const SHIFT_FULL_DAY = 'full_day';
+    
+    // Relations
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    
+    public function closedByUser()
+    {
+        return $this->belongsTo(User::class, 'closed_by');
+    }
+    
+    public function verifiedByUser()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
     
     public function payments()
@@ -44,36 +69,68 @@ class CashierSession extends Model
         return $this->hasMany(Payment::class, 'cashier_session_id');
     }
     
-    public function getDurationAttribute()
+    public function transactions()
     {
-        if (!$this->end_time) return null;
-        return $this->start_time->diff($this->end_time);
+        return $this->hasMany(Transaction::class, 'cashier_session_id');
     }
     
-    public function getFormattedDurationAttribute()
+    // Méthodes pratiques
+    public function isActive()
     {
-        if (!$this->duration) return 'En cours';
-        
-        $hours = $this->duration->h;
-        $minutes = $this->duration->i;
-        
-        return "{$hours}h {$minutes}min";
+        return $this->status === self::STATUS_ACTIVE;
     }
     
-    public function getFormattedInitialBalanceAttribute()
+    public function isClosed()
     {
-        return number_format($this->initial_balance, 2, ',', ' ') . ' FCFA';
+        return $this->status === self::STATUS_CLOSED;
     }
     
-    public function getFormattedCurrentBalanceAttribute()
+    public function calculateTheoreticalBalance()
     {
-        return number_format($this->current_balance, 2, ',', ' ') . ' FCFA';
+        $totalPayments = $this->payments()
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->sum('amount');
+            
+        return $this->initial_balance + $totalPayments;
     }
     
-    public function getFormattedFinalBalanceAttribute()
+    public function getTotalRevenue()
     {
-        return $this->final_balance 
-            ? number_format($this->final_balance, 2, ',', ' ') . ' FCFA'
-            : 'N/A';
+        return $this->payments()
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->sum('amount');
+    }
+    
+    public function getPaymentCount()
+    {
+        return $this->payments()
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->count();
+    }
+    
+    public function getTransactionCount()
+    {
+        return $this->transactions()->count();
+    }
+    
+    // Scopes
+    public function scopeActive($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
+    }
+    
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+    
+    public function scopeToday($query)
+    {
+        return $query->whereDate('created_at', today());
+    }
+    
+    public function scopeThisWeek($query)
+    {
+        return $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
     }
 }
