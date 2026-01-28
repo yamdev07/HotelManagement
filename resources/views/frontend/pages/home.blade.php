@@ -118,6 +118,8 @@
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <span class="h5 mb-0" style="color: #4CAF50;">
                                     {{ number_format($room->price, 0) }} Fcfa / nuit
+                                <span class="h5 mb-0" style="color: #4CAF50;">
+                                    {{ number_format($room->price, 0) }} Fcfa / nuit
                                 </span>
                                 <a href="{{ route('frontend.room.details', $room->id) }}" class="btn btn-primary-custom">
                                     <i class="fas fa-eye me-1"></i> Détails
@@ -179,6 +181,8 @@
                                 <div>
                                     <h6 class="mb-0" style="color: #2E7D32;">Marie Dubois</h6>
                                     <small class="text-muted">Cotonou, Bénin</small>
+                                    <h6 class="mb-0" style="color: #2E7D32;">Marie Dubois</h6>
+                                    <small class="text-muted">Cotonou, Bénin</small>
                                 </div>
                             </div>
                             <p class="card-text text-muted">
@@ -205,6 +209,8 @@
                                 <div>
                                     <h6 class="mb-0" style="color: #2E7D32;">Thomas Martin</h6>
                                     <small class="text-muted">Cotonou, Bénin</small>
+                                    <h6 class="mb-0" style="color: #2E7D32;">Thomas Martin</h6>
+                                    <small class="text-muted">Cotonou, Bénin</small>
                                 </div>
                             </div>
                             <p class="card-text text-muted">
@@ -229,6 +235,8 @@
                                     <img src="https://randomuser.me/api/portraits/women/67.jpg" alt="Client" class="img-fluid">
                                 </div>
                                 <div>
+                                    <h6 class="mb-0" style="color: #2E7D32;">Sophie Lambert</h6>
+                                    <small class="text-muted">Cotonou, Bénin</small>
                                     <h6 class="mb-0" style="color: #2E7D32;">Sophie Lambert</h6>
                                     <small class="text-muted">Cotonou, Bénin</small>
                                 </div>

@@ -169,6 +169,7 @@
                                 <div>
                                     <span class="h4 mb-0" style="color: #4CAF50;">
                                         {{ number_format($room->price, 0) }} Fcfa
+                                        {{ number_format($room->price, 0) }} Fcfa
                                     </span>
                                     <small class="text-muted d-block">par nuit</small>
                                 </div>
@@ -221,6 +222,7 @@
             @if($rooms->hasPages())
             <div class="mt-5 pt-4">
                 <nav aria-label="Navigation des chambres">
+                    {{ $rooms->onEachSide(1)->links() }}
                     {{ $rooms->onEachSide(1)->links() }}
                 </nav>
             </div>
