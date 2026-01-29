@@ -6,10 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Room extends Model
 {
-    use HasFactory;
+    use HasFactory, LogsActivity;
 
     protected $fillable = [
         'type_id',
@@ -31,7 +33,10 @@ class Room extends Model
         'next_available_date',
         'formatted_price',
         'short_description',
-        'facilities_list'
+        'facilities_list',
+        'status_label',
+        'status_color',
+        'status_icon'
     ];
 
     // Constantes pour les statuts - VERSION COHÉRENTE
@@ -40,6 +45,43 @@ class Room extends Model
     const STATUS_CLEANING = 3;       // À nettoyer/En nettoyage
     const STATUS_OCCUPIED = 4;       // Occupée
     const STATUS_RESERVED = 5;       // Réservée (optionnel)
+
+    /**
+     * Configuration du logging d'activité
+     *
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(function(string $eventName) {
+                return match($eventName) {
+                    'created' => 'a créé une chambre',
+                    'updated' => 'a modifié une chambre',
+                    'deleted' => 'a supprimé une chambre',
+                    default => "a {$eventName} une chambre",
+                };
+            });
+    }
+
+    /**
+     * Créer un snapshot pour le journal d'activité
+     * Cela évite "Objet supprimé" quand la chambre est supprimée
+     */
+    public function getLogSnapshot(): array
+    {
+        return [
+            'number' => $this->number,
+            'type' => $this->type->name ?? $this->type_id ?? 'N/A',
+            'floor' => $this->floor ?? 'N/A',
+            'status' => $this->status_label,
+            'price' => $this->price,
+            'capacity' => $this->capacity,
+        ];
+    }
 
     /**
      * Relation avec le type de chambre
@@ -340,6 +382,54 @@ class Room extends Model
     }
 
     /**
+     * Accesseur: Label du statut
+     */
+    public function getStatusLabelAttribute()
+    {
+        $labels = [
+            self::STATUS_AVAILABLE => 'Disponible',
+            self::STATUS_MAINTENANCE => 'En maintenance',
+            self::STATUS_CLEANING => 'À nettoyer',
+            self::STATUS_OCCUPIED => 'Occupée',
+            self::STATUS_RESERVED => 'Réservée',
+        ];
+        
+        return $labels[$this->room_status_id] ?? 'Inconnu';
+    }
+
+    /**
+     * Accesseur: Couleur du statut
+     */
+    public function getStatusColorAttribute()
+    {
+        $colors = [
+            self::STATUS_AVAILABLE => 'success',
+            self::STATUS_MAINTENANCE => 'warning',
+            self::STATUS_CLEANING => 'info',
+            self::STATUS_OCCUPIED => 'danger',
+            self::STATUS_RESERVED => 'primary',
+        ];
+        
+        return $colors[$this->room_status_id] ?? 'secondary';
+    }
+
+    /**
+     * Accesseur: Icône du statut
+     */
+    public function getStatusIconAttribute()
+    {
+        $icons = [
+            self::STATUS_AVAILABLE => 'fa-door-open',
+            self::STATUS_MAINTENANCE => 'fa-tools',
+            self::STATUS_CLEANING => 'fa-broom',
+            self::STATUS_OCCUPIED => 'fa-bed',
+            self::STATUS_RESERVED => 'fa-calendar-check',
+        ];
+        
+        return $icons[$this->room_status_id] ?? 'fa-door-closed';
+    }
+
+    /**
      * Accesseur: Disponible aujourd'hui
      */
     public function getIsAvailableTodayAttribute()
@@ -493,8 +583,10 @@ class Room extends Model
     /**
      * Marquer comme nettoyée
      */
-    public function markAsCleaned()
+    public function markAsCleaned($user = null)
     {
+        $oldStatus = $this->room_status_id;
+        
         // Déterminer le nouveau statut
         $isOccupied = $this->isOccupiedOnDate(now());
         $newStatus = $isOccupied ? self::STATUS_OCCUPIED : self::STATUS_AVAILABLE;
@@ -504,14 +596,29 @@ class Room extends Model
             'last_cleaned_at' => now(),
         ]);
         
+        // Logger l'action
+        if ($user) {
+            activity()
+                ->causedBy($user)
+                ->performedOn($this)
+                ->withProperties([
+                    'old_status' => $oldStatus,
+                    'new_status' => $newStatus,
+                    'cleaned_at' => now(),
+                ])
+                ->log('a nettoyé la chambre');
+        }
+        
         return $this;
     }
 
     /**
      * Marquer comme en maintenance
      */
-    public function markAsMaintenance($reason = null)
+    public function markAsMaintenance($user = null, $reason = null)
     {
+        $oldStatus = $this->room_status_id;
+        
         $data = [
             'room_status_id' => self::STATUS_MAINTENANCE,
             'maintenance_started_at' => now(),
@@ -523,17 +630,77 @@ class Room extends Model
         
         $this->update($data);
         
+        // Logger l'action
+        if ($user) {
+            activity()
+                ->causedBy($user)
+                ->performedOn($this)
+                ->withProperties([
+                    'old_status' => $oldStatus,
+                    'new_status' => self::STATUS_MAINTENANCE,
+                    'reason' => $reason,
+                    'started_at' => now(),
+                ])
+                ->log('a mis la chambre en maintenance');
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Terminer la maintenance
+     */
+    public function endMaintenance($user = null)
+    {
+        $oldStatus = $this->room_status_id;
+        
+        $newStatus = $this->isOccupiedOnDate(now()) ? self::STATUS_OCCUPIED : self::STATUS_AVAILABLE;
+        
+        $this->update([
+            'room_status_id' => $newStatus,
+            'maintenance_ended_at' => now(),
+        ]);
+        
+        // Logger l'action
+        if ($user) {
+            activity()
+                ->causedBy($user)
+                ->performedOn($this)
+                ->withProperties([
+                    'old_status' => $oldStatus,
+                    'new_status' => $newStatus,
+                    'ended_at' => now(),
+                    'duration' => $this->maintenance_started_at ? 
+                        $this->maintenance_started_at->diffInHours(now()) . ' heures' : 'N/A',
+                ])
+                ->log('a terminé la maintenance de la chambre');
+        }
+        
         return $this;
     }
 
     /**
      * Marquer comme à nettoyer
      */
-    public function markAsNeedsCleaning()
+    public function markAsNeedsCleaning($user = null)
     {
+        $oldStatus = $this->room_status_id;
+        
         $this->update([
             'room_status_id' => self::STATUS_CLEANING,
         ]);
+        
+        // Logger l'action
+        if ($user) {
+            activity()
+                ->causedBy($user)
+                ->performedOn($this)
+                ->withProperties([
+                    'old_status' => $oldStatus,
+                    'new_status' => self::STATUS_CLEANING,
+                ])
+                ->log('a marqué la chambre comme à nettoyer');
+        }
         
         return $this;
     }
@@ -636,5 +803,189 @@ class Room extends Model
         }
         
         return round($totalNights / $completedTransactions->count(), 1);
+    }
+
+    /**
+     * Obtenir les activités de la chambre
+     */
+    public function roomActivities()
+    {
+        return $this->hasMany(\Spatie\Activitylog\Models\Activity::class, 'subject_id')
+            ->where('subject_type', self::class);
+    }
+
+    /**
+     * Obtenir l'historique complet de la chambre
+     */
+    public function getHistoryAttribute()
+    {
+        $activities = $this->roomActivities()->orderBy('created_at', 'desc')->get();
+        $transactions = $this->transactions()->orderBy('check_in', 'desc')->get();
+        
+        return [
+            'activities' => $activities,
+            'transactions' => $transactions,
+            'stats' => [
+                'total_transactions' => $transactions->count(),
+                'completed_transactions' => $transactions->where('status', 'completed')->count(),
+                'revenue_total' => $transactions->where('status', 'completed')->sum('total_price'),
+                'average_stay' => $this->getAverageStayDuration(),
+                'occupancy_rate' => $this->getOccupancyRate(now()->subMonth(), now()),
+            ]
+        ];
+    }
+
+    /**
+     * Enregistrer une réservation
+     */
+    public function logBooking($transaction, $user)
+    {
+        activity()
+            ->causedBy($user)
+            ->performedOn($this)
+            ->withProperties([
+                'transaction_id' => $transaction->id,
+                'customer' => $transaction->customer->name ?? 'N/A',
+                'check_in' => $transaction->check_in->format('d/m/Y'),
+                'check_out' => $transaction->check_out->format('d/m/Y'),
+                'nights' => $transaction->getNightsAttribute(),
+                'total_price' => $transaction->getTotalPrice(),
+            ])
+            ->log('a été réservée');
+    }
+
+    /**
+     * Enregistrer le check-in
+     */
+    public function logCheckIn($transaction, $user)
+    {
+        activity()
+            ->causedBy($user)
+            ->performedOn($this)
+            ->withProperties([
+                'transaction_id' => $transaction->id,
+                'customer' => $transaction->customer->name ?? 'N/A',
+                'check_in_time' => $transaction->actual_check_in->format('d/m/Y H:i'),
+                'person_count' => $transaction->person_count,
+            ])
+            ->log('a reçu un check-in');
+    }
+
+    /**
+     * Enregistrer le check-out
+     */
+    public function logCheckOut($transaction, $user)
+    {
+        activity()
+            ->causedBy($user)
+            ->performedOn($this)
+            ->withProperties([
+                'transaction_id' => $transaction->id,
+                'customer' => $transaction->customer->name ?? 'N/A',
+                'check_out_time' => $transaction->actual_check_out->format('d/m/Y H:i'),
+                'total_paid' => $transaction->getTotalPayment(),
+                'revenue' => $transaction->getTotalPrice(),
+            ])
+            ->log('a reçu un check-out');
+    }
+
+    /**
+     * Boot du modèle
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::created(function ($room) {
+            // Logger la création
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($room)
+                ->withProperties([
+                    'number' => $room->number,
+                    'type' => $room->type->name ?? 'N/A',
+                    'price' => $room->price,
+                    'capacity' => $room->capacity,
+                ])
+                ->log('a créé une nouvelle chambre');
+        });
+
+        static::updating(function ($room) {
+            // Vérifier les changements importants
+            $changes = [];
+            
+            if ($room->isDirty('room_status_id')) {
+                $changes['status'] = [
+                    'from' => $room->getOriginal('room_status_id'),
+                    'to' => $room->room_status_id,
+                ];
+            }
+            
+            if ($room->isDirty('price')) {
+                $changes['price'] = [
+                    'from' => $room->getOriginal('price'),
+                    'to' => $room->price,
+                ];
+            }
+            
+            if ($room->isDirty('capacity')) {
+                $changes['capacity'] = [
+                    'from' => $room->getOriginal('capacity'),
+                    'to' => $room->capacity,
+                ];
+            }
+            
+            // Stocker les changements pour les logs
+            $room->log_changes = $changes;
+        });
+
+        static::updated(function ($room) {
+            // Logger les changements s'il y en a
+            if (isset($room->log_changes) && !empty($room->log_changes)) {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($room)
+                    ->withProperties($room->log_changes)
+                    ->log('a modifié la chambre');
+                
+                // Nettoyer la propriété temporaire
+                unset($room->log_changes);
+            }
+        });
+    }
+
+    /**
+     * Obtenir les options de statut
+     */
+    public static function getStatusOptions()
+    {
+        return [
+            self::STATUS_AVAILABLE => 'Disponible',
+            self::STATUS_MAINTENANCE => 'En maintenance',
+            self::STATUS_CLEANING => 'À nettoyer',
+            self::STATUS_OCCUPIED => 'Occupée',
+            self::STATUS_RESERVED => 'Réservée',
+        ];
+    }
+
+    /**
+     * Obtenir les statistiques résumées
+     */
+    public function getSummaryAttribute()
+    {
+        return [
+            'id' => $this->id,
+            'number' => $this->number,
+            'type' => $this->type->name ?? 'N/A',
+            'status' => $this->status_label,
+            'status_color' => $this->status_color,
+            'price' => $this->formatted_price,
+            'capacity' => $this->capacity,
+            'available_today' => $this->is_available_today,
+            'next_available' => $this->next_available_date,
+            'occupancy_rate' => $this->getOccupancyRate(now()->subMonth(), now()) . '%',
+            'average_stay' => $this->getAverageStayDuration() . ' nuits',
+            'facilities' => $this->facilities->count(),
+        ];
     }
 }
