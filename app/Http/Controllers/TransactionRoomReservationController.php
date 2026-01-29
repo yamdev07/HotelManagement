@@ -89,9 +89,17 @@ class TransactionRoomReservationController extends Controller
                     ->with('error', 'Vous devez être connecté pour créer un client');
             }
             
-            // Créer un nouveau client avec l'utilisateur connecté
-            $customerData = $validated;
-            $customerData['user_id'] = $user->id; // Utilisateur connecté
+            // Créer un nouveau client - seulement les champs nécessaires
+            $customerData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'gender' => $validated['gender'],
+                'address' => $validated['address'] ?? null,
+                'job' => $validated['job'] ?? null,
+                'birthdate' => $validated['birthdate'] ?? null,
+                'user_id' => $user->id,
+            ];
             
             if ($request->hasFile('avatar')) {
                 $avatarPath = $request->file('avatar')->store('avatars', 'public');
@@ -353,7 +361,7 @@ class TransactionRoomReservationController extends Controller
                     'check_out' => $checkOut,
                     'person_count' => $personCount,
                     'total_price' => $totalPrice,
-                    'total_payment' => $downPayment, // ✅ Votre colonne s'appelle total_payment
+                    'total_payment' => $downPayment,
                     'status' => 'reservation',
                     'notes' => sprintf(
                         'Réservation créée par %s | %d nuit(s) | %s FCFA/nuit | Acompte: %s FCFA | Méthode: %s',
@@ -403,15 +411,13 @@ class TransactionRoomReservationController extends Controller
                     \Log::info("💰 Création du paiement: " . number_format($downPayment, 0, ',', ' ') . " FCFA");
                     
                     try {
-                        // Votre table payments a les colonnes : id, user_id, transaction_id, amount, payment_method, notes, reference, created_at, updated_at, status, cancelled_at, cancelled_by, cancel_reason, deleted_at
-                        
                         $paymentData = [
                             'user_id' => $userId,
                             'transaction_id' => $transaction->id,
-                            'amount' => $downPayment, // ✅ Votre colonne s'appelle 'amount' pas 'price'
+                            'amount' => $downPayment,
                             'payment_method' => $paymentMethod,
                             'reference' => 'PAY-' . $transaction->id . '-' . time(),
-                            'status' => 'completed', // Défaut est 'pending', mais pour acompte on met 'completed'
+                            'status' => 'completed',
                             'notes' => sprintf(
                                 'Acompte réservation | Agent: %s | Client: %s | Chambre: %s | Nuits: %d',
                                 $user->name ?? 'Système',
@@ -430,7 +436,6 @@ class TransactionRoomReservationController extends Controller
                                     $payment = $paymentRepository->create($paymentData);
                                     \Log::info('✅ Paiement créé via create() - ID: ' . ($payment->id ?? 'N/A'));
                                 } elseif (method_exists($paymentRepository, 'store')) {
-                                    // Créer une requête simulée
                                     $mockRequest = new \Illuminate\Http\Request();
                                     $mockRequest->merge([
                                         'amount' => $downPayment,
@@ -463,7 +468,6 @@ class TransactionRoomReservationController extends Controller
                 
                 // ============ MISE À JOUR STATUT CHAMBRE ============
                 try {
-                    // Vérifier si la colonne room_status_id existe dans la table rooms
                     $roomColumns = DB::select("SHOW COLUMNS FROM rooms LIKE 'room_status_id'");
                     if (!empty($roomColumns)) {
                         $room->update(['room_status_id' => 2]); // 2 = Réservée
@@ -520,14 +524,12 @@ class TransactionRoomReservationController extends Controller
                 \Log::error('❌ Erreur pendant la transaction BDD: ' . $e->getMessage());
                 \Log::error('❌ Stack trace: ' . $e->getTraceAsString());
                 
-                // Log supplémentaire pour debug SQL
                 if ($e instanceof \Illuminate\Database\QueryException) {
                     \Log::error('❌ SQL Error Code: ' . $e->getCode());
                     \Log::error('❌ SQL Error Message: ' . $e->getMessage());
                     \Log::error('❌ SQL Query: ' . $e->getSql());
                     \Log::error('❌ SQL Bindings: ' . json_encode($e->getBindings()));
                     
-                    // Message d'erreur spécifique
                     if (strpos($e->getMessage(), 'Column not found') !== false) {
                         preg_match("/Column not found.*'([^']+)'/", $e->getMessage(), $matches);
                         $column = $matches[1] ?? 'inconnue';
@@ -546,7 +548,6 @@ class TransactionRoomReservationController extends Controller
             \Log::error('❌ SQL Query: ' . $e->getSql());
             \Log::error('❌ SQL Bindings: ' . json_encode($e->getBindings()));
             
-            // Détection d'erreurs spécifiques
             $errorMessage = 'Erreur de base de données lors de la réservation.';
             
             if (strpos($e->getMessage(), 'Column not found') !== false) {
@@ -571,6 +572,7 @@ class TransactionRoomReservationController extends Controller
                 ->withInput();
         }
     }
+
     /**
      * Construire le message de succès avec l'utilisateur
      */
@@ -622,14 +624,6 @@ class TransactionRoomReservationController extends Controller
         $message .= '</div>';
         
         return $message;
-    }
-
-    /**
-     * Construire le message de succès (ancienne version)
-     */
-    private function buildSuccessMessage($transaction, $customer, $room, $checkIn, $checkOut, $days, $totalPrice, $downPayment)
-    {
-        return $this->buildSuccessMessageWithUser($transaction, $customer, $room, $checkIn, $checkOut, $days, $totalPrice, $downPayment, auth()->user());
     }
 
     /**

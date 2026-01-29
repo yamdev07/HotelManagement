@@ -28,7 +28,7 @@ class Customer extends Model
         'company',
         'notes',
         'preferences',
-        'is_active',
+        // 'is_active', // ⬅️ SUPPRIMÉ
         'last_visit',
         'loyalty_points',
         'special_requests',
@@ -38,7 +38,6 @@ class Customer extends Model
     protected $casts = [
         'birthdate' => 'date',
         'last_visit' => 'datetime',
-        'is_active' => 'boolean',
         'loyalty_points' => 'integer',
         'preferences' => 'array',
         'special_requests' => 'array',
@@ -313,11 +312,13 @@ class Customer extends Model
     }
 
     /**
-     * Scope: Clients actifs
+     * Scope: Clients actifs (basé sur les réservations récentes)
      */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->whereHas('transactions', function($q) {
+            $q->where('check_in', '>=', now()->subMonths(6));
+        });
     }
 
     /**
@@ -325,7 +326,9 @@ class Customer extends Model
      */
     public function scopeInactive($query)
     {
-        return $query->where('is_active', false);
+        return $query->whereDoesntHave('transactions', function($q) {
+            $q->where('check_in', '>=', now()->subMonths(6));
+        });
     }
 
     /**
@@ -373,6 +376,8 @@ class Customer extends Model
             'vip' => $query->vip(),
             'regular' => $query->regular(),
             'new' => $query->whereDoesntHave('transactions'),
+            'active' => $query->active(),
+            'inactive' => $query->inactive(),
             default => $query
         };
     }
@@ -391,6 +396,16 @@ class Customer extends Model
     public function isRegular()
     {
         return $this->customer_type === 'Régulier';
+    }
+
+    /**
+     * Vérifier si le client est actif (basé sur les réservations)
+     */
+    public function isActive()
+    {
+        return $this->transactions()
+            ->where('check_in', '>=', now()->subMonths(6))
+            ->exists();
     }
 
     /**
@@ -554,12 +569,6 @@ class Customer extends Model
     {
         parent::boot();
 
-        static::creating(function ($customer) {
-            if (!$customer->is_active) {
-                $customer->is_active = true;
-            }
-        });
-
         static::created(function ($customer) {
             // Logger la création
             activity()
@@ -584,18 +593,6 @@ class Customer extends Model
                         'new_email' => $customer->email,
                     ])
                     ->log('a changé l\'email du client');
-            }
-            
-            if ($customer->isDirty('is_active')) {
-                $action = $customer->is_active ? 'activé' : 'désactivé';
-                activity()
-                    ->causedBy(auth()->user())
-                    ->performedOn($customer)
-                    ->withProperties([
-                        'old_status' => $customer->getOriginal('is_active'),
-                        'new_status' => $customer->is_active,
-                    ])
-                    ->log("a {$action} le client");
             }
         });
     }
@@ -653,7 +650,20 @@ class Customer extends Model
             'active_reservations' => $this->active_reservations_count,
             'last_visit' => $this->formatted_last_visit,
             'occupancy_rate' => $this->getOccupancyRate() . '%',
-            'is_active' => $this->is_active ? 'Actif' : 'Inactif',
+            'status' => $this->isActive() ? 'Actif' : 'Inactif',
         ];
+    }
+
+    /**
+     * Méthode pour filtrer automatiquement is_active si présent
+     */
+    public function fill(array $attributes)
+    {
+        // Filtrer is_active s'il est présent
+        if (array_key_exists('is_active', $attributes)) {
+            unset($attributes['is_active']);
+        }
+        
+        return parent::fill($attributes);
     }
 }
