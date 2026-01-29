@@ -21,6 +21,15 @@ class TypeController extends Controller
         return view('type.create');
     }
 
+    public function show(Type $type)
+    {
+        // Version simple : rediriger vers l'édition
+        return redirect()->route('type.edit', $type);
+        
+        // Ou version complète si vous voulez une page de détail
+        // return view('type.show', compact('type'));
+    }
+
     public function store(StoreTypeRequest $request)
     {
         try {
