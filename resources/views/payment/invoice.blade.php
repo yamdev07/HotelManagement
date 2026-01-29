@@ -246,15 +246,15 @@
         <div class="p-3 border-bottom">
             <div class="row">
                 <div class="col-md-6">
-                    <h6 class="mb-2" style="font-weight: bold; color: #28a745;">SIP HOTEL</h6>
-                    <p class="mb-1" style="font-size: 14px;">123 Avenue de l'Hôtel</p>
-                    <p class="mb-1" style="font-size: 14px;">Abidjan, Côte d'Ivoire</p>
-                    <p class="mb-0" style="font-size: 14px;">Tél : +225 27 22 44 55 66</p>
+                    <h6 class="mb-2" style="font-weight: bold; color: #28a745;">CACTUS HOTEL</h6>
+                    <p class="mb-1" style="font-size: 14px;">Haie Vive, Cotonou</p>
+                    <p class="mb-1" style="font-size: 14px;">Bénin</p>
+                    <p class="mb-0" style="font-size: 14px;">Tél : +229 XX XX XX XX</p>
                 </div>
                 <div class="col-md-6 text-right">
-                    <p class="mb-1" style="font-size: 14px; color: #28a745;"><strong>RCCM :</strong> CI-ABJ-2024-B-12345</p>
-                    <p class="mb-1" style="font-size: 14px; color: #28a745;"><strong>NIF :</strong> 12345678X</p>
-                    <p class="mb-0" style="font-size: 14px; color: #28a745;"><strong>Email :</strong> contact@siphotel.ci</p>
+                    <p class="mb-1" style="font-size: 14px; color: #28a745;"><strong>RCCM :</strong> BJ-COT-XXXX-XXXXX</p>
+                    <p class="mb-1" style="font-size: 14px; color: #28a745;"><strong>NIF :</strong> XXXXXXXXX</p>
+                    <p class="mb-0" style="font-size: 14px; color: #28a745;"><strong>Email :</strong> contact@lecactushotel.bj</p>
                 </div>
             </div>
         </div>
@@ -395,7 +395,7 @@
                             <li>Espèces (FCFA)</li>
                             <li>Carte bancaire</li>
                             <li>Virement bancaire</li>
-                            <li>Mobile money (Orange Money, Moov Money)</li>
+                            <li>Mobile money (Moov Money, MTN Mobile Money)</li>
                         </ul>
                     </div>
                 </div>
@@ -426,7 +426,7 @@
             <div class="row mt-3">
                 <div class="col-12 text-center">
                     <p class="small mb-0" style="color: #28a745;">
-                        SIP Hotel • 123 Avenue de l'Hôtel • Abidjan, Côte d'Ivoire • Tél : +225 27 22 44 55 66 • contact@siphotel.ci
+                        CACTUS HOTEL • Haie Vive • Cotonou, Bénin • Tél : +229 XX XX XX XX • contact@lecactushotel.bj
                     </p>
                 </div>
             </div>

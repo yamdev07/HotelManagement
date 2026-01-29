@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Payment extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'user_id',
@@ -22,12 +24,42 @@ class Payment extends Model
         'reference',
         'cancelled_at',
         'cancelled_by',
-        'cancel_reason'
+        'cancel_reason',
+        'payment_date',
+        'verified_by',
+        'verified_at',
+        'payment_gateway_response',
+        'currency',
+        'exchange_rate',
+        'fees',
+        'tax',
+        'notes'
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'cancelled_at' => 'datetime',
+        'payment_date' => 'datetime',
+        'verified_at' => 'datetime',
+        'fees' => 'decimal:2',
+        'tax' => 'decimal:2',
+        'exchange_rate' => 'decimal:4',
+        'payment_gateway_response' => 'array'
+    ];
+
+    protected $appends = [
+        'status_text',
+        'status_class',
+        'payment_method_label',
+        'payment_method_icon',
+        'payment_method_color',
+        'formatted_amount',
+        'formatted_date',
+        'formatted_payment_date',
+        'total_amount',
+        'formatted_total_amount',
+        'can_be_cancelled',
+        'can_be_refunded'
     ];
 
     // Constantes pour les statuts
@@ -37,6 +69,8 @@ class Payment extends Model
     const STATUS_EXPIRED = 'expired';
     const STATUS_FAILED = 'failed';
     const STATUS_REFUNDED = 'refunded';
+    const STATUS_PROCESSING = 'processing';
+    const STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
 
     // Constantes pour les méthodes de paiement
     const METHOD_CASH = 'cash';
@@ -46,6 +80,28 @@ class Payment extends Model
     const METHOD_FEDAPAY = 'fedapay';
     const METHOD_CHECK = 'check';
     const METHOD_REFUND = 'refund';
+
+    /**
+     * Configuration du logging d'activité
+     *
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(function(string $eventName) {
+                return match($eventName) {
+                    'created' => 'a créé un paiement',
+                    'updated' => 'a modifié un paiement',
+                    'deleted' => 'a supprimé un paiement',
+                    'restored' => 'a restauré un paiement',
+                    default => "a {$eventName} un paiement",
+                };
+            });
+    }
 
     /**
      * Relation avec la transaction
@@ -77,6 +133,14 @@ class Payment extends Model
     public function cancelledByUser()
     {
         return $this->belongsTo(User::class, 'cancelled_by');
+    }
+
+    /**
+     * Relation avec l'utilisateur qui a vérifié le paiement
+     */
+    public function verifiedByUser()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 
     /**
@@ -141,6 +205,31 @@ class Payment extends Model
                 'requires_reference' => true,
                 'fields' => []
             ],
+            self::METHOD_REFUND => [
+                'label' => 'Remboursement',
+                'icon' => 'fa-undo-alt',
+                'color' => 'danger',
+                'description' => 'Remboursement au client',
+                'requires_reference' => true,
+                'fields' => []
+            ],
+        ];
+    }
+
+    /**
+     * Obtenir les statuts disponibles avec leurs labels
+     */
+    public static function getStatusOptions(): array
+    {
+        return [
+            self::STATUS_PENDING => 'En attente',
+            self::STATUS_PROCESSING => 'En traitement',
+            self::STATUS_COMPLETED => 'Complété',
+            self::STATUS_CANCELLED => 'Annulé',
+            self::STATUS_EXPIRED => 'Expiré',
+            self::STATUS_FAILED => 'Échoué',
+            self::STATUS_REFUNDED => 'Remboursé',
+            self::STATUS_PARTIALLY_REFUNDED => 'Partiellement remboursé',
         ];
     }
 
@@ -149,7 +238,39 @@ class Payment extends Model
      */
     public function scopeActive($query)
     {
-        return $query->whereIn('status', [self::STATUS_PENDING, self::STATUS_COMPLETED]);
+        return $query->whereIn('status', [self::STATUS_PENDING, self::STATUS_COMPLETED, self::STATUS_PROCESSING]);
+    }
+
+    /**
+     * Scope pour les paiements complétés
+     */
+    public function scopeCompleted($query)
+    {
+        return $query->where('status', self::STATUS_COMPLETED);
+    }
+
+    /**
+     * Scope pour les paiements en attente
+     */
+    public function scopePending($query)
+    {
+        return $query->where('status', self::STATUS_PENDING);
+    }
+
+    /**
+     * Scope pour les paiements annulés
+     */
+    public function scopeCancelled($query)
+    {
+        return $query->where('status', self::STATUS_CANCELLED);
+    }
+
+    /**
+     * Scope pour les paiements remboursés
+     */
+    public function scopeRefunded($query)
+    {
+        return $query->where('status', self::STATUS_REFUNDED);
     }
 
     /**
@@ -161,19 +282,36 @@ class Payment extends Model
     }
 
     /**
+     * Vérifier si le paiement est complété
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === self::STATUS_COMPLETED;
+    }
+
+    /**
+     * Vérifier si le paiement est en attente
+     */
+    public function isPending(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    /**
+     * Vérifier si le paiement est remboursé
+     */
+    public function isRefunded(): bool
+    {
+        return in_array($this->status, [self::STATUS_REFUNDED, self::STATUS_PARTIALLY_REFUNDED]);
+    }
+
+    /**
      * Obtenir le label du statut
      */
     public function getStatusTextAttribute(): string
     {
-        return match($this->status) {
-            self::STATUS_PENDING => 'En attente',
-            self::STATUS_COMPLETED => 'Complété',
-            self::STATUS_CANCELLED => 'Annulé',
-            self::STATUS_EXPIRED => 'Expiré',
-            self::STATUS_FAILED => 'Échoué',
-            self::STATUS_REFUNDED => 'Remboursé',
-            default => $this->status
-        };
+        $statuses = self::getStatusOptions();
+        return $statuses[$this->status] ?? ucfirst($this->status);
     }
 
     /**
@@ -183,12 +321,30 @@ class Payment extends Model
     {
         return match($this->status) {
             self::STATUS_PENDING => 'warning',
+            self::STATUS_PROCESSING => 'info',
             self::STATUS_COMPLETED => 'success',
             self::STATUS_CANCELLED => 'danger',
             self::STATUS_EXPIRED => 'secondary',
             self::STATUS_FAILED => 'dark',
-            self::STATUS_REFUNDED => 'info',
+            self::STATUS_REFUNDED, self::STATUS_PARTIALLY_REFUNDED => 'info',
             default => 'info'
+        };
+    }
+
+    /**
+     * Obtenir l'icône du statut
+     */
+    public function getStatusIconAttribute(): string
+    {
+        return match($this->status) {
+            self::STATUS_PENDING => 'fa-clock',
+            self::STATUS_PROCESSING => 'fa-sync-alt',
+            self::STATUS_COMPLETED => 'fa-check-circle',
+            self::STATUS_CANCELLED => 'fa-times-circle',
+            self::STATUS_EXPIRED => 'fa-hourglass-end',
+            self::STATUS_FAILED => 'fa-exclamation-circle',
+            self::STATUS_REFUNDED, self::STATUS_PARTIALLY_REFUNDED => 'fa-undo-alt',
+            default => 'fa-circle'
         };
     }
 
@@ -228,6 +384,22 @@ class Payment extends Model
     }
 
     /**
+     * Obtenir le montant total (montant + frais + taxes)
+     */
+    public function getTotalAmountAttribute(): float
+    {
+        return $this->amount + ($this->fees ?? 0) + ($this->tax ?? 0);
+    }
+
+    /**
+     * Obtenir le montant total formaté
+     */
+    public function getFormattedTotalAmountAttribute(): string
+    {
+        return number_format($this->total_amount, 0, ',', ' ') . ' CFA';
+    }
+
+    /**
      * Obtenir la date formatée
      */
     public function getFormattedDateAttribute(): string
@@ -236,9 +408,20 @@ class Payment extends Model
     }
 
     /**
+     * Obtenir la date de paiement formatée
+     */
+    public function getFormattedPaymentDateAttribute(): string
+    {
+        if (!$this->payment_date) {
+            return 'Non défini';
+        }
+        return $this->payment_date->format('d/m/Y');
+    }
+
+    /**
      * Vérifier si le paiement peut être annulé
      */
-    public function canBeCancelled(): bool
+    public function getCanBeCancelledAttribute(): bool
     {
         return $this->status === self::STATUS_COMPLETED || $this->status === self::STATUS_PENDING;
     }
@@ -246,22 +429,153 @@ class Payment extends Model
     /**
      * Vérifier si le paiement peut être remboursé
      */
-    public function canBeRefunded(): bool
+    public function getCanBeRefundedAttribute(): bool
     {
-        return $this->status === self::STATUS_COMPLETED;
+        return $this->status === self::STATUS_COMPLETED && $this->payment_method !== self::METHOD_REFUND;
     }
 
     /**
-     * Marquer comme remboursé
+     * Annuler le paiement
      */
-    public function markAsRefunded($userId, $reason = null): bool
+    public function cancel($userId, $reason = null): bool
     {
+        if (!$this->can_be_cancelled) {
+            return false;
+        }
+
+        $oldStatus = $this->status;
+        
         $this->update([
-            'status' => self::STATUS_REFUNDED,
+            'status' => self::STATUS_CANCELLED,
+            'cancelled_at' => now(),
+            'cancelled_by' => $userId,
+            'cancel_reason' => $reason
+        ]);
+
+        // Logger l'annulation
+        activity()
+            ->causedBy(User::find($userId))
+            ->performedOn($this)
+            ->withProperties([
+                'old_status' => $oldStatus,
+                'new_status' => self::STATUS_CANCELLED,
+                'amount' => $this->amount,
+                'reason' => $reason,
+                'transaction_id' => $this->transaction_id,
+            ])
+            ->log('a annulé le paiement');
+
+        // Mettre à jour le statut de la transaction
+        if ($this->transaction) {
+            $this->transaction->updatePaymentStatus();
+        }
+
+        return true;
+    }
+
+    /**
+     * Rembourser le paiement
+     */
+    public function refund($userId, $amount = null, $reason = null): bool
+    {
+        if (!$this->can_be_refunded) {
+            return false;
+        }
+
+        $refundAmount = $amount ?? $this->amount;
+        $oldStatus = $this->status;
+        
+        if ($refundAmount >= $this->amount) {
+            // Remboursement complet
+            $newStatus = self::STATUS_REFUNDED;
+        } else {
+            // Remboursement partiel
+            $newStatus = self::STATUS_PARTIALLY_REFUNDED;
+        }
+
+        $this->update([
+            'status' => $newStatus,
             'cancelled_at' => now(),
             'cancelled_by' => $userId,
             'cancel_reason' => $reason ?? 'Remboursement'
         ]);
+
+        // Créer un paiement de remboursement
+        if ($refundAmount > 0) {
+            $refundPayment = self::create([
+                'transaction_id' => $this->transaction_id,
+                'user_id' => $this->user_id,
+                'created_by' => $userId,
+                'cashier_session_id' => $this->cashier_session_id,
+                'amount' => $refundAmount,
+                'status' => self::STATUS_COMPLETED,
+                'payment_method' => self::METHOD_REFUND,
+                'description' => "Remboursement du paiement #{$this->reference}",
+                'reference' => 'REFUND-' . $this->reference,
+                'notes' => $reason,
+            ]);
+
+            // Logger le remboursement
+            activity()
+                ->causedBy(User::find($userId))
+                ->performedOn($this)
+                ->withProperties([
+                    'old_status' => $oldStatus,
+                    'new_status' => $newStatus,
+                    'refund_amount' => $refundAmount,
+                    'original_amount' => $this->amount,
+                    'refund_payment_id' => $refundPayment->id,
+                    'reason' => $reason,
+                ])
+                ->log('a remboursé le paiement');
+        }
+
+        // Mettre à jour le statut de la transaction
+        if ($this->transaction) {
+            $this->transaction->updatePaymentStatus();
+        }
+
+        return true;
+    }
+
+    /**
+     * Marquer comme complété
+     */
+    public function markAsCompleted($userId = null): bool
+    {
+        if ($this->status !== self::STATUS_PENDING) {
+            return false;
+        }
+
+        $oldStatus = $this->status;
+        
+        $this->update([
+            'status' => self::STATUS_COMPLETED,
+            'verified_by' => $userId ?? auth()->id(),
+            'verified_at' => now(),
+            'payment_date' => now(),
+        ]);
+
+        // Logger la validation
+        $user = $userId ? User::find($userId) : auth()->user();
+        if ($user) {
+            activity()
+                ->causedBy($user)
+                ->performedOn($this)
+                ->withProperties([
+                    'old_status' => $oldStatus,
+                    'new_status' => self::STATUS_COMPLETED,
+                    'amount' => $this->amount,
+                    'transaction_id' => $this->transaction_id,
+                    'verified_by' => $user->name,
+                ])
+                ->log('a validé le paiement');
+        }
+
+        // Mettre à jour le statut de la transaction
+        if ($this->transaction) {
+            $this->transaction->updatePaymentStatus();
+        }
 
         return true;
     }
@@ -314,6 +628,34 @@ class Payment extends Model
     }
 
     /**
+     * Scope pour les paiements d'aujourd'hui
+     */
+    public function scopeToday($query)
+    {
+        return $query->whereDate('created_at', today());
+    }
+
+    /**
+     * Scope pour les paiements de la semaine
+     */
+    public function scopeThisWeek($query)
+    {
+        return $query->whereBetween('created_at', [
+            now()->startOfWeek(),
+            now()->endOfWeek()
+        ]);
+    }
+
+    /**
+     * Scope pour les paiements du mois
+     */
+    public function scopeThisMonth($query)
+    {
+        return $query->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year);
+    }
+
+    /**
      * Boot du modèle
      */
     protected static function boot()
@@ -323,7 +665,7 @@ class Payment extends Model
         static::creating(function ($payment) {
             // Générer une référence si non fournie
             if (!$payment->reference) {
-                $payment->reference = 'PAY-' . strtoupper($payment->payment_method) . '-' . time();
+                $payment->reference = 'PAY-' . strtoupper($payment->payment_method) . '-' . time() . '-' . rand(1000, 9999);
             }
             
             // Par défaut, le statut est "pending" pour la plupart des paiements
@@ -335,13 +677,85 @@ class Payment extends Model
             if (!$payment->created_by && auth()->check()) {
                 $payment->created_by = auth()->id();
             }
+
+            // Si user_id n'est pas défini, utiliser l'utilisateur courant
+            if (!$payment->user_id && auth()->check()) {
+                $payment->user_id = auth()->id();
+            }
+        });
+
+        static::created(function ($payment) {
+            // Logger la création
+            activity()
+                ->causedBy(User::find($payment->created_by))
+                ->performedOn($payment)
+                ->withProperties([
+                    'amount' => $payment->amount,
+                    'method' => $payment->payment_method,
+                    'transaction_id' => $payment->transaction_id,
+                    'reference' => $payment->reference,
+                ])
+                ->log('a créé un nouveau paiement');
+
+            // Si le paiement est immédiatement complété, logger aussi
+            if ($payment->status === self::STATUS_COMPLETED) {
+                activity()
+                    ->causedBy(User::find($payment->created_by))
+                    ->performedOn($payment)
+                    ->withProperties([
+                        'amount' => $payment->amount,
+                        'verified_at' => $payment->verified_at,
+                    ])
+                    ->log('a créé un paiement complété');
+            }
         });
 
         static::updated(function ($payment) {
+            // Logger les changements de statut
+            if ($payment->isDirty('status')) {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($payment)
+                    ->withProperties([
+                        'old_status' => $payment->getOriginal('status'),
+                        'new_status' => $payment->status,
+                        'amount' => $payment->amount,
+                    ])
+                    ->log('a changé le statut du paiement');
+            }
+
             // Recalculer le total de la transaction si le statut change
             if ($payment->isDirty('status') && $payment->transaction) {
                 $payment->transaction->updatePaymentStatus();
             }
+        });
+
+        static::deleted(function ($payment) {
+            // Logger la suppression
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($payment)
+                ->withProperties([
+                    'amount' => $payment->amount,
+                    'method' => $payment->payment_method,
+                    'transaction_id' => $payment->transaction_id,
+                    'reference' => $payment->reference,
+                ])
+                ->log('a supprimé le paiement');
+        });
+
+        static::restored(function ($payment) {
+            // Logger la restauration
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($payment)
+                ->withProperties([
+                    'amount' => $payment->amount,
+                    'method' => $payment->payment_method,
+                    'transaction_id' => $payment->transaction_id,
+                    'reference' => $payment->reference,
+                ])
+                ->log('a restauré le paiement');
         });
     }
 
@@ -370,8 +784,85 @@ class Payment extends Model
     public static function isTransactionFullyPaid($transactionId, $transactionTotal)
     {
         $balanceDue = self::getBalanceDue($transactionId, $transactionTotal);
-        return $balanceDue <= 0;
+        return $balanceDue <= 100; // Tolérance de 100 CFA
     }
 
-    
+    /**
+     * Obtenir les statistiques des paiements
+     */
+    public function getStatsAttribute()
+    {
+        return [
+            'total_amount' => $this->amount,
+            'total_with_fees' => $this->total_amount,
+            'fees' => $this->fees ?? 0,
+            'tax' => $this->tax ?? 0,
+            'net_amount' => $this->amount - ($this->fees ?? 0),
+            'is_verified' => !is_null($this->verified_at),
+            'verification_time' => $this->verified_at ? $this->created_at->diffInMinutes($this->verified_at) . ' minutes' : null,
+            'age' => $this->created_at->diffForHumans(),
+        ];
+    }
+
+    /**
+     * Obtenir les activités du paiement
+     */
+    public function paymentActivities()
+    {
+        return $this->hasMany(\Spatie\Activitylog\Models\Activity::class, 'subject_id')
+            ->where('subject_type', self::class);
+    }
+
+    /**
+     * Obtenir l'historique complet du paiement
+     */
+    public function getHistoryAttribute()
+    {
+        $activities = $this->paymentActivities()->orderBy('created_at', 'desc')->get();
+        
+        return [
+            'activities' => $activities,
+            'transaction' => $this->transaction,
+            'created_by_user' => $this->createdBy,
+            'verified_by_user' => $this->verifiedByUser,
+            'cancelled_by_user' => $this->cancelledByUser,
+            'cashier_session' => $this->cashierSession,
+            'stats' => $this->stats,
+        ];
+    }
+
+    /**
+     * Sauvegarde sans déclencher d'événements
+     */
+    public function saveQuietly(array $options = [])
+    {
+        return static::withoutEvents(function () use ($options) {
+            return $this->save($options);
+        });
+    }
+
+    /**
+     * Obtenir le résumé du paiement
+     */
+    public function getSummaryAttribute()
+    {
+        return [
+            'id' => $this->id,
+            'reference' => $this->reference,
+            'amount' => $this->formatted_amount,
+            'status' => $this->status_text,
+            'status_color' => $this->status_class,
+            'payment_method' => $this->payment_method_label,
+            'method_color' => $this->payment_method_color,
+            'transaction' => $this->transaction ? '#' . $this->transaction->id : 'N/A',
+            'customer' => $this->transaction && $this->transaction->customer ? 
+                $this->transaction->customer->name : 'N/A',
+            'date' => $this->formatted_date,
+            'payment_date' => $this->formatted_payment_date,
+            'created_by' => $this->createdBy ? $this->createdBy->name : 'Système',
+            'verified_by' => $this->verifiedByUser ? $this->verifiedByUser->name : 'Non vérifié',
+            'can_cancel' => $this->can_be_cancelled,
+            'can_refund' => $this->can_be_refunded,
+        ];
+    }
 }

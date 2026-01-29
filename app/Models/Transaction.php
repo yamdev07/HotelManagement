@@ -11,10 +11,12 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Payment;
 use Illuminate\Support\Facades\Log;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Transaction extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, LogsActivity;
 
     protected $fillable = [
         'user_id',
@@ -61,6 +63,45 @@ class Transaction extends Model
     const ID_TYPE_DRIVER_LICENSE = 'permis';
     const ID_TYPE_OTHER = 'autre';
 
+    /**
+     * Configuration du logging d'activité
+     *
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->setDescriptionForEvent(function(string $eventName) {
+                return match($eventName) {
+                    'created' => 'a créé une réservation',
+                    'updated' => 'a modifié une réservation',
+                    'deleted' => 'a supprimé une réservation',
+                    'restored' => 'a restauré une réservation',
+                    default => "a {$eventName} une réservation",
+                };
+            });
+    }
+
+    /**
+     * Créer un snapshot pour le journal d'activité
+     * Cela évite "Objet supprimé" quand la transaction est supprimée
+     */
+    public function getLogSnapshot(): array
+    {
+        return [
+            'id' => $this->id,
+            'customer' => $this->customer->name ?? 'Client #' . ($this->customer_id ?? 'N/A'),
+            'room' => $this->room->number ?? 'Chambre #' . ($this->room_id ?? 'N/A'),
+            'check_in' => $this->check_in?->format('d/m/Y'),
+            'check_out' => $this->check_out?->format('d/m/Y'),
+            'status' => $this->status_label,
+            'total_price' => $this->total_price ?? 0,
+            'total_payment' => $this->getTotalPayment(),
+        ];
+    }
     /**
      * Relation avec l'utilisateur (créateur)
      */
@@ -147,6 +188,36 @@ class Transaction extends Model
     public function scopeNoShow($query)
     {
         return $query->where('status', self::STATUS_NO_SHOW);
+    }
+
+    /**
+     * Scope pour les transactions d'aujourd'hui
+     */
+    public function scopeToday($query)
+    {
+        return $query->whereDate('check_in', '<=', Carbon::today())
+            ->whereDate('check_out', '>=', Carbon::today())
+            ->whereNotIn('status', [self::STATUS_CANCELLED, self::STATUS_NO_SHOW]);
+    }
+
+    /**
+     * Scope pour les transactions de la semaine
+     */
+    public function scopeThisWeek($query)
+    {
+        return $query->whereBetween('check_in', [
+            Carbon::now()->startOfWeek(),
+            Carbon::now()->endOfWeek()
+        ]);
+    }
+
+    /**
+     * Scope pour les transactions du mois
+     */
+    public function scopeThisMonth($query)
+    {
+        return $query->whereMonth('check_in', Carbon::now()->month)
+            ->whereYear('check_in', Carbon::now()->year);
     }
 
     /**
@@ -260,7 +331,19 @@ class Transaction extends Model
         }
 
         if ($newStatus !== $this->status) {
+            $oldStatus = $this->status;
             $this->update(['status' => $newStatus]);
+            
+            // Logger le changement de statut
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($this)
+                ->withProperties([
+                    'old_status' => $oldStatus,
+                    'new_status' => $newStatus,
+                    'reason' => 'mise à jour automatique',
+                ])
+                ->log('a changé le statut de la réservation');
         }
 
         return $newStatus;
@@ -274,6 +357,8 @@ class Transaction extends Model
         DB::beginTransaction();
         
         try {
+            $oldData = $this->getOriginal();
+            
             $updateData = [
                 'status' => self::STATUS_ACTIVE,
                 'actual_check_in' => now(),
@@ -290,6 +375,18 @@ class Transaction extends Model
 
             $this->update($updateData);
             
+            // Logger le check-in
+            activity()
+                ->causedBy(User::find($userId))
+                ->performedOn($this)
+                ->withProperties([
+                    'old_room_id' => $oldData['room_id'] ?? null,
+                    'new_room_id' => $data['new_room_id'] ?? $this->room_id,
+                    'check_in_time' => now(),
+                    'person_count' => $data['person_count'] ?? $this->person_count,
+                ])
+                ->log('a effectué le check-in');
+            
             DB::commit();
             
             return [
@@ -299,6 +396,17 @@ class Transaction extends Model
             
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            // Logger l'erreur
+            activity()
+                ->causedBy(User::find($userId))
+                ->performedOn($this)
+                ->withProperties([
+                    'error' => $e->getMessage(),
+                    'data' => $data,
+                ])
+                ->log('erreur lors du check-in');
+                
             return [
                 'success' => false,
                 'error' => $e->getMessage()
@@ -330,10 +438,25 @@ class Transaction extends Model
         DB::beginTransaction();
         
         try {
+            $oldStatus = $this->status;
+            
             $this->update([
                 'status' => self::STATUS_COMPLETED,
                 'actual_check_out' => now()
             ]);
+            
+            // Logger le check-out
+            activity()
+                ->causedBy(User::find($userId))
+                ->performedOn($this)
+                ->withProperties([
+                    'old_status' => $oldStatus,
+                    'new_status' => self::STATUS_COMPLETED,
+                    'check_out_time' => now(),
+                    'total_paid' => $this->getTotalPayment(),
+                    'remaining' => $remaining,
+                ])
+                ->log('a effectué le check-out');
             
             DB::commit();
             
@@ -344,6 +467,16 @@ class Transaction extends Model
             
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            // Logger l'erreur
+            activity()
+                ->causedBy(User::find($userId))
+                ->performedOn($this)
+                ->withProperties([
+                    'error' => $e->getMessage(),
+                ])
+                ->log('erreur lors du check-out');
+                
             return [
                 'success' => false,
                 'error' => $e->getMessage()
@@ -371,6 +504,19 @@ class Transaction extends Model
         }
         
         $this->update($updateData);
+        
+        // Logger le changement de statut
+        $user = $userId ? User::find($userId) : null;
+        activity()
+            ->causedBy($user)
+            ->performedOn($this)
+            ->withProperties([
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'reason' => $reason,
+                'cancelled_by' => $userId,
+            ])
+            ->log('a changé le statut de la réservation');
         
         return [
             'old_status' => $oldStatus,
@@ -471,8 +617,22 @@ class Transaction extends Model
             $total = $room_price * $day;
             
             if ($total > 0) {
+                $oldPrice = $this->total_price;
                 $this->total_price = $total;
                 $this->saveQuietly();
+                
+                // Logger la mise à jour du prix
+                if ($oldPrice != $total) {
+                    activity()
+                        ->performedOn($this)
+                        ->withProperties([
+                            'old_price' => $oldPrice,
+                            'new_price' => $total,
+                            'nights' => $day,
+                            'room_price' => $room_price,
+                        ])
+                        ->log('a mis à jour le prix total');
+                }
             }
 
             return (float) $total;
@@ -536,11 +696,23 @@ class Transaction extends Model
             
             // Si la valeur stockée est différente, la mettre à jour
             if (abs($total - (float)($this->total_payment ?? 0)) > 0.01) {
+                $oldTotal = $this->total_payment;
                 $this->total_payment = $total;
                 $this->saveQuietly();
                 
+                // Logger la mise à jour
+                if ($oldTotal != $total) {
+                    activity()
+                        ->performedOn($this)
+                        ->withProperties([
+                            'old_total' => $oldTotal,
+                            'new_total' => $total,
+                        ])
+                        ->log('a mis à jour le total des paiements');
+                }
+                
                 Log::info("Total paiement mis à jour pour transaction #{$this->id}", [
-                    'ancien' => $this->total_payment,
+                    'ancien' => $oldTotal,
                     'nouveau' => $total
                 ]);
             }
@@ -612,12 +784,23 @@ class Transaction extends Model
      */
     public function restoreTransaction()
     {
+        $oldStatus = $this->status;
+        
         $this->update([
             'status' => self::STATUS_RESERVATION,
             'cancelled_at' => null,
             'cancelled_by' => null,
             'cancel_reason' => null
         ]);
+
+        // Logger la restauration
+        activity()
+            ->performedOn($this)
+            ->withProperties([
+                'old_status' => $oldStatus,
+                'new_status' => self::STATUS_RESERVATION,
+            ])
+            ->log('a restauré la réservation annulée');
 
         return true;
     }
@@ -648,6 +831,18 @@ class Transaction extends Model
             // Mettre à jour
             $this->total_payment = $totalPaid;
             $this->save();
+            
+            // Logger la mise à jour
+            if ($diff > 0.01) {
+                activity()
+                    ->performedOn($this)
+                    ->withProperties([
+                        'old_total' => $oldTotal,
+                        'new_total' => $totalPaid,
+                        'difference' => $diff,
+                    ])
+                    ->log('a recalculé le total des paiements');
+            }
             
             // Forcer le rafraîchissement
             $this->refresh();
@@ -805,6 +1000,18 @@ class Transaction extends Model
             $this->total_payment = $totalPayment;
             $this->save();
             
+            // Logger la synchronisation
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($this)
+                ->withProperties([
+                    'old_price' => $oldTotalPrice,
+                    'new_price' => $totalPrice,
+                    'old_payment' => $oldTotalPayment,
+                    'new_payment' => $totalPayment,
+                ])
+                ->log('a synchronisé les totaux de la réservation');
+            
             // Rafraîchir
             $this->refresh();
             
@@ -845,6 +1052,47 @@ class Transaction extends Model
     }
 
     /**
+     * Obtenir les activités de la transaction
+     */
+    public function transactionActivities()
+    {
+        return $this->hasMany(\Spatie\Activitylog\Models\Activity::class, 'subject_id')
+            ->where('subject_type', self::class);
+    }
+
+    /**
+     * Obtenir toutes les activités liées à cette transaction
+     */
+    public function getAllActivitiesAttribute()
+    {
+        return \Spatie\Activitylog\Models\Activity::where('subject_type', self::class)
+            ->where('subject_id', $this->id)
+            ->orWhere(function($query) {
+                $query->where('properties', 'LIKE', '%"transaction_id":' . $this->id . '%')
+                    ->orWhere('properties', 'LIKE', '%"transaction_id":"' . $this->id . '"%');
+            })
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Enregistrer un paiement
+     */
+    public function logPayment($payment, $user)
+    {
+        activity()
+            ->causedBy($user)
+            ->performedOn($this)
+            ->withProperties([
+                'payment_id' => $payment->id,
+                'amount' => $payment->amount,
+                'method' => $payment->payment_method,
+                'status' => $payment->status,
+            ])
+            ->log('a enregistré un paiement');
+    }
+
+    /**
      * Boot du modèle - VERSION SIMPLIFIÉE
      */
     protected static function boot()
@@ -861,6 +1109,18 @@ class Transaction extends Model
         // Après création, forcer le calcul
         static::created(function ($transaction) {
             $transaction->updatePaymentStatus();
+            
+            // Logger la création
+            activity()
+                ->causedBy(auth()->user())
+                ->performedOn($transaction)
+                ->withProperties([
+                    'customer' => $transaction->customer->name ?? 'N/A',
+                    'room' => $transaction->room->number ?? 'N/A',
+                    'nights' => $transaction->getNightsAttribute(),
+                    'total_price' => $transaction->getTotalPrice(),
+                ])
+                ->log('a créé une nouvelle réservation');
         });
     }
     
@@ -872,5 +1132,54 @@ class Transaction extends Model
         return static::withoutEvents(function () use ($options) {
             return $this->save($options);
         });
+    }
+
+    /**
+     * Obtenir le résumé de la transaction
+     */
+    public function getSummaryAttribute()
+    {
+        return [
+            'id' => $this->id,
+            'customer' => $this->customer->name ?? 'N/A',
+            'room' => $this->room->number ?? 'N/A',
+            'status' => $this->status_label,
+            'check_in' => $this->check_in->format('d/m/Y'),
+            'check_out' => $this->check_out->format('d/m/Y'),
+            'nights' => $this->getNightsAttribute(),
+            'total_price' => $this->formatted_total_price,
+            'total_paid' => $this->formatted_total_payment,
+            'remaining' => $this->formatted_remaining_payment,
+            'payment_rate' => $this->getPaymentRate() . '%',
+            'is_fully_paid' => $this->isFullyPaid(),
+        ];
+    }
+
+    /**
+     * Marquer comme no-show
+     */
+    public function markAsNoShow($userId, $reason = null)
+    {
+        $oldStatus = $this->status;
+        
+        $this->update([
+            'status' => self::STATUS_NO_SHOW,
+            'cancelled_by' => $userId,
+            'cancel_reason' => $reason ?? 'No-show',
+            'cancelled_at' => now(),
+        ]);
+
+        // Logger le no-show
+        activity()
+            ->causedBy(User::find($userId))
+            ->performedOn($this)
+            ->withProperties([
+                'old_status' => $oldStatus,
+                'new_status' => self::STATUS_NO_SHOW,
+                'reason' => $reason,
+            ])
+            ->log('a marqué comme no-show');
+
+        return true;
     }
 }

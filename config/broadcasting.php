@@ -2,31 +2,7 @@
 
 return [
 
-    /*
-    |--------------------------------------------------------------------------
-    | Default Broadcaster
-    |--------------------------------------------------------------------------
-    |
-    | This option controls the default broadcaster that will be used by the
-    | framework when an event needs to be broadcast. You may set this to
-    | any of the connections defined in the "connections" array below.
-    |
-    | Supported: "pusher", "ably", "redis", "log", "null"
-    |
-    */
-
     'default' => env('BROADCAST_DRIVER', 'null'),
-
-    /*
-    |--------------------------------------------------------------------------
-    | Broadcast Connections
-    |--------------------------------------------------------------------------
-    |
-    | Here you may define all of the broadcast connections that will be used
-    | to broadcast events to other systems or over websockets. Samples of
-    | each available type of connection are provided inside this array.
-    |
-    */
 
     'connections' => [
 
@@ -37,10 +13,12 @@ return [
             'app_id' => env('PUSHER_APP_ID'),
             'options' => [
                 'cluster' => env('PUSHER_APP_CLUSTER'),
-                // 'encrypted' => true, // Uncomment if using SSL.
-                'host' => env('PUSHER_HOST', '127.0.0.1'), // Socket server URL.
-                'port' => env('PUSHER_PORT', 6001), // Socket server port.
-                'scheme' => env('PUSHER_SCHEME', 'http'), // Connection scheme.
+                'useTLS' => true, // ⚠️ IMPORTANT : true pour Pusher.com
+                // ⚠️ SUPPRIMEZ ces 4 lignes :
+                // 'host' => env('PUSHER_HOST', '127.0.0.1'),
+                // 'port' => env('PUSHER_PORT', 6001),
+                // 'scheme' => env('PUSHER_SCHEME', 'http'),
+                // 'encrypted' => true,
             ],
         ],
 

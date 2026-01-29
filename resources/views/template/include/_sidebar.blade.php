@@ -371,9 +371,9 @@
                     @endif
 
                     <!-- Journal d'Activité -->
-                    @if(Route::has('activity-log.index'))
-                    <a href="{{ route('activity-log.index') }}"
-                       class="nav-item {{ Route::currentRouteName() == 'activity-log.index' ? 'active' : '' }}">
+                    @if(Route::has('activity.index'))
+                    <a href="{{ route('activity.index') }}"
+                       class="nav-item {{ Route::currentRouteName() == 'activity.index' ? 'active' : '' }}">
                         <div class="nav-icon">
                             <i class="fas fa-history"></i>
                         </div>

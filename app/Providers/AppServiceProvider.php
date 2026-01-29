@@ -21,6 +21,8 @@ use App\Repositories\Interface\TransactionRepositoryInterface;
 use App\Repositories\Interface\TypeRepositoryInterface;
 use App\Repositories\Interface\UserRepositoryInterface;
 use Illuminate\Support\ServiceProvider;
+use App\Services\SessionActivityService;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -40,6 +42,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
         $this->app->bind(TypeRepositoryInterface::class, TypeRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
+        $this->app->singleton(SessionActivityService::class, function ($app) {
+                return new SessionActivityService();
+            });
     }
 
     /**

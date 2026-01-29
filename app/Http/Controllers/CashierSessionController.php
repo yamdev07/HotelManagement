@@ -25,9 +25,9 @@ class CashierSessionController extends Controller
         $this->middleware('checkrole:Receptionist,Admin,Super,Cashier');
     }
 
-    /**
-     * DASHBOARD PERSONNALISÉ - Version corrigée
-     */
+   /**
+ * DASHBOARD PERSONNALISÉ - Version corrigée
+ */
     public function dashboard()
     {
         $user = Auth::user();
@@ -45,6 +45,24 @@ class CashierSessionController extends Controller
         // Statistiques du jour
         $todayStats = $this->getTodayStats($user);
         
+        // Pour admin: récupérer tous les réceptionnistes
+        $allReceptionists = [];
+        if ($user->role === 'Admin' || $user->role === 'Super') {
+            $allReceptionists = User::whereIn('role', ['Receptionist', 'Cashier', 'Admin', 'Super'])
+                ->orderBy('name')
+                ->get();
+        }
+        
+        // Récupérer toutes les sessions pour admin
+        $allSessions = collect([]);
+        $allSessionsCount = 0;
+        if ($user->role === 'Admin' || $user->role === 'Super') {
+            $allSessions = CashierSession::with('user')
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+            $allSessionsCount = CashierSession::count();
+        }
+        
         // Données pour la vue
         $data = [
             'user' => $user,
@@ -60,11 +78,15 @@ class CashierSessionController extends Controller
             'isReceptionist' => $user->role === 'Receptionist',
             'isAdmin' => $user->role === 'Admin' || $user->role === 'Super',
             'isCashier' => $user->role === 'Cashier',
+            // AJOUTEZ CES VARIABLES
+            'allReceptionists' => $allReceptionists,
+            'allSessions' => $allSessions,
+            'allSessionsCount' => $allSessionsCount,
         ];
         
         return view('cashier.dashboard', $data);
     }
-    
+        
     /**
      * Récupère la session active de l'utilisateur
      */
@@ -1298,6 +1320,78 @@ class CashierSessionController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Erreur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Récupérer les statistiques en temps réel (AJAX)
+     */
+    public function liveStats(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            
+            // Récupérer la session en cours
+            $currentSession = CashierSession::where('user_id', $user->id)
+                ->whereNull('closed_at')
+                ->first();
+            
+            if (!$currentSession) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Aucune session ouverte',
+                    'has_session' => false
+                ]);
+            }
+            
+            // Calculer les statistiques
+            $totalCash = $currentSession->total_cash ?? 0;
+            $totalCard = $currentSession->total_card ?? 0;
+            $totalMobile = $currentSession->total_mobile ?? 0;
+            $totalCheque = $currentSession->total_cheque ?? 0;
+            $totalOther = $currentSession->total_other ?? 0;
+            
+            $totalTransactions = $currentSession->total_transactions ?? 0;
+            $totalAmount = $totalCash + $totalCard + $totalMobile + $totalCheque + $totalOther;
+            
+            // Récupérer les transactions de la session
+            $transactions = Transaction::where('cashier_session_id', $currentSession->id)
+                ->whereDate('created_at', now()->toDateString())
+                ->get();
+            
+            $transactionsCount = $transactions->count();
+            $transactionsAmount = $transactions->sum(function($transaction) {
+                return $transaction->getTotalPayment();
+            });
+            
+            return response()->json([
+                'success' => true,
+                'has_session' => true,
+                'session_id' => $currentSession->id,
+                'session_start' => $currentSession->created_at->format('H:i'),
+                'stats' => [
+                    'total_amount' => number_format($totalAmount, 0, ',', ' ') . ' CFA',
+                    'total_cash' => number_format($totalCash, 0, ',', ' ') . ' CFA',
+                    'total_card' => number_format($totalCard, 0, ',', ' ') . ' CFA',
+                    'total_mobile' => number_format($totalMobile, 0, ',', ' ') . ' CFA',
+                    'total_cheque' => number_format($totalCheque, 0, ',', ' ') . ' CFA',
+                    'total_other' => number_format($totalOther, 0, ',', ' ') . ' CFA',
+                    'total_transactions' => $totalTransactions,
+                    'session_duration' => $currentSession->created_at->diffForHumans(now(), true),
+                    'today_transactions' => $transactionsCount,
+                    'today_amount' => number_format($transactionsAmount, 0, ',', ' ') . ' CFA'
+                ],
+                'updated_at' => now()->format('H:i:s')
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Erreur live stats caisse:', ['error' => $e->getMessage()]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur',
+                'error' => config('app.debug') ? $e->getMessage() : null
             ], 500);
         }
     }
