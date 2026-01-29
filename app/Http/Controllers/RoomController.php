@@ -60,6 +60,7 @@ class RoomController extends Controller
             'type_id' => 'required|exists:types,id',
             'room_status_id' => 'required|exists:room_statuses,id',
             'number' => 'required|string|max:10|unique:rooms,number',
+            'name' => 'nullable|string|max:255',
             'capacity' => 'required|integer|min:1|max:10',
             'price' => 'required|numeric|min:0',
             'view' => 'nullable|string|max:500',
@@ -82,9 +83,14 @@ class RoomController extends Controller
         // Préparer les données
         $data = $validator->validated();
         
-        // S'assurer que view n'est pas null (car colonne NOT NULL)
+        // S'assurer que view n'est pas null
         if (empty($data['view'])) {
             $data['view'] = '';
+        }
+        
+        // S'assurer que name est null si vide
+        if (empty($data['name'])) {
+            $data['name'] = null;
         }
 
         // Créer la chambre
@@ -119,20 +125,11 @@ class RoomController extends Controller
         $types = Type::all();
         $roomstatuses = RoomStatus::all();
         
-        // Version 1 : Retourner une vue HTML complète pour page dédiée
         return view('room.edit', [
             'room' => $room,
             'types' => $types,
             'roomstatuses' => $roomstatuses,
         ]);
-        
-        // Version 2 (si vous voulez AJAX) :
-        // $view = view('room.edit-modal', [
-        //     'room' => $room,
-        //     'types' => $types,
-        //     'roomstatuses' => $roomstatuses,
-        // ])->render();
-        // return response()->json(['view' => $view]);
     }
 
     public function update(Request $request, Room $room)
@@ -142,6 +139,7 @@ class RoomController extends Controller
             'type_id' => 'required|exists:types,id',
             'room_status_id' => 'required|exists:room_statuses,id',
             'number' => 'required|string|max:10|unique:rooms,number,' . $room->id,
+            'name' => 'nullable|string|max:255',
             'capacity' => 'required|integer|min:1|max:10',
             'price' => 'required|numeric|min:0',
             'view' => 'nullable|string|max:500',
@@ -156,16 +154,9 @@ class RoomController extends Controller
 
         // Si validation échoue
         if ($validator->fails()) {
-            // Version 1 : Pour page dédiée
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
-            
-            // Version 2 (si AJAX) :
-            // return response()->json([
-            //     'success' => false,
-            //     'errors' => $validator->errors()
-            // ], 422);
         }
 
         // Préparer les données
@@ -175,19 +166,17 @@ class RoomController extends Controller
         if (empty($data['view'])) {
             $data['view'] = '';
         }
+        
+        // S'assurer que name est null si vide
+        if (empty($data['name'])) {
+            $data['name'] = null;
+        }
 
         // Mettre à jour la chambre
         $room->update($data);
 
-        // Version 1 : Pour page dédiée
         return redirect()->route('room.index')
             ->with('success', 'Room ' . $room->number . ' updated successfully!');
-            
-        // Version 2 (si AJAX) :
-        // return response()->json([
-        //     'success' => true,
-        //     'message' => 'Room ' . $room->number . ' updated successfully!'
-        // ]);
     }
 
     public function destroy(Room $room, ImageRepositoryInterface $imageRepository)

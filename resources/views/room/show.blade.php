@@ -232,78 +232,91 @@
                         <h5 class="mb-0"><i class="fas fa-images me-2"></i>Room Images</h5>
                     </div>
                     <div class="card-body">
-                        @forelse ($room->image as $image)
-                            <div class="card image-card mb-3">
-                                <img src="{{ $image->getRoomImage() }}" 
-                                     class="room-image" 
-                                     alt="Room Image"
-                                     onclick="openImageModal('{{ $image->getRoomImage() }}')"
-                                     style="cursor: pointer;">
-                                <div class="card-body">
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <small class="text-muted">
-                                            <i class="fas fa-calendar-alt me-1"></i>
-                                            {{ $image->created_at->format('d/m/Y H:i') }}
-                                        </small>
-                                        <form action="{{ route('image.destroy', $image->id) }}" 
-                                              method="POST"
-                                              onsubmit="return confirm('Delete this image?')">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </button>
-                                        </form>
+                        @php
+                            // S'assurer que nous avons toujours une collection
+                            $images = $room->images ?? ($room->image ?? collect());
+                        @endphp
+                        
+                        @if($images && $images->count() > 0)
+                            @foreach ($images as $image)
+                                <div class="card image-card mb-3">
+                                    <img src="{{ asset('img/room/' . $room->number . '/' . $image->url) }}" 
+                                        class="room-image" 
+                                        alt="Room Image"
+                                        onclick="openImageModal('{{ asset('img/room/' . $room->number . '/' . $image->url) }}')"
+                                        style="cursor: pointer;">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                <i class="fas fa-calendar-alt me-1"></i>
+                                                {{ $image->created_at->format('d/m/Y H:i') }}
+                                            </small>
+                                            @if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin')
+                                                <form action="{{ route('image.destroy', $image->id) }}" 
+                                                    method="POST"
+                                                    onsubmit="return confirm('Delete this image?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                        <i class="fas fa-trash"></i> Delete
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        @empty
+                            @endforeach
+                        @else
                             <div class="empty-state">
                                 <i class="fas fa-images"></i>
                                 <h5 class="text-muted">No Images</h5>
                                 <p class="text-muted mb-3">This room doesn't have any images yet</p>
-                                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#imageUploadModal">
-                                    <i class="fas fa-upload me-1"></i>Upload First Image
-                                </button>
+                                @if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin')
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                                            data-bs-target="#imageUploadModal">
+                                        <i class="fas fa-upload me-1"></i>Upload First Image
+                                    </button>
+                                @endif
                             </div>
-                        @endforelse
+                        @endif
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Modal pour upload d'image -->
-    <div class="modal fade" id="imageUploadModal" tabindex="-1" aria-labelledby="imageUploadModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="imageUploadModalLabel">
-                        <i class="fas fa-upload me-2"></i>Upload Room Image
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="{{ route('image.store', $room->id) }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="image" class="form-label">Select Image</label>
-                            <input type="file" class="form-control" name="image" id="image" accept="image/*" required>
-                            <div class="form-text">
-                                Supported formats: JPG, PNG, GIF. Max size: 2MB.
-                            </div>
+            <!-- Modal pour upload d'image -->
+            <div class="modal fade" id="imageUploadModal" tabindex="-1" aria-labelledby="imageUploadModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="imageUploadModalLabel">
+                                <i class="fas fa-upload me-2"></i>Upload Room Image
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-upload me-1"></i>Upload Image
-                            </button>
+                        <div class="modal-body">
+                            <form action="{{ route('image.store', ['room' => $room->id]) }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="mb-3">
+                                    <label for="image" class="form-label">Select Image</label>
+                                    <input type="file" class="form-control @error('image') is-invalid @enderror" 
+                                        name="image" id="image" accept="image/*" required>
+                                    @error('image')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                    <div class="form-text">
+                                        Supported formats: JPG, PNG, GIF. Max size: 2MB.
+                                    </div>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-upload me-1"></i>Upload Image
+                                    </button>
+                                </div>
+                            </form>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
     <!-- Modal pour voir l'image en grand -->
     <div class="modal fade" id="imageViewModal" tabindex="-1" aria-hidden="true">
