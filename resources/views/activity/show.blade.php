@@ -123,24 +123,10 @@
                                 </div>
                                 <div class="card-body">
                                     @if($activity->subject)
-                                        @php
-                                            $modelName = class_basename($activity->subject_type);
-                                            $modelIcon = match($modelName) {
-                                                'User' => 'fa-user text-primary',
-                                                'Facility' => 'fa-cogs text-warning',
-                                                'Room' => 'fa-door-closed text-success',
-                                                'Type' => 'fa-tag text-info',
-                                                'Customer' => 'fa-users text-secondary',
-                                                'Transaction' => 'fa-receipt text-danger',
-                                                'Payment' => 'fa-credit-card text-success',
-                                                default => 'fa-cube text-muted'
-                                            };
-                                        @endphp
-                                        
                                         <div class="d-flex align-items-center mb-3">
-                                            <i class="fas {{ $modelIcon }} fa-2x me-3"></i>
+                                            <i class="fas {{ $activity->model_icon }} fa-2x me-3"></i>
                                             <div>
-                                                <h5 class="mb-1">{{ $modelName }}</h5>
+                                                <h5 class="mb-1">{{ $activity->model_name }}</h5>
                                                 <p class="text-muted mb-0">ID: {{ $activity->subject_id }}</p>
                                             </div>
                                         </div>
@@ -151,8 +137,8 @@
                                             </div>
                                         @endif
                                         
-                                        @if($activity->subject->exists)
-                                            <a href="{{ $this->getSubjectUrl($activity->subject) ?? '#' }}" 
+                                        @if($activity->subject_url)
+                                            <a href="{{ $activity->subject_url }}" 
                                                class="btn btn-sm btn-outline-primary">
                                                 <i class="fas fa-external-link-alt me-1"></i> Voir l'objet
                                             </a>
@@ -255,28 +241,39 @@ pre {
 
 @push('scripts')
 <script>
-// Ajoutez la fonction pour obtenir l'URL de l'objet si nécessaire
+// Fonction pour obtenir l'URL de l'objet (au cas où)
 function getSubjectUrl(subjectType, subjectId) {
     const routes = {
-        'App\\Models\\User': '/user/',
-        'App\\Models\\Room': '/room/',
-        'App\\Models\\Customer': '/customer/',
-        'App\\Models\\Transaction': '/transaction/',
-        'App\\Models\\Payment': '/payment/',
-        'App\\Models\\Facility': '/facility/',
-        'App\\Models\\Type': '/type/'
+        'App\\Models\\User': '/users/',
+        'App\\Models\\Room': '/rooms/',
+        'App\\Models\\Customer': '/customers/',
+        'App\\Models\\Transaction': '/transactions/',
+        'App\\Models\\Payment': '/payments/',
+        'App\\Models\\Facility': '/facilities/',
+        'App\\Models\\Type': '/types/'
     };
     
-    return routes[subjectType] ? routes[subjectType] + subjectId : '#';
+    if (routes[subjectType]) {
+        return `{{ url('') }}${routes[subjectType]}${subjectId}`;
+    }
+    
+    return '#';
 }
 
-// Si vous avez besoin de cette fonctionnalité
+// Initialisation si nécessaire
 document.addEventListener('DOMContentLoaded', function() {
-    const subjectLinks = document.querySelectorAll('.subject-link');
-    subjectLinks.forEach(link => {
-        const subjectType = link.dataset.type;
-        const subjectId = link.dataset.id;
-        link.href = getSubjectUrl(subjectType, subjectId);
+    // Log de débogage
+    console.log('Activity details page loaded');
+    console.log('Activity subject URL:', '{{ $activity->subject_url ?? "N/A" }}');
+    
+    // Si vous avez besoin de gérer des liens dynamiques
+    const dynamicLinks = document.querySelectorAll('[data-subject-url]');
+    dynamicLinks.forEach(link => {
+        const subjectType = link.dataset.subjectType;
+        const subjectId = link.dataset.subjectId;
+        if (subjectType && subjectId) {
+            link.href = getSubjectUrl(subjectType, subjectId);
+        }
     });
 });
 </script>
