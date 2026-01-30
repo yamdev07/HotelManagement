@@ -159,7 +159,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         ->middleware('require.authorization');
 
     // ==================== TYPES DE CHAMBRES ====================
-    // CORRECTION: Définir la route create AVANT la route show avec paramètre
     Route::prefix('type')->name('type.')->group(function () {
         // Routes CRUD complètes pour admins
         Route::middleware('checkrole:Super,Admin')->group(function () {
@@ -178,7 +177,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
     });
 
     // ==================== CHAMBRES ====================
-    // CORRECTION: Réorganiser complètement les routes des chambres
     Route::prefix('room')->name('room.')->group(function () {
         // Routes CRUD complètes pour admins - TOUTES AVANT LA ROUTE {room}
         Route::middleware('checkrole:Super,Admin')->group(function () {
@@ -336,7 +334,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
     // ==================== ACTIVITY LOG ====================
     Route::prefix('activity')->name('activity.')->group(function () {
         Route::get('/', [ActivityController::class, 'index'])->name('index');
-        Route::get('/all', [ActivityController::class, 'all'])->name('all'); // Changé ici
+        Route::get('/all', [ActivityController::class, 'all'])->name('all');
         Route::get('/export/{format?}', [ActivityController::class, 'export'])->name('export');
         Route::post('/cleanup', [ActivityController::class, 'cleanup'])->name('cleanup');
         Route::get('/statistics', [ActivityController::class, 'statistics'])->name('statistics');
@@ -366,7 +364,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
         // Route show en dernier
         Route::get('/{user?}', function ($user = null) {
             if ($user) {
-                // Redirection vers la vue show si un ID est fourni
                 return app()->make(UserController::class)->show($user);
             }
             return redirect()->route('profile.index');
@@ -489,53 +486,83 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist']], f
             Route::get('/report', [CashierSessionController::class, 'sessionReport'])->name('session-report');
         });
     });
+});
+
+// ==================== HOUSEKEEPING POUR RÉCEPTION ====================
+Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'checkrole:Super,Admin,Housekeeping,Receptionist'])->group(function () {
+    // Dashboard et listes
+    Route::get('/', [HousekeepingController::class, 'index'])->name('index');
+    Route::get('/dashboard', [HousekeepingController::class, 'index'])->name('dashboard');
+    Route::get('/to-clean', [HousekeepingController::class, 'toClean'])->name('to-clean');
+    Route::get('/quick-list/{status}', [HousekeepingController::class, 'quickList'])->name('quick-list');
     
-    // ==================== HOUSEKEEPING POUR RÉCEPTION ====================
-    Route::prefix('housekeeping')->name('housekeeping.')->group(function () {
-        // Routes sans paramètres d'abord
-        Route::get('/', [HousekeepingController::class, 'index'])->name('index');
-        Route::get('/to-clean', [HousekeepingController::class, 'to-clean'])->name('to-clean');
-        Route::get('/reports', [HousekeepingController::class, 'reports'])->name('reports');
-        Route::get('/daily-report', [HousekeepingController::class, 'dailyReport'])->name('daily-report');
-        Route::get('/mobile', [HousekeepingController::class, 'mobile'])->name('mobile');
-        Route::get('/quick-list/{status}', [HousekeepingController::class, 'quickList'])->name('quick-list');
-        Route::get('/scan', [HousekeepingController::class, 'scan'])->name('scan');
-        Route::post('/scan/process', [HousekeepingController::class, 'processScan'])->name('scan.process');
-        Route::get('/stats', [HousekeepingController::class, 'stats'])->name('stats');
-        Route::get('/schedule', [HousekeepingController::class, 'schedule'])->name('schedule');
-        Route::get('/maintenance', [HousekeepingController::class, 'maintenance'])->name('maintenance');
-        Route::get('/inspections', [HousekeepingController::class, 'inspections'])->name('inspections');
-        Route::get('/monthly-stats', [HousekeepingController::class, 'monthlyStats'])->name('monthly-stats');
+    // Rapports et statistiques
+    Route::get('/reports', [HousekeepingController::class, 'reports'])->name('reports');
+    Route::get('/daily-report', [HousekeepingController::class, 'dailyReport'])->name('daily-report');
+    Route::get('/stats', [HousekeepingController::class, 'stats'])->name('stats');
+    Route::get('/schedule', [HousekeepingController::class, 'schedule'])->name('schedule');
+    Route::get('/monthly-stats', [HousekeepingController::class, 'monthlyStats'])->name('monthly-stats');
+    
+    // Maintenance et inspections
+    Route::get('/maintenance', [HousekeepingController::class, 'maintenance'])->name('maintenance');
+    Route::get('/inspections', [HousekeepingController::class, 'inspections'])->name('inspections');
+    
+    // Mobile
+    Route::get('/mobile', [HousekeepingController::class, 'mobile'])->name('mobile');
+    Route::get('/scan', [HousekeepingController::class, 'scan'])->name('scan');
+    Route::post('/scan/process', [HousekeepingController::class, 'processScan'])->name('scan.process');
+    
+    // API pour scan mobile
+    Route::post('/api/scan', [HousekeepingController::class, 'scanApi'])->name('api.scan.process');
+    
+    // Routes avec paramètre {room}
+    Route::prefix('room/{room}')->group(function () {
+        // Actions seulement pour housekeeping staff
+        Route::middleware('checkrole:Super,Admin,Housekeeping')->group(function () {
+            Route::post('/start-cleaning', [HousekeepingController::class, 'startCleaning'])->name('start-cleaning');
+            Route::post('/finish-cleaning', [HousekeepingController::class, 'finishCleaning'])->name('finish-cleaning');
+            Route::post('/mark-cleaned', [HousekeepingController::class, 'markCleaned'])->name('mark-cleaned');
+            Route::post('/mark-inspection', [HousekeepingController::class, 'markInspection'])->name('mark-inspection');
+            Route::post('/mark-maintenance', [HousekeepingController::class, 'markMaintenance'])->name('mark-maintenance');
+            Route::post('/complete-inspection', [HousekeepingController::class, 'completeInspection'])->name('complete-inspection');
+            Route::get('/maintenance-form', [HousekeepingController::class, 'showMaintenanceForm'])->name('maintenance-form');
+            Route::post('/end-maintenance', [HousekeepingController::class, 'endMaintenance'])->name('end-maintenance');
+        });
         
-        // Export seulement pour admins
-        Route::post('/export', [HousekeepingController::class, 'export'])->name('export')
-            ->middleware('checkrole:Super,Admin');
-        
-        // Routes avec paramètre {room}
-        Route::prefix('{room}')->group(function () {
-            // Actions seulement pour housekeeping staff
-            Route::middleware('checkrole:Super,Admin,Housekeeping')->group(function () {
-                Route::post('/start-cleaning', [HousekeepingController::class, 'startCleaning'])->name('start-cleaning');
-                Route::post('/mark-cleaned', [HousekeepingController::class, 'markCleaned'])->name('mark-cleaned');
-                Route::post('/mark-inspection', [HousekeepingController::class, 'markInspection'])->name('mark-inspection');
-                Route::post('/mark-maintenance', [HousekeepingController::class, 'markMaintenance'])->name('mark-maintenance');
-                Route::post('/complete-inspection', [HousekeepingController::class, 'completeInspection'])->name('complete-inspection');
-                Route::get('/maintenance-form', [HousekeepingController::class, 'showMaintenanceForm'])->name('maintenance-form');
-                Route::post('/end-maintenance', [HousekeepingController::class, 'endMaintenance'])->name('end-maintenance');
-            });
-            
-            // Gestion avancée seulement pour admins
-            Route::middleware('checkrole:Super,Admin')->group(function () {
-                Route::post('/assign-cleaner', [HousekeepingController::class, 'assignCleaner'])->name('assign-cleaner');
-                Route::post('/update-priority', [HousekeepingController::class, 'updatePriority'])->name('update-priority');
-            });
+        // Gestion avancée seulement pour admins
+        Route::middleware('checkrole:Super,Admin')->group(function () {
+            Route::post('/assign-cleaner', [HousekeepingController::class, 'assignCleaner'])->name('assign-cleaner');
+            Route::post('/update-priority', [HousekeepingController::class, 'updatePriority'])->name('update-priority');
         });
     });
+    
+    // Export seulement pour admins
+    Route::post('/export', [HousekeepingController::class, 'export'])->name('export')
+        ->middleware('checkrole:Super,Admin');
+});
+
+// ==================== ROUTES HOUSEKEEPING SUPPLÉMENTAIRES ====================
+Route::middleware(['auth', 'checkrole:Super,Admin,Housekeeping,Receptionist'])->group(function () {
+    // API pour mobile
+    Route::post('/housekeeping/api/scan', [HousekeepingController::class, 'scanApi'])
+        ->name('housekeeping.api.scan');
+    
+    // Route alternative pour finish-cleaning
+    Route::post('/housekeeping/room/{room}/finish', [HousekeepingController::class, 'finishCleaning'])
+        ->name('housekeeping.finish');
+    
+    // Routes de test
+    Route::get('/housekeeping/test/auto-mark', function() {
+        $controller = new HousekeepingController();
+        $count = $controller->autoMarkDirtyRooms();
+        return back()->with('success', "{$count} chambres marquées comme sales");
+    })->name('housekeeping.test.auto-mark')
+    ->middleware('checkrole:Super,Admin');
 });
 
 // ==================== HOUSEKEEPING STAFF SEULEMENT ====================
 Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Housekeeping']], function () {
-    // Routes déjà définies ci-dessus dans la section réception
+    // Routes déjà définies ci-dessus
 });
 
 // ==================== ROUTE ADMIN ====================

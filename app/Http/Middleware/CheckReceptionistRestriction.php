@@ -329,47 +329,202 @@ class CheckReceptionistRestriction
     }
     
     /**
-     * Déterminer la route à partir du chemin
+     * Déterminer la route à partir du chemin - VERSION MISE À JOUR
      */
     protected function determineRouteFromPath($path, $method)
     {
         $path = trim($path, '/');
         
-        // Mapping des chemins communs
+        if (empty($path)) {
+            return null;
+        }
+        
+        // Mapping des chemins communs - VERSION COMPLÈTE
         $pathMappings = [
+            // Dashboard
             'dashboard' => 'dashboard.index',
             'dashboard/data' => 'dashboard.data',
             'dashboard/stats' => 'dashboard.stats',
+            
+            // Transactions
             'transaction' => 'transaction.index',
+            'transactions' => 'transaction.index',
+            
+            // Check-in
             'checkin' => 'checkin.index',
+            'check-in' => 'checkin.index',
+            
+            // Restaurant
             'restaurant' => 'restaurant.index',
+            
+            // Housekeeping
             'housekeeping' => 'housekeeping.index',
+            'housekeeping/dashboard' => 'housekeeping.index',
+            
+            // Disponibilité
+            'availability' => 'availability.dashboard',
             'availability/dashboard' => 'availability.dashboard',
+            
+            // Clients
             'customer' => 'customer.index',
+            'customers' => 'customer.index',
+            
+            // Chambres
             'room' => 'room.index',
+            'rooms' => 'room.index',
+            
+            // Types de chambres
+            'type' => 'type.index',
+            'types' => 'type.index',
+            
+            // Paiements
             'payments' => 'payments.index',
+            'payment' => 'payment.index',
+            
+            // Caisse
+            'cashier' => 'cashier.dashboard',
             'cashier/dashboard' => 'cashier.dashboard',
+            
+            // Rapports
             'reports' => 'reports.index',
+            
+            // Journal d'activité
+            'activity' => 'activity.index',
             'activity-log' => 'activity-log.index',
+            'activities' => 'activity.index',
+            
+            // Profil
             'profile' => 'profile.index',
+            
+            // Notifications
+            'notification' => 'notification.index',
+            'notifications' => 'notification.index',
+            
+            // API/AJAX routes (routes sans nom dans web.php)
+            'get-dialy-guest-chart-data' => 'chart.dailyGuestData',
+            'chart/dailyGuest' => 'chart.dailyGuest',
+            'dashboard/debug' => 'dashboard.debug',
+            
+            // Routes spéciales
+            'home' => 'home',
+            'logout' => 'logout',
+            'logout-now' => 'logout.now',
+            'admin' => 'admin',
         ];
         
+        // 1. Vérifier le chemin exact
         if (isset($pathMappings[$path])) {
             return $pathMappings[$path];
         }
         
-        // Pour les routes avec paramètres
+        // 2. Vérifier les routes avec paramètres
         foreach ($pathMappings as $key => $route) {
-            if (str_starts_with($path, $key . '/')) {
+            if (!empty($key) && !empty($path) && str_starts_with($path, $key . '/')) {
                 return $route;
             }
         }
         
+        // 3. Vérifier les patterns courants
+        if (str_starts_with($path, 'transaction/reservation/')) {
+            return 'transaction.reservation.createIdentity';
+        }
+        
+        if (str_starts_with($path, 'housekeeping/room/')) {
+            // Identifier l'action spécifique
+            if (str_contains($path, '/start-cleaning')) {
+                return 'housekeeping.start-cleaning';
+            }
+            if (str_contains($path, '/finish-cleaning') || str_contains($path, '/mark-cleaned')) {
+                return 'housekeeping.finish-cleaning';
+            }
+            if (str_contains($path, '/maintenance-form')) {
+                return 'housekeeping.maintenance-form';
+            }
+            return 'housekeeping.index';
+        }
+        
+        if (str_starts_with($path, 'availability/room/')) {
+            return 'availability.room.detail';
+        }
+        
+        if (str_starts_with($path, 'cashier/sessions/')) {
+            if (str_contains($path, '/close')) {
+                return 'cashier.sessions.close';
+            }
+            if (str_contains($path, '/report')) {
+                return 'cashier.sessions.report';
+            }
+            return 'cashier.sessions.show';
+        }
+        
+        if (str_starts_with($path, 'housekeeping/quick-list/')) {
+            return 'housekeeping.quick-list';
+        }
+        
+        // 4. Vérifier les routes de ressources CRUD
+        $crudPatterns = [
+            'customer' => 'customer.',
+            'room' => 'room.',
+            'type' => 'type.',
+            'facility' => 'facility.',
+            'roomstatus' => 'roomstatus.',
+            'user' => 'user.',
+            'transaction' => 'transaction.',
+        ];
+        
+        foreach ($crudPatterns as $resource => $routePrefix) {
+            if (str_starts_with($path, $resource . '/')) {
+                // Extraire l'ID et vérifier la méthode
+                $parts = explode('/', $path);
+                if (count($parts) >= 2) {
+                    $id = $parts[1];
+                    if (is_numeric($id)) {
+                        // Déterminer l'action basée sur la méthode HTTP
+                        switch ($method) {
+                            case 'GET':
+                                if (count($parts) >= 3 && $parts[2] === 'edit') {
+                                    return $routePrefix . 'edit';
+                                }
+                                return $routePrefix . 'show';
+                            case 'PUT':
+                            case 'PATCH':
+                                return $routePrefix . 'update';
+                            case 'DELETE':
+                                return $routePrefix . 'destroy';
+                            case 'POST':
+                                return $routePrefix . 'store';
+                        }
+                    } else {
+                        // Si ce n'est pas un nombre, c'est peut-être une action
+                        if ($id === 'create') {
+                            return $routePrefix . 'create';
+                        }
+                    }
+                }
+                return $routePrefix . 'index';
+            }
+        }
+        
+        // 5. Vérifier les routes d'autorisation
+        if (str_starts_with($path, 'authorization/')) {
+            return 'authorization.pending';
+        }
+        
+        // 6. Log pour le débogage des routes non trouvées
+        if (config('app.debug')) {
+            Log::channel('receptionist')->debug('Route non trouvée dans determineRouteFromPath', [
+                'path' => $path,
+                'method' => $method,
+                'request_path' => request()->path(),
+                'full_url' => request()->fullUrl(),
+            ]);
+        }
+        
         return null;
     }
-    
+        
     /**
-     * Vérifier les restrictions par chemin
+     * Vérifier les restrictions par chemin - CORRECTION ICI
      */
     protected function isRestrictedByPath($path, $method)
     {
@@ -402,7 +557,8 @@ class CheckReceptionistRestriction
         ];
         
         foreach ($restrictedPaths as $restricted) {
-            if (str_starts_with($path, $restricted) || str_contains($path, $restricted)) {
+            // Vérifier que $restricted et $path sont définis avant d'appeler str_starts_with
+            if ($restricted && $path && (str_starts_with($path, $restricted) || str_contains($path, $restricted))) {
                 return true;
             }
         }
@@ -418,7 +574,8 @@ class CheckReceptionistRestriction
             ];
             
             foreach ($deleteRestricted as $restricted) {
-                if (str_starts_with($path, $restricted)) {
+                // Vérifier que $restricted et $path sont définis
+                if ($restricted && $path && str_starts_with($path, $restricted)) {
                     return true;
                 }
             }
@@ -428,7 +585,7 @@ class CheckReceptionistRestriction
     }
     
     /**
-     * Vérifier les routes CRUD
+     * Vérifier les routes CRUD - CORRECTION ICI
      */
     protected function isRestrictedCrudRoute($routeName, $method)
     {
@@ -442,7 +599,8 @@ class CheckReceptionistRestriction
         // Routes de création/édition pour certains modules
         $restrictedModules = ['type', 'facility', 'roomstatus'];
         foreach ($restrictedModules as $module) {
-            if (str_starts_with($routeName, $module . '.') && 
+            // Vérifier que $routeName n'est pas null avant d'utiliser str_starts_with
+            if ($routeName && str_starts_with($routeName, $module . '.') && 
                 in_array(substr($routeName, strlen($module) + 1), ['create', 'store', 'edit', 'update', 'destroy'])) {
                 return true;
             }
@@ -452,13 +610,16 @@ class CheckReceptionistRestriction
     }
     
     /**
-     * Vérifier les routes de gestion des utilisateurs
+     * Vérifier les routes de gestion des utilisateurs - CORRECTION ICI
      */
     protected function isUserManagementRoute($path, $routeName)
     {
-        if (str_starts_with($path, 'user') || 
-            str_starts_with($path, 'users') ||
-            (str_starts_with($routeName, 'user.') && $routeName !== 'user.show')) {
+        // Vérifier que $path et $routeName ne sont pas null
+        if ($path && (str_starts_with($path, 'user') || str_starts_with($path, 'users'))) {
+            return true;
+        }
+        
+        if ($routeName && str_starts_with($routeName, 'user.') && $routeName !== 'user.show') {
             return true;
         }
         
