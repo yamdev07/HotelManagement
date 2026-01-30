@@ -6,54 +6,56 @@ use App\Models\Room;
 use App\Models\RoomStatus;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class HousekeepingController extends Controller
 {
-    // Constantes pour les statuts (en attendant de les mettre dans le modèle Room)
-    const STATUS_AVAILABLE = 1;      // Disponible
-    const STATUS_MAINTENANCE = 2;    // En maintenance
-    const STATUS_CLEANING = 3;       // À nettoyer/En nettoyage
-    const STATUS_OCCUPIED = 4;       // Occupée
+    // Constantes basées sur VOTRE table room_statuses
+    const STATUS_AVAILABLE = 1;      // Available (Disponible)
+    const STATUS_OCCUPIED = 2;       // Occupied (Occupée)
+    const STATUS_MAINTENANCE = 3;    // Maintenance (Maintenance)
+    const STATUS_RESERVED = 4;       // Reserved (Réservée)
+    const STATUS_CLEANING = 5;       // Cleaning (En nettoyage)
+    const STATUS_DIRTY = 6;          // Dirty (Sale/À nettoyer) - AJOUTÉ
     
-    /**
-     * Dashboard femmes de chambre
-     */
     public function index()
     {
         try {
-            // Récupérer toutes les chambres avec leurs statuts
+            // 1. Marquer automatiquement les chambres occupées comme sales
+            $this->autoMarkDirtyRooms();
+            
+            // 2. Récupérer toutes les chambres
             $rooms = Room::with(['type', 'roomStatus'])
                 ->orderBy('number')
                 ->get();
             
-            // Pour chaque chambre, vérifier si elle est occupée
+            // 3. Calculer le statut "is_occupied" pour chaque chambre
             foreach ($rooms as $room) {
-                $room->is_occupied = Transaction::where('room_id', $room->id)
-                    ->whereIn('status', ['active', 'reservation'])
-                    ->where('check_in', '<=', now())
-                    ->where('check_out', '>=', now())
-                    ->exists();
+                $room->is_occupied = $this->isRoomOccupied($room->id);
             }
             
-            // Grouper par statut de nettoyage
+            // 4. Grouper par statut CORRECTEMENT
             $roomsByStatus = [
-                'dirty' => $rooms->where('room_status_id', self::STATUS_CLEANING)->values(),
+                'dirty' => $rooms->where('room_status_id', self::STATUS_DIRTY)->values(),
                 'cleaning' => $rooms->where('room_status_id', self::STATUS_CLEANING)->values(),
                 'clean' => $rooms->where('room_status_id', self::STATUS_AVAILABLE)
                     ->filter(function($room) {
                         return !$room->is_occupied;
                     })->values(),
                 'occupied' => $rooms->filter(function($room) {
-                        return $room->is_occupied || $room->room_status_id == self::STATUS_OCCUPIED;
-                    })->unique('id')->values(),
+                    return $room->is_occupied || $room->room_status_id == self::STATUS_OCCUPIED;
+                })->unique('id')->values(),
                 'maintenance' => $rooms->where('room_status_id', self::STATUS_MAINTENANCE)->values(),
+                'reserved' => $rooms->where('room_status_id', self::STATUS_RESERVED)->values(),
             ];
             
-            // Statistiques
+            // 5. Statistiques
             $stats = [
                 'total_rooms' => $rooms->count(),
                 'dirty_rooms' => $roomsByStatus['dirty']->count(),
@@ -61,50 +63,90 @@ class HousekeepingController extends Controller
                 'clean_rooms' => $roomsByStatus['clean']->count(),
                 'occupied_rooms' => $roomsByStatus['occupied']->count(),
                 'maintenance_rooms' => $roomsByStatus['maintenance']->count(),
+                'reserved_rooms' => $roomsByStatus['reserved']->count(),
+                'cleaned_today' => Room::whereDate('last_cleaned_at', Carbon::today())->count(),
             ];
             
-            // Départs du jour (chambres à nettoyer)
+            // 6. Départs du jour (chambres à nettoyer)
             $todayDepartures = Transaction::with(['room', 'customer'])
-                ->where('status', 'active')
+                ->whereIn('status', ['active', 'checked_in'])
                 ->whereDate('check_out', Carbon::today())
                 ->orderBy('check_out')
                 ->get();
             
-            // Arrivées du jour (chambres préparées)
+            // 7. Arrivées du jour (chambres préparées)
             $todayArrivals = Transaction::with(['room', 'customer'])
-                ->where('status', 'reservation')
+                ->whereIn('status', ['reservation', 'confirmed'])
                 ->whereDate('check_in', Carbon::today())
                 ->orderBy('check_in')
                 ->get();
-            
-            // Chambres changées aujourd'hui
-            $roomsCleanedToday = Room::whereIn('room_status_id', [self::STATUS_AVAILABLE, self::STATUS_OCCUPIED])
-                ->whereDate('updated_at', Carbon::today())
-                ->count();
             
             return view('housekeeping.index', compact(
                 'roomsByStatus',
                 'stats',
                 'todayDepartures',
-                'todayArrivals',
-                'roomsCleanedToday'
+                'todayArrivals'
+                // Supprimez $roomsCleanedToday - utilisez $stats['cleaned_today'] dans le template
             ));
             
         } catch (\Exception $e) {
-            \Log::error('Housekeeping index error: ' . $e->getMessage());
-            return back()->with('error', 'Erreur lors du chargement du dashboard');
+            Log::error('Housekeeping index error: ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors du chargement du dashboard: ' . $e->getMessage());
         }
     }
     
     /**
-     * Interface mobile/simplifiée pour femmes de chambre
+     * Vérifier si une chambre est occupée
+     */
+    private function isRoomOccupied($roomId)
+    {
+        return Transaction::where('room_id', $roomId)
+            ->whereIn('status', ['active', 'checked_in'])
+            ->where('check_in', '<=', now())
+            ->where('check_out', '>=', now())
+            ->exists();
+    }
+    
+    /**
+     * Marquer automatiquement les chambres occupées comme sales
+     */
+    private function autoMarkDirtyRooms()
+    {
+        try {
+            $occupiedRooms = Room::where('room_status_id', self::STATUS_OCCUPIED)
+                ->where(function($query) {
+                    $query->whereNull('last_cleaned_at')
+                          ->orWhereDate('last_cleaned_at', '<', Carbon::today());
+                })
+                ->get();
+            
+            foreach ($occupiedRooms as $room) {
+                $room->update([
+                    'room_status_id' => self::STATUS_DIRTY,
+                    'needs_cleaning' => 1,
+                    'updated_at' => now(),
+                ]);
+                
+                Log::info("Auto-marked room {$room->number} as DIRTY (needs cleaning)");
+            }
+            
+            return count($occupiedRooms);
+            
+        } catch (\Exception $e) {
+            Log::error('Auto-mark error: ' . $e->getMessage());
+            return 0;
+        }
+    }
+    
+    /**
+     * Interface mobile/simplifiée
      */
     public function mobile()
     {
         try {
-            // Chambres à nettoyer (prioritaires)
+            // Chambres à nettoyer (Dirty)
             $dirtyRooms = Room::with(['type', 'roomStatus'])
-                ->where('room_status_id', self::STATUS_CLEANING)
+                ->where('room_status_id', self::STATUS_DIRTY)
                 ->orderBy('updated_at', 'asc')
                 ->get();
             
@@ -114,12 +156,13 @@ class HousekeepingController extends Controller
                 ->orderBy('updated_at', 'asc')
                 ->get();
             
-            // Statistiques simplifiées
+            // Statistiques
             $stats = [
                 'dirty' => $dirtyRooms->count(),
                 'cleaning' => $cleaningRooms->count(),
-                'cleaned_today' => Room::where('room_status_id', self::STATUS_AVAILABLE)
-                    ->whereDate('updated_at', Carbon::today())
+                'cleaned_today' => Room::whereDate('last_cleaned_at', Carbon::today())->count(),
+                'cleaned_by_me' => Room::where('cleaned_by', Auth::id())
+                    ->whereDate('last_cleaned_at', Carbon::today())
                     ->count(),
             ];
             
@@ -130,23 +173,24 @@ class HousekeepingController extends Controller
             ));
             
         } catch (\Exception $e) {
-            \Log::error('Housekeeping mobile error: ' . $e->getMessage());
+            Log::error('Housekeeping mobile error: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors du chargement de l\'interface mobile');
         }
     }
     
     /**
-     * Liste rapide des chambres par statut
+     * Liste rapide des chambres par statut - CORRIGÉE
      */
     public function quickList($status)
     {
         try {
             $statusMap = [
-                'dirty' => self::STATUS_CLEANING,
+                'dirty' => self::STATUS_DIRTY,      // CHANGÉ ICI
                 'cleaning' => self::STATUS_CLEANING,
                 'clean' => self::STATUS_AVAILABLE,
                 'occupied' => self::STATUS_OCCUPIED,
                 'maintenance' => self::STATUS_MAINTENANCE,
+                'reserved' => self::STATUS_RESERVED,
             ];
             
             if (!isset($statusMap[$status])) {
@@ -162,20 +206,17 @@ class HousekeepingController extends Controller
             // Pour les chambres "clean", filtrer celles qui ne sont pas occupées
             if ($status == 'clean') {
                 $rooms = $rooms->filter(function($room) {
-                    return !Transaction::where('room_id', $room->id)
-                        ->whereIn('status', ['active', 'reservation'])
-                        ->where('check_in', '<=', now())
-                        ->where('check_out', '>=', now())
-                        ->exists();
+                    return !$this->isRoomOccupied($room->id);
                 })->values();
             }
             
             $statusLabels = [
                 'dirty' => 'À nettoyer',
                 'cleaning' => 'En nettoyage',
-                'clean' => 'Nettoyées',
+                'clean' => 'Nettoyées/Disponibles',
                 'occupied' => 'Occupées',
                 'maintenance' => 'Maintenance',
+                'reserved' => 'Réservées',
             ];
             
             $statusLabel = $statusLabels[$status] ?? ucfirst($status);
@@ -187,13 +228,13 @@ class HousekeepingController extends Controller
             ));
             
         } catch (\Exception $e) {
-            \Log::error('Housekeeping quickList error: ' . $e->getMessage());
+            Log::error('Housekeeping quickList error: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors du chargement de la liste');
         }
     }
     
     /**
-     * Scanner QR code (pour mobile)
+     * Scanner QR code
      */
     public function scan()
     {
@@ -201,60 +242,60 @@ class HousekeepingController extends Controller
     }
     
     /**
-     * Traiter le scan QR code
+     * Traiter le scan QR code - AMÉLIORÉ
      */
     public function processScan(Request $request)
     {
         try {
             $request->validate([
                 'room_number' => 'required|string|max:10',
-                'action' => 'required|in:start-cleaning,mark-cleaned,mark-maintenance'
+                'action' => 'required|in:start-cleaning,finish-cleaning,maintenance'
             ]);
             
-            // Trouver la chambre par numéro
             $room = Room::where('number', $request->room_number)->first();
             
             if (!$room) {
                 return back()->with('error', 'Chambre ' . $request->room_number . ' non trouvée');
             }
             
-            // Exécuter l'action
             switch ($request->action) {
                 case 'start-cleaning':
                     return $this->startCleaning($room);
-                case 'mark-cleaned':
-                    return $this->markCleaned($room);
-                case 'mark-maintenance':
+                case 'finish-cleaning':
+                    return $this->finishCleaning($room);
+                case 'maintenance':
                     return redirect()->route('housekeeping.maintenance-form', $room);
             }
             
             return back()->with('error', 'Action non reconnue');
             
         } catch (\Exception $e) {
-            \Log::error('Housekeeping processScan error: ' . $e->getMessage());
+            Log::error('Housekeeping processScan error: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors du traitement du scan');
         }
     }
     
     /**
-     * Chambres à nettoyer
+     * Chambres à nettoyer - CORRIGÉ
      */
     public function toClean()
     {
         try {
             $rooms = Room::with(['type', 'roomStatus'])
-                ->where('room_status_id', self::STATUS_CLEANING)
+                ->where('room_status_id', self::STATUS_DIRTY)  // CHANGÉ ICI
+                ->orWhere('room_status_id', self::STATUS_CLEANING)
                 ->orWhere(function($query) {
                     // Chambres avec départ aujourd'hui
                     $query->whereHas('transactions', function($q) {
-                        $q->whereIn('status', ['active'])
+                        $q->whereIn('status', ['active', 'checked_in'])
                           ->whereDate('check_out', Carbon::today());
                     });
                 })
                 ->orderByRaw("
                     CASE 
-                        WHEN room_status_id = " . self::STATUS_CLEANING . " THEN 1
-                        ELSE 2
+                        WHEN room_status_id = " . self::STATUS_DIRTY . " THEN 1
+                        WHEN room_status_id = " . self::STATUS_CLEANING . " THEN 2
+                        ELSE 3
                     END
                 ")
                 ->orderBy('number')
@@ -263,10 +304,11 @@ class HousekeepingController extends Controller
             // Statistiques
             $stats = [
                 'total_to_clean' => $rooms->count(),
-                'dirty' => $rooms->where('room_status_id', self::STATUS_CLEANING)->count(),
+                'dirty' => $rooms->where('room_status_id', self::STATUS_DIRTY)->count(),
+                'cleaning' => $rooms->where('room_status_id', self::STATUS_CLEANING)->count(),
                 'departing_today' => $rooms->filter(function($room) {
                     return $room->transactions()
-                        ->whereIn('status', ['active'])
+                        ->whereIn('status', ['active', 'checked_in'])
                         ->whereDate('check_out', Carbon::today())
                         ->exists();
                 })->count(),
@@ -275,13 +317,13 @@ class HousekeepingController extends Controller
             return view('housekeeping.to-clean', compact('rooms', 'stats'));
             
         } catch (\Exception $e) {
-            \Log::error('Housekeeping toClean error: ' . $e->getMessage());
+            Log::error('Housekeeping toClean error: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors du chargement des chambres à nettoyer');
         }
     }
     
     /**
-     * Marquer comme en nettoyage
+     * Marquer comme en nettoyage - AMÉLIORÉ
      */
     public function startCleaning(Room $room)
     {
@@ -289,6 +331,7 @@ class HousekeepingController extends Controller
         
         try {
             $oldStatus = $room->room_status_id;
+            $user = Auth::user();
             
             $updateData = [
                 'room_status_id' => self::STATUS_CLEANING,
@@ -301,7 +344,7 @@ class HousekeepingController extends Controller
             }
             
             if (Schema::hasColumn('rooms', 'cleaned_by')) {
-                $updateData['cleaned_by'] = auth()->id();
+                $updateData['cleaned_by'] = $user->id;
             }
             
             $room->update($updateData);
@@ -310,7 +353,7 @@ class HousekeepingController extends Controller
             if (class_exists('\Spatie\Activitylog\Models\Activity')) {
                 activity()
                     ->performedOn($room)
-                    ->causedBy(auth()->user())
+                    ->causedBy($user)
                     ->withProperties([
                         'old_status' => $oldStatus,
                         'new_status' => self::STATUS_CLEANING,
@@ -319,6 +362,13 @@ class HousekeepingController extends Controller
                     ->log('Nettoyage démarré');
             }
             
+            // Notification à la réception
+            $this->notifyReception(
+                $room, 
+                'cleaning_started', 
+                "🚿 Nettoyage démarré pour la chambre {$room->number} par {$user->name}"
+            );
+            
             DB::commit();
             
             return back()->with('success', 'Nettoyage démarré pour la chambre ' . $room->number);
@@ -326,9 +376,9 @@ class HousekeepingController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            \Log::error('Erreur démarrage nettoyage: ' . $e->getMessage(), [
+            Log::error('Erreur démarrage nettoyage: ' . $e->getMessage(), [
                 'room_id' => $room->id,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
             ]);
             
             return back()->with('error', 'Erreur lors du démarrage du nettoyage: ' . $e->getMessage());
@@ -336,26 +386,25 @@ class HousekeepingController extends Controller
     }
     
     /**
-     * Marquer comme nettoyée
+     * Marquer comme nettoyée - AMÉLIORÉ
      */
-    public function markCleaned(Room $room)
+    public function finishCleaning(Room $room)
     {
         DB::beginTransaction();
         
         try {
             $oldStatus = $room->room_status_id;
+            $user = Auth::user();
+            
+            // Vérifier si la chambre est occupée
+            $isOccupied = $this->isRoomOccupied($room->id);
             
             // Déterminer le nouveau statut
-            $isOccupied = Transaction::where('room_id', $room->id)
-                ->whereIn('status', ['active', 'reservation'])
-                ->where('check_in', '<=', now())
-                ->where('check_out', '>=', now())
-                ->exists();
-            
             $newStatus = $isOccupied ? self::STATUS_OCCUPIED : self::STATUS_AVAILABLE;
             
             $updateData = [
                 'room_status_id' => $newStatus,
+                'needs_cleaning' => 0,
                 'updated_at' => now(),
             ];
             
@@ -365,7 +414,7 @@ class HousekeepingController extends Controller
             }
             
             if (Schema::hasColumn('rooms', 'cleaned_by')) {
-                $updateData['cleaned_by'] = auth()->id();
+                $updateData['cleaned_by'] = $user->id;
             }
             
             if (Schema::hasColumn('rooms', 'last_cleaned_at')) {
@@ -378,32 +427,76 @@ class HousekeepingController extends Controller
             if (class_exists('\Spatie\Activitylog\Models\Activity')) {
                 activity()
                     ->performedOn($room)
-                    ->causedBy(auth()->user())
+                    ->causedBy($user)
                     ->withProperties([
                         'old_status' => $oldStatus,
                         'new_status' => $newStatus,
                         'room_number' => $room->number,
-                        'cleaned_by' => auth()->user()->name
+                        'cleaned_by' => $user->name
                     ])
                     ->log('Chambre nettoyée');
             }
             
+            // Notification IMPORTANTE à la réception
+            $statusText = $newStatus == self::STATUS_AVAILABLE ? 'DISPONIBLE' : 'OCCUPÉE (nettoyée)';
+            $this->notifyReception(
+                $room,
+                'room_cleaned',
+                "✅ Chambre {$room->number} nettoyée par {$user->name} - Statut: {$statusText}",
+                true // Notification importante
+            );
+            
             DB::commit();
             
             $message = 'Chambre ' . $room->number . ' marquée comme nettoyée. ';
-            $message .= $newStatus == self::STATUS_AVAILABLE ? 'Statut: Disponible' : 'Statut: Occupée';
+            $message .= 'Statut: ' . ($newStatus == self::STATUS_AVAILABLE ? 'Disponible' : 'Occupée');
             
             return back()->with('success', $message);
             
         } catch (\Exception $e) {
             DB::rollBack();
             
-            \Log::error('Erreur marquage nettoyée: ' . $e->getMessage(), [
+            Log::error('Erreur marquage nettoyée: ' . $e->getMessage(), [
                 'room_id' => $room->id,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
             ]);
             
             return back()->with('error', 'Erreur lors du marquage comme nettoyée: ' . $e->getMessage());
+        }
+    }
+    
+    /**
+     * Notifier la réception
+     */
+    private function notifyReception($room, $type, $message, $important = false)
+    {
+        try {
+            // Récupérer les réceptionnistes et administrateurs
+            $receptionists = User::whereHas('roles', function($query) {
+                $query->whereIn('name', ['receptionist', 'admin', 'manager']);
+            })->get();
+            
+            foreach ($receptionists as $receptionist) {
+                Notification::create([
+                    'user_id' => $receptionist->id,
+                    'type' => $type,
+                    'title' => $important ? '🚨 Housekeeping Important' : 'Housekeeping Update',
+                    'message' => $message,
+                    'data' => json_encode([
+                        'room_id' => $room->id,
+                        'room_number' => $room->number,
+                        'action_url' => route('rooms.show', $room),
+                        'important' => $important
+                    ]),
+                    'read_at' => null,
+                    'created_at' => now(),
+                ]);
+            }
+            
+            Log::info("Notification envoyée: {$message}");
+            
+        } catch (\Exception $e) {
+            Log::error('Erreur notification: ' . $e->getMessage());
         }
     }
     
@@ -417,7 +510,6 @@ class HousekeepingController extends Controller
                 'updated_at' => now(),
             ];
             
-            // Ajouter les colonnes si elles existent
             if (Schema::hasColumn('rooms', 'needs_inspection')) {
                 $updateData['needs_inspection'] = true;
             }
@@ -427,26 +519,23 @@ class HousekeepingController extends Controller
             }
             
             if (Schema::hasColumn('rooms', 'inspection_requested_by')) {
-                $updateData['inspection_requested_by'] = auth()->id();
+                $updateData['inspection_requested_by'] = Auth::id();
             }
             
             $room->update($updateData);
             
-            // Journalisation
-            if (class_exists('\Spatie\Activitylog\Models\Activity')) {
-                activity()
-                    ->performedOn($room)
-                    ->causedBy(auth()->user())
-                    ->withProperties(['room_number' => $room->number])
-                    ->log('Inspection demandée');
-            }
+            $this->notifyReception(
+                $room,
+                'inspection_requested',
+                "🔍 Inspection demandée pour la chambre {$room->number}"
+            );
             
             return back()->with('success', 'Inspection demandée pour la chambre ' . $room->number);
             
         } catch (\Exception $e) {
-            \Log::error('Erreur demande inspection: ' . $e->getMessage(), [
+            Log::error('Erreur demande inspection: ' . $e->getMessage(), [
                 'room_id' => $room->id,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
             ]);
             
             return back()->with('error', 'Erreur lors de la demande d\'inspection: ' . $e->getMessage());
@@ -462,7 +551,7 @@ class HousekeepingController extends Controller
     }
     
     /**
-     * Marquer comme en maintenance
+     * Marquer comme en maintenance - AMÉLIORÉ
      */
     public function markMaintenance(Request $request, Room $room)
     {
@@ -475,13 +564,13 @@ class HousekeepingController extends Controller
             DB::beginTransaction();
             
             $oldStatus = $room->room_status_id;
+            $user = Auth::user();
             
             $updateData = [
                 'room_status_id' => self::STATUS_MAINTENANCE,
                 'updated_at' => now(),
             ];
             
-            // Ajouter les colonnes si elles existent
             if (Schema::hasColumn('rooms', 'maintenance_reason')) {
                 $updateData['maintenance_reason'] = $request->maintenance_reason;
             }
@@ -491,7 +580,7 @@ class HousekeepingController extends Controller
             }
             
             if (Schema::hasColumn('rooms', 'maintenance_requested_by')) {
-                $updateData['maintenance_requested_by'] = auth()->id();
+                $updateData['maintenance_requested_by'] = $user->id;
             }
             
             if (Schema::hasColumn('rooms', 'estimated_maintenance_duration')) {
@@ -504,7 +593,7 @@ class HousekeepingController extends Controller
             if (class_exists('\Spatie\Activitylog\Models\Activity')) {
                 activity()
                     ->performedOn($room)
-                    ->causedBy(auth()->user())
+                    ->causedBy($user)
                     ->withProperties([
                         'old_status' => $oldStatus,
                         'new_status' => self::STATUS_MAINTENANCE,
@@ -514,6 +603,14 @@ class HousekeepingController extends Controller
                     ->log('Maintenance demandée');
             }
             
+            // Notification IMPORTANTE à la réception
+            $this->notifyReception(
+                $room,
+                'maintenance_started',
+                "🔧 MAINTENANCE: Chambre {$room->number} - Raison: {$request->maintenance_reason}",
+                true
+            );
+            
             DB::commit();
             
             return redirect()->route('housekeeping.index')
@@ -522,9 +619,9 @@ class HousekeepingController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            \Log::error('Erreur maintenance: ' . $e->getMessage(), [
+            Log::error('Erreur maintenance: ' . $e->getMessage(), [
                 'room_id' => $room->id,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
             ]);
             
             return back()->with('error', 'Erreur lors du marquage en maintenance: ' . $e->getMessage());
@@ -542,30 +639,18 @@ class HousekeepingController extends Controller
                 ->orderBy('updated_at', 'asc')
                 ->get();
             
-            // Initialiser les statistiques
             $stats = [
                 'total_maintenance' => $maintenanceRooms->count(),
+                'rooms_available' => Room::where('room_status_id', self::STATUS_AVAILABLE)->count(),
+                'rooms_occupied' => Room::where('room_status_id', self::STATUS_OCCUPIED)->count(),
+                'rooms_dirty' => Room::where('room_status_id', self::STATUS_DIRTY)->count(),
+                'rooms_cleaning' => Room::where('room_status_id', self::STATUS_CLEANING)->count(),
             ];
-            
-            // Ajouter maintenance_by_reason si la colonne existe
-            if (Schema::hasColumn('rooms', 'maintenance_reason') && $maintenanceRooms->isNotEmpty()) {
-                $grouped = $maintenanceRooms->groupBy('maintenance_reason')->map->count();
-                $stats['maintenance_by_reason'] = $grouped;
-            }
-            
-            // Ajouter longest_maintenance si la colonne existe
-            if (Schema::hasColumn('rooms', 'maintenance_started_at') && $maintenanceRooms->isNotEmpty()) {
-                $longest = $maintenanceRooms->where('maintenance_started_at', '!=', null)
-                    ->max('maintenance_started_at');
-                if ($longest) {
-                    $stats['longest_maintenance'] = $longest;
-                }
-            }
             
             return view('housekeeping.maintenance', compact('maintenanceRooms', 'stats'));
             
         } catch (\Exception $e) {
-            \Log::error('Maintenance page error: ' . $e->getMessage());
+            Log::error('Maintenance page error: ' . $e->getMessage());
             return back()->with('error', 'Erreur: ' . $e->getMessage());
         }
     }
@@ -578,11 +663,9 @@ class HousekeepingController extends Controller
         try {
             $query = Room::with(['type', 'roomStatus']);
             
-            // Vérifier si la colonne existe
             if (Schema::hasColumn('rooms', 'needs_inspection')) {
                 $query->where('needs_inspection', true);
             } else {
-                // Si la colonne n'existe pas, retourner une liste vide
                 return view('housekeeping.inspections', ['inspectionRooms' => collect()]);
             }
             
@@ -597,7 +680,7 @@ class HousekeepingController extends Controller
             return view('housekeeping.inspections', compact('inspectionRooms'));
             
         } catch (\Exception $e) {
-            \Log::error('Inspections page error: ' . $e->getMessage());
+            Log::error('Inspections page error: ' . $e->getMessage());
             return back()->with('error', 'Erreur: ' . $e->getMessage());
         }
     }
@@ -608,11 +691,11 @@ class HousekeepingController extends Controller
     public function completeInspection(Room $room)
     {
         try {
+            $user = Auth::user();
             $updateData = [
                 'updated_at' => now(),
             ];
             
-            // Ajouter les colonnes si elles existent
             if (Schema::hasColumn('rooms', 'needs_inspection')) {
                 $updateData['needs_inspection'] = false;
             }
@@ -622,26 +705,23 @@ class HousekeepingController extends Controller
             }
             
             if (Schema::hasColumn('rooms', 'inspected_by')) {
-                $updateData['inspected_by'] = auth()->id();
+                $updateData['inspected_by'] = $user->id;
             }
             
             $room->update($updateData);
             
-            // Journalisation
-            if (class_exists('\Spatie\Activitylog\Models\Activity')) {
-                activity()
-                    ->performedOn($room)
-                    ->causedBy(auth()->user())
-                    ->withProperties(['room_number' => $room->number])
-                    ->log('Inspection terminée');
-            }
+            $this->notifyReception(
+                $room,
+                'inspection_completed',
+                "✅ Inspection terminée pour la chambre {$room->number}"
+            );
             
             return back()->with('success', 'Inspection terminée pour la chambre ' . $room->number);
             
         } catch (\Exception $e) {
-            \Log::error('Erreur fin inspection: ' . $e->getMessage(), [
+            Log::error('Erreur fin inspection: ' . $e->getMessage(), [
                 'room_id' => $room->id,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
             ]);
             
             return back()->with('error', 'Erreur lors de la fin d\'inspection: ' . $e->getMessage());
@@ -657,14 +737,10 @@ class HousekeepingController extends Controller
         
         try {
             $oldStatus = $room->room_status_id;
+            $user = Auth::user();
             
             // Déterminer le nouveau statut
-            $isOccupied = Transaction::where('room_id', $room->id)
-                ->whereIn('status', ['active', 'reservation'])
-                ->where('check_in', '<=', now())
-                ->where('check_out', '>=', now())
-                ->exists();
-            
+            $isOccupied = $this->isRoomOccupied($room->id);
             $newStatus = $isOccupied ? self::STATUS_OCCUPIED : self::STATUS_AVAILABLE;
             
             $updateData = [
@@ -672,29 +748,24 @@ class HousekeepingController extends Controller
                 'updated_at' => now(),
             ];
             
-            // Ajouter les colonnes si elles existent
             if (Schema::hasColumn('rooms', 'maintenance_ended_at')) {
                 $updateData['maintenance_ended_at'] = now();
             }
             
             if (Schema::hasColumn('rooms', 'maintenance_resolved_by')) {
-                $updateData['maintenance_resolved_by'] = auth()->id();
+                $updateData['maintenance_resolved_by'] = $user->id;
             }
             
             $room->update($updateData);
             
-            // Journalisation
-            if (class_exists('\Spatie\Activitylog\Models\Activity')) {
-                activity()
-                    ->performedOn($room)
-                    ->causedBy(auth()->user())
-                    ->withProperties([
-                        'old_status' => $oldStatus,
-                        'new_status' => $newStatus,
-                        'room_number' => $room->number
-                    ])
-                    ->log('Maintenance terminée');
-            }
+            // Notification IMPORTANTE à la réception
+            $statusText = $newStatus == self::STATUS_AVAILABLE ? 'DISPONIBLE' : 'OCCUPÉE';
+            $this->notifyReception(
+                $room,
+                'maintenance_ended',
+                "✅ MAINTENANCE TERMINÉE: Chambre {$room->number} - Statut: {$statusText}",
+                true
+            );
             
             DB::commit();
             
@@ -703,9 +774,9 @@ class HousekeepingController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             
-            \Log::error('Erreur fin maintenance: ' . $e->getMessage(), [
+            Log::error('Erreur fin maintenance: ' . $e->getMessage(), [
                 'room_id' => $room->id,
-                'user_id' => auth()->id(),
+                'user_id' => Auth::id(),
             ]);
             
             return back()->with('error', 'Erreur lors de la fin de maintenance: ' . $e->getMessage());
@@ -721,27 +792,22 @@ class HousekeepingController extends Controller
             $date = $request->get('date', Carbon::today()->format('Y-m-d'));
             $selectedDate = Carbon::parse($date);
             
-            // Base query pour les chambres nettoyées
             $query = Room::with(['type', 'roomStatus']);
             
-            // Vérifier si la colonne last_cleaned_at existe
             if (Schema::hasColumn('rooms', 'last_cleaned_at')) {
                 $query->whereDate('last_cleaned_at', $selectedDate);
             } else {
-                // Fallback sur updated_at si last_cleaned_at n'existe pas
                 $query->whereDate('updated_at', $selectedDate)
                     ->whereIn('room_status_id', [self::STATUS_AVAILABLE, self::STATUS_OCCUPIED]);
             }
             
-            $cleanedRooms = $query->orderBy('updated_at', 'desc')->get();
+            $cleanedRooms = $query->orderBy('last_cleaned_at', 'desc')->get();
             
-            // Statistiques quotidiennes
             $stats = [
                 'total_cleaned' => $cleanedRooms->count(),
                 'cleaned_by_status' => $cleanedRooms->groupBy('room_status_id')->map->count(),
             ];
             
-            // Chambres par femme de chambre (si la colonne cleaned_by existe)
             $cleanedByUser = collect();
             if (Schema::hasColumn('rooms', 'cleaned_by')) {
                 $cleanedByUser = $cleanedRooms->groupBy('cleaned_by')->map(function($rooms, $userId) {
@@ -753,7 +819,6 @@ class HousekeepingController extends Controller
                 })->values();
             }
             
-            // Dates disponibles pour le filtre
             $availableDates = collect();
             if (Schema::hasColumn('rooms', 'last_cleaned_at')) {
                 $availableDates = Room::select(DB::raw('DATE(last_cleaned_at) as date'))
@@ -774,7 +839,7 @@ class HousekeepingController extends Controller
             ));
             
         } catch (\Exception $e) {
-            \Log::error('Housekeeping reports error: ' . $e->getMessage());
+            Log::error('Housekeeping reports error: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors du chargement des rapports');
         }
     }
@@ -795,33 +860,35 @@ class HousekeepingController extends Controller
                 $queryCleaned->whereDate('updated_at', $today)
                     ->whereIn('room_status_id', [self::STATUS_AVAILABLE, self::STATUS_OCCUPIED]);
             }
-            $cleanedToday = $queryCleaned->orderBy('updated_at', 'desc')->get();
+            $cleanedToday = $queryCleaned->orderBy('last_cleaned_at', 'desc')->get();
             
             // Chambres à nettoyer
             $toClean = Room::with(['type', 'roomStatus'])
-                ->where('room_status_id', self::STATUS_CLEANING)
+                ->where('room_status_id', self::STATUS_DIRTY)
+                ->orWhere('room_status_id', self::STATUS_CLEANING)
                 ->orWhere(function($query) use ($today) {
                     $query->whereHas('transactions', function($q) use ($today) {
-                        $q->whereIn('status', ['active'])
+                        $q->whereIn('status', ['active', 'checked_in'])
                           ->whereDate('check_out', $today);
                     });
                 })
                 ->orderByRaw("
                     CASE 
-                        WHEN room_status_id = " . self::STATUS_CLEANING . " THEN 1
-                        ELSE 2
+                        WHEN room_status_id = " . self::STATUS_DIRTY . " THEN 1
+                        WHEN room_status_id = " . self::STATUS_CLEANING . " THEN 2
+                        ELSE 3
                     END
                 ")
                 ->orderBy('number')
                 ->get();
             
-            // Statistiques
             $stats = [
                 'cleaned_today' => $cleanedToday->count(),
                 'to_clean' => $toClean->count(),
+                'dirty' => $toClean->where('room_status_id', self::STATUS_DIRTY)->count(),
+                'cleaning' => $toClean->where('room_status_id', self::STATUS_CLEANING)->count(),
             ];
             
-            // Chambres par utilisateur (si cleaned_by existe)
             if (Schema::hasColumn('rooms', 'cleaned_by')) {
                 $stats['cleaned_by_user'] = $cleanedToday->groupBy('cleaned_by')->map->count();
             }
@@ -834,100 +901,8 @@ class HousekeepingController extends Controller
             ));
             
         } catch (\Exception $e) {
-            \Log::error('Housekeeping dailyReport error: ' . $e->getMessage());
+            Log::error('Housekeeping dailyReport error: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors du chargement du rapport quotidien');
-        }
-    }
-    
-    /**
-     * Statistiques mensuelles
-     */
-    public function monthlyStats(Request $request)
-    {
-        try {
-            $month = $request->get('month', Carbon::now()->format('Y-m'));
-            $selectedMonth = Carbon::parse($month . '-01');
-            
-            $startDate = $selectedMonth->copy()->startOfMonth();
-            $endDate = $selectedMonth->copy()->endOfMonth();
-            
-            // Vérifier si la colonne last_cleaned_at existe
-            if (!Schema::hasColumn('rooms', 'last_cleaned_at')) {
-                // Si la colonne n'existe pas, retourner des données vides
-                return view('housekeeping.monthly-stats', [
-                    'monthlyStats' => collect(),
-                    'topCleaners' => collect(),
-                    'mostCleanedRooms' => collect(),
-                    'selectedMonth' => $selectedMonth,
-                    'availableMonths' => collect(),
-                ]);
-            }
-            
-            // Statistiques mensuelles
-            $monthlyStats = DB::table('rooms')
-                ->select(
-                    DB::raw('DATE(last_cleaned_at) as date'),
-                    DB::raw('COUNT(*) as cleaned_count')
-                )
-                ->whereBetween('last_cleaned_at', [$startDate, $endDate])
-                ->whereNotNull('last_cleaned_at')
-                ->groupBy(DB::raw('DATE(last_cleaned_at)'))
-                ->orderBy('date')
-                ->get();
-            
-            // Top femmes de chambre du mois
-            $topCleaners = DB::table('rooms')
-                ->select('cleaned_by', DB::raw('COUNT(*) as cleaned_count'))
-                ->whereBetween('last_cleaned_at', [$startDate, $endDate])
-                ->whereNotNull('cleaned_by')
-                ->groupBy('cleaned_by')
-                ->orderByDesc('cleaned_count')
-                ->limit(10)
-                ->get()
-                ->map(function($item) {
-                    $user = User::find($item->cleaned_by);
-                    return [
-                        'name' => $user ? $user->name : 'Inconnu',
-                        'count' => $item->cleaned_count
-                    ];
-                });
-            
-            // Chambres les plus nettoyées
-            $mostCleanedRooms = DB::table('rooms')
-                ->join('types', 'rooms.type_id', '=', 'types.id')
-                ->select(
-                    'rooms.number',
-                    'types.name as type',
-                    DB::raw('COUNT(*) as cleaned_count')
-                )
-                ->whereBetween('last_cleaned_at', [$startDate, $endDate])
-                ->whereNotNull('last_cleaned_at')
-                ->groupBy('rooms.id', 'rooms.number', 'types.name')
-                ->orderByDesc('cleaned_count')
-                ->limit(10)
-                ->get();
-            
-            // Mois disponibles pour le filtre
-            $availableMonths = DB::table('rooms')
-                ->select(DB::raw('DATE_FORMAT(last_cleaned_at, "%Y-%m") as month'))
-                ->whereNotNull('last_cleaned_at')
-                ->groupBy(DB::raw('DATE_FORMAT(last_cleaned_at, "%Y-%m")'))
-                ->orderBy('month', 'desc')
-                ->limit(12)
-                ->get()
-                ->pluck('month');
-            
-            return view('housekeeping.monthly-stats', compact(
-                'monthlyStats',
-                'topCleaners',
-                'mostCleanedRooms',
-                'selectedMonth',
-                'availableMonths'
-            ));
-            
-        } catch (\Exception $e) {
-            \Log::error('Housekeeping monthlyStats error: ' . $e->getMessage());
-            return back()->with('error', 'Erreur lors du chargement des statistiques mensuelles');
         }
     }
     
@@ -939,7 +914,7 @@ class HousekeepingController extends Controller
         try {
             // Départs des 7 prochains jours
             $nextWeekDepartures = Transaction::with(['room', 'customer'])
-                ->where('status', 'active')
+                ->whereIn('status', ['active', 'checked_in'])
                 ->whereBetween('check_out', [Carbon::today(), Carbon::today()->addDays(7)])
                 ->orderBy('check_out')
                 ->get()
@@ -949,7 +924,7 @@ class HousekeepingController extends Controller
             
             // Arrivées des 7 prochains jours
             $nextWeekArrivals = Transaction::with(['room', 'customer'])
-                ->where('status', 'reservation')
+                ->whereIn('status', ['reservation', 'confirmed'])
                 ->whereBetween('check_in', [Carbon::today(), Carbon::today()->addDays(7)])
                 ->orderBy('check_in')
                 ->get()
@@ -969,73 +944,51 @@ class HousekeepingController extends Controller
             ));
             
         } catch (\Exception $e) {
-            \Log::error('Housekeeping schedule error: ' . $e->getMessage());
+            Log::error('Housekeeping schedule error: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors du chargement du planning');
         }
     }
     
     /**
-     * Statistiques pour femmes de chambre
+     * API pour scanner QR code
      */
-    public function stats()
+    public function scanApi(Request $request)
     {
         try {
-            $today = Carbon::today();
-            $lastMonth = $today->copy()->subMonth();
+            $request->validate([
+                'room_number' => 'required',
+                'action' => 'required|in:start,finish',
+            ]);
             
-            // Statistiques générales
-            $generalStats = [
-                'total_rooms' => Room::count(),
-                'available_rooms' => Room::where('room_status_id', self::STATUS_AVAILABLE)->count(),
-                'occupied_rooms' => Room::where('room_status_id', self::STATUS_OCCUPIED)->count(),
-                'cleaning_rooms' => Room::where('room_status_id', self::STATUS_CLEANING)->count(),
-                'maintenance_rooms' => Room::where('room_status_id', self::STATUS_MAINTENANCE)->count(),
-            ];
+            $room = Room::where('number', $request->room_number)->first();
             
-            // Chambres nettoyées aujourd'hui
-            $cleanedToday = 0;
-            if (Schema::hasColumn('rooms', 'last_cleaned_at')) {
-                $cleanedToday = Room::whereDate('last_cleaned_at', $today)->count();
+            if (!$room) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Chambre non trouvée'
+                ], 404);
             }
             
-            // Chambres nettoyées ce mois
-            $cleanedThisMonth = 0;
-            if (Schema::hasColumn('rooms', 'last_cleaned_at')) {
-                $cleanedThisMonth = Room::whereBetween('last_cleaned_at', [
-                    $today->copy()->startOfMonth(),
-                    $today->copy()->endOfMonth()
-                ])->count();
+            if ($request->action == 'start') {
+                $this->startCleaning($room);
+                $message = "Nettoyage démarré pour la chambre {$room->number}";
+            } else {
+                $this->finishCleaning($room);
+                $message = "Chambre {$room->number} marquée comme nettoyée";
             }
             
-            // Performance par femme de chambre (si cleaned_by existe)
-            $performanceByCleaner = collect();
-            if (Schema::hasColumn('rooms', 'cleaned_by') && Schema::hasColumn('rooms', 'last_cleaned_at')) {
-                $performanceByCleaner = DB::table('rooms')
-                    ->select('cleaned_by', DB::raw('COUNT(*) as cleaned_count'))
-                    ->whereBetween('last_cleaned_at', [$lastMonth, $today])
-                    ->whereNotNull('cleaned_by')
-                    ->groupBy('cleaned_by')
-                    ->orderByDesc('cleaned_count')
-                    ->get()
-                    ->map(function($item) {
-                        $user = User::find($item->cleaned_by);
-                        return [
-                            'name' => $user ? $user->name : 'Inconnu',
-                            'count' => $item->cleaned_count
-                        ];
-                    });
-            }
-            
-            return view('housekeeping.stats', compact(
-                'generalStats',
-                'cleanedToday',
-                'cleanedThisMonth',
-                'performanceByCleaner'
-            ));
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'room' => $room->load(['type', 'roomStatus'])
+            ]);
             
         } catch (\Exception $e) {
-            \Log::error('Housekeeping stats error: ' . $e->getMessage());
-            return back()->with('error', 'Erreur lors du chargement des statistiques');
+            Log::error('Scan API error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur: ' . $e->getMessage()
+            ], 500);
         }
     }
 }
