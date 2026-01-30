@@ -991,4 +991,48 @@ class HousekeepingController extends Controller
             ], 500);
         }
     }
+
+    // À la fin de HousekeepingController.php, avant la dernière }
+    /**
+     * Méthode vide pour monthly-stats (page simple)
+     */
+    public function monthlyStats()
+    {
+        return view('housekeeping.monthly-stats', [
+            'message' => 'Les statistiques mensuelles seront disponibles prochainement.',
+            'stats' => [
+                'cleaned_this_month' => 0,
+                'maintenance_this_month' => 0,
+                'average_cleaning_time' => '0h',
+            ]
+        ]);
+    }
+
+    /**
+     * Méthode placeholder pour assigner une femme de chambre
+     */
+    public function assignCleaner(Request $request, Room $room)
+    {
+        // Simple placeholder pour l'instant
+        return back()->with('info', 'Fonctionnalité d\'assignation en développement.');
+    }
+
+    /**
+     * Méthode placeholder pour mettre à jour la priorité
+     */
+    public function updatePriority(Request $request, Room $room)
+    {
+        // Simple placeholder pour l'instant
+        return back()->with('info', 'Fonctionnalité de priorité en développement.');
+    }
+
+    /**
+     * Méthode placeholder pour l'export
+     */
+    public function export(Request $request)
+    {
+        // Simple placeholder pour l'instant
+        return back()->with('info', 'Fonctionnalité d\'export en développement.');
+    }
+
 }

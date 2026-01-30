@@ -521,7 +521,6 @@ Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'check
         Route::middleware('checkrole:Super,Admin,Housekeeping')->group(function () {
             Route::post('/start-cleaning', [HousekeepingController::class, 'startCleaning'])->name('start-cleaning');
             Route::post('/finish-cleaning', [HousekeepingController::class, 'finishCleaning'])->name('finish-cleaning');
-            Route::post('/mark-cleaned', [HousekeepingController::class, 'markCleaned'])->name('mark-cleaned');
             Route::post('/mark-inspection', [HousekeepingController::class, 'markInspection'])->name('mark-inspection');
             Route::post('/mark-maintenance', [HousekeepingController::class, 'markMaintenance'])->name('mark-maintenance');
             Route::post('/complete-inspection', [HousekeepingController::class, 'completeInspection'])->name('complete-inspection');

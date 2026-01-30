@@ -233,8 +233,8 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <form action="{{ route('housekeeping.mark-cleaned', $room->id) }}" 
-                                                  method="POST" style="display: inline;">
+                                            <form action="{{ route('housekeeping.finish-cleaning', $room->id) }}" method="POST"
+                                                style="display: inline;">
                                                 @csrf
                                                 <button type="submit" class="btn btn-sm btn-success">
                                                     <i class="fas fa-check me-1"></i>
