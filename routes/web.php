@@ -177,7 +177,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         Route::get('/{type}', [TypeController::class, 'show'])->name('show');
     });
 
-    // ==================== CHAMBRES ====================
+   // ==================== CHAMBRES ====================
     Route::prefix('room')->name('room.')->group(function () {
         // Routes CRUD complètes pour admins - TOUTES AVANT LA ROUTE {room}
         Route::middleware('checkrole:Super,Admin')->group(function () {
@@ -187,6 +187,15 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
             Route::get('/{room}/edit', [RoomController::class, 'edit'])->name('edit');
             Route::put('/{room}', [RoomController::class, 'update'])->name('update');
             Route::delete('/{room}', [RoomController::class, 'destroy'])->name('destroy');
+            
+            // === NOUVELLES ROUTES POUR MAINTENANCE ===
+            Route::post('/{room}/maintenance-toggle', [RoomController::class, 'toggleMaintenance'])
+                ->name('maintenance.toggle');
+            Route::get('/{room}/status-history', [RoomController::class, 'statusHistory'])
+                ->name('status.history');
+            Route::post('/sync-statuses', [RoomController::class, 'syncStatuses'])
+                ->name('sync.statuses');
+            // =========================================
         });
         
         // Routes de lecture pour tous (admins et réceptionnistes)
@@ -195,7 +204,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         // IMPORTANT: La route show DOIT être définie EN DERNIER
         Route::get('/{room}', [RoomController::class, 'show'])->name('show');
     });
-
     // ==================== STATUTS DE CHAMBRES ====================
     // Seulement pour admins
     Route::resource('roomstatus', RoomStatusController::class)->middleware('checkrole:Super,Admin');

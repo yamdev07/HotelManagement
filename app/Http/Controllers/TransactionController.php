@@ -952,28 +952,50 @@ class TransactionController extends Controller
         
         return true;
     }
+    
 
-    /**
-     * Vérifier disponibilité chambre
-     */
     private function isRoomAvailable($roomId, $checkIn, $checkOut, $excludeTransactionId = null): bool
     {
-        $query = Transaction::where('room_id', $roomId)
-            ->where('status', '!=', 'cancelled')
-            ->where(function($query) use ($checkIn, $checkOut) {
-                $query->whereBetween('check_in', [$checkIn, $checkOut])
-                      ->orWhereBetween('check_out', [$checkIn, $checkOut])
-                      ->orWhere(function($q) use ($checkIn, $checkOut) {
-                          $q->where('check_in', '<', $checkIn)
-                            ->where('check_out', '>', $checkOut);
-                      });
-            });
+        // Convertir en objets Carbon pour une meilleure comparaison
+        $requestCheckIn = Carbon::parse($checkIn);
+        $requestCheckOut = Carbon::parse($checkOut);
         
-        if ($excludeTransactionId) {
-            $query->where('id', '!=', $excludeTransactionId);
+        // Chercher les réservations actives pour cette chambre
+        $existingReservations = Transaction::where('room_id', $roomId)
+            ->whereNotIn('status', ['cancelled', 'completed', 'no_show'])
+            ->when($excludeTransactionId, function($query) use ($excludeTransactionId) {
+                $query->where('id', '!=', $excludeTransactionId);
+            })
+            ->get();
+        
+        // Vérifier chaque réservation existante
+        foreach ($existingReservations as $reservation) {
+            $resCheckIn = Carbon::parse($reservation->check_in);
+            $resCheckOut = Carbon::parse($reservation->check_out);
+            
+            // Vérifier s'il y a chevauchement
+            if (
+                // La nouvelle réservation commence pendant une réservation existante
+                ($requestCheckIn >= $resCheckIn && $requestCheckIn < $resCheckOut) ||
+                // La nouvelle réservation se termine pendant une réservation existante
+                ($requestCheckOut > $resCheckIn && $requestCheckOut <= $resCheckOut) ||
+                // La nouvelle réservation englobe une réservation existante
+                ($requestCheckIn <= $resCheckIn && $requestCheckOut >= $resCheckOut)
+            ) {
+                Log::info('Conflit de réservation détecté', [
+                    'room_id' => $roomId,
+                    'nouvelle_periode' => $requestCheckIn->format('Y-m-d') . ' à ' . $requestCheckOut->format('Y-m-d'),
+                    'reservation_existante' => [
+                        'id' => $reservation->id,
+                        'periode' => $resCheckIn->format('Y-m-d') . ' à ' . $resCheckOut->format('Y-m-d'),
+                        'status' => $reservation->status,
+                    ]
+                ]);
+                return false;
+            }
         }
         
-        return !$query->exists();
+        return true;
     }
 
     /**

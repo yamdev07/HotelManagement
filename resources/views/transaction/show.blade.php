@@ -185,7 +185,7 @@
                 </div>
                 <div class="action-buttons">
                     <!-- Gestion du statut (pour admin) -->
-                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
+                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                         <!-- COMBO BOX DE STATUT -->
                         <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST" class="status-select-form">
                             @csrf
@@ -206,7 +206,7 @@
                     @endif
                     
                     <!-- Actions rapides -->
-                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
+                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                         @if($transaction->status == 'reservation')
                             <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
                                 @csrf
