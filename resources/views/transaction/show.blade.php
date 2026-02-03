@@ -156,6 +156,17 @@
         color: white;
         border: none;
     }
+    
+    .btn-extend {
+        background-color: #ffc107;
+        color: #212529;
+        border: none;
+    }
+    
+    .btn-extend:hover {
+        background-color: #e0a800;
+        color: #212529;
+    }
 </style>
 
 <div class="container-fluid">
@@ -214,7 +225,13 @@
                             </form>
                         @endif
                         
-                        @if($transaction->status !== 'cancelled' && !$isExpired)
+                        @if(in_array($transaction->status, ['reservation', 'active']))
+                            <a href="{{ route('transaction.extend', $transaction) }}" class="btn btn-extend btn-sm">
+                                <i class="fas fa-calendar-plus me-1"></i>Prolonger
+                            </a>
+                        @endif
+                        
+                        @if(!in_array($transaction->status, ['cancelled', 'no_show', 'completed']))
                             <a href="{{ route('transaction.edit', $transaction) }}" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-edit me-1"></i>Modifier
                             </a>
@@ -278,6 +295,9 @@
             <i class="fas fa-bed me-2"></i>
             <strong>🏨 DANS L'HÔTEL</strong> - Le client est actuellement en séjour.
             Départ prévu : <strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y à H:i') }}</strong>
+            @if(\Carbon\Carbon::parse($transaction->check_out)->isPast())
+                <br><span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>La date de départ est dépassée. Considérez une prolongation.</span>
+            @endif
         </div>
     @elseif($transaction->status == 'completed')
         <div class="alert alert-info alert-status alert-status-completed mb-4">
@@ -584,6 +604,12 @@
                                 <a href="{{ route('transaction.edit', $transaction) }}" 
                                    class="btn btn-primary mb-2">
                                     <i class="fas fa-edit me-2"></i>Modifier la réservation
+                                </a>
+                            @endif
+                            
+                            @if(in_array($transaction->status, ['reservation', 'active']))
+                                <a href="{{ route('transaction.extend', $transaction) }}" class="btn btn-warning mb-2">
+                                    <i class="fas fa-calendar-plus me-2"></i>Prolonger le séjour
                                 </a>
                             @endif
                             

@@ -8,6 +8,7 @@ use App\Models\Room;
 use App\Models\Payment;
 use App\Models\ReceptionistAction;
 use App\Models\ReceptionistSession;
+use App\Models\History;
 use App\Repositories\Interface\TransactionRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -1164,5 +1165,156 @@ class TransactionController extends Controller
         
         return redirect()->route('transaction.index')
             ->with('info', 'Fonction d\'exportation à implémenter');
+    }
+
+    /**
+     * Prolonger une réservation
+     */
+    public function extend(Transaction $transaction)
+    {
+        // Vérifier les permissions
+        if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])) {
+            abort(403, 'Accès non autorisé.');
+        }
+        
+        // Vérifier si la réservation peut être prolongée
+        if (!in_array($transaction->status, ['reservation', 'active'])) {
+            return redirect()->route('transaction.show', $transaction)
+                ->with('error', 'Seules les réservations et séjours en cours peuvent être prolongés.');
+        }
+        
+        // Vérifier si la chambre est disponible pour prolongation
+        $currentCheckOut = Carbon::parse($transaction->check_out);
+        $today = Carbon::now();
+        
+        // Si la date de départ est déjà passée, on propose de prolonger à partir d'aujourd'hui
+        $suggestedDate = $currentCheckOut->isPast() ? $today->copy()->addDay() : $currentCheckOut->copy()->addDay();
+        
+        $transaction->load(['customer.user', 'room.type', 'room.roomStatus']);
+        
+        return view('transaction.extend', compact('transaction', 'suggestedDate'));
+    }
+
+    /**
+     * Traiter la prolongation d'une réservation
+     */
+    public function processExtend(Request $request, Transaction $transaction)
+    {
+        // Vérifier les permissions
+        if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])) {
+            abort(403, 'Accès non autorisé.');
+        }
+        
+        // Validation
+        $validator = Validator::make($request->all(), [
+            'new_check_out' => 'required|date|after:' . $transaction->check_out->format('Y-m-d'),
+            'additional_nights' => 'required|integer|min:1|max:30',
+            'notes' => 'nullable|string|max:500',
+        ], [
+            'new_check_out.required' => 'La nouvelle date de départ est requise',
+            'new_check_out.after' => 'La nouvelle date de départ doit être après la date actuelle (' . $transaction->check_out->format('d/m/Y') . ')',
+            'additional_nights.required' => 'Le nombre de nuits supplémentaires est requis',
+            'additional_nights.min' => 'Vous devez ajouter au moins 1 nuit',
+            'additional_nights.max' => 'Vous ne pouvez pas ajouter plus de 30 nuits',
+        ]);
+        
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+        
+        // Vérifier la disponibilité de la chambre
+        $newCheckOut = $request->new_check_out;
+        
+        if (!$this->isRoomAvailable($transaction->room_id, $transaction->check_in->format('Y-m-d'), $newCheckOut, $transaction->id)) {
+            return redirect()->back()
+                ->with('error', 'Cette chambre n\'est pas disponible pour la période de prolongation.')
+                ->withInput();
+        }
+        
+        try {
+            DB::beginTransaction();
+            
+            // Sauvegarder l'état avant modification
+            $beforeState = [
+                'check_out' => $transaction->check_out->format('Y-m-d'),
+                'total_price' => $transaction->getTotalPrice(),
+                'notes' => $transaction->notes
+            ];
+            
+            // Calculer le prix supplémentaire
+            $additionalNights = $request->additional_nights;
+            $additionalPrice = $additionalNights * $transaction->room->price;
+            $newTotalPrice = $transaction->getTotalPrice() + $additionalPrice;
+            
+            // Mettre à jour la réservation
+            $transaction->update([
+                'check_out' => $newCheckOut,
+                'notes' => ($transaction->notes ? $transaction->notes . "\n---\n" : '') . 
+                        'Prolongation: ' . now()->format('d/m/Y H:i') . 
+                        ' - ' . $additionalNights . ' nuit(s) supplémentaire(s)' .
+                        ($request->notes ? ' - ' . $request->notes : ''),
+            ]);
+            
+            // Enregistrer dans l'historique
+            History::create([
+                'transaction_id' => $transaction->id,
+                'user_id' => auth()->id(),
+                'action' => 'extend',
+                'description' => 'Prolongation du séjour de ' . $additionalNights . ' nuit(s)',
+                'old_values' => json_encode($beforeState),
+                'new_values' => json_encode([
+                    'check_out' => $transaction->check_out->format('Y-m-d'),
+                    'total_price' => $newTotalPrice,
+                    'notes' => $transaction->notes
+                ]),
+                'notes' => $request->notes
+            ]);
+            
+            // Enregistrer l'action si réceptionniste
+            if (auth()->user()->role === 'Receptionist') {
+                $this->logReceptionistAction(
+                    actionType: 'reservation',
+                    actionSubtype: 'extend',
+                    actionable: $transaction,
+                    actionData: [
+                        'additional_nights' => $additionalNights,
+                        'additional_price' => $additionalPrice,
+                        'new_check_out' => $newCheckOut,
+                        'old_check_out' => $beforeState['check_out']
+                    ],
+                    beforeState: $beforeState,
+                    afterState: [
+                        'check_out' => $transaction->check_out->format('Y-m-d'),
+                        'total_price' => $newTotalPrice,
+                        'notes' => $transaction->notes
+                    ],
+                    notes: 'Prolongation de ' . $additionalNights . ' nuit(s)'
+                );
+            }
+            
+            DB::commit();
+            
+            // Message de succès
+            $message = "✅ Séjour prolongé avec succès !<br>";
+            $message .= "<strong>+{$additionalNights} nuit(s)</strong> ajoutée(s)<br>";
+            $message .= "Nouvelle date de départ : <strong>" . Carbon::parse($newCheckOut)->format('d/m/Y') . "</strong><br>";
+            $message .= "Supplément : <strong>" . number_format($additionalPrice, 0, ',', ' ') . " CFA</strong><br>";
+            $message .= "Nouveau total : <strong>" . number_format($newTotalPrice, 0, ',', ' ') . " CFA</strong>";
+            
+            return redirect()->route('transaction.show', $transaction)
+                ->with('success', $message);
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur prolongation séjour:', [
+                'error' => $e->getMessage(),
+                'transaction_id' => $transaction->id
+            ]);
+            
+            return redirect()->back()
+                ->with('error', 'Erreur lors de la prolongation: ' . $e->getMessage());
+        }
     }
 }
