@@ -126,7 +126,7 @@ class TransactionController extends Controller
         return view('transaction.edit', compact('transaction'));
     }
 
-    /**
+   /**
      * Mettre à jour une transaction existante
      */
     public function update(Request $request, Transaction $transaction)
@@ -169,19 +169,65 @@ class TransactionController extends Controller
         try {
             DB::beginTransaction();
             
-            // Sauvegarder l'état avant modification
+            // Sauvegarder l'état AVANT modification
             $beforeState = [
-                'check_in' => $transaction->check_in->format('Y-m-d'),
-                'check_out' => $transaction->check_out->format('Y-m-d'),
-                'total_price' => $transaction->getTotalPrice(),
+                'check_in' => $transaction->check_in->format('Y-m-d H:i:s'),
+                'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
+                'total_price' => $transaction->total_price,
                 'notes' => $transaction->notes
             ];
             
-            // Mettre à jour
+            // Calculer l'ANCIEN prix (avant modification)
+            $oldCheckIn = Carbon::parse($transaction->check_in);
+            $oldCheckOut = Carbon::parse($transaction->check_out);
+            $oldNights = $oldCheckIn->diffInDays($oldCheckOut);
+            $oldTotalPrice = $transaction->total_price;
+            
+            // Mettre à jour les dates
             $transaction->update([
                 'check_in' => $request->check_in,
                 'check_out' => $request->check_out,
                 'notes' => $request->notes ?? $transaction->notes,
+            ]);
+            
+            // RECHARGER la transaction pour avoir les nouvelles dates
+            $transaction->refresh();
+            
+            // FORCER le recalcul du prix total
+            $newTotalPrice = $transaction->getTotalPrice(); // Cette méthode doit être corrigée
+            
+            // Mettre à jour le champ total_price avec le nouveau calcul
+            $transaction->total_price = $newTotalPrice;
+            $transaction->save();
+            
+            // Calculer les nouvelles nuits
+            $newCheckIn = Carbon::parse($transaction->check_in);
+            $newCheckOut = Carbon::parse($transaction->check_out);
+            $newNights = $newCheckIn->diffInDays($newCheckOut);
+            
+            // Créer un historique détaillé
+            History::create([
+                'transaction_id' => $transaction->id,
+                'user_id' => auth()->id(),
+                'action' => 'date_change',
+                'description' => 'Modification des dates : ' . 
+                                $oldNights . ' nuit(s) → ' . $newNights . ' nuit(s)',
+                'old_values' => json_encode([
+                    'check_in' => $beforeState['check_in'],
+                    'check_out' => $beforeState['check_out'],
+                    'total_price' => $oldTotalPrice,
+                    'nights' => $oldNights,
+                    'room_price_per_night' => $transaction->room->price ?? 0,
+                ]),
+                'new_values' => json_encode([
+                    'check_in' => $transaction->check_in->format('Y-m-d H:i:s'),
+                    'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
+                    'total_price' => $newTotalPrice,
+                    'nights' => $newNights,
+                    'room_price_per_night' => $transaction->room->price ?? 0,
+                    'calculated_at' => now()->format('Y-m-d H:i:s'),
+                ]),
+                'notes' => $request->notes ?? 'Modification des dates de séjour'
             ]);
             
             // Enregistrer l'action si réceptionniste
@@ -191,35 +237,60 @@ class TransactionController extends Controller
                     actionSubtype: 'update',
                     actionable: $transaction,
                     actionData: [
-                        'old_dates' => $beforeState,
+                        'old_dates' => [
+                            'check_in' => $beforeState['check_in'],
+                            'check_out' => $beforeState['check_out'],
+                            'nights' => $oldNights,
+                            'price' => $oldTotalPrice
+                        ],
                         'new_dates' => [
-                            'check_in' => $transaction->check_in->format('Y-m-d'),
-                            'check_out' => $transaction->check_out->format('Y-m-d')
+                            'check_in' => $transaction->check_in->format('Y-m-d H:i:s'),
+                            'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
+                            'nights' => $newNights,
+                            'price' => $newTotalPrice
                         ]
                     ],
                     beforeState: $beforeState,
                     afterState: [
-                        'check_in' => $transaction->check_in->format('Y-m-d'),
-                        'check_out' => $transaction->check_out->format('Y-m-d'),
-                        'total_price' => $transaction->getTotalPrice(),
+                        'check_in' => $transaction->check_in->format('Y-m-d H:i:s'),
+                        'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
+                        'total_price' => $newTotalPrice,
                         'notes' => $transaction->notes
                     ],
-                    notes: 'Modification des dates de réservation'
+                    notes: 'Modification des dates de réservation avec recalcul du prix'
                 );
             }
             
             DB::commit();
             
-            // Calculer le changement de prix
-            $oldPrice = $transaction->getTotalPrice();
-            $transaction->refresh();
-            $newPrice = $transaction->getTotalPrice();
+            // Message détaillé
+            $priceChange = $newTotalPrice - $oldTotalPrice;
+            $priceChangeFormatted = number_format(abs($priceChange), 0, ',', ' ') . ' CFA';
             
-            $message = "Réservation #{$transaction->id} mise à jour avec succès.";
-            if ($oldPrice != $newPrice) {
-                $oldPriceFormatted = number_format($oldPrice, 0, ',', ' ') . ' CFA';
-                $newPriceFormatted = number_format($newPrice, 0, ',', ' ') . ' CFA';
-                $message .= " Nouveau total: {$newPriceFormatted} (ancien: {$oldPriceFormatted})";
+            $message = "✅ Réservation #{$transaction->id} mise à jour avec succès.<br>";
+            $message .= "<strong>Anciennes dates:</strong> " . 
+                    Carbon::parse($beforeState['check_in'])->format('d/m/Y') . " → " . 
+                    Carbon::parse($beforeState['check_out'])->format('d/m/Y') . 
+                    " ({$oldNights} nuit(s))<br>";
+            $message .= "<strong>Nouvelles dates:</strong> " . 
+                    $newCheckIn->format('d/m/Y') . " → " . 
+                    $newCheckOut->format('d/m/Y') . 
+                    " ({$newNights} nuit(s))<br>";
+            $message .= "<strong>Ancien total:</strong> " . 
+                    number_format($oldTotalPrice, 0, ',', ' ') . " CFA<br>";
+            $message .= "<strong>Nouveau total:</strong> " . 
+                    number_format($newTotalPrice, 0, ',', ' ') . " CFA<br>";
+            
+            if ($priceChange != 0) {
+                $changeType = $priceChange > 0 ? 'majoration' : 'réduction';
+                $message .= "<strong>{$changeType}:</strong> " . 
+                        ($priceChange > 0 ? '+' : '') . 
+                        number_format($priceChange, 0, ',', ' ') . " CFA<br>";
+                
+                // Afficher un avertissement si le prix a diminué
+                if ($priceChange < 0) {
+                    $message .= "<div class='alert alert-warning mt-2'>⚠️ Le prix a diminué. Vérifiez les paiements.</div>";
+                }
             }
             
             return redirect()->route('transaction.show', $transaction)
@@ -1237,16 +1308,14 @@ class TransactionController extends Controller
             DB::beginTransaction();
             
             // Sauvegarder l'état avant modification
-            $beforeState = [
-                'check_out' => $transaction->check_out->format('Y-m-d'),
-                'total_price' => $transaction->getTotalPrice(),
-                'notes' => $transaction->notes
-            ];
+            $oldCheckOut = $transaction->check_out->format('Y-m-d H:i:s');
+            $oldTotalPrice = $transaction->total_price;
+            $oldNights = Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out);
             
             // Calculer le prix supplémentaire
             $additionalNights = $request->additional_nights;
-            $additionalPrice = $additionalNights * $transaction->room->price;
-            $newTotalPrice = $transaction->getTotalPrice() + $additionalPrice;
+            $roomPricePerNight = $transaction->room->price;
+            $additionalPrice = $additionalNights * $roomPricePerNight;
             
             // Mettre à jour la réservation
             $transaction->update([
@@ -1257,17 +1326,46 @@ class TransactionController extends Controller
                         ($request->notes ? ' - ' . $request->notes : ''),
             ]);
             
+            // FORCER le recalcul du prix total
+            $transaction->refresh();
+            $newTotalPrice = $transaction->getTotalPrice(); // Doit recalculer automatiquement
+            
+            // Vérifier que le nouveau prix inclut bien la prolongation
+            $expectedNewPrice = $oldTotalPrice + $additionalPrice;
+            if (abs($newTotalPrice - $expectedNewPrice) > 1) {
+                Log::warning("Incohérence prix prolongation transaction #{$transaction->id}", [
+                    'old_price' => $oldTotalPrice,
+                    'additional_price' => $additionalPrice,
+                    'expected_new_price' => $expectedNewPrice,
+                    'actual_new_price' => $newTotalPrice,
+                    'difference' => $newTotalPrice - $expectedNewPrice
+                ]);
+                
+                // Corriger manuellement si nécessaire
+                $transaction->total_price = $expectedNewPrice;
+                $transaction->save();
+                $newTotalPrice = $expectedNewPrice;
+            }
+            
             // Enregistrer dans l'historique
             History::create([
                 'transaction_id' => $transaction->id,
                 'user_id' => auth()->id(),
                 'action' => 'extend',
                 'description' => 'Prolongation du séjour de ' . $additionalNights . ' nuit(s)',
-                'old_values' => json_encode($beforeState),
+                'old_values' => json_encode([
+                    'check_out' => $oldCheckOut,
+                    'total_price' => $oldTotalPrice,
+                    'nights' => $oldNights,
+                    'room_price_per_night' => $roomPricePerNight,
+                ]),
                 'new_values' => json_encode([
-                    'check_out' => $transaction->check_out->format('Y-m-d'),
+                    'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
                     'total_price' => $newTotalPrice,
-                    'notes' => $transaction->notes
+                    'nights' => Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out),
+                    'room_price_per_night' => $roomPricePerNight,
+                    'additional_nights' => $additionalNights,
+                    'additional_price' => $additionalPrice,
                 ]),
                 'notes' => $request->notes
             ]);
@@ -1282,15 +1380,22 @@ class TransactionController extends Controller
                         'additional_nights' => $additionalNights,
                         'additional_price' => $additionalPrice,
                         'new_check_out' => $newCheckOut,
-                        'old_check_out' => $beforeState['check_out']
+                        'old_check_out' => $oldCheckOut,
+                        'room_price_per_night' => $roomPricePerNight
                     ],
-                    beforeState: $beforeState,
+                    beforeState: [
+                        'check_out' => $oldCheckOut,
+                        'total_price' => $oldTotalPrice,
+                        'nights' => $oldNights
+                    ],
                     afterState: [
-                        'check_out' => $transaction->check_out->format('Y-m-d'),
+                        'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
                         'total_price' => $newTotalPrice,
+                        'nights' => Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out),
                         'notes' => $transaction->notes
                     ],
-                    notes: 'Prolongation de ' . $additionalNights . ' nuit(s)'
+                    notes: 'Prolongation de ' . $additionalNights . ' nuit(s) - ' . 
+                        number_format($additionalPrice, 0, ',', ' ') . ' CFA'
                 );
             }
             
@@ -1298,10 +1403,16 @@ class TransactionController extends Controller
             
             // Message de succès
             $message = "✅ Séjour prolongé avec succès !<br>";
-            $message .= "<strong>+{$additionalNights} nuit(s)</strong> ajoutée(s)<br>";
-            $message .= "Nouvelle date de départ : <strong>" . Carbon::parse($newCheckOut)->format('d/m/Y') . "</strong><br>";
-            $message .= "Supplément : <strong>" . number_format($additionalPrice, 0, ',', ' ') . " CFA</strong><br>";
-            $message .= "Nouveau total : <strong>" . number_format($newTotalPrice, 0, ',', ' ') . " CFA</strong>";
+            $message .= "<strong>+{$additionalNights} nuit(s)</strong> ajoutée(s) à " . 
+                    number_format($roomPricePerNight, 0, ',', ' ') . " CFA/nuit<br>";
+            $message .= "<strong>Supplément :</strong> " . 
+                    number_format($additionalPrice, 0, ',', ' ') . " CFA<br>";
+            $message .= "Nouvelle date de départ : <strong>" . 
+                    Carbon::parse($newCheckOut)->format('d/m/Y') . "</strong><br>";
+            $message .= "<strong>Ancien total :</strong> " . 
+                    number_format($oldTotalPrice, 0, ',', ' ') . " CFA<br>";
+            $message .= "<strong>Nouveau total :</strong> " . 
+                    number_format($newTotalPrice, 0, ',', ' ') . " CFA";
             
             return redirect()->route('transaction.show', $transaction)
                 ->with('success', $message);
