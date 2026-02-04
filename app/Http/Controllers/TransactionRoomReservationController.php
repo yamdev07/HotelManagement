@@ -89,9 +89,17 @@ class TransactionRoomReservationController extends Controller
                     ->with('error', 'Vous devez être connecté pour créer un client');
             }
             
-            // Créer un nouveau client avec l'utilisateur connecté
-            $customerData = $validated;
-            $customerData['user_id'] = $user->id; // Utilisateur connecté
+            // Créer un nouveau client - seulement les champs nécessaires
+            $customerData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'gender' => $validated['gender'],
+                'address' => $validated['address'] ?? null,
+                'job' => $validated['job'] ?? null,
+                'birthdate' => $validated['birthdate'] ?? null,
+                'user_id' => $user->id,
+            ];
             
             if ($request->hasFile('avatar')) {
                 $avatarPath = $request->file('avatar')->store('avatars', 'public');
@@ -353,7 +361,7 @@ class TransactionRoomReservationController extends Controller
                     'check_out' => $checkOut,
                     'person_count' => $personCount,
                     'total_price' => $totalPrice,
-                    'total_payment' => $downPayment, // ✅ Votre colonne s'appelle total_payment
+                    'total_payment' => $downPayment,
                     'status' => 'reservation',
                     'notes' => sprintf(
                         'Réservation créée par %s | %d nuit(s) | %s FCFA/nuit | Acompte: %s FCFA | Méthode: %s',
@@ -403,15 +411,13 @@ class TransactionRoomReservationController extends Controller
                     \Log::info("💰 Création du paiement: " . number_format($downPayment, 0, ',', ' ') . " FCFA");
                     
                     try {
-                        // Votre table payments a les colonnes : id, user_id, transaction_id, amount, payment_method, notes, reference, created_at, updated_at, status, cancelled_at, cancelled_by, cancel_reason, deleted_at
-                        
                         $paymentData = [
                             'user_id' => $userId,
                             'transaction_id' => $transaction->id,
-                            'amount' => $downPayment, // ✅ Votre colonne s'appelle 'amount' pas 'price'
+                            'amount' => $downPayment,
                             'payment_method' => $paymentMethod,
                             'reference' => 'PAY-' . $transaction->id . '-' . time(),
-                            'status' => 'completed', // Défaut est 'pending', mais pour acompte on met 'completed'
+                            'status' => 'completed',
                             'notes' => sprintf(
                                 'Acompte réservation | Agent: %s | Client: %s | Chambre: %s | Nuits: %d',
                                 $user->name ?? 'Système',
@@ -430,7 +436,6 @@ class TransactionRoomReservationController extends Controller
                                     $payment = $paymentRepository->create($paymentData);
                                     \Log::info('✅ Paiement créé via create() - ID: ' . ($payment->id ?? 'N/A'));
                                 } elseif (method_exists($paymentRepository, 'store')) {
-                                    // Créer une requête simulée
                                     $mockRequest = new \Illuminate\Http\Request();
                                     $mockRequest->merge([
                                         'amount' => $downPayment,
@@ -463,32 +468,28 @@ class TransactionRoomReservationController extends Controller
                 
                 // ============ MISE À JOUR STATUT CHAMBRE ============
                 try {
-                    // Vérifier si la colonne room_status_id existe dans la table rooms
+                    // Vérifier si la colonne existe
                     $roomColumns = DB::select("SHOW COLUMNS FROM rooms LIKE 'room_status_id'");
                     if (!empty($roomColumns)) {
-                        $room->update(['room_status_id' => 2]); // 2 = Réservée
-                        \Log::info('✅ Statut chambre mis à jour: Réservée');
+                        // Déterminer le bon statut
+                        $now = Carbon::now();
+                        $checkIn = Carbon::parse($validated['check_in']);
+                        
+                        if ($checkIn->isPast()) {
+                            // Date d'arrivée passée mais client pas encore arrivé
+                            $room->update(['room_status_id' => 2]); // Occupée
+                            \Log::info('✅ Statut chambre: Occupée (arrivée prévue passée)');
+                        } else {
+                            // Réservation future
+                            $room->update(['room_status_id' => 3]); // Réservée
+                            \Log::info('✅ Statut chambre: Réservée (future)');
+                        }
                     } else {
                         \Log::info('ℹ️ Colonne room_status_id non trouvée dans la table rooms');
                     }
                 } catch (\Exception $e) {
                     \Log::warning('⚠️ Erreur mise à jour statut chambre: ' . $e->getMessage());
                 }
-                
-                // ============ ÉVÉNEMENTS ============
-                try {
-                    if (class_exists(NewReservationEvent::class)) {
-                        event(new NewReservationEvent($transaction, $user->name ?? 'Système'));
-                        \Log::info('✅ Événement NewReservationEvent envoyé');
-                    }
-                    if (class_exists(RefreshDashboardEvent::class)) {
-                        event(new RefreshDashboardEvent());
-                        \Log::info('✅ Événement RefreshDashboardEvent envoyé');
-                    }
-                } catch (\Exception $e) {
-                    \Log::warning('⚠️ Erreur lors de l\'envoi des événements: ' . $e->getMessage());
-                }
-                
                 // ============ CONFIRMATION ============
                 DB::commit();
                 \Log::info('✅ Transaction BDD confirmée avec succès');
@@ -520,14 +521,12 @@ class TransactionRoomReservationController extends Controller
                 \Log::error('❌ Erreur pendant la transaction BDD: ' . $e->getMessage());
                 \Log::error('❌ Stack trace: ' . $e->getTraceAsString());
                 
-                // Log supplémentaire pour debug SQL
                 if ($e instanceof \Illuminate\Database\QueryException) {
                     \Log::error('❌ SQL Error Code: ' . $e->getCode());
                     \Log::error('❌ SQL Error Message: ' . $e->getMessage());
                     \Log::error('❌ SQL Query: ' . $e->getSql());
                     \Log::error('❌ SQL Bindings: ' . json_encode($e->getBindings()));
                     
-                    // Message d'erreur spécifique
                     if (strpos($e->getMessage(), 'Column not found') !== false) {
                         preg_match("/Column not found.*'([^']+)'/", $e->getMessage(), $matches);
                         $column = $matches[1] ?? 'inconnue';
@@ -546,7 +545,6 @@ class TransactionRoomReservationController extends Controller
             \Log::error('❌ SQL Query: ' . $e->getSql());
             \Log::error('❌ SQL Bindings: ' . json_encode($e->getBindings()));
             
-            // Détection d'erreurs spécifiques
             $errorMessage = 'Erreur de base de données lors de la réservation.';
             
             if (strpos($e->getMessage(), 'Column not found') !== false) {
@@ -571,6 +569,7 @@ class TransactionRoomReservationController extends Controller
                 ->withInput();
         }
     }
+
     /**
      * Construire le message de succès avec l'utilisateur
      */
@@ -625,14 +624,6 @@ class TransactionRoomReservationController extends Controller
     }
 
     /**
-     * Construire le message de succès (ancienne version)
-     */
-    private function buildSuccessMessage($transaction, $customer, $room, $checkIn, $checkOut, $days, $totalPrice, $downPayment)
-    {
-        return $this->buildSuccessMessageWithUser($transaction, $customer, $room, $checkIn, $checkOut, $days, $totalPrice, $downPayment, auth()->user());
-    }
-
-    /**
      * Extraire le nom du champ à partir du message d'erreur SQL
      */
     private function extractFieldName($errorMessage)
@@ -666,14 +657,56 @@ class TransactionRoomReservationController extends Controller
      */
     private function getOccupiedRoomID($stayFrom, $stayUntil)
     {
-        return Transaction::where(function($query) use ($stayFrom, $stayUntil) {
-                $query->where([['check_in', '<=', $stayFrom], ['check_out', '>=', $stayUntil]])
-                      ->orWhere([['check_in', '>=', $stayFrom], ['check_in', '<=', $stayUntil]])
-                      ->orWhere([['check_out', '>=', $stayFrom], ['check_out', '<=', $stayUntil]]);
+        \Log::info('🔍 === DEBUG getOccupiedRoomID SIMPLIFIÉ ===');
+        \Log::info('📅 Période:', ['from' => $stayFrom, 'until' => $stayUntil]);
+        
+        // LOGIQUE CORRECTE ET SIMPLE :
+        // Une chambre est occupée si sa réservation chevauche notre période
+        $occupied = Transaction::where('status', '!=', 'cancelled')
+            ->where(function($query) use ($stayFrom, $stayUntil) {
+                // La condition unique et correcte :
+                // Réservation commence avant notre départ ET termine après notre arrivée
+                $query->where('check_in', '<', $stayUntil)
+                    ->where('check_out', '>', $stayFrom);
             })
-            ->where('status', '!=', 'cancelled')
             ->pluck('room_id')
             ->unique();
+        
+        \Log::info('📊 Résultat:', [
+            'occupied_count' => $occupied->count(),
+            'occupied_ids' => $occupied->toArray()
+        ]);
+        
+        // DEBUG spécifique chambre 101
+        $room101 = Room::where('number', '101')->first();
+        if ($room101) {
+            $is101Occupied = $occupied->contains($room101->id);
+            \Log::info('🔍 Chambre 101 analyse:', [
+                'room_id' => $room101->id,
+                'is_occupied' => $is101Occupied ? 'OUI' : 'NON',
+                'why' => $is101Occupied ? 'check_in < stayUntil ET check_out > stayFrom' : 'Pas de chevauchement'
+            ]);
+            
+            // Calcul manuel pour comprendre
+            $reservation = Transaction::where('room_id', $room101->id)
+                ->where('status', '!=', 'cancelled')
+                ->where('check_out', '>', now())
+                ->first();
+                
+            if ($reservation) {
+                \Log::info('🔍 Calcul manuel:', [
+                    'reservation' => $reservation->check_in . ' → ' . $reservation->check_out,
+                    'condition1' => $reservation->check_in . ' < ' . $stayUntil . '? ' . 
+                                ($reservation->check_in < $stayUntil ? 'OUI' : 'NON'),
+                    'condition2' => $reservation->check_out . ' > ' . $stayFrom . '? ' . 
+                                ($reservation->check_out > $stayFrom ? 'OUI' : 'NON'),
+                    'result' => ($reservation->check_in < $stayUntil && $reservation->check_out > $stayFrom) ? 
+                            'OCCUPÉE' : 'LIBRE'
+                ]);
+            }
+        }
+        
+        return $occupied;
     }
 
     /**

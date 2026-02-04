@@ -37,8 +37,19 @@
                 <div class="nav-section">
                     <div class="nav-section-title">Dashboard</div>
                     
+                    @php
+                        // Solution robuste pour éviter les erreurs str_starts_with
+                        $currentRoute = Route::currentRouteName() ?: '';
+                        $activeClass = function($routeName, $exact = true) use ($currentRoute) {
+                            if ($exact) {
+                                return $currentRoute === $routeName ? 'active' : '';
+                            }
+                            return str_starts_with($currentRoute, $routeName) ? 'active' : '';
+                        };
+                    @endphp
+                    
                     <a href="{{ route('dashboard.index') }}" 
-                       class="nav-item {{ Route::currentRouteName() == 'dashboard.index' ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('dashboard.index') }}">
                         <div class="nav-icon">
                             <i class="fas fa-chart-pie"></i>
                         </div>
@@ -57,8 +68,15 @@
                     <!-- Check-in -->
                     @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                         @php
-                            $currentRoute = Route::currentRouteName() ?? '';
-                            $isCheckinActive = in_array($currentRoute, ['checkin.index', 'checkin.search', 'checkin.show', 'checkin.direct', 'checkin.process-direct-checkin', 'checkin.quick', 'checkin.availability']);
+                            $isCheckinActive = in_array($currentRoute, [
+                                'checkin.index', 
+                                'checkin.search', 
+                                'checkin.show', 
+                                'checkin.direct', 
+                                'checkin.process-direct-checkin', 
+                                'checkin.quick', 
+                                'checkin.availability'
+                            ]);
                         @endphp
                         
                         @if(Route::has('checkin.index'))
@@ -77,7 +95,7 @@
                         <!-- Disponibilité -->
                         @if(Route::has('availability.dashboard'))
                         <a href="{{ route('availability.dashboard') }}"
-                        class="nav-item {{ str_contains(Route::currentRouteName(), 'availability.') ? 'active' : '' }}">
+                        class="nav-item {{ $activeClass('availability.', false) }}">
                             <div class="nav-icon">
                                 <i class="fas fa-tachometer-alt"></i>
                             </div>
@@ -91,7 +109,7 @@
                         <!-- Transactions (Réservations & Séjours) -->
                         @if(Route::has('transaction.index'))
                         <a href="{{ route('transaction.index') }}"
-                           class="nav-item {{ str_contains(Route::currentRouteName(), 'transaction.') && !str_contains(Route::currentRouteName(), 'transaction.reservation.') ? 'active' : '' }}">
+                           class="nav-item {{ $activeClass('transaction.', false) && !str_contains($currentRoute, 'transaction.reservation.') ? 'active' : '' }}">
                             <div class="nav-icon">
                                 <i class="fas fa-shopping-bag"></i>
                             </div>
@@ -111,7 +129,7 @@
                         <!-- Réservations Rapides -->
                         @if(Route::has('transaction.reservation.createIdentity'))
                         <a href="{{ route('transaction.reservation.createIdentity') }}"
-                           class="nav-item {{ Route::currentRouteName() == 'transaction.reservation.createIdentity' ? 'active' : '' }}">
+                           class="nav-item {{ $activeClass('transaction.reservation.createIdentity') }}">
                             <div class="nav-icon">
                                 <i class="fas fa-plus-circle"></i>
                             </div>
@@ -126,7 +144,7 @@
                     <!-- Caisse -->
                     @if(Route::has('cashier.dashboard'))
                     <a href="{{ route('cashier.dashboard') }}"
-                       class="nav-item {{ str_contains(Route::currentRouteName(), 'cashier.') ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('cashier.', false) }}">
                         <div class="nav-icon">
                             <i class="fas fa-cash-register"></i>
                         </div>
@@ -146,7 +164,7 @@
                     <!-- Restaurant -->
                     @if(Route::has('restaurant.index'))
                     <a href="{{ route('restaurant.index') }}"
-                       class="nav-item {{ str_contains(Route::currentRouteName(), 'restaurant.') ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('restaurant.', false) }}">
                         <div class="nav-icon">
                             <i class="fas fa-utensils"></i>
                         </div>
@@ -162,20 +180,6 @@
                         </div>
                     </a>
                     @endif
-
-                    <!-- Housekeeping (Vue seulement pour réceptionnistes) -->
-                    @if(Route::has('housekeeping.index'))
-                    <a href="{{ route('housekeeping.index') }}"
-                       class="nav-item {{ str_contains(Route::currentRouteName(), 'housekeeping.') ? 'active' : '' }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-broom"></i>
-                        </div>
-                        <div class="nav-content">
-                            <div class="nav-title">Housekeeping</div>
-                            <div class="nav-subtitle">État des chambres</div>
-                        </div>
-                    </a>
-                    @endif
                 </div>
                 @endif
 
@@ -187,7 +191,7 @@
                     <!-- Clients -->
                     @if(Route::has('customer.index'))
                     <a href="{{ route('customer.index') }}"
-                       class="nav-item {{ Route::currentRouteName() == 'customer.index' ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('customer.index') }}">
                         <div class="nav-icon">
                             <i class="fas fa-users"></i>
                         </div>
@@ -207,7 +211,7 @@
                     <!-- Chambres -->
                     @if(Route::has('room.index'))
                     <a href="{{ route('room.index') }}"
-                       class="nav-item {{ Route::currentRouteName() == 'room.index' ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('room.index') }}">
                         <div class="nav-icon">
                             <i class="fas fa-bed"></i>
                         </div>
@@ -227,7 +231,7 @@
                     <!-- Types de Chambres (Admin seulement) -->
                     @if(Route::has('type.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
                     <a href="{{ route('type.index') }}"
-                       class="nav-item restricted {{ Route::currentRouteName() == 'type.index' ? 'active' : '' }}">
+                       class="nav-item restricted {{ $activeClass('type.index') }}">
                         <div class="nav-icon">
                             <i class="fas fa-layer-group"></i>
                         </div>
@@ -246,8 +250,11 @@
 
                     <!-- Paiements -->
                     @if(Route::has('payments.index'))
+                    @php
+                        $isPaymentActive = $activeClass('payments.', false) || $activeClass('payment.', false);
+                    @endphp
                     <a href="{{ route('payments.index') }}"
-                       class="nav-item {{ str_contains(Route::currentRouteName(), 'payments.') || str_contains(Route::currentRouteName(), 'payment.') ? 'active' : '' }}">
+                       class="nav-item {{ $isPaymentActive ? 'active' : '' }}">
                         <div class="nav-icon">
                             <i class="fas fa-credit-card"></i>
                         </div>
@@ -267,7 +274,7 @@
                     <!-- Réservations Avancées -->
                     @if(Route::has('reservation.index') && auth()->user()->role == 'Receptionist')
                     <a href="{{ route('reservation.index') }}"
-                       class="nav-item {{ Route::currentRouteName() == 'reservation.index' ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('reservation.index') }}">
                         <div class="nav-icon">
                             <i class="fas fa-calendar-alt"></i>
                         </div>
@@ -288,14 +295,14 @@
                     <div class="nav-section-title">Nettoyage</div>
 
                     <!-- Dashboard Housekeeping -->
-                    @if(Route::has('housekeeping.index'))
-                    <a href="{{ route('housekeeping.index') }}"
-                       class="nav-item {{ str_contains(Route::currentRouteName(), 'housekeeping.') ? 'active' : '' }}">
+                    @if(Route::has('housekeeping.dashboard'))
+                    <a href="{{ route('housekeeping.dashboard') }}"
+                       class="nav-item {{ $activeClass('housekeeping.', false) }}">
                         <div class="nav-icon">
                             <i class="fas fa-broom"></i>
                         </div>
                         <div class="nav-content">
-                            <div class="nav-title">Dashboard</div>
+                            <div class="nav-title">Housekeeping</div>
                             <div class="nav-subtitle">
                                 @if(auth()->user()->role == 'Receptionist')
                                     <span class="text-info">👁️</span> Vue des chambres
@@ -310,7 +317,7 @@
                     <!-- Statuts des Chambres (Admin seulement) -->
                     @if(Route::has('roomstatus.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
                     <a href="{{ route('roomstatus.index') }}"
-                       class="nav-item {{ Route::currentRouteName() == 'roomstatus.index' ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('roomstatus.index') }}">
                         <div class="nav-icon">
                             <i class="fas fa-flag"></i>
                         </div>
@@ -324,7 +331,7 @@
                     <!-- Équipements (Admin seulement) -->
                     @if(Route::has('facility.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
                     <a href="{{ route('facility.index') }}"
-                       class="nav-item {{ Route::currentRouteName() == 'facility.index' ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('facility.index') }}">
                         <div class="nav-icon">
                             <i class="fas fa-tools"></i>
                         </div>
@@ -345,7 +352,7 @@
                     <!-- Utilisateurs -->
                     @if(Route::has('user.index') && auth()->user()->role == 'Super')
                     <a href="{{ route('user.index') }}"
-                       class="nav-item restricted {{ Route::currentRouteName() == 'user.index' ? 'active' : '' }}">
+                       class="nav-item restricted {{ $activeClass('user.index') }}">
                         <div class="nav-icon">
                             <i class="fas fa-user-cog"></i>
                         </div>
@@ -359,7 +366,7 @@
                     <!-- Rapports -->
                     @if(Route::has('reports.index'))
                     <a href="{{ route('reports.index') }}"
-                       class="nav-item {{ Route::currentRouteName() == 'reports.index' ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('reports.index') }}">
                         <div class="nav-icon">
                             <i class="fas fa-file-alt"></i>
                         </div>
@@ -373,7 +380,7 @@
                     <!-- Journal d'Activité -->
                     @if(Route::has('activity.index'))
                     <a href="{{ route('activity.index') }}"
-                       class="nav-item {{ Route::currentRouteName() == 'activity.index' ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('activity.index') }}">
                         <div class="nav-icon">
                             <i class="fas fa-history"></i>
                         </div>
@@ -393,7 +400,7 @@
                     <!-- Profil -->
                     @if(Route::has('profile.index'))
                     <a href="{{ route('profile.index') }}"
-                       class="nav-item {{ str_contains(Route::currentRouteName(), 'profile.') ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('profile.', false) }}">
                         <div class="nav-icon">
                             <i class="fas fa-user"></i>
                         </div>
@@ -407,7 +414,7 @@
                     <!-- Mes Réservations (pour clients) -->
                     @if(auth()->user()->role == 'Customer' && Route::has('transaction.myReservations'))
                     <a href="{{ route('transaction.myReservations') }}"
-                       class="nav-item {{ Route::currentRouteName() == 'transaction.myReservations' ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('transaction.myReservations') }}">
                         <div class="nav-icon">
                             <i class="fas fa-book"></i>
                         </div>
@@ -421,7 +428,7 @@
                     <!-- Notifications -->
                     @if(Route::has('notification.index'))
                     <a href="{{ route('notification.index') }}"
-                       class="nav-item {{ Route::currentRouteName() == 'notification.index' ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('notification.index') }}">
                         <div class="nav-icon">
                             <i class="fas fa-bell"></i>
                             @if(auth()->user()->unreadNotifications->count() > 0)
@@ -438,7 +445,7 @@
                     <!-- Sessions Réceptionniste -->
                     @if(auth()->user()->role == 'Receptionist' && Route::has('receptionist.session.active'))
                     <a href="{{ route('receptionist.session.active') }}"
-                       class="nav-item {{ str_contains(Route::currentRouteName(), 'receptionist.session.') ? 'active' : '' }}">
+                       class="nav-item {{ $activeClass('receptionist.session.', false) }}">
                         <div class="nav-icon">
                             <i class="fas fa-user-clock"></i>
                         </div>
@@ -541,7 +548,7 @@
     </div>
 </aside>
 
-<!-- STYLES CSS MIS À JOUR -->
+<!-- STYLES CSS -->
 <style>
 .sidebar {
     width: 280px;
@@ -724,7 +731,6 @@
     line-height: 1.3;
 }
 
-/* Style pour les permissions réceptionnistes */
 .nav-subtitle .text-success {
     color: #10b981 !important;
     font-weight: 600;
@@ -851,7 +857,6 @@
     100% { opacity: 1; }
 }
 
-/* Badge colors */
 .bg-danger { background: linear-gradient(135deg, #dc2626, #b91c1c); }
 .bg-primary { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
 .bg-success { background: linear-gradient(135deg, #10b981, #047857); }
@@ -859,7 +864,6 @@
 .bg-info { background: linear-gradient(135deg, #06b6d4, #0891b2); }
 .bg-secondary { background: linear-gradient(135deg, #64748b, #475569); }
 
-/* Style pour les items restreints */
 .nav-item.restricted {
     opacity: 0.9;
     position: relative;
@@ -875,12 +879,10 @@
     opacity: 0.5;
 }
 
-/* Bordures et séparateurs */
 .border-white-10 {
     border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Scrollbar améliorée */
 .sidebar-body::-webkit-scrollbar {
     width: 6px;
 }
@@ -899,7 +901,6 @@
     background: rgba(255, 255, 255, 0.3);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
     .sidebar {
         width: 280px;
@@ -948,7 +949,6 @@
     }
 }
 
-/* Animation pour le collapse */
 .sidebar.collapsed {
     width: 80px;
 }
@@ -993,7 +993,7 @@
 }
 </style>
 
-<!-- SCRIPT POUR LA SIDEBAR MIS À JOUR -->
+<!-- SCRIPT POUR LA SIDEBAR -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Toggle sidebar
@@ -1006,7 +1006,6 @@ document.addEventListener('DOMContentLoaded', function() {
             sidebar.classList.toggle('collapsed');
             localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
             
-            // Changer l'icône
             const icon = toggleSidebar.querySelector('i');
             if (sidebar.classList.contains('collapsed')) {
                 icon.className = 'fas fa-chevron-right';
@@ -1022,7 +1021,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    // Restaurer l'état de la sidebar
     if (localStorage.getItem('sidebarCollapsed') === 'true') {
         sidebar.classList.add('collapsed');
         if (toggleSidebar) {
@@ -1031,17 +1029,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Mettre à jour la date et l'heure en temps réel
     function updateDateTime() {
         const now = new Date();
-        const options = { 
-            weekday: 'short', 
-            day: '2-digit', 
-            month: '2-digit', 
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        };
         const datetimeElement = document.getElementById('sidebar-datetime');
         if (datetimeElement) {
             datetimeElement.textContent = now.toLocaleDateString('fr-FR', {
@@ -1055,9 +1044,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     updateDateTime();
-    setInterval(updateDateTime, 60000); // Mettre à jour toutes les minutes
+    setInterval(updateDateTime, 60000);
     
-    // Fermer la sidebar au clic externe sur mobile
     document.addEventListener('click', function(event) {
         if (window.innerWidth < 768 && sidebar && !sidebar.contains(event.target) && 
             toggleSidebarSm && !toggleSidebarSm.contains(event.target)) {
@@ -1065,141 +1053,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Déconnexion avec confirmation et feedback visuel
     const logoutLink = document.querySelector('a[onclick*="logout-form"]');
     if (logoutLink) {
         logoutLink.addEventListener('click', function(e) {
             e.preventDefault();
             
-            // Créer une modal de confirmation personnalisée
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: rgba(0, 0, 0, 0.8);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                z-index: 9999;
-                backdrop-filter: blur(2px);
-            `;
-            
-            modal.innerHTML = `
-                <div style="background: linear-gradient(135deg, #064e3b, #047857);
-                          padding: 30px;
-                          border-radius: 15px;
-                          max-width: 400px;
-                          width: 90%;
-                          color: white;
-                          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-                          border: 1px solid rgba(255, 255, 255, 0.1);">
-                    <h3 style="margin-top: 0; margin-bottom: 15px;">
-                        <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
-                    </h3>
-                    <p style="opacity: 0.9; margin-bottom: 25px;">
-                        Êtes-vous sûr de vouloir vous déconnecter de votre session ?
-                    </p>
-                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                        <button id="cancel-logout" style="
-                            padding: 10px 20px;
-                            background: rgba(255, 255, 255, 0.1);
-                            border: 1px solid rgba(255, 255, 255, 0.2);
-                            color: white;
-                            border-radius: 8px;
-                            cursor: pointer;
-                            transition: all 0.2s ease;
-                        ">Annuler</button>
-                        <button id="confirm-logout" style="
-                            padding: 10px 20px;
-                            background: linear-gradient(135deg, #dc2626, #b91c1c);
-                            border: none;
-                            color: white;
-                            border-radius: 8px;
-                            cursor: pointer;
-                            font-weight: 600;
-                            transition: all 0.2s ease;
-                        ">Déconnecter</button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Gestion des clics
-            document.getElementById('cancel-logout').addEventListener('click', function() {
-                document.body.removeChild(modal);
-            });
-            
-            document.getElementById('confirm-logout').addEventListener('click', function() {
-                // Afficher l'animation de chargement
-                document.getElementById('confirm-logout').innerHTML = `
-                    <i class="fas fa-spinner fa-spin"></i> Déconnexion...
-                `;
-                document.getElementById('confirm-logout').disabled = true;
-                document.getElementById('cancel-logout').disabled = true;
-                
-                // Soumettre le formulaire après un délai pour l'animation
-                setTimeout(() => {
-                    document.getElementById('logout-form').submit();
-                }, 1000);
-            });
-            
-            // Fermer la modal en cliquant à l'extérieur
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    document.body.removeChild(modal);
-                }
-            });
+            if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+                document.getElementById('logout-form').submit();
+            }
         });
     }
 
-    // Mettre à jour l'indicateur de session pour réceptionnistes
-    if ({{ auth()->user()->role == 'Receptionist' ? 'true' : 'false' }}) {
-        function updateSessionIndicator() {
-            fetch('/receptionist/session/active')
-                .then(response => response.json())
-                .then(data => {
-                    const indicator = document.querySelector('.session-indicator');
-                    if (indicator) {
-                        if (data.active) {
-                            // Formater la durée
-                            let durationText = '';
-                            if (data.duration) {
-                                const hours = Math.floor(data.duration / 3600);
-                                const minutes = Math.floor((data.duration % 3600) / 60);
-                                durationText = ` (${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')})`;
-                            }
-                            
-                            indicator.innerHTML = `
-                                <small class="text-success">
-                                    <i class="fas fa-circle fa-xs"></i> Session active${durationText}
-                                </small>
-                            `;
-                        } else {
-                            indicator.innerHTML = `
-                                <small class="text-warning">
-                                    <i class="fas fa-exclamation-circle fa-xs"></i> Session inactive
-                                </small>
-                            `;
-                        }
-                    }
-                })
-                .catch(() => {
-                    console.log('Erreur de mise à jour de session');
-                });
-        }
-        
-        // Mettre à jour toutes les minutes
-        updateSessionIndicator();
-        setInterval(updateSessionIndicator, 60000);
-    }
-
-    // Améliorer l'expérience mobile
     if (window.innerWidth < 768) {
-        // Fermer la sidebar après un clic sur un lien
         const navLinks = document.querySelectorAll('.nav-item[href]');
         navLinks.forEach(link => {
             link.addEventListener('click', () => {
@@ -1208,58 +1073,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 }, 300);
             });
         });
-        
-        // Ajouter un overlay pour fermer la sidebar
-        const overlay = document.createElement('div');
-        overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-            display: none;
-            backdrop-filter: blur(2px);
-        `;
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('show');
-            overlay.style.display = 'none';
-        });
-        document.body.appendChild(overlay);
-        
-        // Afficher l'overlay quand la sidebar s'ouvre
-        sidebar.addEventListener('transitionend', () => {
-            if (sidebar.classList.contains('show')) {
-                overlay.style.display = 'block';
-            } else {
-                overlay.style.display = 'none';
-            }
-        });
     }
-
-    // Animation douce pour les items de navigation
-    const navItems = document.querySelectorAll('.nav-item');
-    navItems.forEach((item, index) => {
-        item.style.animationDelay = `${index * 30}ms`;
-        item.style.animation = 'fadeIn 0.3s ease forwards';
-        item.style.opacity = '0';
-    });
-
-    // Ajouter une animation CSS
-    const style = document.createElement('style');
-    style.textContent = `
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateX(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-    `;
-    document.head.appendChild(style);
 });
 </script>

@@ -602,42 +602,60 @@ class Transaction extends Model
     }
 
     /**
-     * Calculer le prix total - MÉTHODE CORRIGÉE
+     * Calculer le prix total - MÉTHODE CORRECTE
      */
     public function getTotalPrice()
     {
+        // SI le champ total_price existe et est positif, vérifier sa cohérence
         if ($this->total_price && $this->total_price > 0) {
+            $calculated = $this->calculateTotalPrice();
+            
+            // Si différence > 1 CFA, corriger
+            if (abs($calculated - (float)$this->total_price) > 1) {
+                \Log::info("Correction automatique prix transaction #{$this->id}", [
+                    'ancien' => $this->total_price,
+                    'calculé' => $calculated,
+                    'différence' => $calculated - $this->total_price
+                ]);
+                
+                $this->total_price = $calculated;
+                $this->saveQuietly();
+            }
+            
             return (float) $this->total_price;
         }
+        
+        // Sinon, calculer et sauvegarder
+        $calculated = $this->calculateTotalPrice();
+        $this->total_price = $calculated;
+        $this->saveQuietly();
+        
+        return (float) $calculated;
+    }
 
+    /**
+     * Calcul dynamique du prix
+     */
+    private function calculateTotalPrice()
+    {
         try {
-            $day = Helper::getDateDifference($this->check_in, $this->check_out);
-            $room_price = $this->room ? $this->room->price : 0;
-
-            $total = $room_price * $day;
+            $checkIn = Carbon::parse($this->check_in);
+            $checkOut = Carbon::parse($this->check_out);
             
-            if ($total > 0) {
-                $oldPrice = $this->total_price;
-                $this->total_price = $total;
-                $this->saveQuietly();
-                
-                // Logger la mise à jour du prix
-                if ($oldPrice != $total) {
-                    activity()
-                        ->performedOn($this)
-                        ->withProperties([
-                            'old_price' => $oldPrice,
-                            'new_price' => $total,
-                            'nights' => $day,
-                            'room_price' => $room_price,
-                        ])
-                        ->log('a mis à jour le prix total');
-                }
-            }
-
-            return (float) $total;
+            // Calculer les nuits (arrondi supérieur si plus de 12h)
+            $hours = $checkIn->diffInHours($checkOut);
+            $nights = ceil($hours / 24);
+            
+            // Au moins une nuit
+            $nights = max(1, $nights);
+            
+            // Prix par nuit
+            $pricePerNight = $this->room->price ?? 0;
+            
+            return $nights * $pricePerNight;
+            
         } catch (\Exception $e) {
-            Log::error("Erreur calcul prix total transaction #{$this->id}: " . $e->getMessage());
+            \Log::error("Erreur calcul prix transaction #{$this->id}: " . $e->getMessage());
             return 0;
         }
     }

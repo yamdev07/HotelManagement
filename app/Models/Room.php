@@ -17,13 +17,16 @@ class Room extends Model
         'type_id',
         'room_status_id',
         'number',
+        'name',
         'capacity',
         'price',
         'view',
         'description',
         'size',
-        'floor',
-        'floor_plan_url'
+        'last_cleaned_at',
+        'maintenance_started_at',
+        'maintenance_ended_at',
+        'maintenance_reason'
     ];
 
     protected $appends = [
@@ -36,20 +39,27 @@ class Room extends Model
         'facilities_list',
         'status_label',
         'status_color',
-        'status_icon'
+        'status_icon',
+        'display_name',
+        'full_name'
     ];
 
-    // Constantes pour les statuts - VERSION COHÉRENTE
-    const STATUS_AVAILABLE = 1;      // Disponible
-    const STATUS_MAINTENANCE = 2;    // En maintenance
-    const STATUS_CLEANING = 3;       // À nettoyer/En nettoyage
-    const STATUS_OCCUPIED = 4;       // Occupée
-    const STATUS_RESERVED = 5;       // Réservée (optionnel)
+    protected $casts = [
+        'last_cleaned_at' => 'datetime',
+        'maintenance_started_at' => 'datetime',
+        'maintenance_ended_at' => 'datetime',
+        'price' => 'decimal:2'
+    ];
+
+    // Constantes pour les statuts
+    const STATUS_AVAILABLE = 1;
+    const STATUS_MAINTENANCE = 2;
+    const STATUS_CLEANING = 3;
+    const STATUS_OCCUPIED = 4;
+    const STATUS_RESERVED = 5;
 
     /**
      * Configuration du logging d'activité
-     *
-     * @return LogOptions
      */
     public function getActivitylogOptions(): LogOptions
     {
@@ -69,14 +79,13 @@ class Room extends Model
 
     /**
      * Créer un snapshot pour le journal d'activité
-     * Cela évite "Objet supprimé" quand la chambre est supprimée
      */
     public function getLogSnapshot(): array
     {
         return [
             'number' => $this->number,
+            'name' => $this->name,
             'type' => $this->type->name ?? $this->type_id ?? 'N/A',
-            'floor' => $this->floor ?? 'N/A',
             'status' => $this->status_label,
             'price' => $this->price,
             'capacity' => $this->capacity,
@@ -108,7 +117,7 @@ class Room extends Model
     }
 
     /**
-     * Relation avec les équipements (facilities)
+     * Relation avec les équipements
      */
     public function facilities()
     {
@@ -116,7 +125,7 @@ class Room extends Model
     }
 
     /**
-     * Relation avec les transactions (réservations)
+     * Relation avec les transactions
      */
     public function transactions()
     {
@@ -124,7 +133,7 @@ class Room extends Model
     }
 
     /**
-     * Réservations actives (check-in effectué)
+     * Réservations actives
      */
     public function activeTransactions()
     {
@@ -145,7 +154,7 @@ class Room extends Model
     }
 
     /**
-     * Transaction actuelle (en cours aujourd'hui)
+     * Transaction actuelle
      */
     public function currentTransaction()
     {
@@ -206,7 +215,6 @@ class Room extends Model
         $checkIn = Carbon::parse($checkIn)->startOfDay();
         $checkOut = Carbon::parse($checkOut)->startOfDay();
         
-        // Vérifier d'abord le statut de la chambre
         if ($this->room_status_id != self::STATUS_AVAILABLE) {
             return false;
         }
@@ -214,12 +222,8 @@ class Room extends Model
         $query = $this->transactions()
             ->whereNotIn('status', ['cancelled', 'no_show', 'completed'])
             ->where(function($q) use ($checkIn, $checkOut) {
-                // Chevauchement de dates
-                $q->where(function($innerQ) use ($checkIn, $checkOut) {
-                    // Réservation commence pendant le séjour demandé
-                    $innerQ->where('check_in', '<', $checkOut)
-                           ->where('check_out', '>', $checkIn);
-                });
+                $q->where('check_in', '<', $checkOut)
+                  ->where('check_out', '>', $checkIn);
             });
         
         if ($excludeTransactionId) {
@@ -266,11 +270,9 @@ class Room extends Model
         $startDate = $startFrom ? Carbon::parse($startFrom) : now();
         $startDate = $startDate->startOfDay();
         
-        // Vérifier les 90 prochains jours
         for ($i = 0; $i < 90; $i++) {
             $checkDate = $startDate->copy()->addDays($i);
             
-            // Vérifier si disponible ce jour-là
             if (!$this->isOccupiedOnDate($checkDate) && $this->room_status_id == self::STATUS_AVAILABLE) {
                 return $checkDate;
             }
@@ -322,7 +324,6 @@ class Room extends Model
             $date->addDay();
         }
         
-        // Ajouter la dernière période
         if ($currentPeriod) {
             $duration = $currentPeriod['start']->diffInDays($currentPeriod['end']) + 1;
             if ($duration >= $minNights) {
@@ -430,6 +431,31 @@ class Room extends Model
     }
 
     /**
+     * Accesseur: Nom d'affichage
+     */
+    public function getDisplayNameAttribute()
+    {
+        if (!empty($this->name)) {
+            return $this->name;
+        }
+        
+        $typeName = $this->type ? $this->type->name : 'Room';
+        return "{$typeName} #{$this->number}";
+    }
+
+    /**
+     * Accesseur: Nom complet
+     */
+    public function getFullNameAttribute()
+    {
+        if (!empty($this->name)) {
+            return "{$this->name} (#{$this->number})";
+        }
+        
+        return "Room #{$this->number}";
+    }
+
+    /**
      * Accesseur: Disponible aujourd'hui
      */
     public function getIsAvailableTodayAttribute()
@@ -492,10 +518,8 @@ class Room extends Model
         return $query->where('room_status_id', self::STATUS_AVAILABLE)
             ->whereDoesntHave('transactions', function($q) use ($checkIn, $checkOut) {
                 $q->whereIn('status', ['active', 'reservation', 'confirmed'])
-                  ->where(function($sq) use ($checkIn, $checkOut) {
-                      $sq->where('check_in', '<', $checkOut)
-                        ->where('check_out', '>', $checkIn);
-                  });
+                  ->where('check_in', '<', $checkOut)
+                  ->where('check_out', '>', $checkIn);
             });
     }
 
@@ -587,7 +611,6 @@ class Room extends Model
     {
         $oldStatus = $this->room_status_id;
         
-        // Déterminer le nouveau statut
         $isOccupied = $this->isOccupiedOnDate(now());
         $newStatus = $isOccupied ? self::STATUS_OCCUPIED : self::STATUS_AVAILABLE;
         
@@ -596,7 +619,6 @@ class Room extends Model
             'last_cleaned_at' => now(),
         ]);
         
-        // Logger l'action
         if ($user) {
             activity()
                 ->causedBy($user)
@@ -630,7 +652,6 @@ class Room extends Model
         
         $this->update($data);
         
-        // Logger l'action
         if ($user) {
             activity()
                 ->causedBy($user)
@@ -661,7 +682,6 @@ class Room extends Model
             'maintenance_ended_at' => now(),
         ]);
         
-        // Logger l'action
         if ($user) {
             activity()
                 ->causedBy($user)
@@ -690,7 +710,6 @@ class Room extends Model
             'room_status_id' => self::STATUS_CLEANING,
         ]);
         
-        // Logger l'action
         if ($user) {
             activity()
                 ->causedBy($user)
@@ -719,7 +738,6 @@ class Room extends Model
         $maintenanceRooms = self::where('room_status_id', self::STATUS_MAINTENANCE)->count();
         $cleaningRooms = self::where('room_status_id', self::STATUS_CLEANING)->count();
         
-        // Calculer l'occupation réelle basée sur les transactions
         $actualOccupied = self::whereHas('transactions', function($q) {
             $q->whereIn('status', ['active', 'reservation'])
               ->where('check_in', '<=', now())
@@ -729,7 +747,7 @@ class Room extends Model
         $stats = [
             'total_rooms' => $totalRooms,
             'available_rooms' => $availableRooms,
-            'occupied_rooms' => $actualOccupied, // Utiliser l'occupation réelle
+            'occupied_rooms' => $actualOccupied,
             'maintenance_rooms' => $maintenanceRooms,
             'cleaning_rooms' => $cleaningRooms,
             'occupancy_rate' => $totalRooms > 0 ? round(($actualOccupied / $totalRooms) * 100, 1) : 0
@@ -762,7 +780,6 @@ class Room extends Model
         $totalNights = 0;
         
         foreach ($transactions as $transaction) {
-            // Calculer la portion de la réservation dans la période
             $overlapStart = max($transaction->check_in, $startDate);
             $overlapEnd = min($transaction->check_out, $endDate);
             
@@ -889,69 +906,12 @@ class Room extends Model
             ->log('a reçu un check-out');
     }
 
-    /**
-     * Boot du modèle
-     */
     protected static function boot()
     {
         parent::boot();
 
-        static::created(function ($room) {
-            // Logger la création
-            activity()
-                ->causedBy(auth()->user())
-                ->performedOn($room)
-                ->withProperties([
-                    'number' => $room->number,
-                    'type' => $room->type->name ?? 'N/A',
-                    'price' => $room->price,
-                    'capacity' => $room->capacity,
-                ])
-                ->log('a créé une nouvelle chambre');
-        });
-
-        static::updating(function ($room) {
-            // Vérifier les changements importants
-            $changes = [];
-            
-            if ($room->isDirty('room_status_id')) {
-                $changes['status'] = [
-                    'from' => $room->getOriginal('room_status_id'),
-                    'to' => $room->room_status_id,
-                ];
-            }
-            
-            if ($room->isDirty('price')) {
-                $changes['price'] = [
-                    'from' => $room->getOriginal('price'),
-                    'to' => $room->price,
-                ];
-            }
-            
-            if ($room->isDirty('capacity')) {
-                $changes['capacity'] = [
-                    'from' => $room->getOriginal('capacity'),
-                    'to' => $room->capacity,
-                ];
-            }
-            
-            // Stocker les changements pour les logs
-            $room->log_changes = $changes;
-        });
-
-        static::updated(function ($room) {
-            // Logger les changements s'il y en a
-            if (isset($room->log_changes) && !empty($room->log_changes)) {
-                activity()
-                    ->causedBy(auth()->user())
-                    ->performedOn($room)
-                    ->withProperties($room->log_changes)
-                    ->log('a modifié la chambre');
-                
-                // Nettoyer la propriété temporaire
-                unset($room->log_changes);
-            }
-        });
+        // Le logging est géré automatiquement par Spatie Activitylog
+        // Pas besoin de code supplémentaire
     }
 
     /**
@@ -976,6 +936,8 @@ class Room extends Model
         return [
             'id' => $this->id,
             'number' => $this->number,
+            'name' => $this->name,
+            'display_name' => $this->display_name,
             'type' => $this->type->name ?? 'N/A',
             'status' => $this->status_label,
             'status_color' => $this->status_color,
@@ -987,5 +949,114 @@ class Room extends Model
             'average_stay' => $this->getAverageStayDuration() . ' nuits',
             'facilities' => $this->facilities->count(),
         ];
+    }
+
+    /**
+     * Méthode helper pour obtenir le nom d'affichage
+     */
+    public function getNameOrNumber()
+    {
+        return $this->name ?? "Room #{$this->number}";
+    }
+
+    /**
+     * Méthode pour mettre à jour le nom de la chambre
+     */
+    public function updateName($name, $user = null)
+    {
+        $oldName = $this->name;
+        
+        $this->update(['name' => $name]);
+        
+        if ($user) {
+            activity()
+                ->causedBy($user)
+                ->performedOn($this)
+                ->withProperties([
+                    'old_name' => $oldName,
+                    'new_name' => $name,
+                ])
+                ->log('a renommé la chambre');
+        }
+        
+        return $this;
+    }
+
+    /**
+     * Méthode pour obtenir les prochaines réservations
+     */
+    public function upcomingReservations($limit = 5)
+    {
+        return $this->transactions()
+            ->whereIn('status', ['reservation', 'confirmed'])
+            ->where('check_in', '>=', now())
+            ->orderBy('check_in', 'asc')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Méthode pour vérifier si la chambre est en maintenance
+     */
+    public function isUnderMaintenance()
+    {
+        return $this->room_status_id == self::STATUS_MAINTENANCE;
+    }
+
+    /**
+     * Méthode pour vérifier si la chambre a besoin de nettoyage
+     */
+    public function needsCleaning()
+    {
+        return $this->room_status_id == self::STATUS_CLEANING;
+    }
+
+    /**
+     * Méthode pour obtenir la durée depuis le dernier nettoyage
+     */
+    public function getDaysSinceLastCleaning()
+    {
+        if (!$this->last_cleaned_at) {
+            return null;
+        }
+        
+        return $this->last_cleaned_at->diffInDays(now());
+    }
+
+    /**
+     * Méthode pour obtenir la durée de la maintenance en cours
+     */
+    public function getMaintenanceDuration()
+    {
+        if (!$this->maintenance_started_at) {
+            return null;
+        }
+        
+        return $this->maintenance_started_at->diffInHours(now());
+    }
+
+    /**
+     * Méthode pour obtenir le type avec fallback
+     */
+    public function getTypeWithFallback()
+    {
+        return $this->type ?? (object) ['name' => 'Type inconnu', 'description' => ''];
+    }
+
+    /**
+     * Méthode pour obtenir les images avec fallback
+     */
+    public function getImagesWithFallback()
+    {
+        if ($this->images->isEmpty()) {
+            return [['url' => asset('img/default/default-room.png'), 'alt' => $this->display_name]];
+        }
+        
+        return $this->images->map(function($image) {
+            return [
+                'url' => $image->getRoomImage(),
+                'alt' => $image->alt_text ?? $this->display_name
+            ];
+        });
     }
 }

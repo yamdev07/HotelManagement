@@ -713,23 +713,21 @@
                                                         </span>
                                                     @endif
                                                     
-                                                    <!-- Annuler -->
-                                                    @if($canCancel && ($isSuperAdmin || $isReceptionist))
-                                                        <button type="button" class="btn-action btn-cancel cancel-reservation-btn {{ $isReceptionist ? 'btn-receptionist' : '' }}"
-                                                                data-transaction-id="{{ $transaction->id }}"
-                                                                data-transaction-number="#{{ $transaction->id }}"
-                                                                data-customer-name="{{ $transaction->customer->name }}"
-                                                                data-user-role="{{ auth()->user()->role }}"
-                                                                data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                                title="{{ $isReceptionist ? 'Réceptionniste: Annuler la réservation' : 'Annuler la réservation' }}">
-                                                            <i class="fas fa-ban"></i>
-                                                            @if($isReceptionist)<i class="fas fa-exclamation fa-xs" style="position: absolute; top: -5px; right: -5px; color: #ffc107;"></i>@endif
-                                                        </button>
-                                                    @elseif(($isSuperAdmin || $isReceptionist) && !in_array($status, ['cancelled', 'no_show']))
-                                                        <span class="btn-action btn-cancel disabled"
-                                                              data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                              title="Non autorisé">
-                                                            <i class="fas fa-ban"></i>
+                                                    <!-- Voir la réservation -->
+                                                    @if(($isSuperAdmin || $isReceptionist))
+                                                        <a class="btn-action {{ $isReceptionist ? 'btn-receptionist' : '' }}" 
+                                                        style="background-color: #e2e3e5; color: #383d41;"
+                                                        href="{{ route('transaction.show', $transaction) }}"
+                                                        data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                        title="{{ $isReceptionist ? 'Réceptionniste: Voir la réservation' : 'Voir la réservation' }}">
+                                                            <i class="fas fa-eye"></i>
+                                                            @if($isReceptionist)<i class="fas fa-search fa-xs" style="position: absolute; top: -5px; right: -5px;"></i>@endif
+                                                        </a>
+                                                    @else
+                                                        <span class="btn-action btn-edit disabled"
+                                                            data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                            title="Modification réservée aux administrateurs">
+                                                            <i class="fas fa-eye"></i>
                                                         </span>
                                                     @endif
                                                     

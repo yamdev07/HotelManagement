@@ -39,6 +39,40 @@
         .alert-status-completed { border-left-color: #0dcaf0; }
         .alert-status-cancelled { border-left-color: #dc3545; }
         .alert-status-no_show { border-left-color: #6c757d; }
+        .time-input-group {
+            position: relative;
+        }
+        .time-input-group i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 10;
+            color: #6c757d;
+        }
+        .time-input-group input {
+            padding-left: 40px;
+        }
+        .datetime-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .datetime-date {
+            flex: 2;
+        }
+        .datetime-time {
+            flex: 1;
+        }
+        @media (max-width: 768px) {
+            .datetime-wrapper {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .datetime-date, .datetime-time {
+                width: 100%;
+            }
+        }
     </style>
 
     <div class="container-fluid">
@@ -61,8 +95,8 @@
                         <i class="fas fa-edit text-primary me-2"></i>
                         Modifier la Réservation #{{ $transaction->id }}
                     </h2>
-                    <a href="{{ route('transaction.index') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Retour
+                    <a href="{{ route('transaction.show', $transaction) }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour aux détails
                     </a>
                 </div>
                 <p class="text-muted">Modifiez les dates, statut et détails de la réservation</p>
@@ -122,11 +156,13 @@
                             <div class="alert alert-warning alert-status alert-status-reservation">
                                 <i class="fas fa-calendar-check me-2"></i>
                                 <strong>📅 Réservation</strong> - Le client n'est pas encore arrivé à l'hôtel.
+                                Arrivée prévue : <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y à H:i') }}</strong>
                             </div>
                         @elseif($transaction->status == 'active')
                             <div class="alert alert-success alert-status alert-status-active">
                                 <i class="fas fa-bed me-2"></i>
                                 <strong>🏨 Dans l'hôtel</strong> - Le client est actuellement en séjour.
+                                Départ prévu : <strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y à H:i') }}</strong>
                             </div>
                         @elseif($transaction->status == 'completed')
                             <div class="alert alert-info alert-status alert-status-completed">
@@ -141,7 +177,7 @@
                         @endif
 
                         @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
-                        <form method="POST" action="{{ route('transaction.update', $transaction->id) }}" id="edit-transaction-form">
+                        <form method="POST" action="{{ route('transaction.update', $transaction) }}" id="edit-transaction-form">
                             @csrf
                             @method('PUT')
                             
@@ -245,60 +281,96 @@
                                     @endif
                                 </h6>
                                 
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="check_in" class="form-label">Date d'Arrivée *</label>
-                                            <div class="date-picker-container">
+                                <!-- Arrivée -->
+                                <div class="row mb-4">
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">Date et Heure d'Arrivée *</label>
+                                        <div class="datetime-wrapper">
+                                            <div class="datetime-date date-picker-container">
                                                 <input type="date" 
-                                                       class="form-control @error('check_in') is-invalid @enderror" 
-                                                       id="check_in" 
-                                                       name="check_in" 
-                                                       value="{{ old('check_in', \Carbon\Carbon::parse($transaction->check_in)->format('Y-m-d')) }}"
+                                                       class="form-control @error('check_in_date') is-invalid @enderror" 
+                                                       id="check_in_date" 
+                                                       name="check_in_date" 
+                                                       value="{{ old('check_in_date', \Carbon\Carbon::parse($transaction->check_in)->format('Y-m-d')) }}"
                                                        @if(in_array($transaction->status, ['cancelled', 'no_show', 'completed'])) readonly @endif
                                                        required
                                                        min="{{ now()->format('Y-m-d') }}">
                                                 <span class="date-picker-icon">
                                                     <i class="fas fa-calendar"></i>
                                                 </span>
-                                                @error('check_in')
+                                                @error('check_in_date')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="datetime-time time-input-group">
+                                                <i class="fas fa-clock"></i>
+                                                <input type="time" 
+                                                       class="form-control @error('check_in_time') is-invalid @enderror" 
+                                                       id="check_in_time" 
+                                                       name="check_in_time" 
+                                                       value="{{ old('check_in_time', \Carbon\Carbon::parse($transaction->check_in)->format('H:i')) }}"
+                                                       @if(in_array($transaction->status, ['cancelled', 'no_show', 'completed'])) readonly @endif
+                                                       required>
+                                                @error('check_in_time')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
+                                        <small class="text-muted">Sélectionnez la date et l'heure d'arrivée du client</small>
                                     </div>
-                                    
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="check_out" class="form-label">Date de Départ *</label>
-                                            <div class="date-picker-container">
+                                </div>
+                                
+                                <!-- Départ -->
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label class="form-label fw-bold">Date et Heure de Départ *</label>
+                                        <div class="datetime-wrapper">
+                                            <div class="datetime-date date-picker-container">
                                                 <input type="date" 
-                                                       class="form-control @error('check_out') is-invalid @enderror" 
-                                                       id="check_out" 
-                                                       name="check_out" 
-                                                       value="{{ old('check_out', \Carbon\Carbon::parse($transaction->check_out)->format('Y-m-d')) }}"
+                                                       class="form-control @error('check_out_date') is-invalid @enderror" 
+                                                       id="check_out_date" 
+                                                       name="check_out_date" 
+                                                       value="{{ old('check_out_date', \Carbon\Carbon::parse($transaction->check_out)->format('Y-m-d')) }}"
                                                        @if(in_array($transaction->status, ['cancelled', 'no_show', 'completed'])) readonly @endif
                                                        required
                                                        min="{{ now()->addDay()->format('Y-m-d') }}">
                                                 <span class="date-picker-icon">
                                                     <i class="fas fa-calendar"></i>
                                                 </span>
-                                                @error('check_out')
+                                                @error('check_out_date')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="datetime-time time-input-group">
+                                                <i class="fas fa-clock"></i>
+                                                <input type="time" 
+                                                       class="form-control @error('check_out_time') is-invalid @enderror" 
+                                                       id="check_out_time" 
+                                                       name="check_out_time" 
+                                                       value="{{ old('check_out_time', \Carbon\Carbon::parse($transaction->check_out)->format('H:i')) }}"
+                                                       @if(in_array($transaction->status, ['cancelled', 'no_show', 'completed'])) readonly @endif
+                                                       required>
+                                                @error('check_out_time')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                         </div>
+                                        <small class="text-muted">Sélectionnez la date et l'heure de départ du client</small>
                                     </div>
                                 </div>
 
                                 <!-- Calcul des nuits -->
-                                <div class="nights-counter">
+                                <div class="nights-counter mt-4">
                                     <div class="row">
-                                        <div class="col-md-6">
-                                            <p class="mb-1"><strong>Nombre de Nuits :</strong></p>
+                                        <div class="col-md-4">
+                                            <p class="mb-1"><strong>Nuits :</strong></p>
                                             <div id="nights-count" class="h4 text-primary">0</div>
                                         </div>
-                                        <div class="col-md-6">
+                                        <div class="col-md-4">
+                                            <p class="mb-1"><strong>Prix/Nuit :</strong></p>
+                                            <div class="h5 text-info">{{ Helper::formatCFA($transaction->room->price) }}</div>
+                                        </div>
+                                        <div class="col-md-4">
                                             <p class="mb-1"><strong>Nouveau Total :</strong></p>
                                             <div id="new-total" class="h4 text-success">0 CFA</div>
                                         </div>
@@ -308,6 +380,8 @@
                                         <strong>Ancien total :</strong> {{ Helper::formatCFA($transaction->getTotalPrice()) }}
                                         <br>
                                         <strong>Déjà payé :</strong> {{ Helper::formatCFA($transaction->getTotalPayment()) }}
+                                        <br>
+                                        <strong>Différence :</strong> <span id="price-difference" class="fw-bold">0 CFA</span>
                                     </div>
                                 </div>
 
@@ -387,47 +461,6 @@
                             </div>
                             @endif
 
-                            <!-- Section Paiement -->
-                            <div class="mb-4">
-                                <h6 class="border-bottom pb-2 mb-3">
-                                    <i class="fas fa-money-bill-wave me-2"></i>État du Paiement
-                                </h6>
-                                <div class="row">
-                                    <div class="col-md-4">
-                                        <div class="alert alert-secondary">
-                                            <small class="d-block">Total Réservation</small>
-                                            <strong class="h5" id="current-total">{{ Helper::formatCFA($transaction->getTotalPrice()) }}</strong>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="alert alert-info">
-                                            <small class="d-block">Déjà Payé</small>
-                                            <strong class="h5">{{ Helper::formatCFA($transaction->getTotalPayment()) }}</strong>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        @php
-                                            $balance = $transaction->getTotalPrice() - $transaction->getTotalPayment();
-                                        @endphp
-                                        <div class="alert {{ $balance > 0 ? 'alert-warning' : 'alert-success' }}">
-                                            <small class="d-block">Solde à Payer</small>
-                                            <strong class="h5">{{ Helper::formatCFA($balance) }}</strong>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                @if($balance > 0)
-                                <div class="alert alert-warning">
-                                    <i class="fas fa-exclamation-triangle me-2"></i>
-                                    Cette réservation a un solde impayé de {{ Helper::formatCFA($balance) }}.
-                                    <a href="{{ route('transaction.payment.create', ['transaction' => $transaction->id]) }}" 
-                                       class="alert-link ms-2">
-                                        <i class="fas fa-plus-circle me-1"></i>Ajouter un paiement
-                                    </a>
-                                </div>
-                                @endif
-                            </div>
-
                             <!-- Notes -->
                             <div class="mb-4">
                                 <label for="notes" class="form-label">Notes supplémentaires</label>
@@ -439,7 +472,12 @@
                                 @error('notes')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
+                                <small class="text-muted">Ces notes seront ajoutées à l'historique de la réservation</small>
                             </div>
+
+                            <!-- Champs cachés pour les dates combinées -->
+                            <input type="hidden" id="check_in" name="check_in" value="{{ old('check_in', $transaction->check_in) }}">
+                            <input type="hidden" id="check_out" name="check_out" value="{{ old('check_out', $transaction->check_out) }}">
 
                             <!-- Boutons -->
                             <div class="d-flex justify-content-between mt-4">
@@ -448,13 +486,13 @@
                                         <i class="fas fa-times me-2"></i>Annuler les modifications
                                     </button>
                                     @if(in_array($transaction->status, ['reservation', 'active']) && in_array(auth()->user()->role, ['Super', 'Admin']))
-                                    <form action="{{ route('transaction.cancel', $transaction->id) }}" 
+                                    <form action="{{ route('transaction.cancel', $transaction) }}" 
                                           method="POST" 
                                           class="d-inline ms-2"
-                                          onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')">
+                                          id="cancel-form">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger">
+                                        <button type="button" class="btn btn-outline-danger" onclick="showCancelReasonModal()">
                                             <i class="fas fa-ban me-2"></i>Annuler Réservation
                                         </button>
                                     </form>
@@ -498,15 +536,28 @@
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-calendar me-2 text-muted"></i>Arrivée</span>
-                                <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</strong>
+                                <div class="text-end">
+                                    <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</strong><br>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($transaction->check_in)->format('H:i') }}</small>
+                                </div>
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-calendar me-2 text-muted"></i>Départ</span>
-                                <strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</strong>
+                                <div class="text-end">
+                                    <strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</strong><br>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($transaction->check_out)->format('H:i') }}</small>
+                                </div>
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <span><i class="fas fa-moon me-2 text-muted"></i>Nuits</span>
-                                <strong>{{ $transaction->nights }} nuit{{ $transaction->nights > 1 ? 's' : '' }}</strong>
+                                <span><i class="fas fa-moon me-2 text-muted"></i>Nuits actuelles</span>
+                                @php
+                                    $currentNights = \Carbon\Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out);
+                                @endphp
+                                <strong>{{ $currentNights }} nuit{{ $currentNights > 1 ? 's' : '' }}</strong>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-money-bill me-2 text-muted"></i>Total actuel</span>
+                                <strong>{{ Helper::formatCFA($transaction->getTotalPrice()) }}</strong>
                             </div>
                             <div class="list-group-item">
                                 <span class="d-block mb-2"><i class="fas fa-chart-line me-2 text-muted"></i>Statut Actuel</span>
@@ -535,7 +586,7 @@
                         <div class="d-grid gap-2">
                             <!-- Actions selon le statut -->
                             @if($transaction->status == 'reservation' && in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
-                                <form action="{{ route('transaction.mark-arrived', $transaction->id) }}" method="POST" class="d-grid">
+                                <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-grid">
                                     @csrf
                                     <button type="submit" class="btn btn-success mb-2">
                                         <i class="fas fa-sign-in-alt me-2"></i>Marquer comme arrivé
@@ -544,7 +595,7 @@
                             @endif
 
                             @if($transaction->status == 'active' && in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
-                                <form action="{{ route('transaction.mark-departed', $transaction->id) }}" method="POST" class="d-grid">
+                                <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-grid">
                                     @csrf
                                     <button type="submit" class="btn btn-info mb-2">
                                         <i class="fas fa-sign-out-alt me-2"></i>Marquer comme parti
@@ -552,17 +603,19 @@
                                 </form>
                             @endif
 
-                            <a href="{{ route('transaction.payment.create', ['transaction' => $transaction->id]) }}" 
+                            @if(!in_array($transaction->status, ['cancelled', 'no_show', 'completed']) && $transaction->getTotalPayment() < $transaction->getTotalPrice())
+                            <a href="{{ route('transaction.payment.create', $transaction) }}" 
                                class="btn btn-outline-success mb-2">
                                 <i class="fas fa-credit-card me-2"></i>Ajouter un Paiement
                             </a>
+                            @endif
                             
-                            <a href="{{ route('transaction.invoice', $transaction->id) }}" 
+                            <a href="{{ route('transaction.invoice', $transaction) }}" 
                                class="btn btn-outline-primary mb-2">
                                 <i class="fas fa-file-invoice me-2"></i>Voir Facture
                             </a>
                             
-                            <a href="{{ route('customer.show', $transaction->customer->id) }}" 
+                            <a href="{{ route('customer.show', $transaction->customer) }}" 
                                class="btn btn-outline-info">
                                 <i class="fas fa-user me-2"></i>Voir Profil Client
                             </a>
@@ -592,7 +645,7 @@
                             </li>
                             @endif
                         </ul>
-                        <a href="{{ route('transaction.history', $transaction->id) }}" class="btn btn-sm btn-outline-dark">
+                        <a href="{{ route('transaction.history', $transaction) }}" class="btn btn-sm btn-outline-dark">
                             <i class="fas fa-history me-1"></i> Voir l'historique complet
                         </a>
                     </div>
@@ -600,17 +653,55 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal pour la raison d'annulation -->
+    <div class="modal fade" id="cancelReasonModal" tabindex="-1" aria-labelledby="cancelReasonModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="cancelReasonModalLabel">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Confirmer l'annulation
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.</p>
+                    <div class="mb-3">
+                        <label for="modal_cancel_reason" class="form-label">Raison de l'annulation (optionnel)</label>
+                        <textarea class="form-control" id="modal_cancel_reason" rows="3" 
+                                  placeholder="Pourquoi annuler cette réservation ?"></textarea>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        L'annulation libérera la chambre et créera un remboursement si des paiements ont été effectués.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="submitCancelForm()">
+                        <i class="fas fa-ban me-2"></i>Confirmer l'annulation
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('footer')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const checkInInput = document.getElementById('check_in');
-    const checkOutInput = document.getElementById('check_out');
+    const checkInDateInput = document.getElementById('check_in_date');
+    const checkInTimeInput = document.getElementById('check_in_time');
+    const checkOutDateInput = document.getElementById('check_out_date');
+    const checkOutTimeInput = document.getElementById('check_out_time');
+    const checkInHiddenInput = document.getElementById('check_in');
+    const checkOutHiddenInput = document.getElementById('check_out');
     const nightsCount = document.getElementById('nights-count');
     const newTotal = document.getElementById('new-total');
-    const currentTotal = document.getElementById('current-total');
-    const roomPricePerNight = {{ $transaction->room->price }};
+    const priceDifference = document.getElementById('price-difference');
     const statusSelect = document.getElementById('status');
     const statusDescription = document.getElementById('status-description');
     const cancelReasonField = document.getElementById('cancel-reason-field');
@@ -618,31 +709,80 @@ document.addEventListener('DOMContentLoaded', function() {
     const saveButton = document.getElementById('save-button');
     const transactionId = {{ $transaction->id }};
     const originalStatus = "{{ $transaction->status }}";
+    const roomPricePerNight = {{ $transaction->room->price }};
+    const originalTotalPrice = {{ $transaction->getTotalPrice() }};
+    
+    // Fonction pour combiner date et heure
+    function combineDateTime(dateInput, timeInput) {
+        const date = dateInput.value;
+        const time = timeInput.value;
+        if (date && time) {
+            return `${date}T${time}`;
+        }
+        return null;
+    }
     
     // Fonction pour calculer les nuits et le total
     function calculateNightsAndTotal() {
-        const checkIn = new Date(checkInInput.value);
-        const checkOut = new Date(checkOutInput.value);
+        const checkInDateTime = combineDateTime(checkInDateInput, checkInTimeInput);
+        const checkOutDateTime = combineDateTime(checkOutDateInput, checkOutTimeInput);
         
-        if (checkIn && checkOut && checkOut > checkIn) {
-            const timeDiff = checkOut.getTime() - checkIn.getTime();
-            const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+        // Mettre à jour les champs cachés
+        if (checkInDateTime) {
+            checkInHiddenInput.value = checkInDateTime;
+        }
+        if (checkOutDateTime) {
+            checkOutHiddenInput.value = checkOutDateTime;
+        }
+        
+        if (checkInDateTime && checkOutDateTime) {
+            const checkIn = new Date(checkInDateTime);
+            const checkOut = new Date(checkOutDateTime);
             
-            nightsCount.textContent = nights;
-            const total = nights * roomPricePerNight;
-            newTotal.textContent = total.toLocaleString('fr-FR') + ' CFA';
-            currentTotal.textContent = total.toLocaleString('fr-FR') + ' CFA';
-            
-            // Validation : départ doit être après arrivée
-            if (checkOut <= checkIn) {
-                checkOutInput.setCustomValidity('La date de départ doit être après la date d\'arrivée');
+            if (checkOut > checkIn) {
+                // Calculer la différence en millisecondes
+                const timeDiff = checkOut.getTime() - checkIn.getTime();
+                // Convertir en jours (arrondi au supérieur)
+                const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                
+                nightsCount.textContent = nights;
+                const total = nights * roomPricePerNight;
+                newTotal.textContent = formatCFA(total);
+                
+                // Calculer la différence de prix
+                const difference = total - originalTotalPrice;
+                const differenceElement = document.getElementById('price-difference');
+                if (difference > 0) {
+                    differenceElement.textContent = '+' + formatCFA(difference);
+                    differenceElement.className = 'fw-bold text-danger';
+                } else if (difference < 0) {
+                    differenceElement.textContent = formatCFA(difference);
+                    differenceElement.className = 'fw-bold text-success';
+                } else {
+                    differenceElement.textContent = formatCFA(0);
+                    differenceElement.className = 'fw-bold text-muted';
+                }
+                
+                // Validation : départ doit être après arrivée
+                if (checkOut <= checkIn) {
+                    checkOutDateInput.setCustomValidity('La date de départ doit être après la date d\'arrivée');
+                } else {
+                    checkOutDateInput.setCustomValidity('');
+                }
             } else {
-                checkOutInput.setCustomValidity('');
+                nightsCount.textContent = '0';
+                newTotal.textContent = formatCFA(0);
+                checkOutDateInput.setCustomValidity('La date de départ doit être après la date d\'arrivée');
             }
         } else {
             nightsCount.textContent = '0';
-            newTotal.textContent = '0 CFA';
+            newTotal.textContent = formatCFA(0);
         }
+    }
+    
+    // Formater le prix en CFA
+    function formatCFA(amount) {
+        return new Intl.NumberFormat('fr-FR').format(amount) + ' CFA';
     }
     
     // Gérer le champ raison d'annulation
@@ -668,53 +808,91 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Vérifier la disponibilité des nouvelles dates
     async function checkAvailability() {
-        const checkIn = checkInInput.value;
-        const checkOut = checkOutInput.value;
+        const checkIn = checkInHiddenInput.value;
+        const checkOut = checkOutHiddenInput.value;
         
         if (!checkIn || !checkOut) {
-            alert('Veuillez sélectionner les deux dates');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Dates incomplètes',
+                text: 'Veuillez sélectionner les deux dates et heures'
+            });
             return;
         }
         
         if (new Date(checkOut) <= new Date(checkIn)) {
-            alert('La date de départ doit être après la date d\'arrivée');
+            Swal.fire({
+                icon: 'error',
+                title: 'Dates invalides',
+                text: 'La date de départ doit être après la date d\'arrivée'
+            });
             return;
         }
         
         try {
-            const response = await fetch(`/transaction/${transactionId}/check-availability?check_in=${checkIn}&check_out=${checkOut}`);
+            Swal.fire({
+                title: 'Vérification en cours...',
+                text: 'Vérification de la disponibilité de la chambre',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            const response = await fetch(`/transactions/${transactionId}/check-availability`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    check_in: checkIn,
+                    check_out: checkOut,
+                    transaction_id: transactionId
+                })
+            });
+            
             const data = await response.json();
+            
+            Swal.close();
             
             const resultDiv = document.getElementById('availability-result');
             if (data.available) {
                 resultDiv.innerHTML = `
                     <div class="alert alert-success">
                         <i class="fas fa-check-circle me-2"></i>
-                        ${data.message} pour les nouvelles dates.
+                        <strong>Disponible !</strong> ${data.message}<br>
+                        <small>La chambre est libre pour les dates sélectionnées.</small>
                     </div>
                 `;
             } else {
                 resultDiv.innerHTML = `
                     <div class="alert alert-danger">
                         <i class="fas fa-times-circle me-2"></i>
-                        ${data.message}
+                        <strong>Non disponible !</strong> ${data.message}<br>
+                        <small>La chambre est déjà réservée pour tout ou partie de cette période.</small>
                     </div>
                 `;
             }
         } catch (error) {
             console.error('Erreur:', error);
+            Swal.close();
             document.getElementById('availability-result').innerHTML = `
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    Erreur lors de la vérification
+                    <strong>Erreur de connexion</strong><br>
+                    <small>Impossible de vérifier la disponibilité. Veuillez réessayer.</small>
                 </div>
             `;
         }
     }
     
-    // Écouter les changements de dates
-    checkInInput.addEventListener('change', calculateNightsAndTotal);
-    checkOutInput.addEventListener('change', calculateNightsAndTotal);
+    // Écouter les changements de dates et heures
+    checkInDateInput.addEventListener('change', calculateNightsAndTotal);
+    checkInTimeInput.addEventListener('change', calculateNightsAndTotal);
+    checkOutDateInput.addEventListener('change', calculateNightsAndTotal);
+    checkOutTimeInput.addEventListener('change', calculateNightsAndTotal);
     
     // Écouter le changement de statut
     statusSelect.addEventListener('change', updateStatusDescription);
@@ -729,68 +907,8 @@ document.addEventListener('DOMContentLoaded', function() {
     calculateNightsAndTotal();
     updateStatusDescription();
     
-    // Fonction de confirmation d'annulation
-    window.confirmCancel = function() {
-        if (confirm('Voulez-vous vraiment annuler les modifications ? Toutes les modifications seront perdues.')) {
-            window.location.href = "{{ route('transaction.index') }}";
-        }
-    };
-    
-    // Validation du formulaire
-    document.getElementById('edit-transaction-form').addEventListener('submit', function(e) {
-        const checkIn = new Date(checkInInput.value);
-        const checkOut = new Date(checkOutInput.value);
-        const newStatus = statusSelect.value;
-        
-        // Vérification dates
-        if (checkOut <= checkIn) {
-            e.preventDefault();
-            alert('La date de départ doit être après la date d\'arrivée');
-            checkOutInput.focus();
-            return false;
-        }
-        
-        // Vérification statut annulation
-        if (newStatus === 'cancelled') {
-            if (!confirm('Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.')) {
-                e.preventDefault();
-                return false;
-            }
-        }
-        
-        // Vérification statut no show
-        if (newStatus === 'no_show') {
-            if (!confirm('Marquer comme "No Show" ? Le client ne s\'est pas présenté.')) {
-                e.preventDefault();
-                return false;
-            }
-        }
-        
-        // Vérifier si des modifications ont été faites
-        const originalCheckIn = "{{ \Carbon\Carbon::parse($transaction->check_in)->format('Y-m-d') }}";
-        const originalCheckOut = "{{ \Carbon\Carbon::parse($transaction->check_out)->format('Y-m-d') }}";
-        const originalNotes = "{{ $transaction->notes ?? '' }}";
-        const currentNotes = document.getElementById('notes').value;
-        
-        if (checkInInput.value === originalCheckIn && 
-            checkOutInput.value === originalCheckOut && 
-            newStatus === originalStatus && 
-            currentNotes === originalNotes) {
-            if (!confirm('Aucune modification détectée. Souhaitez-vous quand même enregistrer ?')) {
-                e.preventDefault();
-                return false;
-            }
-        }
-        
-        // Désactiver le bouton pour éviter double soumission
-        saveButton.disabled = true;
-        saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...';
-        
-        return true;
-    });
-    
     // Définir la date minimale pour le départ (jour suivant l'arrivée)
-    checkInInput.addEventListener('change', function() {
+    checkInDateInput.addEventListener('change', function() {
         if (this.disabled) return;
         
         const checkInDate = new Date(this.value);
@@ -799,23 +917,191 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Formater en YYYY-MM-DD pour l'attribut min
         const minDate = nextDay.toISOString().split('T')[0];
-        checkOutInput.min = minDate;
+        checkOutDateInput.min = minDate;
         
         // Si la date de départ actuelle est antérieure au nouveau minimum
-        if (checkOutInput.value && new Date(checkOutInput.value) < nextDay) {
-            checkOutInput.value = minDate;
+        if (checkOutDateInput.value && new Date(checkOutDateInput.value) < nextDay) {
+            checkOutDateInput.value = minDate;
             calculateNightsAndTotal();
         }
     });
     
     // Initialiser les dates min
-    if (checkInInput.value) {
-        const checkInDate = new Date(checkInInput.value);
+    if (checkInDateInput.value) {
+        const checkInDate = new Date(checkInDateInput.value);
         const nextDay = new Date(checkInDate);
         nextDay.setDate(nextDay.getDate() + 1);
         const minDate = nextDay.toISOString().split('T')[0];
-        checkOutInput.min = minDate;
+        checkOutDateInput.min = minDate;
     }
+    
+    // Fonction de confirmation d'annulation
+    window.confirmCancel = function() {
+        Swal.fire({
+            title: 'Annuler les modifications ?',
+            text: 'Toutes les modifications non enregistrées seront perdues.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: '<i class="fas fa-check me-2"></i>Oui, annuler',
+            cancelButtonText: '<i class="fas fa-times me-2"></i>Non, rester'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "{{ route('transaction.show', $transaction) }}";
+            }
+        });
+    };
+    
+    // Afficher le modal d'annulation
+    window.showCancelReasonModal = function() {
+        const modal = new bootstrap.Modal(document.getElementById('cancelReasonModal'));
+        modal.show();
+    };
+    
+    // Soumettre le formulaire d'annulation
+    window.submitCancelForm = function() {
+        const reason = document.getElementById('modal_cancel_reason').value;
+        const cancelForm = document.getElementById('cancel-form');
+        
+        // Créer un champ caché pour la raison
+        const reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden';
+        reasonInput.name = 'cancel_reason';
+        reasonInput.value = reason || "Annulation depuis l'interface d'édition";
+        cancelForm.appendChild(reasonInput);
+        
+        // Soumettre le formulaire
+        cancelForm.submit();
+    };
+    
+    // Validation du formulaire
+    document.getElementById('edit-transaction-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const checkIn = new Date(checkInHiddenInput.value);
+        const checkOut = new Date(checkOutHiddenInput.value);
+        const newStatus = statusSelect.value;
+        
+        // Vérification dates
+        if (checkOut <= checkIn) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Dates invalides',
+                text: 'La date de départ doit être après la date d\'arrivée'
+            });
+            checkOutDateInput.focus();
+            return false;
+        }
+        
+        // Vérification statut annulation
+        if (newStatus === 'cancelled') {
+            Swal.fire({
+                title: 'Confirmer l\'annulation ?',
+                text: 'Cette action est irréversible. La réservation sera annulée.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '<i class="fas fa-ban me-2"></i>Oui, annuler',
+                cancelButtonText: '<i class="fas fa-times me-2"></i>Non, garder',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Désactiver le bouton pour éviter double soumission
+                    saveButton.disabled = true;
+                    saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...';
+                    e.target.submit();
+                }
+            });
+            return false;
+        }
+        
+        // Vérification statut no show
+        if (newStatus === 'no_show') {
+            Swal.fire({
+                title: 'Marquer comme No Show ?',
+                text: 'Le client ne s\'est pas présenté. Cette action est irréversible.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#6c757d',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '<i class="fas fa-user-slash me-2"></i>Oui, No Show',
+                cancelButtonText: '<i class="fas fa-times me-2"></i>Annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    saveButton.disabled = true;
+                    saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...';
+                    e.target.submit();
+                }
+            });
+            return false;
+        }
+        
+        // Vérifier si des modifications ont été faites
+        const originalCheckIn = "{{ \Carbon\Carbon::parse($transaction->check_in)->format('Y-m-d') }}";
+        const originalCheckOut = "{{ \Carbon\Carbon::parse($transaction->check_out)->format('Y-m-d') }}";
+        const originalCheckInTime = "{{ \Carbon\Carbon::parse($transaction->check_in)->format('H:i') }}";
+        const originalCheckOutTime = "{{ \Carbon\Carbon::parse($transaction->check_out)->format('H:i') }}";
+        const originalNotes = "{{ addslashes($transaction->notes) ?? '' }}";
+        const currentNotes = document.getElementById('notes').value;
+        
+        if (checkInDateInput.value === originalCheckIn && 
+            checkInTimeInput.value === originalCheckInTime &&
+            checkOutDateInput.value === originalCheckOut && 
+            checkOutTimeInput.value === originalCheckOutTime &&
+            newStatus === originalStatus && 
+            currentNotes === originalNotes.replace(/\\/g, '')) {
+            
+            Swal.fire({
+                title: 'Aucune modification',
+                text: 'Aucune modification n\'a été détectée. Souhaitez-vous quand même continuer ?',
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="fas fa-check me-2"></i>Oui, continuer',
+                cancelButtonText: '<i class="fas fa-times me-2"></i>Non, annuler'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    saveButton.disabled = true;
+                    saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...';
+                    e.target.submit();
+                }
+            });
+            return false;
+        }
+        
+        // Confirmation standard pour les modifications
+        Swal.fire({
+            title: 'Enregistrer les modifications ?',
+            html: `
+                <div class="text-start">
+                    <p>Voulez-vous enregistrer les modifications suivantes ?</p>
+                    <div class="alert alert-info">
+                        <strong>Arrivée :</strong> ${checkInDateInput.value} à ${checkInTimeInput.value}<br>
+                        <strong>Départ :</strong> ${checkOutDateInput.value} à ${checkOutTimeInput.value}<br>
+                        <strong>Nuits :</strong> ${nightsCount.textContent}<br>
+                        <strong>Nouveau total :</strong> ${newTotal.textContent}
+                    </div>
+                </div>
+            `,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#198754',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: '<i class="fas fa-save me-2"></i>Oui, enregistrer',
+            cancelButtonText: '<i class="fas fa-times me-2"></i>Annuler'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                saveButton.disabled = true;
+                saveButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...';
+                e.target.submit();
+            }
+        });
+        
+        return false;
+    });
 });
 </script>
 @endsection

@@ -12,6 +12,82 @@ class RoomStatusController extends Controller
     public function __construct(
         private RoomStatusRepositoryInterface $roomStatusRepository
     ) {}
+    
+    /**
+     * AJOUTER CETTE MÉTHODE POUR INITIALISER LES STATUTS
+     */
+    public function initializeDefaults()
+    {
+        try {
+            $defaultStatuses = [
+                [
+                    'id' => 1,
+                    'name' => 'Available',
+                    'code' => 'AVL',
+                    'information' => 'Room is available for booking',
+                    'color' => '#28a745',
+                    'is_available' => true,
+                ],
+                [
+                    'id' => 2,
+                    'name' => 'Occupied',
+                    'code' => 'OCC',
+                    'information' => 'Room is currently occupied',
+                    'color' => '#007bff',
+                    'is_available' => false,
+                ],
+                [
+                    'id' => 3,
+                    'name' => 'Maintenance',
+                    'code' => 'MNT',
+                    'information' => 'Room is under maintenance',
+                    'color' => '#6c757d',
+                    'is_available' => false,
+                ],
+                [
+                    'id' => 4,
+                    'name' => 'Reserved',
+                    'code' => 'RSV',
+                    'information' => 'Room is reserved',
+                    'color' => '#ffc107',
+                    'is_available' => false,
+                ],
+                [
+                    'id' => 5,
+                    'name' => 'Cleaning',
+                    'code' => 'CLN',
+                    'information' => 'Room is being cleaned',
+                    'color' => '#17a2b8',
+                    'is_available' => false,
+                ],
+                [
+                    'id' => 6,
+                    'name' => 'Dirty',
+                    'code' => 'DRT',
+                    'information' => 'Room needs cleaning',
+                    'color' => '#dc3545',
+                    'is_available' => false,
+                ],
+            ];
+            
+            foreach ($defaultStatuses as $status) {
+                RoomStatus::updateOrCreate(
+                    ['id' => $status['id']],
+                    $status
+                );
+            }
+            
+            return response()->json([
+                'message' => 'Statuses initialized successfully!',
+                'count' => count($defaultStatuses)
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
     public function index(Request $request)
     {
