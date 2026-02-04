@@ -208,7 +208,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
     // Seulement pour admins
     Route::resource('roomstatus', RoomStatusController::class)->middleware('checkrole:Super,Admin');
     
-    // ==================== TRANSACTIONS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
+   // ==================== TRANSACTIONS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
     Route::prefix('transaction')->name('transaction.')->group(function () {
         // Routes CRUD complètes SANS paramètres d'abord
         Route::get('/', [TransactionController::class, 'index'])->name('index');
@@ -225,8 +225,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
             Route::get('/edit', [TransactionController::class, 'edit'])->name('edit');
             Route::get('/invoice', [TransactionController::class, 'invoice'])->name('invoice');
             Route::get('/history', [TransactionController::class, 'history'])->name('history');
-            
-            // AJOUTEZ CES DEUX LIGNES POUR LA PROLONGATION :
             Route::get('/extend', [TransactionController::class, 'extend'])->name('extend');
             Route::post('/extend', [TransactionController::class, 'processExtend'])->name('extend.process');
             
@@ -253,12 +251,14 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
             // Restauration seulement pour admins
             Route::post('/restore', [TransactionController::class, 'restore'])->name('restore')
                 ->middleware('checkrole:Super,Admin');
+            
+            // IMPORTANT: La route show DOIT ÊTRE ICI, DANS LE GROUPE
+            Route::get('/', [TransactionController::class, 'show'])->name('show');
         });
         
-        // IMPORTANT : La route show DOIT ÊTRE EN DERNIER, après toutes les routes avec segments
-        Route::get('/{transaction}', [TransactionController::class, 'show'])->name('show');
+        // SUPPRIMEZ CETTE LIGNE CI-DESSOUS CAR ELLE EST DÉJÀ DANS LE GROUPE CI-DESSUS
+        // Route::get('/{transaction}', [TransactionController::class, 'show'])->name('show');
     });
-
     // ==================== ÉQUIPEMENTS ====================
     // Seulement pour admins
     Route::resource('facility', FacilityController::class)->middleware('checkrole:Super,Admin');
@@ -471,20 +471,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist']], f
     });
     
     Route::get('/checkin-dashboard', [DashboardController::class, 'checkinDashboard'])->name('checkin.dashboard');
-    
-    // ==================== ACTIONS RAPIDES RÉCEPTION ====================
-    Route::prefix('transaction')->name('transaction.')->group(function () {
-        Route::post('/{transaction}/check-in', function($transaction) {
-            return app(TransactionController::class)->markAsArrived($transaction);
-        })->name('check-in');
-        
-        Route::post('/{transaction}/check-out', function($transaction) {
-            return app(TransactionController::class)->markAsDeparted($transaction);
-        })->name('check-out');
-        
-        Route::get('/reception/today', [TransactionController::class, 'index'])->name('reception.today')
-            ->defaults('view', 'reception');
-    });
     
     // ==================== CAISSE RÉCEPTION ====================
     Route::prefix('cashier')->name('cashier.')->group(function () {
