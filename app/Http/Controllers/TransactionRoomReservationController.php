@@ -468,31 +468,28 @@ class TransactionRoomReservationController extends Controller
                 
                 // ============ MISE À JOUR STATUT CHAMBRE ============
                 try {
+                    // Vérifier si la colonne existe
                     $roomColumns = DB::select("SHOW COLUMNS FROM rooms LIKE 'room_status_id'");
                     if (!empty($roomColumns)) {
-                        $room->update(['room_status_id' => 2]); // 2 = Réservée
-                        \Log::info('✅ Statut chambre mis à jour: Réservée');
+                        // Déterminer le bon statut
+                        $now = Carbon::now();
+                        $checkIn = Carbon::parse($validated['check_in']);
+                        
+                        if ($checkIn->isPast()) {
+                            // Date d'arrivée passée mais client pas encore arrivé
+                            $room->update(['room_status_id' => 2]); // Occupée
+                            \Log::info('✅ Statut chambre: Occupée (arrivée prévue passée)');
+                        } else {
+                            // Réservation future
+                            $room->update(['room_status_id' => 3]); // Réservée
+                            \Log::info('✅ Statut chambre: Réservée (future)');
+                        }
                     } else {
                         \Log::info('ℹ️ Colonne room_status_id non trouvée dans la table rooms');
                     }
                 } catch (\Exception $e) {
                     \Log::warning('⚠️ Erreur mise à jour statut chambre: ' . $e->getMessage());
                 }
-                
-                // ============ ÉVÉNEMENTS ============
-                try {
-                    if (class_exists(NewReservationEvent::class)) {
-                        event(new NewReservationEvent($transaction, $user->name ?? 'Système'));
-                        \Log::info('✅ Événement NewReservationEvent envoyé');
-                    }
-                    if (class_exists(RefreshDashboardEvent::class)) {
-                        event(new RefreshDashboardEvent());
-                        \Log::info('✅ Événement RefreshDashboardEvent envoyé');
-                    }
-                } catch (\Exception $e) {
-                    \Log::warning('⚠️ Erreur lors de l\'envoi des événements: ' . $e->getMessage());
-                }
-                
                 // ============ CONFIRMATION ============
                 DB::commit();
                 \Log::info('✅ Transaction BDD confirmée avec succès');
@@ -660,14 +657,56 @@ class TransactionRoomReservationController extends Controller
      */
     private function getOccupiedRoomID($stayFrom, $stayUntil)
     {
-        return Transaction::where(function($query) use ($stayFrom, $stayUntil) {
-                $query->where([['check_in', '<=', $stayFrom], ['check_out', '>=', $stayUntil]])
-                      ->orWhere([['check_in', '>=', $stayFrom], ['check_in', '<=', $stayUntil]])
-                      ->orWhere([['check_out', '>=', $stayFrom], ['check_out', '<=', $stayUntil]]);
+        \Log::info('🔍 === DEBUG getOccupiedRoomID SIMPLIFIÉ ===');
+        \Log::info('📅 Période:', ['from' => $stayFrom, 'until' => $stayUntil]);
+        
+        // LOGIQUE CORRECTE ET SIMPLE :
+        // Une chambre est occupée si sa réservation chevauche notre période
+        $occupied = Transaction::where('status', '!=', 'cancelled')
+            ->where(function($query) use ($stayFrom, $stayUntil) {
+                // La condition unique et correcte :
+                // Réservation commence avant notre départ ET termine après notre arrivée
+                $query->where('check_in', '<', $stayUntil)
+                    ->where('check_out', '>', $stayFrom);
             })
-            ->where('status', '!=', 'cancelled')
             ->pluck('room_id')
             ->unique();
+        
+        \Log::info('📊 Résultat:', [
+            'occupied_count' => $occupied->count(),
+            'occupied_ids' => $occupied->toArray()
+        ]);
+        
+        // DEBUG spécifique chambre 101
+        $room101 = Room::where('number', '101')->first();
+        if ($room101) {
+            $is101Occupied = $occupied->contains($room101->id);
+            \Log::info('🔍 Chambre 101 analyse:', [
+                'room_id' => $room101->id,
+                'is_occupied' => $is101Occupied ? 'OUI' : 'NON',
+                'why' => $is101Occupied ? 'check_in < stayUntil ET check_out > stayFrom' : 'Pas de chevauchement'
+            ]);
+            
+            // Calcul manuel pour comprendre
+            $reservation = Transaction::where('room_id', $room101->id)
+                ->where('status', '!=', 'cancelled')
+                ->where('check_out', '>', now())
+                ->first();
+                
+            if ($reservation) {
+                \Log::info('🔍 Calcul manuel:', [
+                    'reservation' => $reservation->check_in . ' → ' . $reservation->check_out,
+                    'condition1' => $reservation->check_in . ' < ' . $stayUntil . '? ' . 
+                                ($reservation->check_in < $stayUntil ? 'OUI' : 'NON'),
+                    'condition2' => $reservation->check_out . ' > ' . $stayFrom . '? ' . 
+                                ($reservation->check_out > $stayFrom ? 'OUI' : 'NON'),
+                    'result' => ($reservation->check_in < $stayUntil && $reservation->check_out > $stayFrom) ? 
+                            'OCCUPÉE' : 'LIBRE'
+                ]);
+            }
+        }
+        
+        return $occupied;
     }
 
     /**

@@ -44,6 +44,7 @@ Route::get('/debug-test', function() {
         'url' => url()->current(),
     ]);
 });
+
 // ==================== ROUTES FRONTEND (Site Vitrine) ====================
 Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
 Route::get('/chambres', [FrontendController::class, 'rooms'])->name('frontend.rooms');
@@ -176,7 +177,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         Route::get('/{type}', [TypeController::class, 'show'])->name('show');
     });
 
-    // ==================== CHAMBRES ====================
+   // ==================== CHAMBRES ====================
     Route::prefix('room')->name('room.')->group(function () {
         // Routes CRUD complètes pour admins - TOUTES AVANT LA ROUTE {room}
         Route::middleware('checkrole:Super,Admin')->group(function () {
@@ -186,6 +187,15 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
             Route::get('/{room}/edit', [RoomController::class, 'edit'])->name('edit');
             Route::put('/{room}', [RoomController::class, 'update'])->name('update');
             Route::delete('/{room}', [RoomController::class, 'destroy'])->name('destroy');
+            
+            // === NOUVELLES ROUTES POUR MAINTENANCE ===
+            Route::post('/{room}/maintenance-toggle', [RoomController::class, 'toggleMaintenance'])
+                ->name('maintenance.toggle');
+            Route::get('/{room}/status-history', [RoomController::class, 'statusHistory'])
+                ->name('status.history');
+            Route::post('/sync-statuses', [RoomController::class, 'syncStatuses'])
+                ->name('sync.statuses');
+            // =========================================
         });
         
         // Routes de lecture pour tous (admins et réceptionnistes)
@@ -194,39 +204,31 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         // IMPORTANT: La route show DOIT être définie EN DERNIER
         Route::get('/{room}', [RoomController::class, 'show'])->name('show');
     });
-
     // ==================== STATUTS DE CHAMBRES ====================
     // Seulement pour admins
     Route::resource('roomstatus', RoomStatusController::class)->middleware('checkrole:Super,Admin');
     
     // ==================== TRANSACTIONS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
     Route::prefix('transaction')->name('transaction.')->group(function () {
-        // Routes CRUD complètes AVANT les routes avec paramètres
+        // Routes CRUD complètes SANS paramètres d'abord
+        Route::get('/', [TransactionController::class, 'index'])->name('index');
         Route::get('/create', [TransactionController::class, 'create'])->name('create');
         Route::post('/', [TransactionController::class, 'store'])->name('store');
         
-        // Routes de base
-        Route::get('/', [TransactionController::class, 'index'])->name('index');
+        // Routes avec segments supplémentaires AVANT la route générique {transaction}
+        Route::get('/export/{type}', [TransactionController::class, 'export'])->name('export')
+            ->middleware('checkrole:Super,Admin');
         
-        // Routes avec paramètre {transaction}
+        // Groupe pour les routes avec paramètre {transaction} et segments supplémentaires
         Route::prefix('{transaction}')->group(function () {
-            Route::get('/', [TransactionController::class, 'show'])->name('show');
+            // Routes avec segments supplémentaires
             Route::get('/edit', [TransactionController::class, 'edit'])->name('edit');
-            Route::put('/', [TransactionController::class, 'update'])->name('update');
-            
-            // Actions critiques nécessitant autorisation
-            Route::middleware('require.authorization')->group(function () {
-                Route::delete('/', [TransactionController::class, 'destroy'])->name('destroy');
-                Route::delete('/cancel', [TransactionController::class, 'cancel'])->name('cancel');
-            });
-            
-            // Restauration seulement pour admins
-            Route::post('/restore', [TransactionController::class, 'restore'])->name('restore')
-                ->middleware('checkrole:Super,Admin');
-            
-            // Routes utilitaires
             Route::get('/invoice', [TransactionController::class, 'invoice'])->name('invoice');
             Route::get('/history', [TransactionController::class, 'history'])->name('history');
+            
+            // AJOUTEZ CES DEUX LIGNES POUR LA PROLONGATION :
+            Route::get('/extend', [TransactionController::class, 'extend'])->name('extend');
+            Route::post('/extend', [TransactionController::class, 'processExtend'])->name('extend.process');
             
             // Gestion des statuts
             Route::put('/update-status', [TransactionController::class, 'updateStatus'])->name('updateStatus');
@@ -238,11 +240,23 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
             Route::get('/can-complete', [TransactionController::class, 'checkIfCanComplete'])->name('can-complete');
             Route::get('/check-availability', [TransactionController::class, 'checkAvailability'])->name('checkAvailability');
             Route::get('/details', [TransactionController::class, 'showDetails'])->name('showDetails');
+            
+            // RESTful routes
+            Route::put('/', [TransactionController::class, 'update'])->name('update');
+            
+            // Actions critiques nécessitant autorisation
+            Route::middleware('require.authorization')->group(function () {
+                Route::delete('/', [TransactionController::class, 'destroy'])->name('destroy');
+                Route::delete('/cancel', [TransactionController::class, 'cancel'])->name('cancel');
+            });
+            
+            // Restauration seulement pour admins
+            Route::post('/restore', [TransactionController::class, 'restore'])->name('restore')
+                ->middleware('checkrole:Super,Admin');
         });
         
-        // Export seulement pour admins
-        Route::get('/export/{type}', [TransactionController::class, 'export'])->name('export')
-            ->middleware('checkrole:Super,Admin');
+        // IMPORTANT : La route show DOIT ÊTRE EN DERNIER, après toutes les routes avec segments
+        Route::get('/{transaction}', [TransactionController::class, 'show'])->name('show');
     });
 
     // ==================== ÉQUIPEMENTS ====================
@@ -589,8 +603,8 @@ if (env('APP_DEBUG', false)) {
     Route::get('/test-route/{id}', function($id) {
         return response()->json([
             'id' => $id,
-            'route_exists' => Route::has('transaction.edit'),
-            'url' => route('transaction.edit', $id),
+            'route_exists' => Route::has('transaction.extend'),
+            'url' => route('transaction.extend', $id),
             'all_routes' => collect(Route::getRoutes())->map(function($route) {
                 return [
                     'uri' => $route->uri(),
