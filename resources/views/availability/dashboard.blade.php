@@ -229,7 +229,7 @@
                                         </td>
                                         <td>
                                             @if(isset($room->room_status_id) && $room->room_status_id == 3)
-                                            <a href="{{ route('housekeeping.finish-cleaning', $room->id) }}" 
+                                            <a href="{{ route('housekeeping.finish-cleaning', $room->id) }}"    
                                                class="btn btn-sm btn-outline-success">
                                                 <i class="fas fa-check me-1"></i>
                                                 Nettoyée
