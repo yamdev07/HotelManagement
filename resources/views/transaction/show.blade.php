@@ -551,7 +551,7 @@
                                     <i class="fas fa-money-bill-wave fa-3x text-muted mb-3"></i>
                                     <h5>Aucun paiement enregistré</h5>
                                     <p class="text-muted">Aucun paiement n'a été effectué pour cette réservation.</p>
-                                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']) && $remaining > 0 && !in_array($transaction->status, ['cancelled', 'no_show']))
+                                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']) && $remaining > 0 && !in_array($transaction->status, ['cancelled', 'no_show']))
                                         <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn btn-primary">
                                             <i class="fas fa-plus me-1"></i>Ajouter un paiement
                                         </a>
@@ -574,7 +574,7 @@
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         <!-- Actions selon le statut -->
-                        @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
+                        @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                             @if($transaction->status == 'reservation')
                                 <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-grid">
                                     @csrf
