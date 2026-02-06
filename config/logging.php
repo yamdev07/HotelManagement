@@ -74,7 +74,7 @@ return [
         'emergency' => [
             'path' => storage_path('logs/laravel.log'),
         ],
-        
+
         // ============ CANAUX AJOUTÉS ============
         'receptionist' => [
             'driver' => 'daily', // Utilisez 'daily' pour rotation automatique
@@ -82,7 +82,7 @@ return [
             'level' => env('LOG_LEVEL', 'info'),
             'days' => 7,
         ],
-        
+
         'security' => [
             'driver' => 'daily',
             'path' => storage_path('logs/security.log'),

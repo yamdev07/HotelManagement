@@ -11,27 +11,25 @@ class CheckRole
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
      * @param  string  ...$roles
      * @return mixed
      */
     public function handle(Request $request, Closure $next, ...$roles)
     {
         // 1. Vérifie si l'utilisateur est authentifié
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('login')->with('error', 'Veuillez vous connecter.');
         }
 
         // 2. Récupère l'utilisateur
         $user = Auth::user();
-        
+
         // 3. ⭐⭐ CORRECTION CRITIQUE : "Super" = SUPER ADMIN = accès à TOUT
         //    Peu importe les rôles demandés, "Super" passe toujours
         if ($user->role === 'Super') {
             return $next($request);
         }
-        
+
         // 4. Pour les autres rôles : vérifie si l'utilisateur a un des rôles autorisés
         if (in_array($user->role, $roles)) {
             return $next($request);
@@ -45,7 +43,7 @@ class CheckRole
                 'user_role' => $user->role,
                 'roles_requis' => $roles,
                 'url' => $request->fullUrl(),
-                'ip' => $request->ip()
+                'ip' => $request->ip(),
             ]);
         }
 

@@ -10,22 +10,22 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             // Ajouter deleted_at si elle n'existe pas
-            if (!Schema::hasColumn('transactions', 'deleted_at')) {
+            if (! Schema::hasColumn('transactions', 'deleted_at')) {
                 $table->softDeletes();
             }
-            
+
             // Ajouter aussi cancelled_at si elle n'existe pas
-            if (!Schema::hasColumn('transactions', 'cancelled_at')) {
+            if (! Schema::hasColumn('transactions', 'cancelled_at')) {
                 $table->timestamp('cancelled_at')->nullable()->after('status');
             }
-            
+
             // Ajouter cancelled_by si elle n'existe pas
-            if (!Schema::hasColumn('transactions', 'cancelled_by')) {
+            if (! Schema::hasColumn('transactions', 'cancelled_by')) {
                 $table->foreignId('cancelled_by')->nullable()->constrained('users')->after('cancelled_at');
             }
-            
+
             // Ajouter cancel_reason si elle n'existe pas
-            if (!Schema::hasColumn('transactions', 'cancel_reason')) {
+            if (! Schema::hasColumn('transactions', 'cancel_reason')) {
                 $table->text('cancel_reason')->nullable()->after('cancelled_by');
             }
         });

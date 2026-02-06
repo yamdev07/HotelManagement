@@ -3,9 +3,6 @@
 namespace App\Services;
 
 use App\Models\SessionActivity;
-use App\Models\CashierSession;
-use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SessionActivityService
@@ -15,24 +12,23 @@ class SessionActivityService
      */
     public static function log(
         string $action,
-        string $entityType = null,
-        int $entityId = null,
+        ?string $entityType,
+        ?int $entityId,
         string $description,
         array $data = []
-    ): SessionActivity
-    {
+    ): SessionActivity {
         $user = Auth::user();
-        if (!$user) {
+        if (! $user) {
             return null;
         }
-        
+
         $session = $user->activeCashierSession ?? null;
-        if (!$session) {
+        if (! $session) {
             return null;
         }
-        
+
         $request = app('request');
-        
+
         return SessionActivity::create([
             'cashier_session_id' => $session->id,
             'user_id' => $user->id,
@@ -45,20 +41,20 @@ class SessionActivityService
             'user_agent' => $request->userAgent(),
         ]);
     }
-    
+
     /**
      * Loguer une activité de paiement
      */
     public static function logPayment($payment, $action)
     {
         $descriptions = [
-            'created' => "Paiement #{$payment->id} créé - Montant: " . number_format($payment->amount, 0) . " FCFA",
+            'created' => "Paiement #{$payment->id} créé - Montant: ".number_format($payment->amount, 0).' FCFA',
             'updated' => "Paiement #{$payment->id} modifié",
             'deleted' => "Paiement #{$payment->id} supprimé",
             'completed' => "Paiement #{$payment->id} complété",
             'refunded' => "Paiement #{$payment->id} remboursé",
         ];
-        
+
         return self::log(
             "payment_{$action}",
             'Payment',
@@ -73,7 +69,7 @@ class SessionActivityService
             ]
         );
     }
-    
+
     /**
      * Loguer une activité de réservation
      */
@@ -86,7 +82,7 @@ class SessionActivityService
             'checkin' => "Check-in pour réservation #{$booking->id} - Chambre: {$booking->room->room_number}",
             'checkout' => "Check-out pour réservation #{$booking->id} - Chambre: {$booking->room->room_number}",
         ];
-        
+
         return self::log(
             $action === 'checkin' || $action === 'checkout' ? $action : "booking_{$action}",
             'Booking',
@@ -101,18 +97,18 @@ class SessionActivityService
             ]
         );
     }
-    
+
     /**
      * Loguer une activité de session
      */
     public static function logSession($session, $action)
     {
         $descriptions = [
-            'started' => "Session #{$session->id} démarrée - Solde initial: " . number_format($session->initial_balance, 0) . " FCFA",
-            'closed' => "Session #{$session->id} clôturée - Solde final: " . number_format($session->final_balance, 0) . " FCFA",
+            'started' => "Session #{$session->id} démarrée - Solde initial: ".number_format($session->initial_balance, 0).' FCFA',
+            'closed' => "Session #{$session->id} clôturée - Solde final: ".number_format($session->final_balance, 0).' FCFA',
             'updated' => "Session #{$session->id} mise à jour",
         ];
-        
+
         return self::log(
             "session_{$action}",
             'CashierSession',

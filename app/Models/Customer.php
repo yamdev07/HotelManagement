@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
-use Carbon\Carbon;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Customer extends Model
 {
-    use HasFactory, Notifiable, LogsActivity;
+    use HasFactory, LogsActivity, Notifiable;
 
     protected $fillable = [
         'name',
@@ -32,7 +32,7 @@ class Customer extends Model
         'last_visit',
         'loyalty_points',
         'special_requests',
-        'payment_preferences'
+        'payment_preferences',
     ];
 
     protected $casts = [
@@ -41,7 +41,7 @@ class Customer extends Model
         'loyalty_points' => 'integer',
         'preferences' => 'array',
         'special_requests' => 'array',
-        'payment_preferences' => 'array'
+        'payment_preferences' => 'array',
     ];
 
     protected $appends = [
@@ -53,13 +53,11 @@ class Customer extends Model
         'active_reservations_count',
         'customer_type',
         'loyalty_tier',
-        'avatar_url'
+        'avatar_url',
     ];
 
     /**
      * Configuration du logging d'activité
-     *
-     * @return LogOptions
      */
     public function getActivitylogOptions(): LogOptions
     {
@@ -67,8 +65,8 @@ class Customer extends Model
             ->logAll()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(function(string $eventName) {
-                return match($eventName) {
+            ->setDescriptionForEvent(function (string $eventName) {
+                return match ($eventName) {
                     'created' => 'a créé un client',
                     'updated' => 'a modifié un client',
                     'deleted' => 'a supprimé un client',
@@ -180,10 +178,10 @@ class Customer extends Model
      */
     public function getAgeAttribute()
     {
-        if (!$this->birthdate) {
+        if (! $this->birthdate) {
             return null;
         }
-        
+
         return Carbon::parse($this->birthdate)->age;
     }
 
@@ -192,10 +190,10 @@ class Customer extends Model
      */
     public function getFormattedBirthdateAttribute()
     {
-        if (!$this->birthdate) {
+        if (! $this->birthdate) {
             return 'Non renseignée';
         }
-        
+
         return $this->birthdate->format('d/m/Y');
     }
 
@@ -204,10 +202,10 @@ class Customer extends Model
      */
     public function getFormattedLastVisitAttribute()
     {
-        if (!$this->last_visit) {
+        if (! $this->last_visit) {
             return 'Jamais';
         }
-        
+
         return $this->last_visit->format('d/m/Y H:i');
     }
 
@@ -244,11 +242,11 @@ class Customer extends Model
     {
         $totalSpent = $this->total_spent;
         $totalReservations = $this->total_reservations;
-        
+
         if ($totalReservations == 0) {
             return 'Nouveau';
         }
-        
+
         if ($totalSpent > 1000000) {
             return 'VIP';
         } elseif ($totalSpent > 500000) {
@@ -266,7 +264,7 @@ class Customer extends Model
     public function getLoyaltyTierAttribute()
     {
         $points = $this->loyalty_points ?? 0;
-        
+
         if ($points >= 10000) {
             return 'Platine';
         } elseif ($points >= 5000) {
@@ -284,8 +282,8 @@ class Customer extends Model
     public function getLoyaltyTierColorAttribute()
     {
         $tier = $this->loyalty_tier;
-        
-        return match($tier) {
+
+        return match ($tier) {
             'Platine' => 'info',
             'Or' => 'warning',
             'Argent' => 'secondary',
@@ -302,12 +300,12 @@ class Customer extends Model
         if ($this->user && $this->user->avatar) {
             return $this->user->getAvatar();
         }
-        
+
         // Générer un avatar basé sur le nom
         $name = urlencode($this->name);
         $colors = ['4ecdc4', '45b7d1', '96c93d', 'a363d9', 'e74a3b'];
         $color = $colors[array_rand($colors)];
-        
+
         return "https://ui-avatars.com/api/?name={$name}&background={$color}&color=fff&size=150&bold=true";
     }
 
@@ -316,7 +314,7 @@ class Customer extends Model
      */
     public function scopeActive($query)
     {
-        return $query->whereHas('transactions', function($q) {
+        return $query->whereHas('transactions', function ($q) {
             $q->where('check_in', '>=', now()->subMonths(6));
         });
     }
@@ -326,7 +324,7 @@ class Customer extends Model
      */
     public function scopeInactive($query)
     {
-        return $query->whereDoesntHave('transactions', function($q) {
+        return $query->whereDoesntHave('transactions', function ($q) {
             $q->where('check_in', '>=', now()->subMonths(6));
         });
     }
@@ -336,10 +334,10 @@ class Customer extends Model
      */
     public function scopeVip($query)
     {
-        return $query->whereHas('transactions', function($q) {
+        return $query->whereHas('transactions', function ($q) {
             $q->whereIn('status', ['completed', 'active'])
-              ->groupBy('customer_id')
-              ->havingRaw('SUM(total_price) > ?', [1000000]);
+                ->groupBy('customer_id')
+                ->havingRaw('SUM(total_price) > ?', [1000000]);
         });
     }
 
@@ -348,10 +346,10 @@ class Customer extends Model
      */
     public function scopeRegular($query)
     {
-        return $query->whereHas('transactions', function($q) {
+        return $query->whereHas('transactions', function ($q) {
             $q->whereIn('status', ['completed', 'active'])
-              ->groupBy('customer_id')
-              ->havingRaw('COUNT(*) > ?', [5]);
+                ->groupBy('customer_id')
+                ->havingRaw('COUNT(*) > ?', [5]);
         });
     }
 
@@ -360,10 +358,10 @@ class Customer extends Model
      */
     public function scopeWithActiveBooking($query)
     {
-        return $query->whereHas('transactions', function($q) {
+        return $query->whereHas('transactions', function ($q) {
             $q->where('status', 'active')
-              ->where('check_in', '<=', now())
-              ->where('check_out', '>=', now());
+                ->where('check_in', '<=', now())
+                ->where('check_out', '>=', now());
         });
     }
 
@@ -372,7 +370,7 @@ class Customer extends Model
      */
     public function scopeByType($query, $type)
     {
-        return match($type) {
+        return match ($type) {
             'vip' => $query->vip(),
             'regular' => $query->regular(),
             'new' => $query->whereDoesntHave('transactions'),
@@ -415,7 +413,7 @@ class Customer extends Model
     {
         $this->last_visit = now();
         $this->saveQuietly();
-        
+
         // Logger la visite
         activity()
             ->performedOn($this)
@@ -434,7 +432,7 @@ class Customer extends Model
     {
         $this->loyalty_points += $points;
         $this->saveQuietly();
-        
+
         // Logger l'ajout de points
         activity()
             ->performedOn($this)
@@ -444,7 +442,7 @@ class Customer extends Model
                 'reason' => $reason,
             ])
             ->log('a reçu des points de fidélité');
-        
+
         return $this;
     }
 
@@ -455,7 +453,7 @@ class Customer extends Model
     {
         $this->loyalty_points = max(0, $this->loyalty_points - $points);
         $this->saveQuietly();
-        
+
         // Logger la déduction
         activity()
             ->performedOn($this)
@@ -465,7 +463,7 @@ class Customer extends Model
                 'reason' => $reason,
             ])
             ->log('a utilisé des points de fidélité');
-        
+
         return $this;
     }
 
@@ -476,15 +474,15 @@ class Customer extends Model
     {
         $totalNights = 0;
         $totalPossibleNights = 0;
-        
+
         foreach ($this->transactions()->where('status', 'completed')->get() as $transaction) {
             $totalNights += $transaction->check_in->diffInDays($transaction->check_out);
         }
-        
+
         // Calcul approximatif - on considère qu'un client idéal occupe 30 nuits par an
         $yearsAsCustomer = $this->created_at->diffInYears(now()) ?: 1;
         $totalPossibleNights = $yearsAsCustomer * 30;
-        
+
         return $totalPossibleNights > 0 ? round(($totalNights / $totalPossibleNights) * 100, 1) : 0;
     }
 
@@ -494,6 +492,7 @@ class Customer extends Model
     public function getPreference($key, $default = null)
     {
         $preferences = $this->preferences ?? [];
+
         return $preferences[$key] ?? $default;
     }
 
@@ -506,7 +505,7 @@ class Customer extends Model
         $preferences[$key] = $value;
         $this->preferences = $preferences;
         $this->save();
-        
+
         return $this;
     }
 
@@ -530,7 +529,7 @@ class Customer extends Model
         ];
         $this->special_requests = $requests;
         $this->save();
-        
+
         return $this;
     }
 
@@ -541,24 +540,25 @@ class Customer extends Model
     {
         $transactions = $this->transactions()->get();
         $completedTransactions = $transactions->where('status', 'completed');
-        
+
         $stats = [
             'total_transactions' => $transactions->count(),
             'completed_transactions' => $completedTransactions->count(),
             'active_transactions' => $transactions->where('status', 'active')->count(),
             'cancelled_transactions' => $transactions->where('status', 'cancelled')->count(),
-            'total_nights' => $completedTransactions->sum(function($t) {
+            'total_nights' => $completedTransactions->sum(function ($t) {
                 return $t->check_in->diffInDays($t->check_out);
             }),
             'total_spent' => $completedTransactions->sum('total_price'),
-            'average_spend_per_night' => $completedTransactions->avg(function($t) {
+            'average_spend_per_night' => $completedTransactions->avg(function ($t) {
                 $nights = $t->check_in->diffInDays($t->check_out);
+
                 return $nights > 0 ? $t->total_price / $nights : 0;
             }),
             'last_transaction' => $transactions->sortByDesc('check_in')->first(),
             'favorite_room_type' => $transactions->groupBy('room.type_id')->sortDesc()->keys()->first(),
         ];
-        
+
         return $stats;
     }
 
@@ -614,7 +614,7 @@ class Customer extends Model
         $activities = $this->customerActivities()->orderBy('created_at', 'desc')->get();
         $transactions = $this->transactions()->with('room', 'payments')->orderBy('check_in', 'desc')->get();
         $payments = $this->payments()->with('transaction')->orderBy('payment_date', 'desc')->get();
-        
+
         return [
             'activities' => $activities,
             'transactions' => $transactions,
@@ -645,11 +645,11 @@ class Customer extends Model
             'phone' => $this->phone ?? 'Non renseigné',
             'customer_type' => $this->customer_type,
             'loyalty_tier' => $this->loyalty_tier,
-            'total_spent' => number_format($this->total_spent, 0, ',', ' ') . ' CFA',
+            'total_spent' => number_format($this->total_spent, 0, ',', ' ').' CFA',
             'total_reservations' => $this->total_reservations,
             'active_reservations' => $this->active_reservations_count,
             'last_visit' => $this->formatted_last_visit,
-            'occupancy_rate' => $this->getOccupancyRate() . '%',
+            'occupancy_rate' => $this->getOccupancyRate().'%',
             'status' => $this->isActive() ? 'Actif' : 'Inactif',
         ];
     }
@@ -663,7 +663,7 @@ class Customer extends Model
         if (array_key_exists('is_active', $attributes)) {
             unset($attributes['is_active']);
         }
-        
+
         return parent::fill($attributes);
     }
 }

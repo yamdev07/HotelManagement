@@ -16,7 +16,7 @@ class ActivityController extends Controller
         // Filtres
         if ($request->filled('user_id')) {
             $query->where('causer_id', $request->user_id)
-                  ->where('causer_type', User::class);
+                ->where('causer_type', User::class);
         }
 
         if ($request->filled('event')) {
@@ -36,7 +36,7 @@ class ActivityController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where('description', 'like', '%' . $request->search . '%');
+            $query->where('description', 'like', '%'.$request->search.'%');
         }
 
         $perPage = $request->get('per_page', 25);
@@ -58,7 +58,7 @@ class ActivityController extends Controller
         // Filtres
         if ($request->filled('user_id')) {
             $query->where('causer_id', $request->user_id)
-                  ->where('causer_type', User::class);
+                ->where('causer_type', User::class);
         }
 
         if ($request->filled('event')) {
@@ -74,7 +74,7 @@ class ActivityController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where('description', 'like', '%' . $request->search . '%');
+            $query->where('description', 'like', '%'.$request->search.'%');
         }
 
         // Pas de pagination pour /all - on prend tout
@@ -89,6 +89,7 @@ class ActivityController extends Controller
     public function show($id)
     {
         $activity = Activity::with(['causer', 'subject'])->findOrFail($id);
+
         // UTILISE activity/show.blade.php
         return view('activity.show', compact('activity'));
     }
@@ -97,7 +98,7 @@ class ActivityController extends Controller
     {
         $activity = Activity::with(['causer', 'subject'])->findOrFail($id);
 
-        $eventColor = match($activity->event) {
+        $eventColor = match ($activity->event) {
             'created' => 'success',
             'updated' => 'warning',
             'deleted' => 'danger',
@@ -105,7 +106,7 @@ class ActivityController extends Controller
             default => 'secondary'
         };
 
-        $eventLabel = match($activity->event) {
+        $eventLabel = match ($activity->event) {
             'created' => 'Création',
             'updated' => 'Modification',
             'deleted' => 'Suppression',
@@ -141,7 +142,7 @@ class ActivityController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $data = $activities->map(function($activity) {
+        $data = $activities->map(function ($activity) {
             return [
                 'ID' => $activity->id,
                 'Date' => $activity->created_at->format('Y-m-d H:i:s'),
@@ -159,18 +160,18 @@ class ActivityController extends Controller
         if ($format === 'json') {
             return response()->json($data, 200, [
                 'Content-Type' => 'application/json',
-                'Content-Disposition' => 'attachment; filename="activity-logs-' . now()->format('Y-m-d') . '.json"'
+                'Content-Disposition' => 'attachment; filename="activity-logs-'.now()->format('Y-m-d').'.json"',
             ]);
         }
 
         // CSV
-        $filename = 'activity-logs-' . now()->format('Y-m-d') . '.csv';
+        $filename = 'activity-logs-'.now()->format('Y-m-d').'.csv';
         $headers = [
             'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
         ];
 
-        $callback = function() use ($data) {
+        $callback = function () use ($data) {
             $file = fopen('php://output', 'w');
 
             // En-têtes
@@ -192,7 +193,7 @@ class ActivityController extends Controller
     public function cleanup(Request $request)
     {
         $request->validate([
-            'days' => 'required|integer|min:1|max:365'
+            'days' => 'required|integer|min:1|max:365',
         ]);
 
         $date = now()->subDays($request->days);
@@ -204,7 +205,7 @@ class ActivityController extends Controller
             ->withProperties([
                 'days' => $request->days,
                 'deleted_count' => $deletedCount,
-                'date_threshold' => $date->format('Y-m-d')
+                'date_threshold' => $date->format('Y-m-d'),
             ])
             ->log('a nettoyé les logs d\'activité');
 

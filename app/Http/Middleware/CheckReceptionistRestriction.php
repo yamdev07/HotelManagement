@@ -17,7 +17,7 @@ class CheckReceptionistRestriction
         'dashboard.index' => true,
         'dashboard.data' => true,
         'dashboard.stats' => true,
-        
+
         // Transactions - Lecture et actions limitées
         'transaction.index' => true,
         'transaction.create' => true,
@@ -32,12 +32,12 @@ class CheckReceptionistRestriction
         'transaction.invoice' => true,
         'transaction.myReservations' => false, // Seulement pour clients
         'transaction.show.customer' => false, // Seulement pour clients
-        
+
         // Transactions - INTERDITES
         'transaction.destroy' => false, // Pas de suppression
         'transaction.cancel' => false, // Pas d'annulation sans autorisation
         'transaction.restore' => false, // Pas de restauration
-        
+
         // Réservations
         'transaction.reservation.createIdentity' => true,
         'transaction.reservation.pickFromCustomer' => true,
@@ -46,7 +46,7 @@ class CheckReceptionistRestriction
         'transaction.reservation.chooseRoom' => true,
         'transaction.reservation.confirmation' => true,
         'transaction.reservation.payDownPayment' => true,
-        
+
         // Check-in
         'checkin.index' => true,
         'checkin.search' => true,
@@ -56,7 +56,7 @@ class CheckReceptionistRestriction
         'checkin.quick' => true,
         'checkin.availability' => true,
         'checkin.dashboard' => true,
-        
+
         // Restaurant
         'restaurant.index' => true,
         'restaurant.create' => true,
@@ -69,7 +69,7 @@ class CheckReceptionistRestriction
         'restaurant.orders.cancel' => true,
         'restaurant.api.customers' => true,
         'restaurant.api.menus' => true,
-        
+
         // Housekeeping - Vue seulement
         'housekeeping.index' => true,
         'housekeeping.to-clean' => true,
@@ -84,7 +84,7 @@ class CheckReceptionistRestriction
         'housekeeping.maintenance' => true,
         'housekeeping.inspections' => true,
         'housekeeping.monthly-stats' => true,
-        
+
         // Housekeeping - Actions INTERDITES
         'housekeeping.start-cleaning' => false, // Seulement pour housekeeping
         'housekeeping.mark-cleaned' => false,
@@ -96,7 +96,7 @@ class CheckReceptionistRestriction
         'housekeeping.assign-cleaner' => false, // Seulement pour admins
         'housekeeping.update-priority' => false,
         'housekeeping.export' => false,
-        
+
         // Disponibilité
         'availability.dashboard' => true,
         'availability.search' => true,
@@ -106,7 +106,7 @@ class CheckReceptionistRestriction
         'availability.room.conflicts' => true,
         'availability.check.availability' => true,
         'availability.calendar.cell.details' => true,
-        
+
         // Clients
         'customer.index' => true,
         'customer.create' => true,
@@ -115,7 +115,7 @@ class CheckReceptionistRestriction
         'customer.edit' => true,
         'customer.update' => true,
         'customer.destroy' => false, // Pas de suppression de clients
-        
+
         // Chambres
         'room.index' => true,
         'room.show' => true,
@@ -124,7 +124,7 @@ class CheckReceptionistRestriction
         'room.edit' => false, // Modification limitée
         'room.update' => false,
         'room.destroy' => false, // Pas de suppression
-        
+
         // Types de chambres - Lecture seulement
         'type.index' => true,
         'type.show' => true,
@@ -133,7 +133,7 @@ class CheckReceptionistRestriction
         'type.edit' => false,
         'type.update' => false,
         'type.destroy' => false,
-        
+
         // Équipements - Lecture seulement
         'facility.index' => true,
         'facility.show' => true,
@@ -142,7 +142,7 @@ class CheckReceptionistRestriction
         'facility.edit' => false,
         'facility.update' => false,
         'facility.destroy' => false,
-        
+
         // Statuts de chambres - Lecture seulement
         'roomstatus.index' => true,
         'roomstatus.show' => true,
@@ -151,7 +151,7 @@ class CheckReceptionistRestriction
         'roomstatus.edit' => false,
         'roomstatus.update' => false,
         'roomstatus.destroy' => false,
-        
+
         // Paiements
         'payments.index' => true,
         'payment.index' => true,
@@ -160,13 +160,13 @@ class CheckReceptionistRestriction
         'transaction.payment.check-status' => true,
         'transaction.payment.force-sync' => true,
         'payment.invoice' => true,
-        
+
         // Paiements - INTERDITS
         'payments.cancel' => false, // Pas d'annulation
         'payments.restore' => false,
         'payments.expire' => false,
         'payments.export' => false,
-        
+
         // Caisse
         'cashier.dashboard' => true,
         'cashier.current-session' => true,
@@ -185,23 +185,23 @@ class CheckReceptionistRestriction
         'cashier.my-sessions' => true,
         'cashier.session-report' => true,
         'cashier.reception-dashboard' => true,
-        
+
         // Images - Lecture seulement
         'image.store' => false, // Upload seulement pour admins
         'image.destroy' => false,
-        
+
         // Rapports
         'reports.index' => true,
-        
+
         // Journal d'activité
         'activity-log.index' => true,
         'activity-log.all' => true,
-        
+
         // Notifications
         'notification.index' => true,
         'notification.markAllAsRead' => true,
         'notification.routeTo' => true,
-        
+
         // Profil
         'profile.index' => true,
         'profile.edit' => true,
@@ -209,7 +209,7 @@ class CheckReceptionistRestriction
         'profile.update.info' => true,
         'profile.update.password' => true,
         'profile.update.avatar' => true,
-        
+
         // Utilisateurs - INTERDIT
         'user.index' => false,
         'user.create' => false,
@@ -218,7 +218,7 @@ class CheckReceptionistRestriction
         'user.edit' => false,
         'user.update' => false,
         'user.destroy' => false,
-        
+
         // Routes spéciales
         'quick.createIdentity' => true,
         'home' => true,
@@ -246,35 +246,35 @@ class CheckReceptionistRestriction
     public function handle(Request $request, Closure $next)
     {
         $user = Auth::user();
-        
-        if (!$user || $user->role !== 'Receptionist') {
+
+        if (! $user || $user->role !== 'Receptionist') {
             return $next($request);
         }
-        
+
         $routeName = $request->route()->getName();
         $method = $request->method();
         $path = $request->path();
-        
+
         // Si pas de nom de route, utiliser le chemin
-        if (!$routeName) {
+        if (! $routeName) {
             $routeName = $this->determineRouteFromPath($path, $method);
         }
-        
+
         // Vérifier les permissions
-        if (!$this->hasPermission($routeName, $method, $path, $user)) {
+        if (! $this->hasPermission($routeName, $method, $path, $user)) {
             return $this->handleUnauthorized($request, $routeName);
         }
-        
+
         // Vérifier les autorisations spéciales pour les actions critiques
         if ($this->requiresSpecialAuthorization($routeName)) {
-            if (!$this->hasSpecialAuthorization($user, $routeName)) {
+            if (! $this->hasSpecialAuthorization($user, $routeName)) {
                 return redirect()->route('dashboard.index')
                     ->with('error', 'Cette action nécessite une autorisation spéciale. Veuillez contacter un administrateur.')
                     ->with('authorization_required', true)
                     ->with('action', $routeName);
             }
         }
-        
+
         // Journaliser l'accès (optionnel pour le débogage)
         if (config('app.debug')) {
             Log::channel('receptionist')->info('Receptionist access', [
@@ -283,17 +283,17 @@ class CheckReceptionistRestriction
                 'route' => $routeName,
                 'path' => $path,
                 'method' => $method,
-                'ip' => $request->ip()
+                'ip' => $request->ip(),
             ]);
         }
-        
+
         // Ajouter des restrictions supplémentaires pour certaines routes
         $response = $next($request);
-        
+
         // Post-processing : vérifier les restrictions dans la réponse
         return $this->postProcess($response, $routeName, $user);
     }
-    
+
     /**
      * Vérifier si le réceptionniste a la permission
      */
@@ -303,132 +303,134 @@ class CheckReceptionistRestriction
         if ($routeName && array_key_exists($routeName, $this->receptionistPermissions)) {
             return $this->receptionistPermissions[$routeName];
         }
-        
+
         // 2. Vérifier par chemin et méthode
         if ($this->isRestrictedByPath($path, $method)) {
             return false;
         }
-        
+
         // 3. Vérifier les routes de ressources CRUD
         if ($this->isRestrictedCrudRoute($routeName, $method)) {
             return false;
         }
-        
+
         // 4. Vérifier l'accès aux utilisateurs
         if ($this->isUserManagementRoute($path, $routeName)) {
             // Un réceptionniste peut seulement voir son propre profil
             if ($routeName === 'user.show') {
                 $requestedUserId = request()->route('user');
+
                 return $requestedUserId == $user->id;
             }
+
             return false;
         }
-        
+
         // 5. Par défaut, permettre l'accès (mais avec restrictions dans les contrôleurs)
         return true;
     }
-    
+
     /**
      * Déterminer la route à partir du chemin - VERSION MISE À JOUR
      */
     protected function determineRouteFromPath($path, $method)
     {
         $path = trim($path, '/');
-        
+
         if (empty($path)) {
             return null;
         }
-        
+
         // Mapping des chemins communs - VERSION COMPLÈTE
         $pathMappings = [
             // Dashboard
             'dashboard' => 'dashboard.index',
             'dashboard/data' => 'dashboard.data',
             'dashboard/stats' => 'dashboard.stats',
-            
+
             // Transactions
             'transaction' => 'transaction.index',
             'transactions' => 'transaction.index',
-            
+
             // Check-in
             'checkin' => 'checkin.index',
             'check-in' => 'checkin.index',
-            
+
             // Restaurant
             'restaurant' => 'restaurant.index',
-            
+
             // Housekeeping
             'housekeeping' => 'housekeeping.index',
             'housekeeping/dashboard' => 'housekeeping.index',
-            
+
             // Disponibilité
             'availability' => 'availability.dashboard',
             'availability/dashboard' => 'availability.dashboard',
-            
+
             // Clients
             'customer' => 'customer.index',
             'customers' => 'customer.index',
-            
+
             // Chambres
             'room' => 'room.index',
             'rooms' => 'room.index',
-            
+
             // Types de chambres
             'type' => 'type.index',
             'types' => 'type.index',
-            
+
             // Paiements
             'payments' => 'payments.index',
             'payment' => 'payment.index',
-            
+
             // Caisse
             'cashier' => 'cashier.dashboard',
             'cashier/dashboard' => 'cashier.dashboard',
-            
+
             // Rapports
             'reports' => 'reports.index',
-            
+
             // Journal d'activité
             'activity' => 'activity.index',
             'activity-log' => 'activity-log.index',
             'activities' => 'activity.index',
-            
+
             // Profil
             'profile' => 'profile.index',
-            
+
             // Notifications
             'notification' => 'notification.index',
             'notifications' => 'notification.index',
-            
+
             // API/AJAX routes (routes sans nom dans web.php)
             'get-dialy-guest-chart-data' => 'chart.dailyGuestData',
             'chart/dailyGuest' => 'chart.dailyGuest',
             'dashboard/debug' => 'dashboard.debug',
-            
+
             // Routes spéciales
             'home' => 'home',
             'logout' => 'logout',
             'logout-now' => 'logout.now',
             'admin' => 'admin',
         ];
-        
+
         // 1. Vérifier le chemin exact
         if (isset($pathMappings[$path])) {
             return $pathMappings[$path];
         }
-        
+
         // 2. Vérifier les routes avec paramètres
         foreach ($pathMappings as $key => $route) {
-            if (!empty($key) && !empty($path) && str_starts_with($path, $key . '/')) {
+            if (! empty($key) && ! empty($path) && str_starts_with($path, $key.'/')) {
                 return $route;
             }
         }
-        
+
         // 3. Vérifier les patterns courants
         if (str_starts_with($path, 'transaction/reservation/')) {
             return 'transaction.reservation.createIdentity';
         }
-        
+
         if (str_starts_with($path, 'housekeeping/room/')) {
             // Identifier l'action spécifique
             if (str_contains($path, '/start-cleaning')) {
@@ -440,13 +442,14 @@ class CheckReceptionistRestriction
             if (str_contains($path, '/maintenance-form')) {
                 return 'housekeeping.maintenance-form';
             }
+
             return 'housekeeping.index';
         }
-        
+
         if (str_starts_with($path, 'availability/room/')) {
             return 'availability.room.detail';
         }
-        
+
         if (str_starts_with($path, 'cashier/sessions/')) {
             if (str_contains($path, '/close')) {
                 return 'cashier.sessions.close';
@@ -454,13 +457,14 @@ class CheckReceptionistRestriction
             if (str_contains($path, '/report')) {
                 return 'cashier.sessions.report';
             }
+
             return 'cashier.sessions.show';
         }
-        
+
         if (str_starts_with($path, 'housekeeping/quick-list/')) {
             return 'housekeeping.quick-list';
         }
-        
+
         // 4. Vérifier les routes de ressources CRUD
         $crudPatterns = [
             'customer' => 'customer.',
@@ -471,9 +475,9 @@ class CheckReceptionistRestriction
             'user' => 'user.',
             'transaction' => 'transaction.',
         ];
-        
+
         foreach ($crudPatterns as $resource => $routePrefix) {
-            if (str_starts_with($path, $resource . '/')) {
+            if (str_starts_with($path, $resource.'/')) {
                 // Extraire l'ID et vérifier la méthode
                 $parts = explode('/', $path);
                 if (count($parts) >= 2) {
@@ -483,33 +487,35 @@ class CheckReceptionistRestriction
                         switch ($method) {
                             case 'GET':
                                 if (count($parts) >= 3 && $parts[2] === 'edit') {
-                                    return $routePrefix . 'edit';
+                                    return $routePrefix.'edit';
                                 }
-                                return $routePrefix . 'show';
+
+                                return $routePrefix.'show';
                             case 'PUT':
                             case 'PATCH':
-                                return $routePrefix . 'update';
+                                return $routePrefix.'update';
                             case 'DELETE':
-                                return $routePrefix . 'destroy';
+                                return $routePrefix.'destroy';
                             case 'POST':
-                                return $routePrefix . 'store';
+                                return $routePrefix.'store';
                         }
                     } else {
                         // Si ce n'est pas un nombre, c'est peut-être une action
                         if ($id === 'create') {
-                            return $routePrefix . 'create';
+                            return $routePrefix.'create';
                         }
                     }
                 }
-                return $routePrefix . 'index';
+
+                return $routePrefix.'index';
             }
         }
-        
+
         // 5. Vérifier les routes d'autorisation
         if (str_starts_with($path, 'authorization/')) {
             return 'authorization.pending';
         }
-        
+
         // 6. Log pour le débogage des routes non trouvées
         if (config('app.debug')) {
             Log::channel('receptionist')->debug('Route non trouvée dans determineRouteFromPath', [
@@ -519,10 +525,10 @@ class CheckReceptionistRestriction
                 'full_url' => request()->fullUrl(),
             ]);
         }
-        
+
         return null;
     }
-        
+
     /**
      * Vérifier les restrictions par chemin - CORRECTION ICI
      */
@@ -534,19 +540,19 @@ class CheckReceptionistRestriction
             'user/store',
             'user/destroy',
             'users/create',
-            
+
             // Actions d'administration
             'admin/users',
             'admin/permissions',
             'admin/settings',
-            
+
             // Actions critiques
             'transaction/destroy', // Suppression
             'transaction/cancel',  // Annulation
             'customer/destroy',
             'room/destroy',
             'payments/cancel',
-            
+
             // API/System
             'system/',
             'api/users',
@@ -555,14 +561,14 @@ class CheckReceptionistRestriction
             'horizon',
             'log-viewer',
         ];
-        
+
         foreach ($restrictedPaths as $restricted) {
             // Vérifier que $restricted et $path sont définis avant d'appeler str_starts_with
             if ($restricted && $path && (str_starts_with($path, $restricted) || str_contains($path, $restricted))) {
                 return true;
             }
         }
-        
+
         // Vérifier les méthodes dangereuses sur certaines routes
         if ($method === 'DELETE') {
             $deleteRestricted = [
@@ -572,7 +578,7 @@ class CheckReceptionistRestriction
                 'payment/',
                 'user/',
             ];
-            
+
             foreach ($deleteRestricted as $restricted) {
                 // Vérifier que $restricted et $path sont définis
                 if ($restricted && $path && str_starts_with($path, $restricted)) {
@@ -580,35 +586,37 @@ class CheckReceptionistRestriction
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Vérifier les routes CRUD - CORRECTION ICI
      */
     protected function isRestrictedCrudRoute($routeName, $method)
     {
-        if (!$routeName) return false;
-        
+        if (! $routeName) {
+            return false;
+        }
+
         // Routes de suppression
         if (str_ends_with($routeName, '.destroy') && $method === 'DELETE') {
             return true;
         }
-        
+
         // Routes de création/édition pour certains modules
         $restrictedModules = ['type', 'facility', 'roomstatus'];
         foreach ($restrictedModules as $module) {
             // Vérifier que $routeName n'est pas null avant d'utiliser str_starts_with
-            if ($routeName && str_starts_with($routeName, $module . '.') && 
+            if ($routeName && str_starts_with($routeName, $module.'.') &&
                 in_array(substr($routeName, strlen($module) + 1), ['create', 'store', 'edit', 'update', 'destroy'])) {
                 return true;
             }
         }
-        
+
         return false;
     }
-    
+
     /**
      * Vérifier les routes de gestion des utilisateurs - CORRECTION ICI
      */
@@ -618,14 +626,14 @@ class CheckReceptionistRestriction
         if ($path && (str_starts_with($path, 'user') || str_starts_with($path, 'users'))) {
             return true;
         }
-        
+
         if ($routeName && str_starts_with($routeName, 'user.') && $routeName !== 'user.show') {
             return true;
         }
-        
+
         return false;
     }
-    
+
     /**
      * Vérifier si une action nécessite une autorisation spéciale
      */
@@ -633,7 +641,7 @@ class CheckReceptionistRestriction
     {
         return in_array($routeName, $this->requiresAuthorization);
     }
-    
+
     /**
      * Vérifier si l'utilisateur a une autorisation spéciale
      */
@@ -647,11 +655,11 @@ class CheckReceptionistRestriction
                 return true;
             }
         }
-        
+
         // Vérifier avec un superviseur en temps réel (optionnel)
         return $this->requestSupervisorAuthorization($user, $routeName);
     }
-    
+
     /**
      * Demander une autorisation à un superviseur (optionnel)
      */
@@ -661,18 +669,18 @@ class CheckReceptionistRestriction
         // 1. Envoyer une notification à un superviseur
         // 2. Vérifier si un superviseur est en ligne
         // 3. Utiliser un système d'approbation en deux étapes
-        
+
         // Pour l'instant, retourner false par défaut
         return false;
     }
-    
+
     /**
      * Gérer les accès non autorisés
      */
     protected function handleUnauthorized(Request $request, $routeName)
     {
         $user = Auth::user();
-        
+
         // Journaliser la tentative d'accès non autorisé
         Log::channel('security')->warning('Receptionist unauthorized access attempt', [
             'user_id' => $user->id,
@@ -680,32 +688,32 @@ class CheckReceptionistRestriction
             'route' => $routeName,
             'path' => $request->path(),
             'method' => $request->method(),
-            'ip' => $request->ip()
+            'ip' => $request->ip(),
         ]);
-        
+
         // Si c'est une requête AJAX/API
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'error' => 'Accès non autorisé',
                 'message' => 'Vous n\'avez pas la permission d\'accéder à cette ressource.',
-                'requires_authorization' => $this->requiresSpecialAuthorization($routeName)
+                'requires_authorization' => $this->requiresSpecialAuthorization($routeName),
             ], 403);
         }
-        
+
         // Redirection avec message d'erreur
         $message = 'Accès non autorisé. ';
-        
+
         if ($this->requiresSpecialAuthorization($routeName)) {
             $message .= 'Cette action nécessite une autorisation spéciale.';
         } else {
             $message .= 'Le personnel de réception n\'a pas accès à cette fonctionnalité.';
         }
-        
+
         return redirect()->route('dashboard.index')
             ->with('error', $message)
             ->with('unauthorized_access', true);
     }
-    
+
     /**
      * Post-processing de la réponse
      */
@@ -715,32 +723,34 @@ class CheckReceptionistRestriction
         // 1. Modifier les réponses (cacher des boutons, etc.)
         // 2. Ajouter des restrictions supplémentaires
         // 3. Journaliser les actions
-        
+
         // Pour l'instant, retourner la réponse telle quelle
         return $response;
     }
-    
+
     /**
      * Obtenir la liste des permissions (pour l'affichage dans l'interface)
      */
     public static function getReceptionistPermissions()
     {
-        $instance = new self();
+        $instance = new self;
+
         return $instance->receptionistPermissions;
     }
-    
+
     /**
      * Vérifier une permission spécifique (utilisable dans les vues)
      */
     public static function can($permission)
     {
         $user = Auth::user();
-        
-        if (!$user || $user->role !== 'Receptionist') {
+
+        if (! $user || $user->role !== 'Receptionist') {
             return true; // Les autres rôles ne sont pas restreints par ce middleware
         }
-        
-        $instance = new self();
+
+        $instance = new self;
+
         return $instance->receptionistPermissions[$permission] ?? true;
     }
 }

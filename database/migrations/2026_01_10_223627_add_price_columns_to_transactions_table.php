@@ -9,15 +9,15 @@ return new class extends Migration
     public function up()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            if (!Schema::hasColumn('transactions', 'total_price')) {
+            if (! Schema::hasColumn('transactions', 'total_price')) {
                 $table->decimal('total_price', 10, 2)->nullable()->after('check_out');
             }
-            
-            if (!Schema::hasColumn('transactions', 'total_payment')) {
+
+            if (! Schema::hasColumn('transactions', 'total_payment')) {
                 $table->decimal('total_payment', 10, 2)->nullable()->after('total_price');
             }
-            
-            if (!Schema::hasColumn('transactions', 'person_count')) {
+
+            if (! Schema::hasColumn('transactions', 'person_count')) {
                 $table->integer('person_count')->nullable()->after('total_payment');
             }
         });

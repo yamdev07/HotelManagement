@@ -16,12 +16,12 @@ class History extends Model
         'description',
         'old_values',
         'new_values',
-        'notes'
+        'notes',
     ];
 
     protected $casts = [
         'old_values' => 'array',
-        'new_values' => 'array'
+        'new_values' => 'array',
     ];
 
     public function transaction()

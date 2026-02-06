@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class CashierTransaction extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'cashier_session_id',
@@ -39,24 +39,41 @@ class CashierTransaction extends Model
     ];
 
     const TYPE_CASH_PAYMENT = 'cash_payment';
+
     const TYPE_CARD_PAYMENT = 'card_payment';
+
     const TYPE_TRANSFER_PAYMENT = 'transfer_payment';
+
     const TYPE_CHECK_PAYMENT = 'check_payment';
+
     const TYPE_MOBILE_PAYMENT = 'mobile_payment';
+
     const TYPE_CASH_REFUND = 'cash_refund';
+
     const TYPE_CARD_REFUND = 'card_refund';
+
     const TYPE_TRANSFER_REFUND = 'transfer_refund';
+
     const TYPE_CHECK_REFUND = 'check_refund';
+
     const TYPE_MOBILE_REFUND = 'mobile_refund';
+
     const TYPE_CASH_DEPOSIT = 'cash_deposit';
+
     const TYPE_CASH_WITHDRAWAL = 'cash_withdrawal';
+
     const TYPE_ADJUSTMENT = 'adjustment';
+
     const TYPE_CORRECTION = 'correction';
 
     const STATUS_PENDING = 'pending';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_VERIFIED = 'verified';
+
     const STATUS_CANCELLED = 'cancelled';
+
     const STATUS_REVERSED = 'reversed';
 
     /**
@@ -68,8 +85,8 @@ class CashierTransaction extends Model
             ->logAll()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(function(string $eventName) {
-                return match($eventName) {
+            ->setDescriptionForEvent(function (string $eventName) {
+                return match ($eventName) {
                     'created' => 'a créé une transaction de caisse',
                     'updated' => 'a modifié une transaction de caisse',
                     'deleted' => 'a supprimé une transaction de caisse',
@@ -162,7 +179,8 @@ class CashierTransaction extends Model
     public function getFormattedAmountAttribute()
     {
         $prefix = str_contains($this->type, 'refund') ? '-' : '';
-        return $prefix . number_format($this->amount, 0, ',', ' ') . ' CFA';
+
+        return $prefix.number_format($this->amount, 0, ',', ' ').' CFA';
     }
 
     public function getIsPaymentAttribute()
@@ -187,11 +205,22 @@ class CashierTransaction extends Model
 
     public function getPaymentMethodAttribute()
     {
-        if (str_contains($this->type, 'cash')) return 'cash';
-        if (str_contains($this->type, 'card')) return 'card';
-        if (str_contains($this->type, 'transfer')) return 'transfer';
-        if (str_contains($this->type, 'check')) return 'check';
-        if (str_contains($this->type, 'mobile')) return 'mobile';
+        if (str_contains($this->type, 'cash')) {
+            return 'cash';
+        }
+        if (str_contains($this->type, 'card')) {
+            return 'card';
+        }
+        if (str_contains($this->type, 'transfer')) {
+            return 'transfer';
+        }
+        if (str_contains($this->type, 'check')) {
+            return 'check';
+        }
+        if (str_contains($this->type, 'mobile')) {
+            return 'mobile';
+        }
+
         return 'other';
     }
 
@@ -228,7 +257,7 @@ class CashierTransaction extends Model
 
     public function scopeByPaymentMethod($query, $method)
     {
-        return $query->where('type', 'like', $method . '_%');
+        return $query->where('type', 'like', $method.'_%');
     }
 
     public function scopeCompleted($query)
@@ -256,12 +285,12 @@ class CashierTransaction extends Model
         $this->status = self::STATUS_VERIFIED;
         $this->verified_by = $userId;
         $this->verified_at = now();
-        
+
         if ($notes) {
-            $this->notes = ($this->notes ? $this->notes . "\n" : '') . 
-                "Vérifié le " . now()->format('d/m/Y H:i') . ": " . $notes;
+            $this->notes = ($this->notes ? $this->notes."\n" : '').
+                'Vérifié le '.now()->format('d/m/Y H:i').': '.$notes;
         }
-        
+
         $this->save();
 
         activity()
@@ -280,12 +309,12 @@ class CashierTransaction extends Model
 
     public function cancel($userId, $reason)
     {
-        if (!in_array($this->status, [self::STATUS_PENDING, self::STATUS_COMPLETED])) {
+        if (! in_array($this->status, [self::STATUS_PENDING, self::STATUS_COMPLETED])) {
             return false;
         }
 
         $oldStatus = $this->status;
-        
+
         $this->status = self::STATUS_CANCELLED;
         $this->cancelled_by = $userId;
         $this->cancelled_at = now();
@@ -318,10 +347,10 @@ class CashierTransaction extends Model
             'cashier_session_id' => $this->cashier_session_id,
             'transaction_id' => $this->transaction_id,
             'payment_id' => $this->payment_id,
-            'type' => $this->type . '_reversed',
+            'type' => $this->type.'_reversed',
             'amount' => -$this->amount,
-            'description' => 'Inversion: ' . $this->description,
-            'reference' => 'REV-' . $this->reference,
+            'description' => 'Inversion: '.$this->description,
+            'reference' => 'REV-'.$this->reference,
             'status' => self::STATUS_COMPLETED,
             'notes' => $reason,
             'created_by' => $userId,
@@ -356,15 +385,15 @@ class CashierTransaction extends Model
         parent::boot();
 
         static::creating(function ($cashierTransaction) {
-            if (!$cashierTransaction->reference) {
-                $cashierTransaction->reference = 'CTX-' . strtoupper(Str::random(8)) . '-' . time();
+            if (! $cashierTransaction->reference) {
+                $cashierTransaction->reference = 'CTX-'.strtoupper(Str::random(8)).'-'.time();
             }
-            
-            if (!$cashierTransaction->status) {
+
+            if (! $cashierTransaction->status) {
                 $cashierTransaction->status = self::STATUS_COMPLETED;
             }
-            
-            if (auth()->check() && !$cashierTransaction->created_by) {
+
+            if (auth()->check() && ! $cashierTransaction->created_by) {
                 $cashierTransaction->created_by = auth()->id();
             }
         });

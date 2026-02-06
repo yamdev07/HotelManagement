@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Carbon\Carbon;
-use Carbon\CarbonPeriod;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Room extends Model
 {
@@ -26,7 +25,7 @@ class Room extends Model
         'last_cleaned_at',
         'maintenance_started_at',
         'maintenance_ended_at',
-        'maintenance_reason'
+        'maintenance_reason',
     ];
 
     protected $appends = [
@@ -41,21 +40,25 @@ class Room extends Model
         'status_color',
         'status_icon',
         'display_name',
-        'full_name'
+        'full_name',
     ];
 
     protected $casts = [
         'last_cleaned_at' => 'datetime',
         'maintenance_started_at' => 'datetime',
         'maintenance_ended_at' => 'datetime',
-        'price' => 'decimal:2'
+        'price' => 'decimal:2',
     ];
 
     // Constantes pour les statuts
     const STATUS_AVAILABLE = 1;
+
     const STATUS_MAINTENANCE = 2;
+
     const STATUS_CLEANING = 3;
+
     const STATUS_OCCUPIED = 4;
+
     const STATUS_RESERVED = 5;
 
     /**
@@ -67,8 +70,8 @@ class Room extends Model
             ->logAll()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(function(string $eventName) {
-                return match($eventName) {
+            ->setDescriptionForEvent(function (string $eventName) {
+                return match ($eventName) {
                     'created' => 'a créé une chambre',
                     'updated' => 'a modifié une chambre',
                     'deleted' => 'a supprimé une chambre',
@@ -183,14 +186,14 @@ class Room extends Model
     {
         if ($this->relationLoaded('images') && $this->images->isNotEmpty()) {
             $firstImage = $this->images->first();
-            
+
             if (method_exists($firstImage, 'getRoomImage')) {
                 return $firstImage->getRoomImage();
             }
-            
+
             return $firstImage->url ?? asset('img/default/default-room.png');
         }
-        
+
         $image = $this->images()->first();
         if ($image) {
             return $image->getRoomImage();
@@ -198,7 +201,7 @@ class Room extends Model
 
         return asset('img/default/default-room.png');
     }
-    
+
     /**
      * Accesseur: URL de la première image
      */
@@ -214,22 +217,22 @@ class Room extends Model
     {
         $checkIn = Carbon::parse($checkIn)->startOfDay();
         $checkOut = Carbon::parse($checkOut)->startOfDay();
-        
+
         if ($this->room_status_id != self::STATUS_AVAILABLE) {
             return false;
         }
 
         $query = $this->transactions()
             ->whereNotIn('status', ['cancelled', 'no_show', 'completed'])
-            ->where(function($q) use ($checkIn, $checkOut) {
+            ->where(function ($q) use ($checkIn, $checkOut) {
                 $q->where('check_in', '<', $checkOut)
-                  ->where('check_out', '>', $checkIn);
+                    ->where('check_out', '>', $checkIn);
             });
-        
+
         if ($excludeTransactionId) {
             $query->where('id', '!=', $excludeTransactionId);
         }
-        
+
         return $query->count() === 0;
     }
 
@@ -239,7 +242,7 @@ class Room extends Model
     public function getReservationsForDate($date)
     {
         $date = Carbon::parse($date)->startOfDay();
-        
+
         return $this->transactions()
             ->whereNotIn('status', ['cancelled', 'no_show'])
             ->where('check_in', '<=', $date)
@@ -254,7 +257,7 @@ class Room extends Model
     public function isOccupiedOnDate($date)
     {
         $date = Carbon::parse($date)->startOfDay();
-        
+
         return $this->transactions()
             ->whereIn('status', ['active', 'reservation', 'confirmed'])
             ->where('check_in', '<=', $date)
@@ -269,15 +272,15 @@ class Room extends Model
     {
         $startDate = $startFrom ? Carbon::parse($startFrom) : now();
         $startDate = $startDate->startOfDay();
-        
+
         for ($i = 0; $i < 90; $i++) {
             $checkDate = $startDate->copy()->addDays($i);
-            
-            if (!$this->isOccupiedOnDate($checkDate) && $this->room_status_id == self::STATUS_AVAILABLE) {
+
+            if (! $this->isOccupiedOnDate($checkDate) && $this->room_status_id == self::STATUS_AVAILABLE) {
                 return $checkDate;
             }
         }
-        
+
         return null;
     }
 
@@ -288,19 +291,19 @@ class Room extends Model
     {
         $startDate = $startDate ? Carbon::parse($startDate) : now();
         $endDate = $endDate ? Carbon::parse($endDate) : now()->addDays(90);
-        
+
         $periods = [];
         $currentPeriod = null;
-        
+
         $date = $startDate->copy();
         while ($date->lte($endDate)) {
-            $isAvailable = !$this->isOccupiedOnDate($date) && $this->room_status_id == self::STATUS_AVAILABLE;
-            
+            $isAvailable = ! $this->isOccupiedOnDate($date) && $this->room_status_id == self::STATUS_AVAILABLE;
+
             if ($isAvailable) {
-                if (!$currentPeriod) {
+                if (! $currentPeriod) {
                     $currentPeriod = [
                         'start' => $date->copy(),
-                        'end' => $date->copy()
+                        'end' => $date->copy(),
                     ];
                 } else {
                     $currentPeriod['end'] = $date->copy();
@@ -314,16 +317,16 @@ class Room extends Model
                             'end' => $currentPeriod['end']->format('Y-m-d'),
                             'nights' => $duration,
                             'total_price' => $this->price * $duration,
-                            'formatted_period' => $currentPeriod['start']->format('d/m/Y') . ' - ' . $currentPeriod['end']->format('d/m/Y')
+                            'formatted_period' => $currentPeriod['start']->format('d/m/Y').' - '.$currentPeriod['end']->format('d/m/Y'),
                         ];
                     }
                     $currentPeriod = null;
                 }
             }
-            
+
             $date->addDay();
         }
-        
+
         if ($currentPeriod) {
             $duration = $currentPeriod['start']->diffInDays($currentPeriod['end']) + 1;
             if ($duration >= $minNights) {
@@ -332,11 +335,11 @@ class Room extends Model
                     'end' => $currentPeriod['end']->format('Y-m-d'),
                     'nights' => $duration,
                     'total_price' => $this->price * $duration,
-                    'formatted_period' => $currentPeriod['start']->format('d/m/Y') . ' - ' . $currentPeriod['end']->format('d/m/Y')
+                    'formatted_period' => $currentPeriod['start']->format('d/m/Y').' - '.$currentPeriod['end']->format('d/m/Y'),
                 ];
             }
         }
-        
+
         return $periods;
     }
 
@@ -347,10 +350,10 @@ class Room extends Model
     {
         $startDate = $startDate ? Carbon::parse($startDate) : now()->startOfMonth();
         $endDate = $endDate ? Carbon::parse($endDate) : now()->endOfMonth();
-        
+
         $totalDays = $startDate->diffInDays($endDate) + 1;
         $occupiedDays = 0;
-        
+
         $date = $startDate->copy();
         while ($date->lte($endDate)) {
             if ($this->isOccupiedOnDate($date)) {
@@ -358,7 +361,7 @@ class Room extends Model
             }
             $date->addDay();
         }
-        
+
         return $totalDays > 0 ? round(($occupiedDays / $totalDays) * 100, 1) : 0;
     }
 
@@ -370,15 +373,15 @@ class Room extends Model
         if ($this->room_status_id == self::STATUS_MAINTENANCE) {
             return 'maintenance';
         }
-        
+
         if ($this->room_status_id == self::STATUS_CLEANING) {
             return 'cleaning';
         }
-        
+
         if ($this->room_status_id == self::STATUS_OCCUPIED) {
             return 'occupied';
         }
-        
+
         return $this->isOccupiedOnDate(now()) ? 'occupied' : 'available';
     }
 
@@ -394,7 +397,7 @@ class Room extends Model
             self::STATUS_OCCUPIED => 'Occupée',
             self::STATUS_RESERVED => 'Réservée',
         ];
-        
+
         return $labels[$this->room_status_id] ?? 'Inconnu';
     }
 
@@ -410,7 +413,7 @@ class Room extends Model
             self::STATUS_OCCUPIED => 'danger',
             self::STATUS_RESERVED => 'primary',
         ];
-        
+
         return $colors[$this->room_status_id] ?? 'secondary';
     }
 
@@ -426,7 +429,7 @@ class Room extends Model
             self::STATUS_OCCUPIED => 'fa-bed',
             self::STATUS_RESERVED => 'fa-calendar-check',
         ];
-        
+
         return $icons[$this->room_status_id] ?? 'fa-door-closed';
     }
 
@@ -435,11 +438,12 @@ class Room extends Model
      */
     public function getDisplayNameAttribute()
     {
-        if (!empty($this->name)) {
+        if (! empty($this->name)) {
             return $this->name;
         }
-        
+
         $typeName = $this->type ? $this->type->name : 'Room';
+
         return "{$typeName} #{$this->number}";
     }
 
@@ -448,10 +452,10 @@ class Room extends Model
      */
     public function getFullNameAttribute()
     {
-        if (!empty($this->name)) {
+        if (! empty($this->name)) {
             return "{$this->name} (#{$this->number})";
         }
-        
+
         return "Room #{$this->number}";
     }
 
@@ -460,8 +464,8 @@ class Room extends Model
      */
     public function getIsAvailableTodayAttribute()
     {
-        return $this->room_status_id == self::STATUS_AVAILABLE && 
-               !$this->isOccupiedOnDate(now());
+        return $this->room_status_id == self::STATUS_AVAILABLE &&
+               ! $this->isOccupiedOnDate(now());
     }
 
     /**
@@ -472,8 +476,9 @@ class Room extends Model
         if ($this->is_available_today) {
             return now()->format('Y-m-d');
         }
-        
+
         $nextDate = $this->getNextAvailableDate();
+
         return $nextDate ? $nextDate->format('Y-m-d') : null;
     }
 
@@ -482,7 +487,7 @@ class Room extends Model
      */
     public function getFormattedPriceAttribute()
     {
-        return number_format($this->price, 0, ',', ' ') . ' FCFA/nuit';
+        return number_format($this->price, 0, ',', ' ').' FCFA/nuit';
     }
 
     /**
@@ -493,9 +498,9 @@ class Room extends Model
         if (empty($this->description)) {
             return '';
         }
-        
-        return strlen($this->description) > 100 
-            ? substr($this->description, 0, 100) . '...' 
+
+        return strlen($this->description) > 100
+            ? substr($this->description, 0, 100).'...'
             : $this->description;
     }
 
@@ -514,12 +519,12 @@ class Room extends Model
     {
         $checkIn = Carbon::parse($checkIn)->startOfDay();
         $checkOut = Carbon::parse($checkOut)->startOfDay();
-        
+
         return $query->where('room_status_id', self::STATUS_AVAILABLE)
-            ->whereDoesntHave('transactions', function($q) use ($checkIn, $checkOut) {
+            ->whereDoesntHave('transactions', function ($q) use ($checkIn, $checkOut) {
                 $q->whereIn('status', ['active', 'reservation', 'confirmed'])
-                  ->where('check_in', '<', $checkOut)
-                  ->where('check_out', '>', $checkIn);
+                    ->where('check_in', '<', $checkOut)
+                    ->where('check_out', '>', $checkIn);
             });
     }
 
@@ -561,10 +566,10 @@ class Room extends Model
     public function scopeAvailableToday($query)
     {
         return $query->where('room_status_id', self::STATUS_AVAILABLE)
-            ->whereDoesntHave('transactions', function($q) {
+            ->whereDoesntHave('transactions', function ($q) {
                 $q->whereIn('status', ['active', 'reservation', 'confirmed'])
-                  ->where('check_in', '<=', now())
-                  ->where('check_out', '>', now());
+                    ->where('check_in', '<=', now())
+                    ->where('check_out', '>', now());
             });
     }
 
@@ -573,10 +578,10 @@ class Room extends Model
      */
     public function scopeOccupiedToday($query)
     {
-        return $query->whereHas('transactions', function($q) {
+        return $query->whereHas('transactions', function ($q) {
             $q->whereIn('status', ['active', 'reservation', 'confirmed'])
-              ->where('check_in', '<=', now())
-              ->where('check_out', '>', now());
+                ->where('check_in', '<=', now())
+                ->where('check_out', '>', now());
         });
     }
 
@@ -610,15 +615,15 @@ class Room extends Model
     public function markAsCleaned($user = null)
     {
         $oldStatus = $this->room_status_id;
-        
+
         $isOccupied = $this->isOccupiedOnDate(now());
         $newStatus = $isOccupied ? self::STATUS_OCCUPIED : self::STATUS_AVAILABLE;
-        
+
         $this->update([
             'room_status_id' => $newStatus,
             'last_cleaned_at' => now(),
         ]);
-        
+
         if ($user) {
             activity()
                 ->causedBy($user)
@@ -630,7 +635,7 @@ class Room extends Model
                 ])
                 ->log('a nettoyé la chambre');
         }
-        
+
         return $this;
     }
 
@@ -640,18 +645,18 @@ class Room extends Model
     public function markAsMaintenance($user = null, $reason = null)
     {
         $oldStatus = $this->room_status_id;
-        
+
         $data = [
             'room_status_id' => self::STATUS_MAINTENANCE,
             'maintenance_started_at' => now(),
         ];
-        
+
         if ($reason) {
             $data['maintenance_reason'] = $reason;
         }
-        
+
         $this->update($data);
-        
+
         if ($user) {
             activity()
                 ->causedBy($user)
@@ -664,7 +669,7 @@ class Room extends Model
                 ])
                 ->log('a mis la chambre en maintenance');
         }
-        
+
         return $this;
     }
 
@@ -674,14 +679,14 @@ class Room extends Model
     public function endMaintenance($user = null)
     {
         $oldStatus = $this->room_status_id;
-        
+
         $newStatus = $this->isOccupiedOnDate(now()) ? self::STATUS_OCCUPIED : self::STATUS_AVAILABLE;
-        
+
         $this->update([
             'room_status_id' => $newStatus,
             'maintenance_ended_at' => now(),
         ]);
-        
+
         if ($user) {
             activity()
                 ->causedBy($user)
@@ -690,12 +695,12 @@ class Room extends Model
                     'old_status' => $oldStatus,
                     'new_status' => $newStatus,
                     'ended_at' => now(),
-                    'duration' => $this->maintenance_started_at ? 
-                        $this->maintenance_started_at->diffInHours(now()) . ' heures' : 'N/A',
+                    'duration' => $this->maintenance_started_at ?
+                        $this->maintenance_started_at->diffInHours(now()).' heures' : 'N/A',
                 ])
                 ->log('a terminé la maintenance de la chambre');
         }
-        
+
         return $this;
     }
 
@@ -705,11 +710,11 @@ class Room extends Model
     public function markAsNeedsCleaning($user = null)
     {
         $oldStatus = $this->room_status_id;
-        
+
         $this->update([
             'room_status_id' => self::STATUS_CLEANING,
         ]);
-        
+
         if ($user) {
             activity()
                 ->causedBy($user)
@@ -720,7 +725,7 @@ class Room extends Model
                 ])
                 ->log('a marqué la chambre comme à nettoyer');
         }
-        
+
         return $this;
     }
 
@@ -731,28 +736,28 @@ class Room extends Model
     {
         $startDate = $startDate ? Carbon::parse($startDate) : now()->startOfMonth();
         $endDate = $endDate ? Carbon::parse($endDate) : now()->endOfMonth();
-        
+
         $totalRooms = self::count();
         $availableRooms = self::where('room_status_id', self::STATUS_AVAILABLE)->count();
         $occupiedRooms = self::where('room_status_id', self::STATUS_OCCUPIED)->count();
         $maintenanceRooms = self::where('room_status_id', self::STATUS_MAINTENANCE)->count();
         $cleaningRooms = self::where('room_status_id', self::STATUS_CLEANING)->count();
-        
-        $actualOccupied = self::whereHas('transactions', function($q) {
+
+        $actualOccupied = self::whereHas('transactions', function ($q) {
             $q->whereIn('status', ['active', 'reservation'])
-              ->where('check_in', '<=', now())
-              ->where('check_out', '>', now());
+                ->where('check_in', '<=', now())
+                ->where('check_out', '>', now());
         })->count();
-        
+
         $stats = [
             'total_rooms' => $totalRooms,
             'available_rooms' => $availableRooms,
             'occupied_rooms' => $actualOccupied,
             'maintenance_rooms' => $maintenanceRooms,
             'cleaning_rooms' => $cleaningRooms,
-            'occupancy_rate' => $totalRooms > 0 ? round(($actualOccupied / $totalRooms) * 100, 1) : 0
+            'occupancy_rate' => $totalRooms > 0 ? round(($actualOccupied / $totalRooms) * 100, 1) : 0,
         ];
-        
+
         return $stats;
     }
 
@@ -763,40 +768,40 @@ class Room extends Model
     {
         $startDate = $startDate ? Carbon::parse($startDate) : now()->startOfMonth();
         $endDate = $endDate ? Carbon::parse($endDate) : now()->endOfMonth();
-        
+
         $transactions = $this->transactions()
             ->whereIn('status', ['completed', 'active'])
-            ->where(function($q) use ($startDate, $endDate) {
+            ->where(function ($q) use ($startDate, $endDate) {
                 $q->whereBetween('check_in', [$startDate, $endDate])
-                  ->orWhereBetween('check_out', [$startDate, $endDate])
-                  ->orWhere(function($inner) use ($startDate, $endDate) {
-                      $inner->where('check_in', '<', $startDate)
+                    ->orWhereBetween('check_out', [$startDate, $endDate])
+                    ->orWhere(function ($inner) use ($startDate, $endDate) {
+                        $inner->where('check_in', '<', $startDate)
                             ->where('check_out', '>', $endDate);
-                  });
+                    });
             })
             ->get();
-        
+
         $totalRevenue = 0;
         $totalNights = 0;
-        
+
         foreach ($transactions as $transaction) {
             $overlapStart = max($transaction->check_in, $startDate);
             $overlapEnd = min($transaction->check_out, $endDate);
-            
+
             if ($overlapStart < $overlapEnd) {
                 $overlapNights = $overlapStart->diffInDays($overlapEnd);
                 $nightlyRate = $transaction->total_price / $transaction->check_in->diffInDays($transaction->check_out);
                 $revenueForPeriod = $overlapNights * $nightlyRate;
-                
+
                 $totalRevenue += $revenueForPeriod;
                 $totalNights += $overlapNights;
             }
         }
-        
+
         return [
             'revenue' => $totalRevenue,
             'nights' => $totalNights,
-            'average_rate' => $totalNights > 0 ? $totalRevenue / $totalNights : $this->price
+            'average_rate' => $totalNights > 0 ? $totalRevenue / $totalNights : $this->price,
         ];
     }
 
@@ -809,16 +814,16 @@ class Room extends Model
             ->whereIn('status', ['completed'])
             ->where('check_out', '>=', now()->subYear())
             ->get();
-        
+
         if ($completedTransactions->isEmpty()) {
             return 0;
         }
-        
+
         $totalNights = 0;
         foreach ($completedTransactions as $transaction) {
             $totalNights += $transaction->check_in->diffInDays($transaction->check_out);
         }
-        
+
         return round($totalNights / $completedTransactions->count(), 1);
     }
 
@@ -838,7 +843,7 @@ class Room extends Model
     {
         $activities = $this->roomActivities()->orderBy('created_at', 'desc')->get();
         $transactions = $this->transactions()->orderBy('check_in', 'desc')->get();
-        
+
         return [
             'activities' => $activities,
             'transactions' => $transactions,
@@ -848,7 +853,7 @@ class Room extends Model
                 'revenue_total' => $transactions->where('status', 'completed')->sum('total_price'),
                 'average_stay' => $this->getAverageStayDuration(),
                 'occupancy_rate' => $this->getOccupancyRate(now()->subMonth(), now()),
-            ]
+            ],
         ];
     }
 
@@ -945,8 +950,8 @@ class Room extends Model
             'capacity' => $this->capacity,
             'available_today' => $this->is_available_today,
             'next_available' => $this->next_available_date,
-            'occupancy_rate' => $this->getOccupancyRate(now()->subMonth(), now()) . '%',
-            'average_stay' => $this->getAverageStayDuration() . ' nuits',
+            'occupancy_rate' => $this->getOccupancyRate(now()->subMonth(), now()).'%',
+            'average_stay' => $this->getAverageStayDuration().' nuits',
             'facilities' => $this->facilities->count(),
         ];
     }
@@ -965,9 +970,9 @@ class Room extends Model
     public function updateName($name, $user = null)
     {
         $oldName = $this->name;
-        
+
         $this->update(['name' => $name]);
-        
+
         if ($user) {
             activity()
                 ->causedBy($user)
@@ -978,7 +983,7 @@ class Room extends Model
                 ])
                 ->log('a renommé la chambre');
         }
-        
+
         return $this;
     }
 
@@ -1016,10 +1021,10 @@ class Room extends Model
      */
     public function getDaysSinceLastCleaning()
     {
-        if (!$this->last_cleaned_at) {
+        if (! $this->last_cleaned_at) {
             return null;
         }
-        
+
         return $this->last_cleaned_at->diffInDays(now());
     }
 
@@ -1028,10 +1033,10 @@ class Room extends Model
      */
     public function getMaintenanceDuration()
     {
-        if (!$this->maintenance_started_at) {
+        if (! $this->maintenance_started_at) {
             return null;
         }
-        
+
         return $this->maintenance_started_at->diffInHours(now());
     }
 
@@ -1051,11 +1056,11 @@ class Room extends Model
         if ($this->images->isEmpty()) {
             return [['url' => asset('img/default/default-room.png'), 'alt' => $this->display_name]];
         }
-        
-        return $this->images->map(function($image) {
+
+        return $this->images->map(function ($image) {
             return [
                 'url' => $image->getRoomImage(),
-                'alt' => $image->alt_text ?? $this->display_name
+                'alt' => $image->alt_text ?? $this->display_name,
             ];
         });
     }

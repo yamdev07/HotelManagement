@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Facility extends Model
 {
@@ -19,13 +19,13 @@ class Facility extends Model
         'is_active',
         'sort_order',
         'description',
-        'additional_info'
+        'additional_info',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'sort_order' => 'integer',
-        'additional_info' => 'array'
+        'additional_info' => 'array',
     ];
 
     protected $appends = [
@@ -33,24 +33,30 @@ class Facility extends Model
         'icon_class',
         'category_label',
         'rooms_count',
-        'is_popular'
+        'is_popular',
     ];
 
     // Catégories d'équipements
     const CATEGORY_GENERAL = 'general';
+
     const CATEGORY_BATHROOM = 'bathroom';
+
     const CATEGORY_BEDROOM = 'bedroom';
+
     const CATEGORY_TECHNOLOGY = 'technology';
+
     const CATEGORY_KITCHEN = 'kitchen';
+
     const CATEGORY_ENTERTAINMENT = 'entertainment';
+
     const CATEGORY_ACCESSIBILITY = 'accessibility';
+
     const CATEGORY_SAFETY = 'safety';
+
     const CATEGORY_SERVICES = 'services';
 
     /**
      * Configuration du logging d'activité
-     *
-     * @return LogOptions
      */
     public function getActivitylogOptions(): LogOptions
     {
@@ -58,8 +64,8 @@ class Facility extends Model
             ->logAll()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(function(string $eventName) {
-                return match($eventName) {
+            ->setDescriptionForEvent(function (string $eventName) {
+                return match ($eventName) {
                     'created' => 'a créé un équipement',
                     'updated' => 'a modifié un équipement',
                     'deleted' => 'a supprimé un équipement',
@@ -102,10 +108,10 @@ class Facility extends Model
      */
     public function getFormattedDetailAttribute()
     {
-        if (!$this->detail) {
+        if (! $this->detail) {
             return $this->name;
         }
-        
+
         return $this->detail;
     }
 
@@ -114,9 +120,9 @@ class Facility extends Model
      */
     public function getIconClassAttribute()
     {
-        if (!$this->icon) {
+        if (! $this->icon) {
             // Icône par défaut selon la catégorie
-            return match($this->category) {
+            return match ($this->category) {
                 self::CATEGORY_BATHROOM => 'fa-bath',
                 self::CATEGORY_BEDROOM => 'fa-bed',
                 self::CATEGORY_TECHNOLOGY => 'fa-wifi',
@@ -128,12 +134,12 @@ class Facility extends Model
                 default => 'fa-check-circle'
             };
         }
-        
+
         // Vérifier si c'est déjà une classe FontAwesome
         if (str_contains($this->icon, 'fa-')) {
             return $this->icon;
         }
-        
+
         // Sinon, retourner l'icône telle quelle
         return $this->icon;
     }
@@ -144,6 +150,7 @@ class Facility extends Model
     public function getCategoryLabelAttribute()
     {
         $categories = self::getCategoryOptions();
+
         return $categories[$this->category] ?? 'Général';
     }
 
@@ -164,8 +171,9 @@ class Facility extends Model
         if ($totalRooms === 0) {
             return false;
         }
-        
+
         $roomsWithFacility = $this->rooms()->count();
+
         return ($roomsWithFacility / $totalRooms) > 0.5;
     }
 
@@ -221,6 +229,7 @@ class Facility extends Model
         if ($category) {
             return $query->where('category', $category);
         }
+
         return $query;
     }
 
@@ -229,7 +238,7 @@ class Facility extends Model
      */
     public function scopePopular($query)
     {
-        return $query->whereHas('rooms', function($q) {
+        return $query->whereHas('rooms', function ($q) {
             $q->havingRaw('COUNT(*) > ?', [Room::count() * 0.5]);
         });
     }
@@ -239,7 +248,7 @@ class Facility extends Model
      */
     public function scopeForRoom($query, $roomId)
     {
-        return $query->whereHas('rooms', function($q) use ($roomId) {
+        return $query->whereHas('rooms', function ($q) use ($roomId) {
             $q->where('rooms.id', $roomId);
         });
     }
@@ -249,7 +258,7 @@ class Facility extends Model
      */
     public function scopeWithoutRoom($query, $roomId)
     {
-        return $query->whereDoesntHave('rooms', function($q) use ($roomId) {
+        return $query->whereDoesntHave('rooms', function ($q) use ($roomId) {
             $q->where('rooms.id', $roomId);
         });
     }
@@ -268,12 +277,12 @@ class Facility extends Model
     public function activate()
     {
         $this->update(['is_active' => true]);
-        
+
         activity()
             ->causedBy(auth()->user())
             ->performedOn($this)
             ->log('a activé l\'équipement');
-            
+
         return $this;
     }
 
@@ -283,12 +292,12 @@ class Facility extends Model
     public function deactivate()
     {
         $this->update(['is_active' => false]);
-        
+
         activity()
             ->causedBy(auth()->user())
             ->performedOn($this)
             ->log('a désactivé l\'équipement');
-            
+
         return $this;
     }
 
@@ -298,15 +307,15 @@ class Facility extends Model
     public function addToRoom($roomId, $quantity = 1, $notes = null)
     {
         $room = Room::findOrFail($roomId);
-        
+
         // Vérifier si déjà associé
         if ($this->rooms()->where('room_id', $roomId)->exists()) {
             // Mettre à jour la quantité
             $this->rooms()->updateExistingPivot($roomId, [
                 'quantity' => $quantity,
-                'notes' => $notes
+                'notes' => $notes,
             ]);
-            
+
             activity()
                 ->causedBy(auth()->user())
                 ->performedOn($this)
@@ -315,7 +324,7 @@ class Facility extends Model
                     'room_number' => $room->number,
                     'quantity' => $quantity,
                     'notes' => $notes,
-                    'action' => 'updated'
+                    'action' => 'updated',
                 ])
                 ->log('a mis à jour l\'équipement dans une chambre');
         } else {
@@ -324,9 +333,9 @@ class Facility extends Model
                 'quantity' => $quantity,
                 'notes' => $notes,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
-            
+
             activity()
                 ->causedBy(auth()->user())
                 ->performedOn($this)
@@ -335,11 +344,11 @@ class Facility extends Model
                     'room_number' => $room->number,
                     'quantity' => $quantity,
                     'notes' => $notes,
-                    'action' => 'added'
+                    'action' => 'added',
                 ])
                 ->log('a ajouté l\'équipement à une chambre');
         }
-        
+
         return $this;
     }
 
@@ -349,21 +358,21 @@ class Facility extends Model
     public function removeFromRoom($roomId)
     {
         $room = Room::findOrFail($roomId);
-        
+
         if ($this->rooms()->where('room_id', $roomId)->exists()) {
             $this->rooms()->detach($roomId);
-            
+
             activity()
                 ->causedBy(auth()->user())
                 ->performedOn($this)
                 ->withProperties([
                     'room_id' => $roomId,
                     'room_number' => $room->number,
-                    'action' => 'removed'
+                    'action' => 'removed',
                 ])
                 ->log('a retiré l\'équipement d\'une chambre');
         }
-        
+
         return $this;
     }
 
@@ -374,15 +383,15 @@ class Facility extends Model
     {
         $rooms = $this->rooms()->get();
         $roomTypes = $this->roomTypes()->get();
-        
+
         return [
             'total_rooms' => $rooms->count(),
             'total_room_types' => $roomTypes->count(),
             'average_quantity' => $rooms->avg('pivot.quantity') ?? 1,
             'rooms_by_type' => $rooms->groupBy('type_id')->map->count(),
             'popular_rooms' => $rooms->take(5)->pluck('number')->toArray(),
-            'occupancy_rate' => Room::count() > 0 ? 
-                round(($rooms->count() / Room::count()) * 100, 1) . '%' : '0%',
+            'occupancy_rate' => Room::count() > 0 ?
+                round(($rooms->count() / Room::count()) * 100, 1).'%' : '0%',
             'last_updated' => $this->updated_at->diffForHumans(),
         ];
     }
@@ -395,16 +404,16 @@ class Facility extends Model
         parent::boot();
 
         static::creating(function ($facility) {
-            if (!isset($facility->is_active)) {
+            if (! isset($facility->is_active)) {
                 $facility->is_active = true;
             }
-            
-            if (!isset($facility->sort_order)) {
+
+            if (! isset($facility->sort_order)) {
                 $maxOrder = self::max('sort_order') ?? 0;
                 $facility->sort_order = $maxOrder + 1;
             }
-            
-            if (!isset($facility->category)) {
+
+            if (! isset($facility->category)) {
                 $facility->category = self::CATEGORY_GENERAL;
             }
         });
@@ -433,7 +442,7 @@ class Facility extends Model
                     ])
                     ->log('a renommé l\'équipement');
             }
-            
+
             if ($facility->isDirty('is_active')) {
                 $action = $facility->is_active ? 'activé' : 'désactivé';
                 activity()
@@ -465,7 +474,7 @@ class Facility extends Model
         $activities = $this->facilityActivities()->orderBy('created_at', 'desc')->get();
         $rooms = $this->rooms()->with('type')->get();
         $roomTypes = $this->roomTypes()->get();
-        
+
         return [
             'activities' => $activities,
             'rooms' => $rooms,
@@ -512,12 +521,12 @@ class Facility extends Model
         foreach ($order as $position => $id) {
             self::where('id', $id)->update(['sort_order' => $position + 1]);
         }
-        
+
         activity()
             ->causedBy(auth()->user())
             ->withProperties(['order' => $order])
             ->log('a réorganisé l\'ordre des équipements');
-        
+
         return true;
     }
 }
@@ -526,16 +535,16 @@ class Facility extends Model
 class FacilityRoom extends \Illuminate\Database\Eloquent\Relations\Pivot
 {
     protected $table = 'facility_room';
-    
+
     protected $casts = [
         'quantity' => 'integer',
     ];
-    
+
     public function facility()
     {
         return $this->belongsTo(Facility::class);
     }
-    
+
     public function room()
     {
         return $this->belongsTo(Room::class);

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -15,13 +16,13 @@ class SessionActivity extends Model
         'description',
         'data',
         'ip_address',
-        'user_agent'
+        'user_agent',
     ];
-    
+
     protected $casts = [
         'data' => 'array',
     ];
-    
+
     /**
      * Relation avec la session de caisse
      */
@@ -29,7 +30,7 @@ class SessionActivity extends Model
     {
         return $this->belongsTo(CashierSession::class, 'cashier_session_id');
     }
-    
+
     /**
      * Relation avec l'utilisateur
      */
@@ -37,7 +38,7 @@ class SessionActivity extends Model
     {
         return $this->belongsTo(User::class);
     }
-    
+
     /**
      * Relation avec l'entité concernée (polymorphique)
      */
@@ -45,7 +46,7 @@ class SessionActivity extends Model
     {
         return $this->morphTo('entity', 'entity_type', 'entity_id');
     }
-    
+
     /**
      * Formater la date de façon lisible
      */
@@ -53,7 +54,7 @@ class SessionActivity extends Model
     {
         return $this->created_at->format('H:i:s');
     }
-    
+
     /**
      * Obtenir l'icône correspondant à l'action
      */
@@ -77,10 +78,10 @@ class SessionActivity extends Model
             'invoice_printed' => 'fa-print',
             'report_generated' => 'fa-chart-bar',
         ];
-        
+
         return $icons[$this->action] ?? 'fa-circle';
     }
-    
+
     /**
      * Obtenir la couleur de l'action
      */
@@ -104,7 +105,7 @@ class SessionActivity extends Model
             'invoice_printed' => 'secondary',
             'report_generated' => 'info',
         ];
-        
+
         return $colors[$this->action] ?? 'secondary';
     }
 

@@ -2,12 +2,12 @@
 
 namespace App\Http;
 
-use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\CheckAdminRestriction;
-use App\Http\Middleware\CheckReceptionistRestriction;
 use App\Http\Middleware\CheckHousekeepingReadOnly;
+use App\Http\Middleware\CheckReceptionistRestriction;
+use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\TrackUserActivity; // AJOUTEZ CE USE
-use App\Http\Middleware\CaptureRequestDetails; // ET CELUI-CI SI VOUS L'AVEZ
+// ET CELUI-CI SI VOUS L'AVEZ
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -27,7 +27,7 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-        
+
         // OPTIONNEL : Si vous voulez capturer les détails pour TOUTES les requêtes
         // \App\Http\Middleware\CaptureRequestDetails::class,
     ];
@@ -46,7 +46,7 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            
+
             // MIDDLEWARE D'ACTIVITÉ - RECOMMANDÉ ICI
             // Il sera exécuté pour toutes les routes web
             \App\Http\Middleware\TrackUserActivity::class,
@@ -77,13 +77,13 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        
+
         // ==================== MIDDLEWARES PERSONNALISÉS ====================
         'checkrole' => CheckRole::class,
         'admin.restrict' => CheckAdminRestriction::class,
         'receptionist.restrict' => CheckReceptionistRestriction::class,
         'housekeeping.readonly' => CheckHousekeepingReadOnly::class,
-        
+
         // MIDDLEWARE D'ACTIVITÉ EN TANT QUE MIDDLEWARE DE ROUTE
         // Utile si vous voulez l'appliquer sélectivement
         'activity' => TrackUserActivity::class,

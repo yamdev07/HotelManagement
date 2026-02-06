@@ -12,7 +12,7 @@ class RoomStatusController extends Controller
     public function __construct(
         private RoomStatusRepositoryInterface $roomStatusRepository
     ) {}
-    
+
     /**
      * AJOUTER CETTE MÉTHODE POUR INITIALISER LES STATUTS
      */
@@ -69,22 +69,22 @@ class RoomStatusController extends Controller
                     'is_available' => false,
                 ],
             ];
-            
+
             foreach ($defaultStatuses as $status) {
                 RoomStatus::updateOrCreate(
                     ['id' => $status['id']],
                     $status
                 );
             }
-            
+
             return response()->json([
                 'message' => 'Statuses initialized successfully!',
-                'count' => count($defaultStatuses)
+                'count' => count($defaultStatuses),
             ]);
-            
+
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error: ' . $e->getMessage()
+                'message' => 'Error: '.$e->getMessage(),
             ], 500);
         }
     }

@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable, LogsActivity;
+    use HasFactory, LogsActivity, Notifiable;
 
     /**
      * Les attributs assignables en masse.
@@ -54,13 +54,10 @@ class User extends Authenticatable
      *
      * @return LogOptions
      */
-    
 
     /**
      * Retourne le chemin complet de l'avatar de l'utilisateur.
      * Si aucun avatar n'est défini ou le fichier est manquant, retourne l'avatar par défaut.
-     *
-     * @return string
      */
     public function getAvatar(): string
     {
@@ -70,7 +67,7 @@ class User extends Authenticatable
         }
 
         // Le fichier est directement dans /public/img/user/
-        $fullPath = 'img/user/' . trim($this->avatar, '/');
+        $fullPath = 'img/user/'.trim($this->avatar, '/');
 
         if (file_exists(public_path($fullPath))) {
             return asset($fullPath);
@@ -134,7 +131,7 @@ class User extends Authenticatable
      */
     public function canStartSession(): bool
     {
-        return !$this->activeCashierSession && 
+        return ! $this->activeCashierSession &&
             in_array($this->role, ['Receptionist', 'Admin', 'Super', 'Cashier']);
     }
 
@@ -168,7 +165,7 @@ class User extends Authenticatable
     public function getPermissionsAttribute(): array
     {
         $permissions = [];
-        
+
         if ($this->isSuper()) {
             $permissions = ['all'];
         } elseif ($this->isAdmin()) {
@@ -178,7 +175,7 @@ class User extends Authenticatable
         } elseif ($this->isCustomer()) {
             $permissions = ['view_bookings', 'make_payments'];
         }
-        
+
         return $permissions;
     }
 
@@ -205,13 +202,13 @@ class User extends Authenticatable
      */
     public function allActivities()
     {
-        return \Spatie\Activitylog\Models\Activity::where(function($query) {
-                $query->where('causer_type', self::class)
-                      ->where('causer_id', $this->id);
-            })
-            ->orWhere(function($query) {
+        return \Spatie\Activitylog\Models\Activity::where(function ($query) {
+            $query->where('causer_type', self::class)
+                ->where('causer_id', $this->id);
+        })
+            ->orWhere(function ($query) {
                 $query->where('subject_type', self::class)
-                      ->where('subject_id', $this->id);
+                    ->where('subject_id', $this->id);
             })
             ->orderBy('created_at', 'desc');
     }
@@ -229,7 +226,7 @@ class User extends Authenticatable
                 'method' => 'web',
             ])
             ->log('Connexion réussie');
-            
+
         $this->last_login_at = now();
         $this->save();
     }
@@ -307,7 +304,7 @@ class User extends Authenticatable
             'Housekeeping' => 'Housekeeping',
             'Customer' => 'Client',
         ];
-        
+
         return $roles[$this->role] ?? $this->role;
     }
 
@@ -324,7 +321,7 @@ class User extends Authenticatable
             'Housekeeping' => 'fas fa-broom',
             'Customer' => 'fas fa-user',
         ];
-        
+
         return $icons[$this->role] ?? 'fas fa-user';
     }
 
@@ -341,7 +338,7 @@ class User extends Authenticatable
             'Housekeeping' => 'warning',
             'Customer' => 'secondary',
         ];
-        
+
         return $colors[$this->role] ?? 'secondary';
     }
 
@@ -353,15 +350,15 @@ class User extends Authenticatable
         if ($this->id === $targetUser->id) {
             return true; // Peut modifier son propre profil
         }
-        
+
         if ($this->isSuper()) {
             return true; // Super admin peut modifier tout le monde
         }
-        
-        if ($this->isAdmin() && !$targetUser->isSuper()) {
+
+        if ($this->isAdmin() && ! $targetUser->isSuper()) {
             return true; // Admin peut modifier sauf les super admins
         }
-        
+
         return false;
     }
 
@@ -373,11 +370,11 @@ class User extends Authenticatable
         if ($this->id === $targetUser->id) {
             return false; // Ne peut pas se supprimer soi-même
         }
-        
-        if ($this->isSuper() && !$targetUser->isSuper()) {
+
+        if ($this->isSuper() && ! $targetUser->isSuper()) {
             return true; // Super admin peut supprimer sauf les autres super admins
         }
-        
+
         return false;
     }
 
@@ -389,9 +386,9 @@ class User extends Authenticatable
         $totalActivities = $this->allActivities()->count();
         $actionsDone = $this->activities()->count();
         $modificationsReceived = $this->targetedActivities()->count();
-        
+
         $lastActivity = $this->allActivities()->first();
-        
+
         return [
             'total' => $totalActivities,
             'actions_done' => $actionsDone,
@@ -416,13 +413,13 @@ class User extends Authenticatable
     {
         $colors = ['4e73df', '1cc88a', '36b9cc', 'f6c23e', 'e74a3b', '858796'];
         $color = $colors[array_rand($colors)];
-        
-        return "https://ui-avatars.com/api/?name=" . urlencode($this->name) . 
-               "&background=" . $color . 
-               "&color=fff&size=150&bold=true";
+
+        return 'https://ui-avatars.com/api/?name='.urlencode($this->name).
+               '&background='.$color.
+               '&color=fff&size=150&bold=true';
     }
 
-        /**
+    /**
      * Créer un snapshot pour le journal d'activité
      * Cela évite "Objet supprimé" quand l'utilisateur est supprimé
      */
@@ -448,8 +445,8 @@ class User extends Authenticatable
             ->logAll()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(function(string $eventName) {
-                return match($eventName) {
+            ->setDescriptionForEvent(function (string $eventName) {
+                return match ($eventName) {
                     'created' => 'a créé l\'utilisateur :name',
                     'updated' => 'a modifié l\'utilisateur :name',
                     'deleted' => 'a supprimé l\'utilisateur :name (:email)',
@@ -462,10 +459,8 @@ class User extends Authenticatable
     /**
      * Vérifier si l'avatar est l'avatar par défaut
      */
-
     public function hasDefaultAvatar(): bool
     {
-        return !$this->avatar || str_contains($this->avatar, 'default-user.jpg');
+        return ! $this->avatar || str_contains($this->avatar, 'default-user.jpg');
     }
-
 }

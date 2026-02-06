@@ -21,14 +21,14 @@ class ReceptionistAction extends Model
         'ip_address',
         'user_agent',
         'notes',
-        'performed_at'
+        'performed_at',
     ];
 
     protected $casts = [
         'action_data' => 'array',
         'before_state' => 'array',
         'after_state' => 'array',
-        'performed_at' => 'datetime'
+        'performed_at' => 'datetime',
     ];
 
     // Relations
@@ -71,54 +71,55 @@ class ReceptionistAction extends Model
                 'create' => 'Création réservation',
                 'update' => 'Modification réservation',
                 'cancel' => 'Annulation réservation',
-                'confirm' => 'Confirmation réservation'
+                'confirm' => 'Confirmation réservation',
             ],
             'checkin' => [
                 'create' => 'Check-in client',
                 'update' => 'Modification check-in',
                 'early' => 'Check-in anticipé',
-                'late' => 'Check-in tardif'
+                'late' => 'Check-in tardif',
             ],
             'checkout' => [
                 'create' => 'Check-out client',
                 'update' => 'Modification check-out',
                 'early' => 'Check-out anticipé',
-                'late' => 'Check-out tardif'
+                'late' => 'Check-out tardif',
             ],
             'payment' => [
                 'create' => 'Enregistrement paiement',
                 'update' => 'Modification paiement',
                 'refund' => 'Remboursement',
-                'partial' => 'Paiement partiel'
+                'partial' => 'Paiement partiel',
             ],
             'customer' => [
                 'create' => 'Création client',
                 'update' => 'Modification client',
-                'delete' => 'Suppression client'
+                'delete' => 'Suppression client',
             ],
             'room' => [
                 'status_change' => 'Changement statut chambre',
                 'assignment' => 'Assignation chambre',
-                'transfer' => 'Transfert chambre'
-            ]
+                'transfer' => 'Transfert chambre',
+            ],
         ];
 
         $type = $descriptions[$this->action_type] ?? [];
+
         return $type[$this->action_subtype] ?? "{$this->action_type} - {$this->action_subtype}";
     }
 
     public function getDetails()
     {
         $details = $this->getActionDescription();
-        
+
         if ($this->actionable) {
             $details .= " (ID: {$this->actionable_id})";
         }
-        
+
         if ($this->notes) {
             $details .= " - {$this->notes}";
         }
-        
+
         return $details;
     }
 }

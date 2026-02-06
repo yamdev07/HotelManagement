@@ -5,14 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
-use Carbon\Carbon;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class CashierSession extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity;
-    
+    use HasFactory, LogsActivity, SoftDeletes;
+
     protected $fillable = [
         'user_id',
         'initial_balance',
@@ -41,9 +40,9 @@ class CashierSession extends Model
         'excess_amount',
         'declared_amount',
         'actual_amount',
-        'verified_at'
+        'verified_at',
     ];
-    
+
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
@@ -92,28 +91,35 @@ class CashierSession extends Model
         'total_payments',
         'user_name',
         'closing_user_name',
-        'verification_user_name'
+        'verification_user_name',
     ];
-    
+
     const STATUS_ACTIVE = 'active';
+
     const STATUS_CLOSED = 'closed';
+
     const STATUS_PENDING_REVIEW = 'pending_review';
+
     const STATUS_VERIFIED = 'verified';
+
     const STATUS_ABANDONED = 'abandoned';
+
     const STATUS_SUSPENDED = 'suspended';
-    
+
     const SHIFT_MORNING = 'morning';
+
     const SHIFT_EVENING = 'evening';
+
     const SHIFT_NIGHT = 'night';
+
     const SHIFT_FULL_DAY = 'full_day';
+
     const SHIFT_CUSTOM = 'custom';
 
     const ALLOWED_DIFFERENCE = 1000; // Tolérance de 1000 CFA
-    
+
     /**
      * Configuration du logging d'activité
-     *
-     * @return LogOptions
      */
     public function getActivitylogOptions(): LogOptions
     {
@@ -121,8 +127,8 @@ class CashierSession extends Model
             ->logAll()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(function(string $eventName) {
-                return match($eventName) {
+            ->setDescriptionForEvent(function (string $eventName) {
+                return match ($eventName) {
                     'created' => 'a ouvert une session de caisse',
                     'updated' => 'a modifié une session de caisse',
                     'deleted' => 'a supprimé une session de caisse',
@@ -131,28 +137,28 @@ class CashierSession extends Model
                 };
             });
     }
-    
+
     // Relations
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    
+
     public function closedByUser()
     {
         return $this->belongsTo(User::class, 'closed_by');
     }
-    
+
     public function verifiedByUser()
     {
         return $this->belongsTo(User::class, 'verified_by');
     }
-    
+
     public function payments()
     {
         return $this->hasMany(Payment::class, 'cashier_session_id');
     }
-    
+
     public function transactions()
     {
         return $this->hasMany(Transaction::class, 'cashier_session_id');
@@ -162,13 +168,13 @@ class CashierSession extends Model
     {
         return $this->hasMany(SessionActivity::class, 'cashier_session_id');
     }
-    
+
     // Méthodes pratiques
     public function isActive()
     {
         return $this->status === self::STATUS_ACTIVE;
     }
-    
+
     public function isClosed()
     {
         return $this->status === self::STATUS_CLOSED;
@@ -206,7 +212,7 @@ class CashierSession extends Model
 
     public function canBeReopened()
     {
-        return $this->isClosed() && !$this->isVerified();
+        return $this->isClosed() && ! $this->isVerified();
     }
 
     public function calculateTheoreticalBalance()
@@ -214,12 +220,12 @@ class CashierSession extends Model
         $totalPayments = $this->payments()
             ->where('status', Payment::STATUS_COMPLETED)
             ->sum('amount');
-            
+
         $totalRefunds = $this->payments()
             ->where('status', Payment::STATUS_REFUNDED)
             ->orWhere('status', Payment::STATUS_PARTIALLY_REFUNDED)
             ->sum('amount');
-            
+
         return $this->initial_balance + $totalPayments - $totalRefunds;
     }
 
@@ -227,14 +233,14 @@ class CashierSession extends Model
     {
         $methods = Payment::getPaymentMethods();
         $totals = [];
-        
+
         foreach ($methods as $method => $details) {
             $totals[$method] = $this->payments()
                 ->where('status', Payment::STATUS_COMPLETED)
                 ->where('payment_method', $method)
                 ->sum('amount');
         }
-        
+
         return $totals;
     }
 
@@ -243,7 +249,7 @@ class CashierSession extends Model
         $theoretical = $this->calculateTheoreticalBalance();
         $this->current_balance = $theoretical;
         $this->saveQuietly();
-        
+
         return $theoretical;
     }
 
@@ -251,7 +257,7 @@ class CashierSession extends Model
     {
         $oldBalance = $this->current_balance;
         $newBalance = $this->calculateTheoreticalBalance();
-        
+
         $this->current_balance = $newBalance;
         $this->saveQuietly();
 
@@ -265,10 +271,10 @@ class CashierSession extends Model
                 ])
                 ->log('a recalculé le solde de la session');
         }
-        
+
         return $newBalance;
     }
-    
+
     public function getTotalRevenue()
     {
         return $this->payments()
@@ -290,7 +296,7 @@ class CashierSession extends Model
             ->where('payment_method', $method)
             ->sum('amount');
     }
-    
+
     public function getPaymentCount()
     {
         return $this->payments()
@@ -304,7 +310,7 @@ class CashierSession extends Model
             ->whereIn('status', [Payment::STATUS_REFUNDED, Payment::STATUS_PARTIALLY_REFUNDED])
             ->count();
     }
-    
+
     public function getTransactionCount()
     {
         return $this->transactions()->count();
@@ -328,11 +334,12 @@ class CashierSession extends Model
     // Accesseurs
     public function getDurationAttribute()
     {
-        if (!$this->start_time) {
+        if (! $this->start_time) {
             return null;
         }
-        
+
         $endTime = $this->end_time ?? now();
+
         return $this->start_time->diff($endTime);
     }
 
@@ -348,49 +355,51 @@ class CashierSession extends Model
 
     public function getFormattedInitialBalanceAttribute()
     {
-        return number_format($this->initial_balance, 0, ',', ' ') . ' CFA';
+        return number_format($this->initial_balance, 0, ',', ' ').' CFA';
     }
 
     public function getFormattedFinalBalanceAttribute()
     {
-        return number_format($this->final_balance ?? 0, 0, ',', ' ') . ' CFA';
+        return number_format($this->final_balance ?? 0, 0, ',', ' ').' CFA';
     }
 
     public function getFormattedCurrentBalanceAttribute()
     {
-        return number_format($this->current_balance ?? 0, 0, ',', ' ') . ' CFA';
+        return number_format($this->current_balance ?? 0, 0, ',', ' ').' CFA';
     }
 
     public function getFormattedTheoreticalBalanceAttribute()
     {
         $balance = $this->theoretical_balance ?? $this->calculateTheoreticalBalance();
-        return number_format($balance, 0, ',', ' ') . ' CFA';
+
+        return number_format($balance, 0, ',', ' ').' CFA';
     }
 
     public function getFormattedBalanceDifferenceAttribute()
     {
         $difference = $this->balance_difference ?? 0;
-        return number_format($difference, 0, ',', ' ') . ' CFA';
+
+        return number_format($difference, 0, ',', ' ').' CFA';
     }
 
     public function getFormattedTotalRevenueAttribute()
     {
-        return number_format($this->getTotalRevenue(), 0, ',', ' ') . ' CFA';
+        return number_format($this->getTotalRevenue(), 0, ',', ' ').' CFA';
     }
 
     public function getFormattedExpectedBalanceAttribute()
     {
-        return number_format($this->expected_balance ?? 0, 0, ',', ' ') . ' CFA';
+        return number_format($this->expected_balance ?? 0, 0, ',', ' ').' CFA';
     }
 
     public function getFormattedShortageAmountAttribute()
     {
-        return number_format($this->shortage_amount ?? 0, 0, ',', ' ') . ' CFA';
+        return number_format($this->shortage_amount ?? 0, 0, ',', ' ').' CFA';
     }
 
     public function getFormattedExcessAmountAttribute()
     {
-        return number_format($this->excess_amount ?? 0, 0, ',', ' ') . ' CFA';
+        return number_format($this->excess_amount ?? 0, 0, ',', ' ').' CFA';
     }
 
     public function getStatusLabelAttribute()
@@ -403,7 +412,7 @@ class CashierSession extends Model
             self::STATUS_ABANDONED => 'Abandonnée',
             self::STATUS_SUSPENDED => 'Suspendue',
         ];
-        
+
         return $labels[$this->status] ?? ucfirst($this->status);
     }
 
@@ -417,7 +426,7 @@ class CashierSession extends Model
             self::STATUS_ABANDONED => 'secondary',
             self::STATUS_SUSPENDED => 'dark',
         ];
-        
+
         return $colors[$this->status] ?? 'secondary';
     }
 
@@ -431,7 +440,7 @@ class CashierSession extends Model
             self::STATUS_ABANDONED => 'fa-times-circle',
             self::STATUS_SUSPENDED => 'fa-pause-circle',
         ];
-        
+
         return $icons[$this->status] ?? 'fa-circle';
     }
 
@@ -444,7 +453,7 @@ class CashierSession extends Model
             self::SHIFT_FULL_DAY => 'Journée complète',
             self::SHIFT_CUSTOM => 'Personnalisé',
         ];
-        
+
         return $shifts[$this->shift_type] ?? ucfirst($this->shift_type);
     }
 
@@ -457,19 +466,20 @@ class CashierSession extends Model
             self::SHIFT_FULL_DAY => 'success',
             self::SHIFT_CUSTOM => 'secondary',
         ];
-        
+
         return $colors[$this->shift_type] ?? 'secondary';
     }
 
     public function getIsBalancedAttribute()
     {
         $difference = abs($this->balance_difference ?? 0);
+
         return $difference <= self::ALLOWED_DIFFERENCE;
     }
 
     public function getHasDiscrepancyAttribute()
     {
-        return !$this->is_balanced;
+        return ! $this->is_balanced;
     }
 
     public function getDiscrepancyAmountAttribute()
@@ -480,7 +490,8 @@ class CashierSession extends Model
     public function getFormattedDiscrepancyAmountAttribute()
     {
         $amount = abs($this->discrepancy_amount);
-        return number_format($amount, 0, ',', ' ') . ' CFA';
+
+        return number_format($amount, 0, ',', ' ').' CFA';
     }
 
     public function getTotalTransactionsAttribute()
@@ -543,7 +554,7 @@ class CashierSession extends Model
 
     public function closeSession($userId, $finalBalance = null, $closingNotes = '')
     {
-        if (!$this->canBeClosed()) {
+        if (! $this->canBeClosed()) {
             return false;
         }
 
@@ -558,10 +569,10 @@ class CashierSession extends Model
         $this->end_time = now();
         $this->closed_by = $userId;
         $this->closing_notes = $closingNotes;
-        
+
         // Calculer les totaux par méthode
         $this->calculatePaymentTotals();
-        
+
         // Déterminer s'il y a un écart
         if (abs($difference) > self::ALLOWED_DIFFERENCE) {
             if ($difference > 0) {
@@ -570,7 +581,7 @@ class CashierSession extends Model
                 $this->shortage_amount = abs($difference);
             }
         }
-        
+
         $this->save();
 
         // Log activité
@@ -600,12 +611,12 @@ class CashierSession extends Model
 
     public function verifySession($userId, $notes = '')
     {
-        if (!$this->canBeVerified()) {
+        if (! $this->canBeVerified()) {
             return false;
         }
 
         $oldStatus = $this->status;
-        
+
         $this->status = self::STATUS_VERIFIED;
         $this->verified_by = $userId;
         $this->verified_at = now();
@@ -635,12 +646,12 @@ class CashierSession extends Model
 
     public function suspendSession($userId, $reason = '')
     {
-        if (!$this->isActive()) {
+        if (! $this->isActive()) {
             return false;
         }
 
         $oldStatus = $this->status;
-        
+
         $this->status = self::STATUS_SUSPENDED;
         $this->save();
 
@@ -666,12 +677,12 @@ class CashierSession extends Model
 
     public function reopenSession($userId, $reason = '')
     {
-        if (!$this->canBeReopened()) {
+        if (! $this->canBeReopened()) {
             return false;
         }
 
         $oldStatus = $this->status;
-        
+
         $this->status = self::STATUS_ACTIVE;
         $this->end_time = null;
         $this->closed_by = null;
@@ -699,16 +710,16 @@ class CashierSession extends Model
 
     public function abandonSession($userId, $reason = '')
     {
-        if (!$this->isActive() && !$this->isSuspended()) {
+        if (! $this->isActive() && ! $this->isSuspended()) {
             return false;
         }
 
         $oldStatus = $this->status;
-        
+
         $this->status = self::STATUS_ABANDONED;
         $this->end_time = now();
         $this->closed_by = $userId;
-        $this->closing_notes = "Session abandonnée: " . $reason;
+        $this->closing_notes = 'Session abandonnée: '.$reason;
         $this->save();
 
         // Log activité
@@ -734,7 +745,7 @@ class CashierSession extends Model
     private function determineShiftType()
     {
         $hour = now()->hour;
-        
+
         if ($hour >= 6 && $hour < 14) {
             return self::SHIFT_MORNING;
         } elseif ($hour >= 14 && $hour < 22) {
@@ -747,15 +758,15 @@ class CashierSession extends Model
     private function calculatePaymentTotals()
     {
         $methods = Payment::getPaymentMethods();
-        
+
         foreach ($methods as $method => $details) {
             $total = $this->payments()
                 ->where('status', Payment::STATUS_COMPLETED)
                 ->where('payment_method', $method)
                 ->sum('amount');
-                
-            $field = 'total_' . strtolower(str_replace('_', '', $method));
-            
+
+            $field = 'total_'.strtolower(str_replace('_', '', $method));
+
             if (in_array($field, $this->fillable)) {
                 $this->$field = $total;
             }
@@ -767,17 +778,17 @@ class CashierSession extends Model
     {
         return $query->where('status', self::STATUS_ACTIVE);
     }
-    
+
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
     }
-    
+
     public function scopeToday($query)
     {
         return $query->whereDate('created_at', today());
     }
-    
+
     public function scopeThisWeek($query)
     {
         return $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
@@ -794,6 +805,7 @@ class CashierSession extends Model
         if ($status) {
             return $query->where('status', $status);
         }
+
         return $query;
     }
 
@@ -802,6 +814,7 @@ class CashierSession extends Model
         if ($shift) {
             return $query->where('shift_type', $shift);
         }
+
         return $query;
     }
 
@@ -827,15 +840,15 @@ class CashierSession extends Model
         parent::boot();
 
         static::creating(function ($session) {
-            if (!$session->status) {
+            if (! $session->status) {
                 $session->status = self::STATUS_ACTIVE;
             }
-            
-            if (!$session->start_time) {
+
+            if (! $session->start_time) {
                 $session->start_time = now();
             }
-            
-            if (!$session->shift_type) {
+
+            if (! $session->shift_type) {
                 $session->shift_type = (new self)->determineShiftType();
             }
         });
@@ -878,9 +891,9 @@ class CashierSession extends Model
             'refund_count' => $this->getRefundCount(),
             'refund_total' => $this->getTotalRefunds(),
             'transaction_count' => $this->getTransactionCount(),
-            'duration' => $this->duration ? 
+            'duration' => $this->duration ?
                 $this->duration->format('%h heures %i minutes') : 'En cours',
-            'average_payment' => $this->getPaymentCount() > 0 ? 
+            'average_payment' => $this->getPaymentCount() > 0 ?
                 $this->getTotalRevenue() / $this->getPaymentCount() : 0,
             'balance_status' => $this->is_balanced ? 'Équilibrée' : 'Déséquilibrée',
             'discrepancy' => $this->formatted_discrepancy_amount,
@@ -900,7 +913,7 @@ class CashierSession extends Model
         $activities = $this->cashierActivities()->orderBy('created_at', 'desc')->get();
         $sessionActivities = $this->sessionActivities()->orderBy('created_at', 'desc')->get();
         $payments = $this->payments()->with('transaction.customer')->get();
-        
+
         return [
             'activities' => $activities,
             'session_activities' => $sessionActivities,
@@ -927,7 +940,7 @@ class CashierSession extends Model
             'shift' => $this->shift_label,
             'start_time' => $this->formatted_start_time,
             'end_time' => $this->formatted_end_time,
-            'duration' => $this->duration ? 
+            'duration' => $this->duration ?
                 $this->duration->format('%h heures %i minutes') : 'En cours',
             'initial_balance' => $this->formatted_initial_balance,
             'final_balance' => $this->formatted_final_balance,

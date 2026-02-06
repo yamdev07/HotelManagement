@@ -17,11 +17,11 @@ class ImageController extends Controller
     public function store(StoreImageRequest $request, Room $room)
     {
         // Créer le répertoire s'il n'existe pas
-        $path = public_path('img/room/' . $room->number);
-        if (!File::exists($path)) {
+        $path = public_path('img/room/'.$room->number);
+        if (! File::exists($path)) {
             File::makeDirectory($path, 0755, true);
         }
-        
+
         $file = $request->file('image');
 
         // Upload de l'image
@@ -41,16 +41,16 @@ class ImageController extends Controller
 
     public function destroy(Image $image)
     {
-        $path = public_path('img/room/' . $image->room->number . '/' . $image->url);
-        
+        $path = public_path('img/room/'.$image->room->number.'/'.$image->url);
+
         if (file_exists($path)) {
             unlink($path);
         }
-        
+
         $image->delete();
 
         return redirect()
             ->back()
-            ->with('success', 'Image "' . $image->url . '" has been deleted!');
+            ->with('success', 'Image "'.$image->url.'" has been deleted!');
     }
 }

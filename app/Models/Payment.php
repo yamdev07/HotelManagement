@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\Activitylog\LogOptions;
+use Spatie\Activitylog\Traits\LogsActivity;
 
 class Payment extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity;
+    use HasFactory, LogsActivity, SoftDeletes;
 
     protected $fillable = [
         'user_id',
@@ -33,7 +33,7 @@ class Payment extends Model
         'exchange_rate',
         'fees',
         'tax',
-        'notes'
+        'notes',
     ];
 
     protected $casts = [
@@ -44,7 +44,7 @@ class Payment extends Model
         'fees' => 'decimal:2',
         'tax' => 'decimal:2',
         'exchange_rate' => 'decimal:4',
-        'payment_gateway_response' => 'array'
+        'payment_gateway_response' => 'array',
     ];
 
     protected $appends = [
@@ -59,32 +59,43 @@ class Payment extends Model
         'total_amount',
         'formatted_total_amount',
         'can_be_cancelled',
-        'can_be_refunded'
+        'can_be_refunded',
     ];
 
     // Constantes pour les statuts
     const STATUS_PENDING = 'pending';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_CANCELLED = 'cancelled';
+
     const STATUS_EXPIRED = 'expired';
+
     const STATUS_FAILED = 'failed';
+
     const STATUS_REFUNDED = 'refunded';
+
     const STATUS_PROCESSING = 'processing';
+
     const STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
 
     // Constantes pour les méthodes de paiement
     const METHOD_CASH = 'cash';
+
     const METHOD_CARD = 'card';
+
     const METHOD_TRANSFER = 'transfer';
+
     const METHOD_MOBILE_MONEY = 'mobile_money';
+
     const METHOD_FEDAPAY = 'fedapay';
+
     const METHOD_CHECK = 'check';
+
     const METHOD_REFUND = 'refund';
 
     /**
      * Configuration du logging d'activité
-     *
-     * @return LogOptions
      */
     public function getActivitylogOptions(): LogOptions
     {
@@ -92,8 +103,8 @@ class Payment extends Model
             ->logAll()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->setDescriptionForEvent(function(string $eventName) {
-                return match($eventName) {
+            ->setDescriptionForEvent(function (string $eventName) {
+                return match ($eventName) {
                     'created' => 'a créé un paiement',
                     'updated' => 'a modifié un paiement',
                     'deleted' => 'a supprimé un paiement',
@@ -163,7 +174,7 @@ class Payment extends Model
                 'color' => 'success',
                 'description' => 'Paiement en espèces comptant',
                 'requires_reference' => false,
-                'fields' => []
+                'fields' => [],
             ],
             self::METHOD_CARD => [
                 'label' => 'Carte bancaire',
@@ -171,7 +182,7 @@ class Payment extends Model
                 'color' => 'primary',
                 'description' => 'Paiement par carte Visa/Mastercard',
                 'requires_reference' => true,
-                'fields' => []
+                'fields' => [],
             ],
             self::METHOD_TRANSFER => [
                 'label' => 'Virement bancaire',
@@ -179,7 +190,7 @@ class Payment extends Model
                 'color' => 'info',
                 'description' => 'Virement bancaire ou Western Union',
                 'requires_reference' => true,
-                'fields' => []
+                'fields' => [],
             ],
             self::METHOD_MOBILE_MONEY => [
                 'label' => 'Mobile Money',
@@ -187,7 +198,7 @@ class Payment extends Model
                 'color' => 'warning',
                 'description' => 'Paiement mobile (Moov, MTN, etc.)',
                 'requires_reference' => true,
-                'fields' => []
+                'fields' => [],
             ],
             self::METHOD_FEDAPAY => [
                 'label' => 'Fedapay',
@@ -195,7 +206,7 @@ class Payment extends Model
                 'color' => 'dark',
                 'description' => 'Paiement en ligne sécurisé',
                 'requires_reference' => true,
-                'fields' => []
+                'fields' => [],
             ],
             self::METHOD_CHECK => [
                 'label' => 'Chèque',
@@ -203,7 +214,7 @@ class Payment extends Model
                 'color' => 'secondary',
                 'description' => 'Chèque bancaire',
                 'requires_reference' => true,
-                'fields' => []
+                'fields' => [],
             ],
             self::METHOD_REFUND => [
                 'label' => 'Remboursement',
@@ -211,7 +222,7 @@ class Payment extends Model
                 'color' => 'danger',
                 'description' => 'Remboursement au client',
                 'requires_reference' => true,
-                'fields' => []
+                'fields' => [],
             ],
         ];
     }
@@ -311,6 +322,7 @@ class Payment extends Model
     public function getStatusTextAttribute(): string
     {
         $statuses = self::getStatusOptions();
+
         return $statuses[$this->status] ?? ucfirst($this->status);
     }
 
@@ -319,7 +331,7 @@ class Payment extends Model
      */
     public function getStatusClassAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             self::STATUS_PENDING => 'warning',
             self::STATUS_PROCESSING => 'info',
             self::STATUS_COMPLETED => 'success',
@@ -336,7 +348,7 @@ class Payment extends Model
      */
     public function getStatusIconAttribute(): string
     {
-        return match($this->status) {
+        return match ($this->status) {
             self::STATUS_PENDING => 'fa-clock',
             self::STATUS_PROCESSING => 'fa-sync-alt',
             self::STATUS_COMPLETED => 'fa-check-circle',
@@ -354,6 +366,7 @@ class Payment extends Model
     public function getPaymentMethodLabelAttribute(): string
     {
         $methods = self::getPaymentMethods();
+
         return $methods[$this->payment_method]['label'] ?? ucfirst($this->payment_method);
     }
 
@@ -363,6 +376,7 @@ class Payment extends Model
     public function getPaymentMethodIconAttribute(): string
     {
         $methods = self::getPaymentMethods();
+
         return $methods[$this->payment_method]['icon'] ?? 'fa-money-bill-wave';
     }
 
@@ -372,6 +386,7 @@ class Payment extends Model
     public function getPaymentMethodColorAttribute(): string
     {
         $methods = self::getPaymentMethods();
+
         return $methods[$this->payment_method]['color'] ?? 'secondary';
     }
 
@@ -380,7 +395,7 @@ class Payment extends Model
      */
     public function getFormattedAmountAttribute(): string
     {
-        return number_format($this->amount, 0, ',', ' ') . ' CFA';
+        return number_format($this->amount, 0, ',', ' ').' CFA';
     }
 
     /**
@@ -396,7 +411,7 @@ class Payment extends Model
      */
     public function getFormattedTotalAmountAttribute(): string
     {
-        return number_format($this->total_amount, 0, ',', ' ') . ' CFA';
+        return number_format($this->total_amount, 0, ',', ' ').' CFA';
     }
 
     /**
@@ -412,9 +427,10 @@ class Payment extends Model
      */
     public function getFormattedPaymentDateAttribute(): string
     {
-        if (!$this->payment_date) {
+        if (! $this->payment_date) {
             return 'Non défini';
         }
+
         return $this->payment_date->format('d/m/Y');
     }
 
@@ -439,17 +455,17 @@ class Payment extends Model
      */
     public function cancel($userId, $reason = null): bool
     {
-        if (!$this->can_be_cancelled) {
+        if (! $this->can_be_cancelled) {
             return false;
         }
 
         $oldStatus = $this->status;
-        
+
         $this->update([
             'status' => self::STATUS_CANCELLED,
             'cancelled_at' => now(),
             'cancelled_by' => $userId,
-            'cancel_reason' => $reason
+            'cancel_reason' => $reason,
         ]);
 
         // Logger l'annulation
@@ -478,13 +494,13 @@ class Payment extends Model
      */
     public function refund($userId, $amount = null, $reason = null): bool
     {
-        if (!$this->can_be_refunded) {
+        if (! $this->can_be_refunded) {
             return false;
         }
 
         $refundAmount = $amount ?? $this->amount;
         $oldStatus = $this->status;
-        
+
         if ($refundAmount >= $this->amount) {
             // Remboursement complet
             $newStatus = self::STATUS_REFUNDED;
@@ -497,7 +513,7 @@ class Payment extends Model
             'status' => $newStatus,
             'cancelled_at' => now(),
             'cancelled_by' => $userId,
-            'cancel_reason' => $reason ?? 'Remboursement'
+            'cancel_reason' => $reason ?? 'Remboursement',
         ]);
 
         // Créer un paiement de remboursement
@@ -511,7 +527,7 @@ class Payment extends Model
                 'status' => self::STATUS_COMPLETED,
                 'payment_method' => self::METHOD_REFUND,
                 'description' => "Remboursement du paiement #{$this->reference}",
-                'reference' => 'REFUND-' . $this->reference,
+                'reference' => 'REFUND-'.$this->reference,
                 'notes' => $reason,
             ]);
 
@@ -548,7 +564,7 @@ class Payment extends Model
         }
 
         $oldStatus = $this->status;
-        
+
         $this->update([
             'status' => self::STATUS_COMPLETED,
             'verified_by' => $userId ?? auth()->id(),
@@ -588,6 +604,7 @@ class Payment extends Model
         if ($status) {
             return $query->where('status', $status);
         }
+
         return $query;
     }
 
@@ -599,6 +616,7 @@ class Payment extends Model
         if ($method) {
             return $query->where('payment_method', $method);
         }
+
         return $query;
     }
 
@@ -613,6 +631,7 @@ class Payment extends Model
         if ($endDate) {
             $query->whereDate('created_at', '<=', $endDate);
         }
+
         return $query;
     }
 
@@ -624,6 +643,7 @@ class Payment extends Model
         if ($sessionId) {
             return $query->where('cashier_session_id', $sessionId);
         }
+
         return $query;
     }
 
@@ -642,7 +662,7 @@ class Payment extends Model
     {
         return $query->whereBetween('created_at', [
             now()->startOfWeek(),
-            now()->endOfWeek()
+            now()->endOfWeek(),
         ]);
     }
 
@@ -664,22 +684,22 @@ class Payment extends Model
 
         static::creating(function ($payment) {
             // Générer une référence si non fournie
-            if (!$payment->reference) {
-                $payment->reference = 'PAY-' . strtoupper($payment->payment_method) . '-' . time() . '-' . rand(1000, 9999);
+            if (! $payment->reference) {
+                $payment->reference = 'PAY-'.strtoupper($payment->payment_method).'-'.time().'-'.rand(1000, 9999);
             }
-            
+
             // Par défaut, le statut est "pending" pour la plupart des paiements
-            if (!$payment->status) {
+            if (! $payment->status) {
                 $payment->status = self::STATUS_PENDING;
             }
 
             // Si created_by n'est pas défini, utiliser l'utilisateur courant
-            if (!$payment->created_by && auth()->check()) {
+            if (! $payment->created_by && auth()->check()) {
                 $payment->created_by = auth()->id();
             }
 
             // Si user_id n'est pas défini, utiliser l'utilisateur courant
-            if (!$payment->user_id && auth()->check()) {
+            if (! $payment->user_id && auth()->check()) {
                 $payment->user_id = auth()->id();
             }
         });
@@ -775,6 +795,7 @@ class Payment extends Model
     public static function getBalanceDue($transactionId, $transactionTotal)
     {
         $totalPaid = self::getTotalForTransaction($transactionId);
+
         return max(0, $transactionTotal - $totalPaid);
     }
 
@@ -784,6 +805,7 @@ class Payment extends Model
     public static function isTransactionFullyPaid($transactionId, $transactionTotal)
     {
         $balanceDue = self::getBalanceDue($transactionId, $transactionTotal);
+
         return $balanceDue <= 100; // Tolérance de 100 CFA
     }
 
@@ -798,8 +820,8 @@ class Payment extends Model
             'fees' => $this->fees ?? 0,
             'tax' => $this->tax ?? 0,
             'net_amount' => $this->amount - ($this->fees ?? 0),
-            'is_verified' => !is_null($this->verified_at),
-            'verification_time' => $this->verified_at ? $this->created_at->diffInMinutes($this->verified_at) . ' minutes' : null,
+            'is_verified' => ! is_null($this->verified_at),
+            'verification_time' => $this->verified_at ? $this->created_at->diffInMinutes($this->verified_at).' minutes' : null,
             'age' => $this->created_at->diffForHumans(),
         ];
     }
@@ -819,7 +841,7 @@ class Payment extends Model
     public function getHistoryAttribute()
     {
         $activities = $this->paymentActivities()->orderBy('created_at', 'desc')->get();
-        
+
         return [
             'activities' => $activities,
             'transaction' => $this->transaction,
@@ -854,8 +876,8 @@ class Payment extends Model
             'status_color' => $this->status_class,
             'payment_method' => $this->payment_method_label,
             'method_color' => $this->payment_method_color,
-            'transaction' => $this->transaction ? '#' . $this->transaction->id : 'N/A',
-            'customer' => $this->transaction && $this->transaction->customer ? 
+            'transaction' => $this->transaction ? '#'.$this->transaction->id : 'N/A',
+            'customer' => $this->transaction && $this->transaction->customer ?
                 $this->transaction->customer->name : 'N/A',
             'date' => $this->formatted_date,
             'payment_date' => $this->formatted_payment_date,
