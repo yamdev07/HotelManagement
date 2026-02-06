@@ -1,134 +1,195 @@
-# 🏨 Hotel Management System (Laravel)
+# HotelManagement
 
-Application web de **gestion hôtelière** développée avec **Laravel**, destinée à gérer efficacement les opérations quotidiennes d’un hôtel : chambres, réservations, clients, paiements et facturation.
+**HotelManagement** is a full-featured hotel management web application built with **Laravel**.  
+It includes a **public-facing hotel website** and a **secure internal dashboard** to manage rooms, reservations, services, and users.
 
----
-
-## ✨ Fonctionnalités
-
-### 🔐 Authentification & utilisateurs
-- Connexion / déconnexion sécurisée
-- Gestion des utilisateurs
-- Attribution de rôles (administrateur, réception, etc.)
-
-### 🛏️ Gestion des chambres
-- Création, modification et suppression de chambres
-- Gestion des types de chambres
-- Suivi de la disponibilité
-- Définition des tarifs par chambre
-
-### 📅 Réservations
-- Recherche de chambres disponibles par date (check-in / check-out)
-- Création et modification de réservations
-- Annulation de réservations
-- Historique des réservations
-
-### 👤 Gestion des clients
-- Enregistrement des clients
-- Association client ↔ réservation
-- Historique des séjours
-
-### 💳 Paiements & facturation
-- Enregistrement des paiements
-- Paiements partiels ou complets
-- Suivi des statuts de paiement
-- Génération de factures
-- Historique des transactions
-
-### 📊 Tableau de bord
-- Vue globale des activités de l’hôtel
-- Statistiques des réservations
-- Suivi des revenus
-- Taux d’occupation des chambres
-
-### ⚙️ Administration
-- Interface d’administration
-- CRUD complet sur les entités principales
-- Gestion centralisée des données
-- Sécurité et validation des formulaires
+This project was designed to simulate a real-world hotel management system, from customer experience to internal operations.
 
 ---
 
-## 🧱 Technologies utilisées
+## 🏨 Project Overview
 
-- **Laravel** (PHP Framework)
-- **Blade** (templating)
-- **Eloquent ORM**
-- **MySQL / MariaDB**
-- **Bootstrap / CSS**
-- **JavaScript**
-- **Vite**
+The application is divided into two main parts:
+
+### 🌐 Public Website
+- Hotel homepage with branding and hero section
+- Rooms & Suites listing with pricing and availability
+- Restaurant and services pages
+- Contact page
+- Custom logo and favicon integration
+- Responsive design (desktop & mobile)
+
+### 🔐 Admin Dashboard
+- Secure authentication
+- Dashboard access for hotel staff
+- Room management
+- Reservation management
+- Service management
+- User access control
+- Sidebar navigation with branding
 
 ---
 
-## 📦 Installation
+## 🛠️ Tech Stack
 
-### Prérequis
-- PHP >= 8.x
+- **Backend:** Laravel (PHP)
+- **Frontend:** Blade, Bootstrap 5
+- **Database:** MySQL
+- **Authentication:** Laravel Auth
+- **Deployment:** ISPConfig / Apache / Nginx
+- **Assets:** Custom logo & favicon
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+Make sure you have:
+- PHP >= 8.1
 - Composer
-- Node.js & npm
 - MySQL
+- Node.js & npm (optional, if using Vite)
+- A local or remote web server
 
-### Étapes
+---
 
-```bash
-git clone https://github.com/yamdev07/HotelManagement.git
-cd HotelManagement
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/yamdev07/HotelManagement.git
+   cd HotelManagement
+    ````
+
+Install PHP dependencies
+````
 composer install
-npm install
+````
+
+Create environment file
+````
 cp .env.example .env
+````
+
+Configure your environment
+Update .env with your database and app settings:
+````
+APP_NAME="Hotel Management"
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=hotel_management
+DB_USERNAME=root
+DB_PASSWORD=
+````
+
+Generate application key
+````
 php artisan key:generate
+````
+
+Run database migrations
+````
 php artisan migrate
+````
+Install npm 
+````
+npm install
+````
+Start the application
+````
 npm run dev
 php artisan serve
 ````
-Configurer la base de données dans le fichier .env avant de lancer les migrations.
 
-### 🗂️ Structure du projet
+Visit: http://localhost:8000
+
+## 🌍 Production Deployment
+
+This project is designed to be deployed in production environments such as ISPConfig, cPanel, or Plesk.
+
+Deployment Notes
+
+- Set the document root to the public/ directory
+
+- Upload assets (logo, favicon) to public/
+
+- Set correct permissions:
+
+- Directories: 755
+
+- Files: 644
+
+- Disable debug mode in production:
+  ````
+  APP_DEBUG=false
+  ````
+
+Clear caches after deployment:
 ````
-app/                → Logique métier
-routes/             → Routes web
-resources/views/    → Templates Blade
-database/migrations → Schéma de la base de données
-public/             → Fichiers publics
+php artisan config:clear
+php artisan route:clear
+php artisan view:clear
+php artisan cache:clear
 ````
----
+## 🎨 Logo & Favicon
 
-### 🚧 Évolutions prévues
+The application uses a custom logo and favicon for branding.
 
-- Module de gestion de caisse
+To add or update the favicon:
 
-- Rapports financiers détaillés
+1- Generate favicon files from your logo
 
-- Export PDF / Excel
+2- Place them in the public/ directory
 
-- Notifications avancées
+3- Reference them in the main layout <head>
 
-- API REST / Mobile
+Supported formats:
+````
+favicon.ico
 
----
-### 🤝 Contribution
+favicon-16x16.png
 
-Les contributions sont les bienvenues !
+favicon-32x32.png
 
-- Fork le projet
+apple-touch-icon.png
+````
+## 🧪 Testing (Planned)
 
-- Crée une branche (feature/ma-fonctionnalite)
+Testing support will be added to improve reliability and code quality:
 
-- Commit tes changements
+- Feature tests (authentication, reservations)
 
-- Ouvre une Pull Request
+- Unit tests (business logic)
 
---- 
-### 📄 Licence
+- CI integration (GitHub Actions)
 
-Projet sous licence Apache 2.0.
+## 🗺️ Roadmap
 
----
-### 👨‍💻 Auteur
+- [ ] Role-based permissions (Admin / Staff)
 
-Yoann Yamd
-Développeur Web & Logiciel
-📧 yoannyamd@gmail.com
+- [ ] Automated tests
 
-🌐 https://github.com/yamdev07
+- [ ] REST API for mobile apps
+
+- [ ] Online booking & payment integration
+
+- [ ] Multi-language support
+
+## 👨‍💻 Author
+
+**yamdev07**
+
+GitHub: https://github.com/yamdev07
+
+Role: Full-Stack Developer (Laravel)
+
+## 📄 License
+
+This project is open-source and available under the MIT License.
