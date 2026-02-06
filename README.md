@@ -5,6 +5,9 @@ It includes a **public-facing hotel website** and a **secure internal dashboard*
 
 This project was designed to simulate a real-world hotel management system, from customer experience to internal operations.
 
+![Lint](https://github.com/yamdev07/HotelManagement/actions/workflows/lint.yml/badge.svg)
+
+
 ---
 
 ## 🏨 Project Overview
