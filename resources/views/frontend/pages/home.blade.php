@@ -68,37 +68,6 @@
         </div>
     </section>
 
-    <!-- Barre de réservation fixe qui apparaît au scroll -->
-    <section class="booking-bar-fixed">
-        <div class="container">
-            <div class="booking-container-fixed">
-                <form class="booking-form">
-                    <div class="form-group">
-                        <label>Arrivée</label>
-                        <input type="date" class="form-input" placeholder="Date d'arrivée">
-                    </div>
-                    <div class="form-group">
-                        <label>Départ</label>
-                        <input type="date" class="form-input" placeholder="Date de départ">
-                    </div>
-                    <div class="form-group">
-                        <label>Invités</label>
-                        <select class="form-input">
-                            <option>1 Adulte</option>
-                            <option>2 Adultes</option>
-                            <option>3 Adultes</option>
-                            <option>4+ Adultes</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn-search">
-                        <i class="fas fa-search"></i>
-                        Rechercher
-                    </button>
-                </form>
-            </div>
-        </div>
-    </section>
-
     <!-- Section Introduction -->
     <section class="intro-section py-7">
         <div class="container">
@@ -522,7 +491,7 @@ body {
 }
 
 /* ============================================
-   HERO SECTION - CORRIGÉ
+   HERO SECTION
    ============================================ */
 .hero-modern {
     position: relative;
@@ -541,7 +510,6 @@ body {
     position: relative;
     z-index: 2;
     width: 100%;
-    padding-top: 80px; /* Compense pour la barre fixe */
 }
 
 .hero-badge {
@@ -648,93 +616,6 @@ body {
 }
 
 /* ============================================
-   BARRE DE RÉSERVATION FIXE - NOUVEAU STYLE
-   ============================================ */
-.booking-bar-fixed {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 9999;
-    background: var(--white);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    padding: 15px 0;
-    transform: translateY(-100%);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.booking-bar-fixed.visible {
-    transform: translateY(0);
-}
-
-.booking-container-fixed {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-}
-
-.booking-bar-fixed .booking-form {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    align-items: end;
-    margin: 0;
-}
-
-.booking-bar-fixed .form-group {
-    margin-bottom: 0;
-}
-
-.booking-bar-fixed .form-group label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--cactus-green);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 5px;
-    display: block;
-}
-
-.booking-bar-fixed .form-input {
-    padding: 12px 16px;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 14px;
-    width: 100%;
-    background: var(--white);
-    transition: var(--transition-smooth);
-}
-
-.booking-bar-fixed .form-input:focus {
-    outline: none;
-    border-color: var(--cactus-green);
-    box-shadow: 0 0 0 3px rgba(26, 71, 42, 0.1);
-}
-
-.booking-bar-fixed .btn-search {
-    padding: 12px 25px;
-    background: var(--cactus-green);
-    color: var(--white);
-    border: none;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    height: 46px;
-}
-
-.booking-bar-fixed .btn-search:hover {
-    background: var(--cactus-light);
-    transform: translateY(-1px);
-}
-
-/* ============================================
    BUTTONS
    ============================================ */
 .btn-modern {
@@ -816,7 +697,7 @@ body {
 }
 
 /* ============================================
-   FORMULAIRES DE RÉSERVATION COMMUNS
+   FORMULAIRES DE RÉSERVATION
    ============================================ */
 .booking-form {
     display: grid;
@@ -1503,12 +1384,6 @@ body {
 /* ============================================
    RESPONSIVE
    ============================================ */
-@media (max-width: 1200px) {
-    .booking-bar-fixed .booking-form {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
 @media (max-width: 991px) {
     .py-7 {
         padding: 70px 0;
@@ -1535,15 +1410,6 @@ body {
     
     .badge-circle {
         margin: 30px auto 0;
-    }
-    
-    .booking-bar-fixed .booking-form {
-        grid-template-columns: 1fr;
-        gap: 10px;
-    }
-    
-    .booking-bar-fixed {
-        padding: 10px 0;
     }
 }
 
@@ -1572,16 +1438,6 @@ body {
     
     .booking-form {
         grid-template-columns: 1fr;
-    }
-    
-    .booking-bar-fixed .form-group label {
-        font-size: 11px;
-    }
-    
-    .booking-bar-fixed .form-input,
-    .booking-bar-fixed .btn-search {
-        font-size: 13px;
-        padding: 10px 14px;
     }
 }
 
@@ -1656,40 +1512,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             }
-        });
-    }
-    
-    // Gestion de la barre de réservation fixe
-    const bookingBarFixed = document.querySelector('.booking-bar-fixed');
-    const heroSection = document.querySelector('.hero-modern');
-    
-    if (bookingBarFixed && heroSection) {
-        function handleBookingBarVisibility() {
-            const heroHeight = heroSection.offsetHeight;
-            const scrollPosition = window.scrollY;
-            
-            if (scrollPosition > heroHeight * 0.3) {
-                bookingBarFixed.classList.add('visible');
-            } else {
-                bookingBarFixed.classList.remove('visible');
-            }
-        }
-        
-        window.addEventListener('scroll', handleBookingBarVisibility);
-        window.addEventListener('load', handleBookingBarVisibility);
-        
-        // Gestion du z-index pour les dropdowns
-        const formInputs = bookingBarFixed.querySelectorAll('.form-input');
-        formInputs.forEach(input => {
-            input.addEventListener('focus', () => {
-                bookingBarFixed.style.zIndex = '10000';
-            });
-            
-            input.addEventListener('blur', () => {
-                setTimeout(() => {
-                    bookingBarFixed.style.zIndex = '9999';
-                }, 200);
-            });
         });
     }
     
