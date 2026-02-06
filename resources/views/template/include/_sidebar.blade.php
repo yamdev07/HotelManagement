@@ -3,15 +3,20 @@
 
     <!-- Logo -->
     <a href="{{ route('dashboard.index') }}" class="sidebar-logo">
-        <div class="d-flex align-items-center">
-            <div class="brand-icon">
-                <i class="fas fa-hotel"></i>
+       <div class="d-flex align-items-center">
+            <div class="">
+                <img src="{{ asset('img/logo_cactus1.jpeg') }}"
+                    alt="Hotel Cactus"
+                    style="height: 42px;">
             </div>
+
             <div class="brand-text ms-2">
                 <span class="brand-name">Hotel Management</span>
                 <small class="brand-subtitle d-block">Gestion Hôtelière</small>
             </div>
         </div>
+
+
         <button id="toggle-sidebar" class="btn btn-icon">
             <i class="fas fa-bars"></i>
         </button>
