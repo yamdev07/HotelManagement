@@ -201,9 +201,14 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="{{ route('frontend.home') }}">
-                <i class="fas fa-hotel me-2"></i>Cactus Palace
+            <a class="navbar-brand d-flex align-items-center" href="{{ route('frontend.home') }}">
+                <img src="{{ asset('img/logo_cactus.png') }}"
+                    alt="Hôtel Le Cactus"
+                    class="me-2"
+                    style="height: 45px; width: auto;">
+                <span>Cactus Palace</span>
             </a>
+
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
