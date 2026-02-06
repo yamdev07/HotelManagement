@@ -206,7 +206,7 @@
                     alt="Hôtel Le Cactus"
                     class="me-2"
                     style="height: 45px; width: auto;">
-                <span>Cactus Palace</span>
+                <span>Le cactus Hotel</span>
             </a>
 
 
