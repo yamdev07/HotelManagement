@@ -126,11 +126,17 @@ class TransactionController extends Controller
     }
 
     /**
-     * Mettre à jour une transaction existante
+     * Mettre à jour une transaction existante - VERSION CORRIGÉE
      */
     public function update(Request $request, Transaction $transaction)
     {
-        // Vérifier les permissions - INCLUS LES RECEPTIONNISTES
+        Log::info('🚀 === DÉBUT MODIFICATION RÉSERVATION ===', [
+            'transaction_id' => $transaction->id,
+            'user_id' => auth()->id(),
+            'user_role' => auth()->user()->role,
+        ]);
+
+        // Vérifier les permissions
         if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
             abort(403, 'Accès non autorisé');
         }
@@ -141,95 +147,156 @@ class TransactionController extends Controller
                 ->with('error', 'Cette réservation ne peut plus être modifiée.');
         }
 
-        // Validation
+        // Validation des données
         $validator = Validator::make($request->all(), [
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
             'notes' => 'nullable|string|max:500',
+            'status' => 'required|in:reservation,active,completed,cancelled,no_show',
+            'cancel_reason' => 'nullable|required_if:status,cancelled|string|max:500',
+            'person_count' => 'nullable|integer|min:1|max:' . ($transaction->room->capacity ?? 4),
         ], [
             'check_in.required' => 'La date d\'arrivée est requise',
             'check_out.required' => 'La date de départ est requise',
             'check_out.after' => 'La date de départ doit être après la date d\'arrivée',
+            'person_count.max' => 'Le nombre de personnes ne peut pas dépasser la capacité de la chambre',
         ]);
 
+        // Validation personnalisée pour les statuts
+        $validator->after(function ($validator) use ($request, $transaction) {
+            // Empêcher retour à réservation si date passée
+            if ($request->status === 'reservation' && Carbon::parse($transaction->check_in)->isPast()) {
+                $validator->errors()->add('status', 'Impossible de revenir à "Réservation", la date d\'arrivée est passée.');
+            }
+
+            // Vérifier paiement complet pour statut "completed"
+            if ($request->status === 'completed' && !$transaction->isFullyPaid()) {
+                $remaining = $transaction->getRemainingPayment();
+                $validator->errors()->add('status', 
+                    'Impossible de marquer comme terminé. Solde restant: ' . 
+                    number_format($remaining, 0, ',', ' ') . ' CFA');
+            }
+        });
+
         if ($validator->fails()) {
+            Log::error('❌ Validation échouée', $validator->errors()->toArray());
             return redirect()->back()
                 ->withErrors($validator)
                 ->withInput();
         }
 
-        // Vérifier la disponibilité de la chambre
-        if (! $this->isRoomAvailable($transaction->room_id, $request->check_in, $request->check_out, $transaction->id)) {
-            return redirect()->back()
-                ->with('error', 'Cette chambre est déjà réservée pour les dates sélectionnées.')
-                ->withInput();
+        // Vérifier la disponibilité de la chambre si les dates changent
+        if ($request->check_in != $transaction->check_in->format('Y-m-d H:i:s') || 
+            $request->check_out != $transaction->check_out->format('Y-m-d H:i:s')) {
+            
+            if (! $this->isRoomAvailable($transaction->room_id, $request->check_in, $request->check_out, $transaction->id)) {
+                return redirect()->back()
+                    ->with('error', '⚠️ Cette chambre n\'est pas disponible pour les dates sélectionnées.')
+                    ->withInput();
+            }
         }
 
         try {
             DB::beginTransaction();
 
-            // Sauvegarder l'état AVANT modification
-            $beforeState = [
-                'check_in' => $transaction->check_in->format('Y-m-d H:i:s'),
-                'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
+            // ============ SAUVEGARDE ÉTAT AVANT MODIFICATION ============
+            $oldState = [
+                'check_in' => $transaction->check_in,
+                'check_out' => $transaction->check_out,
                 'total_price' => $transaction->total_price,
+                'status' => $transaction->status,
                 'notes' => $transaction->notes,
+                'person_count' => $transaction->person_count,
             ];
+            
+            $oldNights = $transaction->getNightsAttribute();
+            $oldTotalPrice = $transaction->getTotalPrice();
+            $roomPricePerNight = $transaction->room->price ?? 0;
+            $oldStatus = $transaction->status;
+            $newStatus = $request->status;
 
-            // Calculer l'ANCIEN prix (avant modification)
-            $oldCheckIn = Carbon::parse($transaction->check_in);
-            $oldCheckOut = Carbon::parse($transaction->check_out);
-            $oldNights = $oldCheckIn->diffInDays($oldCheckOut);
-            $oldTotalPrice = $transaction->total_price;
+            Log::info('📊 État avant modification', [
+                'old_nights' => $oldNights,
+                'old_total_price' => $oldTotalPrice,
+                'old_status' => $oldStatus,
+            ]);
 
-            // Mettre à jour les dates
-            $transaction->update([
+            // ============ PRÉPARATION DES DONNÉES DE MISE À JOUR ============
+            $updateData = [
                 'check_in' => $request->check_in,
                 'check_out' => $request->check_out,
+                'status' => $newStatus,
                 'notes' => $request->notes ?? $transaction->notes,
-            ]);
+                'person_count' => $request->person_count ?? $transaction->person_count ?? 1,
+            ];
 
-            // RECHARGER la transaction pour avoir les nouvelles dates
+            // ============ GESTION SPÉCIFIQUE DES STATUTS ============
+            if ($newStatus === 'cancelled') {
+                $updateData['cancelled_at'] = now();
+                $updateData['cancelled_by'] = auth()->id();
+                $updateData['cancel_reason'] = $request->cancel_reason;
+                
+                // Libérer la chambre
+                if ($transaction->room) {
+                    $transaction->room()->update(['room_status_id' => 1]); // Libre
+                }
+                
+                // Créer remboursement si paiements existants
+                $totalPaid = $transaction->getTotalPayment();
+                if ($totalPaid > 0) {
+                    Payment::create([
+                        'transaction_id' => $transaction->id,
+                        'amount' => -$totalPaid,
+                        'payment_method' => 'refund',
+                        'reference' => 'REFUND-'.$transaction->id.'-'.time(),
+                        'status' => 'completed',
+                        'notes' => 'Remboursement annulation' . 
+                                ($request->cancel_reason ? ": {$request->cancel_reason}" : ''),
+                        'user_id' => auth()->id(),
+                    ]);
+                }
+            } elseif ($oldStatus === 'cancelled' && $newStatus !== 'cancelled') {
+                // Restauration d'une annulation
+                $updateData['cancelled_at'] = null;
+                $updateData['cancelled_by'] = null;
+                $updateData['cancel_reason'] = null;
+                
+                // Supprimer remboursement
+                Payment::where('transaction_id', $transaction->id)
+                    ->where('payment_method', 'refund')
+                    ->delete();
+            }
+
+            // ============ MISE À JOUR DE LA TRANSACTION ============
+            Log::info('🔵 Mise à jour transaction', $updateData);
+            $transaction->update($updateData);
+
+            // ============ RECALCUL DU PRIX TOTAL ============
             $transaction->refresh();
+            $newNights = $transaction->getNightsAttribute();
+            $newTotalPrice = $transaction->getTotalPrice();
+            $priceDifference = $newTotalPrice - $oldTotalPrice;
 
-            // FORCER le recalcul du prix total
-            $newTotalPrice = $transaction->getTotalPrice(); // Cette méthode doit être corrigée
-
-            // Mettre à jour le champ total_price avec le nouveau calcul
-            $transaction->total_price = $newTotalPrice;
-            $transaction->save();
-
-            // Calculer les nouvelles nuits
-            $newCheckIn = Carbon::parse($transaction->check_in);
-            $newCheckOut = Carbon::parse($transaction->check_out);
-            $newNights = $newCheckIn->diffInDays($newCheckOut);
-
-            // Créer un historique détaillé
-            History::create([
-                'transaction_id' => $transaction->id,
-                'user_id' => auth()->id(),
-                'action' => 'date_change',
-                'description' => 'Modification des dates : '.
-                                $oldNights.' nuit(s) → '.$newNights.' nuit(s)',
-                'old_values' => json_encode([
-                    'check_in' => $beforeState['check_in'],
-                    'check_out' => $beforeState['check_out'],
-                    'total_price' => $oldTotalPrice,
-                    'nights' => $oldNights,
-                    'room_price_per_night' => $transaction->room->price ?? 0,
-                ]),
-                'new_values' => json_encode([
-                    'check_in' => $transaction->check_in->format('Y-m-d H:i:s'),
-                    'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
-                    'total_price' => $newTotalPrice,
-                    'nights' => $newNights,
-                    'room_price_per_night' => $transaction->room->price ?? 0,
-                    'calculated_at' => now()->format('Y-m-d H:i:s'),
-                ]),
-                'notes' => $request->notes ?? 'Modification des dates de séjour',
+            Log::info('📊 État après modification', [
+                'new_nights' => $newNights,
+                'new_total_price' => $newTotalPrice,
+                'price_difference' => $priceDifference,
             ]);
 
-            // Enregistrer l'action si réceptionniste
+            // ============ MISE À JOUR STATUT CHAMBRE ============
+            $this->updateRoomStatus($transaction, $oldStatus, $newStatus);
+
+            // ============ ENREGISTREMENT HISTORIQUE ============
+            $this->logHistory($transaction, $oldState, [
+                'check_in' => $transaction->check_in,
+                'check_out' => $transaction->check_out,
+                'total_price' => $newTotalPrice,
+                'status' => $newStatus,
+                'notes' => $transaction->notes,
+                'person_count' => $transaction->person_count,
+            ]);
+
+            // ============ ENREGISTREMENT ACTION RÉCEPTIONNISTE ============
             if (auth()->user()->role === 'Receptionist') {
                 $this->logReceptionistAction(
                     actionType: 'reservation',
@@ -237,76 +304,225 @@ class TransactionController extends Controller
                     actionable: $transaction,
                     actionData: [
                         'old_dates' => [
-                            'check_in' => $beforeState['check_in'],
-                            'check_out' => $beforeState['check_out'],
+                            'check_in' => $oldState['check_in']->format('Y-m-d H:i:s'),
+                            'check_out' => $oldState['check_out']->format('Y-m-d H:i:s'),
                             'nights' => $oldNights,
                             'price' => $oldTotalPrice,
+                            'status' => $oldStatus,
                         ],
                         'new_dates' => [
                             'check_in' => $transaction->check_in->format('Y-m-d H:i:s'),
                             'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
                             'nights' => $newNights,
                             'price' => $newTotalPrice,
+                            'status' => $newStatus,
                         ],
+                        'price_difference' => $priceDifference,
+                        'changed_by' => auth()->user()->name,
                     ],
-                    beforeState: $beforeState,
+                    beforeState: [
+                        'check_in' => $oldState['check_in']->format('Y-m-d H:i:s'),
+                        'check_out' => $oldState['check_out']->format('Y-m-d H:i:s'),
+                        'total_price' => $oldTotalPrice,
+                        'status' => $oldStatus,
+                        'notes' => $oldState['notes'],
+                        'person_count' => $oldState['person_count'],
+                    ],
                     afterState: [
                         'check_in' => $transaction->check_in->format('Y-m-d H:i:s'),
                         'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
                         'total_price' => $newTotalPrice,
+                        'status' => $newStatus,
                         'notes' => $transaction->notes,
+                        'person_count' => $transaction->person_count,
                     ],
-                    notes: 'Modification des dates de réservation avec recalcul du prix'
+                    notes: 'Modification complète de la réservation'
                 );
             }
 
             DB::commit();
 
-            // Message détaillé
-            $priceChange = $newTotalPrice - $oldTotalPrice;
-            $priceChangeFormatted = number_format(abs($priceChange), 0, ',', ' ').' CFA';
+            // ============ MESSAGE DE SUCCÈS ============
+            $message = $this->buildSuccessMessage($transaction, $oldState, $oldNights, $newNights, $oldTotalPrice, $newTotalPrice, $oldStatus, $newStatus);
 
-            $message = "✅ Réservation #{$transaction->id} mise à jour avec succès.<br>";
-            $message .= '<strong>Anciennes dates:</strong> '.
-                    Carbon::parse($beforeState['check_in'])->format('d/m/Y').' → '.
-                    Carbon::parse($beforeState['check_out'])->format('d/m/Y').
-                    " ({$oldNights} nuit(s))<br>";
-            $message .= '<strong>Nouvelles dates:</strong> '.
-                    $newCheckIn->format('d/m/Y').' → '.
-                    $newCheckOut->format('d/m/Y').
-                    " ({$newNights} nuit(s))<br>";
-            $message .= '<strong>Ancien total:</strong> '.
-                    number_format($oldTotalPrice, 0, ',', ' ').' CFA<br>';
-            $message .= '<strong>Nouveau total:</strong> '.
-                    number_format($newTotalPrice, 0, ',', ' ').' CFA<br>';
-
-            if ($priceChange != 0) {
-                $changeType = $priceChange > 0 ? 'majoration' : 'réduction';
-                $message .= "<strong>{$changeType}:</strong> ".
-                        ($priceChange > 0 ? '+' : '').
-                        number_format($priceChange, 0, ',', ' ').' CFA<br>';
-
-                // Afficher un avertissement si le prix a diminué
-                if ($priceChange < 0) {
-                    $message .= "<div class='alert alert-warning mt-2'>⚠️ Le prix a diminué. Vérifiez les paiements.</div>";
-                }
-            }
+            Log::info('✅ Modification réussie', [
+                'transaction_id' => $transaction->id,
+                'new_status' => $newStatus,
+                'price_change' => $priceDifference,
+            ]);
 
             return redirect()->route('transaction.show', $transaction)
                 ->with('success', $message);
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Erreur modification transaction:', [
+            Log::error('❌ Erreur modification transaction:', [
                 'error' => $e->getMessage(),
                 'transaction_id' => $transaction->id,
+                'stack' => $e->getTraceAsString(),
             ]);
 
             return redirect()->back()
-                ->with('error', 'Erreur lors de la modification: '.$e->getMessage());
+                ->with('error', 'Erreur lors de la modification: ' . $e->getMessage())
+                ->withInput();
         }
     }
 
+    /**
+     * Mettre à jour le statut de la chambre
+     */
+    private function updateRoomStatus(Transaction $transaction, $oldStatus, $newStatus)
+    {
+        if (!$transaction->room) {
+            return;
+        }
+
+        $roomStatusMap = [
+            'reservation' => 3, // Réservée
+            'active' => 2,      // Occupée
+            'completed' => 1,   // Libre
+            'cancelled' => 1,   // Libre
+            'no_show' => 1,     // Libre
+        ];
+
+        if (isset($roomStatusMap[$newStatus])) {
+            $transaction->room()->update(['room_status_id' => $roomStatusMap[$newStatus]]);
+            Log::info('🔄 Statut chambre mis à jour', [
+                'room_id' => $transaction->room_id,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'room_status_id' => $roomStatusMap[$newStatus],
+            ]);
+        }
+    }
+
+    /**
+     * Enregistrer dans l'historique
+     */
+    private function logHistory(Transaction $transaction, $oldState, $newState)
+    {
+        try {
+            $oldNights = Carbon::parse($oldState['check_in'])->diffInDays($oldState['check_out']);
+            $newNights = Carbon::parse($newState['check_in'])->diffInDays($newState['check_out']);
+
+            History::create([
+                'transaction_id' => $transaction->id,
+                'user_id' => auth()->id(),
+                'action' => 'update',
+                'description' => 'Modification complète de la réservation',
+                'old_values' => json_encode([
+                    'check_in' => $oldState['check_in']->format('Y-m-d H:i:s'),
+                    'check_out' => $oldState['check_out']->format('Y-m-d H:i:s'),
+                    'total_price' => $oldState['total_price'],
+                    'status' => $oldState['status'],
+                    'nights' => $oldNights,
+                    'notes' => $oldState['notes'],
+                    'person_count' => $oldState['person_count'],
+                ]),
+                'new_values' => json_encode([
+                    'check_in' => $newState['check_in']->format('Y-m-d H:i:s'),
+                    'check_out' => $newState['check_out']->format('Y-m-d H:i:s'),
+                    'total_price' => $newState['total_price'],
+                    'status' => $newState['status'],
+                    'nights' => $newNights,
+                    'notes' => $newState['notes'],
+                    'person_count' => $newState['person_count'],
+                ]),
+                'notes' => 'Modification via interface d\'édition',
+            ]);
+
+            Log::info('📝 Historique enregistré', [
+                'transaction_id' => $transaction->id,
+                'action' => 'update',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Erreur enregistrement historique', [
+                'error' => $e->getMessage(),
+                'transaction_id' => $transaction->id,
+            ]);
+        }
+    }
+
+    /**
+     * Construire le message de succès
+     */
+    private function buildSuccessMessage($transaction, $oldState, $oldNights, $newNights, $oldTotalPrice, $newTotalPrice, $oldStatus, $newStatus)
+    {
+        $message = '<div class="alert alert-success border-0">';
+        $message .= '<div class="d-flex align-items-center mb-3">';
+        $message .= '<i class="fas fa-check-circle fa-2x me-3 text-success"></i>';
+        $message .= '<div>';
+        $message .= '<h5 class="alert-heading mb-1">✅ Réservation modifiée avec succès !</h5>';
+        $message .= '<p class="mb-0"><small>Modifiée par <strong>'.auth()->user()->name.'</strong></small></p>';
+        $message .= '</div>';
+        $message .= '</div>';
+
+        $message .= '<div class="row">';
+        $message .= '<div class="col-md-6">';
+        $message .= '<p><strong><i class="fas fa-history me-2"></i>Anciennes dates:</strong><br>';
+        $message .= $oldState['check_in']->format('d/m/Y H:i').' → '.$oldState['check_out']->format('d/m/Y H:i').'<br>';
+        $message .= '('.$oldNights.' nuit'.($oldNights > 1 ? 's' : '').')</p>';
+
+        $message .= '<p><strong><i class="fas fa-calendar-alt me-2"></i>Nouvelles dates:</strong><br>';
+        $message .= $transaction->check_in->format('d/m/Y H:i').' → '.$transaction->check_out->format('d/m/Y H:i').'<br>';
+        $message .= '('.$newNights.' nuit'.($newNights > 1 ? 's' : '').')</p>';
+        $message .= '</div>';
+
+        $message .= '<div class="col-md-6">';
+        $message .= '<p><strong><i class="fas fa-exchange-alt me-2"></i>Statut:</strong> ';
+        $message .= '<span class="badge bg-'.$this->getStatusColor($oldStatus).'">'.ucfirst($oldStatus).'</span> → ';
+        $message .= '<span class="badge bg-'.$this->getStatusColor($newStatus).'">'.ucfirst($newStatus).'</span></p>';
+
+        $priceDifference = $newTotalPrice - $oldTotalPrice;
+        if ($priceDifference != 0) {
+            $changeType = $priceDifference > 0 ? 'Majoration' : 'Réduction';
+            $message .= '<p class="'.($priceDifference > 0 ? 'text-danger' : 'text-success').'">';
+            $message .= '<strong><i class="fas fa-money-bill-wave me-2"></i>'.$changeType.':</strong> ';
+            $message .= ($priceDifference > 0 ? '+' : '').number_format($priceDifference, 0, ',', ' ').' CFA</p>';
+        }
+
+        $message .= '<p><strong><i class="fas fa-receipt me-2"></i>Nouveau total:</strong> ';
+        $message .= number_format($newTotalPrice, 0, ',', ' ').' CFA</p>';
+        $message .= '</div>';
+        $message .= '</div>';
+
+        // Avertissement si changement majeur
+        if ($oldStatus !== $newStatus && in_array($newStatus, ['cancelled', 'no_show'])) {
+            $message .= '<div class="alert alert-warning mt-2">';
+            $message .= '<i class="fas fa-exclamation-triangle me-2"></i>';
+            $message .= '<strong>Attention :</strong> La réservation est maintenant '.$newStatus.'. ';
+            $message .= 'La chambre a été libérée.';
+            $message .= '</div>';
+        }
+
+        $message .= '<hr class="my-3">';
+        $message .= '<div class="text-center">';
+        $message .= '<small class="text-muted">';
+        $message .= '<i class="fas fa-hashtag me-1"></i>Référence: #TRX-'.$transaction->id.' | ';
+        $message .= '<i class="fas fa-user-circle me-1"></i>Agent: '.auth()->user()->name.' | ';
+        $message .= '<i class="fas fa-calendar me-1"></i>Modifié le: '.now()->format('d/m/Y H:i');
+        $message .= '</small>';
+        $message .= '</div>';
+        $message .= '</div>';
+
+        return $message;
+    }
+
+    /**
+     * Obtenir la couleur d'un statut
+     */
+    private function getStatusColor($status)
+    {
+        $colors = [
+            'reservation' => 'warning',
+            'active' => 'success',
+            'completed' => 'info',
+            'cancelled' => 'danger',
+            'no_show' => 'secondary',
+        ];
+
+        return $colors[$status] ?? 'secondary';
+    }
     /**
      * Supprimer une transaction
      */

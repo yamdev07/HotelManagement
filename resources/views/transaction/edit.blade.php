@@ -177,6 +177,7 @@
                         @endif
 
                         @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
+                        <!-- FORMULAIRE PRINCIPAL DE MODIFICATION -->
                         <form method="POST" action="{{ route('transaction.update', $transaction) }}" id="edit-transaction-form">
                             @csrf
                             @method('PUT')
@@ -396,7 +397,7 @@
                                 @endif
                             </div>
 
-                            <!-- Section Statut (Nouveau) -->
+                            <!-- Section Statut -->
                             @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
                             <div class="mb-4">
                                 <h6 class="border-bottom pb-2 mb-3">
@@ -476,8 +477,8 @@
                             </div>
 
                             <!-- Champs cachés pour les dates combinées -->
-                            <input type="hidden" id="check_in" name="check_in" value="{{ old('check_in', $transaction->check_in) }}">
-                            <input type="hidden" id="check_out" name="check_out" value="{{ old('check_out', $transaction->check_out) }}">
+                            <input type="hidden" id="check_in" name="check_in" value="{{ old('check_in', $transaction->check_in->format('Y-m-d\TH:i')) }}">
+                            <input type="hidden" id="check_out" name="check_out" value="{{ old('check_out', $transaction->check_out->format('Y-m-d\TH:i')) }}">
 
                             <!-- Boutons -->
                             <div class="d-flex justify-content-between mt-4">
@@ -485,17 +486,12 @@
                                     <button type="button" class="btn btn-outline-secondary" onclick="confirmCancel()">
                                         <i class="fas fa-times me-2"></i>Annuler les modifications
                                     </button>
-                                    @if(in_array($transaction->status, ['reservation', 'active']) && in_array(auth()->user()->role, ['Super', 'Admin']))
-                                    <form action="{{ route('transaction.cancel', $transaction) }}" 
-                                          method="POST" 
-                                          class="d-inline ms-2"
-                                          id="cancel-form">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="button" class="btn btn-outline-danger" onclick="showCancelReasonModal()">
+                                    
+                                    @if(in_array($transaction->status, ['reservation', 'active']) && in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
+                                        <!-- Bouton pour ouvrir le modal d'annulation -->
+                                        <button type="button" class="btn btn-outline-danger ms-2" onclick="showCancelReasonModal()">
                                             <i class="fas fa-ban me-2"></i>Annuler Réservation
                                         </button>
-                                    </form>
                                     @endif
                                 </div>
                                 <div>
@@ -504,7 +500,19 @@
                                     </button>
                                 </div>
                             </div>
-                        </form>
+                        </form> <!-- Fermeture du formulaire principal -->
+
+                        <!-- FORMULAIRE D'ANNULATION CACHÉ (SÉPARÉ) -->
+                        @if(in_array($transaction->status, ['reservation', 'active']) && in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
+                            <form action="{{ route('transaction.cancel', $transaction) }}" 
+                                  method="POST" 
+                                  id="cancel-form"
+                                  style="display: none;">
+                                @csrf
+                                @method('DELETE')
+                                <input type="hidden" name="cancel_reason" id="hidden_cancel_reason">
+                            </form>
+                        @endif
                         @else
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle me-2"></i>
@@ -693,6 +701,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // ============ VARIABLES GLOBALES ============
     const checkInDateInput = document.getElementById('check_in_date');
     const checkInTimeInput = document.getElementById('check_in_time');
     const checkOutDateInput = document.getElementById('check_out_date');
@@ -712,17 +721,30 @@ document.addEventListener('DOMContentLoaded', function() {
     const roomPricePerNight = {{ $transaction->room->price }};
     const originalTotalPrice = {{ $transaction->getTotalPrice() }};
     
-    // Fonction pour combiner date et heure
+    // ============ FONCTIONS UTILITAIRES ============
+    
+    /**
+     * Combiner date et heure en format ISO
+     */
     function combineDateTime(dateInput, timeInput) {
         const date = dateInput.value;
-        const time = timeInput.value;
-        if (date && time) {
+        const time = timeInput.value || '00:00';
+        if (date) {
             return `${date}T${time}`;
         }
         return null;
     }
     
-    // Fonction pour calculer les nuits et le total
+    /**
+     * Formater le prix en CFA
+     */
+    function formatCFA(amount) {
+        return new Intl.NumberFormat('fr-FR').format(amount) + ' CFA';
+    }
+    
+    /**
+     * Calculer les nuits et le total
+     */
     function calculateNightsAndTotal() {
         const checkInDateTime = combineDateTime(checkInDateInput, checkInTimeInput);
         const checkOutDateTime = combineDateTime(checkOutDateInput, checkOutTimeInput);
@@ -740,9 +762,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const checkOut = new Date(checkOutDateTime);
             
             if (checkOut > checkIn) {
-                // Calculer la différence en millisecondes
+                // Calculer la différence en jours (arrondi supérieur)
                 const timeDiff = checkOut.getTime() - checkIn.getTime();
-                // Convertir en jours (arrondi au supérieur)
                 const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
                 
                 nightsCount.textContent = nights;
@@ -752,6 +773,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Calculer la différence de prix
                 const difference = total - originalTotalPrice;
                 const differenceElement = document.getElementById('price-difference');
+                
                 if (difference > 0) {
                     differenceElement.textContent = '+' + formatCFA(difference);
                     differenceElement.className = 'fw-bold text-danger';
@@ -780,12 +802,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Formater le prix en CFA
-    function formatCFA(amount) {
-        return new Intl.NumberFormat('fr-FR').format(amount) + ' CFA';
-    }
-    
-    // Gérer le champ raison d'annulation
+    /**
+     * Gérer le champ raison d'annulation
+     */
     function toggleCancelReasonField() {
         if (statusSelect.value === 'cancelled') {
             cancelReasonField.style.display = 'block';
@@ -798,7 +817,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Mettre à jour la description du statut
+    /**
+     * Mettre à jour la description du statut
+     */
     function updateStatusDescription() {
         const selectedOption = statusSelect.options[statusSelect.selectedIndex];
         const description = selectedOption.getAttribute('data-desc');
@@ -806,7 +827,9 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleCancelReasonField();
     }
     
-    // Vérifier la disponibilité des nouvelles dates
+    /**
+     * Vérifier la disponibilité des nouvelles dates
+     */
     async function checkAvailability() {
         const checkIn = checkInHiddenInput.value;
         const checkOut = checkOutHiddenInput.value;
@@ -888,6 +911,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // ============ ÉVÉNEMENTS ============
+    
     // Écouter les changements de dates et heures
     checkInDateInput.addEventListener('change', calculateNightsAndTotal);
     checkInTimeInput.addEventListener('change', calculateNightsAndTotal);
@@ -902,10 +927,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (checkAvailabilityBtn) {
         checkAvailabilityBtn.addEventListener('click', checkAvailability);
     }
-    
-    // Calculer au chargement
-    calculateNightsAndTotal();
-    updateStatusDescription();
     
     // Définir la date minimale pour le départ (jour suivant l'arrivée)
     checkInDateInput.addEventListener('change', function() {
@@ -926,16 +947,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Initialiser les dates min
-    if (checkInDateInput.value) {
-        const checkInDate = new Date(checkInDateInput.value);
-        const nextDay = new Date(checkInDate);
-        nextDay.setDate(nextDay.getDate() + 1);
-        const minDate = nextDay.toISOString().split('T')[0];
-        checkOutDateInput.min = minDate;
-    }
+    // ============ FONCTIONS GLOBALES (window) ============
     
-    // Fonction de confirmation d'annulation
+    /**
+     * Confirmer l'annulation des modifications
+     */
     window.confirmCancel = function() {
         Swal.fire({
             title: 'Annuler les modifications ?',
@@ -953,38 +969,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
     
-    // Afficher le modal d'annulation
+    /**
+     * Afficher le modal d'annulation
+     */
     window.showCancelReasonModal = function() {
         const modal = new bootstrap.Modal(document.getElementById('cancelReasonModal'));
         modal.show();
     };
     
-    // Soumettre le formulaire d'annulation
+    /**
+     * Soumettre le formulaire d'annulation
+     */
     window.submitCancelForm = function() {
         const reason = document.getElementById('modal_cancel_reason').value;
         const cancelForm = document.getElementById('cancel-form');
         
-        // Créer un champ caché pour la raison
-        const reasonInput = document.createElement('input');
-        reasonInput.type = 'hidden';
-        reasonInput.name = 'cancel_reason';
-        reasonInput.value = reason || "Annulation depuis l'interface d'édition";
-        cancelForm.appendChild(reasonInput);
-        
-        // Soumettre le formulaire
-        cancelForm.submit();
+        if (cancelForm) {
+            // Mettre la raison dans le champ caché
+            document.getElementById('hidden_cancel_reason').value = 
+                reason || "Annulation depuis l'interface d'édition";
+            
+            // Soumettre le formulaire
+            cancelForm.submit();
+        } else {
+            console.error('Formulaire d\'annulation non trouvé');
+            Swal.fire({
+                icon: 'error',
+                title: 'Erreur',
+                text: 'Formulaire d\'annulation non disponible'
+            });
+        }
     };
     
-    // Validation du formulaire
+    // ============ VALIDATION DU FORMULAIRE PRINCIPAL ============
+    
     document.getElementById('edit-transaction-form').addEventListener('submit', function(e) {
         e.preventDefault();
         
-        const checkIn = new Date(checkInHiddenInput.value);
-        const checkOut = new Date(checkOutHiddenInput.value);
+        // Combiner les dates avant validation
+        const checkIn = combineDateTime(checkInDateInput, checkInTimeInput);
+        const checkOut = combineDateTime(checkOutDateInput, checkOutTimeInput);
         const newStatus = statusSelect.value;
         
         // Vérification dates
-        if (checkOut <= checkIn) {
+        if (!checkIn || !checkOut) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Dates incomplètes',
+                text: 'Veuillez remplir toutes les dates et heures'
+            });
+            return false;
+        }
+        
+        if (new Date(checkOut) <= new Date(checkIn)) {
             Swal.fire({
                 icon: 'error',
                 title: 'Dates invalides',
@@ -1102,6 +1139,21 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return false;
     });
+    
+    // ============ INITIALISATION ============
+    
+    // Calculer au chargement
+    calculateNightsAndTotal();
+    updateStatusDescription();
+    
+    // Initialiser les dates min
+    if (checkInDateInput.value) {
+        const checkInDate = new Date(checkInDateInput.value);
+        const nextDay = new Date(checkInDate);
+        nextDay.setDate(nextDay.getDate() + 1);
+        const minDate = nextDay.toISOString().split('T')[0];
+        checkOutDateInput.min = minDate;
+    }
 });
 </script>
 @endsection

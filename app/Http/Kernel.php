@@ -6,8 +6,7 @@ use App\Http\Middleware\CheckAdminRestriction;
 use App\Http\Middleware\CheckHousekeepingReadOnly;
 use App\Http\Middleware\CheckReceptionistRestriction;
 use App\Http\Middleware\CheckRole;
-use App\Http\Middleware\TrackUserActivity; // AJOUTEZ CE USE
-// ET CELUI-CI SI VOUS L'AVEZ
+use App\Http\Middleware\TrackUserActivity;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -17,7 +16,7 @@ class Kernel extends HttpKernel
      *
      * These middleware are run during every request to your application.
      *
-     * @var array
+     * @var array<int, class-string|string>
      */
     protected $middleware = [
         // \App\Http\Middleware\TrustHosts::class,
@@ -27,15 +26,12 @@ class Kernel extends HttpKernel
         \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
-
-        // OPTIONNEL : Si vous voulez capturer les détails pour TOUTES les requêtes
-        // \App\Http\Middleware\CaptureRequestDetails::class,
     ];
 
     /**
      * The application's route middleware groups.
      *
-     * @var array
+     * @var array<string, array<int, class-string|string>>
      */
     protected $middlewareGroups = [
         'web' => [
@@ -46,17 +42,14 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-
-            // MIDDLEWARE D'ACTIVITÉ - RECOMMANDÉ ICI
-            // Il sera exécuté pour toutes les routes web
-            \App\Http\Middleware\TrackUserActivity::class,
+            
+            // SUPPRIMEZ CETTE LIGNE TEMPORAIREMENT POUR DÉBOGUER
+            // \App\Http\Middleware\TrackUserActivity::class,
         ],
 
         'api' => [
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            // Optionnel pour l'API
-            // \App\Http\Middleware\TrackUserActivity::class,
         ],
     ];
 
@@ -65,7 +58,7 @@ class Kernel extends HttpKernel
      *
      * These middleware may be assigned to groups or used individually.
      *
-     * @var array
+     * @var array<string, class-string|string>
      */
     protected $routeMiddleware = [
         'auth' => \App\Http\Middleware\Authenticate::class,
@@ -83,10 +76,27 @@ class Kernel extends HttpKernel
         'admin.restrict' => CheckAdminRestriction::class,
         'receptionist.restrict' => CheckReceptionistRestriction::class,
         'housekeeping.readonly' => CheckHousekeepingReadOnly::class,
+        
+        // SUPPRIMEZ CES LIGNES TEMPORAIREMENT POUR DÉBOGUER
+        // 'activity' => TrackUserActivity::class,
+        // 'activity.withparams' => \App\Http\Middleware\TrackUserActivity::class,
+    ];
 
-        // MIDDLEWARE D'ACTIVITÉ EN TANT QUE MIDDLEWARE DE ROUTE
-        // Utile si vous voulez l'appliquer sélectivement
-        'activity' => TrackUserActivity::class,
-        'activity.withparams' => \App\Http\Middleware\TrackUserActivity::class,
+    /**
+     * The priority-sorted list of middleware.
+     *
+     * This forces non-global middleware to always be in the given order.
+     *
+     * @var array<int, class-string|string>
+     */
+    protected $middlewarePriority = [
+        \Illuminate\Cookie\Middleware\EncryptCookies::class,
+        \Illuminate\Session\Middleware\StartSession::class,
+        \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+        \Illuminate\Contracts\Auth\Middleware\AuthenticatesRequests::class,
+        \Illuminate\Routing\Middleware\ThrottleRequests::class,
+        \Illuminate\Session\Middleware\AuthenticateSession::class,
+        \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        \Illuminate\Auth\Middleware\Authorize::class,
     ];
 }
