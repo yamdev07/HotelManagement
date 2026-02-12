@@ -101,7 +101,7 @@ class TransactionController extends Controller
     }
 
     /**
-     * Afficher le formulaire d'édition d'une transaction
+     * Afficher le formulaire d'édition d'une transaction - VERSION CORRIGÉE
      */
     public function edit(Transaction $transaction)
     {
@@ -119,8 +119,32 @@ class TransactionController extends Controller
                 ->with('error', 'Impossible de modifier une réservation terminée, annulée ou no show.');
         }
 
-        // Charger les relations nécessaires
-        $transaction->load(['customer.user', 'room.type', 'room.roomStatus']);
+        // CORRECTION: Charger toutes les relations nécessaires AVANT d'envoyer à la vue
+        // Utiliser with() pour charger les relations imbriquées
+        $transaction = Transaction::with([
+            'customer.user',
+            'room.type', 
+            'room.roomStatus'
+        ])->findOrFail($transaction->id);
+
+        // CORRECTION: Si pas de chambre, créer un objet par défaut pour éviter les erreurs
+        if (!$transaction->room) {
+            $transaction->room = (object) [
+                'id' => null,
+                'number' => 'Non attribuée',
+                'price' => 0,
+                'type' => (object) ['name' => 'Non défini'],
+                'roomStatus' => (object) ['name' => 'Non disponible']
+            ];
+        } else {
+            // S'assurer que les sous-relations sont chargées
+            if (!$transaction->room->relationLoaded('type')) {
+                $transaction->room->load('type');
+            }
+            if (!$transaction->room->relationLoaded('roomStatus')) {
+                $transaction->room->load('roomStatus');
+            }
+        }
 
         return view('transaction.edit', compact('transaction'));
     }
@@ -189,7 +213,8 @@ class TransactionController extends Controller
         if ($request->check_in != $transaction->check_in->format('Y-m-d H:i:s') || 
             $request->check_out != $transaction->check_out->format('Y-m-d H:i:s')) {
             
-            if (! $this->isRoomAvailable($transaction->room_id, $request->check_in, $request->check_out, $transaction->id)) {
+            // CORRECTION: Vérifier si la transaction a une chambre
+            if ($transaction->room && !$this->isRoomAvailable($transaction->room_id, $request->check_in, $request->check_out, $transaction->id)) {
                 return redirect()->back()
                     ->with('error', '⚠️ Cette chambre n\'est pas disponible pour les dates sélectionnées.')
                     ->withInput();
@@ -236,7 +261,7 @@ class TransactionController extends Controller
                 $updateData['cancelled_by'] = auth()->id();
                 $updateData['cancel_reason'] = $request->cancel_reason;
                 
-                // Libérer la chambre
+                // Libérer la chambre si elle existe
                 if ($transaction->room) {
                     $transaction->room()->update(['room_status_id' => 1]); // Libre
                 }
@@ -373,7 +398,12 @@ class TransactionController extends Controller
      */
     private function updateRoomStatus(Transaction $transaction, $oldStatus, $newStatus)
     {
+        // CORRECTION: Vérifier si la transaction a une chambre
         if (!$transaction->room) {
+            Log::warning('Transaction sans chambre - impossible de mettre à jour le statut', [
+                'transaction_id' => $transaction->id,
+                'new_status' => $newStatus,
+            ]);
             return;
         }
 
@@ -523,9 +553,7 @@ class TransactionController extends Controller
 
         return $colors[$status] ?? 'secondary';
     }
-    /**
-     * Supprimer une transaction
-     */
+
     /**
      * Supprimer une transaction
      */
@@ -584,7 +612,6 @@ class TransactionController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            // CORRECTION ICI : Supprimer les parenthèses après transaction.index
             return redirect()->route('transaction.index')
                 ->with('error', 'Erreur lors de la suppression: '.$e->getMessage());
         }
@@ -1168,6 +1195,9 @@ class TransactionController extends Controller
         return true;
     }
 
+    /**
+     * Vérifier la disponibilité d'une chambre
+     */
     private function isRoomAvailable($roomId, $checkIn, $checkOut, $excludeTransactionId = null): bool
     {
         // Convertir en objets Carbon pour une meilleure comparaison
@@ -1448,6 +1478,14 @@ class TransactionController extends Controller
             'check_out' => 'required|date|after:check_in',
         ]);
 
+        // CORRECTION: Vérifier si la transaction a une chambre
+        if (!$transaction->room) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Cette transaction n\'a pas de chambre attribuée',
+            ]);
+        }
+
         $available = $this->isRoomAvailable(
             $transaction->room_id,
             $request->check_in,
@@ -1500,6 +1538,17 @@ class TransactionController extends Controller
 
         $transaction->load(['customer.user', 'room.type', 'room.roomStatus']);
 
+        // CORRECTION: Si pas de chambre, créer un objet par défaut
+        if (!$transaction->room) {
+            $transaction->room = (object) [
+                'id' => null,
+                'number' => 'Non attribuée',
+                'price' => 0,
+                'type' => (object) ['name' => 'Non défini'],
+                'roomStatus' => (object) ['name' => 'Non disponible']
+            ];
+        }
+
         return view('transaction.extend', compact('transaction', 'suggestedDate'));
     }
 
@@ -1511,6 +1560,13 @@ class TransactionController extends Controller
         // Vérifier les permissions
         if (! in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])) {
             abort(403, 'Accès non autorisé.');
+        }
+
+        // CORRECTION: Vérifier si la transaction a une chambre
+        if (!$transaction->room) {
+            return redirect()->back()
+                ->with('error', 'Impossible de prolonger : aucune chambre attribuée.')
+                ->withInput();
         }
 
         // Validation

@@ -20,7 +20,7 @@ class DashboardController extends Controller
         $dateFilter = $request->get('date_filter', 'today');
         $statusFilter = $request->get('status', null);
 
-        // Base query pour les transactions
+        // Base query pour les transactions avec eager loading
         $query = Transaction::with([
             'customer',
             'room.type',
@@ -34,13 +34,11 @@ class DashboardController extends Controller
         $today = Carbon::today();
         switch ($dateFilter) {
             case 'today':
-                // Transactions actives aujourd'hui
                 $query->where(function ($q) use ($today) {
                     $q->where('check_in', '<=', $today->endOfDay())
                         ->where('check_out', '>=', $today->startOfDay());
                 });
                 break;
-
             case 'tomorrow':
                 $tomorrow = $today->copy()->addDay();
                 $query->where(function ($q) use ($tomorrow) {
@@ -48,7 +46,6 @@ class DashboardController extends Controller
                         ->where('check_out', '>=', $tomorrow->startOfDay());
                 });
                 break;
-
             case 'this_week':
                 $weekStart = $today->copy()->startOfWeek();
                 $weekEnd = $today->copy()->endOfWeek();
@@ -59,7 +56,6 @@ class DashboardController extends Controller
                             ->where('check_out', '>=', $weekEnd);
                     });
                 break;
-
             case 'all':
                 // Toutes les transactions actives
                 break;
@@ -69,17 +65,72 @@ class DashboardController extends Controller
         if ($statusFilter) {
             $query->where('status', $statusFilter);
         } else {
-            // Par défaut, exclure les annulées et no show
             $query->whereNotIn('status', ['cancelled', 'no_show']);
         }
 
         // Obtenir les transactions
         $transactions = $query->orderBy('check_in', 'asc')->get();
 
+        // Transformation sécurisée des transactions
+        $transactions->transform(function ($transaction) {
+            // Créer un objet customer par défaut si manquant
+            if (!$transaction->customer) {
+                $transaction->setRelation('customer', (object)[
+                    'id' => 0,
+                    'name' => 'Client inconnu',
+                    'phone' => 'N/A',
+                    'email' => null
+                ]);
+            }
+
+            // Créer un objet room par défaut si manquant
+            if (!$transaction->room) {
+                $defaultType = (object)[
+                    'id' => 0,
+                    'name' => 'Standard',
+                    'price' => 20000,
+                    'capacity' => 2
+                ];
+                
+                $defaultRoom = (object)[
+                    'id' => 0,
+                    'number' => 'N/A',
+                    'type' => $defaultType,
+                    'roomStatus' => (object)[
+                        'id' => 0,
+                        'name' => 'Inconnu'
+                    ]
+                ];
+                
+                $transaction->setRelation('room', $defaultRoom);
+            } else {
+                // Si room existe mais pas type, créer un type par défaut
+                if (!isset($transaction->room->type)) {
+                    $transaction->room->type = (object)[
+                        'id' => 0,
+                        'name' => 'Standard',
+                        'price' => 20000,
+                        'capacity' => 2
+                    ];
+                }
+            }
+
+            // Corriger le total_price si invalide
+            if ($transaction->total_price <= 0) {
+                $pricePerNight = isset($transaction->room->type->price) 
+                    ? $transaction->room->type->price 
+                    : 20000;
+                $nights = $transaction->total_nights ?? 1;
+                $transaction->total_price = $pricePerNight * $nights;
+            }
+
+            return $transaction;
+        });
+
         Log::info('Dashboard transactions count: '.$transactions->count());
 
         // ====================
-        // CALCUL DES STATISTIQUES
+        // CALCUL DES STATISTIQUES - NE PAS SUPPRIMER !
         // ====================
 
         // 1. Transactions actives (dans l'hôtel en ce moment)
@@ -102,13 +153,14 @@ class DashboardController extends Controller
         // 4. Paiements en attente
         $pendingPaymentTransactions = $transactions->filter(function ($transaction) {
             $balance = $this->calculateBalance($transaction);
-
             return $balance > 0;
         });
         $pendingPaymentsCount = $pendingPaymentTransactions->count();
 
         // 5. Paiements urgents (départ dans 24h avec solde positif)
         $urgentPaymentsCount = $pendingPaymentTransactions->filter(function ($transaction) {
+            if (!$transaction->check_out) return false;
+            
             $checkOut = Carbon::parse($transaction->check_out);
             $hoursLeft = $checkOut->diffInHours(Carbon::now(), false);
 
@@ -117,6 +169,8 @@ class DashboardController extends Controller
 
         // 6. Complétés aujourd'hui (départ aujourd'hui et complètement payé)
         $completedTodayCount = $transactions->filter(function ($transaction) use ($today) {
+            if (!$transaction->check_out) return false;
+            
             $isDepartingToday = Carbon::parse($transaction->check_out)->isSameDay($today);
             $balance = $this->calculateBalance($transaction);
 
@@ -151,6 +205,7 @@ class DashboardController extends Controller
         $occupiedRoomsCount = Transaction::where('status', 'active')
             ->where('check_in', '<=', Carbon::now())
             ->where('check_out', '>=', Carbon::now())
+            ->whereNotNull('room_id')
             ->distinct('room_id')
             ->count('room_id');
 
@@ -190,7 +245,6 @@ class DashboardController extends Controller
 
         return view('dashboard.index', compact('transactions', 'stats'));
     }
-
     /**
      * Calculer le solde d'une transaction
      */

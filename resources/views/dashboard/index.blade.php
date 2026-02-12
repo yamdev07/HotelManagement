@@ -352,13 +352,23 @@
                                                 
                                                 <!-- Room Column -->
                                                 <td class="px-4 py-3">
-                                                    <a href="{{ route('room.show', $transaction->room->id) }}" 
-                                                       class="fw-medium text-dark text-decoration-none">
-                                                        Room {{ $transaction->room->number }}
-                                                    </a>
-                                                    <div>
-                                                        <small class="text-muted">{{ $transaction->room->type->name ?? 'Standard' }}</small>
-                                                    </div>
+                                                    @if($transaction->room)
+                                                        <a href="{{ route('room.show', $transaction->room->id) }}" 
+                                                        class="fw-medium text-dark text-decoration-none">
+                                                            Room {{ $transaction->room->number }}
+                                                        </a>
+                                                        <div>
+                                                            <small class="text-muted">{{ $transaction->room->type->name ?? 'Standard' }}</small>
+                                                        </div>
+                                                    @else
+                                                        <div class="text-muted">
+                                                            <i class="fas fa-exclamation-triangle me-1 text-warning"></i>
+                                                            Room not assigned
+                                                        </div>
+                                                        <div>
+                                                            <small class="text-muted">Awaiting check-in</small>
+                                                        </div>
+                                                    @endif
                                                 </td>
                                                 
                                                 <!-- Dates Column -->

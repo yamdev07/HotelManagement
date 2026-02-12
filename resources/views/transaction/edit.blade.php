@@ -1,6 +1,22 @@
 @extends('template.master')
 @section('title', 'Modifier Réservation')
 @section('content')
+    @php
+        // CRÉER UN OBJET ROOM PAR DÉFAUT SI NULL
+        if (!$transaction->room) {
+            $transaction->room = (object) [
+                'id' => null,
+                'number' => 'Non attribuée',
+                'price' => 0,
+                'type' => (object) ['name' => 'Non défini'],
+                'roomStatus' => (object) ['name' => 'Non disponible'],
+                'floor' => null,
+                'capacity' => null,
+                'description' => null
+            ];
+        }
+    @endphp
+    
     <style>
         .date-picker-container {
             position: relative;
@@ -239,8 +255,8 @@
                                         <div class="mb-3">
                                             <label class="form-label">Numéro de Chambre</label>
                                             <div class="input-group">
-                                                <input type="text" class="form-control" 
-                                                       value="Chambre {{ $transaction->room->number }}" readonly>
+                                                <input type="text" class="form-control"
+                                                       value="{{ $transaction->room->number == 'Non attribuée' ? 'Non attribuée' : 'Chambre ' . $transaction->room->number }}" readonly>
                                                 <span class="input-group-text bg-info text-white">
                                                     <i class="fas fa-door-closed"></i>
                                                 </span>
@@ -250,8 +266,8 @@
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label class="form-label">Type de Chambre</label>
-                                            <input type="text" class="form-control" 
-                                                   value="{{ $transaction->room->type->name ?? 'Standard' }}" readonly>
+                                            <input type="text" class="form-control"
+                                                   value="{{ $transaction->room->type->name }}" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -260,14 +276,14 @@
                                         <div class="mb-3">
                                             <label class="form-label">Prix par Nuit (CFA)</label>
                                             <input type="text" class="form-control" 
-                                                   value="{{ Helper::formatCFA($transaction->room->price) }}" readonly>
+                                                   value="{{ $transaction->room->price > 0 ? Helper::formatCFA($transaction->room->price) : 'N/A' }}" readonly>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
                                             <label class="form-label">Statut Chambre</label>
                                             <input type="text" class="form-control" 
-                                                   value="{{ $transaction->room->roomStatus->name ?? 'Indisponible' }}" readonly>
+                                                   value="{{ $transaction->room->roomStatus->name }}" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -369,7 +385,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <p class="mb-1"><strong>Prix/Nuit :</strong></p>
-                                            <div class="h5 text-info">{{ Helper::formatCFA($transaction->room->price) }}</div>
+                                            <div class="h5 text-info">{{ $transaction->room->price > 0 ? Helper::formatCFA($transaction->room->price) : 'N/A' }}</div>
                                         </div>
                                         <div class="col-md-4">
                                             <p class="mb-1"><strong>Nouveau Total :</strong></p>
@@ -540,7 +556,9 @@
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-bed me-2 text-muted"></i>Chambre</span>
-                                <strong>Chambre {{ $transaction->room->number }}</strong>
+                                <strong>
+                                    {{ $transaction->room->number == 'Non attribuée' ? 'Non attribuée' : 'Chambre ' . $transaction->room->number }}
+                                </strong>
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-calendar me-2 text-muted"></i>Arrivée</span>
@@ -767,7 +785,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
                 
                 nightsCount.textContent = nights;
-                const total = nights * roomPricePerNight;
+                
+                // Utiliser roomPricePerNight (sera 0 si chambre non attribuée)
+                const pricePerNight = roomPricePerNight || 0;
+                const total = nights * pricePerNight;
+                
                 newTotal.textContent = formatCFA(total);
                 
                 // Calculer la différence de prix

@@ -2,6 +2,42 @@
 @section('title', 'Effectuer un Paiement')
 @section('content')
 
+@php
+    // ============ PROTECTION COMPLÈTE CONTRE LES ERREURS ============
+    // Créer un objet room par défaut si null
+    if (!isset($transaction->room) || $transaction->room === null) {
+        $transaction->room = (object) [
+            'id' => null,
+            'number' => 'Non attribuée',
+            'price' => 0,
+            'type' => (object) ['name' => 'Non défini'],
+            'roomStatus' => (object) ['name' => 'Non disponible'],
+            'capacity' => 4
+        ];
+    }
+    
+    // S'assurer que les méthodes de calcul existent
+    $remainingAmount = method_exists($transaction, 'getRemainingPayment') 
+        ? $transaction->getRemainingPayment() 
+        : ($transaction->total_price - $transaction->total_payment);
+    
+    $totalPriceAmount = method_exists($transaction, 'getTotalPrice') 
+        ? $transaction->getTotalPrice() 
+        : $transaction->total_price;
+    
+    $totalPaymentAmount = method_exists($transaction, 'getTotalPayment') 
+        ? $transaction->getTotalPayment() 
+        : $transaction->total_payment;
+    
+    $paymentRateAmount = method_exists($transaction, 'getPaymentRate') 
+        ? $transaction->getPaymentRate() 
+        : ($totalPriceAmount > 0 ? ($totalPaymentAmount / $totalPriceAmount * 100) : 0);
+    
+    $nightsCount = method_exists($transaction, 'getNightsAttribute') 
+        ? $transaction->getNightsAttribute() 
+        : \Carbon\Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out);
+@endphp
+
 <style>
     .method-card {
         border: 2px solid #dee2e6;
@@ -117,6 +153,13 @@
     .toast-container {
         z-index: 9999;
     }
+    
+    /* Badge pour chambre non attribuée */
+    .badge-unspecified {
+        background-color: #6c757d;
+        color: white;
+        font-style: italic;
+    }
 </style>
 
 <div class="container-fluid">
@@ -165,13 +208,13 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="debug-item">
-                                        Prix total (calculé): <span class="debug-value" id="debug-total-price">{{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA</span>
+                                        Prix total (calculé): <span class="debug-value" id="debug-total-price">{{ number_format($totalPriceAmount, 0, ',', ' ') }} CFA</span>
                                     </div>
                                     <div class="debug-item">
-                                        Paiement total (calculé): <span class="debug-value" id="debug-total-payment">{{ number_format($transaction->getTotalPayment(), 0, ',', ' ') }} CFA</span>
+                                        Paiement total (calculé): <span class="debug-value" id="debug-total-payment">{{ number_format($totalPaymentAmount, 0, ',', ' ') }} CFA</span>
                                     </div>
                                     <div class="debug-item">
-                                        Solde restant (calculé): <span class="debug-value" id="debug-remaining">{{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA</span>
+                                        Solde restant (calculé): <span class="debug-value" id="debug-remaining">{{ number_format($remainingAmount, 0, ',', ' ') }} CFA</span>
                                     </div>
                                     <div class="debug-item">
                                         Paiements (total/complétés): 
@@ -205,14 +248,22 @@
                                             <i class="fas fa-user fa-lg me-3"></i>
                                             <div>
                                                 <div class="small opacity-75">Client</div>
-                                                <strong class="h6 mb-0">{{ $transaction->customer->name }}</strong>
+                                                <strong class="h6 mb-0">{{ $transaction->customer->name ?? 'Client non spécifié' }}</strong>
                                             </div>
                                         </div>
                                         <div class="d-flex align-items-center">
                                             <i class="fas fa-bed fa-lg me-3"></i>
                                             <div>
                                                 <div class="small opacity-75">Chambre</div>
-                                                <span class="badge bg-light text-dark">#{{ $transaction->room->number }}</span>
+                                                @if($transaction->room && $transaction->room->number != 'Non attribuée')
+                                                    <span class="badge bg-light text-dark">
+                                                        #{{ $transaction->room->number }}
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-unspecified">
+                                                        <i class="fas fa-question-circle me-1"></i>Non attribuée
+                                                    </span>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -222,9 +273,9 @@
                                             <div>
                                                 <div class="small opacity-75">Période</div>
                                                 <strong class="h6 mb-0">
-                                                    {{ $transaction->check_in->format('d/m/Y') }} 
+                                                    {{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }} 
                                                     <i class="fas fa-arrow-right mx-2"></i>
-                                                    {{ $transaction->check_out->format('d/m/Y') }}
+                                                    {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}
                                                 </strong>
                                             </div>
                                         </div>
@@ -232,7 +283,7 @@
                                             <i class="fas fa-moon fa-lg me-3"></i>
                                             <div>
                                                 <div class="small opacity-75">Nuits</div>
-                                                <span class="badge bg-light text-dark">{{ $transaction->getNightsAttribute() }} nuits</span>
+                                                <span class="badge bg-light text-dark">{{ $nightsCount }} nuit(s)</span>
                                             </div>
                                         </div>
                                     </div>
@@ -242,11 +293,11 @@
                                 <div class="bg-white rounded p-3 text-dark">
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>Total séjour:</span>
-                                        <strong id="summary-total-price">{{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA</strong>
+                                        <strong id="summary-total-price">{{ number_format($totalPriceAmount, 0, ',', ' ') }} CFA</strong>
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>Déjà payé:</span>
-                                        <strong class="text-success" id="summary-total-payment">{{ number_format($transaction->getTotalPayment(), 0, ',', ' ') }} CFA</strong>
+                                        <strong class="text-success" id="summary-total-payment">{{ number_format($totalPaymentAmount, 0, ',', ' ') }} CFA</strong>
                                     </div>
                                     
                                     <!-- Barre de progression -->
@@ -254,11 +305,11 @@
                                         <div class="payment-progress bg-light mb-1">
                                             <div class="progress-bar bg-success" 
                                                  id="payment-progress-bar"
-                                                 style="width: {{ $transaction->getPaymentRate() }}%">
+                                                 style="width: {{ $paymentRateAmount }}%">
                                             </div>
                                         </div>
                                         <div class="small text-center">
-                                            <span id="payment-percentage-text">{{ number_format($transaction->getPaymentRate(), 1) }}%</span> payé
+                                            <span id="payment-percentage-text">{{ number_format($paymentRateAmount, 1) }}%</span> payé
                                         </div>
                                     </div>
                                     
@@ -266,7 +317,7 @@
                                     <div class="d-flex justify-content-between">
                                         <span class="h5 mb-0">Reste à payer:</span>
                                         <span class="h4 mb-0 text-danger fw-bold" id="summary-remaining">
-                                            {{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA
+                                            {{ number_format($remainingAmount, 0, ',', ' ') }} CFA
                                         </span>
                                     </div>
                                 </div>
@@ -290,7 +341,7 @@
                                             <label for="amount" class="form-label fw-bold">
                                                 Montant à payer (CFA)
                                                 <small class="text-muted d-block">
-                                                    Maximum: <span id="max-amount">{{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA</span>
+                                                    Maximum: <span id="max-amount">{{ number_format($remainingAmount, 0, ',', ' ') }} CFA</span>
                                                 </small>
                                             </label>
                                             <div class="amount-input-wrapper">
@@ -303,9 +354,9 @@
                                                            id="amount" 
                                                            name="amount"
                                                            min="100"
-                                                           max="{{ $transaction->getRemainingPayment() }}"
+                                                           max="{{ $remainingAmount }}"
                                                            step="100"
-                                                           value="{{ min($transaction->getRemainingPayment(), max(1000, $transaction->getRemainingPayment())) }}"
+                                                           value="{{ min($remainingAmount, max(1000, $remainingAmount)) }}"
                                                            required
                                                            style="font-weight: 600;">
                                                     <span class="input-group-text fw-bold">CFA</span>
@@ -322,14 +373,13 @@
                                             <label class="form-label fw-bold">Montants rapides:</label>
                                             <div class="d-flex flex-wrap gap-2" id="quick-amount-buttons">
                                                 @php
-                                                    $remaining = $transaction->getRemainingPayment();
                                                     $quickAmounts = [
-                                                        min(1000, $remaining),
-                                                        min(5000, $remaining),
-                                                        min(10000, $remaining),
-                                                        min(25000, $remaining),
-                                                        min(50000, $remaining),
-                                                        $remaining
+                                                        min(1000, $remainingAmount),
+                                                        min(5000, $remainingAmount),
+                                                        min(10000, $remainingAmount),
+                                                        min(25000, $remainingAmount),
+                                                        min(50000, $remainingAmount),
+                                                        $remainingAmount
                                                     ];
                                                     $quickAmounts = array_unique(array_filter($quickAmounts));
                                                 @endphp
@@ -340,7 +390,7 @@
                                                                 class="btn btn-outline-primary quick-amount-btn"
                                                                 data-amount="{{ $quickAmount }}">
                                                             {{ number_format($quickAmount, 0, ',', ' ') }} CFA
-                                                            @if($quickAmount == $remaining)
+                                                            @if($quickAmount == $remainingAmount)
                                                                 <i class="fas fa-check ms-1"></i>
                                                             @endif
                                                         </button>
@@ -497,9 +547,9 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('=== INITIALISATION SYSTÈME DE PAIEMENT SIMPLIFIÉ ===');
     
     const transactionId = {{ $transaction->id }};
-    const remaining = {{ $transaction->getRemainingPayment() }};
-    const totalPrice = {{ $transaction->getTotalPrice() }};
-    const totalPayment = {{ $transaction->getTotalPayment() }};
+    const remaining = {{ $remainingAmount }};
+    const totalPrice = {{ $totalPriceAmount }};
+    const totalPayment = {{ $totalPaymentAmount }};
     
     // Éléments DOM
     const amountInput = document.getElementById('amount');
@@ -606,7 +656,8 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!selectedMethod) return;
         
         const method = selectedMethod.value;
-        const methodLabel = document.querySelector(`#method_${method} + label .card-title`).textContent;
+        const methodCard = document.querySelector(`#method_${method} + label .card-title`);
+        const methodLabel = methodCard ? methodCard.textContent : method;
         
         if (amount === currentRemaining || newRemaining === 0) {
             submitText.innerHTML = `<i class="fas fa-check me-2"></i>Régler l'intégralité (${methodLabel})`;
@@ -646,7 +697,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.method-card').forEach(card => {
                 card.classList.remove('active');
             });
-            document.getElementById(`method-card-${method}`).classList.add('active');
+            const card = document.getElementById(`method-card-${method}`);
+            if (card) {
+                card.classList.add('active');
+            }
             
             // Générer une nouvelle référence
             let prefix = 'PAY-';
@@ -700,7 +754,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Validation du formulaire
     document.getElementById('validate-form').addEventListener('click', function() {
         const amount = parseFloat(amountInput.value) || 0;
-        const method = document.querySelector('input[name="payment_method"]:checked').value;
+        const methodRadio = document.querySelector('input[name="payment_method"]:checked');
+        
+        if (!methodRadio) {
+            Swal.fire({
+                title: '❌ Erreur',
+                text: 'Veuillez sélectionner une méthode de paiement',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+        
+        const method = methodRadio.value;
         
         let isValid = true;
         let errors = [];
@@ -718,7 +784,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Afficher les résultats
         if (isValid) {
-            const methodLabel = document.querySelector(`#method_${method} + label .card-title`).textContent;
+            const methodCard = document.querySelector(`#method_${method} + label .card-title`);
+            const methodLabel = methodCard ? methodCard.textContent : method;
             Swal.fire({
                 title: '✅ Validation réussie',
                 html: `
@@ -751,7 +818,17 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('=== TENTATIVE DE SOUMISSION SIMPLIFIÉE ===');
         
         const amount = parseFloat(amountInput.value) || 0;
-        const method = document.querySelector('input[name="payment_method"]:checked').value;
+        const methodRadio = document.querySelector('input[name="payment_method"]:checked');
+        
+        if (!methodRadio) {
+            Swal.fire({
+                title: '❌ Erreur',
+                text: 'Veuillez sélectionner une méthode de paiement',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return false;
+        }
         
         // Validation finale
         if (amount <= 0 || amount > currentRemaining + 100) {
@@ -793,19 +870,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     title: '✅ Succès',
                     html: `
                         <div class="text-start">
-                            <p>${data.message}</p>
+                            <p>${data.message || 'Paiement enregistré avec succès'}</p>
                             <div class="alert alert-success">
-                                <h5 class="mb-1">${data.data.payment.amount.toLocaleString('fr-FR')} CFA</h5>
-                                <small class="text-muted">${data.data.payment.method_label}</small>
+                                <h5 class="mb-1">${(data.data?.payment?.amount || amount).toLocaleString('fr-FR')} CFA</h5>
+                                <small class="text-muted">${data.data?.payment?.method_label || ''}</small>
                                 <div class="mt-2">
-                                    <small>Référence: ${data.data.payment.reference}</small>
+                                    <small>Référence: ${data.data?.payment?.reference || ''}</small>
                                 </div>
                             </div>
-                            ${data.data.transaction.is_fully_paid ? 
+                            ${data.data?.transaction?.is_fully_paid ? 
                                 '<div class="alert alert-info mt-2"><i class="fas fa-trophy me-2"></i>Transaction entièrement payée !</div>' : 
                                 `<div class="alert alert-warning mt-2">
                                     <i class="fas fa-info-circle me-2"></i>
-                                    Solde restant: ${data.data.transaction.remaining.toLocaleString('fr-FR')} CFA
+                                    Solde restant: ${(data.data?.transaction?.remaining || 0).toLocaleString('fr-FR')} CFA
                                 </div>`
                             }
                         </div>
@@ -862,100 +939,120 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fonctions de débogage
     @if(auth()->user()->isAdmin())
         // Toggle debug panel
-        document.getElementById('debug-toggle').addEventListener('click', function() {
-            const panel = document.getElementById('debug-panel');
-            panel.classList.toggle('d-none');
-            this.innerHTML = panel.classList.contains('d-none') 
-                ? '<i class="fas fa-bug me-1"></i> Debug'
-                : '<i class="fas fa-eye-slash me-1"></i> Cacher';
-        });
+        const debugToggle = document.getElementById('debug-toggle');
+        if (debugToggle) {
+            debugToggle.addEventListener('click', function() {
+                const panel = document.getElementById('debug-panel');
+                panel.classList.toggle('d-none');
+                this.innerHTML = panel.classList.contains('d-none') 
+                    ? '<i class="fas fa-bug me-1"></i> Debug'
+                    : '<i class="fas fa-eye-slash me-1"></i> Cacher';
+            });
+        }
         
         // Rafraîchir les données de débogage
-        document.getElementById('refresh-debug').addEventListener('click', async function() {
-            const btn = this;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>';
-            btn.disabled = true;
-            
-            try {
-                const response = await fetch(`/api/transactions/${transactionId}/check-status`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    // Mettre à jour les valeurs de débogage
-                    document.getElementById('debug-total-price').textContent = 
-                        data.transaction.total_price.toLocaleString('fr-FR') + ' CFA';
-                    document.getElementById('debug-total-payment').textContent = 
-                        data.transaction.total_payment.toLocaleString('fr-FR') + ' CFA';
-                    document.getElementById('debug-remaining').textContent = 
-                        data.transaction.remaining.toLocaleString('fr-FR') + ' CFA';
-                    document.getElementById('debug-payment-count').textContent = 
-                        `${data.payments.total_count} / ${data.payments.completed_count}`;
-                    
-                    // Mettre à jour les valeurs principales
-                    currentRemaining = data.transaction.remaining;
-                    updateCalculations();
-                    
-                    Swal.fire('Succès', 'Données actualisées', 'success');
-                }
-            } catch (error) {
-                Swal.fire('Erreur', 'Impossible de rafraîchir', 'error');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        });
-        
-        // Forcer la synchronisation
-        document.getElementById('force-sync').addEventListener('click', async function() {
-            const result = await Swal.fire({
-                title: 'Synchroniser ?',
-                text: 'Recalculer tous les totaux',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Oui',
-                cancelButtonText: 'Non'
-            });
-            
-            if (result.isConfirmed) {
+        const refreshDebug = document.getElementById('refresh-debug');
+        if (refreshDebug) {
+            refreshDebug.addEventListener('click', async function() {
                 const btn = this;
+                const originalText = btn.innerHTML;
                 btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>';
                 btn.disabled = true;
                 
                 try {
-                    const response = await fetch(`/api/transactions/${transactionId}/force-sync`);
+                    const response = await fetch(`/api/transactions/${transactionId}/check-status`);
                     const data = await response.json();
                     
                     if (data.success) {
-                        Swal.fire('Succès', data.message, 'success');
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        throw new Error(data.error);
+                        // Mettre à jour les valeurs de débogage
+                        const debugTotalPrice = document.getElementById('debug-total-price');
+                        const debugTotalPayment = document.getElementById('debug-total-payment');
+                        const debugRemaining = document.getElementById('debug-remaining');
+                        const debugPaymentCount = document.getElementById('debug-payment-count');
+                        
+                        if (debugTotalPrice) debugTotalPrice.textContent = 
+                            (data.transaction?.total_price || 0).toLocaleString('fr-FR') + ' CFA';
+                        if (debugTotalPayment) debugTotalPayment.textContent = 
+                            (data.transaction?.total_payment || 0).toLocaleString('fr-FR') + ' CFA';
+                        if (debugRemaining) debugRemaining.textContent = 
+                            (data.transaction?.remaining || 0).toLocaleString('fr-FR') + ' CFA';
+                        if (debugPaymentCount) debugPaymentCount.textContent = 
+                            `${data.payments?.total_count || 0} / ${data.payments?.completed_count || 0}`;
+                        
+                        // Mettre à jour les valeurs principales
+                        currentRemaining = data.transaction?.remaining || remaining;
+                        updateCalculations();
+                        
+                        Swal.fire('Succès', 'Données actualisées', 'success');
                     }
                 } catch (error) {
-                    Swal.fire('Erreur', error.message, 'error');
+                    Swal.fire('Erreur', 'Impossible de rafraîchir', 'error');
                 } finally {
-                    btn.innerHTML = '<i class="fas fa-cogs me-1"></i> Synchroniser';
+                    btn.innerHTML = originalText;
                     btn.disabled = false;
                 }
-            }
-        });
+            });
+        }
+        
+        // Forcer la synchronisation
+        const forceSync = document.getElementById('force-sync');
+        if (forceSync) {
+            forceSync.addEventListener('click', async function() {
+                const result = await Swal.fire({
+                    title: 'Synchroniser ?',
+                    text: 'Recalculer tous les totaux',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Oui',
+                    cancelButtonText: 'Non'
+                });
+                
+                if (result.isConfirmed) {
+                    const btn = this;
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>';
+                    btn.disabled = true;
+                    
+                    try {
+                        const response = await fetch(`/api/transactions/${transactionId}/force-sync`);
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            Swal.fire('Succès', data.message, 'success');
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            throw new Error(data.error || 'Erreur inconnue');
+                        }
+                    } catch (error) {
+                        Swal.fire('Erreur', error.message, 'error');
+                    } finally {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                }
+            });
+        }
         
         // Afficher les données API
-        document.getElementById('show-api').addEventListener('click', async function() {
-            try {
-                const response = await fetch(`/api/transactions/${transactionId}/check-status`);
-                const data = await response.json();
-                
-                document.getElementById('api-response-content').textContent = 
-                    JSON.stringify(data, null, 2);
-                
-                const modal = new bootstrap.Modal(document.getElementById('api-modal'));
-                modal.show();
-            } catch (error) {
-                Swal.fire('Erreur', 'Impossible de récupérer les données API', 'error');
-            }
-        });
+        const showApi = document.getElementById('show-api');
+        if (showApi) {
+            showApi.addEventListener('click', async function() {
+                try {
+                    const response = await fetch(`/api/transactions/${transactionId}/check-status`);
+                    const data = await response.json();
+                    
+                    const apiContent = document.getElementById('api-response-content');
+                    if (apiContent) {
+                        apiContent.textContent = JSON.stringify(data, null, 2);
+                    }
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('api-modal'));
+                    modal.show();
+                } catch (error) {
+                    Swal.fire('Erreur', 'Impossible de récupérer les données API', 'error');
+                }
+            });
+        }
     @endif
     
     // Initialiser
@@ -968,7 +1065,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     updateCalculations();
-    document.querySelector('input[name="payment_method"]:checked').dispatchEvent(new Event('change'));
+    const checkedRadio = document.querySelector('input[name="payment_method"]:checked');
+    if (checkedRadio) {
+        checkedRadio.dispatchEvent(new Event('change'));
+    }
     
     // Rafraîchissement périodique
     setInterval(async () => {
@@ -976,7 +1076,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const response = await fetch(`/api/transactions/${transactionId}/check-status`);
             const data = await response.json();
             
-            if (data.success && data.transaction.remaining !== currentRemaining) {
+            if (data.success && data.transaction?.remaining !== undefined && 
+                data.transaction.remaining !== currentRemaining) {
                 console.log('Solde mis à jour:', {
                     ancien: currentRemaining,
                     nouveau: data.transaction.remaining

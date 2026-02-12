@@ -475,6 +475,11 @@
                                 <tbody>
                                     @forelse ($transactions as $transaction)
                                         @php
+                                            // Vérifications sécurisées des relations
+                                            $customer = $transaction->customer ?? null;
+                                            $room = $transaction->room ?? null;
+                                            $user = $customer->user ?? null;
+                                            
                                             // Calcul des montants
                                             $totalPrice = $transaction->getTotalPrice();
                                             $totalPayment = $transaction->getTotalPayment();
@@ -505,16 +510,16 @@
                                             $canPay = !in_array($status, ['cancelled', 'no_show']) && !$isFullyPaid && ($isAdmin || $isOwnReservation);
                                             
                                             // Calcul du nombre de nuits
-                                            $checkIn = \Carbon\Carbon::parse($transaction->check_in);
-                                            $checkOut = \Carbon\Carbon::parse($transaction->check_out);
-                                            $nights = $checkIn->diffInDays($checkOut);
+                                            $checkIn = $transaction->check_in ? \Carbon\Carbon::parse($transaction->check_in) : null;
+                                            $checkOut = $transaction->check_out ? \Carbon\Carbon::parse($transaction->check_out) : null;
+                                            $nights = $checkIn && $checkOut ? $checkIn->diffInDays($checkOut) : 0;
                                             
                                             // Vérifier si on peut marquer comme arrivé/départ
                                             $canMarkArrived = $isAdmin && $status == 'reservation';
                                             $canMarkDeparted = $isAdmin && $status == 'active';
                                             
                                             // Vérifier si séjour terminé mais non payé
-                                            $isPastDue = $checkOut->isPast() && $status == 'active' && !$isFullyPaid;
+                                            $isPastDue = $checkOut && $checkOut->isPast() && $status == 'active' && !$isFullyPaid;
                                             $canMarkCompleted = $isAdmin && $status == 'active' && $isFullyPaid;
                                             
                                             // ============================================
@@ -544,25 +549,39 @@
                                             <td><strong>#{{ $transaction->id }}</strong></td>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <img src="{{ $transaction->customer->user->getAvatar() }}" 
-                                                         class="rounded-circle me-2" width="30" height="30" 
-                                                         alt="{{ $transaction->customer->name }}">
+                                                    @if($user && method_exists($user, 'getAvatar'))
+                                                        <img src="{{ $user->getAvatar() }}" 
+                                                            class="rounded-circle me-2" width="30" height="30" 
+                                                            alt="{{ $customer->name ?? 'Client' }}">
+                                                    @else
+                                                        <div class="rounded-circle bg-light d-flex align-items-center justify-content-center me-2" 
+                                                            style="width: 30px; height: 30px;">
+                                                            <i class="fas fa-user text-muted"></i>
+                                                        </div>
+                                                    @endif
                                                     <div>
-                                                        <div>{{ $transaction->customer->name }}</div>
-                                                        <small class="text-muted">{{ $transaction->customer->phone ?? '' }}</small>
+                                                        <div>{{ $customer->name ?? 'Client non trouvé' }}</div>
+                                                        <small class="text-muted">{{ $customer->phone ?? '' }}</small>
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge bg-info">
-                                                    {{ $transaction->room->number }}
-                                                    @if($isReceptionist)
-                                                    <i class="fas fa-user-check ms-1" title="Réceptionniste: Vue complète"></i>
-                                                    @endif
-                                                </span>
+                                                @if($room)
+                                                    <span class="badge bg-info">
+                                                        {{ $room->number }}
+                                                        @if($isReceptionist)
+                                                        <i class="fas fa-user-check ms-1" title="Réceptionniste: Vue complète"></i>
+                                                        @endif
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-warning">
+                                                        <i class="fas fa-door-closed me-1"></i>
+                                                        Non attribuée
+                                                    </span>
+                                                @endif
                                             </td>
-                                            <td>{{ $checkIn->format('d/m/Y') }}</td>
-                                            <td>{{ $checkOut->format('d/m/Y') }}</td>
+                                            <td>{{ $checkIn ? $checkIn->format('d/m/Y') : 'N/A' }}</td>
+                                            <td>{{ $checkOut ? $checkOut->format('d/m/Y') : 'N/A' }}</td>
                                             <td>
                                                 <span class="badge bg-secondary">
                                                     {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}
@@ -654,16 +673,16 @@
                                                     <!-- Paiement -->
                                                     @if($canPay)
                                                         <a class="btn-action btn-pay {{ $isReceptionist ? 'btn-receptionist' : '' }}"
-                                                           href="{{ route('transaction.payment.create', $transaction) }}"
-                                                           data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                           title="{{ $isReceptionist ? 'Réceptionniste: Effectuer un paiement' : 'Effectuer un paiement' }}">
+                                                        href="{{ route('transaction.payment.create', $transaction) }}"
+                                                        data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                        title="{{ $isReceptionist ? 'Réceptionniste: Effectuer un paiement' : 'Effectuer un paiement' }}">
                                                             <i class="fas fa-money-bill-wave-alt"></i>
                                                             @if($isReceptionist && !$isFullyPaid)<i class="fas fa-bolt fa-xs" style="position: absolute; top: -5px; right: -5px; color: #ffc107;"></i>@endif
                                                         </a>
                                                     @else
                                                         <span class="btn-action btn-pay disabled"
-                                                              data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                              title="{{ $isFullyPaid ? 'Déjà payé' : (in_array($status, ['cancelled', 'no_show']) ? 'Réservation annulée/no show' : 'Non autorisé') }}">
+                                                            data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                            title="{{ $isFullyPaid ? 'Déjà payé' : (in_array($status, ['cancelled', 'no_show']) ? 'Réservation annulée/no show' : 'Non autorisé') }}">
                                                             <i class="fas fa-money-bill-wave-alt"></i>
                                                         </span>
                                                     @endif
@@ -699,16 +718,16 @@
                                                     <!-- Modifier -->
                                                     @if(($isSuperAdmin || $isReceptionist) && !in_array($status, ['cancelled', 'no_show', 'completed']))
                                                         <a class="btn-action btn-edit {{ $isReceptionist ? 'btn-receptionist' : '' }}"
-                                                           href="{{ $editUrl }}"
-                                                           data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                           title="{{ $isReceptionist ? 'Réceptionniste: Modifier la réservation' : 'Modifier la réservation' }}">
+                                                        href="{{ $editUrl }}"
+                                                        data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                        title="{{ $isReceptionist ? 'Réceptionniste: Modifier la réservation' : 'Modifier la réservation' }}">
                                                             <i class="fas fa-edit"></i>
                                                             @if($isReceptionist)<i class="fas fa-pen fa-xs" style="position: absolute; top: -5px; right: -5px;"></i>@endif
                                                         </a>
                                                     @else
                                                         <span class="btn-action btn-edit disabled"
-                                                              data-bs-toggle="tooltip" data-bs-placement="top" 
-                                                              title="{{ $isAdmin ? 'Réservation non modifiable' : 'Modification réservée aux administrateurs' }}">
+                                                            data-bs-toggle="tooltip" data-bs-placement="top" 
+                                                            title="{{ $isAdmin ? 'Réservation non modifiable' : 'Modification réservée aux administrateurs' }}">
                                                             <i class="fas fa-edit"></i>
                                                         </span>
                                                     @endif

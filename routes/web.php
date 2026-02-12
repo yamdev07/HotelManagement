@@ -139,15 +139,21 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         return redirect()->route('transaction.reservation.createIdentity');
     })->name('quick.createIdentity');
 
-    // ==================== RÉSERVATIONS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
+   // ==================== RÉSERVATIONS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
     Route::prefix('transaction/reservation')->name('transaction.reservation.')->group(function () {
         Route::get('/createIdentity', [TransactionRoomReservationController::class, 'createIdentity'])->name('createIdentity');
         Route::get('/pickFromCustomer', [TransactionRoomReservationController::class, 'pickFromCustomer'])->name('pickFromCustomer');
         Route::post('/search-by-email', [TransactionRoomReservationController::class, 'searchByEmail'])->name('searchByEmail');
         Route::post('/storeCustomer', [TransactionRoomReservationController::class, 'storeCustomer'])->name('storeCustomer');
+
+        
+        // AJOUTEZ CETTE LIGNE (Route manquante)
+        Route::get('/{customer}/choose-type', [TransactionRoomReservationController::class, 'chooseRoomType'])->name('choose-type');
+        Route::get('/by-type/{transaction}/confirmation', [TransactionRoomReservationController::class, 'showReservationConfirmation'])->name('by-type.confirmation');
         Route::get('/{customer}/viewCountPerson', [TransactionRoomReservationController::class, 'viewCountPerson'])->name('viewCountPerson');
         Route::get('/{customer}/chooseRoom', [TransactionRoomReservationController::class, 'chooseRoom'])->name('chooseRoom');
-        Route::get('/{customer}/{room}/{from}/{to}/confirmation', [TransactionRoomReservationController::class, 'confirmation'])->name('confirmation');
+        Route::post('/{customer}/type/{roomType}/confirmation', [TransactionRoomReservationController::class, 'confirmation'])->name('confirmation');   
+         Route::post('/store', [TransactionRoomReservationController::class, 'storeReservation'])->name('store');     
         Route::post('/{customer}/{room}/payDownPayment', [TransactionRoomReservationController::class, 'payDownPayment'])->name('payDownPayment');
         Route::get('/customer/{customer}/reservations', [TransactionRoomReservationController::class, 'showCustomerReservations'])->name('customerReservations');
     });

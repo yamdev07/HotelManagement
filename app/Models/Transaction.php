@@ -20,7 +20,8 @@ class Transaction extends Model
     protected $fillable = [
         'user_id',
         'customer_id',
-        'room_id',
+        'room_id',           // Peut être NULL au départ
+        'room_type_id',      // NOUVEAU: Référence au type de chambre
         'check_in',
         'check_out',
         'status',
@@ -37,6 +38,9 @@ class Transaction extends Model
         'id_type',
         'id_number',
         'nationality',
+        'is_assigned',       // NOUVEAU: Booléen si chambre attribuée
+        'assigned_at',       // NOUVEAU: Date d'attribution
+        'assigned_by',       // NOUVEAU: Qui a attribué
     ];
 
     protected $casts = [
@@ -47,26 +51,21 @@ class Transaction extends Model
         'total_payment' => 'decimal:2',
         'actual_check_in' => 'datetime',
         'actual_check_out' => 'datetime',
+        'is_assigned' => 'boolean',  // NOUVEAU
+        'assigned_at' => 'datetime', // NOUVEAU
     ];
 
     // Constantes pour les statuts
     const STATUS_RESERVATION = 'reservation';
-
     const STATUS_ACTIVE = 'active';
-
     const STATUS_COMPLETED = 'completed';
-
     const STATUS_CANCELLED = 'cancelled';
-
     const STATUS_NO_SHOW = 'no_show';
 
     // Types de pièces d'identité
     const ID_TYPE_PASSPORT = 'passeport';
-
     const ID_TYPE_CNI = 'cni';
-
     const ID_TYPE_DRIVER_LICENSE = 'permis';
-
     const ID_TYPE_OTHER = 'autre';
 
     /**
@@ -91,19 +90,20 @@ class Transaction extends Model
 
     /**
      * Créer un snapshot pour le journal d'activité
-     * Cela évite "Objet supprimé" quand la transaction est supprimée
      */
     public function getLogSnapshot(): array
     {
         return [
             'id' => $this->id,
             'customer' => $this->customer->name ?? 'Client #'.($this->customer_id ?? 'N/A'),
-            'room' => $this->room->number ?? 'Chambre #'.($this->room_id ?? 'N/A'),
+            'room_type' => $this->roomType->name ?? 'Type #'.($this->room_type_id ?? 'N/A'),
+            'room' => $this->room->number ?? ($this->is_assigned ? 'À attribuer' : 'Non attribué'),
             'check_in' => $this->check_in?->format('d/m/Y'),
             'check_out' => $this->check_out?->format('d/m/Y'),
             'status' => $this->status_label,
             'total_price' => $this->total_price ?? 0,
             'total_payment' => $this->getTotalPayment(),
+            'is_assigned' => $this->is_assigned,
         ];
     }
 
@@ -124,11 +124,19 @@ class Transaction extends Model
     }
 
     /**
-     * Relation avec la chambre
+     * Relation avec la chambre (peut être null)
      */
     public function room()
     {
-        return $this->belongsTo(Room::class);
+        return $this->belongsTo(Room::class, 'room_id');
+    }
+
+    /**
+     * Relation avec le type de chambre
+     */
+    public function roomType()
+    {
+        return $this->belongsTo(Type::class, 'room_type_id');
     }
 
     /**
@@ -153,6 +161,42 @@ class Transaction extends Model
     public function cancelledBy()
     {
         return $this->belongsTo(User::class, 'cancelled_by');
+    }
+
+    /**
+     * Relation avec l'utilisateur qui a attribué la chambre
+     */
+    public function assignedBy()
+    {
+        return $this->belongsTo(User::class, 'assigned_by');
+    }
+
+    /**
+     * Scope pour les réservations non attribuées
+     */
+    public function scopeUnassigned($query)
+    {
+        return $query->where('is_assigned', false)
+                    ->whereIn('status', [self::STATUS_RESERVATION, self::STATUS_ACTIVE]);
+    }
+
+    /**
+     * Scope pour les réservations à attribuer aujourd'hui
+     */
+    public function scopeToAssignToday($query)
+    {
+        return $query->where('is_assigned', false)
+                    ->whereDate('check_in', '<=', now()->addDay()) // Aujourd'hui ou demain
+                    ->whereIn('status', [self::STATUS_RESERVATION, self::STATUS_ACTIVE])
+                    ->orderBy('check_in');
+    }
+
+    /**
+     * Scope pour les réservations par type
+     */
+    public function scopeByRoomType($query, $roomTypeId)
+    {
+        return $query->where('room_type_id', $roomTypeId);
     }
 
     /**
@@ -196,33 +240,106 @@ class Transaction extends Model
     }
 
     /**
-     * Scope pour les transactions d'aujourd'hui
+     * Vérifier si une chambre a été attribuée
      */
-    public function scopeToday($query)
+    public function isRoomAssigned()
     {
-        return $query->whereDate('check_in', '<=', Carbon::today())
-            ->whereDate('check_out', '>=', Carbon::today())
-            ->whereNotIn('status', [self::STATUS_CANCELLED, self::STATUS_NO_SHOW]);
+        return $this->is_assigned && !is_null($this->room_id);
     }
 
     /**
-     * Scope pour les transactions de la semaine
+     * Attribuer une chambre à cette réservation
      */
-    public function scopeThisWeek($query)
+    public function assignRoom($roomId, $userId, $notes = null)
     {
-        return $query->whereBetween('check_in', [
-            Carbon::now()->startOfWeek(),
-            Carbon::now()->endOfWeek(),
-        ]);
+        DB::beginTransaction();
+
+        try {
+            $room = Room::findOrFail($roomId);
+            
+            // Vérifier que la chambre est du bon type
+            if ($room->type_id != $this->room_type_id) {
+                throw new \Exception('La chambre sélectionnée n\'est pas du type réservé.');
+            }
+
+            // Vérifier la disponibilité
+            if (!$room->isAvailableForPeriod($this->check_in, $this->check_out, $this->id)) {
+                throw new \Exception('Cette chambre n\'est pas disponible pour ces dates.');
+            }
+
+            $oldRoomId = $this->room_id;
+
+            // Mettre à jour la transaction
+            $this->update([
+                'room_id' => $roomId,
+                'is_assigned' => true,
+                'assigned_at' => now(),
+                'assigned_by' => $userId,
+                'notes' => $notes ? ($this->notes . "\n" . $notes) : $this->notes,
+            ]);
+
+            // Mettre à jour le statut de la chambre
+            $room->update(['room_status_id' => 2]); // Occupé
+
+            // Si ancienne chambre existe, la libérer
+            if ($oldRoomId && $oldRoomId != $roomId) {
+                $oldRoom = Room::find($oldRoomId);
+                if ($oldRoom) {
+                    $oldRoom->update(['room_status_id' => 1]); // Disponible
+                }
+            }
+
+            // Logger l'attribution
+            activity()
+                ->causedBy(User::find($userId))
+                ->performedOn($this)
+                ->withProperties([
+                    'old_room_id' => $oldRoomId,
+                    'new_room_id' => $roomId,
+                    'room_number' => $room->number,
+                    'assigned_at' => now(),
+                ])
+                ->log('a attribué une chambre à la réservation');
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'message' => "Chambre {$room->number} attribuée avec succès.",
+                'room' => $room,
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error("Erreur attribution chambre transaction #{$this->id}: " . $e->getMessage());
+            
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
+        }
     }
 
     /**
-     * Scope pour les transactions du mois
+     * Obtenir les chambres disponibles pour cette réservation
      */
-    public function scopeThisMonth($query)
+    public function getAvailableRooms()
     {
-        return $query->whereMonth('check_in', Carbon::now()->month)
-            ->whereYear('check_in', Carbon::now()->year);
+        if (!$this->room_type_id) {
+            return collect();
+        }
+
+        return Room::where('type_id', $this->room_type_id)
+            ->where('room_status_id', 1) // Disponible
+            ->whereDoesntHave('transactions', function ($query) {
+                $query->where('check_in', '<', $this->check_out)
+                    ->where('check_out', '>', $this->check_in)
+                    ->whereIn('status', ['confirmed', 'active', 'checked-in'])
+                    ->where('id', '!=', $this->id);
+            })
+            ->orderBy('number')
+            ->get();
     }
 
     /**
@@ -356,10 +473,19 @@ class Transaction extends Model
     }
 
     /**
-     * Effectuer le check-in
+     * Effectuer le check-in AVEC vérification d'attribution
      */
     public function checkIn($userId, $data = [])
     {
+        // Vérifier qu'une chambre est attribuée
+        if (!$this->isRoomAssigned()) {
+            return [
+                'success' => false,
+                'error' => 'Aucune chambre attribuée. Veuillez attribuer une chambre avant le check-in.',
+                'requires_assignment' => true,
+            ];
+        }
+
         DB::beginTransaction();
 
         try {
@@ -375,19 +501,18 @@ class Transaction extends Model
                 'person_count' => $data['person_count'] ?? $this->person_count ?? 1,
             ];
 
-            if (isset($data['new_room_id']) && $data['new_room_id'] != $this->room_id) {
-                $updateData['room_id'] = $data['new_room_id'];
-            }
-
             $this->update($updateData);
+
+            // Mettre à jour le statut de la chambre
+            $this->room->update(['room_status_id' => 2]); // Occupé
 
             // Logger le check-in
             activity()
                 ->causedBy(User::find($userId))
                 ->performedOn($this)
                 ->withProperties([
-                    'old_room_id' => $oldData['room_id'] ?? null,
-                    'new_room_id' => $data['new_room_id'] ?? $this->room_id,
+                    'room_id' => $this->room_id,
+                    'room_number' => $this->room->number,
                     'check_in_time' => now(),
                     'person_count' => $data['person_count'] ?? $this->person_count,
                 ])
@@ -451,6 +576,11 @@ class Transaction extends Model
                 'actual_check_out' => now(),
             ]);
 
+            // Libérer la chambre
+            if ($this->room) {
+                $this->room->update(['room_status_id' => 1]); // Disponible
+            }
+
             // Logger le check-out
             activity()
                 ->causedBy(User::find($userId))
@@ -461,6 +591,7 @@ class Transaction extends Model
                     'check_out_time' => now(),
                     'total_paid' => $this->getTotalPayment(),
                     'remaining' => $remaining,
+                    'room_number' => $this->room->number ?? null,
                 ])
                 ->log('a effectué le check-out');
 
@@ -503,6 +634,11 @@ class Transaction extends Model
             $updateData['cancelled_at'] = Carbon::now();
             $updateData['cancelled_by'] = $userId;
             $updateData['cancel_reason'] = $reason;
+            
+            // Libérer la chambre si attribuée
+            if ($this->isRoomAssigned() && $this->room) {
+                $this->room->update(['room_status_id' => 1]); // Disponible
+            }
         } elseif ($oldStatus === self::STATUS_CANCELLED && $newStatus !== self::STATUS_CANCELLED) {
             $updateData['cancelled_at'] = null;
             $updateData['cancelled_by'] = null;
@@ -608,7 +744,7 @@ class Transaction extends Model
     }
 
     /**
-     * Calculer le prix total - MÉTHODE CORRECTE
+     * Calculer le prix total - BASÉ SUR LE TYPE DE CHAMBRE
      */
     public function getTotalPrice()
     {
@@ -640,33 +776,35 @@ class Transaction extends Model
     }
 
     /**
-     * Calcul dynamique du prix
+     * Calcul dynamique du prix BASÉ SUR LE TYPE
      */
     private function calculateTotalPrice()
     {
         try {
+            if (!$this->room_type_id) {
+                return 0;
+            }
+
             $checkIn = Carbon::parse($this->check_in);
             $checkOut = Carbon::parse($this->check_out);
 
-            // Calculer les nuits (arrondi supérieur si plus de 12h)
+            // Calculer les nuits
             $hours = $checkIn->diffInHours($checkOut);
             $nights = ceil($hours / 24);
-
-            // Au moins une nuit
             $nights = max(1, $nights);
 
-            // Prix par nuit
-            $pricePerNight = $this->room->price ?? 0;
+            // Prix par nuit du TYPE de chambre
+            $roomType = Type::find($this->room_type_id);
+            $pricePerNight = $roomType->price ?? 0; // price est un accessor pour base_price
 
-            return $nights * $pricePerNight;
+            // CORRECT : prix par chambre, pas par personne
+            return $nights * $pricePerNight; // NE PAS multiplier par person_count
 
         } catch (\Exception $e) {
             \Log::error("Erreur calcul prix transaction #{$this->id}: ".$e->getMessage());
-
             return 0;
         }
     }
-
     /**
      * Obtenir la différence de dates avec pluriel
      */
@@ -711,7 +849,7 @@ class Transaction extends Model
     }
 
     /**
-     * Calculer le total des paiements COMPLÉTÉS - MÉTHODE CRITIQUE CORRIGÉE
+     * Calculer le total des paiements COMPLÉTÉS
      */
     public function getTotalPayment()
     {
@@ -752,7 +890,7 @@ class Transaction extends Model
     }
 
     /**
-     * Calculer le montant restant à payer - MÉTHODE CORRIGÉE
+     * Calculer le montant restant à payer
      */
     public function getRemainingPayment()
     {
@@ -791,7 +929,7 @@ class Transaction extends Model
     }
 
     /**
-     * Vérifier si la transaction est complètement payée - MÉTHODE CORRIGÉE
+     * Vérifier si la transaction est complètement payée
      */
     public function isFullyPaid()
     {
@@ -835,7 +973,7 @@ class Transaction extends Model
     }
 
     /**
-     * Recalculer et mettre à jour le statut des paiements - MÉTHODE CRITIQUE
+     * Recalculer et mettre à jour le statut des paiements
      */
     public function updatePaymentStatus()
     {
@@ -922,13 +1060,21 @@ class Transaction extends Model
     }
 
     /**
+     * Vérifier si une chambre peut être attribuée
+     */
+    public function canBeAssigned()
+    {
+        return !$this->isRoomAssigned() && 
+               $this->isReservation() && 
+               !is_null($this->room_type_id);
+    }
+
+    /**
      * Calculer l'acompte minimum
      */
     public function getMinimumDownPayment()
     {
-        $dayDifference = Helper::getDateDifference($this->check_in, $this->check_out);
-        $total = $this->room->price * $dayDifference;
-
+        $total = $this->getTotalPrice();
         return $total * 0.15;
     }
 
@@ -1007,7 +1153,21 @@ class Transaction extends Model
     }
 
     /**
-     * Synchroniser manuellement les totaux - MÉTHODE IMPORTANTE
+     * Obtenir le badge pour l'attribution
+     */
+    public function getAssignmentBadgeAttribute()
+    {
+        if ($this->isRoomAssigned()) {
+            return '<span class="badge bg-success">Chambre '.$this->room->number.'</span>';
+        } elseif ($this->room_type_id) {
+            return '<span class="badge bg-warning">À attribuer ('.$this->roomType->name.')</span>';
+        } else {
+            return '<span class="badge bg-danger">Non configuré</span>';
+        }
+    }
+
+    /**
+     * Synchroniser manuellement les totaux
      */
     public function syncPaymentTotals()
     {
@@ -1122,7 +1282,7 @@ class Transaction extends Model
     }
 
     /**
-     * Boot du modèle - VERSION SIMPLIFIÉE
+     * Boot du modèle
      */
     protected static function boot()
     {
@@ -1132,6 +1292,11 @@ class Transaction extends Model
         static::creating(function ($transaction) {
             if (! $transaction->total_payment) {
                 $transaction->total_payment = 0;
+            }
+            
+            // S'assurer que room_id est null si pas encore attribué
+            if (!$transaction->is_assigned) {
+                $transaction->room_id = null;
             }
         });
 
@@ -1145,11 +1310,22 @@ class Transaction extends Model
                 ->performedOn($transaction)
                 ->withProperties([
                     'customer' => $transaction->customer->name ?? 'N/A',
-                    'room' => $transaction->room->number ?? 'N/A',
+                    'room_type' => $transaction->roomType->name ?? 'N/A',
                     'nights' => $transaction->getNightsAttribute(),
                     'total_price' => $transaction->getTotalPrice(),
+                    'is_assigned' => $transaction->is_assigned,
                 ])
                 ->log('a créé une nouvelle réservation');
+        });
+
+        // Après mise à jour, vérifier l'attribution
+        static::updated(function ($transaction) {
+            if ($transaction->wasChanged('is_assigned') && $transaction->is_assigned) {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($transaction)
+                    ->log('a attribué une chambre à la réservation');
+            }
         });
     }
 
@@ -1171,7 +1347,8 @@ class Transaction extends Model
         return [
             'id' => $this->id,
             'customer' => $this->customer->name ?? 'N/A',
-            'room' => $this->room->number ?? 'N/A',
+            'room_type' => $this->roomType->name ?? 'N/A',
+            'room' => $this->isRoomAssigned() ? $this->room->number : 'À attribuer',
             'status' => $this->status_label,
             'check_in' => $this->check_in->format('d/m/Y'),
             'check_out' => $this->check_out->format('d/m/Y'),
@@ -1181,6 +1358,7 @@ class Transaction extends Model
             'remaining' => $this->formatted_remaining_payment,
             'payment_rate' => $this->getPaymentRate().'%',
             'is_fully_paid' => $this->isFullyPaid(),
+            'is_assigned' => $this->isRoomAssigned(),
         ];
     }
 
@@ -1198,6 +1376,11 @@ class Transaction extends Model
             'cancelled_at' => now(),
         ]);
 
+        // Libérer la chambre si attribuée
+        if ($this->isRoomAssigned() && $this->room) {
+            $this->room->update(['room_status_id' => 1]); // Disponible
+        }
+
         // Logger le no-show
         activity()
             ->causedBy(User::find($userId))
@@ -1210,5 +1393,27 @@ class Transaction extends Model
             ->log('a marqué comme no-show');
 
         return true;
+    }
+
+    /**
+     * Vérifier la disponibilité pour le type de chambre
+     */
+    public function checkTypeAvailability()
+    {
+        if (!$this->room_type_id) {
+            return false;
+        }
+
+        $availableRooms = Room::where('type_id', $this->room_type_id)
+            ->where('room_status_id', 1) // Disponible
+            ->whereDoesntHave('transactions', function ($query) {
+                $query->where('check_in', '<', $this->check_out)
+                    ->where('check_out', '>', $this->check_in)
+                    ->whereIn('status', ['confirmed', 'active', 'checked-in'])
+                    ->where('id', '!=', $this->id);
+            })
+            ->count();
+
+        return $availableRooms > 0;
     }
 }
