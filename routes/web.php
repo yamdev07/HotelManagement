@@ -157,7 +157,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
 
     // Suppression nécessite autorisation pour réceptionnistes
     Route::delete('/customer/{customer}', [CustomerController::class, 'destroy'])->name('customer.destroy')
-        ->middleware('require.authorization');
+        ->middleware('checkrole:Super,Admin');
 
     // ==================== TYPES DE CHAMBRES ====================
     Route::prefix('type')->name('type.')->group(function () {
@@ -243,7 +243,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
             Route::put('/', [TransactionController::class, 'update'])->name('update');
 
             // Actions critiques nécessitant autorisation
-            Route::middleware('require.authorization')->group(function () {
+            Route::middleware('checkrole:Super,Admin')->group(function () {
                 Route::delete('/', [TransactionController::class, 'destroy'])->name('destroy');
                 Route::delete('/cancel', [TransactionController::class, 'cancel'])->name('cancel');
             });
@@ -273,7 +273,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
 
             // Annulation nécessite autorisation
             Route::delete('/cancel', [PaymentController::class, 'cancel'])->name('cancel')
-                ->middleware('require.authorization');
+                ->middleware('checkrole:Super,Admin');
 
             // Restauration et export seulement pour admins
             Route::middleware('checkrole:Super,Admin')->group(function () {
