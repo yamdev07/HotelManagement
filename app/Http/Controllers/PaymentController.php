@@ -857,4 +857,170 @@ class PaymentController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * ✅ Récupérer les détails d'un paiement au format JSON
+     * Utilisé par la modale AJAX
+     * 
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDetails($id)
+    {
+        try {
+            // Vérifier les permissions
+            if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Accès non autorisé'
+                ], 403);
+            }
+
+            // Charger le paiement avec ses relations
+            $payment = Payment::with([
+                'transaction.customer',
+                'transaction.room',
+                'user',
+                'createdBy',
+                'cancelledByUser'
+            ])->find($id);
+
+            if (!$payment) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Paiement non trouvé'
+                ], 404);
+            }
+
+            // ✅ CORRECTION : Vérifier chaque relation avant d'accéder aux propriétés
+            $userName = $payment->user ? $payment->user->name : 'Système';
+            $createdByName = $payment->createdBy ? $payment->createdBy->name : 'N/A';
+            $cancelledByName = $payment->cancelledByUser ? $payment->cancelledByUser->name : null;
+            
+            $guestName = 'N/A';
+            $roomNumber = 'N/A';
+            $transactionData = null;
+            
+            if ($payment->transaction) {
+                $guestName = $payment->transaction->customer->name ?? 'N/A';
+                $roomNumber = $payment->transaction->room->number ?? 'N/A';
+                
+                // Recalculer les totaux si nécessaire
+                if (method_exists($payment->transaction, 'updatePaymentStatus')) {
+                    $payment->transaction->updatePaymentStatus();
+                }
+                $payment->transaction->refresh();
+                
+                // Préparer les données de transaction
+                $transactionData = [
+                    'id' => $payment->transaction->id,
+                    'total_price' => $payment->transaction->total_price,
+                    'total_payment' => $payment->transaction->total_payment,
+                    'remaining' => method_exists($payment->transaction, 'getRemainingPayment') 
+                        ? $payment->transaction->getRemainingPayment() 
+                        : 0,
+                    'is_fully_paid' => method_exists($payment->transaction, 'isFullyPaid') 
+                        ? $payment->transaction->isFullyPaid() 
+                        : false,
+                    'status' => $payment->transaction->status,
+                    'check_in' => $payment->transaction->check_in 
+                        ? $payment->transaction->check_in->format('d/m/Y') 
+                        : 'N/A',
+                    'check_out' => $payment->transaction->check_out 
+                        ? $payment->transaction->check_out->format('d/m/Y') 
+                        : 'N/A',
+                ];
+            }
+
+            // Formater les données pour la modale
+            $data = [
+                'success' => true,
+                'payment' => [
+                    'id' => $payment->id,
+                    'amount' => $payment->amount,
+                    'amount_formatted' => number_format($payment->amount, 0, ',', ' ') . ' CFA',
+                    'reference' => $payment->reference ?? 'N/A',
+                    'status' => $this->getStatusLabel($payment->status),
+                    'status_color' => $this->getStatusColor($payment->status),
+                    'method' => $payment->payment_method_label ?? $payment->payment_method ?? 'Non spécifié',
+                    'transaction_id' => $payment->transaction_id,
+                    'guest_name' => $guestName,
+                    'room_number' => $roomNumber,
+                    'processed_by' => $userName,
+                    'created_by' => $createdByName,
+                    'cancelled_by' => $cancelledByName,
+                    'cancelled_at' => $payment->cancelled_at ? $payment->cancelled_at->format('d/m/Y H:i') : null,
+                    'cancel_reason' => $payment->cancel_reason,
+                    'date_formatted' => $payment->created_at ? $payment->created_at->format('d/m/Y H:i') : now()->format('d/m/Y H:i'),
+                    'created_at' => $payment->created_at ? $payment->created_at->format('d/m/Y H:i:s') : now()->format('d/m/Y H:i:s'),
+                    'verified_at' => $payment->verified_at ? $payment->verified_at->format('d/m/Y H:i') : null,
+                    'notes' => $payment->description ?? $payment->notes,
+                    'is_refund' => $payment->amount < 0,
+                    'is_cancellable' => method_exists($payment, 'canBeCancelled') ? $payment->canBeCancelled() : false,
+                    'is_refundable' => method_exists($payment, 'canBeRefunded') ? $payment->canBeRefunded() : false,
+                    'transaction' => $transactionData,
+                ]
+            ];
+
+            Log::info("✅ Détails paiement #{$id} chargés avec succès", [
+                'user' => auth()->user()->name ?? 'inconnu',
+                'role' => auth()->user()->role ?? 'inconnu'
+            ]);
+
+            return response()->json($data);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Erreur getDetails paiement:', [
+                'payment_id' => $id,
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur serveur: ' . $e->getMessage(),
+                'error_details' => config('app.debug') ? [
+                    'message' => $e->getMessage(),
+                    'line' => $e->getLine(),
+                    'file' => $e->getFile()
+                ] : null
+            ], 500);
+        }
+    }
+
+    /**
+     * Helper pour le libellé du statut
+     */
+    private function getStatusLabel($status)
+    {
+        $labels = [
+            'pending' => 'En attente',
+            'completed' => 'Complété',
+            'cancelled' => 'Annulé',
+            'expired' => 'Expiré',
+            'failed' => 'Échoué',
+            'refunded' => 'Remboursé'
+        ];
+        
+        return $labels[$status] ?? ucfirst($status);
+    }
+
+    /**
+     * Helper pour la couleur du statut
+     */
+    private function getStatusColor($status)
+    {
+        $colors = [
+            'pending' => 'warning',
+            'completed' => 'success',
+            'cancelled' => 'secondary',
+            'expired' => 'danger',
+            'failed' => 'danger',
+            'refunded' => 'info'
+        ];
+        
+        return $colors[$status] ?? 'secondary';
+    }
 }

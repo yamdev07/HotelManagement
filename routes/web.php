@@ -267,6 +267,9 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [PaymentController::class, 'index'])->name('index');
 
+        Route::get('/{payment}/details', [PaymentController::class, 'getDetails'])->name('details');
+
+
         // Routes avec paramètre {payment}
         Route::prefix('{payment}')->group(function () {
             Route::get('/invoice', [PaymentController::class, 'invoice'])->name('invoice');
