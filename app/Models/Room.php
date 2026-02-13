@@ -51,15 +51,12 @@ class Room extends Model
     ];
 
     // Constantes pour les statuts
-    const STATUS_AVAILABLE = 1;
-
-    const STATUS_MAINTENANCE = 2;
-
-    const STATUS_CLEANING = 3;
-
-    const STATUS_OCCUPIED = 4;
-
-    const STATUS_RESERVED = 5;
+    const STATUS_AVAILABLE = 1;      // Disponible
+    const STATUS_OCCUPIED = 2;       // Occupée
+    const STATUS_MAINTENANCE = 3;    // Maintenance
+    const STATUS_RESERVED = 4;       // Réservée
+    const STATUS_CLEANING = 5;       // En nettoyage
+    const STATUS_DIRTY = 6;          // Sale/À nettoyer
 
     /**
      * Configuration du logging d'activité
@@ -392,10 +389,11 @@ class Room extends Model
     {
         $labels = [
             self::STATUS_AVAILABLE => 'Disponible',
-            self::STATUS_MAINTENANCE => 'En maintenance',
-            self::STATUS_CLEANING => 'À nettoyer',
-            self::STATUS_OCCUPIED => 'Occupée',
-            self::STATUS_RESERVED => 'Réservée',
+            self::STATUS_OCCUPIED => 'Occupée',           // ← Changé
+            self::STATUS_MAINTENANCE => 'En maintenance',  // ← Changé
+            self::STATUS_RESERVED => 'Réservée',           // ← Changé
+            self::STATUS_CLEANING => 'En nettoyage',       // ← Changé
+            self::STATUS_DIRTY => 'À nettoyer',            // ← Ajouté
         ];
 
         return $labels[$this->room_status_id] ?? 'Inconnu';
@@ -408,10 +406,11 @@ class Room extends Model
     {
         $colors = [
             self::STATUS_AVAILABLE => 'success',
-            self::STATUS_MAINTENANCE => 'warning',
-            self::STATUS_CLEANING => 'info',
-            self::STATUS_OCCUPIED => 'danger',
-            self::STATUS_RESERVED => 'primary',
+            self::STATUS_OCCUPIED => 'danger',      // ← Changé (occupé = danger)
+            self::STATUS_MAINTENANCE => 'warning',   // ← Changé (maintenance = warning)
+            self::STATUS_RESERVED => 'primary',      // ← Changé (réservé = primary)
+            self::STATUS_CLEANING => 'info',         // ← Changé (en nettoyage = info)
+            self::STATUS_DIRTY => 'secondary',       // ← Ajouté (sale = secondary)
         ];
 
         return $colors[$this->room_status_id] ?? 'secondary';
@@ -424,10 +423,11 @@ class Room extends Model
     {
         $icons = [
             self::STATUS_AVAILABLE => 'fa-door-open',
-            self::STATUS_MAINTENANCE => 'fa-tools',
-            self::STATUS_CLEANING => 'fa-broom',
             self::STATUS_OCCUPIED => 'fa-bed',
+            self::STATUS_MAINTENANCE => 'fa-tools',
             self::STATUS_RESERVED => 'fa-calendar-check',
+            self::STATUS_CLEANING => 'fa-broom',
+            self::STATUS_DIRTY => 'fa-exclamation-triangle',
         ];
 
         return $icons[$this->room_status_id] ?? 'fa-door-closed';
@@ -926,10 +926,11 @@ class Room extends Model
     {
         return [
             self::STATUS_AVAILABLE => 'Disponible',
-            self::STATUS_MAINTENANCE => 'En maintenance',
-            self::STATUS_CLEANING => 'À nettoyer',
             self::STATUS_OCCUPIED => 'Occupée',
+            self::STATUS_MAINTENANCE => 'En maintenance',
             self::STATUS_RESERVED => 'Réservée',
+            self::STATUS_CLEANING => 'En nettoyage',
+            self::STATUS_DIRTY => 'À nettoyer',
         ];
     }
 

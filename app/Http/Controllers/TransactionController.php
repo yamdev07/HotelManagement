@@ -8,15 +8,25 @@ use App\Models\Payment;
 use App\Models\ReceptionistAction;
 use App\Models\ReceptionistSession;
 use App\Models\Transaction;
+use App\Models\Room;
 use App\Repositories\Interface\TransactionRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Schema;
 
 class TransactionController extends Controller
 {
+    // Constantes pour les statuts des chambres (doivent correspondre à votre DB)
+    const STATUS_AVAILABLE = 1;   // Disponible
+    const STATUS_OCCUPIED = 2;    // Occupée
+    const STATUS_MAINTENANCE = 3; // Maintenance
+    const STATUS_RESERVED = 4;    // Réservée
+    const STATUS_CLEANING = 5;    // En nettoyage
+    const STATUS_DIRTY = 6;       // 👈 SALE / À NETTOYER
+
     public function __construct(
         private TransactionRepositoryInterface $transactionRepository
     ) {}
@@ -26,10 +36,7 @@ class TransactionController extends Controller
      */
     public function index(Request $request)
     {
-        // Récupérer les transactions ACTIVES (pas annulées, pas terminées)
         $transactions = $this->transactionRepository->getTransaction($request);
-
-        // Récupérer les transactions EXPIRÉES ou ANCIENNES (incluant les annulées)
         $transactionsExpired = $this->transactionRepository->getTransactionExpired($request);
 
         return view('transaction.index', [
@@ -43,7 +50,6 @@ class TransactionController extends Controller
      */
     public function create()
     {
-        // Cette méthode est gérée par TransactionRoomReservationController
         return redirect()->route('transaction.reservation.createIdentity');
     }
 
@@ -52,7 +58,6 @@ class TransactionController extends Controller
      */
     public function store(Request $request)
     {
-        // La création est gérée par TransactionRoomReservationController
         return redirect()->route('transaction.index');
     }
 
@@ -62,7 +67,6 @@ class TransactionController extends Controller
     public function show(Transaction $transaction)
     {
         try {
-            // Récupérer les paiements
             $payments = $transaction->payments()->orderBy('created_at', 'desc')->get();
         } catch (\Exception $e) {
             $payments = collect([]);
@@ -72,25 +76,20 @@ class TransactionController extends Controller
             ]);
         }
 
-        // Calculer le nombre de nuits
         $checkIn = Carbon::parse($transaction->check_in);
         $checkOut = Carbon::parse($transaction->check_out);
         $nights = $checkIn->diffInDays($checkOut);
 
-        // Calculer les totaux
         $totalPrice = $transaction->getTotalPrice();
         $totalPayment = $transaction->getTotalPayment();
         $remaining = $totalPrice - $totalPayment;
         $isFullyPaid = $remaining <= 0;
 
-        // Déterminer le statut
         $status = $transaction->status;
         $isExpired = $checkOut->isPast();
 
-        // Vérifier si la réservation peut être annulée
         $canCancel = $this->canCancelReservation($transaction);
 
-        // Récupérer le client et la chambre
         $transaction->load(['customer.user', 'room.type', 'user']);
 
         return view('transaction.show', compact(
@@ -105,12 +104,10 @@ class TransactionController extends Controller
      */
     public function edit(Transaction $transaction)
     {
-        // Vérifier les permissions - INCLUS LES RECEPTIONNISTES
         if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
             abort(403, 'Accès non autorisé.');
         }
 
-        // Vérifier si la transaction peut être modifiée
         $checkOutDate = Carbon::parse($transaction->check_out);
         $isExpired = $checkOutDate->isPast();
 
@@ -119,7 +116,6 @@ class TransactionController extends Controller
                 ->with('error', 'Impossible de modifier une réservation terminée, annulée ou no show.');
         }
 
-        // Charger les relations nécessaires
         $transaction->load(['customer.user', 'room.type', 'room.roomStatus']);
 
         return view('transaction.edit', compact('transaction'));
@@ -130,18 +126,15 @@ class TransactionController extends Controller
      */
     public function update(Request $request, Transaction $transaction)
     {
-        // Vérifier les permissions - INCLUS LES RECEPTIONNISTES
         if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
             abort(403, 'Accès non autorisé');
         }
 
-        // Vérifier si la transaction peut être modifiée
         if (! $this->canModifyTransaction($transaction)) {
             return redirect()->route('transaction.show', $transaction)
                 ->with('error', 'Cette réservation ne peut plus être modifiée.');
         }
 
-        // Validation
         $validator = Validator::make($request->all(), [
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
@@ -158,7 +151,6 @@ class TransactionController extends Controller
                 ->withInput();
         }
 
-        // Vérifier la disponibilité de la chambre
         if (! $this->isRoomAvailable($transaction->room_id, $request->check_in, $request->check_out, $transaction->id)) {
             return redirect()->back()
                 ->with('error', 'Cette chambre est déjà réservée pour les dates sélectionnées.')
@@ -168,7 +160,6 @@ class TransactionController extends Controller
         try {
             DB::beginTransaction();
 
-            // Sauvegarder l'état AVANT modification
             $beforeState = [
                 'check_in' => $transaction->check_in->format('Y-m-d H:i:s'),
                 'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
@@ -176,35 +167,26 @@ class TransactionController extends Controller
                 'notes' => $transaction->notes,
             ];
 
-            // Calculer l'ANCIEN prix (avant modification)
             $oldCheckIn = Carbon::parse($transaction->check_in);
             $oldCheckOut = Carbon::parse($transaction->check_out);
             $oldNights = $oldCheckIn->diffInDays($oldCheckOut);
             $oldTotalPrice = $transaction->total_price;
 
-            // Mettre à jour les dates
             $transaction->update([
                 'check_in' => $request->check_in,
                 'check_out' => $request->check_out,
                 'notes' => $request->notes ?? $transaction->notes,
             ]);
 
-            // RECHARGER la transaction pour avoir les nouvelles dates
             $transaction->refresh();
-
-            // FORCER le recalcul du prix total
-            $newTotalPrice = $transaction->getTotalPrice(); // Cette méthode doit être corrigée
-
-            // Mettre à jour le champ total_price avec le nouveau calcul
+            $newTotalPrice = $transaction->getTotalPrice();
             $transaction->total_price = $newTotalPrice;
             $transaction->save();
 
-            // Calculer les nouvelles nuits
             $newCheckIn = Carbon::parse($transaction->check_in);
             $newCheckOut = Carbon::parse($transaction->check_out);
             $newNights = $newCheckIn->diffInDays($newCheckOut);
 
-            // Créer un historique détaillé
             History::create([
                 'transaction_id' => $transaction->id,
                 'user_id' => auth()->id(),
@@ -229,7 +211,6 @@ class TransactionController extends Controller
                 'notes' => $request->notes ?? 'Modification des dates de séjour',
             ]);
 
-            // Enregistrer l'action si réceptionniste
             if (auth()->user()->role === 'Receptionist') {
                 $this->logReceptionistAction(
                     actionType: 'reservation',
@@ -262,7 +243,6 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            // Message détaillé
             $priceChange = $newTotalPrice - $oldTotalPrice;
             $priceChangeFormatted = number_format(abs($priceChange), 0, ',', ' ').' CFA';
 
@@ -286,7 +266,6 @@ class TransactionController extends Controller
                         ($priceChange > 0 ? '+' : '').
                         number_format($priceChange, 0, ',', ' ').' CFA<br>';
 
-                // Afficher un avertissement si le prix a diminué
                 if ($priceChange < 0) {
                     $message .= "<div class='alert alert-warning mt-2'>⚠️ Le prix a diminué. Vérifiez les paiements.</div>";
                 }
@@ -310,13 +289,9 @@ class TransactionController extends Controller
     /**
      * Supprimer une transaction
      */
-    /**
-     * Supprimer une transaction
-     */
     public function destroy(Transaction $transaction)
     {
         try {
-            // Seuls Super Admin peuvent supprimer
             if (! in_array(auth()->user()->role, ['Super'])) {
                 abort(403, 'Accès non autorisé. Seuls les Super Admins peuvent supprimer.');
             }
@@ -326,7 +301,6 @@ class TransactionController extends Controller
 
             DB::beginTransaction();
 
-            // Sauvegarder pour logs
             $deletedData = [
                 'transaction' => $transaction->toArray(),
                 'payments' => $transaction->payments->toArray(),
@@ -334,13 +308,9 @@ class TransactionController extends Controller
                 'deleted_at' => now()->format('Y-m-d H:i:s'),
             ];
 
-            // Supprimer les paiements
             Payment::where('transaction_id', $transaction->id)->delete();
-
-            // Supprimer la transaction
             $transaction->delete();
 
-            // Libérer la chambre si nécessaire
             $room = $transaction->room;
             if ($room && $room->room_status_id == 2) {
                 $otherTransactions = Transaction::where('room_id', $room->id)
@@ -355,7 +325,6 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            // Log la suppression
             Log::warning('Transaction supprimée définitivement', $deletedData);
 
             return redirect()->route('transaction.index')
@@ -368,18 +337,18 @@ class TransactionController extends Controller
                 'transaction_id' => $transaction->id,
             ]);
 
-            // CORRECTION ICI : Supprimer les parenthèses après transaction.index
             return redirect()->route('transaction.index')
                 ->with('error', 'Erreur lors de la suppression: '.$e->getMessage());
         }
     }
 
     /**
-     * Mettre à jour le statut d'une transaction (METHODE PRINCIPALE)
+     * =====================================================
+     * ✅ MÉTHODE PRINCIPALE : MISE À JOUR DU STATUT
+     * =====================================================
      */
     public function updateStatus(Request $request, Transaction $transaction)
     {
-        // Vérifier les permissions - INCLUS LES RECEPTIONNISTES
         if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
             if ($request->ajax()) {
                 return response()->json(['error' => 'Accès non autorisé'], 403);
@@ -387,7 +356,6 @@ class TransactionController extends Controller
             abort(403, 'Accès non autorisé.');
         }
 
-        // Validation
         $request->validate([
             'status' => 'required|in:reservation,active,completed,cancelled,no_show',
             'cancel_reason' => 'nullable|string|max:500',
@@ -397,27 +365,23 @@ class TransactionController extends Controller
         $oldStatus = $transaction->status;
         $newStatus = $request->status;
 
-        // Vérifications spécifiques selon le statut
-        if ($newStatus === 'completed') {
-            if (! $transaction->isFullyPaid()) {
-                $remaining = $transaction->getRemainingPayment();
-                $formattedRemaining = number_format($remaining, 0, ',', ' ').' CFA';
+        if ($newStatus === 'completed' && ! $transaction->isFullyPaid()) {
+            $remaining = $transaction->getRemainingPayment();
+            $formattedRemaining = number_format($remaining, 0, ',', ' ').' CFA';
 
-                if ($request->ajax()) {
-                    return response()->json([
-                        'error' => 'Paiement incomplet',
-                        'message' => 'Impossible de marquer comme terminé. Solde restant: '.$formattedRemaining,
-                        'remaining' => $remaining,
-                    ], 422);
-                }
-
-                return redirect()->back()->with('error',
-                    "❌ Paiement incomplet ! Solde restant: {$formattedRemaining}"
-                );
+            if ($request->ajax()) {
+                return response()->json([
+                    'error' => 'Paiement incomplet',
+                    'message' => 'Impossible de marquer comme terminé. Solde restant: '.$formattedRemaining,
+                    'remaining' => $remaining,
+                ], 422);
             }
+
+            return redirect()->back()->with('error',
+                "❌ Paiement incomplet ! Solde restant: {$formattedRemaining}"
+            );
         }
 
-        // Blocage du retour à réservation si date passée
         if ($newStatus === 'reservation' && Carbon::parse($transaction->check_in)->isPast()) {
             $errorMsg = 'Impossible de revenir à "Réservation", la date d\'arrivée est passée.';
 
@@ -428,7 +392,6 @@ class TransactionController extends Controller
             return redirect()->back()->with('error', $errorMsg);
         }
 
-        // Raison obligatoire pour annulation
         if ($newStatus === 'cancelled' && empty($request->cancel_reason)) {
             $errorMsg = 'Une raison est obligatoire pour l\'annulation.';
 
@@ -442,23 +405,17 @@ class TransactionController extends Controller
         try {
             DB::beginTransaction();
 
-            // Sauvegarder l'état avant modification
             $beforeState = $this->getTransactionState($transaction);
-
-            // Préparer les données de mise à jour
             $updateData = ['status' => $newStatus];
 
-            // Gérer les transitions spécifiques
             switch ($newStatus) {
                 case 'active':
-                    // Client arrive
                     $updateData['check_in_actual'] = now();
 
-                    // Marquer la chambre comme occupée
                     if ($transaction->room) {
-                        $transaction->room->update(['room_status_id' => 2]);
+                        $transaction->room->update(['room_status_id' => self::STATUS_OCCUPIED]);
+                        Log::info("Arrivée: Chambre {$transaction->room->number} marquée OCCUPÉE");
 
-                        // Enregistrer l'action réceptionniste
                         if (auth()->user()->role === 'Receptionist') {
                             $this->logReceptionistAction(
                                 actionType: 'checkin',
@@ -468,6 +425,7 @@ class TransactionController extends Controller
                                     'check_in_actual' => now()->format('Y-m-d H:i:s'),
                                     'room_number' => $transaction->room->number,
                                     'customer_name' => $transaction->customer->name,
+                                    'room_status' => 'occupied',
                                 ],
                                 beforeState: $beforeState,
                                 afterState: $this->getTransactionState($transaction, true),
@@ -478,24 +436,29 @@ class TransactionController extends Controller
                     break;
 
                 case 'completed':
-                    // Client part - vérification sécurité
                     if (! $transaction->isFullyPaid()) {
                         DB::rollBack();
                         $remaining = $transaction->getRemainingPayment();
                         $formattedRemaining = number_format($remaining, 0, ',', ' ').' CFA';
 
                         return redirect()->back()->with('error',
-                            "Erreur de sécurité: Paiement incomplet. Solde: {$formattedRemaining}"
-                        );
+                            "Erreur de sécurité: Paiement incomplet. Solde: {$formattedRemaining}");
                     }
 
                     $updateData['check_out_actual'] = now();
 
-                    // Libérer la chambre
+                    // =====================================================
+                    // ✅ CORRECTION MAJEURE : Marquer la chambre comme DIRTY (SALE)
+                    // =====================================================
                     if ($transaction->room) {
-                        $transaction->room->update(['room_status_id' => 1]);
+                        $transaction->room->update([
+                            'room_status_id' => self::STATUS_DIRTY, // 6 = À nettoyer
+                            'needs_cleaning' => 1,
+                            'updated_at' => now(),
+                        ]);
 
-                        // Enregistrer l'action réceptionniste
+                        Log::info("✅ DÉPART (updateStatus): Chambre {$transaction->room->number} marquée DIRTY");
+
                         if (auth()->user()->role === 'Receptionist') {
                             $this->logReceptionistAction(
                                 actionType: 'checkout',
@@ -506,27 +469,26 @@ class TransactionController extends Controller
                                     'room_number' => $transaction->room->number,
                                     'total_paid' => $transaction->getTotalPayment(),
                                     'payment_status' => 'complet',
+                                    'room_status' => 'dirty',
                                 ],
                                 beforeState: $beforeState,
                                 afterState: $this->getTransactionState($transaction, true),
-                                notes: 'Client marqué comme parti - Séjour terminé'
+                                notes: 'Client marqué comme parti - Chambre marquée À NETTOYER'
                             );
                         }
                     }
                     break;
 
                 case 'cancelled':
-                    // Annulation
                     $updateData['cancelled_at'] = now();
                     $updateData['cancelled_by'] = auth()->id();
                     $updateData['cancel_reason'] = $request->cancel_reason;
 
-                    // Libérer la chambre si occupée
-                    if ($transaction->room && $transaction->room->room_status_id == 2) {
-                        $transaction->room->update(['room_status_id' => 1]);
+                    if ($transaction->room && $transaction->room->room_status_id == self::STATUS_OCCUPIED) {
+                        $transaction->room->update(['room_status_id' => self::STATUS_AVAILABLE]);
+                        Log::info("Annulation: Chambre {$transaction->room->number} libérée");
                     }
 
-                    // Créer remboursement si paiements existants
                     $totalPaid = $transaction->getTotalPayment();
                     if ($totalPaid > 0) {
                         Payment::create([
@@ -541,7 +503,6 @@ class TransactionController extends Controller
                         ]);
                     }
 
-                    // Enregistrer l'action réceptionniste
                     if (auth()->user()->role === 'Receptionist') {
                         $this->logReceptionistAction(
                             actionType: 'reservation',
@@ -560,12 +521,9 @@ class TransactionController extends Controller
                     break;
             }
 
-            // Mettre à jour la transaction
             $transaction->update($updateData);
-
             DB::commit();
 
-            // Journalisation
             Log::info('Statut transaction modifié', [
                 'transaction_id' => $transaction->id,
                 'old_status' => $oldStatus,
@@ -575,14 +533,15 @@ class TransactionController extends Controller
                 'room' => $transaction->room->number ?? 'N/A',
             ]);
 
-            // Réponse
             $message = $this->getStatusChangeMessage($oldStatus, $newStatus);
 
             if ($newStatus === 'completed') {
                 session()->flash('departure_success', [
-                    'title' => 'Départ enregistré',
-                    'message' => 'Client marqué comme parti. Chambre libérée.',
+                    'title' => '✅ Départ enregistré - Chambre à nettoyer',
+                    'message' => 'Client marqué comme parti. Chambre marquée "À NETTOYER". Housekeeping informé.',
                     'transaction_id' => $transaction->id,
+                    'room_number' => $transaction->room->number ?? 'N/A',
+                    'customer_name' => $transaction->customer->name,
                 ]);
             }
 
@@ -615,16 +574,16 @@ class TransactionController extends Controller
     }
 
     /**
-     * ACTION RAPIDE: Marquer comme arrivé (bouton spécifique)
+     * =====================================================
+     * ✅ ACTION RAPIDE : MARQUER COMME ARRIVÉ
+     * =====================================================
      */
     public function markAsArrived(Transaction $transaction)
     {
-        // Vérifier permissions
         if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
             abort(403, 'Accès non autorisé');
         }
 
-        // Vérifier que c'est une réservation
         if ($transaction->status !== 'reservation') {
             return redirect()->back()->with('error',
                 'Seule une réservation peut être marquée comme arrivée.');
@@ -633,21 +592,18 @@ class TransactionController extends Controller
         try {
             DB::beginTransaction();
 
-            // Sauvegarder état avant
             $beforeState = $this->getTransactionState($transaction);
 
-            // Mettre à jour
             $transaction->update([
                 'status' => 'active',
                 'check_in_actual' => now(),
             ]);
 
-            // Marquer chambre comme occupée
             if ($transaction->room) {
-                $transaction->room->update(['room_status_id' => 2]);
+                $transaction->room->update(['room_status_id' => self::STATUS_OCCUPIED]);
+                Log::info("Arrivée rapide: Chambre {$transaction->room->number} marquée OCCUPÉE");
             }
 
-            // Enregistrer action réceptionniste
             if (auth()->user()->role === 'Receptionist') {
                 $this->logReceptionistAction(
                     actionType: 'checkin',
@@ -667,7 +623,8 @@ class TransactionController extends Controller
             DB::commit();
 
             return redirect()->back()->with('success',
-                "✅ Client marqué comme arrivé ! La chambre {$transaction->room->number} est maintenant occupée.");
+                "✅ Client marqué comme arrivé ! La chambre <strong>{$transaction->room->number}</strong> est maintenant occupée."
+            );
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -682,22 +639,21 @@ class TransactionController extends Controller
     }
 
     /**
-     * ACTION RAPIDE: Marquer comme parti (bouton spécifique)
+     * =====================================================
+     * ✅ ACTION RAPIDE : MARQUER COMME PARTI (AVEC DIRTY)
+     * =====================================================
      */
     public function markAsDeparted(Transaction $transaction)
     {
-        // Vérifier permissions
         if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
             abort(403, 'Accès non autorisé');
         }
 
-        // Vérifier que le client est dans l'hôtel
         if ($transaction->status !== 'active') {
             return redirect()->back()->with('error',
                 'Seul un client dans l\'hôtel peut être marqué comme parti.');
         }
 
-        // Vérifier paiement
         if (! $transaction->isFullyPaid()) {
             $remaining = $transaction->getRemainingPayment();
             $formattedRemaining = number_format($remaining, 0, ',', ' ').' CFA';
@@ -709,21 +665,26 @@ class TransactionController extends Controller
         try {
             DB::beginTransaction();
 
-            // Sauvegarder état avant
             $beforeState = $this->getTransactionState($transaction);
 
-            // Mettre à jour
             $transaction->update([
                 'status' => 'completed',
                 'check_out_actual' => now(),
             ]);
 
-            // Libérer la chambre
+            // =====================================================
+            // ✅ CORRECTION MAJEURE : Marquer la chambre comme DIRTY (SALE)
+            // =====================================================
             if ($transaction->room) {
-                $transaction->room->update(['room_status_id' => 1]);
+                $transaction->room->update([
+                    'room_status_id' => self::STATUS_DIRTY, // 6 = À nettoyer
+                    'needs_cleaning' => 1,
+                    'updated_at' => now(),
+                ]);
+
+                Log::info("✅ DÉPART RAPIDE: Chambre {$transaction->room->number} marquée DIRTY");
             }
 
-            // Enregistrer action réceptionniste
             if (auth()->user()->role === 'Receptionist') {
                 $this->logReceptionistAction(
                     actionType: 'checkout',
@@ -734,17 +695,21 @@ class TransactionController extends Controller
                         'time' => now()->format('H:i:s'),
                         'room' => $transaction->room->number ?? 'N/A',
                         'total_paid' => $transaction->getTotalPayment(),
+                        'room_status' => 'dirty',
                     ],
                     beforeState: $beforeState,
                     afterState: $this->getTransactionState($transaction, true),
-                    notes: 'Client marqué comme parti via bouton rapide'
+                    notes: 'Client marqué comme parti - Chambre marquée À NETTOYER'
                 );
             }
 
             DB::commit();
 
             return redirect()->back()->with('success',
-                "✅ Client marqué comme parti ! La chambre {$transaction->room->number} est maintenant disponible.");
+                "✅ <strong>Départ enregistré avec succès !</strong><br>
+                🏨 Chambre <strong style='color:#dc3545;'>{$transaction->room->number}</strong> marquée comme <span style='background:#dc3545; color:white; padding:2px 8px; border-radius:4px;'>À NETTOYER</span><br>
+                🧹 Housekeeping informé - Nettoyage requis."
+            );
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -759,23 +724,57 @@ class TransactionController extends Controller
     }
 
     /**
-     * Annuler une réservation (ancienne méthode)
+     * =====================================================
+     * ✅ UTILITAIRE : MARQUER UNE CHAMBRE COMME DIRTY
+     * =====================================================
+     */
+    private function markRoomAsDirty(Room $room, ?Transaction $transaction = null): bool
+    {
+        try {
+            $room->update([
+                'room_status_id' => self::STATUS_DIRTY,
+                'needs_cleaning' => 1,
+                'updated_at' => now(),
+            ]);
+
+            if (Schema::hasColumn('rooms', 'last_cleaned_at')) {
+                $room->update(['last_cleaned_at' => null]);
+            }
+
+            Log::info("🧹 Housekeeping: Chambre {$room->number} marquée sale (DIRTY)", [
+                'room_id' => $room->id,
+                'transaction_id' => $transaction?->id,
+                'customer' => $transaction?->customer?->name,
+                'marked_by' => auth()->user()->name,
+                'marked_at' => now()->format('Y-m-d H:i:s'),
+            ]);
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Erreur marquage chambre sale:', [
+                'room_id' => $room->id,
+                'room_number' => $room->number,
+                'error' => $e->getMessage(),
+            ]);
+            return false;
+        }
+    }
+
+    /**
+     * Annuler une réservation
      */
     public function cancel(Request $request, Transaction $transaction)
     {
         try {
-            // Vérifier permissions
             if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
                 return redirect()->back()->with('error', 'Accès non autorisé.');
             }
 
-            // Vérifier si annulable
             if (! $this->canCancelReservation($transaction)) {
                 return redirect()->back()->with('error',
                     'Cette réservation ne peut pas être annulée.');
             }
 
-            // Validation raison
             if ($request->has('cancel_reason') && strlen($request->cancel_reason) > 500) {
                 return redirect()->back()->with('error',
                     'La raison ne doit pas dépasser 500 caractères.');
@@ -783,10 +782,8 @@ class TransactionController extends Controller
 
             DB::beginTransaction();
 
-            // Sauvegarder état avant
             $beforeState = $this->getTransactionState($transaction);
 
-            // Mettre à jour
             $transaction->update([
                 'status' => 'cancelled',
                 'cancelled_at' => now(),
@@ -794,13 +791,12 @@ class TransactionController extends Controller
                 'cancel_reason' => $request->cancel_reason,
             ]);
 
-            // Libérer chambre si occupée
             $room = $transaction->room;
-            if ($room && $room->room_status_id == 2) {
-                $room->update(['room_status_id' => 1]);
+            if ($room && $room->room_status_id == self::STATUS_OCCUPIED) {
+                $room->update(['room_status_id' => self::STATUS_AVAILABLE]);
+                Log::info("Annulation: Chambre {$room->number} libérée");
             }
 
-            // Remboursement si paiements
             $totalPaid = $transaction->getTotalPayment();
             if ($totalPaid > 0) {
                 Payment::create([
@@ -815,7 +811,6 @@ class TransactionController extends Controller
                 ]);
             }
 
-            // Enregistrer action réceptionniste
             if (auth()->user()->role === 'Receptionist') {
                 $this->logReceptionistAction(
                     actionType: 'reservation',
@@ -859,7 +854,6 @@ class TransactionController extends Controller
     public function restore(Transaction $transaction)
     {
         try {
-            // Seuls Super/Admin peuvent restaurer
             if (! $this->hasPermission(['Super', 'Admin'])) {
                 abort(403, 'Accès non autorisé');
             }
@@ -878,7 +872,6 @@ class TransactionController extends Controller
                 'cancel_reason' => null,
             ]);
 
-            // Supprimer remboursement
             Payment::where('transaction_id', $transaction->id)
                 ->where('payment_method', 'refund')
                 ->delete();
@@ -900,23 +893,15 @@ class TransactionController extends Controller
         }
     }
 
-    /**
-     * ========================================
-     * METHODES UTILITAIRES
-     * ========================================
-     */
+    // =====================================================
+    // MÉTHODES UTILITAIRES (inchangées)
+    // =====================================================
 
-    /**
-     * Vérifier les permissions
-     */
     private function hasPermission(array $allowedRoles): bool
     {
         return in_array(auth()->user()->role, $allowedRoles);
     }
 
-    /**
-     * Vérifier si une transaction peut être modifiée
-     */
     private function canModifyTransaction(Transaction $transaction): bool
     {
         $checkOutDate = Carbon::parse($transaction->check_out);
@@ -926,9 +911,6 @@ class TransactionController extends Controller
         return ! $isExpired && ! in_array($transaction->status, $notAllowedStatus);
     }
 
-    /**
-     * Vérifier si une réservation peut être annulée
-     */
     private function canCancelReservation(Transaction $transaction): bool
     {
         if ($transaction->status == 'cancelled') {
@@ -938,12 +920,10 @@ class TransactionController extends Controller
         $checkInDate = Carbon::parse($transaction->check_in);
         $now = Carbon::now();
 
-        // Pas d'annulation si date d'arrivée passée
         if ($checkInDate->isPast()) {
             return false;
         }
 
-        // Pas d'annulation moins de 2h avant arrivée
         $hoursBeforeCheckIn = $now->diffInHours($checkInDate, false);
         if ($hoursBeforeCheckIn < 2 && $hoursBeforeCheckIn > 0) {
             return false;
@@ -954,11 +934,9 @@ class TransactionController extends Controller
 
     private function isRoomAvailable($roomId, $checkIn, $checkOut, $excludeTransactionId = null): bool
     {
-        // Convertir en objets Carbon pour une meilleure comparaison
         $requestCheckIn = Carbon::parse($checkIn);
         $requestCheckOut = Carbon::parse($checkOut);
 
-        // Chercher les réservations actives pour cette chambre
         $existingReservations = Transaction::where('room_id', $roomId)
             ->whereNotIn('status', ['cancelled', 'completed', 'no_show'])
             ->when($excludeTransactionId, function ($query) use ($excludeTransactionId) {
@@ -966,18 +944,13 @@ class TransactionController extends Controller
             })
             ->get();
 
-        // Vérifier chaque réservation existante
         foreach ($existingReservations as $reservation) {
             $resCheckIn = Carbon::parse($reservation->check_in);
             $resCheckOut = Carbon::parse($reservation->check_out);
 
-            // Vérifier s'il y a chevauchement
             if (
-                // La nouvelle réservation commence pendant une réservation existante
                 ($requestCheckIn >= $resCheckIn && $requestCheckIn < $resCheckOut) ||
-                // La nouvelle réservation se termine pendant une réservation existante
                 ($requestCheckOut > $resCheckIn && $requestCheckOut <= $resCheckOut) ||
-                // La nouvelle réservation englobe une réservation existante
                 ($requestCheckIn <= $resCheckIn && $requestCheckOut >= $resCheckOut)
             ) {
                 Log::info('Conflit de réservation détecté', [
@@ -997,9 +970,6 @@ class TransactionController extends Controller
         return true;
     }
 
-    /**
-     * Obtenir l'état d'une transaction
-     */
     private function getTransactionState(Transaction $transaction, $refresh = false): array
     {
         if ($refresh) {
@@ -1021,24 +991,21 @@ class TransactionController extends Controller
         ];
     }
 
-    /**
-     * Obtenir le message de changement de statut
-     */
     private function getStatusChangeMessage($oldStatus, $newStatus): string
     {
         $messages = [
             'reservation' => [
-                'active' => 'Client marqué comme arrivé',
-                'cancelled' => 'Réservation annulée',
-                'no_show' => 'Client marqué comme No Show',
+                'active' => '✅ Client marqué comme arrivé',
+                'cancelled' => '❌ Réservation annulée',
+                'no_show' => '👤 Client marqué comme No Show',
             ],
             'active' => [
-                'completed' => 'Client marqué comme parti',
-                'cancelled' => 'Séjour annulé',
+                'completed' => '✅ Client marqué comme parti - Chambre à nettoyer',
+                'cancelled' => '❌ Séjour annulé',
             ],
             'completed' => [
-                'active' => 'Séjour réactivé',
-                'cancelled' => 'Séjour annulé',
+                'active' => '🔄 Séjour réactivé',
+                'cancelled' => '❌ Séjour annulé',
             ],
         ];
 
@@ -1046,9 +1013,6 @@ class TransactionController extends Controller
             ?? "Statut changé de '{$this->getStatusLabel($oldStatus)}' à '{$this->getStatusLabel($newStatus)}'";
     }
 
-    /**
-     * Obtenir le label d'un statut
-     */
     private function getStatusLabel($status): string
     {
         $labels = [
@@ -1062,9 +1026,6 @@ class TransactionController extends Controller
         return $labels[$status] ?? $status;
     }
 
-    /**
-     * Enregistrer une action réceptionniste
-     */
     private function logReceptionistAction(
         string $actionType,
         string $actionSubtype,
@@ -1075,7 +1036,6 @@ class TransactionController extends Controller
         string $notes = ''
     ): void {
         try {
-            // Trouver ou créer une session pour le réceptionniste
             $session = ReceptionistSession::firstOrCreate(
                 [
                     'user_id' => auth()->id(),
@@ -1088,7 +1048,6 @@ class TransactionController extends Controller
                 ]
             );
 
-            // Créer l'action
             ReceptionistAction::create([
                 'session_id' => $session->id,
                 'user_id' => auth()->id(),
@@ -1113,15 +1072,10 @@ class TransactionController extends Controller
         }
     }
 
-    /**
-     * ========================================
-     * METHODES AJAX ET API
-     * ========================================
-     */
+    // =====================================================
+    // MÉTHODES AJAX, EXPORT, PROLONGATION (inchangées)
+    // =====================================================
 
-    /**
-     * Vérifier si peut être marqué comme terminé
-     */
     public function checkIfCanComplete(Transaction $transaction)
     {
         $canComplete = $transaction->isFullyPaid();
@@ -1136,9 +1090,6 @@ class TransactionController extends Controller
         ]);
     }
 
-    /**
-     * Vérifier statut paiement
-     */
     public function checkPaymentStatus(Transaction $transaction)
     {
         return response()->json([
@@ -1149,9 +1100,6 @@ class TransactionController extends Controller
         ]);
     }
 
-    /**
-     * Générer une facture
-     */
     public function invoice(Transaction $transaction)
     {
         $payments = $transaction->payments()->orderBy('created_at')->get();
@@ -1166,9 +1114,6 @@ class TransactionController extends Controller
         return redirect()->route('payment.invoice', $lastPayment->id);
     }
 
-    /**
-     * Historique des modifications
-     */
     public function history(Transaction $transaction)
     {
         return view('transaction.history', [
@@ -1176,9 +1121,6 @@ class TransactionController extends Controller
         ]);
     }
 
-    /**
-     * Mes réservations (pour clients)
-     */
     public function myReservations(Request $request)
     {
         if (auth()->user()->role === 'Customer') {
@@ -1211,9 +1153,6 @@ class TransactionController extends Controller
         ]);
     }
 
-    /**
-     * Détails en format compact (modal)
-     */
     public function showDetails(Request $request, $id)
     {
         $transaction = Transaction::with(['customer.user', 'room.type', 'payments'])
@@ -1222,9 +1161,6 @@ class TransactionController extends Controller
         return view('transaction.details-modal', compact('transaction'));
     }
 
-    /**
-     * Vérifier disponibilité pour modification
-     */
     public function checkAvailability(Request $request, Transaction $transaction)
     {
         $request->validate([
@@ -1247,39 +1183,26 @@ class TransactionController extends Controller
         ]);
     }
 
-    /**
-     * Exporter les transactions
-     */
     public function export(Request $request, $type = 'pdf')
     {
-        $transactions = $this->transactionRepository->getTransaction($request);
-        $transactionsExpired = $this->transactionRepository->getTransactionExpired($request);
-
         return redirect()->route('transaction.index')
             ->with('info', 'Fonction d\'exportation à implémenter');
     }
 
-    /**
-     * Prolonger une réservation
-     */
     public function extend(Transaction $transaction)
     {
-        // Vérifier les permissions
         if (! in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])) {
             abort(403, 'Accès non autorisé.');
         }
 
-        // Vérifier si la réservation peut être prolongée
         if (! in_array($transaction->status, ['reservation', 'active'])) {
             return redirect()->route('transaction.show', $transaction)
                 ->with('error', 'Seules les réservations et séjours en cours peuvent être prolongés.');
         }
 
-        // Vérifier si la chambre est disponible pour prolongation
         $currentCheckOut = Carbon::parse($transaction->check_out);
         $today = Carbon::now();
 
-        // Si la date de départ est déjà passée, on propose de prolonger à partir d'aujourd'hui
         $suggestedDate = $currentCheckOut->isPast() ? $today->copy()->addDay() : $currentCheckOut->copy()->addDay();
 
         $transaction->load(['customer.user', 'room.type', 'room.roomStatus']);
@@ -1287,17 +1210,12 @@ class TransactionController extends Controller
         return view('transaction.extend', compact('transaction', 'suggestedDate'));
     }
 
-    /**
-     * Traiter la prolongation d'une réservation
-     */
     public function processExtend(Request $request, Transaction $transaction)
     {
-        // Vérifier les permissions
         if (! in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])) {
             abort(403, 'Accès non autorisé.');
         }
 
-        // Validation
         $validator = Validator::make($request->all(), [
             'new_check_out' => 'required|date|after:'.$transaction->check_out->format('Y-m-d'),
             'additional_nights' => 'required|integer|min:1|max:30',
@@ -1316,7 +1234,6 @@ class TransactionController extends Controller
                 ->withInput();
         }
 
-        // Vérifier la disponibilité de la chambre
         $newCheckOut = $request->new_check_out;
 
         if (! $this->isRoomAvailable($transaction->room_id, $transaction->check_in->format('Y-m-d'), $newCheckOut, $transaction->id)) {
@@ -1328,17 +1245,14 @@ class TransactionController extends Controller
         try {
             DB::beginTransaction();
 
-            // Sauvegarder l'état avant modification
             $oldCheckOut = $transaction->check_out->format('Y-m-d H:i:s');
             $oldTotalPrice = $transaction->total_price;
             $oldNights = Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out);
 
-            // Calculer le prix supplémentaire
             $additionalNights = $request->additional_nights;
             $roomPricePerNight = $transaction->room->price;
             $additionalPrice = $additionalNights * $roomPricePerNight;
 
-            // Mettre à jour la réservation
             $transaction->update([
                 'check_out' => $newCheckOut,
                 'notes' => ($transaction->notes ? $transaction->notes."\n---\n" : '').
@@ -1347,28 +1261,22 @@ class TransactionController extends Controller
                         ($request->notes ? ' - '.$request->notes : ''),
             ]);
 
-            // FORCER le recalcul du prix total
             $transaction->refresh();
-            $newTotalPrice = $transaction->getTotalPrice(); // Doit recalculer automatiquement
-
-            // Vérifier que le nouveau prix inclut bien la prolongation
+            $newTotalPrice = $transaction->getTotalPrice();
             $expectedNewPrice = $oldTotalPrice + $additionalPrice;
+
             if (abs($newTotalPrice - $expectedNewPrice) > 1) {
                 Log::warning("Incohérence prix prolongation transaction #{$transaction->id}", [
                     'old_price' => $oldTotalPrice,
                     'additional_price' => $additionalPrice,
                     'expected_new_price' => $expectedNewPrice,
                     'actual_new_price' => $newTotalPrice,
-                    'difference' => $newTotalPrice - $expectedNewPrice,
                 ]);
-
-                // Corriger manuellement si nécessaire
                 $transaction->total_price = $expectedNewPrice;
                 $transaction->save();
                 $newTotalPrice = $expectedNewPrice;
             }
 
-            // Enregistrer dans l'historique
             History::create([
                 'transaction_id' => $transaction->id,
                 'user_id' => auth()->id(),
@@ -1391,7 +1299,6 @@ class TransactionController extends Controller
                 'notes' => $request->notes,
             ]);
 
-            // Enregistrer l'action si réceptionniste
             if (auth()->user()->role === 'Receptionist') {
                 $this->logReceptionistAction(
                     actionType: 'reservation',
@@ -1422,7 +1329,6 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            // Message de succès
             $message = '✅ Séjour prolongé avec succès !<br>';
             $message .= "<strong>+{$additionalNights} nuit(s)</strong> ajoutée(s) à ".
                     number_format($roomPricePerNight, 0, ',', ' ').' CFA/nuit<br>';

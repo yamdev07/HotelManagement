@@ -50,8 +50,17 @@
                                 <label for="employee" class="form-label">Femme de chambre</label>
                                 <select class="form-select" id="employee" name="employee">
                                     <option value="">Toutes</option>
-                                    @foreach(\App\Models\User::role('housekeeping')->get() as $employee)
-                                        <option value="{{ $employee->id }}">{{ $employee->name }}</option>
+                                    @php
+                                        // Récupérer les utilisateurs avec le rôle Housekeeping
+                                        $housekeepingStaff = \App\Models\User::where('role', 'Housekeeping')
+                                            ->orWhere('role', 'housekeeping')
+                                            ->get();
+                                    @endphp
+                                    @foreach($housekeepingStaff as $employee)
+                                        <option value="{{ $employee->id }}" 
+                                            {{ request('employee') == $employee->id ? 'selected' : '' }}>
+                                            {{ $employee->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -59,8 +68,25 @@
                                 <label for="room_type" class="form-label">Type de chambre</label>
                                 <select class="form-select" id="room_type" name="room_type">
                                     <option value="">Tous</option>
-                                    @foreach(\App\Models\RoomType::all() as $type)
-                                        <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                    @php
+                                        // Vérifier quel modèle de type de chambre existe
+                                        $typeModel = null;
+                                        if (class_exists('\App\Models\Type')) {
+                                            $typeModel = '\App\Models\Type';
+                                            $roomTypes = $typeModel::all();
+                                        } elseif (class_exists('\App\Models\RoomType')) {
+                                            $typeModel = '\App\Models\RoomType';
+                                            $roomTypes = $typeModel::all();
+                                        } else {
+                                            $roomTypes = collect([]);
+                                        }
+                                    @endphp
+                                    
+                                    @foreach($roomTypes as $type)
+                                        <option value="{{ $type->id }}" 
+                                            {{ request('room_type') == $type->id ? 'selected' : '' }}>
+                                            {{ $type->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -71,10 +97,10 @@
                                     <i class="fas fa-filter me-2"></i>
                                     Filtrer
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary" onclick="resetFilters()">
+                                <a href="{{ route('housekeeping.reports') }}" class="btn btn-outline-secondary">
                                     <i class="fas fa-redo me-2"></i>
                                     Réinitialiser
-                                </button>
+                                </a>
                                 <button type="button" class="btn btn-success" onclick="exportToExcel()">
                                     <i class="fas fa-file-excel me-2"></i>
                                     Exporter
@@ -95,7 +121,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="text-muted mb-1">Chambres nettoyées</h6>
-                            <h2 class="fw-bold text-primary">{{ $stats['total_cleaned'] }}</h2>
+                            <h2 class="fw-bold text-primary">{{ $stats['total_cleaned'] ?? 0 }}</h2>
                             <small class="text-muted">{{ $selectedDate->format('d/m/Y') }}</small>
                         </div>
                         <div class="align-self-center">
@@ -111,7 +137,7 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="text-muted mb-1">Temps moyen</h6>
-                            <h2 class="fw-bold text-info">{{ $stats['average_cleaning_time'] }} min</h2>
+                            <h2 class="fw-bold text-info">{{ $stats['average_cleaning_time'] ?? 30 }} min</h2>
                             <small class="text-muted">Par chambre</small>
                         </div>
                         <div class="align-self-center">
@@ -127,7 +153,9 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="text-muted mb-1">Disponibles</h6>
-                            <h2 class="fw-bold text-success">{{ $stats['cleaned_by_status'][\App\Models\Room::STATUS_AVAILABLE] ?? 0 }}</h2>
+                            <h2 class="fw-bold text-success">
+                                {{ $stats['cleaned_by_status'][\App\Models\Room::STATUS_AVAILABLE] ?? 0 }}
+                            </h2>
                             <small class="text-muted">Nettoyées et disponibles</small>
                         </div>
                         <div class="align-self-center">
@@ -143,7 +171,9 @@
                     <div class="d-flex justify-content-between">
                         <div>
                             <h6 class="text-muted mb-1">Occupées</h6>
-                            <h2 class="fw-bold text-warning">{{ $stats['cleaned_by_status'][\App\Models\Room::STATUS_OCCUPIED] ?? 0 }}</h2>
+                            <h2 class="fw-bold text-warning">
+                                {{ $stats['cleaned_by_status'][\App\Models\Room::STATUS_OCCUPIED] ?? 0 }}
+                            </h2>
                             <small class="text-muted">Nettoyées et occupées</small>
                         </div>
                         <div class="align-self-center">
@@ -193,14 +223,14 @@
                                         <td>{{ $room->type->name ?? 'Standard' }}</td>
                                         <td>
                                             @if($room->cleaning_started_at)
-                                                {{ $room->cleaning_started_at->format('H:i') }}
+                                                {{ \Carbon\Carbon::parse($room->cleaning_started_at)->format('H:i') }}
                                             @else
                                                 <span class="text-muted">N/A</span>
                                             @endif
                                         </td>
                                         <td>
                                             @if($room->cleaning_completed_at)
-                                                {{ $room->cleaning_completed_at->format('H:i') }}
+                                                {{ \Carbon\Carbon::parse($room->cleaning_completed_at)->format('H:i') }}
                                             @else
                                                 <span class="text-muted">N/A</span>
                                             @endif
@@ -208,7 +238,9 @@
                                         <td>
                                             @if($room->cleaning_started_at && $room->cleaning_completed_at)
                                                 @php
-                                                    $duration = $room->cleaning_started_at->diffInMinutes($room->cleaning_completed_at);
+                                                    $start = \Carbon\Carbon::parse($room->cleaning_started_at);
+                                                    $end = \Carbon\Carbon::parse($room->cleaning_completed_at);
+                                                    $duration = $start->diffInMinutes($end);
                                                     $color = $duration > 60 ? 'danger' : ($duration > 45 ? 'warning' : 'success');
                                                 @endphp
                                                 <span class="badge bg-{{ $color }}">
@@ -220,15 +252,23 @@
                                         </td>
                                         <td>
                                             @if($room->cleaned_by)
+                                                @php
+                                                    $cleaner = \App\Models\User::find($room->cleaned_by);
+                                                @endphp
                                                 <span class="badge bg-info">
-                                                    {{ \App\Models\User::find($room->cleaned_by)->name ?? 'Inconnu' }}
+                                                    {{ $cleaner->name ?? 'Inconnu' }}
                                                 </span>
                                             @else
                                                 <span class="text-muted">Auto</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <span class="badge bg-{{ $room->room_status_id == \App\Models\Room::STATUS_AVAILABLE ? 'success' : ($room->room_status_id == \App\Models\Room::STATUS_OCCUPIED ? 'info' : 'warning') }}">
+                                            @php
+                                                $statusClass = $room->room_status_id == \App\Models\Room::STATUS_AVAILABLE ? 'success' : 
+                                                              ($room->room_status_id == \App\Models\Room::STATUS_OCCUPIED ? 'info' : 
+                                                              ($room->room_status_id == \App\Models\Room::STATUS_DIRTY ? 'danger' : 'warning'));
+                                            @endphp
+                                            <span class="badge bg-{{ $statusClass }}">
                                                 {{ $room->roomStatus->name ?? 'Inconnu' }}
                                             </span>
                                         </td>
@@ -238,7 +278,7 @@
                                                         onclick="showRoomDetails({{ $room->id }})">
                                                     <i class="fas fa-eye"></i>
                                                 </button>
-                                                <a href="{{ route('housekeeping.show-maintenance-form', $room->id) }}" 
+                                                <a href="{{ route('housekeeping.maintenance-form', $room) }}" 
                                                    class="btn btn-outline-warning">
                                                     <i class="fas fa-tools"></i>
                                                 </a>
@@ -289,15 +329,15 @@
                     <strong>Répartition par agent</strong>
                 </div>
                 <div class="card-body">
-                    @if($cleanedByUser->count() > 0)
+                    @if(isset($cleanedByUser) && $cleanedByUser->count() > 0)
                         <canvas id="employeeChart" height="200"></canvas>
                         <div class="mt-3">
                             <table class="table table-sm">
                                 <tbody>
-                                    @foreach($cleanedByUser as $name => $count)
+                                    @foreach($cleanedByUser as $item)
                                     <tr>
-                                        <td>{{ $name }}</td>
-                                        <td class="text-end">{{ $count }}</td>
+                                        <td>{{ $item['name'] }}</td>
+                                        <td class="text-end">{{ $item['count'] }}</td>
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -319,17 +359,24 @@
                     <strong>Dates disponibles</strong>
                 </div>
                 <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        @foreach($availableDates as $date)
-                        <a href="{{ route('housekeeping.reports', ['date' => $date]) }}" 
-                           class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {{ $selectedDate->format('Y-m-d') == $date ? 'active' : '' }}">
-                            {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
-                            <span class="badge bg-primary rounded-pill">
-                                <i class="fas fa-arrow-right"></i>
-                            </span>
-                        </a>
-                        @endforeach
-                    </div>
+                    @if(isset($availableDates) && $availableDates->count() > 0)
+                        <div class="list-group list-group-flush">
+                            @foreach($availableDates as $date)
+                            <a href="{{ route('housekeeping.reports', ['date' => $date]) }}" 
+                               class="list-group-item list-group-item-action d-flex justify-content-between align-items-center {{ $selectedDate->format('Y-m-d') == $date ? 'active' : '' }}">
+                                {{ \Carbon\Carbon::parse($date)->format('d/m/Y') }}
+                                <span class="badge bg-primary rounded-pill">
+                                    <i class="fas fa-arrow-right"></i>
+                                </span>
+                            </a>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-3">
+                            <i class="fas fa-calendar-times fa-2x text-muted mb-2"></i>
+                            <p class="text-muted mb-0">Aucune date disponible</p>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -399,6 +446,12 @@
     .list-group-item.active {
         background-color: #0d6efd;
         border-color: #0d6efd;
+        color: white;
+    }
+    
+    .list-group-item.active .badge {
+        background-color: white !important;
+        color: #0d6efd !important;
     }
 </style>
 @endpush
@@ -406,38 +459,48 @@
 @push('scripts')
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- DataTables -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialiser le graphique des employés
     const employeeChart = document.getElementById('employeeChart');
     if (employeeChart) {
-        const ctx = employeeChart.getContext('2d');
-        
-        // Données du graphique
-        const labels = {!! json_encode($cleanedByUser->keys()) !!};
-        const data = {!! json_encode($cleanedByUser->values()) !!};
-        const backgroundColors = generateColors(data.length);
-        
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: backgroundColors,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
+        try {
+            const ctx = employeeChart.getContext('2d');
+            
+            // Données du graphique
+            @if(isset($cleanedByUser) && $cleanedByUser->count() > 0)
+                const labels = {!! json_encode($cleanedByUser->pluck('name')) !!};
+                const data = {!! json_encode($cleanedByUser->pluck('count')) !!};
+                const backgroundColors = generateColors(data.length);
+                
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: backgroundColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            }
+                        }
                     }
-                }
-            }
-        });
+                });
+            @endif
+        } catch (error) {
+            console.error('Erreur lors de la création du graphique:', error);
+        }
     }
     
     // Bouton "Aujourd'hui"
@@ -447,109 +510,118 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('reportFilters').submit();
     });
     
-    // Tri du tableau
-    $('#cleaningReportTable').DataTable({
-        pageLength: 25,
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
-        },
-        dom: '<"row"<"col-md-6"l><"col-md-6"f>>rtip'
-    });
+    // Initialiser DataTable
+    const table = document.getElementById('cleaningReportTable');
+    if (table && typeof $.fn.DataTable !== 'undefined') {
+        try {
+            $(table).DataTable({
+                pageLength: 25,
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json'
+                },
+                dom: '<"row"<"col-md-6"l><"col-md-6"f>>rtip',
+                order: [[0, 'asc']]
+            });
+        } catch (error) {
+            console.error('Erreur lors de l\'initialisation de DataTable:', error);
+        }
+    }
 });
 
 // Générer des couleurs pour le graphique
 function generateColors(count) {
     const colors = [
         '#4dc9f6', '#f67019', '#f53794', '#537bc4', '#acc236',
-        '#166a8f', '#00a950', '#58595b', '#8549ba', '#ff6384'
+        '#166a8f', '#00a950', '#58595b', '#8549ba', '#ff6384',
+        '#36a2eb', '#cc65fe', '#ffce56', '#4bc0c0', '#9966ff'
     ];
     return colors.slice(0, count);
 }
 
-// Réinitialiser les filtres
-function resetFilters() {
-    document.getElementById('date').value = '';
-    document.getElementById('employee').value = '';
-    document.getElementById('room_type').value = '';
-    document.getElementById('reportFilters').submit();
-}
-
 // Exporter vers Excel
 function exportToExcel() {
-    // Cette fonction nécessiterait une implémentation backend
-    // Pour l'instant, on fait une alerte
-    alert('L\'export Excel nécessite une implémentation backend. Pour l\'instant, utilisez l\'impression du navigateur.');
+    const table = document.getElementById('cleaningReportTable');
+    if (!table) {
+        alert('Aucune donnée à exporter');
+        return;
+    }
     
-    // Alternative: ouvrir dans une nouvelle fenêtre pour impression
-    const table = document.getElementById('cleaningReportTable').cloneNode(true);
+    // Créer une copie du tableau pour l'export
+    const clone = table.cloneNode(true);
+    
+    // Supprimer la colonne Actions
+    const rows = clone.querySelectorAll('tr');
+    rows.forEach(row => {
+        if (row.cells.length > 0) {
+            row.deleteCell(row.cells.length - 1);
+        }
+    });
+    
+    // Créer le contenu HTML
+    const html = `
+        <html>
+            <head>
+                <title>Export Rapport Nettoyage</title>
+                <meta charset="UTF-8">
+                <style>
+                    table { border-collapse: collapse; width: 100%; }
+                    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                    th { background-color: #f2f2f2; }
+                </style>
+            </head>
+            <body>
+                <h2>Rapport de nettoyage - {{ $selectedDate->format('d/m/Y') }}</h2>
+                ${clone.outerHTML}
+                <p><em>Généré le {{ now()->format('d/m/Y H:i') }}</em></p>
+            </body>
+        </html>
+    `;
+    
+    // Ouvrir dans une nouvelle fenêtre pour impression/export
     const printWindow = window.open('', '_blank');
-    printWindow.document.write('<html><head><title>Export Excel</title></head><body>');
-    printWindow.document.write('<h2>Rapport de nettoyage - {{ $selectedDate->format("d/m/Y") }}</h2>');
-    printWindow.document.write(table.outerHTML);
-    printWindow.document.write('</body></html>');
+    printWindow.document.write(html);
     printWindow.document.close();
-    printWindow.print();
+    printWindow.focus();
+    
+    // Option d'impression
+    setTimeout(() => {
+        printWindow.print();
+    }, 500);
 }
 
 // Afficher les détails d'une chambre
 function showRoomDetails(roomId) {
-    // Simuler un chargement AJAX
-    const content = `
-        <div class="text-center py-3">
+    const content = document.getElementById('roomDetailsContent');
+    const modal = new bootstrap.Modal(document.getElementById('roomDetailsModal'));
+    
+    // Afficher le chargement
+    content.innerHTML = `
+        <div class="text-center py-4">
             <div class="spinner-border text-primary" role="status">
                 <span class="visually-hidden">Chargement...</span>
             </div>
-            <p class="mt-2">Chargement des détails...</p>
+            <p class="mt-2 text-muted">Chargement des détails de la chambre...</p>
         </div>
     `;
     
-    document.getElementById('roomDetailsContent').innerHTML = content;
-    const modal = new bootstrap.Modal(document.getElementById('roomDetailsModal'));
     modal.show();
     
-    // Ici, vous devriez faire un appel AJAX pour récupérer les détails
-    // Pour l'exemple, on simule un chargement
+    // Simulation de chargement (à remplacer par un vrai appel AJAX)
     setTimeout(() => {
-        document.getElementById('roomDetailsContent').innerHTML = `
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Informations générales</h6>
-                    <table class="table table-sm">
-                        <tr><td>Chambre:</td><td><strong>101</strong></td></tr>
-                        <tr><td>Type:</td><td>Standard</td></tr>
-                        <tr><td>Étage:</td><td>1</td></tr>
-                        <tr><td>Statut:</td><td><span class="badge bg-success">Disponible</span></td></tr>
-                    </table>
-                </div>
-                <div class="col-md-6">
-                    <h6>Dernier nettoyage</h6>
-                    <table class="table table-sm">
-                        <tr><td>Début:</td><td>09:15</td></tr>
-                        <tr><td>Fin:</td><td>09:45</td></tr>
-                        <tr><td>Durée:</td><td>30 minutes</td></tr>
-                        <tr><td>Agent:</td><td>Marie Dupont</td></tr>
-                    </table>
-                </div>
+        content.innerHTML = `
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Les détails complets de la chambre seront disponibles prochainement.
+                <br><small>ID de la chambre: ${roomId}</small>
             </div>
-            <div class="mt-3">
-                <h6>Historique récent</h6>
-                <ul class="list-group">
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Nettoyage complet</span>
-                        <small class="text-muted">Aujourd'hui, 09:45</small>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Inspection</span>
-                        <small class="text-muted">Hier, 16:30</small>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span>Nettoyage rapide</span>
-                        <small class="text-muted">Hier, 11:20</small>
-                    </li>
-                </ul>
+            <div class="text-center mt-3">
+                <button class="btn btn-sm btn-primary" onclick="location.reload()">
+                    <i class="fas fa-sync-alt me-2"></i>
+                    Rafraîchir
+                </button>
             </div>
         `;
-    }, 500);
+    }, 800);
 }
 </script>
 @endpush
