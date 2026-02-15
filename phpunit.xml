@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/11.0/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache">
+
+    <testsuites>
+        <testsuite name="Feature">
+            <directory suffix="Test.php">./tests/Feature</directory>
+        </testsuite>
+
+        <testsuite name="Unit">
+            <directory suffix="Test.php">./tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_DEBUG" value="true"/>
+        <env name="CACHE_STORE" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="MAIL_MAILER" value="array"/>
+
+        <!-- DB will be overridden by GitHub Actions env -->
+        <env name="DB_CONNECTION" value="mysql"/>
+        <env name="DB_HOST" value="127.0.0.1"/>
+        <env name="DB_PORT" value="3306"/>
+        <env name="DB_DATABASE" value="hotel_management_test"/>
+        <env name="DB_USERNAME" value="root"/>
+        <env name="DB_PASSWORD" value="root"/>
+    </php>
+</phpunit>
