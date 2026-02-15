@@ -20,11 +20,12 @@ jobs:
           --health-cmd="mysqladmin ping -h 127.0.0.1 -proot"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
 
     steps:
       - uses: actions/checkout@v4
 
+      # ---------- PHP ----------
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -32,25 +33,30 @@ jobs:
           extensions: mbstring, pdo, pdo_mysql
           coverage: none
 
-      - name: Install dependencies
+      - name: Install PHP dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 
       - name: Prepare Laravel env
         run: |
           cp .env.example .env
           php artisan key:generate
-
-      - name: Configure DB for CI
-        run: |
           php artisan config:clear
-        env:
-          DB_CONNECTION: mysql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 3306
-          DB_DATABASE: hotel_management_test
-          DB_USERNAME: root
-          DB_PASSWORD: root
 
+      # ---------- Node / Vite ----------
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Si tu as package-lock.json, garde npm ci (recommandé)
+      # Sinon remplace par: npm install
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build assets (Vite)
+        run: npm run build
+
+      # ---------- DB ----------
       - name: Run migrations
         run: php artisan migrate --force
         env:
@@ -61,7 +67,7 @@ jobs:
           DB_USERNAME: root
           DB_PASSWORD: root
 
-      - name: Run seeders (optional)
+      - name: Run seeders
         run: php artisan db:seed --force
         env:
           DB_CONNECTION: mysql
@@ -71,6 +77,7 @@ jobs:
           DB_USERNAME: root
           DB_PASSWORD: root
 
+      # ---------- Tests ----------
       - name: Run tests
         run: vendor/bin/phpunit -c phpunit.xml
         env:
