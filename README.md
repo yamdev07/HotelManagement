@@ -95,6 +95,20 @@ The application follows a classical MVC pattern:
 Critical operations (reservation & payment) should run inside database transactions to avoid inconsistent hotel states.
 
 ---
+## Demo Access
+
+After seeding the database:
+
+```bash
+php artisan db:seed --class=DemoUserSeeder
+
+````
+
+Login:
+
+Email: admin@hotel.test
+
+Password: password123
 
 ## Installation
 
