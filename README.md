@@ -8,7 +8,7 @@ It contains:
 - a public hotel website for customers
 - a secured internal management dashboard for hotel staff
 
-![Lint](https://github.com/yamdev07/HotelManagement/actions/workflows/lint.yml/badge.svg)
+![Lint](https://github.com/yamdev07/HotelManagement/actions/workflows/ci.yml/badge.svg)
 
 ---
 
