@@ -29,13 +29,13 @@ class AuthController extends Controller
     {
         // CORRECTION ICI : Sauvegardez le nom AVANT de déconnecter
         $name = auth()->user()->name;
-        
+
         // Déconnexion complète
         Auth::logout();
-        
+
         // Invalide la session (important!)
         session()->invalidate();
-        
+
         // Régénère le token CSRF
         session()->regenerateToken();
 

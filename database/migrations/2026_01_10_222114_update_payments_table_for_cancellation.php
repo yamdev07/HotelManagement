@@ -13,7 +13,7 @@ return new class extends Migration
             if (Schema::hasColumn('payments', 'price')) {
                 $table->renameColumn('price', 'amount');
             }
-            
+
             // Ajouter les nouveaux champs
             $table->string('payment_method')->nullable()->after('amount');
             $table->text('notes')->nullable()->after('payment_method');
@@ -33,7 +33,7 @@ return new class extends Migration
             if (Schema::hasColumn('payments', 'amount')) {
                 $table->renameColumn('amount', 'price');
             }
-            
+
             // Supprimer les champs
             $table->dropColumn(['payment_method', 'notes', 'reference', 'cancelled_at', 'cancelled_by', 'cancel_reason']);
             $table->dropSoftDeletes();

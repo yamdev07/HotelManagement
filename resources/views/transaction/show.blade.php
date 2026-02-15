@@ -156,6 +156,17 @@
         color: white;
         border: none;
     }
+    
+    .btn-extend {
+        background-color: #ffc107;
+        color: #212529;
+        border: none;
+    }
+    
+    .btn-extend:hover {
+        background-color: #e0a800;
+        color: #212529;
+    }
 </style>
 
 <div class="container-fluid">
@@ -174,7 +185,7 @@
                 </div>
                 <div class="action-buttons">
                     <!-- Gestion du statut (pour admin) -->
-                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
+                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                         <!-- COMBO BOX DE STATUT -->
                         <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST" class="status-select-form">
                             @csrf
@@ -195,7 +206,7 @@
                     @endif
                     
                     <!-- Actions rapides -->
-                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
+                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                         @if($transaction->status == 'reservation')
                             <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
                                 @csrf
@@ -214,7 +225,13 @@
                             </form>
                         @endif
                         
-                        @if($transaction->status !== 'cancelled' && !$isExpired)
+                        @if(in_array($transaction->status, ['reservation', 'active']))
+                            <a href="{{ route('transaction.extend', $transaction) }}" class="btn btn-extend btn-sm">
+                                <i class="fas fa-calendar-plus me-1"></i>Prolonger
+                            </a>
+                        @endif
+                        
+                        @if(!in_array($transaction->status, ['cancelled', 'no_show', 'completed']))
                             <a href="{{ route('transaction.edit', $transaction) }}" class="btn btn-outline-primary btn-sm">
                                 <i class="fas fa-edit me-1"></i>Modifier
                             </a>
@@ -278,6 +295,9 @@
             <i class="fas fa-bed me-2"></i>
             <strong>🏨 DANS L'HÔTEL</strong> - Le client est actuellement en séjour.
             Départ prévu : <strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y à H:i') }}</strong>
+            @if(\Carbon\Carbon::parse($transaction->check_out)->isPast())
+                <br><span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>La date de départ est dépassée. Considérez une prolongation.</span>
+            @endif
         </div>
     @elseif($transaction->status == 'completed')
         <div class="alert alert-info alert-status alert-status-completed mb-4">
@@ -531,7 +551,7 @@
                                     <i class="fas fa-money-bill-wave fa-3x text-muted mb-3"></i>
                                     <h5>Aucun paiement enregistré</h5>
                                     <p class="text-muted">Aucun paiement n'a été effectué pour cette réservation.</p>
-                                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']) && $remaining > 0 && !in_array($transaction->status, ['cancelled', 'no_show']))
+                                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']) && $remaining > 0 && !in_array($transaction->status, ['cancelled', 'no_show']))
                                         <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn btn-primary">
                                             <i class="fas fa-plus me-1"></i>Ajouter un paiement
                                         </a>
@@ -554,7 +574,7 @@
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         <!-- Actions selon le statut -->
-                        @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Reception']))
+                        @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                             @if($transaction->status == 'reservation')
                                 <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-grid">
                                     @csrf
@@ -584,6 +604,12 @@
                                 <a href="{{ route('transaction.edit', $transaction) }}" 
                                    class="btn btn-primary mb-2">
                                     <i class="fas fa-edit me-2"></i>Modifier la réservation
+                                </a>
+                            @endif
+                            
+                            @if(in_array($transaction->status, ['reservation', 'active']))
+                                <a href="{{ route('transaction.extend', $transaction) }}" class="btn btn-warning mb-2">
+                                    <i class="fas fa-calendar-plus me-2"></i>Prolonger le séjour
                                 </a>
                             @endif
                             

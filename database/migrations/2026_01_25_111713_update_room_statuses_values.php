@@ -1,8 +1,6 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
@@ -13,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         // Mettre à jour les valeurs des statuts pour correspondre au nouveau schéma
-        DB::statement("
+        DB::statement('
             UPDATE rooms 
             SET room_status_id = 
                 CASE room_status_id
@@ -23,7 +21,7 @@ return new class extends Migration
                     WHEN 4 THEN 3  -- Ancien Nettoyage (4) devient Nettoyage (3)
                     ELSE room_status_id
                 END
-        ");
+        ');
     }
 
     /**
@@ -32,7 +30,7 @@ return new class extends Migration
     public function down(): void
     {
         // Revenir aux anciennes valeurs
-        DB::statement("
+        DB::statement('
             UPDATE rooms 
             SET room_status_id = 
                 CASE room_status_id
@@ -42,6 +40,6 @@ return new class extends Migration
                     WHEN 3 THEN 4  -- Nettoyage (3) redevient ancien Nettoyage (4)
                     ELSE room_status_id
                 END
-        ");
+        ');
     }
 };

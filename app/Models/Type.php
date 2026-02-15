@@ -20,14 +20,14 @@ class Type extends Model
         'bed_count',
         'size',
         'sort_order',
-        'is_active'
+        'is_active',
     ];
 
     // CASTING DES TYPES
     protected $casts = [
         'amenities' => 'array',
         'base_price' => 'decimal:2',
-        'is_active' => 'boolean'
+        'is_active' => 'boolean',
     ];
 
     // RELATIONS
@@ -50,13 +50,19 @@ class Type extends Model
     // ACCESSORS (GETTERS)
     public function getFormattedPriceAttribute()
     {
-        if (!$this->base_price) return 'N/A';
-        return number_format($this->base_price, 0, ',', ' ') . ' FCFA';
+        if (! $this->base_price) {
+            return 'N/A';
+        }
+
+        return number_format($this->base_price, 0, ',', ' ').' FCFA';
     }
 
     public function getAmenitiesListAttribute()
     {
-        if (!$this->amenities) return [];
+        if (! $this->amenities) {
+            return [];
+        }
+
         return is_array($this->amenities) ? $this->amenities : json_decode($this->amenities, true);
     }
 }

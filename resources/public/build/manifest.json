@@ -1,0 +1,139 @@
+{
+  "_select2-DSRF4-Y0.js": {
+    "file": "assets/select2-DSRF4-Y0.js",
+    "name": "select2",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf": {
+    "file": "assets/fa-brands-400-D1LuMI3I.ttf",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.ttf"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2": {
+    "file": "assets/fa-brands-400-D_cYUPeE.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-brands-400.woff2"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.ttf": {
+    "file": "assets/fa-regular-400-DZaxPHgR.ttf",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.ttf"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.woff2": {
+    "file": "assets/fa-regular-400-BjRzuEpd.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-regular-400.woff2"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf": {
+    "file": "assets/fa-solid-900-D0aA9rwL.ttf",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.ttf"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2": {
+    "file": "assets/fa-solid-900-CTAAxXor.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-solid-900.woff2"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.ttf": {
+    "file": "assets/fa-v4compatibility-CCth-dXg.ttf",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.ttf"
+  },
+  "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.woff2": {
+    "file": "assets/fa-v4compatibility-C9RhG_FT.woff2",
+    "src": "node_modules/@fortawesome/fontawesome-free/webfonts/fa-v4compatibility.woff2"
+  },
+  "node_modules/bootstrap/dist/js/bootstrap.esm.js": {
+    "file": "assets/bootstrap.esm-BIRXU5Tj.js",
+    "name": "bootstrap.esm",
+    "src": "node_modules/bootstrap/dist/js/bootstrap.esm.js",
+    "isDynamicEntry": true
+  },
+  "node_modules/datatables.net-bs5/js/dataTables.bootstrap5.mjs": {
+    "file": "assets/dataTables.bootstrap5-GPFucn2f.js",
+    "name": "dataTables.bootstrap5",
+    "src": "node_modules/datatables.net-bs5/js/dataTables.bootstrap5.mjs",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js",
+      "node_modules/datatables.net/js/jquery.dataTables.mjs"
+    ]
+  },
+  "node_modules/datatables.net/js/jquery.dataTables.mjs": {
+    "file": "assets/jquery.dataTables-BB-M9bVx.js",
+    "name": "jquery.dataTables",
+    "src": "node_modules/datatables.net/js/jquery.dataTables.mjs",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
+  "resources/js/app.js": {
+    "file": "assets/app-BFRjLJTp.js",
+    "name": "app",
+    "src": "resources/js/app.js",
+    "isEntry": true,
+    "dynamicImports": [
+      "node_modules/bootstrap/dist/js/bootstrap.esm.js",
+      "_select2-DSRF4-Y0.js",
+      "node_modules/datatables.net/js/jquery.dataTables.mjs",
+      "node_modules/datatables.net-bs5/js/dataTables.bootstrap5.mjs",
+      "resources/js/echo.js",
+      "resources/js/pages/room-status.js",
+      "resources/js/pages/type.js",
+      "resources/js/pages/room.js",
+      "resources/js/pages/dashboard.js",
+      "resources/js/pages/login.js",
+      "resources/js/pages/global.js"
+    ],
+    "css": [
+      "assets/app-DUYZabDZ.css"
+    ]
+  },
+  "resources/js/echo.js": {
+    "file": "assets/echo-349YrlQo.js",
+    "name": "echo",
+    "src": "resources/js/echo.js",
+    "isDynamicEntry": true,
+    "imports": [
+      "resources/js/app.js"
+    ]
+  },
+  "resources/js/pages/dashboard.js": {
+    "file": "assets/dashboard-Db16HFiK.js",
+    "name": "dashboard",
+    "src": "resources/js/pages/dashboard.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/pages/global.js": {
+    "file": "assets/global-Bi-9O3NF.js",
+    "name": "global",
+    "src": "resources/js/pages/global.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/pages/login.js": {
+    "file": "assets/login-Cg2fQW7c.js",
+    "name": "login",
+    "src": "resources/js/pages/login.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/pages/room-status.js": {
+    "file": "assets/room-status-CnSn4fFP.js",
+    "name": "room-status",
+    "src": "resources/js/pages/room-status.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/pages/room.js": {
+    "file": "assets/room-Dqf4z0dC.js",
+    "name": "room",
+    "src": "resources/js/pages/room.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/pages/type.js": {
+    "file": "assets/type-Y8WVD2qz.js",
+    "name": "type",
+    "src": "resources/js/pages/type.js",
+    "isDynamicEntry": true
+  },
+  "resources/sass/app.scss": {
+    "file": "assets/app-CX4rpg4M.css",
+    "src": "resources/sass/app.scss",
+    "isEntry": true
+  }
+}

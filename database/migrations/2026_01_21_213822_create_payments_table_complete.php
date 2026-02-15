@@ -29,8 +29,7 @@ return new class extends Migration
                     'pending', 'completed', 'cancelled', 'expired', 'failed', 'refunded',
                 ])->default('completed');
 
-                // ⚠️ In CI/seed, unique reference can break if not provided.
-                // Keep it nullable + unique index (if you always set it in app).
+                // Keep nullable to avoid CI/seed issues
                 $table->string('reference')->nullable();
 
                 $table->string('check_number')->nullable();
@@ -61,7 +60,6 @@ return new class extends Migration
 
         // Upgrade existing table safely
         Schema::table('payments', function (Blueprint $table) {
-            // Add columns only if missing (safe for prod/dev/CI)
             if (! Schema::hasColumn('payments', 'payment_method')) {
                 $table->enum('payment_method', [
                     'cash', 'card', 'transfer', 'mobile_money', 'fedapay', 'check', 'refund',
@@ -81,7 +79,6 @@ return new class extends Migration
             if (! Schema::hasColumn('payments', 'reference')) {
                 $table->string('reference')->nullable()->after('status');
             } else {
-                // Ensure it's nullable to avoid CI/seed issues
                 $table->string('reference')->nullable()->change();
             }
 
@@ -102,14 +99,8 @@ return new class extends Migration
             if (! Schema::hasColumn('payments', 'deleted_at')) $table->softDeletes();
         });
 
-        // Indexes (create only if not existing)
-        // Note: Laravel doesn't have a perfect "hasIndex" helper,
-        // so we keep this minimal. If you want, we can add a raw check.
+        // Indexes (attempt add; ignore if already exists)
         Schema::table('payments', function (Blueprint $table) {
-            // These index calls are safe if they don't exist,
-            // but can fail if they already exist with same name.
-            // If your previous migration already created them,
-            // comment out the duplicates.
             try { $table->index('reference'); } catch (\Throwable $e) {}
             try { $table->index('payment_method'); } catch (\Throwable $e) {}
             try { $table->index('status'); } catch (\Throwable $e) {}
@@ -119,11 +110,9 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Safe rollback: only drop columns we added (don't drop entire table)
         if (! Schema::hasTable('payments')) return;
 
         Schema::table('payments', function (Blueprint $table) {
-            // Drop columns if they exist
             foreach ([
                 'payment_method_details', 'check_number', 'card_last_four', 'card_type',
                 'mobile_money_provider', 'mobile_money_number', 'bank_name', 'account_number',

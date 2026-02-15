@@ -1,134 +1,238 @@
-# 🏨 Hotel Management System (Laravel)
+# Hotel Management System
 
-Application web de **gestion hôtelière** développée avec **Laravel**, destinée à gérer efficacement les opérations quotidiennes d’un hôtel : chambres, réservations, clients, paiements et facturation.
+A production-oriented **Hotel Management Software** built with **Laravel** to manage real hotel operations: reservations, check-in/check-out, customers, rooms, and payments.
 
----
+This application simulates the workflow of a real hotel front-desk and internal staff back-office.
 
-## ✨ Fonctionnalités
+It contains:
+- a public hotel website for customers
+- a secured internal management dashboard for hotel staff
 
-### 🔐 Authentification & utilisateurs
-- Connexion / déconnexion sécurisée
-- Gestion des utilisateurs
-- Attribution de rôles (administrateur, réception, etc.)
-
-### 🛏️ Gestion des chambres
-- Création, modification et suppression de chambres
-- Gestion des types de chambres
-- Suivi de la disponibilité
-- Définition des tarifs par chambre
-
-### 📅 Réservations
-- Recherche de chambres disponibles par date (check-in / check-out)
-- Création et modification de réservations
-- Annulation de réservations
-- Historique des réservations
-
-### 👤 Gestion des clients
-- Enregistrement des clients
-- Association client ↔ réservation
-- Historique des séjours
-
-### 💳 Paiements & facturation
-- Enregistrement des paiements
-- Paiements partiels ou complets
-- Suivi des statuts de paiement
-- Génération de factures
-- Historique des transactions
-
-### 📊 Tableau de bord
-- Vue globale des activités de l’hôtel
-- Statistiques des réservations
-- Suivi des revenus
-- Taux d’occupation des chambres
-
-### ⚙️ Administration
-- Interface d’administration
-- CRUD complet sur les entités principales
-- Gestion centralisée des données
-- Sécurité et validation des formulaires
+![Lint](https://github.com/yamdev07/HotelManagement/actions/workflows/lint.yml/badge.svg)
 
 ---
 
-## 🧱 Technologies utilisées
+## Business Workflow
 
-- **Laravel** (PHP Framework)
-- **Blade** (templating)
-- **Eloquent ORM**
-- **MySQL / MariaDB**
-- **Bootstrap / CSS**
-- **JavaScript**
-- **Vite**
+The system models a real hotel process:
+
+1. A customer searches a room
+2. Staff creates a reservation
+3. Customer checks-in
+4. Stay is tracked
+5. Payment is recorded
+6. Transaction history is stored
+7. Customer checks-out and room becomes available again
+
+This workflow ensures room availability consistency and operational tracking.
 
 ---
 
-## 📦 Installation
+## Main Modules
 
-### Prérequis
-- PHP >= 8.x
+### Authentication & Access
+- Secure login system
+- Staff access control
+- Session protection
+
+### Room Management
+- Room listing
+- Room categories
+- Room status (available / reserved / occupied / maintenance)
+- Pricing management
+
+### Reservation Management
+- Reservation creation
+- Reservation update & cancellation
+- Date-based availability checking
+- Reservation history
+
+### Customer Management
+- Customer registration
+- Customer stay history
+- Customer ↔ reservation linking
+
+### Stay Operations
+- Check-in
+- Check-out
+- Automatic room status updates
+
+### Payments & Transactions
+- Record payments
+- Track unpaid balances
+- Transaction history
+
+### Public Website
+- Hotel homepage
+- Rooms & suites pages
+- Services page
+- Contact page
+- Responsive layout
+
+---
+
+## Technical Stack
+
+| Layer | Technology |
+|------|------|
+| Backend | Laravel (PHP) |
+| Frontend | Blade + Bootstrap 5 |
+| Database | MySQL |
+| Build Tool | Vite |
+| Authentication | Laravel Auth |
+| Server | Apache / Nginx |
+
+---
+
+## Architecture
+
+The application follows a classical MVC pattern:
+
+- Models → database entities (rooms, reservations, customers, payments)
+- Controllers → business operations
+- Views → staff dashboard & public website
+
+Critical operations (reservation & payment) should run inside database transactions to avoid inconsistent hotel states.
+
+---
+## Demo Access
+
+After seeding the database:
+
+```bash
+php artisan db:seed --class=DemoUserSeeder
+
+````
+
+Login:
+
+Email: admin@hotel.test
+
+Password: password123
+
+## Installation
+
+### Requirements
+- PHP >= 8.1
 - Composer
+- MySQL / MariaDB
 - Node.js & npm
-- MySQL
 
-### Étapes
+### Setup
 
 ```bash
 git clone https://github.com/yamdev07/HotelManagement.git
 cd HotelManagement
+
 composer install
 npm install
-cp .env.example .env
-php artisan key:generate
+```
+
+Configure database in .env:
+````
+DB_DATABASE=hotel_management
+DB_USERNAME=root
+DB_PASSWORD=
+````
+
+Run migrations:
+````
 php artisan migrate
+````
+
+Run application:
+````
 npm run dev
 php artisan serve
 ````
-Configurer la base de données dans le fichier .env avant de lancer les migrations.
 
-### 🗂️ Structure du projet
+Visit:
 ````
-app/                → Logique métier
-routes/             → Routes web
-resources/views/    → Templates Blade
-database/migrations → Schéma de la base de données
-public/             → Fichiers publics
+http://localhost:8000
 ````
----
+## Database
 
-### 🚧 Évolutions prévues
+The database is relational and uses foreign keys between:
 
-- Module de gestion de caisse
+- [ ] rooms
 
-- Rapports financiers détaillés
+- [ ] reservations
 
-- Export PDF / Excel
+- [ ] customers
 
-- Notifications avancées
+- [ ] payments
 
-- API REST / Mobile
+- [ ] users
 
----
-### 🤝 Contribution
+An ERD diagram is included in the repository.
 
-Les contributions sont les bienvenues !
+Recommended improvements:
 
-- Fork le projet
+- [ ] indexes on reservation dates
 
-- Crée une branche (feature/ma-fonctionnalite)
+- [ ] transaction usage during check-in / payment
 
-- Commit tes changements
+## Production Deployment
 
-- Ouvre une Pull Request
+For production:
 
---- 
-### 📄 Licence
+- [ ] Set web root → public/
 
-Projet sous licence Apache 2.0.
+Disable debug:
+````
+APP_ENV=production
+APP_DEBUG=false
+````
 
----
-### 👨‍💻 Auteur
+Optimize Laravel:
+````
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+````
+Security Considerations
 
-Yoann Yamd
-Développeur Web & Logiciel
-📧 yoannyamd@gmail.com
+The application implements:
 
-🌐 https://github.com/yamdev07
+- [ ]authentication protection
+
+- [ ] session management
+
+- [ ] CSRF protection
+
+- [ ] input validation
+
+Recommended additions:
+
+- [ ] role-based authorization policies
+
+- [ ] rate limiting on login
+
+- [ ] audit logs
+
+## Roadmap
+
+Planned improvements:
+
+- Role-based permissions (Admin / Receptionist / Housekeeping)
+
+- Automated tests (PHPUnit)
+
+- Online booking system
+
+- Payment gateway integration
+
+- REST API for mobile app
+
+- Reporting & analytics
+
+## Author
+
+Yoann Adigbonon
+Laravel Developer
+https://github.com/yamdev07
+
+## License
+
+MIT License
+

@@ -49,7 +49,7 @@
                             <i class="fas fa-keyboard me-2"></i>
                             Saisie manuelle
                         </h6>
-                        <form id="manualForm" action="{{ route('housekeeping.process-scan') }}" method="POST">
+                        <form id="manualForm" action="{{ route('housekeeping.scan.process') }}" method="POST">
                             @csrf
                             <div class="row g-2">
                                 <div class="col-md-8">
@@ -64,9 +64,8 @@
                                     <select class="form-select form-select-lg" name="action" required>
                                         <option value="">Action...</option>
                                         <option value="start-cleaning">Démarrer nettoyage</option>
-                                        <option value="mark-cleaned">Nettoyage terminé</option>
-                                        <option value="mark-maintenance">Maintenance</option>
-                                        <option value="mark-inspection">Demander inspection</option>
+                                        <option value="finish-cleaning">Nettoyage terminé</option>
+                                        <option value="maintenance">Maintenance</option>
                                     </select>
                                 </div>
                             </div>
@@ -225,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <i class="fas fa-info-circle me-2"></i>
                                 QR code scanné: <code>${qrCode}</code>
                             </div>
-                            <form id="scanForm" method="POST" action="{{ route('housekeeping.process-scan') }}">
+                            <form id="scanForm" method="POST" action="{{ route('housekeeping.scan.process') }}">
                                 @csrf
                                 <input type="hidden" name="room_number" value="${roomNumber}">
                                 <div class="mb-3">
@@ -233,9 +232,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                     <select class="form-select" name="action" required>
                                         <option value="">Choisir une action...</option>
                                         <option value="start-cleaning">Démarrer nettoyage</option>
-                                        <option value="mark-cleaned">Nettoyage terminé</option>
-                                        <option value="mark-maintenance">Signaler maintenance</option>
-                                        <option value="mark-inspection">Demander inspection</option>
+                                        <option value="finish-cleaning">Nettoyage terminé</option>
+                                        <option value="maintenance">Signaler maintenance</option>
                                     </select>
                                 </div>
                                 <div id="maintenanceFields" class="d-none">
@@ -273,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const maintenanceFields = document.getElementById('maintenanceFields');
         
         actionSelect.addEventListener('change', function() {
-            if (this.value === 'mark-maintenance') {
+            if (this.value === 'maintenance') {
                 maintenanceFields.classList.remove('d-none');
             } else {
                 maintenanceFields.classList.add('d-none');

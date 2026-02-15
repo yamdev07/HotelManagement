@@ -31,7 +31,7 @@ return new class extends Migration
             $table->decimal('other_payments_handled', 10, 2)->default(0);
             $table->json('performance_metrics')->nullable();
             $table->timestamps();
-            
+
             $table->index(['user_id', 'session_status']);
             $table->index(['login_time', 'logout_time']);
         });

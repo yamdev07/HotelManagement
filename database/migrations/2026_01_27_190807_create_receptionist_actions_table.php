@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('user_agent')->nullable();
             $table->text('notes')->nullable();
             $table->timestamp('performed_at')->useCurrent();
-            
+
             $table->index(['user_id', 'action_type']);
             $table->index(['session_id', 'performed_at']);
             $table->index('actionable_type');

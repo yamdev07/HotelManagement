@@ -10,16 +10,16 @@ return new class extends Migration
     {
         // Désactivez temporairement les contraintes de clé étrangère
         Schema::disableForeignKeyConstraints();
-        
+
         // Supprimez d'abord les contraintes de clé étrangère
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        
+
         // Supprimez toutes les données existantes (les types de chambres)
         DB::table('room_statuses')->truncate();
-        
+
         // Réactivez les contraintes
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
-        
+
         // Insérez les vrais statuts
         $statuses = [
             ['name' => 'Available', 'code' => 'AVL', 'information' => 'Room is available for booking'],
@@ -38,10 +38,10 @@ return new class extends Migration
                 'updated_at' => now(),
             ]);
         }
-        
+
         // Réactivez les contraintes
         Schema::enableForeignKeyConstraints();
-        
+
         echo "Table room_statuses mise à jour avec les vrais statuts.\n";
     }
 
@@ -49,9 +49,9 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        
+
         DB::table('room_statuses')->truncate();
-        
+
         // Si vous voulez restaurer les anciens types (optionnel)
         $oldTypes = [
             ['name' => 'single room', 'code' => 'SR', 'information' => 'A room for one person with a single bed.'],
@@ -72,7 +72,7 @@ return new class extends Migration
                 'updated_at' => now(),
             ]);
         }
-        
+
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
         Schema::enableForeignKeyConstraints();
     }
