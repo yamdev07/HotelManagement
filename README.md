@@ -1,198 +1,224 @@
-# HotelManagement
+# Hotel Management System
 
-**HotelManagement** is a full-featured hotel management web application built with **Laravel**.  
-It includes a **public-facing hotel website** and a **secure internal dashboard** to manage rooms, reservations, services, and users.
+A production-oriented **Hotel Management Software** built with **Laravel** to manage real hotel operations: reservations, check-in/check-out, customers, rooms, and payments.
 
-This project was designed to simulate a real-world hotel management system, from customer experience to internal operations.
+This application simulates the workflow of a real hotel front-desk and internal staff back-office.
+
+It contains:
+- a public hotel website for customers
+- a secured internal management dashboard for hotel staff
 
 ![Lint](https://github.com/yamdev07/HotelManagement/actions/workflows/lint.yml/badge.svg)
 
+---
+
+## Business Workflow
+
+The system models a real hotel process:
+
+1. A customer searches a room
+2. Staff creates a reservation
+3. Customer checks-in
+4. Stay is tracked
+5. Payment is recorded
+6. Transaction history is stored
+7. Customer checks-out and room becomes available again
+
+This workflow ensures room availability consistency and operational tracking.
 
 ---
 
-## 🏨 Project Overview
+## Main Modules
 
-The application is divided into two main parts:
+### Authentication & Access
+- Secure login system
+- Staff access control
+- Session protection
 
-### 🌐 Public Website
-- Hotel homepage with branding and hero section
-- Rooms & Suites listing with pricing and availability
-- Restaurant and services pages
+### Room Management
+- Room listing
+- Room categories
+- Room status (available / reserved / occupied / maintenance)
+- Pricing management
+
+### Reservation Management
+- Reservation creation
+- Reservation update & cancellation
+- Date-based availability checking
+- Reservation history
+
+### Customer Management
+- Customer registration
+- Customer stay history
+- Customer ↔ reservation linking
+
+### Stay Operations
+- Check-in
+- Check-out
+- Automatic room status updates
+
+### Payments & Transactions
+- Record payments
+- Track unpaid balances
+- Transaction history
+
+### Public Website
+- Hotel homepage
+- Rooms & suites pages
+- Services page
 - Contact page
-- Custom logo and favicon integration
-- Responsive design (desktop & mobile)
-
-### 🔐 Admin Dashboard
-- Secure authentication
-- Dashboard access for hotel staff
-- Room management
-- Reservation management
-- Service management
-- User access control
-- Sidebar navigation with branding
+- Responsive layout
 
 ---
 
-## 🛠️ Tech Stack
+## Technical Stack
 
-- **Backend:** Laravel (PHP)
-- **Frontend:** Blade, Bootstrap 5
-- **Database:** MySQL
-- **Authentication:** Laravel Auth
-- **Deployment:** ISPConfig / Apache / Nginx
-- **Assets:** Custom logo & favicon
+| Layer | Technology |
+|------|------|
+| Backend | Laravel (PHP) |
+| Frontend | Blade + Bootstrap 5 |
+| Database | MySQL |
+| Build Tool | Vite |
+| Authentication | Laravel Auth |
+| Server | Apache / Nginx |
 
 ---
 
-## 🚀 Getting Started
+## Architecture
 
-### Prerequisites
+The application follows a classical MVC pattern:
 
-Make sure you have:
+- Models → database entities (rooms, reservations, customers, payments)
+- Controllers → business operations
+- Views → staff dashboard & public website
+
+Critical operations (reservation & payment) should run inside database transactions to avoid inconsistent hotel states.
+
+---
+
+## Installation
+
+### Requirements
 - PHP >= 8.1
 - Composer
-- MySQL
-- Node.js & npm (optional, if using Vite)
-- A local or remote web server
+- MySQL / MariaDB
+- Node.js & npm
 
----
+### Setup
 
-### Installation
+```bash
+git clone https://github.com/yamdev07/HotelManagement.git
+cd HotelManagement
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yamdev07/HotelManagement.git
-   cd HotelManagement
-    ````
-
-Install PHP dependencies
-````
 composer install
-````
+npm install
+```
 
-Create environment file
+Configure database in .env:
 ````
-cp .env.example .env
-````
-
-Configure your environment
-Update .env with your database and app settings:
-````
-APP_NAME="Hotel Management"
-APP_ENV=local
-APP_KEY=
-APP_DEBUG=true
-APP_URL=http://localhost
-
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
 DB_DATABASE=hotel_management
 DB_USERNAME=root
 DB_PASSWORD=
 ````
 
-Generate application key
-````
-php artisan key:generate
-````
-
-Run database migrations
+Run migrations:
 ````
 php artisan migrate
 ````
-Install npm 
-````
-npm install
-````
-Start the application
+
+Run application:
 ````
 npm run dev
 php artisan serve
 ````
 
-Visit: http://localhost:8000
-
-## 🌍 Production Deployment
-
-This project is designed to be deployed in production environments such as ISPConfig, cPanel, or Plesk.
-
-Deployment Notes
-
-- Set the document root to the public/ directory
-
-- Upload assets (logo, favicon) to public/
-
-- Set correct permissions:
-
-- Directories: 755
-
-- Files: 644
-
-- Disable debug mode in production:
-  ````
-  APP_DEBUG=false
-  ````
-
-Clear caches after deployment:
+Visit:
 ````
-php artisan config:clear
-php artisan route:clear
-php artisan view:clear
-php artisan cache:clear
+http://localhost:8000
 ````
-## 🎨 Logo & Favicon
+## Database
 
-The application uses a custom logo and favicon for branding.
+The database is relational and uses foreign keys between:
 
-To add or update the favicon:
+- [ ] rooms
 
-1- Generate favicon files from your logo
+- [ ] reservations
 
-2- Place them in the public/ directory
+- [ ] customers
 
-3- Reference them in the main layout <head>
+- [ ] payments
 
-Supported formats:
+- [ ] users
+
+An ERD diagram is included in the repository.
+
+Recommended improvements:
+
+- [ ] indexes on reservation dates
+
+- [ ] transaction usage during check-in / payment
+
+## Production Deployment
+
+For production:
+
+- [ ] Set web root → public/
+
+Disable debug:
 ````
-favicon.ico
-
-favicon-16x16.png
-
-favicon-32x32.png
-
-apple-touch-icon.png
+APP_ENV=production
+APP_DEBUG=false
 ````
-## 🧪 Testing (Planned)
 
-Testing support will be added to improve reliability and code quality:
+Optimize Laravel:
+````
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+````
+Security Considerations
 
-- Feature tests (authentication, reservations)
+The application implements:
 
-- Unit tests (business logic)
+- [ ]authentication protection
 
-- CI integration (GitHub Actions)
+- [ ] session management
 
-## 🗺️ Roadmap
+- [ ] CSRF protection
 
-- [ ] Role-based permissions (Admin / Staff)
+- [ ] input validation
 
-- [ ] Automated tests
+Recommended additions:
 
-- [ ] REST API for mobile apps
+- [ ] role-based authorization policies
 
-- [ ] Online booking & payment integration
+- [ ] rate limiting on login
 
-- [ ] Multi-language support
+- [ ] audit logs
 
-## 👨‍💻 Author
+## Roadmap
 
-**yamdev07**
+Planned improvements:
 
-GitHub: https://github.com/yamdev07
+- Role-based permissions (Admin / Receptionist / Housekeeping)
 
-Role: Full-Stack Developer (Laravel)
+- Automated tests (PHPUnit)
 
-## 📄 License
+- Online booking system
 
-This project is open-source and available under the MIT License.
+- Payment gateway integration
+
+- REST API for mobile app
+
+- Reporting & analytics
+
+## Author
+
+Yoann Adigbonon
+Laravel Developer
+https://github.com/yamdev07
+
+## License
+
+MIT License
+
