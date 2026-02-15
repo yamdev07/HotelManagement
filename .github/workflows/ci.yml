@@ -72,7 +72,7 @@ jobs:
           DB_PASSWORD: root
 
       - name: Run tests
-        run: php artisan test
+        run: vendor/bin/phpunit -c phpunit.xml
         env:
           DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1
