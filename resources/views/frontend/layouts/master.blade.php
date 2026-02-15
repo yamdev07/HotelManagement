@@ -5,6 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Hôtel de luxe - Réservez votre séjour dans notre établissement 5 étoiles">
     <title>@yield('title', 'Hôtel Cactus Palace')</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ asset('site.webmanifest') }}">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    
+
     
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -201,9 +210,14 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="{{ route('frontend.home') }}">
-                <i class="fas fa-hotel me-2"></i>Cactus Palace
+            <a class="navbar-brand d-flex align-items-center" href="{{ route('frontend.home') }}">
+                <img src="{{ asset('img/logo_cactus.png') }}"
+                    alt="Hôtel Le Cactus"
+                    class="me-2"
+                    style="height: 45px; width: auto;">
+                <span>Le cactus Hotel</span>
             </a>
+
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>

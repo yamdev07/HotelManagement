@@ -33,10 +33,25 @@ $(function () {
             const mode = "index";
             const intersect = true;
 
-            const visitorsChart = $("#visitors-chart");
-            const this_year = visitorsChart.attr("this-year");
-            const this_month = visitorsChart.attr("this-month");
+            // ⚠️ CORRECTION CRITIQUE : [0] pour obtenir l'élément DOM
+            const visitorsChart = $("#visitors-chart")[0];
+            
+            // ⚠️ VÉRIFICATION DE SÉCURITÉ
+            if (!visitorsChart) {
+                console.warn("Canvas #visitors-chart non trouvé sur cette page");
+                return;
+            }
+            
+            if (visitorsChart.tagName !== 'CANVAS') {
+                console.error("L'élément #visitors-chart doit être un <canvas>");
+                return;
+            }
+
+            const this_year = $(visitorsChart).attr("this-year");
+            const this_month = $(visitorsChart).attr("this-month");
+            
             if (myVisitorChart) myVisitorChart.destroy();
+            
             myVisitorChart = new Chart(visitorsChart, {
                 type: "line",
                 data: {
@@ -107,7 +122,8 @@ $(function () {
                 },
             });
 
-            visitorsChart.on("click", function (e) {
+            // ⚠️ Utilisez $(visitorsChart) pour l'événement click
+            $(visitorsChart).on("click", function (e) {
                 const slice = myVisitorChart.getElementsAtEventForMode(
                     e,
                     "nearest",
@@ -127,7 +143,6 @@ $(function () {
 
     window.Echo.channel("dashboard").listen(".dashboard.event", (e) => {
         charts.ajaxGetdailyGuestPerMonthData();
-        // reloadJs("style/js/guestsChart.js");
         toastr.warning(e.message, "Hello");
     });
 });

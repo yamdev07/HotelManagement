@@ -9,7 +9,7 @@ return new class extends Migration
     {
         // Ajoute les nouveaux rôles à l'ENUM
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Cashier','Manager') NULL");
-        
+
         // Optionnel : Mettre 'Customer' comme valeur par défaut
         DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Cashier','Manager') DEFAULT 'Customer'");
     }

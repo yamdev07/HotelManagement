@@ -233,8 +233,8 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <form action="{{ route('housekeeping.mark-cleaned', $room->id) }}" 
-                                                  method="POST" style="display: inline;">
+                                            <form action="{{ route('housekeeping.finish-cleaning', $room->id) }}" method="POST"
+                                                style="display: inline;">
                                                 @csrf
                                                 <button type="submit" class="btn btn-sm btn-success">
                                                     <i class="fas fa-check me-1"></i>
@@ -262,7 +262,7 @@
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
                             <i class="fas fa-check-circle me-2"></i>
-                            <strong>Chambres nettoyées aujourd'hui ({{ $roomsCleanedToday }})</strong>
+                            <strong>Chambres nettoyées aujourd'hui ({{ $stats['cleaned_today'] }})</strong>
                         </div>
                         <span class="badge bg-light text-success">{{ now()->format('d/m/Y') }}</span>
                     </div>
@@ -274,8 +274,8 @@
                             <div>
                                 <h6 class="mb-1">Excellent travail !</h6>
                                 <p class="mb-0">
-                                    Vous avez nettoyé <strong>{{ $roomsCleanedToday }}</strong> chambres aujourd'hui.
-                                    @if($roomsCleanedToday > 0)
+                                Vous avez nettoyé <strong>{{ $stats['cleaned_today'] }}</strong> chambres aujourd'hui.
+                                    @if($stats['cleaned_today'] > 0)
                                         Continue comme ça !
                                     @else
                                         Commencez par nettoyer les chambres à nettoyer.

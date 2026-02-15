@@ -14,7 +14,7 @@ class StoreTypeRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string|max:100|unique:types,name,' . ($this->type ? $this->type->id : 'NULL'),
+            'name' => 'required|string|max:100|unique:types,name,'.($this->type ? $this->type->id : 'NULL'),
             'information' => 'nullable|string|max:1000',
             'base_price' => 'nullable|numeric|min:0|max:99999999',
             'capacity' => 'nullable|integer|min:1|max:20',
@@ -44,7 +44,7 @@ class StoreTypeRequest extends FormRequest
         // Convertir amenities en array si c'est une chaîne
         if ($this->has('amenities') && is_string($this->amenities)) {
             $this->merge([
-                'amenities' => json_decode($this->amenities, true) ?? []
+                'amenities' => json_decode($this->amenities, true) ?? [],
             ]);
         }
     }

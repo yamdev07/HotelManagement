@@ -8,6 +8,6 @@ class RestaurantReservation extends Model
 {
     protected $fillable = [
         'name', 'phone', 'reservation_date', 'reservation_time',
-        'persons', 'table_type', 'notes', 'status'
+        'persons', 'table_type', 'notes', 'status',
     ];
 }

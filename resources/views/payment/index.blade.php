@@ -202,25 +202,55 @@
                                         </div>
                                     </td>
                                     
-                                    <!-- Détails du paiement -->
+                                    <!-- ✅ Détails du paiement - AVEC RÉFÉRENCE -->
                                     <td class="py-3">
-                                        <div class="mb-1">
-                                            <span class="fw-bold text-dark fs-5">{{ Helper::formatCFA($payment->amount) }}</span>
-                                        </div>
-                                        @if($payment->payment_method)
-                                            <small class="text-muted">
-                                                <i class="fas fa-credit-card me-1"></i>
-                                                {{ ucfirst($payment->payment_method) }}
-                                            </small>
-                                        @endif
-                                        @if($payment->notes)
-                                            <div class="mt-1">
-                                                <small class="text-muted" title="{{ $payment->notes }}">
-                                                    <i class="fas fa-sticky-note me-1"></i>
-                                                    {{ Str::limit($payment->notes, 30) }}
+                                        <div class="d-flex flex-column">
+                                            <!-- Montant -->
+                                            <span class="fw-bold text-dark fs-5 mb-1">{{ Helper::formatCFA($payment->amount) }}</span>
+                                            
+                                            <!-- Référence du paiement -->
+                                            @if($payment->reference)
+                                                <div class="d-flex align-items-center mb-1">
+                                                    <span class="badge" style="background-color: #e9ecef; color: #495057; font-family: monospace; font-size: 0.75rem; padding: 0.35rem 0.65rem;">
+                                                        <i class="fas fa-fingerprint me-1" style="font-size: 0.7rem;"></i>
+                                                        <span>{{ $payment->reference }}</span>
+                                                    </span>
+                                                    
+                                                    @if(str_contains($payment->reference, 'INV-'))
+                                                        <span class="badge bg-primary ms-1" style="font-size: 0.65rem;">Facture</span>
+                                                    @elseif(str_contains($payment->reference, 'REFUND-'))
+                                                        <span class="badge bg-warning ms-1" style="font-size: 0.65rem;">Remboursement</span>
+                                                    @elseif(str_contains($payment->reference, 'PAY-'))
+                                                        <span class="badge bg-success ms-1" style="font-size: 0.65rem;">Paiement</span>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <div class="mb-1">
+                                                    <span class="badge bg-light text-muted border-0" style="font-size: 0.7rem;">
+                                                        <i class="far fa-question-circle me-1"></i>
+                                                        Référence non disponible
+                                                    </span>
+                                                </div>
+                                            @endif
+                                            
+                                            <!-- Méthode de paiement -->
+                                            @if($payment->payment_method)
+                                                <small class="text-muted">
+                                                    <i class="fas fa-credit-card me-1"></i>
+                                                    {{ ucfirst($payment->payment_method) }}
                                                 </small>
-                                            </div>
-                                        @endif
+                                            @endif
+                                            
+                                            <!-- Notes -->
+                                            @if($payment->notes)
+                                                <div class="mt-1">
+                                                    <small class="text-muted" title="{{ $payment->notes }}">
+                                                        <i class="fas fa-sticky-note me-1"></i>
+                                                        {{ Str::limit($payment->notes, 30) }}
+                                                    </small>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </td>
                                     
                                     <!-- Date & Heure -->
@@ -293,6 +323,14 @@
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                             
+                                            <!-- Bouton Détails du paiement -->
+                                            <button class="btn btn-outline-secondary btn-sm px-3"
+                                                    onclick="showPaymentDetails({{ $payment->id }})"
+                                                    data-bs-toggle="tooltip" 
+                                                    title="Détails du paiement">
+                                                <i class="fas fa-info-circle"></i>
+                                            </button>
+                                            
                                             <!-- Menu déroulant Plus d'actions -->
                                             @if(in_array($payment->status, ['pending', 'completed']))
                                                 <div class="dropdown">
@@ -310,13 +348,6 @@
                                                                 </a>
                                                             </li>
                                                         @endif
-                                                        <li>
-                                                            <a class="dropdown-item" href="#"
-                                                               onclick="showPaymentDetails({{ $payment->id }})">
-                                                                <i class="fas fa-info-circle me-2"></i>
-                                                                Voir les détails
-                                                            </a>
-                                                        </li>
                                                         <li><hr class="dropdown-divider"></li>
                                                         @if($payment->status == 'completed')
                                                             <li>
@@ -488,7 +519,7 @@ function markAsCompleted(paymentId) {
     }
 }
 
-// Afficher les détails du paiement
+// ✅ Afficher les détails du paiement (AVEC RÉFÉRENCE)
 function showPaymentDetails(paymentId) {
     fetch(`/payments/${paymentId}/details`)
         .then(response => response.json())
@@ -511,33 +542,54 @@ function showPaymentDetails(paymentId) {
                                             <dt class="col-sm-4">Montant:</dt>
                                             <dd class="col-sm-8">${data.payment.amount_formatted}</dd>
                                             
+                                            <!-- ✅ RÉFÉRENCE AJOUTÉE -->
+                                            <dt class="col-sm-4">Référence:</dt>
+                                            <dd class="col-sm-8">
+                                                ${data.payment.reference ? 
+                                                    `<span class="fw-bold" style="font-family: monospace;">${data.payment.reference}</span>` : 
+                                                    `<span class="text-muted fst-italic">Non disponible</span>`
+                                                }
+                                            </dd>
+                                            
                                             <dt class="col-sm-4">Statut:</dt>
                                             <dd class="col-sm-8"><span class="badge bg-${data.payment.status_color}">${data.payment.status}</span></dd>
                                             
                                             <dt class="col-sm-4">Méthode:</dt>
                                             <dd class="col-sm-8">${data.payment.method || 'N/A'}</dd>
                                             
-                                            <dt class="col-sm-4">Référence:</dt>
-                                            <dd class="col-sm-8">${data.payment.reference || 'N/A'}</dd>
+                                            <dt class="col-sm-4">ID Transaction:</dt>
+                                            <dd class="col-sm-8"><span class="badge bg-dark">#${data.payment.transaction_id || 'N/A'}</span></dd>
                                         </dl>
                                     </div>
                                     <div class="col-md-6">
                                         <h6>Détails de la transaction</h6>
                                         <dl class="row">
                                             <dt class="col-sm-4">Client:</dt>
-                                            <dd class="col-sm-8">${data.payment.guest_name}</dd>
+                                            <dd class="col-sm-8"><strong>${data.payment.guest_name}</strong></dd>
                                             
                                             <dt class="col-sm-4">Chambre:</dt>
-                                            <dd class="col-sm-8">${data.payment.room_number}</dd>
+                                            <dd class="col-sm-8"><span class="badge bg-info">${data.payment.room_number}</span></dd>
                                             
                                             <dt class="col-sm-4">Date:</dt>
                                             <dd class="col-sm-8">${data.payment.date_formatted}</dd>
                                             
                                             <dt class="col-sm-4">Traité par:</dt>
                                             <dd class="col-sm-8">${data.payment.processed_by}</dd>
+                                            
+                                            <dt class="col-sm-4">Créé le:</dt>
+                                            <dd class="col-sm-8">${data.payment.created_at || 'N/A'}</dd>
                                         </dl>
                                     </div>
                                 </div>
+                                
+                                <!-- Vérification si c'est un remboursement -->
+                                ${data.payment.reference && data.payment.reference.includes('REFUND-') ? `
+                                <div class="alert alert-warning mt-3">
+                                    <i class="fas fa-undo me-2"></i>
+                                    <strong>Ceci est un remboursement</strong>
+                                </div>
+                                ` : ''}
+                                
                                 ${data.payment.notes ? `
                                 <div class="mt-3">
                                     <h6>Notes</h6>
@@ -555,6 +607,12 @@ function showPaymentDetails(paymentId) {
                     </div>
                 </div>
                 `;
+                
+                // Supprimer l'ancienne modale si elle existe
+                const oldModal = document.getElementById('paymentDetailsModal');
+                if (oldModal) {
+                    oldModal.remove();
+                }
                 
                 document.body.insertAdjacentHTML('beforeend', modalHTML);
                 const modal = new bootstrap.Modal(document.getElementById('paymentDetailsModal'));
@@ -644,6 +702,15 @@ function initiateRefund(paymentId) {
         });
     }
 }
+
+// ✅ Fonction pour copier la référence (optionnel)
+function copyReference(reference) {
+    navigator.clipboard.writeText(reference).then(() => {
+        alert('Référence copiée !');
+    }).catch(() => {
+        alert('Erreur lors de la copie');
+    });
+}
 </script>
 
 <style>
@@ -708,6 +775,16 @@ function initiateRefund(paymentId) {
     font-weight: 500;
     padding: 0.35em 0.65em;
     border-radius: 6px;
+}
+
+/* Style spécial pour les références */
+.badge-ref {
+    background-color: #e9ecef;
+    color: #495057;
+    font-family: monospace;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 4px;
 }
 
 /* Boutons */
@@ -797,6 +874,11 @@ function initiateRefund(paymentId) {
 /* Ligne d'information du tableau */
 .table-info {
     background-color: #f0f9ff !important;
+}
+
+/* Style pour le texte monospace des références */
+.font-mono {
+    font-family: 'Courier New', monospace;
 }
 
 /* Responsive */

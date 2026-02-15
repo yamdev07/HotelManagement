@@ -21,11 +21,11 @@ class StoreRoomRequest extends FormRequest
     {
         // Récupérer l'ID de la chambre si elle existe (pour l'update)
         $roomId = $this->route('room') ? $this->route('room')->id : null;
-        
+
         return [
             'type_id' => 'required|exists:types,id',
             'room_status_id' => 'required|exists:room_statuses,id',
-            'number' => 'required|string|max:10|unique:rooms,number,' . $roomId,
+            'number' => 'required|string|max:10|unique:rooms,number,'.$roomId,
             'capacity' => 'required|integer|min:1|max:10',
             'price' => 'required|numeric|min:0',
             'view' => 'nullable|string|max:500',

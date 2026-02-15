@@ -12,6 +12,7 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
+
         return view('profile.index', compact('user'));
     }
 
@@ -20,7 +21,7 @@ class ProfileController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => [
-                'required', 'email', Rule::unique('users')->ignore(Auth::id())
+                'required', 'email', Rule::unique('users')->ignore(Auth::id()),
             ],
             'phone' => 'nullable|string|max:20',
         ]);
@@ -38,7 +39,7 @@ class ProfileController extends Controller
             'password' => 'required|min:6|confirmed',
         ]);
 
-        if (!Hash::check($request->current_password, Auth::user()->password)) {
+        if (! Hash::check($request->current_password, Auth::user()->password)) {
             return back()->with('error', 'Le mot de passe actuel est incorrect.');
         }
 
@@ -52,15 +53,15 @@ class ProfileController extends Controller
     public function updateAvatar(Request $request)
     {
         $request->validate([
-            'avatar' => 'required|image|max:2048'
+            'avatar' => 'required|image|max:2048',
         ]);
 
         $user = Auth::user();
 
-        $imageName = 'avatar_' . time() . '.' . $request->avatar->extension();
+        $imageName = 'avatar_'.time().'.'.$request->avatar->extension();
         $request->avatar->move(public_path('img/user'), $imageName);
 
-        $user->avatar = '/img/user/' . $imageName;
+        $user->avatar = '/img/user/'.$imageName;
         $user->save();
 
         return back()->with('success', 'Photo de profil mise à jour.');
@@ -72,7 +73,7 @@ class ProfileController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $user->id,
+            'email' => 'required|email|unique:users,email,'.$user->id,
             'password' => 'nullable|min(6|confirmed',
         ]);
 
@@ -87,5 +88,4 @@ class ProfileController extends Controller
 
         return back()->with('success', 'Profil mis à jour avec succès !');
     }
-
 }

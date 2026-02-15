@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Room;
 use App\Models\Booking;
+use App\Models\Room;
 use App\Models\RoomStatus;
 
 class ReportController extends Controller

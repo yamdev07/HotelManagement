@@ -26,18 +26,18 @@ class Image extends Model
         if (str_starts_with($this->url, 'http://') || str_starts_with($this->url, 'https://')) {
             return $this->url;
         }
-        
+
         // Sinon, supposez que c'est un chemin dans storage
         // Enlève le 'storage/' s'il est déjà présent au début
         $url = ltrim($this->url, '/');
         if (str_starts_with($url, 'storage/')) {
             return asset($url);
         }
-        
+
         // Par défaut, ajoute 'storage/'
-        return asset('storage/' . $url);
+        return asset('storage/'.$url);
     }
-    
+
     // Méthode alternative plus simple
     public function getImageUrl()
     {

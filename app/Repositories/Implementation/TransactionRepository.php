@@ -13,10 +13,10 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function store($request, Customer $customer, Room $room)
     {
         \Log::info('🔵 === TRANSACTION REPOSITORY STORE ===');
-        \Log::info('🔵 Customer: ' . $customer->id);
-        \Log::info('🔵 Room: ' . $room->id);
+        \Log::info('🔵 Customer: '.$customer->id);
+        \Log::info('🔵 Room: '.$room->id);
         \Log::info('🔵 Request keys:', array_keys($request->all()));
-        
+
         try {
             // DEBUG détaillé
             \Log::info('🔵 Form data received:', [
@@ -26,26 +26,28 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'has_person_count' => $request->has('person_count'),
                 'all_data' => $request->all(),
             ]);
-            
+
             // ⭐ CORRECTION : Définir person_count par défaut
             $personCount = $request->person_count ?? 1;
-            
+
             // Si c'est null, vide ou "NOT SET"
-            if (empty($personCount) || $personCount === "NOT SET") {
+            if (empty($personCount) || $personCount === 'NOT SET') {
                 $personCount = 1;
                 \Log::warning('⚠️ person_count manquant, utilisation de la valeur par défaut: 1');
             }
-            
+
             // Calculs
             $checkIn = \Carbon\Carbon::parse($request->check_in);
             $checkOut = \Carbon\Carbon::parse($request->check_out);
             $days = $checkOut->diffInDays($checkIn);
-            if ($days == 0) $days = 1;
-            
+            if ($days == 0) {
+                $days = 1;
+            }
+
             $totalPrice = $room->price * $days;
-            
-            \Log::info('🔵 Calcul: ' . $days . ' jours, ' . $personCount . ' pers, prix: ' . $totalPrice);
-            
+
+            \Log::info('🔵 Calcul: '.$days.' jours, '.$personCount.' pers, prix: '.$totalPrice);
+
             // Données de la transaction
             $data = [
                 'user_id' => auth()->check() ? auth()->id() : 1,
@@ -60,31 +62,31 @@ class TransactionRepository implements TransactionRepositoryInterface
                 'children' => 0,
                 'notes' => $request->notes ?? null,
             ];
-            
+
             \Log::info('🔵 Transaction data to create:', $data);
-            
+
             // ⭐ TEST DIRECT avec try-catch interne
             try {
                 $transaction = Transaction::create($data);
-                \Log::info('✅ Transaction créée ID: ' . $transaction->id);
+                \Log::info('✅ Transaction créée ID: '.$transaction->id);
                 \Log::info('🔵 Transaction details:', $transaction->toArray());
-                
+
                 return $transaction;
-                
+
             } catch (\Illuminate\Database\QueryException $qe) {
-                \Log::error('❌ QueryException: ' . $qe->getMessage());
-                \Log::error('❌ SQL: ' . $qe->getSql());
-                \Log::error('❌ Bindings: ' . json_encode($qe->getBindings()));
+                \Log::error('❌ QueryException: '.$qe->getMessage());
+                \Log::error('❌ SQL: '.$qe->getSql());
+                \Log::error('❌ Bindings: '.json_encode($qe->getBindings()));
                 throw $qe;
             }
-            
+
         } catch (\Exception $e) {
-            \Log::error('❌ ERREUR TransactionRepository: ' . $e->getMessage());
-            \Log::error('❌ File: ' . $e->getFile() . ' Line: ' . $e->getLine());
-            \Log::error('❌ Trace: ' . $e->getTraceAsString());
-            
+            \Log::error('❌ ERREUR TransactionRepository: '.$e->getMessage());
+            \Log::error('❌ File: '.$e->getFile().' Line: '.$e->getLine());
+            \Log::error('❌ Trace: '.$e->getTraceAsString());
+
             // Relancer avec message amélioré
-            throw new \Exception('Erreur création transaction: ' . $e->getMessage() . ' (person_count=' . ($request->person_count ?? 'null') . ')');
+            throw new \Exception('Erreur création transaction: '.$e->getMessage().' (person_count='.($request->person_count ?? 'null').')');
         }
     }
 
@@ -94,28 +96,28 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function getTransaction($request)
     {
         return Transaction::with(['user', 'room', 'room.type', 'customer', 'payments'])
-            ->where(function($query) {
+            ->where(function ($query) {
                 // Seulement les statuts actifs : réservation et actif
                 $query->whereIn('status', ['reservation', 'active'])
-                      ->orWhere(function($q) {
-                          // Ou les transactions avec check_out futur
-                          $q->where('check_out', '>=', Carbon::now())
+                    ->orWhere(function ($q) {
+                        // Ou les transactions avec check_out futur
+                        $q->where('check_out', '>=', Carbon::now())
                             ->whereNotIn('status', ['cancelled', 'no_show', 'completed']);
-                      });
+                    });
             })
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->search;
 
                 $query->where(function ($q) use ($search) {
                     $q->where('transactions.id', 'like', "%{$search}%")
-                    ->orWhereHas('customer', function ($c) use ($search) {
-                        $c->where('customers.name', 'like', "%{$search}%")
-                          ->orWhere('customers.email', 'like', "%{$search}%")
-                          ->orWhere('customers.phone', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('room', function ($r) use ($search) {
-                        $r->where('rooms.number', 'like', "%{$search}%");
-                    });
+                        ->orWhereHas('customer', function ($c) use ($search) {
+                            $c->where('customers.name', 'like', "%{$search}%")
+                                ->orWhere('customers.email', 'like', "%{$search}%")
+                                ->orWhere('customers.phone', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('room', function ($r) use ($search) {
+                            $r->where('rooms.number', 'like', "%{$search}%");
+                        });
                 });
             })
             ->when($request->filled('status'), function ($query) use ($request) {
@@ -139,24 +141,24 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function getTransactionExpired($request)
     {
         return Transaction::with(['user', 'room', 'room.type', 'customer', 'payments'])
-            ->where(function($query) {
+            ->where(function ($query) {
                 // Transactions avec statuts terminaux
                 $query->whereIn('status', ['completed', 'cancelled', 'no_show'])
-                      ->orWhere('check_out', '<', Carbon::now()); // Ou dates passées
+                    ->orWhere('check_out', '<', Carbon::now()); // Ou dates passées
             })
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->search;
 
                 $query->where(function ($q) use ($search) {
                     $q->where('transactions.id', 'like', "%{$search}%")
-                    ->orWhereHas('customer', function ($c) use ($search) {
-                        $c->where('customers.name', 'like', "%{$search}%")
-                          ->orWhere('customers.email', 'like', "%{$search}%")
-                          ->orWhere('customers.phone', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('room', function ($r) use ($search) {
-                        $r->where('rooms.number', 'like', "%{$search}%");
-                    });
+                        ->orWhereHas('customer', function ($c) use ($search) {
+                            $c->where('customers.name', 'like', "%{$search}%")
+                                ->orWhere('customers.email', 'like', "%{$search}%")
+                                ->orWhere('customers.phone', 'like', "%{$search}%");
+                        })
+                        ->orWhereHas('room', function ($r) use ($search) {
+                            $r->where('rooms.number', 'like', "%{$search}%");
+                        });
                 });
             })
             ->when($request->filled('status'), function ($query) use ($request) {
@@ -173,7 +175,7 @@ class TransactionRepository implements TransactionRepositoryInterface
                     $query->where('status', 'cancelled');
                 } elseif ($request->type === 'expired') {
                     $query->where('check_out', '<', Carbon::now())
-                          ->whereNotIn('status', ['cancelled', 'no_show', 'completed']);
+                        ->whereNotIn('status', ['cancelled', 'no_show', 'completed']);
                 } elseif ($request->type === 'completed') {
                     $query->where('status', 'completed');
                 } elseif ($request->type === 'no_show') {
@@ -197,9 +199,9 @@ class TransactionRepository implements TransactionRepositoryInterface
                 $search = $request->search;
                 $query->where(function ($q) use ($search) {
                     $q->where('transactions.id', 'like', "%{$search}%")
-                    ->orWhereHas('customer', function ($c) use ($search) {
-                        $c->where('customers.name', 'like', "%{$search}%");
-                    });
+                        ->orWhereHas('customer', function ($c) use ($search) {
+                            $c->where('customers.name', 'like', "%{$search}%");
+                        });
                 });
             })
             ->orderBy('cancelled_at', 'DESC')
@@ -226,7 +228,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function getStatistics()
     {
         $now = Carbon::now();
-        
+
         return [
             'total' => Transaction::count(),
             'active' => Transaction::whereIn('status', ['reservation', 'active'])
@@ -273,7 +275,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function getCurrentGuests()
     {
         $now = Carbon::now();
-        
+
         return Transaction::with(['customer', 'room', 'room.type'])
             ->where('status', 'active')
             ->where('check_in', '<=', $now)
@@ -288,7 +290,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function getTodayTransactions()
     {
         $today = Carbon::today();
-        
+
         return [
             'checkins' => Transaction::with(['customer', 'room'])
                 ->whereDate('check_in', $today)
@@ -310,19 +312,19 @@ class TransactionRepository implements TransactionRepositoryInterface
     {
         $query = Transaction::where('room_id', $roomId)
             ->whereIn('status', ['reservation', 'active']) // Seulement les réservations actives
-            ->where(function($q) use ($checkIn, $checkOut) {
+            ->where(function ($q) use ($checkIn, $checkOut) {
                 $q->whereBetween('check_in', [$checkIn, $checkOut])
-                  ->orWhereBetween('check_out', [$checkIn, $checkOut])
-                  ->orWhere(function($q2) use ($checkIn, $checkOut) {
-                      $q2->where('check_in', '<', $checkIn)
-                         ->where('check_out', '>', $checkOut);
-                  });
+                    ->orWhereBetween('check_out', [$checkIn, $checkOut])
+                    ->orWhere(function ($q2) use ($checkIn, $checkOut) {
+                        $q2->where('check_in', '<', $checkIn)
+                            ->where('check_out', '>', $checkOut);
+                    });
             });
-        
+
         if ($excludeTransactionId) {
             $query->where('id', '!=', $excludeTransactionId);
         }
-        
+
         return $query->exists();
     }
 }

@@ -323,11 +323,16 @@
         <div class="login-card">
             <!-- Côté gauche avec l'icône et présentation -->
             <div class="login-left">
-                <div class="hotel-icon">
-                    <i class="fas fa-hotel"></i>
+                <div class="hotel-icon text-center">
+                    <img src="{{ asset('img/logo_cactus1.jpeg') }}"
+                        alt="Cactus Hotel"
+                        class="mb-2"
+                        style="height: 70px; width: auto;">
+
                     <div class="hotel-name">CACTUS HOTEL</div>
                     <div class="hotel-slogan">Luxury & Comfort in Every Stay</div>
                 </div>
+
 
                 <ul class="features-list">
                     <li>
@@ -412,24 +417,6 @@
                         Sign In
                     </button>
 
-                    <div class="login-divider">
-                        <span>Demo Access</span>
-                    </div>
-
-                    <div class="demo-credentials">
-                        <h6>
-                            <i class="fas fa-info-circle"></i>
-                            Test Account
-                        </h6>
-                        <p>
-                            <strong>Email:</strong>
-                            <span>yoannyamd@gmail.com</span>
-                        </p>
-                        <p>
-                            <strong>Password:</strong>
-                            <span>123456789</span>
-                        </p>
-                    </div>
                 </form>
             </div>
         </div>

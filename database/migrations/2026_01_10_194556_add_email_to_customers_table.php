@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('customers', function (Blueprint $table) {
             // Ajoutez la colonne email (NON UNIQUE pour permettre les doublons)
-            if (!Schema::hasColumn('customers', 'email')) {
+            if (! Schema::hasColumn('customers', 'email')) {
                 $table->string('email')->nullable()->after('name');
             }
         });

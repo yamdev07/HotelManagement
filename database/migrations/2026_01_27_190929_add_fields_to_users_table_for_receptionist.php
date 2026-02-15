@@ -39,7 +39,7 @@ return new class extends Migration
                 'total_checkouts',
                 'total_transactions_value',
                 'performance_stats',
-                'is_active_session'
+                'is_active_session',
             ]);
         });
     }
