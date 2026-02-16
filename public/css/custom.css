@@ -1,0 +1,26 @@
+/* Styles personnalisés pour l'admin */
+.navbar-brand {
+    font-weight: 700;
+    color: #2c3e50 !important;
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+}
+
+.alert {
+    border-radius: 0.5rem;
+    border-left: 4px solid;
+}
+
+.alert-success { border-left-color: #28a745; }
+.alert-danger { border-left-color: #dc3545; }
+.alert-warning { border-left-color: #ffc107; }
+.alert-info { border-left-color: #17a2b8; }
+
+/* Pour les pages de chargement */
+.loading {
+    opacity: 0.5;
+    pointer-events: none;
+}

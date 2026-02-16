@@ -64,5 +64,13 @@ services:
     depends_on:
       - db
 
+  mysql:
+    command: 
+      - --innodb-flush-log-at-trx-commit=0
+      - --innodb-flush-method=nosync
+      - --skip-innodb-doublewrite
+    volumes:
+      - db_data:/var/lib/mysql
+
 volumes:
   db_data:
