@@ -4,11 +4,12 @@ import path from 'path';
 import viteCompression from 'vite-plugin-compression';
 
 export default defineConfig({
-    resolve:{
-      alias:{
-        '@' : path.resolve(__dirname, './src'),
-      },
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './resources/js'),
+        },
     },
+
     plugins: [
         laravel({
             input: [
@@ -19,4 +20,20 @@ export default defineConfig({
         }),
         viteCompression(),
     ],
+
+    // 🔥 TRÈS IMPORTANT POUR DOCKER
+    server: {
+        host: '0.0.0.0',
+        port: 5173,
+        strictPort: true,
+
+        hmr: {
+            host: 'localhost',
+            port: 5173,
+        },
+
+        watch: {
+            usePolling: true,
+        },
+    },
 });
