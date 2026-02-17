@@ -12,6 +12,10 @@
     
     {{-- style --}}
     @vite('resources/sass/app.scss')
+
+        {{-- Styles spécifiques aux pages --}}
+
+    @stack('styles')
     
     <title>@yield('title') - Hotel Admin</title>
     

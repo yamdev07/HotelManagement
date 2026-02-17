@@ -365,23 +365,56 @@ class TransactionController extends Controller
         $oldStatus = $transaction->status;
         $newStatus = $request->status;
 
+        // ✅ VÉRIFICATION DES DATES POUR CHANGEMENT DE STATUT
+        $today = Carbon::today();
+        $checkInDate = Carbon::parse($transaction->check_in)->startOfDay();
+        $checkOutDate = Carbon::parse($transaction->check_out)->startOfDay();
+
+        // Bloquer "active" avant date d'arrivée
+        if ($newStatus === 'active' && $today->lt($checkInDate)) {
+            $daysUntil = $today->diffInDays($checkInDate);
+            $errorMsg = "⏳ Date d'arrivée non atteinte ! " .
+                        "Arrivée prévue le " . $checkInDate->format('d/m/Y') . ". " .
+                        ($daysUntil > 0 ? "Encore " . $daysUntil . " jour(s) à attendre." : "");
+            
+            if ($request->ajax()) {
+                return response()->json(['error' => $errorMsg], 422);
+            }
+            return redirect()->back()->with('error', $errorMsg);
+        }
+
+        // Bloquer "completed" avant date de départ
+        if ($newStatus === 'completed' && $today->lt($checkOutDate)) {
+            $daysUntil = $today->diffInDays($checkOutDate);
+            $errorMsg = "⏳ Date de départ non atteinte ! " .
+                        "Départ prévu le " . $checkOutDate->format('d/m/Y') . ". " .
+                        ($daysUntil > 0 ? "Encore " . $daysUntil . " jour(s) de séjour." : "Départ prévu aujourd'hui.");
+            
+            if ($request->ajax()) {
+                return response()->json(['error' => $errorMsg], 422);
+            }
+            return redirect()->back()->with('error', $errorMsg);
+        }
+
+        // Vérification paiement pour "completed"
         if ($newStatus === 'completed' && ! $transaction->isFullyPaid()) {
             $remaining = $transaction->getRemainingPayment();
-            $formattedRemaining = number_format($remaining, 0, ',', ' ').' CFA';
+            $formattedRemaining = number_format($remaining, 0, ',', ' ') . ' CFA';
 
             if ($request->ajax()) {
                 return response()->json([
                     'error' => 'Paiement incomplet',
-                    'message' => 'Impossible de marquer comme terminé. Solde restant: '.$formattedRemaining,
+                    'message' => 'Impossible de marquer comme terminé. Solde restant: ' . $formattedRemaining,
                     'remaining' => $remaining,
                 ], 422);
             }
 
             return redirect()->back()->with('error',
-                "❌ Paiement incomplet ! Solde restant: {$formattedRemaining}"
+                "❌ Paiement incomplet ! Solde restant: " . $formattedRemaining
             );
         }
 
+        // Vérification pour retour à "reservation"
         if ($newStatus === 'reservation' && Carbon::parse($transaction->check_in)->isPast()) {
             $errorMsg = 'Impossible de revenir à "Réservation", la date d\'arrivée est passée.';
 
@@ -392,6 +425,7 @@ class TransactionController extends Controller
             return redirect()->back()->with('error', $errorMsg);
         }
 
+        // Vérification raison pour annulation
         if ($newStatus === 'cancelled' && empty($request->cancel_reason)) {
             $errorMsg = 'Une raison est obligatoire pour l\'annulation.';
 
@@ -439,10 +473,10 @@ class TransactionController extends Controller
                     if (! $transaction->isFullyPaid()) {
                         DB::rollBack();
                         $remaining = $transaction->getRemainingPayment();
-                        $formattedRemaining = number_format($remaining, 0, ',', ' ').' CFA';
+                        $formattedRemaining = number_format($remaining, 0, ',', ' ') . ' CFA';
 
                         return redirect()->back()->with('error',
-                            "Erreur de sécurité: Paiement incomplet. Solde: {$formattedRemaining}");
+                            "Erreur de sécurité: Paiement incomplet. Solde: " . $formattedRemaining);
                     }
 
                     $updateData['check_out_actual'] = now();
@@ -495,10 +529,10 @@ class TransactionController extends Controller
                             'transaction_id' => $transaction->id,
                             'price' => -$totalPaid,
                             'payment_method' => 'refund',
-                            'reference' => 'REFUND-'.$transaction->id.'-'.time(),
+                            'reference' => 'REFUND-' . $transaction->id . '-' . time(),
                             'status' => 'completed',
-                            'notes' => 'Remboursement annulation'.
-                                    ($request->cancel_reason ? ": {$request->cancel_reason}" : ''),
+                            'notes' => 'Remboursement annulation' .
+                                    ($request->cancel_reason ? ": " . $request->cancel_reason : ''),
                             'created_by' => auth()->id(),
                         ]);
                     }
@@ -573,7 +607,7 @@ class TransactionController extends Controller
         }
     }
 
-    /**
+     /**
      * =====================================================
      * ✅ ACTION RAPIDE : MARQUER COMME ARRIVÉ
      * =====================================================
@@ -587,6 +621,24 @@ class TransactionController extends Controller
         if ($transaction->status !== 'reservation') {
             return redirect()->back()->with('error',
                 'Seule une réservation peut être marquée comme arrivée.');
+        }
+
+        // ✅ VÉRIFICATION DE LA DATE D'ARRIVÉE
+        $today = Carbon::today();
+        $checkInDate = Carbon::parse($transaction->check_in)->startOfDay();
+        
+        if ($today->lt($checkInDate)) {
+            $daysUntil = $today->diffInDays($checkInDate);
+            $message = "⏳ Date d'arrivée non atteinte ! " .
+                    "Arrivée prévue le " . $checkInDate->format('d/m/Y') . ". ";
+            
+            if ($daysUntil > 0) {
+                $message .= "Encore " . $daysUntil . " jour(s) à attendre.";
+            } else {
+                $message .= "Arrivée prévue aujourd'hui.";
+            }
+            
+            return redirect()->back()->with('error', $message);
         }
 
         try {
@@ -634,10 +686,9 @@ class TransactionController extends Controller
             ]);
 
             return redirect()->back()->with('error',
-                'Erreur: '.$e->getMessage());
+                'Erreur: ' . $e->getMessage());
         }
     }
-
     /**
      * =====================================================
      * ✅ ACTION RAPIDE : MARQUER COMME PARTI (AVEC DIRTY)
@@ -654,12 +705,30 @@ class TransactionController extends Controller
                 'Seul un client dans l\'hôtel peut être marqué comme parti.');
         }
 
+        // ✅ VÉRIFICATION DE LA DATE DE DÉPART
+        $today = Carbon::today();
+        $checkOutDate = Carbon::parse($transaction->check_out)->startOfDay();
+        
+        if ($today->lt($checkOutDate)) {
+            $daysUntil = $today->diffInDays($checkOutDate);
+            $message = "⏳ Date de départ non atteinte ! " .
+                    "Départ prévu le " . $checkOutDate->format('d/m/Y') . ". ";
+            
+            if ($daysUntil > 0) {
+                $message .= "Encore " . $daysUntil . " jour(s) de séjour.";
+            } else {
+                $message .= "Départ prévu aujourd'hui.";
+            }
+            
+            return redirect()->back()->with('error', $message);
+        }
+
         if (! $transaction->isFullyPaid()) {
             $remaining = $transaction->getRemainingPayment();
-            $formattedRemaining = number_format($remaining, 0, ',', ' ').' CFA';
+            $formattedRemaining = number_format($remaining, 0, ',', ' ') . ' CFA';
 
             return redirect()->back()->with('error',
-                "❌ Paiement incomplet ! Solde restant: {$formattedRemaining}");
+                "❌ Paiement incomplet ! Solde restant: " . $formattedRemaining);
         }
 
         try {
@@ -705,11 +774,11 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            return redirect()->back()->with('success',
-                "✅ <strong>Départ enregistré avec succès !</strong><br>
-                🏨 Chambre <strong style='color:#dc3545;'>{$transaction->room->number}</strong> marquée comme <span style='background:#dc3545; color:white; padding:2px 8px; border-radius:4px;'>À NETTOYER</span><br>
-                🧹 Housekeeping informé - Nettoyage requis."
-            );
+            $successMessage = "✅ Départ enregistré avec succès ! " .
+                            "Chambre " . $transaction->room->number . " marquée comme À NETTOYER. " .
+                            "Housekeeping informé - Nettoyage requis.";
+
+            return redirect()->back()->with('success', $successMessage);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -719,7 +788,7 @@ class TransactionController extends Controller
             ]);
 
             return redirect()->back()->with('error',
-                'Erreur: '.$e->getMessage());
+                'Erreur: ' . $e->getMessage());
         }
     }
 

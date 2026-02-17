@@ -1,512 +1,1009 @@
 @extends('template.master')
-@section('title', 'Check-in - Dashboard')
+@section('title', 'Check-in — Dashboard')
 @section('content')
-    <style>
-        .stat-card {
-            border-radius: 10px;
-            transition: transform 0.3s;
-        }
-        .stat-card:hover {
-            transform: translateY(-5px);
-        }
-        .list-group-item-hover:hover {
-            background-color: #f8f9fa;
-        }
-        .quick-action-btn {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-        }
-        .reservation-date {
-            background-color: #f8f9fa;
-            border-left: 4px solid #0d6efd;
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 4px;
-        }
-        .guest-status {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-        .status-checked-in { background-color: #d1e7dd; color: #0f5132; }
-        .status-departing { background-color: #fff3cd; color: #856404; }
-        .status-upcoming { background-color: #cfe2ff; color: #084298; }
-        .badge-notification {
-            font-size: 0.7rem;
-            padding: 3px 6px;
-            margin-left: 5px;
-        }
-    </style>
 
-    <div class="container-fluid">
-        <div class="row mb-4">
-            <div class="col-12">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a href="{{ route('dashboard.index') }}">Dashboard</a>
-                        </li>
-                        <li class="breadcrumb-item active">Check-in</li>
-                    </ol>
-                </nav>
-                
-                <div class="d-flex justify-content-between align-items-center">
-                    <h2 class="h4 mb-0">
-                        <i class="fas fa-door-open text-primary me-2"></i>
-                        Gestion des Check-in
-                    </h2>
-                    <div class="btn-group">
-                        <a href="{{ route('checkin.search') }}" class="btn btn-outline-primary">
-                            <i class="fas fa-search me-2"></i>Rechercher
-                        </a>
-                        <a href="{{ route('checkin.direct') }}" class="btn btn-primary">
-                            <i class="fas fa-user-plus me-2"></i>Check-in Direct
-                        </a>
-                    </div>
+<style>
+/* ══════════════════════════════════════════════
+   VARIABLES & BASE
+══════════════════════════════════════════════ */
+:root {
+    --green-950: #052e16;
+    --green-900: #064e3b;
+    --green-800: #065f46;
+    --green-600: #059669;
+    --green-500: #10b981;
+    --green-400: #34d399;
+    --green-100: #d1fae5;
+    --green-50:  #ecfdf5;
+
+    --amber-500: #f59e0b;
+    --amber-100: #fef3c7;
+    --amber-50:  #fffbeb;
+
+    --blue-600:  #2563eb;
+    --blue-100:  #dbeafe;
+    --blue-50:   #eff6ff;
+
+    --slate-900: #0f172a;
+    --slate-700: #334155;
+    --slate-500: #64748b;
+    --slate-400: #94a3b8;
+    --slate-200: #e2e8f0;
+    --slate-100: #f1f5f9;
+    --slate-50:  #f8fafc;
+
+    --red-500:   #ef4444;
+    --red-100:   #fee2e2;
+
+    --shadow-sm:  0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
+    --shadow-md:  0 4px 12px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
+    --shadow-lg:  0 10px 30px rgba(0,0,0,.1),  0 4px 12px rgba(0,0,0,.06);
+    --radius-sm:  8px;
+    --radius-md:  12px;
+    --radius-lg:  16px;
+
+    --transition: all .2s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── Page wrapper ───────────────────────────── */
+.ci-page {
+    padding: 28px 28px 48px;
+    background: var(--slate-50);
+    min-height: 100vh;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* ── Fade-in animation ──────────────────────── */
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.anim-1 { animation: fadeUp .35s ease both; }
+.anim-2 { animation: fadeUp .35s .08s ease both; }
+.anim-3 { animation: fadeUp .35s .16s ease both; }
+.anim-4 { animation: fadeUp .35s .22s ease both; }
+.anim-5 { animation: fadeUp .35s .28s ease both; }
+.anim-6 { animation: fadeUp .35s .34s ease both; }
+
+/* ── Breadcrumb ─────────────────────────────── */
+.ci-breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .78rem;
+    color: var(--slate-400);
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+.ci-breadcrumb a { color: var(--slate-400); text-decoration: none; transition: var(--transition); }
+.ci-breadcrumb a:hover { color: var(--green-600); }
+.ci-breadcrumb .sep { color: var(--slate-300); }
+.ci-breadcrumb .current { color: var(--slate-600); font-weight: 500; }
+
+/* ── Page header ────────────────────────────── */
+.ci-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 28px;
+}
+.ci-header-left {}
+.ci-header-title {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--slate-900);
+    line-height: 1.2;
+    margin: 0;
+}
+.ci-header-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--green-800), var(--green-600));
+    border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(5,150,105,.3);
+    flex-shrink: 0;
+}
+.ci-header-subtitle {
+    color: var(--slate-500);
+    font-size: .875rem;
+    margin: 6px 0 0 56px;
+}
+.ci-header-actions {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+}
+
+/* ── Buttons ────────────────────────────────── */
+.btn-ci {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-size: .85rem;
+    font-weight: 500;
+    border: none; cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+    white-space: nowrap;
+    line-height: 1;
+}
+.btn-ci-primary {
+    background: linear-gradient(135deg, var(--green-800), var(--green-600));
+    color: white;
+    box-shadow: 0 4px 12px rgba(5,150,105,.3);
+}
+.btn-ci-primary:hover {
+    background: linear-gradient(135deg, var(--green-900), var(--green-800));
+    box-shadow: 0 6px 16px rgba(5,150,105,.4);
+    transform: translateY(-1px);
+    color: white;
+    text-decoration: none;
+}
+.btn-ci-outline {
+    background: white;
+    color: var(--slate-700);
+    border: 1.5px solid var(--slate-200);
+    box-shadow: var(--shadow-sm);
+}
+.btn-ci-outline:hover {
+    background: var(--slate-50);
+    border-color: var(--slate-300);
+    color: var(--slate-900);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+/* ── Alerts ─────────────────────────────────── */
+.ci-alert {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 18px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
+    border: 1px solid transparent;
+    font-size: .875rem;
+}
+.ci-alert-success {
+    background: var(--green-50);
+    border-color: var(--green-100);
+    color: #065f46;
+}
+.ci-alert-error {
+    background: var(--red-100);
+    border-color: #fecaca;
+    color: #991b1b;
+}
+.ci-alert-icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
+.ci-alert-close {
+    margin-left: auto; background: none; border: none;
+    cursor: pointer; color: inherit; opacity: .5;
+    padding: 0 4px; font-size: 1rem; line-height: 1;
+    transition: var(--transition);
+}
+.ci-alert-close:hover { opacity: 1; }
+
+/* ══════════════════════════════════════════════
+   STAT CARDS
+══════════════════════════════════════════════ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+@media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 600px)  { .stats-grid { grid-template-columns: 1fr; } }
+
+.stat-card {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 20px 22px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--slate-200);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent, var(--green-500));
+    border-radius: 4px 4px 0 0;
+}
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+.stat-card--arrivals   { --card-accent: var(--blue-600); }
+.stat-card--staying    { --card-accent: var(--green-500); }
+.stat-card--departures { --card-accent: var(--amber-500); }
+.stat-card--available  { --card-accent: #8b5cf6; }
+
+.stat-card-top {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 12px;
+}
+.stat-card-label {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    color: var(--slate-500);
+    margin-bottom: 6px;
+}
+.stat-card-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--slate-900);
+    line-height: 1;
+}
+.stat-card-icon {
+    width: 46px; height: 46px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    opacity: .85;
+}
+.stat-card--arrivals .stat-card-icon   { background: var(--blue-50);  color: var(--blue-600); }
+.stat-card--staying .stat-card-icon    { background: var(--green-50); color: var(--green-600); }
+.stat-card--departures .stat-card-icon { background: var(--amber-50); color: var(--amber-500); }
+.stat-card--available .stat-card-icon  { background: #f5f3ff;         color: #7c3aed; }
+
+.stat-card-meta {
+    font-size: .78rem;
+    color: var(--slate-400);
+    display: flex; align-items: center; gap: 5px;
+    border-top: 1px solid var(--slate-100);
+    padding-top: 10px;
+    margin-top: 10px;
+}
+
+/* ══════════════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════════════ */
+.ci-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 20px;
+    align-items: start;
+}
+@media (max-width: 1100px) {
+    .ci-main-grid { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════
+   CARDS
+══════════════════════════════════════════════ */
+.ci-card {
+    background: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--slate-200);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+.ci-card:last-child { margin-bottom: 0; }
+
+.ci-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--slate-100);
+    gap: 12px;
+}
+.ci-card-title {
+    display: flex; align-items: center; gap: 9px;
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--slate-800);
+    margin: 0;
+}
+.ci-card-title-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.ci-card-badge {
+    font-size: .72rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+/* ── Badge colors ───────────────────────────── */
+.badge-green  { background: var(--green-100); color: #065f46; }
+.badge-amber  { background: var(--amber-100); color: #92400e; }
+.badge-blue   { background: var(--blue-100);  color: #1e40af; }
+.badge-purple { background: #f5f3ff;          color: #5b21b6; }
+.badge-slate  { background: var(--slate-100); color: var(--slate-700); }
+
+/* ══════════════════════════════════════════════
+   DATE GROUP (upcoming reservations)
+══════════════════════════════════════════════ */
+.date-group {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--slate-100);
+}
+.date-group:last-child { border-bottom: none; }
+
+.date-group-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap; gap: 8px;
+}
+.date-group-label {
+    display: flex; align-items: center; gap: 9px;
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--slate-600);
+}
+.date-group-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--blue-50);
+    color: var(--blue-600);
+    font-size: .7rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--blue-100);
+}
+
+/* ── Reservation row ────────────────────────── */
+.res-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--slate-100);
+    margin-bottom: 8px;
+    transition: var(--transition);
+    background: var(--slate-50);
+}
+.res-row:last-child { margin-bottom: 0; }
+.res-row:hover {
+    background: white;
+    border-color: var(--green-100);
+    box-shadow: var(--shadow-sm);
+    transform: translateX(2px);
+}
+
+.res-guest { min-width: 0; }
+.res-guest-name {
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--slate-900);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.res-guest-phone {
+    font-size: .75rem;
+    color: var(--slate-400);
+    margin-top: 2px;
+}
+
+.res-room-badge {
+    background: var(--slate-100);
+    color: var(--slate-700);
+    font-size: .78rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.res-time {
+    text-align: center;
+    min-width: 56px;
+}
+.res-time-val {
+    font-size: .9rem; font-weight: 700; color: var(--slate-800);
+    display: block;
+}
+.res-time-label {
+    font-size: .68rem; color: var(--slate-400); margin-top: 1px;
+}
+
+.res-nights {
+    text-align: center; min-width: 52px;
+}
+.res-nights-val {
+    font-size: .88rem; font-weight: 600; color: var(--slate-700);
+    display: block;
+}
+.res-nights-label { font-size: .68rem; color: var(--slate-400); margin-top: 1px; }
+
+.res-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* ── Action buttons ─────────────────────────── */
+.btn-res {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 6px 11px;
+    border-radius: 6px;
+    font-size: .78rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    transition: var(--transition);
+    white-space: nowrap;
+    line-height: 1;
+}
+.btn-res:hover { transform: translateY(-1px); text-decoration: none; }
+.btn-res-checkin {
+    background: linear-gradient(135deg, var(--green-800), var(--green-600));
+    color: white; border-color: var(--green-700);
+    box-shadow: 0 2px 6px rgba(5,150,105,.25);
+}
+.btn-res-checkin:hover {
+    box-shadow: 0 4px 10px rgba(5,150,105,.35);
+    color: white;
+}
+.btn-res-quick {
+    background: white; color: var(--green-700);
+    border-color: var(--green-200);
+}
+.btn-res-quick:hover { background: var(--green-50); color: var(--green-800); border-color: var(--green-300); }
+.btn-res-view {
+    background: white; color: var(--slate-600);
+    border-color: var(--slate-200);
+}
+.btn-res-view:hover { background: var(--slate-50); color: var(--slate-900); border-color: var(--slate-300); }
+
+/* ── Empty state ────────────────────────────── */
+.ci-empty {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 48px 24px; text-align: center;
+}
+.ci-empty-icon {
+    width: 72px; height: 72px;
+    background: var(--slate-100);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem; color: var(--slate-300);
+    margin-bottom: 16px;
+}
+.ci-empty-title { font-size: .95rem; font-weight: 600; color: var(--slate-700); margin-bottom: 6px; }
+.ci-empty-text  { font-size: .82rem; color: var(--slate-400); max-width: 260px; }
+
+/* ══════════════════════════════════════════════
+   RIGHT COLUMN — Guest cards
+══════════════════════════════════════════════ */
+.guest-card {
+    display: flex; flex-direction: column;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--slate-100);
+    transition: var(--transition);
+    gap: 10px;
+}
+.guest-card:last-child { border-bottom: none; }
+.guest-card:hover { background: var(--slate-50); }
+
+.guest-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.guest-card-name {
+    font-size: .875rem;
+    font-weight: 600;
+    color: var(--slate-900);
+    line-height: 1.2;
+}
+.guest-card-meta {
+    font-size: .75rem; color: var(--slate-400);
+    display: flex; align-items: center; gap: 5px; margin-top: 3px;
+    flex-wrap: wrap;
+}
+.guest-card-meta span { display: flex; align-items: center; gap: 4px; }
+.guest-card-room {
+    font-size: .78rem; font-weight: 700;
+    background: var(--slate-100); color: var(--slate-600);
+    padding: 2px 8px; border-radius: 5px; flex-shrink: 0;
+}
+.guest-card-footer {
+    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+}
+.guest-card-departure {
+    font-size: .75rem; color: var(--slate-500);
+    display: flex; align-items: center; gap: 5px;
+}
+.guest-card-actions { display: flex; gap: 6px; }
+
+.btn-ghost-sm {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 6px;
+    border: 1px solid var(--slate-200);
+    background: white;
+    color: var(--slate-500);
+    font-size: .8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+.btn-ghost-sm:hover { border-color: var(--slate-300); color: var(--slate-900); background: var(--slate-50); transform: translateY(-1px); }
+.btn-ghost-sm-green:hover { border-color: var(--green-200); color: var(--green-700); background: var(--green-50); }
+
+/* Departure "urgent" tag */
+.tag-urgent {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--amber-50); color: #92400e;
+    font-size: .68rem; font-weight: 700;
+    padding: 2px 7px; border-radius: 5px;
+    border: 1px solid var(--amber-100);
+}
+
+/* ── Departure row ──────────────────────────── */
+.dep-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--slate-100);
+    gap: 10px;
+    transition: var(--transition);
+}
+.dep-row:last-child { border-bottom: none; }
+.dep-row:hover { background: var(--amber-50); }
+
+.dep-row-info {}
+.dep-row-name { font-size: .875rem; font-weight: 600; color: var(--slate-900); }
+.dep-row-room { font-size: .75rem; color: var(--slate-400); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
+.dep-row-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.dep-time-badge {
+    font-size: .8rem; font-weight: 700;
+    background: var(--amber-100); color: #92400e;
+    padding: 4px 9px; border-radius: 6px;
+    border: 1px solid #fde68a;
+}
+.dep-actions { display: flex; gap: 6px; }
+
+.btn-dep-invoice {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: 6px; font-size: .75rem; font-weight: 500;
+    border: 1px solid var(--slate-200); background: white; color: var(--slate-600);
+    cursor: pointer; text-decoration: none; transition: var(--transition);
+}
+.btn-dep-invoice:hover { background: var(--slate-50); border-color: var(--slate-300); color: var(--slate-900); text-decoration: none; }
+.btn-dep-checkout {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: 6px; font-size: .75rem; font-weight: 600;
+    border: 1px solid var(--green-200); background: var(--green-50); color: var(--green-700);
+    cursor: pointer; text-decoration: none; transition: var(--transition);
+}
+.btn-dep-checkout:hover {
+    background: linear-gradient(135deg, var(--green-800), var(--green-600));
+    color: white; border-color: transparent;
+    box-shadow: 0 3px 8px rgba(5,150,105,.3);
+    transform: translateY(-1px);
+}
+
+/* ── Card footer ────────────────────────────── */
+.ci-card-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--slate-100);
+    background: var(--slate-50);
+    text-align: center;
+}
+.btn-ci-footer {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border-radius: var(--radius-sm);
+    font-size: .78rem; font-weight: 500;
+    color: var(--green-700); background: transparent;
+    border: 1px solid var(--green-200);
+    text-decoration: none; cursor: pointer; transition: var(--transition);
+}
+.btn-ci-footer:hover {
+    background: var(--green-50);
+    border-color: var(--green-300);
+    color: var(--green-800);
+    text-decoration: none;
+}
+
+/* ── Toast / feedback overlay ───────────────── */
+.ci-toast-wrap {
+    position: fixed; top: 24px; right: 24px; z-index: 9999;
+    display: flex; flex-direction: column; gap: 8px;
+    pointer-events: none;
+}
+.ci-toast {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 18px;
+    background: white;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    border-left: 4px solid var(--green-500);
+    font-size: .875rem; font-weight: 500;
+    color: var(--slate-800);
+    pointer-events: auto;
+    animation: slideIn .25s ease;
+    min-width: 280px; max-width: 380px;
+}
+.ci-toast-error { border-left-color: var(--red-500); }
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+</style>
+
+<div class="ci-page">
+    <!-- Toast container -->
+    <div class="ci-toast-wrap" id="toast-container"></div>
+
+    <!-- Breadcrumb -->
+    <nav class="ci-breadcrumb anim-1">
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <span class="current">Check-in</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="ci-header anim-2">
+        <div class="ci-header-left">
+            <h1 class="ci-header-title">
+                <span class="ci-header-icon"><i class="fas fa-door-open"></i></span>
+                Gestion des Check-in
+            </h1>
+            <p class="ci-header-subtitle">Arrivées, séjours en cours et départs du {{ $today->format('d/m/Y') }}</p>
+        </div>
+        <div class="ci-header-actions">
+            <a href="{{ route('checkin.search') }}" class="btn-ci btn-ci-outline">
+                <i class="fas fa-search"></i> Rechercher
+            </a>
+            <a href="{{ route('checkin.direct') }}" class="btn-ci btn-ci-primary">
+                <i class="fas fa-user-plus"></i> Check-in Direct
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerts session -->
+    @if(session('success'))
+    <div class="ci-alert ci-alert-success anim-2">
+        <span class="ci-alert-icon"><i class="fas fa-check-circle"></i></span>
+        <span>{!! session('success') !!}</span>
+        <button class="ci-alert-close" onclick="this.parentElement.remove()">✕</button>
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="ci-alert ci-alert-error anim-2">
+        <span class="ci-alert-icon"><i class="fas fa-exclamation-circle"></i></span>
+        <span>{{ session('error') }}</span>
+        <button class="ci-alert-close" onclick="this.parentElement.remove()">✕</button>
+    </div>
+    @endif
+
+    <!-- ─── Stat Cards ──────────────────────── -->
+    <div class="stats-grid anim-3">
+        <div class="stat-card stat-card--arrivals">
+            <div class="stat-card-top">
+                <div>
+                    <div class="stat-card-label">Arrivées aujourd'hui</div>
+                    <div class="stat-card-value">{{ $stats['arrivals_today'] }}</div>
                 </div>
-                <p class="text-muted">Gérez les arrivées, départs et séjours en cours</p>
+                <div class="stat-card-icon"><i class="fas fa-calendar-day"></i></div>
+            </div>
+            <div class="stat-card-meta">
+                <i class="fas fa-clock"></i>
+                Prévues pour {{ $today->format('d/m/Y') }}
             </div>
         </div>
 
-        <!-- Messages de session -->
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i>
-                {!! session('success') !!}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        @endif
-
-        <!-- Statistiques -->
-        <div class="row mb-4">
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card stat-card border-left-primary shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Arrivées aujourd'hui
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ $stats['arrivals_today'] }}
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-xs text-muted">
-                                        <i class="fas fa-calendar-day me-1"></i>
-                                        {{ $today->format('d/m/Y') }}
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-calendar-day fa-2x text-primary"></i>
-                            </div>
-                        </div>
-                    </div>
+        <div class="stat-card stat-card--staying">
+            <div class="stat-card-top">
+                <div>
+                    <div class="stat-card-label">Séjours en cours</div>
+                    <div class="stat-card-value">{{ $stats['currently_checked_in'] }}</div>
                 </div>
+                <div class="stat-card-icon"><i class="fas fa-bed"></i></div>
             </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card stat-card border-left-success shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                    Séjours en cours
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ $stats['currently_checked_in'] }}
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-xs text-muted">
-                                        <i class="fas fa-bed me-1"></i>
-                                        Dans l'hôtel
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-bed fa-2x text-success"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card stat-card border-left-warning shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                    Départs aujourd'hui
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ $stats['departures_today'] }}
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-xs text-muted">
-                                        <i class="fas fa-sign-out-alt me-1"></i>
-                                        À libérer
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-sign-out-alt fa-2x text-warning"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-xl-3 col-md-6 mb-4">
-                <div class="card stat-card border-left-info shadow h-100 py-2">
-                    <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                                    Chambres disponibles
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ $stats['available_rooms'] }}
-                                </div>
-                                <div class="mt-2">
-                                    <span class="text-xs text-muted">
-                                        <i class="fas fa-door-closed me-1"></i>
-                                        Prêtes
-                                    </span>
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-door-closed fa-2x text-info"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="stat-card-meta">
+                <i class="fas fa-hotel"></i>
+                Clients dans l'hôtel
             </div>
         </div>
 
-        <div class="row">
-            <!-- Réservations à venir -->
-            <div class="col-lg-8">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="m-0 font-weight-bold text-primary">
-                            <i class="fas fa-calendar-check me-2"></i>
-                            Réservations à venir (Aujourd'hui & Demain)
-                        </h6>
-                        <span class="badge bg-primary">{{ $upcomingReservations->count() }} jours</span>
-                    </div>
-                    <div class="card-body">
-                        @if($upcomingReservations->isEmpty())
-                            <div class="text-center py-5">
-                                <i class="fas fa-calendar-times fa-4x text-gray-300 mb-3"></i>
-                                <h5 class="text-muted">Aucune réservation à venir</h5>
-                                <p class="text-muted">Pas d'arrivées prévues pour aujourd'hui ou demain</p>
-                                <a href="{{ route('checkin.search') }}" class="btn btn-primary mt-2">
-                                    <i class="fas fa-search me-2"></i>Chercher des réservations
-                                </a>
-                            </div>
-                        @else
-                            @foreach($upcomingReservations as $date => $reservations)
-                                <div class="reservation-date">
-                                    <h6 class="font-weight-bold mb-3 d-flex justify-content-between align-items-center">
-                                        <span>
-                                            <i class="fas fa-calendar-day me-2"></i>
-                                            {{ \Carbon\Carbon::parse($date)->translatedFormat('l d F Y') }}
-                                        </span>
-                                        <span class="badge bg-secondary">{{ $reservations->count() }} réservation(s)</span>
-                                    </h6>
-                                    
-                                    <div class="table-responsive">
-                                        <table class="table table-sm table-hover mb-0">
-                                            <thead>
-                                                <tr class="bg-light">
-                                                    <th width="25%">Client</th>
-                                                    <th width="15%">Chambre</th>
-                                                    <th width="15%">Arrivée</th>
-                                                    <th width="15%">Durée</th>
-                                                    <th width="30%" class="text-center">Actions</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($reservations as $transaction)
-                                                    <tr class="list-group-item-hover">
-                                                        <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="flex-shrink-0">
-                                                                    <i class="fas fa-user-circle text-muted"></i>
-                                                                </div>
-                                                                <div class="flex-grow-1 ms-2">
-                                                                    <strong class="d-block">{{ $transaction->customer->name }}</strong>
-                                                                    <small class="text-muted">{{ $transaction->customer->phone }}</small>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <span class="badge bg-light text-dark">{{ $transaction->room->number }}</span>
-                                                            <div><small class="text-muted">{{ $transaction->room->type->name ?? 'N/A' }}</small></div>
-                                                        </td>
-                                                        <td>
-                                                            <span class="d-block">{{ $transaction->check_in->format('H:i') }}</span>
-                                                            <small class="text-muted">check-in</small>
-                                                        </td>
-                                                        <td>
-                                                            <span class="d-block">{{ $transaction->nights }} nuit(s)</span>
-                                                            <small class="text-muted">jusqu'au {{ $transaction->check_out->format('d/m') }}</small>
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <div class="btn-group btn-group-sm" role="group">
-                                                                <a href="{{ route('checkin.show', $transaction) }}" 
-                                                                   class="btn btn-outline-primary quick-action-btn">
-                                                                    <i class="fas fa-door-open me-1"></i> Check-in
-                                                                </a>
-                                                                <button onclick="quickCheckIn({{ $transaction->id }})" 
-                                                                        class="btn btn-outline-success quick-action-btn">
-                                                                    <i class="fas fa-bolt me-1"></i> Rapide
-                                                                </button>
-                                                                <a href="{{ route('transaction.show', $transaction) }}" 
-                                                                   class="btn btn-outline-info quick-action-btn">
-                                                                    <i class="fas fa-eye me-1"></i> Détails
-                                                                </a>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                @if(!$loop->last)
-                                    <hr class="my-4">
-                                @endif
-                            @endforeach
-                        @endif
-                    </div>
+        <div class="stat-card stat-card--departures">
+            <div class="stat-card-top">
+                <div>
+                    <div class="stat-card-label">Départs aujourd'hui</div>
+                    <div class="stat-card-value">{{ $stats['departures_today'] }}</div>
                 </div>
+                <div class="stat-card-icon"><i class="fas fa-sign-out-alt"></i></div>
             </div>
+            <div class="stat-card-meta">
+                <i class="fas fa-door-open"></i>
+                Chambres à libérer
+            </div>
+        </div>
 
-            <!-- Clients dans l'hôtel et départs -->
-            <div class="col-lg-4">
-                <!-- Clients dans l'hôtel -->
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="m-0 font-weight-bold text-success">
-                            <i class="fas fa-bed me-2"></i>
-                            Clients dans l'hôtel
-                        </h6>
-                        <span class="badge bg-success">{{ $activeGuests->count() }}</span>
-                    </div>
-                    <div class="card-body p-0">
-                        @if($activeGuests->isEmpty())
-                            <div class="text-center py-5">
-                                <i class="fas fa-users-slash fa-3x text-gray-300 mb-3"></i>
-                                <p class="text-muted">Aucun client actuellement</p>
-                            </div>
-                        @else
-                            <div class="list-group list-group-flush">
-                                @foreach($activeGuests as $transaction)
-                                    <div class="list-group-item list-group-item-hover">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h6 class="mb-1">
-                                                    <i class="fas fa-user-circle text-success me-1"></i>
-                                                    {{ $transaction->customer->name }}
-                                                </h6>
-                                                <small class="text-muted d-block">
-                                                    <i class="fas fa-door-closed me-1"></i>
-                                                    Chambre {{ $transaction->room->number }}
-                                                </small>
-                                                <small class="text-muted">
-                                                    <i class="fas fa-clock me-1"></i>
-                                                    Depuis {{ $transaction->check_in->diffForHumans() }}
-                                                </small>
-                                            </div>
-                                            <span class="badge bg-light text-dark">{{ $transaction->room->type->name ?? 'N/A' }}</span>
-                                        </div>
-                                        <div class="mt-3 d-flex justify-content-between align-items-center">
-                                            <small class="text-muted">
-                                                <i class="fas fa-calendar me-1"></i>
-                                                Départ: {{ $transaction->check_out->format('d/m H:i') }}
-                                            </small>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="{{ route('transaction.show', $transaction) }}" 
-                                                   class="btn btn-outline-primary btn-sm">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <button onclick="checkoutGuest({{ $transaction->id }})" 
-                                                        class="btn btn-outline-success btn-sm">
-                                                    <i class="fas fa-sign-out-alt"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                    @if($activeGuests->isNotEmpty())
-                        <div class="card-footer text-center">
-                            <a href="{{ route('transaction.index') }}?status=active" class="btn btn-sm btn-outline-success">
-                                <i class="fas fa-list me-1"></i> Voir tous les séjours
-                            </a>
-                        </div>
-                    @endif
+        <div class="stat-card stat-card--available">
+            <div class="stat-card-top">
+                <div>
+                    <div class="stat-card-label">Chambres disponibles</div>
+                    <div class="stat-card-value">{{ $stats['available_rooms'] }}</div>
                 </div>
-
-                <!-- Départs du jour -->
-                <div class="card shadow">
-                    <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                        <h6 class="m-0 font-weight-bold text-warning">
-                            <i class="fas fa-sign-out-alt me-2"></i>
-                            Départs aujourd'hui
-                        </h6>
-                        <span class="badge bg-warning">{{ $todayDepartures->count() }}</span>
-                    </div>
-                    <div class="card-body p-0">
-                        @if($todayDepartures->isEmpty())
-                            <div class="text-center py-4">
-                                <i class="fas fa-check-circle fa-2x text-gray-300 mb-3"></i>
-                                <p class="text-muted">Aucun départ prévu aujourd'hui</p>
-                            </div>
-                        @else
-                            <div class="list-group list-group-flush">
-                                @foreach($todayDepartures as $transaction)
-                                    <div class="list-group-item list-group-item-hover">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h6 class="mb-1">{{ $transaction->customer->name }}</h6>
-                                                <small class="text-muted d-block">
-                                                    <i class="fas fa-door-closed me-1"></i>
-                                                    Chambre {{ $transaction->room->number }}
-                                                </small>
-                                            </div>
-                                            <span class="badge bg-warning">
-                                                {{ $transaction->check_out->format('H:i') }}
-                                            </span>
-                                        </div>
-                                        <div class="mt-2 d-flex gap-2">
-                                            <a href="{{ route('transaction.show', $transaction) }}" 
-                                               class="btn btn-sm btn-outline-primary flex-fill">
-                                                <i class="fas fa-file-invoice me-1"></i> Facture
-                                            </a>
-                                            <button onclick="checkoutGuest({{ $transaction->id }})" 
-                                                    class="btn btn-sm btn-outline-success flex-fill">
-                                                <i class="fas fa-sign-out-alt me-1"></i> Check-out
-                                            </button>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                </div>
+                <div class="stat-card-icon"><i class="fas fa-door-closed"></i></div>
+            </div>
+            <div class="stat-card-meta">
+                <i class="fas fa-check-circle"></i>
+                Prêtes à l'accueil
             </div>
         </div>
     </div>
+
+    <!-- ─── Main Grid ──────────────────────── -->
+    <div class="ci-main-grid">
+
+        <!-- LEFT — Upcoming reservations -->
+        <div class="anim-4">
+            <div class="ci-card">
+                <div class="ci-card-header">
+                    <h2 class="ci-card-title">
+                        <span class="ci-card-title-dot" style="background:var(--blue-600)"></span>
+                        Réservations à venir
+                        <span style="font-size:.75rem;font-weight:400;color:var(--slate-400)">Aujourd'hui & Demain</span>
+                    </h2>
+                    <span class="ci-card-badge badge-blue">{{ $upcomingReservations->count() }} groupe(s)</span>
+                </div>
+
+                @if($upcomingReservations->isEmpty())
+                <div class="ci-empty">
+                    <div class="ci-empty-icon"><i class="fas fa-calendar-times"></i></div>
+                    <p class="ci-empty-title">Aucune arrivée prévue</p>
+                    <p class="ci-empty-text">Pas de réservations pour aujourd'hui ni demain</p>
+                    <a href="{{ route('checkin.search') }}" class="btn-ci btn-ci-primary" style="margin-top:16px;font-size:.82rem;">
+                        <i class="fas fa-search"></i> Chercher des réservations
+                    </a>
+                </div>
+                @else
+                    @foreach($upcomingReservations as $date => $reservations)
+                    <div class="date-group">
+                        <div class="date-group-header">
+                            <span class="date-group-label">
+                                <i class="fas fa-calendar-day" style="color:var(--blue-600)"></i>
+                                {{ \Carbon\Carbon::parse($date)->translatedFormat('l d F Y') }}
+                            </span>
+                            <span class="date-group-pill">
+                                <i class="fas fa-ticket-alt"></i>
+                                {{ $reservations->count() }} réservation{{ $reservations->count() > 1 ? 's' : '' }}
+                            </span>
+                        </div>
+
+                        @foreach($reservations as $transaction)
+                        <div class="res-row">
+                            <!-- Guest -->
+                            <div class="res-guest">
+                                <div class="res-guest-name">{{ $transaction->customer->name }}</div>
+                                <div class="res-guest-phone">
+                                    <i class="fas fa-phone fa-xs" style="color:var(--slate-300)"></i>
+                                    {{ $transaction->customer->phone }}
+                                </div>
+                            </div>
+
+                            <!-- Room -->
+                            <div style="text-align:center;">
+                                <span class="res-room-badge">N° {{ $transaction->room->number }}</span>
+                                <div style="font-size:.68rem;color:var(--slate-400);margin-top:3px;">{{ $transaction->room->type->name ?? 'N/A' }}</div>
+                            </div>
+
+                            <!-- Time -->
+                            <div class="res-time">
+                                <span class="res-time-val">{{ $transaction->check_in->format('H:i') }}</span>
+                                <span class="res-time-label">Arrivée</span>
+                            </div>
+
+                            <!-- Nights -->
+                            <div class="res-nights">
+                                <span class="res-nights-val">{{ $transaction->nights }}n</span>
+                                <span class="res-nights-label">→ {{ $transaction->check_out->format('d/m') }}</span>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="res-actions">
+                                <a href="{{ route('checkin.show', $transaction) }}" class="btn-res btn-res-checkin">
+                                    <i class="fas fa-door-open"></i> Check-in
+                                </a>
+                                <button onclick="quickCheckIn({{ $transaction->id }}, this)" class="btn-res btn-res-quick">
+                                    <i class="fas fa-bolt"></i>
+                                </button>
+                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-res btn-res-view">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    @endforeach
+                @endif
+            </div>
+        </div>
+
+        <!-- RIGHT column -->
+        <div class="anim-5">
+
+            <!-- Clients dans l'hôtel -->
+            <div class="ci-card">
+                <div class="ci-card-header">
+                    <h2 class="ci-card-title">
+                        <span class="ci-card-title-dot" style="background:var(--green-500)"></span>
+                        Dans l'hôtel
+                    </h2>
+                    <span class="ci-card-badge badge-green">{{ $activeGuests->count() }} client{{ $activeGuests->count() > 1 ? 's' : '' }}</span>
+                </div>
+
+                @if($activeGuests->isEmpty())
+                <div class="ci-empty" style="padding: 32px 20px;">
+                    <div class="ci-empty-icon" style="width:52px;height:52px;font-size:1.3rem;"><i class="fas fa-users-slash"></i></div>
+                    <p class="ci-empty-title" style="font-size:.85rem;">Aucun client en ce moment</p>
+                </div>
+                @else
+                    @foreach($activeGuests as $transaction)
+                    <div class="guest-card">
+                        <div class="guest-card-top">
+                            <div>
+                                <div class="guest-card-name">{{ $transaction->customer->name }}</div>
+                                <div class="guest-card-meta">
+                                    <span><i class="fas fa-door-closed"></i> Ch. {{ $transaction->room->number }}</span>
+                                    <span style="color:var(--slate-300)">·</span>
+                                    <span><i class="fas fa-clock"></i> {{ $transaction->check_in->diffForHumans() }}</span>
+                                </div>
+                            </div>
+                            <span class="guest-card-room">{{ $transaction->room->type->name ?? 'N/A' }}</span>
+                        </div>
+                        <div class="guest-card-footer">
+                            <div class="guest-card-departure">
+                                <i class="fas fa-calendar-minus" style="color:var(--amber-500)"></i>
+                                Départ {{ $transaction->check_out->format('d/m à H:i') }}
+                            </div>
+                            <div class="guest-card-actions">
+                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-ghost-sm" title="Voir détails">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <button onclick="checkoutGuest({{ $transaction->id }}, this)" class="btn-ghost-sm btn-ghost-sm-green" title="Check-out">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                @endif
+
+                @if($activeGuests->isNotEmpty())
+                <div class="ci-card-footer">
+                    <a href="{{ route('transaction.index') }}?status=active" class="btn-ci-footer">
+                        <i class="fas fa-list"></i> Voir tous les séjours
+                    </a>
+                </div>
+                @endif
+            </div>
+
+            <!-- Départs du jour -->
+            <div class="ci-card anim-6">
+                <div class="ci-card-header">
+                    <h2 class="ci-card-title">
+                        <span class="ci-card-title-dot" style="background:var(--amber-500)"></span>
+                        Départs aujourd'hui
+                    </h2>
+                    <span class="ci-card-badge badge-amber">{{ $todayDepartures->count() }}</span>
+                </div>
+
+                @if($todayDepartures->isEmpty())
+                <div class="ci-empty" style="padding: 28px 20px;">
+                    <div class="ci-empty-icon" style="width:52px;height:52px;font-size:1.3rem;color:var(--green-400);background:var(--green-50);"><i class="fas fa-check-circle"></i></div>
+                    <p class="ci-empty-title" style="font-size:.85rem;">Aucun départ prévu</p>
+                </div>
+                @else
+                    @foreach($todayDepartures as $transaction)
+                    <div class="dep-row">
+                        <div class="dep-row-info">
+                            <div class="dep-row-name">{{ $transaction->customer->name }}</div>
+                            <div class="dep-row-room">
+                                <i class="fas fa-door-closed"></i>
+                                Chambre {{ $transaction->room->number }}
+                            </div>
+                        </div>
+                        <div class="dep-row-right">
+                            <span class="dep-time-badge">{{ $transaction->check_out->format('H:i') }}</span>
+                            <div class="dep-actions">
+                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-dep-invoice">
+                                    <i class="fas fa-file-invoice"></i>
+                                </a>
+                                <button onclick="checkoutGuest({{ $transaction->id }}, this)" class="btn-dep-checkout">
+                                    <i class="fas fa-sign-out-alt"></i> Out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                @endif
+            </div>
+
+        </div><!-- /right col -->
+    </div><!-- /main grid -->
+</div><!-- /ci-page -->
+
 @endsection
 
 @section('footer')
 <script>
-function quickCheckIn(transactionId) {
-    if (confirm('Effectuer un check-in rapide sans formulaire détaillé ?\n\nLe client sera enregistré avec les informations de base.')) {
-        // Afficher un indicateur de chargement
-        const button = event.target;
-        const originalText = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Traitement...';
-        button.disabled = true;
-        
-        fetch(`/checkin/${transactionId}/quick`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({})
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erreur réseau');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Afficher message de succès
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                alertDiv.innerHTML = `
-                    <i class="fas fa-check-circle me-2"></i>
-                    ${data.message || 'Check-in effectué avec succès!'}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                document.querySelector('.container-fluid').prepend(alertDiv);
-                
-                // Recharger la page après 1.5 secondes
-                setTimeout(() => {
-                    location.reload();
-                }, 1500);
-            } else {
-                alert('Erreur: ' + (data.error || 'Échec du check-in'));
-                button.innerHTML = originalText;
-                button.disabled = false;
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Une erreur est survenue lors du check-in');
-            button.innerHTML = originalText;
-            button.disabled = false;
-        });
-    }
+/* ── Toast helper ─────────────────────────────── */
+function showToast(msg, type = 'success') {
+    const wrap = document.getElementById('toast-container');
+    const t = document.createElement('div');
+    t.className = 'ci-toast' + (type === 'error' ? ' ci-toast-error' : '');
+    const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+    const color = type === 'success' ? 'var(--green-500)' : 'var(--red-500)';
+    t.innerHTML = `<i class="${icon}" style="color:${color};font-size:1rem;flex-shrink:0"></i><span>${msg}</span>`;
+    wrap.appendChild(t);
+    setTimeout(() => t.style.opacity = '0', 2800);
+    setTimeout(() => t.remove(), 3100);
 }
 
-function checkoutGuest(transactionId) {
-    if (confirm('Effectuer le check-out de ce client ?\n\nLa chambre sera marquée comme à nettoyer.')) {
-        fetch(`/transaction/${transactionId}/check-out`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erreur réseau');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                alertDiv.innerHTML = `
-                    <i class="fas fa-check-circle me-2"></i>
-                    ${data.message || 'Check-out effectué avec succès!'}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-                document.querySelector('.container-fluid').prepend(alertDiv);
-                
-                setTimeout(() => {
-                    location.reload();
-                }, 1500);
-            } else {
-                alert('Erreur: ' + (data.message || 'Échec du check-out'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Une erreur est survenue lors du check-out');
-        });
-    }
+/* ── Quick check-in ───────────────────────────── */
+function quickCheckIn(id, btn) {
+    if (!confirm('Effectuer un check-in rapide sans formulaire détaillé ?\nLe client sera enregistré avec les informations de base.')) return;
+
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    fetch(`/checkin/${id}/quick`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+    })
+    .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+    .then(data => {
+        if (data.success) {
+            showToast(data.message || 'Check-in effectué avec succès !');
+            setTimeout(() => location.reload(), 1600);
+        } else {
+            showToast(data.error || 'Échec du check-in', 'error');
+            btn.innerHTML = orig;
+            btn.disabled = false;
+        }
+    })
+    .catch(() => {
+        showToast('Une erreur est survenue', 'error');
+        btn.innerHTML = orig;
+        btn.disabled = false;
+    });
+}
+
+/* ── Check-out ────────────────────────────────── */
+function checkoutGuest(id, btn) {
+    if (!confirm('Effectuer le check-out de ce client ?\nLa chambre sera marquée comme à nettoyer.')) return;
+
+    const orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    fetch(`/transaction/${id}/check-out`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+    .then(data => {
+        if (data.success) {
+            showToast(data.message || 'Check-out effectué avec succès !');
+            setTimeout(() => location.reload(), 1600);
+        } else {
+            showToast(data.message || 'Échec du check-out', 'error');
+            btn.innerHTML = orig;
+            btn.disabled = false;
+        }
+    })
+    .catch(() => {
+        showToast('Une erreur est survenue', 'error');
+        btn.innerHTML = orig;
+        btn.disabled = false;
+    });
 }
 </script>
 @endsection

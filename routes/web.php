@@ -500,6 +500,12 @@ Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'check
     Route::get('/to-clean', [HousekeepingController::class, 'toClean'])->name('to-clean');
     Route::get('/quick-list/{status}', [HousekeepingController::class, 'quickList'])->name('quick-list');
 
+     // ✅ AJOUTE CETTE ROUTE ICI (vers ligne 1030)
+    Route::post('/room/{room}/mark-cleaned', [HousekeepingController::class, 'markAsCleaned'])
+        ->name('mark-cleaned')
+        ->middleware('checkrole:Super,Admin,Housekeeping');
+        
+
     // Rapports et statistiques
     Route::get('/reports', [HousekeepingController::class, 'reports'])->name('reports');
     Route::get('/daily-report', [HousekeepingController::class, 'dailyReport'])->name('daily-report');

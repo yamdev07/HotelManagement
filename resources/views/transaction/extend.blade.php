@@ -3,263 +3,511 @@
 @section('content')
 
 <style>
-    .extend-card {
-        border-radius: 10px;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    .date-preview {
-        background-color: #f8f9fa;
-        border-radius: 8px;
-        padding: 15px;
-        margin-top: 10px;
-    }
-    
-    .price-breakdown {
-        background-color: #e8f4f8;
-        border-left: 4px solid #17a2b8;
-        padding: 15px;
-        border-radius: 6px;
-    }
-    
-    .night-option {
-        border: 1px solid #dee2e6;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 10px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .night-option:hover {
-        border-color: #0dcaf0;
-        background-color: #f8f9fa;
-    }
-    
-    .night-option.selected {
-        border-color: #198754;
-        background-color: #d1e7dd;
-    }
-    
-    .night-badge {
-        font-size: 0.9rem;
-        padding: 5px 10px;
-        border-radius: 20px;
-    }
+/* ═══════════════════════════════════════════════════════════════
+   STYLES TRANSACTION EXTEND - Design moderne cohérent
+═══════════════════════════════════════════════════════════════════ */
+:root {
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --primary-soft: rgba(37, 99, 235, 0.08);
+    --success: #10b981;
+    --success-light: rgba(16, 185, 129, 0.08);
+    --warning: #f59e0b;
+    --warning-light: rgba(245, 158, 11, 0.08);
+    --danger: #ef4444;
+    --danger-light: rgba(239, 68, 68, 0.08);
+    --info: #3b82f6;
+    --info-light: rgba(59, 130, 246, 0.08);
+    --dark: #1e293b;
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --radius: 12px;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.05);
+    --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
+    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ────────── CARTE PRINCIPALE ────────── */
+.extend-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    transition: var(--transition);
+    margin-bottom: 20px;
+}
+.extend-card:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: var(--gray-300);
+}
+
+.extend-card .card-header {
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 16px 20px;
+}
+.extend-card .card-header h5 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+.extend-card .card-header h5 i {
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.extend-card .card-body {
+    padding: 24px;
+}
+
+/* ────────── SÉLECTION DE NUITS ────────── */
+.night-option {
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: var(--transition);
+    background: white;
+    text-align: center;
+}
+.night-option:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    transform: translateY(-2px);
+}
+.night-option.selected {
+    border-color: var(--success);
+    background: var(--success-light);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1);
+}
+.night-option .h4 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-800);
+    margin-bottom: 4px;
+}
+.night-option small {
+    color: var(--gray-500);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+.night-option.selected .h4 {
+    color: var(--success);
+}
+
+/* ────────── PRÉVISUALISATION ────────── */
+.date-preview {
+    background: var(--gray-50);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid var(--gray-200);
+}
+.date-preview h6 {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 16px;
+}
+.preview-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+.preview-number.primary { color: var(--primary); }
+.preview-number.success { color: var(--success); }
+.preview-label {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ────────── DÉTAILS DU PRIX ────────── */
+.price-breakdown {
+    background: var(--primary-soft);
+    border-left: 4px solid var(--primary);
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid rgba(37, 99, 235, 0.1);
+}
+.price-breakdown h6 {
+    color: var(--primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+.price-label {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    margin-bottom: 4px;
+}
+.price-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+.price-value.primary { color: var(--primary); }
+.price-value.success { color: var(--success); }
+
+/* ────────── BOUTONS ────────── */
+.btn-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid transparent;
+    transition: var(--transition);
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.btn-modern:hover {
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+.btn-primary-modern {
+    background: var(--primary);
+    color: white;
+}
+.btn-primary-modern:hover {
+    background: var(--primary-light);
+    color: white;
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
+}
+.btn-outline-modern {
+    background: transparent;
+    color: var(--gray-700);
+    border: 1px solid var(--gray-300);
+}
+.btn-outline-modern:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-400);
+    color: var(--gray-800);
+}
+
+/* ────────── SIDEBAR ────────── */
+.info-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+.info-card .card-header {
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+    padding: 14px 16px;
+}
+.info-card .card-header h5, 
+.info-card .card-header h6 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.info-card .card-body {
+    padding: 16px;
+}
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--gray-100);
+}
+.info-item:last-child {
+    border-bottom: none;
+}
+.info-label {
+    font-size: 0.8rem;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.info-value {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+/* ────────── CARTE IMPORTANT ────────── */
+.important-card {
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    background: var(--warning-light);
+}
+.important-card .card-header {
+    background: rgba(245, 158, 11, 0.1);
+    border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+    color: #b45309;
+}
+.important-card .card-header h6 i {
+    color: #b45309;
+}
+.important-card .card-body ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.important-card .card-body li {
+    padding: 6px 0;
+    font-size: 0.8rem;
+    color: var(--gray-700);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.important-card .card-body li i {
+    color: #b45309;
+    font-size: 0.7rem;
+}
+
+/* ────────── BREADCRUMB ────────── */
+.breadcrumb-modern {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--gray-500);
+    margin-bottom: 16px;
+}
+.breadcrumb-modern a {
+    color: var(--gray-500);
+    text-decoration: none;
+}
+.breadcrumb-modern a:hover {
+    color: var(--primary);
+}
+.breadcrumb-modern .sep {
+    color: var(--gray-300);
+    font-size: 0.7rem;
+}
+
+/* ────────── FORMULAIRES ────────── */
+.form-control-modern {
+    border: 1px solid var(--gray-200);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    transition: var(--transition);
+}
+.form-control-modern:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-soft);
+}
+.input-group-modern {
+    display: flex;
+    align-items: center;
+}
+.input-group-modern .input-group-text {
+    background: var(--gray-100);
+    border: 1px solid var(--gray-200);
+    border-left: none;
+    border-radius: 0 6px 6px 0;
+    padding: 8px 12px;
+    color: var(--gray-600);
+}
 </style>
 
-<div class="container-fluid">
-    <div class="row mb-4">
-        <div class="col-12">
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('dashboard.index') }}">Dashboard</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('transaction.index') }}">Réservations</a>
-                    </li>
-                    <li class="breadcrumb-item">
-                        <a href="{{ route('transaction.show', $transaction) }}">#{{ $transaction->id }}</a>
-                    </li>
-                    <li class="breadcrumb-item active">Prolonger</li>
-                </ol>
-            </nav>
-            
-            <div class="d-flex justify-content-between align-items-center">
-                <h2 class="h4 mb-0">
-                    <i class="fas fa-calendar-plus text-primary me-2"></i>
-                    Prolonger la Réservation #{{ $transaction->id }}
-                </h2>
-                <a href="{{ route('transaction.show', $transaction) }}" class="btn btn-outline-secondary">
-                    <i class="fas fa-arrow-left me-2"></i>Retour aux détails
-                </a>
-            </div>
-            <p class="text-muted">Ajoutez des nuits supplémentaires au séjour du client</p>
+<div class="container-fluid px-4 py-3">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-modern">
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <a href="{{ route('transaction.index') }}">Réservations</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <a href="{{ route('transaction.show', $transaction) }}">#{{ $transaction->id }}</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <span style="color: var(--gray-700); font-weight: 500;">Prolonger</span>
+    </div>
+
+    <!-- En-tête -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h4 mb-1" style="color: var(--gray-800); font-weight: 700;">
+                <i class="fas fa-calendar-plus me-2" style="color: var(--primary);"></i>
+                Prolonger la Réservation #{{ $transaction->id }}
+            </h2>
+            <p class="text-muted small mb-0">Ajoutez des nuits supplémentaires au séjour du client</p>
         </div>
+        
+        <a href="{{ route('transaction.show', $transaction) }}" class="btn-modern btn-outline-modern">
+            <i class="fas fa-arrow-left me-1"></i>Retour
+        </a>
     </div>
 
     <!-- Messages de session -->
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle me-2"></i>
-            {!! session('success') !!}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i> {!! session('success') !!}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     @endif
-
+    
     @if(session('error') || session('failed'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle me-2"></i>
-            {!! session('error') ?? session('failed') !!}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i> {!! session('error') ?? session('failed') !!}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
     @endif
 
     <div class="row">
         <div class="col-lg-8">
-            <div class="card extend-card">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Prolonger le séjour</h5>
+            <div class="extend-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-calendar-alt me-2"></i>Prolonger le séjour</h5>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ route('transaction.extend.process', $transaction) }}" id="extend-form">
                         @csrf
                         
                         <!-- Informations actuelles -->
-                        <div class="alert alert-info mb-4">
-                            <h6><i class="fas fa-info-circle me-2"></i>Séjour actuel</h6>
-                            <div class="row mt-2">
-                                <div class="col-md-6">
-                                    <small class="text-muted">Client</small>
-                                    <p class="mb-1"><strong>{{ $transaction->customer->name }}</strong></p>
+                        <div class="alert alert-info d-flex align-items-center gap-3 mb-4" style="background: var(--info-light); border: 1px solid rgba(59, 130, 246, 0.1); color: #1e40af;">
+                            <i class="fas fa-info-circle fa-2x"></i>
+                            <div>
+                                <strong>Séjour actuel</strong>
+                                <div class="row mt-2">
+                                    <div class="col-md-6">
+                                        <small>Client</small>
+                                        <p class="mb-1"><strong>{{ $transaction->customer->name }}</strong></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <small>Chambre</small>
+                                        <p class="mb-1"><strong>Chambre {{ $transaction->room->number }}</strong></p>
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <small class="text-muted">Chambre</small>
-                                    <p class="mb-1"><strong>Chambre {{ $transaction->room->number }}</strong></p>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <small class="text-muted">Arrivée</small>
-                                    <p class="mb-1">
-                                        <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</strong>
-                                    </p>
-                                </div>
-                                <div class="col-md-4">
-                                    <small class="text-muted">Départ actuel</small>
-                                    <p class="mb-1">
-                                        <strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</strong>
-                                    </p>
-                                </div>
-                                <div class="col-md-4">
-                                    <small class="text-muted">Nuits actuelles</small>
-                                    <p class="mb-1">
-                                        <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out) }}</strong>
-                                    </p>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <small>Arrivée</small>
+                                        <p class="mb-1"><strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</strong></p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small>Départ actuel</small>
+                                        <p class="mb-1"><strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</strong></p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <small>Nuits actuelles</small>
+                                        <p class="mb-1"><strong>{{ \Carbon\Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out) }}</strong></p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Sélection du nombre de nuits supplémentaires -->
                         <div class="mb-4">
-                            <h6 class="border-bottom pb-2 mb-3">
-                                <i class="fas fa-moon me-2"></i>Nombre de nuits supplémentaires
+                            <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--gray-700); margin-bottom: 16px; border-bottom: 1px solid var(--gray-200); padding-bottom: 8px;">
+                                <i class="fas fa-moon me-2" style="color: var(--primary);"></i>Nombre de nuits supplémentaires
                             </h6>
                             
-                            <div class="row" id="nights-options">
-                                <!-- Options de nuits prédéfinies -->
+                            <div class="row g-3 mb-3" id="nights-options">
+                                @foreach([1, 2, 3, 7] as $night)
                                 <div class="col-md-3">
-                                    <div class="night-option" data-nights="1" onclick="selectNights(1)">
-                                        <div class="text-center">
-                                            <div class="h4 mb-1">1</div>
-                                            <small class="text-muted">Nuit</small>
-                                        </div>
+                                    <div class="night-option" data-nights="{{ $night }}" onclick="selectNights({{ $night }})">
+                                        <div class="h4">{{ $night }}</div>
+                                        <small>{{ $night == 1 ? 'Nuit' : 'Nuits' }}</small>
                                     </div>
                                 </div>
-                                <div class="col-md-3">
-                                    <div class="night-option" data-nights="2" onclick="selectNights(2)">
-                                        <div class="text-center">
-                                            <div class="h4 mb-1">2</div>
-                                            <small class="text-muted">Nuits</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="night-option" data-nights="3" onclick="selectNights(3)">
-                                        <div class="text-center">
-                                            <div class="h4 mb-1">3</div>
-                                            <small class="text-muted">Nuits</small>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="night-option" data-nights="7" onclick="selectNights(7)">
-                                        <div class="text-center">
-                                            <div class="h4 mb-1">7</div>
-                                            <small class="text-muted">Nuits</small>
-                                        </div>
-                                    </div>
-                                </div>
+                                @endforeach
                             </div>
                             
                             <!-- Sélection personnalisée -->
-                            <div class="mt-3">
-                                <label for="additional_nights" class="form-label">
-                                    <i class="fas fa-sliders-h me-1"></i>Ou nombre personnalisé
+                            <div class="mt-4">
+                                <label for="additional_nights" class="form-label" style="font-size: 0.85rem; font-weight: 500; color: var(--gray-700);">
+                                    <i class="fas fa-sliders-h me-1" style="color: var(--primary);"></i>Nombre personnalisé
                                 </label>
                                 <div class="input-group">
                                     <input type="number" 
-                                           class="form-control @error('additional_nights') is-invalid @enderror" 
+                                           class="form-control" 
                                            id="additional_nights" 
                                            name="additional_nights" 
                                            min="1" 
                                            max="30" 
                                            value="{{ old('additional_nights', 1) }}"
                                            required
-                                           onchange="updatePreview()">
-                                    <span class="input-group-text">nuit(s)</span>
-                                    @error('additional_nights')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                           onchange="updatePreview()"
+                                           style="border-radius: 6px 0 0 6px; border: 1px solid var(--gray-200); padding: 8px 12px;">
+                                    <span class="input-group-text" style="background: var(--gray-100); border: 1px solid var(--gray-200); border-left: none; border-radius: 0 6px 6px 0; color: var(--gray-600);">nuit(s)</span>
                                 </div>
-                                <small class="text-muted">Maximum 30 nuits supplémentaires</small>
+                                @error('additional_nights')
+                                    <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+                                <small class="text-muted" style="font-size: 0.7rem;">Maximum 30 nuits supplémentaires</small>
                             </div>
                         </div>
 
                         <!-- Nouvelle date de départ -->
                         <div class="mb-4">
-                            <label for="new_check_out" class="form-label fw-bold">
-                                <i class="fas fa-calendar-day me-1"></i>Nouvelle date de départ
+                            <label for="new_check_out" class="form-label" style="font-size: 0.85rem; font-weight: 500; color: var(--gray-700);">
+                                <i class="fas fa-calendar-day me-1" style="color: var(--primary);"></i>Nouvelle date de départ
                             </label>
                             <div class="input-group">
                                 <input type="date" 
-                                       class="form-control @error('new_check_out') is-invalid @enderror" 
+                                       class="form-control" 
                                        id="new_check_out" 
                                        name="new_check_out" 
                                        value="{{ old('new_check_out', $suggestedDate->format('Y-m-d')) }}"
                                        required
-                                       onchange="updateNightsFromDate()">
-                                <span class="input-group-text">
+                                       onchange="updateNightsFromDate()"
+                                       style="border-radius: 6px 0 0 6px; border: 1px solid var(--gray-200); padding: 8px 12px;">
+                                <span class="input-group-text" style="background: var(--gray-100); border: 1px solid var(--gray-200); border-left: none; border-radius: 0 6px 6px 0; color: var(--gray-600);">
                                     <i class="fas fa-calendar"></i>
                                 </span>
-                                @error('new_check_out')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
                             </div>
-                            <small class="text-muted">
+                            @error('new_check_out')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                            <small class="text-muted" style="font-size: 0.7rem;">
                                 Départ actuel : {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}
                             </small>
                         </div>
 
                         <!-- Prévisualisation -->
                         <div class="date-preview mb-4">
-                            <h6><i class="fas fa-eye me-2"></i>Prévisualisation</h6>
-                            <div class="row mt-3">
-                                <div class="col-md-4 text-center">
-                                    <p class="mb-1"><small>Nuits actuelles</small></p>
-                                    <p id="current-nights" class="h4 mb-0">0</p>
+                            <h6><i class="fas fa-eye me-2" style="color: var(--primary);"></i>Prévisualisation</h6>
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <div class="preview-number">{{ \Carbon\Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out) }}</div>
+                                    <div class="preview-label">Nuits actuelles</div>
                                 </div>
-                                <div class="col-md-4 text-center">
-                                    <p class="mb-1"><small>Nuits supplémentaires</small></p>
-                                    <p id="additional-nights-preview" class="h4 mb-0 text-primary">0</p>
+                                <div class="col-md-4">
+                                    <div class="preview-number primary" id="additional-nights-preview">0</div>
+                                    <div class="preview-label">Nuits supplémentaires</div>
                                 </div>
-                                <div class="col-md-4 text-center">
-                                    <p class="mb-1"><small>Total nuits</small></p>
-                                    <p id="total-nights" class="h4 mb-0 text-success">0</p>
+                                <div class="col-md-4">
+                                    <div class="preview-number success" id="total-nights">0</div>
+                                    <div class="preview-label">Total nuits</div>
                                 </div>
                             </div>
-                            <div class="row mt-2">
+                            <div class="row mt-3">
                                 <div class="col-md-6">
-                                    <p class="mb-1"><small>Nouvelle date de départ</small></p>
-                                    <p id="new-check-out-preview" class="h5 mb-0">-</p>
+                                    <div class="preview-label">Nouvelle date de départ</div>
+                                    <div class="h5 mb-0" id="new-check-out-preview">-</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <p class="mb-1"><small>Statut de disponibilité</small></p>
-                                    <p id="availability-status" class="mb-0">
-                                        <span class="badge bg-secondary">Non vérifié</span>
-                                    </p>
+                                    <div class="preview-label">Disponibilité</div>
+                                    <div id="availability-status">
+                                        <span class="badge" style="background: var(--gray-200); color: var(--gray-600);">Non vérifié</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -267,62 +515,59 @@
                         <!-- Détails du prix -->
                         <div class="price-breakdown mb-4">
                             <h6><i class="fas fa-calculator me-2"></i>Détails du prix</h6>
-                            <div class="row mt-3">
+                            <div class="row">
                                 <div class="col-md-6">
-                                    <p class="mb-1"><small>Prix par nuit</small></p>
-                                    <p class="h5 mb-0 text-info">
-                                        {{ number_format($transaction->room->price, 0, ',', ' ') }} CFA
-                                    </p>
+                                    <div class="price-label">Prix par nuit</div>
+                                    <div class="price-value primary">{{ number_format($transaction->room->price, 0, ',', ' ') }} CFA</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <p class="mb-1"><small>Total actuel</small></p>
-                                    <p class="h5 mb-0">
-                                        {{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA
-                                    </p>
+                                    <div class="price-label">Total actuel</div>
+                                    <div class="price-value">{{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA</div>
                                 </div>
                             </div>
-                            <div class="row mt-3 pt-3 border-top">
+                            <div class="row mt-3 pt-3" style="border-top: 1px solid rgba(37, 99, 235, 0.1);">
                                 <div class="col-md-6">
-                                    <p class="mb-1"><small>Supplément</small></p>
-                                    <p id="additional-price" class="h4 mb-0 text-primary">0 CFA</p>
+                                    <div class="price-label">Supplément</div>
+                                    <div class="price-value primary" id="additional-price">0 CFA</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <p class="mb-1"><small>Nouveau total</small></p>
-                                    <p id="new-total-price" class="h4 mb-0 text-success">0 CFA</p>
+                                    <div class="price-label">Nouveau total</div>
+                                    <div class="price-value success" id="new-total-price">0 CFA</div>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Vérification de disponibilité -->
                         <div class="mb-4">
-                            <button type="button" id="check-availability-btn" class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-search me-2"></i>Vérifier disponibilité de la chambre
+                            <button type="button" id="check-availability-btn" class="btn-modern btn-outline-modern">
+                                <i class="fas fa-search me-1"></i>Vérifier disponibilité
                             </button>
                             <div id="availability-result" class="mt-2"></div>
                         </div>
 
                         <!-- Notes -->
                         <div class="mb-4">
-                            <label for="notes" class="form-label">
-                                <i class="fas fa-sticky-note me-1"></i>Notes de prolongation (optionnel)
+                            <label for="notes" class="form-label" style="font-size: 0.85rem; font-weight: 500; color: var(--gray-700);">
+                                <i class="fas fa-sticky-note me-1" style="color: var(--primary);"></i>Notes (optionnel)
                             </label>
-                            <textarea class="form-control @error('notes') is-invalid @enderror" 
+                            <textarea class="form-control" 
                                       id="notes" 
                                       name="notes" 
                                       rows="3"
+                                      style="border: 1px solid var(--gray-200); border-radius: 6px; padding: 8px 12px;"
                                       placeholder="Raison de la prolongation, instructions spéciales...">{{ old('notes') }}</textarea>
                             @error('notes')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                         </div>
 
                         <!-- Boutons -->
-                        <div class="d-flex justify-content-between mt-4">
-                            <a href="{{ route('transaction.show', $transaction) }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-times me-2"></i>Annuler
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ route('transaction.show', $transaction) }}" class="btn-modern btn-outline-modern">
+                                <i class="fas fa-times me-1"></i>Annuler
                             </a>
-                            <button type="submit" class="btn btn-primary" id="extend-btn">
-                                <i class="fas fa-calendar-plus me-2"></i>Confirmer la prolongation
+                            <button type="submit" class="btn-modern btn-primary-modern" id="extend-btn">
+                                <i class="fas fa-calendar-plus me-1"></i>Confirmer la prolongation
                             </button>
                         </div>
                     </form>
@@ -330,57 +575,57 @@
             </div>
         </div>
 
-        <!-- Sidebar - Informations -->
+        <!-- Sidebar -->
         <div class="col-lg-4">
             <!-- Résumé -->
-            <div class="card mb-4">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Résumé</h5>
+            <div class="info-card">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle" style="color: var(--primary);"></i>Résumé</h5>
                 </div>
                 <div class="card-body">
-                    <div class="list-group list-group-flush">
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><i class="fas fa-user me-2 text-muted"></i>Client</span>
-                            <strong>{{ $transaction->customer->name }}</strong>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><i class="fas fa-bed me-2 text-muted"></i>Chambre</span>
-                            <strong>Chambre {{ $transaction->room->number }}</strong>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><i class="fas fa-calendar-check me-2 text-muted"></i>Arrivée</span>
-                            <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</strong>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><i class="fas fa-calendar-times me-2 text-muted"></i>Départ actuel</span>
-                            <strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</strong>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><i class="fas fa-money-bill me-2 text-muted"></i>Prix/nuit</span>
-                            <strong>{{ number_format($transaction->room->price, 0, ',', ' ') }} CFA</strong>
-                        </div>
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <span><i class="fas fa-chart-line me-2 text-muted"></i>Statut</span>
-                            <span class="badge bg-{{ $transaction->status == 'active' ? 'success' : 'warning' }}">
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-user"></i>Client</span>
+                        <span class="info-value">{{ $transaction->customer->name }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-bed"></i>Chambre</span>
+                        <span class="info-value">{{ $transaction->room->number }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-calendar-check"></i>Arrivée</span>
+                        <span class="info-value">{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-calendar-times"></i>Départ actuel</span>
+                        <span class="info-value">{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-money-bill"></i>Prix/nuit</span>
+                        <span class="info-value">{{ number_format($transaction->room->price, 0, ',', ' ') }} CFA</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label"><i class="fas fa-chart-line"></i>Statut</span>
+                        <span class="info-value">
+                            <span class="badge" style="background: {{ $transaction->status == 'active' ? 'var(--success-light)' : 'var(--warning-light)' }}; color: {{ $transaction->status == 'active' ? '#047857' : '#b45309' }};">
                                 {{ $transaction->status == 'active' ? 'Dans l\'hôtel' : 'Réservation' }}
                             </span>
-                        </div>
+                        </span>
                     </div>
                 </div>
             </div>
 
             <!-- Important -->
-            <div class="card border-warning">
-                <div class="card-header bg-warning text-dark">
-                    <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Important</h6>
+            <div class="info-card important-card">
+                <div class="card-header">
+                    <h6><i class="fas fa-exclamation-triangle"></i>Important</h6>
                 </div>
                 <div class="card-body">
-                    <ul class="mb-0">
-                        <li>La prolongation prend effet immédiatement</li>
-                        <li>Le supplément sera ajouté au total de la réservation</li>
-                        <li>Vérifiez toujours la disponibilité de la chambre</li>
-                        <li>Le client sera notifié de la prolongation</li>
-                        <li>Toute modification est enregistrée dans l'historique</li>
+                    <ul>
+                        <li><i class="fas fa-check-circle"></i> La prolongation prend effet immédiatement</li>
+                        <li><i class="fas fa-check-circle"></i> Le supplément sera ajouté au total</li>
+                        <li><i class="fas fa-check-circle"></i> Vérifiez la disponibilité de la chambre</li>
+                        <li><i class="fas fa-check-circle"></i> Le client sera notifié</li>
+                        <li><i class="fas fa-check-circle"></i> Toute modification est enregistrée</li>
                     </ul>
                 </div>
             </div>
@@ -419,7 +664,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mettre à jour l'affichage
         document.getElementById('additional-nights-preview').textContent = additionalNights;
         document.getElementById('total-nights').textContent = currentNights + additionalNights;
-        document.getElementById('current-nights').textContent = currentNights;
         document.getElementById('new-check-out-preview').textContent = 
             newCheckOutDate.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
         
@@ -431,7 +675,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('new-total-price').textContent = formatPrice(newTotalPrice);
         
         // Mettre à jour les options sélectionnées
-        updateSelectedNightOption(additionalNights);
+        document.querySelectorAll('.night-option').forEach(option => {
+            const optionNights = parseInt(option.getAttribute('data-nights'));
+            if (optionNights === additionalNights) {
+                option.classList.add('selected');
+            } else {
+                option.classList.remove('selected');
+            }
+        });
     }
     
     // Mettre à jour le nombre de nuits à partir de la date
@@ -456,19 +707,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.selectNights = function(nights) {
         document.getElementById('additional_nights').value = nights;
         updatePreview();
-    }
-    
-    // Mettre à jour l'option sélectionnée
-    function updateSelectedNightOption(nights) {
-        document.querySelectorAll('.night-option').forEach(option => {
-            const optionNights = parseInt(option.getAttribute('data-nights'));
-            if (optionNights === nights) {
-                option.classList.add('selected');
-            } else {
-                option.classList.remove('selected');
-            }
-        });
-    }
+    };
     
     // Vérifier la disponibilité
     async function checkAvailability() {
@@ -489,7 +728,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Afficher chargement
             const checkBtn = document.getElementById('check-availability-btn');
             const originalText = checkBtn.innerHTML;
-            checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Vérification...';
+            checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Vérification...';
             checkBtn.disabled = true;
             
             const response = await fetch(`/transaction/${transactionId}/check-availability`, {
@@ -517,34 +756,30 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (data.available) {
                 resultDiv.innerHTML = `
-                    <div class="alert alert-success">
-                        <i class="fas fa-check-circle me-2"></i>
-                        <strong>Disponible !</strong> La chambre est libre pour la période de prolongation.
+                    <div class="alert alert-success py-2" style="background: var(--success-light); border: 1px solid rgba(16, 185, 129, 0.2); color: #047857;">
+                        <i class="fas fa-check-circle me-1"></i> Disponible !
                     </div>
                 `;
-                statusBadge.innerHTML = '<span class="badge bg-success">Disponible ✓</span>';
+                statusBadge.innerHTML = '<span class="badge" style="background: var(--success); color: white;">Disponible ✓</span>';
             } else {
                 resultDiv.innerHTML = `
-                    <div class="alert alert-danger">
-                        <i class="fas fa-times-circle me-2"></i>
-                        <strong>Non disponible !</strong> ${data.message}
+                    <div class="alert alert-danger py-2" style="background: var(--danger-light); border: 1px solid rgba(239, 68, 68, 0.2); color: #b91c1c;">
+                        <i class="fas fa-times-circle me-1"></i> Non disponible !
                     </div>
                 `;
-                statusBadge.innerHTML = '<span class="badge bg-danger">Non disponible ✗</span>';
+                statusBadge.innerHTML = '<span class="badge" style="background: var(--danger); color: white;">Non disponible ✗</span>';
             }
             
         } catch (error) {
             console.error('Erreur:', error);
             document.getElementById('availability-result').innerHTML = `
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Erreur lors de la vérification
+                <div class="alert alert-warning py-2" style="background: var(--warning-light); border: 1px solid rgba(245, 158, 11, 0.2); color: #b45309;">
+                    <i class="fas fa-exclamation-triangle me-1"></i> Erreur lors de la vérification
                 </div>
             `;
             
-            // Restaurer le bouton
             const checkBtn = document.getElementById('check-availability-btn');
-            checkBtn.innerHTML = '<i class="fas fa-search me-2"></i>Vérifier disponibilité de la chambre';
+            checkBtn.innerHTML = '<i class="fas fa-search me-1"></i>Vérifier disponibilité';
             checkBtn.disabled = false;
         }
     }
@@ -569,21 +804,10 @@ document.addEventListener('DOMContentLoaded', function() {
             return false;
         }
         
-        // Confirmation
-        const confirmationMessage = `Confirmez-vous la prolongation du séjour ?\n\n` +
-                                  `+${additionalNights} nuit(s) supplémentaire(s)\n` +
-                                  `Nouvelle date de départ: ${new Date(newCheckOut).toLocaleDateString('fr-FR')}\n` +
-                                  `Supplément: ${formatPrice(additionalNights * pricePerNight)}`;
-        
-        if (!confirm(confirmationMessage)) {
-            e.preventDefault();
-            return false;
-        }
-        
         // Désactiver le bouton pour éviter double soumission
         const extendBtn = document.getElementById('extend-btn');
         extendBtn.disabled = true;
-        extendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Traitement en cours...';
+        extendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Traitement...';
         
         return true;
     });
