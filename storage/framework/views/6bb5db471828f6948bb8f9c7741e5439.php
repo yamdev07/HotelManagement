@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Gestion des Paiements')
-@section('content')
+
+<?php $__env->startSection('title', 'Gestion des Paiements'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
@@ -632,7 +632,7 @@
 <div class="payments-page">
     <!-- Breadcrumb -->
     <div class="breadcrumb-custom">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Paiements</span>
     </div>
@@ -647,7 +647,7 @@
                 <h1>Gestion des Paiements</h1>
             </div>
             <p class="header-subtitle">
-                {{ $payments->total() }} paiement(s) enregistré(s)
+                <?php echo e($payments->total()); ?> paiement(s) enregistré(s)
             </p>
         </div>
         
@@ -684,16 +684,16 @@
 
     <!-- Stats cards -->
     <div class="stats-grid">
-        @php
+        <?php
             $totalAmount = $payments->sum('amount');
             $todayAmount = $payments->where('created_at', '>=', now()->startOfDay())->sum('amount');
-        @endphp
+        ?>
         
         <div class="stat-card-modern">
             <div class="stat-icon-wrapper primary">
                 <i class="fas fa-coins fa-lg"></i>
             </div>
-            <div class="stat-number">{{ Helper::formatCFA($totalAmount) }}</div>
+            <div class="stat-number"><?php echo e(Helper::formatCFA($totalAmount)); ?></div>
             <div class="stat-label">Total des paiements</div>
             <div class="stat-badge">Global</div>
         </div>
@@ -702,16 +702,16 @@
             <div class="stat-icon-wrapper success">
                 <i class="fas fa-calendar-day fa-lg"></i>
             </div>
-            <div class="stat-number">{{ Helper::formatCFA($todayAmount) }}</div>
+            <div class="stat-number"><?php echo e(Helper::formatCFA($todayAmount)); ?></div>
             <div class="stat-label">Reçu aujourd'hui</div>
-            <div class="stat-badge">{{ now()->format('d/m/Y') }}</div>
+            <div class="stat-badge"><?php echo e(now()->format('d/m/Y')); ?></div>
         </div>
         
         <div class="stat-card-modern">
             <div class="stat-icon-wrapper info">
                 <i class="fas fa-users fa-lg"></i>
             </div>
-            <div class="stat-number">{{ $payments->unique('transaction.customer_id')->count() }}</div>
+            <div class="stat-number"><?php echo e($payments->unique('transaction.customer_id')->count()); ?></div>
             <div class="stat-label">Clients uniques</div>
             <div class="stat-badge">Paiements</div>
         </div>
@@ -720,7 +720,7 @@
             <div class="stat-icon-wrapper warning">
                 <i class="fas fa-bed fa-lg"></i>
             </div>
-            <div class="stat-number">{{ $payments->unique('transaction.room_id')->count() }}</div>
+            <div class="stat-number"><?php echo e($payments->unique('transaction.room_id')->count()); ?></div>
             <div class="stat-label">Chambres payées</div>
             <div class="stat-badge">Réservations</div>
         </div>
@@ -741,7 +741,7 @@
         </div>
         
         <div class="card-body-modern p-0">
-            @if($payments->count() > 0)
+            <?php if($payments->count() > 0): ?>
                 <div class="table-container">
                     <table class="table-modern" id="paymentsTable">
                         <thead>
@@ -756,8 +756,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($payments as $payment)
-                                @php
+                            <?php $__currentLoopData = $payments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $statusClass = [
                                         'completed' => 'badge-completed',
                                         'pending' => 'badge-pending',
@@ -775,13 +775,14 @@
                                     ];
                                     
                                     $isToday = $payment->created_at->isToday();
-                                @endphp
+                                ?>
                                 
-                                <tr style="{{ $isToday ? 'background: var(--primary-50);' : '' }}">
+                                <tr style="<?php echo e($isToday ? 'background: var(--primary-50);' : ''); ?>">
                                     <!-- ID -->
                                     <td>
                                         <span class="badge-modern" style="background: var(--gray-800); color: white; border: none;">
-                                            #{{ $payment->id }}
+                                            #<?php echo e($payment->id); ?>
+
                                         </span>
                                     </td>
                                     
@@ -793,11 +794,13 @@
                                             </div>
                                             <div>
                                                 <div style="font-weight: 600; color: var(--gray-800);">
-                                                    {{ $payment->transaction->customer->name ?? 'N/A' }}
+                                                    <?php echo e($payment->transaction->customer->name ?? 'N/A'); ?>
+
                                                 </div>
                                                 <div style="font-size: 0.75rem; color: var(--gray-500);">
                                                     <i class="fas fa-bed me-1"></i>
-                                                    Chambre {{ $payment->transaction->room->number ?? 'N/A' }}
+                                                    Chambre <?php echo e($payment->transaction->room->number ?? 'N/A'); ?>
+
                                                 </div>
                                             </div>
                                         </div>
@@ -806,72 +809,79 @@
                                     <!-- Détails du paiement -->
                                     <td>
                                         <div style="font-weight: 700; color: var(--gray-800); font-size: 1rem; margin-bottom: 4px;">
-                                            {{ Helper::formatCFA($payment->amount) }}
+                                            <?php echo e(Helper::formatCFA($payment->amount)); ?>
+
                                         </div>
                                         
                                         <!-- Référence -->
-                                        @if($payment->reference)
+                                        <?php if($payment->reference): ?>
                                             <div class="reference-badge mb-2">
                                                 <i class="fas fa-fingerprint" style="font-size: 0.7rem;"></i>
-                                                {{ $payment->reference }}
+                                                <?php echo e($payment->reference); ?>
+
                                             </div>
-                                        @else
+                                        <?php else: ?>
                                             <div class="reference-badge mb-2" style="color: var(--gray-400);">
                                                 <i class="far fa-question-circle"></i>
                                                 Référence non disponible
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                         
                                         <!-- Méthode -->
-                                        @if($payment->payment_method)
+                                        <?php if($payment->payment_method): ?>
                                             <div style="font-size: 0.75rem; color: var(--gray-500);">
                                                 <i class="fas fa-credit-card me-1"></i>
-                                                {{ ucfirst($payment->payment_method) }}
+                                                <?php echo e(ucfirst($payment->payment_method)); ?>
+
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                         
                                         <!-- Notes -->
-                                        @if($payment->notes)
+                                        <?php if($payment->notes): ?>
                                             <div style="font-size: 0.75rem; color: var(--gray-400); margin-top: 4px;">
                                                 <i class="fas fa-sticky-note me-1"></i>
-                                                {{ Str::limit($payment->notes, 20) }}
+                                                <?php echo e(Str::limit($payment->notes, 20)); ?>
+
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     
                                     <!-- Date & Heure -->
                                     <td>
                                         <div style="font-weight: 500; color: var(--gray-800);">
-                                            {{ Helper::dateFormat($payment->created_at) }}
+                                            <?php echo e(Helper::dateFormat($payment->created_at)); ?>
+
                                         </div>
                                         <div style="font-size: 0.75rem; color: var(--gray-500);">
                                             <i class="fas fa-clock me-1"></i>
-                                            {{ $payment->created_at->format('H:i') }}
+                                            <?php echo e($payment->created_at->format('H:i')); ?>
+
                                         </div>
                                     </td>
                                     
                                     <!-- Statut -->
                                     <td>
-                                        <span class="badge-modern {{ $statusClass }}">
-                                            @if($payment->status == 'completed') 
+                                        <span class="badge-modern <?php echo e($statusClass); ?>">
+                                            <?php if($payment->status == 'completed'): ?> 
                                                 <i class="fas fa-check-circle"></i>
-                                            @elseif($payment->status == 'pending')
+                                            <?php elseif($payment->status == 'pending'): ?>
                                                 <i class="fas fa-clock"></i>
-                                            @elseif($payment->status == 'failed')
+                                            <?php elseif($payment->status == 'failed'): ?>
                                                 <i class="fas fa-times-circle"></i>
-                                            @elseif($payment->status == 'refunded')
+                                            <?php elseif($payment->status == 'refunded'): ?>
                                                 <i class="fas fa-undo"></i>
-                                            @else
+                                            <?php else: ?>
                                                 <i class="fas fa-ban"></i>
-                                            @endif
-                                            {{ $statusTranslations[$payment->status] ?? ucfirst($payment->status) }}
+                                            <?php endif; ?>
+                                            <?php echo e($statusTranslations[$payment->status] ?? ucfirst($payment->status)); ?>
+
                                         </span>
                                         
-                                        @if($payment->verified_at)
+                                        <?php if($payment->verified_at): ?>
                                             <div style="font-size: 0.688rem; color: var(--primary-600); margin-top: 4px;">
                                                 <i class="fas fa-check-circle me-1"></i>Vérifié
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     
                                     <!-- Traité par -->
@@ -882,7 +892,8 @@
                                             </div>
                                             <div>
                                                 <div style="font-weight: 500; color: var(--gray-700);">
-                                                    {{ $payment->user->name ?? 'Système' }}
+                                                    <?php echo e($payment->user->name ?? 'Système'); ?>
+
                                                 </div>
                                                 <div style="font-size: 0.688rem; color: var(--gray-400);">Personnel</div>
                                             </div>
@@ -893,7 +904,7 @@
                                     <td class="text-end">
                                         <div class="actions-group">
                                             <!-- Facture -->
-                                            <a href="{{ route('payment.invoice', $payment->id) }}" 
+                                            <a href="<?php echo e(route('payment.invoice', $payment->id)); ?>" 
                                                class="btn-icon-modern"
                                                data-bs-toggle="tooltip" 
                                                title="Voir la facture">
@@ -901,7 +912,7 @@
                                             </a>
                                             
                                             <!-- Transaction -->
-                                            <a href="{{ route('transaction.show', $payment->transaction_id) }}" 
+                                            <a href="<?php echo e(route('transaction.show', $payment->transaction_id)); ?>" 
                                                class="btn-icon-modern"
                                                data-bs-toggle="tooltip" 
                                                title="Voir la transaction">
@@ -910,7 +921,7 @@
                                             
                                             <!-- Détails -->
                                             <button class="btn-icon-modern"
-                                                    onclick="showPaymentDetails({{ $payment->id }})"
+                                                    onclick="showPaymentDetails(<?php echo e($payment->id); ?>)"
                                                     data-bs-toggle="tooltip" 
                                                     title="Détails du paiement">
                                                 <i class="fas fa-info-circle"></i>
@@ -918,64 +929,64 @@
                                         </div>
                                     </td>
                                 </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </div>
                 
                 <!-- Pagination -->
-                @if($payments->hasPages())
+                <?php if($payments->hasPages()): ?>
                     <div style="padding: 16px 24px; border-top: 1px solid var(--gray-100);">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                             <div style="font-size: 0.813rem; color: var(--gray-500);">
-                                Affichage de {{ $payments->firstItem() }} à {{ $payments->lastItem() }} 
-                                sur {{ $payments->total() }} paiements
+                                Affichage de <?php echo e($payments->firstItem()); ?> à <?php echo e($payments->lastItem()); ?> 
+                                sur <?php echo e($payments->total()); ?> paiements
                             </div>
                             
                             <nav>
                                 <ul class="pagination-modern">
-                                    @if($payments->onFirstPage())
+                                    <?php if($payments->onFirstPage()): ?>
                                         <li class="page-item-modern disabled">
                                             <span class="page-link-modern">‹</span>
                                         </li>
-                                    @else
+                                    <?php else: ?>
                                         <li class="page-item-modern">
-                                            <a class="page-link-modern" href="{{ $payments->previousPageUrl() }}">‹</a>
+                                            <a class="page-link-modern" href="<?php echo e($payments->previousPageUrl()); ?>">‹</a>
                                         </li>
-                                    @endif
+                                    <?php endif; ?>
                                     
-                                    @foreach(range(1, $payments->lastPage()) as $i)
-                                        <li class="page-item-modern {{ $i == $payments->currentPage() ? 'active' : '' }}">
-                                            <a class="page-link-modern" href="{{ $payments->url($i) }}">{{ $i }}</a>
+                                    <?php $__currentLoopData = range(1, $payments->lastPage()); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li class="page-item-modern <?php echo e($i == $payments->currentPage() ? 'active' : ''); ?>">
+                                            <a class="page-link-modern" href="<?php echo e($payments->url($i)); ?>"><?php echo e($i); ?></a>
                                         </li>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     
-                                    @if($payments->hasMorePages())
+                                    <?php if($payments->hasMorePages()): ?>
                                         <li class="page-item-modern">
-                                            <a class="page-link-modern" href="{{ $payments->nextPageUrl() }}">›</a>
+                                            <a class="page-link-modern" href="<?php echo e($payments->nextPageUrl()); ?>">›</a>
                                         </li>
-                                    @else
+                                    <?php else: ?>
                                         <li class="page-item-modern disabled">
                                             <span class="page-link-modern">›</span>
                                         </li>
-                                    @endif
+                                    <?php endif; ?>
                                 </ul>
                             </nav>
                         </div>
                     </div>
-                @endif
-            @else
+                <?php endif; ?>
+            <?php else: ?>
                 <!-- Empty state -->
                 <div class="empty-state-modern">
                     <i class="fas fa-money-bill-wave"></i>
                     <h3>Aucun paiement trouvé</h3>
                     <p>Aucun enregistrement de paiement trouvé dans la base de données.</p>
-                    <a href="{{ route('dashboard.index') }}" class="btn-modern btn-primary-modern">
+                    <a href="<?php echo e(route('dashboard.index')); ?>" class="btn-modern btn-primary-modern">
                         <i class="fas fa-tachometer-alt me-2"></i>
                         Tableau de bord
                     </a>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 </div>
@@ -1001,9 +1012,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 // Initialisation des tooltips
 document.addEventListener('DOMContentLoaded', function() {
@@ -1030,7 +1041,7 @@ function filterPayments() {
 // Export des paiements
 function exportPayments() {
     if (confirm('Exporter tous les paiements en CSV ?')) {
-        window.location.href = '{{ route("transaction.export", "payments") }}';
+        window.location.href = '<?php echo e(route("transaction.export", "payments")); ?>';
     }
 }
 
@@ -1040,7 +1051,7 @@ function markAsCompleted(paymentId) {
         fetch(`/payments/${paymentId}/complete`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Accept': 'application/json'
             }
         })
@@ -1188,7 +1199,7 @@ function cancelPayment(paymentId) {
         fetch(`/payments/${paymentId}/cancel`, {
             method: 'DELETE',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Accept': 'application/json'
             }
         })
@@ -1215,7 +1226,7 @@ function initiateRefund(paymentId) {
         fetch(`/payments/${paymentId}/refund`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
             },
@@ -1237,4 +1248,5 @@ function initiateRefund(paymentId) {
     }
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/payment/index.blade.php ENDPATH**/ ?>
