@@ -12,9 +12,11 @@ class CustomerRepository implements CustomerRepositoryInterface
     public function get($request)
     {
         return Customer::with('user')->orderBy('id', 'DESC')
-            ->when($request->q, function ($query) use ($request) {
-                $query->where('name', 'Like', '%'.$request->q.'%')
-                    ->orWhere('id', 'Like', '%'.$request->q.'%');
+            ->when($request->search, function ($query) use ($request) {
+                $query->where('name', 'Like', '%'.$request->search.'%')
+                    ->orWhere('id', 'Like', '%'.$request->search.'%')
+                    ->orWhere('phone', 'Like', '%'.$request->search.'%')
+                    ->orWhere('email', 'Like', '%'.$request->search.'%');
             })
             ->paginate(8)
             ->appends($request->all());
