@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Gestion des Clients')
-@section('content')
+
+<?php $__env->startSection('title', 'Gestion des Clients'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
@@ -822,7 +822,7 @@
 <div class="customers-page">
     <!-- Breadcrumb -->
     <div class="breadcrumb-custom">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Clients</span>
     </div>
@@ -839,36 +839,37 @@
     </div>
 
     <!-- Statistiques -->
-    @php
+    <?php
         $totalClients = $customers->total();
         $resultCount = $customers->count();
-    @endphp
+    ?>
     
     <div class="stats-grid">
         <div class="stat-card-modern primary fade-in stagger-1">
-            <div class="stat-number">{{ $totalClients }}</div>
+            <div class="stat-number"><?php echo e($totalClients); ?></div>
             <div class="stat-label">Clients totaux</div>
             <div class="stat-footer">
                 <i class="fas fa-user"></i>
-                {{ $totalClients }} enregistrés
+                <?php echo e($totalClients); ?> enregistrés
             </div>
         </div>
         
         <div class="stat-card-modern success fade-in stagger-2">
-            <div class="stat-number">{{ $resultCount }}</div>
+            <div class="stat-number"><?php echo e($resultCount); ?></div>
             <div class="stat-label">Sur cette page</div>
             <div class="stat-footer">
                 <i class="fas fa-users"></i>
-                Page {{ $customers->currentPage() }}/{{ $customers->lastPage() }}
+                Page <?php echo e($customers->currentPage()); ?>/<?php echo e($customers->lastPage()); ?>
+
             </div>
         </div>
         
         <div class="stat-card-modern info fade-in stagger-3">
-            <div class="stat-number">{{ $customers->lastPage() }}</div>
+            <div class="stat-number"><?php echo e($customers->lastPage()); ?></div>
             <div class="stat-label">Pages totales</div>
             <div class="stat-footer">
                 <i class="fas fa-layer-group"></i>
-                {{ $customers->perPage() }} par page
+                <?php echo e($customers->perPage()); ?> par page
             </div>
         </div>
     </div>
@@ -882,121 +883,123 @@
             </button>
             
             <div class="filter-badges">
-                <a href="{{ route('customer.index') }}" class="filter-badge {{ !request()->has('search') || request()->search == '' ? 'active' : '' }}">
+                <a href="<?php echo e(route('customer.index')); ?>" class="filter-badge <?php echo e(!request()->has('search') || request()->search == '' ? 'active' : ''); ?>">
                     <i class="fas fa-users"></i>
                     Tous
-                    <span class="badge-count">{{ $totalClients }}</span>
+                    <span class="badge-count"><?php echo e($totalClients); ?></span>
                 </a>
-                @if(request()->has('search') && request()->search != '')
-                <a href="{{ route('customer.index') }}" class="filter-badge">
+                <?php if(request()->has('search') && request()->search != ''): ?>
+                <a href="<?php echo e(route('customer.index')); ?>" class="filter-badge">
                     <i class="fas fa-times"></i>
                     Effacer la recherche
                 </a>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
         
         <div class="action-right">
             <div class="search-container">
                 <i class="fas fa-search search-icon"></i>
-                <form method="GET" action="{{ route('customer.index') }}" id="search-form">
+                <form method="GET" action="<?php echo e(route('customer.index')); ?>" id="search-form">
                     <input type="text" 
                            class="search-input" 
                            placeholder="Rechercher par nom, email, téléphone..." 
                            name="search" 
                            id="search-input"
-                           value="{{ request()->input('search') }}"
+                           value="<?php echo e(request()->input('search')); ?>"
                            autocomplete="off">
-                    @if(request()->has('search') && request()->search != '')
+                    <?php if(request()->has('search') && request()->search != ''): ?>
                     <button type="button" class="search-clear" onclick="clearSearch()">
                         <i class="fas fa-times"></i>
                     </button>
                     <span class="search-result-badge" style="position: absolute; right: 40px; top: 50%; transform: translateY(-50%);">
                         <i class="fas fa-check-circle fa-xs me-1"></i>
-                        {{ $customers->total() }} résultat(s)
+                        <?php echo e($customers->total()); ?> résultat(s)
                     </span>
-                    @endif
+                    <?php endif; ?>
                 </form>
             </div>
         </div>
     </div>
 
     <!-- Messages d'alerte -->
-    @if(session('success'))
+    <?php if(session('success')): ?>
     <div class="alert-modern alert-success fade-in">
         <div class="alert-icon">
             <i class="fas fa-check"></i>
         </div>
-        <div class="flex-grow-1">{!! session('success') !!}</div>
+        <div class="flex-grow-1"><?php echo session('success'); ?></div>
         <button type="button" class="alert-close" onclick="this.parentElement.remove()">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    @endif
+    <?php endif; ?>
 
-    @if(session('error') || session('failed'))
+    <?php if(session('error') || session('failed')): ?>
     <div class="alert-modern alert-danger fade-in">
         <div class="alert-icon">
             <i class="fas fa-exclamation"></i>
         </div>
-        <div class="flex-grow-1">{{ session('error') ?? session('failed') }}</div>
+        <div class="flex-grow-1"><?php echo e(session('error') ?? session('failed')); ?></div>
         <button type="button" class="alert-close" onclick="this.parentElement.remove()">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Message de résultat de recherche -->
-    @if(request()->has('search') && request()->search != '')
+    <?php if(request()->has('search') && request()->search != ''): ?>
     <div class="alert-modern alert-info fade-in">
         <div class="alert-icon">
             <i class="fas fa-search"></i>
         </div>
         <div class="flex-grow-1">
-            <strong>{{ $customers->total() }}</strong> résultat(s) pour la recherche "<strong>{{ e(request()->search) }}</strong>"
+            <strong><?php echo e($customers->total()); ?></strong> résultat(s) pour la recherche "<strong><?php echo e(e(request()->search)); ?></strong>"
         </div>
-        <a href="{{ route('customer.index') }}" class="btn-modern btn-sm-modern btn-outline-modern">
+        <a href="<?php echo e(route('customer.index')); ?>" class="btn-modern btn-sm-modern btn-outline-modern">
             <i class="fas fa-times me-1"></i>Effacer
         </a>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Grille des clients -->
-    @if($customers->count() > 0)
+    <?php if($customers->count() > 0): ?>
     <div class="customer-grid">
-        @foreach ($customers as $customer)
-        @php
+        <?php $__currentLoopData = $customers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $customer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <?php
             $index = ($customers->currentPage() - 1) * $customers->perPage() + $loop->index + 1;
             $reservationsCount = $customer->transactions()->count();
             $avatarUrl = $customer->user ? $customer->user->getAvatar() : null;
-        @endphp
+        ?>
         
-        <div class="customer-card fade-in" style="animation-delay: {{ $loop->index * 0.03 }}s">
+        <div class="customer-card fade-in" style="animation-delay: <?php echo e($loop->index * 0.03); ?>s">
             <!-- En-tête -->
             <div class="customer-header">
                 <span class="customer-badge">
                     <i class="fas fa-star"></i>
-                    Client #{{ $index }}
+                    Client #<?php echo e($index); ?>
+
                 </span>
-                <span class="customer-number">{{ $index }}</span>
+                <span class="customer-number"><?php echo e($index); ?></span>
                 
-                @if($avatarUrl)
-                <img src="{{ $avatarUrl }}" 
-                     alt="{{ $customer->name }}" 
+                <?php if($avatarUrl): ?>
+                <img src="<?php echo e($avatarUrl); ?>" 
+                     alt="<?php echo e($customer->name); ?>" 
                      class="customer-avatar"
-                     onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($customer->name) }}&background=059669&color=fff&size=80'">
-                @else
-                <img src="https://ui-avatars.com/api/?name={{ urlencode($customer->name) }}&background=059669&color=fff&size=80" 
-                     alt="{{ $customer->name }}" 
+                     onerror="this.src='https://ui-avatars.com/api/?name=<?php echo e(urlencode($customer->name)); ?>&background=059669&color=fff&size=80'">
+                <?php else: ?>
+                <img src="https://ui-avatars.com/api/?name=<?php echo e(urlencode($customer->name)); ?>&background=059669&color=fff&size=80" 
+                     alt="<?php echo e($customer->name); ?>" 
                      class="customer-avatar">
-                @endif
+                <?php endif; ?>
             </div>
             
             <!-- Corps -->
             <div class="customer-body">
                 <div class="customer-name">
-                    <a href="{{ route('customer.show', $customer->id) }}" class="text-decoration-none">
-                        {{ $customer->name }}
+                    <a href="<?php echo e(route('customer.show', $customer->id)); ?>" class="text-decoration-none">
+                        <?php echo e($customer->name); ?>
+
                     </a>
                     <div class="dropdown">
                         <button class="btn btn-sm p-0" style="color: var(--gray-400);" data-bs-toggle="dropdown">
@@ -1004,23 +1007,23 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end dropdown-modern">
                             <li>
-                                <a class="dropdown-item" href="{{ route('customer.show', $customer->id) }}">
+                                <a class="dropdown-item" href="<?php echo e(route('customer.show', $customer->id)); ?>">
                                     <i class="fas fa-eye me-2"></i>Voir le profil
                                 </a>
                             </li>
                             <li>
-                                <a class="dropdown-item" href="{{ route('transaction.reservation.customerReservations', $customer->id) }}">
+                                <a class="dropdown-item" href="<?php echo e(route('transaction.reservation.customerReservations', $customer->id)); ?>">
                                     <i class="fas fa-calendar-check me-2"></i>Voir ses réservations
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item" href="{{ route('customer.edit', $customer->id) }}">
+                                <a class="dropdown-item" href="<?php echo e(route('customer.edit', $customer->id)); ?>">
                                     <i class="fas fa-edit me-2"></i>Modifier
                                 </a>
                             </li>
                             <li>
-                                <button class="dropdown-item text-danger" onclick="confirmDelete('{{ $customer->name }}', {{ $customer->id }})">
+                                <button class="dropdown-item text-danger" onclick="confirmDelete('<?php echo e($customer->name); ?>', <?php echo e($customer->id); ?>)">
                                     <i class="fas fa-trash me-2"></i>Supprimer
                                 </button>
                             </li>
@@ -1029,43 +1032,43 @@
                 </div>
                 
                 <!-- Informations -->
-                @if($customer->user)
+                <?php if($customer->user): ?>
                 <div class="customer-info-item">
                     <div class="customer-info-icon">
                         <i class="fas fa-envelope"></i>
                     </div>
                     <div style="flex: 1;">
                         <div class="customer-info-label">Email</div>
-                        <div class="customer-info-value">{{ $customer->user->email }}</div>
+                        <div class="customer-info-value"><?php echo e($customer->user->email); ?></div>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
                 
-                @if($customer->phone)
+                <?php if($customer->phone): ?>
                 <div class="customer-info-item">
                     <div class="customer-info-icon">
                         <i class="fas fa-phone"></i>
                     </div>
                     <div style="flex: 1;">
                         <div class="customer-info-label">Téléphone</div>
-                        <div class="customer-info-value">{{ $customer->phone }}</div>
+                        <div class="customer-info-value"><?php echo e($customer->phone); ?></div>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
                 
-                @if($customer->job)
+                <?php if($customer->job): ?>
                 <div class="customer-info-item">
                     <div class="customer-info-icon">
                         <i class="fas fa-briefcase"></i>
                     </div>
                     <div style="flex: 1;">
                         <div class="customer-info-label">Profession</div>
-                        <div class="customer-info-value">{{ $customer->job }}</div>
+                        <div class="customer-info-value"><?php echo e($customer->job); ?></div>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
                 
-                @if($customer->birthdate)
+                <?php if($customer->birthdate): ?>
                 <div class="customer-info-item">
                     <div class="customer-info-icon">
                         <i class="fas fa-cake-candles"></i>
@@ -1073,12 +1076,13 @@
                     <div style="flex: 1;">
                         <div class="customer-info-label">Date de naissance</div>
                         <div class="customer-info-value">
-                            {{ \Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y') }}
-                            ({{ \Carbon\Carbon::parse($customer->birthdate)->age }} ans)
+                            <?php echo e(\Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y')); ?>
+
+                            (<?php echo e(\Carbon\Carbon::parse($customer->birthdate)->age); ?> ans)
                         </div>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
                 
                 <div class="customer-info-item">
                     <div class="customer-info-icon">
@@ -1088,7 +1092,7 @@
                         <div class="customer-info-label">Réservations</div>
                         <div class="customer-info-value">
                             <span class="badge" style="background: var(--primary-100); color: var(--primary-700); padding: 4px 8px; border-radius: 6px;">
-                                {{ $reservationsCount }} réservation(s)
+                                <?php echo e($reservationsCount); ?> réservation(s)
                             </span>
                         </div>
                     </div>
@@ -1097,32 +1101,33 @@
             
             <!-- Footer avec actions -->
             <div class="customer-footer">
-                <a href="{{ route('customer.show', $customer->id) }}" class="customer-action-btn primary">
+                <a href="<?php echo e(route('customer.show', $customer->id)); ?>" class="customer-action-btn primary">
                     <i class="fas fa-user"></i>
                     Profil
                 </a>
-                <a href="{{ route('transaction.reservation.customerReservations', $customer->id) }}" class="customer-action-btn">
+                <a href="<?php echo e(route('transaction.reservation.customerReservations', $customer->id)); ?>" class="customer-action-btn">
                     <i class="fas fa-calendar-check"></i>
                     Réservations
                 </a>
             </div>
         </div>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
     
     <!-- Pagination -->
-    @if($customers->hasPages())
+    <?php if($customers->hasPages()): ?>
     <div class="pagination-modern fade-in">
-        {{ $customers->onEachSide(2)->links('pagination::bootstrap-5') }}
+        <?php echo e($customers->onEachSide(2)->links('pagination::bootstrap-5')); ?>
+
     </div>
-    @endif
+    <?php endif; ?>
     
-    @elseif(request()->has('search') && request()->search != '')
+    <?php elseif(request()->has('search') && request()->search != ''): ?>
     <!-- État vide avec recherche -->
     <div class="empty-state-modern fade-in">
         <i class="fas fa-search"></i>
         <div class="search-term">
-            Recherche : "{{ e(request()->search) }}"
+            Recherche : "<?php echo e(e(request()->search)); ?>"
         </div>
         <h3>Aucun client trouvé</h3>
         <p>
@@ -1130,7 +1135,7 @@
             Essayez d'autres termes ou ajoutez un nouveau client.
         </p>
         <div class="d-flex gap-2 justify-content-center">
-            <a href="{{ route('customer.index') }}" class="btn-modern btn-outline-modern">
+            <a href="<?php echo e(route('customer.index')); ?>" class="btn-modern btn-outline-modern">
                 <i class="fas fa-times me-2"></i>Effacer la recherche
             </a>
             <button class="btn-modern btn-primary-modern" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
@@ -1138,7 +1143,7 @@
             </button>
         </div>
     </div>
-    @else
+    <?php else: ?>
     <!-- État vide sans recherche -->
     <div class="empty-state-modern fade-in">
         <i class="fas fa-users"></i>
@@ -1148,7 +1153,7 @@
             <i class="fas fa-plus-circle me-2"></i>Ajouter un client
         </button>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Modal d'ajout -->
     <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-hidden="true">
@@ -1169,7 +1174,7 @@
                     <p class="text-muted small mb-4">Sélectionnez comment vous souhaitez ajouter un nouveau client.</p>
                     
                     <div class="d-grid gap-2">
-                        <a href="{{ route('customer.create') }}" class="btn-modern btn-primary-modern w-100">
+                        <a href="<?php echo e(route('customer.create')); ?>" class="btn-modern btn-primary-modern w-100">
                             <i class="fas fa-user-plus me-2"></i>
                             Créer un nouveau compte
                         </a>
@@ -1186,13 +1191,13 @@
 
 <!-- Formulaire de suppression caché -->
 <form id="delete-form" method="POST" style="display: none;">
-    @csrf
-    @method('DELETE')
+    <?php echo csrf_field(); ?>
+    <?php echo method_field('DELETE'); ?>
 </form>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1289,4 +1294,5 @@ function clearSearch() {
     }
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/customer/index.blade.php ENDPATH**/ ?>
