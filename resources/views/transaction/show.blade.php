@@ -4,450 +4,524 @@
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   STYLES TRANSACTION SHOW - Design moderne cohérent
+   DESIGN MODERNE - MÊME FONCTIONNALITÉS
 ═══════════════════════════════════════════════════════════════════ */
 :root {
-    --primary: #2563eb;
-    --primary-light: #3b82f6;
-    --primary-soft: rgba(37, 99, 235, 0.08);
-    --success: #10b981;
-    --success-light: rgba(16, 185, 129, 0.08);
-    --warning: #f59e0b;
-    --warning-light: rgba(245, 158, 11, 0.08);
-    --danger: #ef4444;
-    --danger-light: rgba(239, 68, 68, 0.08);
-    --info: #3b82f6;
-    --info-light: rgba(59, 130, 246, 0.08);
-    --dark: #1e293b;
-    --gray-50: #f8fafc;
-    --gray-100: #f1f5f9;
-    --gray-200: #e2e8f0;
-    --gray-300: #cbd5e1;
-    --gray-400: #94a3b8;
-    --gray-500: #64748b;
-    --gray-600: #475569;
-    --gray-700: #334155;
-    --gray-800: #1e293b;
-    --radius: 12px;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.05);
-    --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --primary-50: #ecfdf5;
+    --primary-100: #d1fae5;
+    --primary-400: #34d399;
+    --primary-500: #10b981;
+    --primary-600: #059669;
+    --primary-700: #047857;
+    --primary-800: #065f46;
+
+    --amber-50: #fffbeb;
+    --amber-100: #fef3c7;
+    --amber-400: #fbbf24;
+    --amber-500: #f59e0b;
+    --amber-600: #d97706;
+
+    --blue-50: #eff6ff;
+    --blue-100: #dbeafe;
+    --blue-500: #3b82f6;
+    --blue-600: #2563eb;
+
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
 }
 
-/* ────────── CARTE PRINCIPALE ────────── */
-.detail-card {
-    background: white;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    border: 1px solid var(--gray-200);
-    overflow: hidden;
-    transition: var(--transition);
-    margin-bottom: 20px;
-}
-.detail-card:hover {
-    box-shadow: var(--shadow-hover);
-    border-color: var(--gray-300);
-}
+* { box-sizing: border-box; }
 
-/* ────────── EN-TÊTE DE CARTE ────────── */
-.detail-card .card-header {
+.detail-page {
     background: var(--gray-50);
-    border-bottom: 1px solid var(--gray-200);
-    padding: 16px 20px;
+    min-height: 100vh;
+    padding: 24px 32px;
+    font-family: 'Inter', system-ui, sans-serif;
 }
-.detail-card .card-header h5 {
+
+/* Breadcrumb */
+.breadcrumb-custom {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--gray-800);
-}
-.detail-card .card-header h5 i {
-    color: var(--primary);
-    font-size: 1rem;
+    font-size: 0.813rem;
+    color: var(--gray-400);
+    margin-bottom: 24px;
+    flex-wrap: wrap;
 }
 
-.detail-card .card-body {
-    padding: 20px;
+.breadcrumb-custom a {
+    color: var(--gray-400);
+    text-decoration: none;
 }
 
-/* ────────── LABELS ET VALEURS ────────── */
-.detail-label {
-    font-size: 0.7rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: var(--gray-500);
-    margin-bottom: 4px;
+.breadcrumb-custom a:hover {
+    color: var(--primary-600);
 }
-.detail-value {
-    font-size: 0.9rem;
+
+.breadcrumb-custom .separator {
+    color: var(--gray-300);
+}
+
+.breadcrumb-custom .current {
+    color: var(--gray-600);
     font-weight: 500;
-    color: var(--gray-800);
-    margin-bottom: 12px;
 }
 
-/* ────────── BADGES STATUT ────────── */
+/* En-tête */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-title h1 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0;
+}
+
+.header-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
+}
+
+/* Boutons */
+.btn-modern {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-primary-modern {
+    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
+    color: white;
+    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.3);
+}
+
+.btn-primary-modern:hover {
+    background: linear-gradient(135deg, var(--primary-800), var(--primary-600));
+    transform: translateY(-1px);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-success-modern {
+    background: var(--primary-600);
+    color: white;
+}
+
+.btn-success-modern:hover {
+    background: var(--primary-700);
+    transform: translateY(-1px);
+}
+
+.btn-warning-modern {
+    background: var(--amber-500);
+    color: white;
+}
+
+.btn-warning-modern:hover {
+    background: var(--amber-600);
+    transform: translateY(-1px);
+}
+
+.btn-outline-modern {
+    background: white;
+    color: var(--gray-700);
+    border: 1px solid var(--gray-200);
+}
+
+.btn-outline-modern:hover {
+    background: var(--gray-50);
+    border-color: var(--gray-300);
+    color: var(--gray-900);
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.btn-outline-danger-modern {
+    background: white;
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+
+.btn-outline-danger-modern:hover {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-sm {
+    padding: 6px 14px;
+    font-size: 0.813rem;
+}
+
+/* Badges statut */
 .status-badge {
     display: inline-flex;
     align-items: center;
+    gap: 6px;
     padding: 6px 14px;
     border-radius: 30px;
-    font-size: 0.8rem;
+    font-size: 0.813rem;
     font-weight: 600;
-    line-height: 1;
-    white-space: nowrap;
-    gap: 6px;
-    border: none;
 }
+
 .status-reservation {
-    background: var(--warning-light);
-    color: #b45309;
-    border: 1px solid rgba(245, 158, 11, 0.15);
+    background: var(--amber-100);
+    color: var(--amber-700);
+    border: 1px solid var(--amber-200);
 }
+
 .status-active {
-    background: var(--success-light);
-    color: #047857;
-    border: 1px solid rgba(16, 185, 129, 0.15);
+    background: var(--primary-100);
+    color: var(--primary-700);
+    border: 1px solid var(--primary-200);
 }
+
 .status-completed {
-    background: var(--info-light);
-    color: #1e40af;
-    border: 1px solid rgba(37, 99, 235, 0.15);
+    background: var(--blue-100);
+    color: var(--blue-700);
+    border: 1px solid var(--blue-200);
 }
+
 .status-cancelled {
-    background: var(--danger-light);
+    background: #fee2e2;
     color: #b91c1c;
-    border: 1px solid rgba(239, 68, 68, 0.15);
+    border: 1px solid #fecaca;
 }
+
 .status-no_show {
     background: var(--gray-100);
     color: var(--gray-600);
     border: 1px solid var(--gray-200);
 }
 
-/* ────────── BOUTONS ────────── */
-.btn-modern {
-    display: inline-flex;
+/* Cartes */
+.detail-card {
+    background: white;
+    border-radius: 20px;
+    border: 1px solid var(--gray-200);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+}
+
+.detail-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.card-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--gray-100);
+    background: white;
+}
+
+.card-header h5 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin: 0;
+    display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    border: 1px solid transparent;
-    transition: var(--transition);
-    cursor: pointer;
-    text-decoration: none;
-    white-space: nowrap;
-}
-.btn-modern:hover {
-    transform: translateY(-2px);
-    text-decoration: none;
-}
-.btn-primary-modern {
-    background: var(--primary);
-    color: white;
-}
-.btn-primary-modern:hover {
-    background: var(--primary-light);
-    color: white;
-    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.2);
-}
-.btn-success-modern {
-    background: var(--success);
-    color: white;
-}
-.btn-success-modern:hover {
-    background: #0d9488;
-    color: white;
-}
-.btn-warning-modern {
-    background: var(--warning);
-    color: white;
-}
-.btn-warning-modern:hover {
-    background: #d97706;
-    color: white;
-}
-.btn-info-modern {
-    background: var(--info);
-    color: white;
-}
-.btn-info-modern:hover {
-    background: #2563eb;
-    color: white;
-}
-.btn-outline-modern {
-    background: transparent;
-    color: var(--gray-700);
-    border: 1px solid var(--gray-300);
-}
-.btn-outline-modern:hover {
-    background: var(--gray-50);
-    border-color: var(--gray-400);
-    color: var(--gray-800);
-}
-.btn-outline-danger-modern {
-    background: transparent;
-    color: var(--danger);
-    border: 1px solid var(--danger);
-}
-.btn-outline-danger-modern:hover {
-    background: var(--danger);
-    color: white;
+    gap: 8px;
 }
 
-/* ────────── SÉLECTEUR STATUT ────────── */
-.status-select {
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 1px solid var(--gray-200);
-    background: white;
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--gray-700);
-    transition: var(--transition);
-    cursor: pointer;
-    min-width: 150px;
-}
-.status-select:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+.card-header h5 i {
+    color: var(--primary-500);
 }
 
-/* ────────── ALERTES STATUT ────────── */
-.alert-status {
-    border-radius: 8px;
-    border: none;
-    padding: 16px 20px;
-    margin-bottom: 24px;
-    border-left: 4px solid;
-    background: white;
-    box-shadow: var(--shadow);
-}
-.alert-status-reservation {
-    border-left-color: var(--warning);
-    background: var(--warning-light);
-}
-.alert-status-active {
-    border-left-color: var(--success);
-    background: var(--success-light);
-}
-.alert-status-completed {
-    border-left-color: var(--info);
-    background: var(--info-light);
-}
-.alert-status-cancelled {
-    border-left-color: var(--danger);
-    background: var(--danger-light);
-}
-.alert-status-no_show {
-    border-left-color: var(--gray-500);
-    background: var(--gray-100);
+.card-body {
+    padding: 24px;
 }
 
-/* ────────── TIMELINE PAIEMENTS ────────── */
-.timeline {
-    position: relative;
-    padding-left: 30px;
-    margin-top: 20px;
-}
-.timeline::before {
-    content: '';
-    position: absolute;
-    left: 15px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: var(--gray-200);
-}
-.timeline-item {
-    position: relative;
-    margin-bottom: 24px;
-    padding-bottom: 8px;
-}
-.timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -23px;
-    top: 6px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--primary);
-    border: 2px solid white;
-    box-shadow: 0 0 0 2px var(--primary-soft);
-}
-.timeline-item:last-child {
-    margin-bottom: 0;
-}
-
-/* ────────── STATISTIQUES ────────── */
-.stat-box {
-    background: var(--gray-50);
-    border-radius: 8px;
-    padding: 16px;
-    text-align: center;
-    border: 1px solid var(--gray-200);
-    transition: var(--transition);
-}
-.stat-box:hover {
-    background: white;
-    border-color: var(--gray-300);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow);
-}
-.stat-label {
-    font-size: 0.7rem;
+/* Labels */
+.detail-label {
+    font-size: 0.688rem;
     font-weight: 600;
     text-transform: uppercase;
     color: var(--gray-500);
     margin-bottom: 4px;
 }
-.stat-value {
-    font-size: 1.2rem;
-    font-weight: 700;
+
+.detail-value {
+    font-size: 0.938rem;
+    font-weight: 500;
     color: var(--gray-800);
-}
-.stat-value-success {
-    color: var(--success);
-}
-.stat-value-danger {
-    color: var(--danger);
-}
-.stat-value-primary {
-    color: var(--primary);
+    margin-bottom: 12px;
 }
 
-/* ────────── CARTE CLIENT ────────── */
+/* Avatar client */
 .client-avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 30px;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-600), var(--primary-400));
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    font-size: 1.2rem;
+    font-size: 1.5rem;
     flex-shrink: 0;
-    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
 }
+
 .client-avatar img {
     width: 100%;
     height: 100%;
-    border-radius: 30px;
+    border-radius: 50%;
     object-fit: cover;
 }
 
-/* ────────── BADGE CHAMBRE ────────── */
+/* Badge chambre */
 .room-badge-large {
-    background: var(--primary-soft);
-    color: var(--primary);
+    background: var(--primary-50);
+    color: var(--primary-700);
     font-weight: 700;
-    padding: 8px 20px;
-    border-radius: 30px;
-    font-size: 1.1rem;
+    padding: 8px 24px;
+    border-radius: 40px;
+    font-size: 1.25rem;
     display: inline-block;
-    border: 1px solid rgba(37, 99, 235, 0.2);
+    border: 1px solid var(--primary-200);
 }
 
-/* ────────── PRIX ────────── */
-.price-amount {
-    font-weight: 700;
-    font-family: 'Inter', monospace;
-    font-size: 1.2rem;
-}
-.price-success {
-    color: var(--success);
-}
-.price-danger {
-    color: var(--danger);
-}
-.price-primary {
-    color: var(--primary);
+/* Timeline */
+.timeline {
+    position: relative;
+    padding-left: 30px;
 }
 
-/* ────────── BADGE PAIEMENT ────────── */
-.payment-status-paid {
-    color: var(--success);
-    font-weight: 600;
-}
-.payment-status-pending {
-    color: var(--warning);
-    font-weight: 600;
-}
-.payment-status-cancelled {
-    color: var(--danger);
-    font-weight: 600;
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--gray-200);
 }
 
-/* ────────── ACTIONS RAPIDES ────────── */
-.quick-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+.timeline-item {
+    position: relative;
     margin-bottom: 20px;
 }
 
-/* ────────── SÉPARATEUR ────────── */
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -19px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--primary-500);
+    border: 2px solid white;
+}
+
+/* Stat boxes */
+.stat-box {
+    background: var(--gray-50);
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    border: 1px solid var(--gray-200);
+}
+
+.stat-label {
+    font-size: 0.688rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--gray-800);
+}
+
+.stat-value-success {
+    color: var(--primary-600);
+}
+
+.stat-value-danger {
+    color: #ef4444;
+}
+
+.stat-value-primary {
+    color: var(--blue-600);
+}
+
+/* Sélecteur statut */
+.status-select {
+    padding: 8px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--gray-200);
+    background: white;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--gray-700);
+    min-width: 180px;
+}
+
+.status-select:focus {
+    outline: none;
+    border-color: var(--primary-500);
+}
+
+/* Alertes statut */
+.alert-status {
+    border-radius: 16px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-left: 4px solid;
+}
+
+.alert-status-reservation {
+    border-left-color: var(--amber-500);
+    background: var(--amber-50);
+}
+
+.alert-status-active {
+    border-left-color: var(--primary-500);
+    background: var(--primary-50);
+}
+
+.alert-status-completed {
+    border-left-color: var(--blue-500);
+    background: var(--blue-50);
+}
+
+.alert-status-cancelled {
+    border-left-color: #ef4444;
+    background: #fee2e2;
+}
+
+.alert-status-no_show {
+    border-left-color: var(--gray-500);
+    background: var(--gray-100);
+}
+
+/* Divider */
 .divider {
     height: 1px;
     background: var(--gray-200);
     margin: 20px 0;
 }
 
-/* ────────── BREADCRUMB ────────── */
-.breadcrumb-modern {
+/* Actions rapides */
+.quick-actions {
     display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    color: var(--gray-500);
-    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
 }
-.breadcrumb-modern a {
-    color: var(--gray-500);
-    text-decoration: none;
+
+/* Badge paiement */
+.payment-status-paid {
+    color: var(--primary-600);
+    font-weight: 600;
 }
-.breadcrumb-modern a:hover {
-    color: var(--primary);
+
+.payment-status-pending {
+    color: var(--amber-600);
+    font-weight: 600;
 }
-.breadcrumb-modern .sep {
-    color: var(--gray-300);
-    font-size: 0.7rem;
+
+/* Garder les styles existants pour compatibilité */
+.alert.alert-success {
+    border-radius: 12px;
+    background: var(--primary-50);
+    border-color: var(--primary-200);
+    color: var(--primary-800);
+}
+
+.alert.alert-danger {
+    border-radius: 12px;
+    background: #fee2e2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+.modal-content {
+    border-radius: 20px;
+    border: none;
+}
+
+.modal-header {
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.modal-footer {
+    background: var(--gray-50);
+    border-top: 1px solid var(--gray-200);
 }
 </style>
 
-<div class="container-fluid px-4 py-3">
+<div class="detail-page">
     <!-- Breadcrumb -->
-    <div class="breadcrumb-modern">
+    <div class="breadcrumb-custom">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
-        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('transaction.index') }}">Réservations</a>
-        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span style="color: var(--gray-700); font-weight: 500;">#{{ $transaction->id }}</span>
+        <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <span class="current">#{{ $transaction->id }}</span>
     </div>
 
-    <!-- En-tête avec titre et actions -->
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-        <div>
-            <h2 class="h4 mb-1" style="color: var(--gray-800); font-weight: 700;">
-                <i class="fas fa-calendar-check me-2" style="color: var(--primary);"></i>
-                Réservation #{{ $transaction->id }}
-            </h2>
-            <p class="text-muted small mb-0">
-                {{ $transaction->customer->name }} · Chambre {{ $transaction->room->number }}
-            </p>
+    <!-- En-tête -->
+    <div class="page-header">
+        <div class="header-title">
+            <span class="header-icon">
+                <i class="fas fa-calendar-check"></i>
+            </span>
+            <h1>Réservation #{{ $transaction->id }}</h1>
         </div>
         
         <div class="d-flex gap-2 flex-wrap">
-            <!-- Sélecteur de statut (admin seulement) -->
             @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
             <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST" class="d-inline">
                 @csrf
@@ -463,7 +537,7 @@
             @endif
             
             <a href="{{ route('transaction.index') }}" class="btn-modern btn-outline-modern">
-                <i class="fas fa-arrow-left me-1"></i>Retour
+                <i class="fas fa-arrow-left me-2"></i>Retour
             </a>
         </div>
     </div>
@@ -499,16 +573,16 @@
 
     <!-- Alerte statut -->
     @if($transaction->status == 'reservation')
-    <div class="alert-status alert-status-reservation d-flex align-items-center gap-3">
-        <i class="fas fa-calendar-check fa-2x" style="color: #b45309;"></i>
+    <div class="alert-status alert-status-reservation">
+        <i class="fas fa-calendar-check fa-2x" style="color: var(--amber-600);"></i>
         <div>
             <strong class="d-block mb-1">📅 RÉSERVATION</strong>
             <p class="mb-0 small">Arrivée prévue : <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y à H:i') }}</strong></p>
         </div>
     </div>
     @elseif($transaction->status == 'active')
-    <div class="alert-status alert-status-active d-flex align-items-center gap-3">
-        <i class="fas fa-bed fa-2x" style="color: #047857;"></i>
+    <div class="alert-status alert-status-active">
+        <i class="fas fa-bed fa-2x" style="color: var(--primary-600);"></i>
         <div>
             <strong class="d-block mb-1">🏨 DANS L'HÔTEL</strong>
             <p class="mb-0 small">Départ prévu : <strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y à H:i') }}</strong>
@@ -519,15 +593,15 @@
         </div>
     </div>
     @elseif($transaction->status == 'completed')
-    <div class="alert-status alert-status-completed d-flex align-items-center gap-3">
-        <i class="fas fa-check-circle fa-2x" style="color: #1e40af;"></i>
+    <div class="alert-status alert-status-completed">
+        <i class="fas fa-check-circle fa-2x" style="color: var(--blue-600);"></i>
         <div>
             <strong class="d-block mb-1">✅ SÉJOUR TERMINÉ</strong>
             <p class="mb-0 small">Client parti, séjour terminé</p>
         </div>
     </div>
     @elseif($transaction->status == 'cancelled')
-    <div class="alert-status alert-status-cancelled d-flex align-items-center gap-3">
+    <div class="alert-status alert-status-cancelled">
         <i class="fas fa-ban fa-2x" style="color: #b91c1c;"></i>
         <div>
             <strong class="d-block mb-1">❌ ANNULÉE</strong>
@@ -541,8 +615,8 @@
         </div>
     </div>
     @elseif($transaction->status == 'no_show')
-    <div class="alert-status alert-status-no_show d-flex align-items-center gap-3">
-        <i class="fas fa-user-slash fa-2x" style="color: #64748b;"></i>
+    <div class="alert-status alert-status-no_show">
+        <i class="fas fa-user-slash fa-2x" style="color: var(--gray-500);"></i>
         <div>
             <strong class="d-block mb-1">👤 NO SHOW</strong>
             <p class="mb-0 small">Client ne s'est pas présenté</p>
@@ -550,9 +624,9 @@
     </div>
     @endif
 
-    <!-- Actions rapides (uniquement pour admin) -->
+    <!-- Actions rapides -->
     @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
-    <div class="quick-actions mb-4">
+    <div class="quick-actions">
         @if($transaction->status == 'reservation')
         <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
             @csrf
@@ -565,7 +639,7 @@
         @if($transaction->status == 'active')
         <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
             @csrf
-            <button type="submit" class="btn-modern btn-info-modern">
+            <button type="submit" class="btn-modern btn-success-modern">
                 <i class="fas fa-sign-out-alt me-1"></i>Départ
             </button>
         </form>
@@ -584,7 +658,7 @@
         @endif
         
         @if($remaining > 0 && !in_array($transaction->status, ['cancelled', 'no_show']))
-        <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-modern btn-success-modern">
+        <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-modern btn-primary-modern">
             <i class="fas fa-money-bill-wave me-1"></i>Paiement
         </a>
         @endif
@@ -599,10 +673,10 @@
     @endif
 
     <div class="row">
-        <!-- Colonne de gauche (8 colonnes) -->
+        <!-- Colonne gauche -->
         <div class="col-lg-8">
             <!-- Client -->
-            <div class="detail-card mb-4">
+            <div class="detail-card">
                 <div class="card-header">
                     <h5><i class="fas fa-user"></i>Informations Client</h5>
                 </div>
@@ -644,7 +718,7 @@
             </div>
 
             <!-- Chambre et dates -->
-            <div class="detail-card mb-4">
+            <div class="detail-card">
                 <div class="card-header">
                     <h5><i class="fas fa-bed"></i>Informations Séjour</h5>
                 </div>
@@ -657,7 +731,7 @@
                         </div>
                         <div class="col-md-6 text-center">
                             <p class="detail-label">Durée du séjour</p>
-                            <span class="room-badge-large" style="background: var(--gray-100); color: var(--gray-700);">
+                            <span class="room-badge-large" style="background: var(--gray-100); color: var(--gray-700); border-color: var(--gray-200);">
                                 {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}
                             </span>
                         </div>
@@ -667,7 +741,7 @@
                         <div class="col-md-6">
                             <p class="detail-label">Arrivée</p>
                             <p class="detail-value">
-                                <i class="fas fa-calendar-check me-1" style="color: var(--success);"></i>
+                                <i class="fas fa-calendar-check me-2" style="color: var(--primary-500);"></i>
                                 {{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}
                                 <span class="text-muted ms-2">{{ \Carbon\Carbon::parse($transaction->check_in)->format('H:i') }}</span>
                             </p>
@@ -675,7 +749,7 @@
                         <div class="col-md-6">
                             <p class="detail-label">Départ</p>
                             <p class="detail-value">
-                                <i class="fas fa-calendar-times me-1" style="color: var(--danger);"></i>
+                                <i class="fas fa-calendar-times me-2" style="color: #ef4444;"></i>
                                 {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}
                                 <span class="text-muted ms-2">{{ \Carbon\Carbon::parse($transaction->check_out)->format('H:i') }}</span>
                             </p>
@@ -689,7 +763,7 @@
                             <p class="detail-label">Statut chambre</p>
                             <p class="detail-value">
                                 @if($transaction->room->roomStatus)
-                                <span class="badge-statut badge-{{ $transaction->room->roomStatus->name == 'Occupée' ? 'active' : ($transaction->room->roomStatus->name == 'Disponible' ? 'completed' : 'reservation') }}">
+                                <span class="status-badge {{ $transaction->room->roomStatus->name == 'Occupée' ? 'status-active' : ($transaction->room->roomStatus->name == 'Disponible' ? 'status-completed' : 'status-reservation') }}">
                                     {{ $transaction->room->roomStatus->name }}
                                 </span>
                                 @endif
@@ -699,12 +773,6 @@
                             <p class="detail-label">Statut réservation</p>
                             <p class="detail-value">
                                 <span class="status-badge status-{{ $transaction->status }}">
-                                    @if($transaction->status == 'reservation') 📅
-                                    @elseif($transaction->status == 'active') 🏨
-                                    @elseif($transaction->status == 'completed') ✅
-                                    @elseif($transaction->status == 'cancelled') ❌
-                                    @else 👤
-                                    @endif
                                     {{ $transaction->status_label }}
                                 </span>
                             </p>
@@ -717,7 +785,7 @@
             <div class="detail-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5><i class="fas fa-money-bill-wave"></i>Paiements</h5>
-                    <span class="status-badge {{ $isFullyPaid ? 'badge-active' : ($remaining > 0 ? 'badge-reservation' : 'badge-no_show') }}">
+                    <span class="status-badge {{ $isFullyPaid ? 'status-active' : ($remaining > 0 ? 'status-reservation' : 'status-completed') }}">
                         {{ $isFullyPaid ? 'Soldé' : ($remaining > 0 ? 'En attente' : 'Aucune dette') }}
                     </span>
                 </div>
@@ -771,7 +839,8 @@
                                         <div>
                                             <h6 class="mb-1" style="font-weight: 600;">
                                                 Paiement #{{ $payment->id }}
-                                                <span class="badge-statut {{ $payment->status === 'completed' ? 'badge-active' : ($payment->status === 'pending' ? 'badge-reservation' : 'badge-cancelled') }}" style="margin-left: 8px;">
+                                                <span class="payment-status-{{ $payment->status }}" style="margin-left: 8px;">
+                                                    {{ $payment->status === 'completed' ? '✓' : ($payment->status === 'pending' ? '⏳' : '✗') }}
                                                     {{ $payment->status === 'completed' ? 'Complet' : ($payment->status === 'pending' ? 'En attente' : 'Annulé') }}
                                                 </span>
                                             </h6>
@@ -790,7 +859,7 @@
                                             @endif
                                         </div>
                                         <div class="text-end">
-                                            <p class="price-amount price-success mb-1">
+                                            <p class="fw-bold text-success mb-1" style="font-size: 1.1rem;">
                                                 {{ number_format($payment->amount, 0, ',', ' ') }} CFA
                                             </p>
                                             <a href="{{ route('payment.invoice', $payment) }}" class="btn-modern btn-outline-modern btn-sm" target="_blank">
@@ -817,10 +886,10 @@
             </div>
         </div>
 
-        <!-- Colonne de droite (4 colonnes) -->
+        <!-- Colonne droite -->
         <div class="col-lg-4">
-            <!-- Actions rapides (version compacte) -->
-            <div class="detail-card mb-4">
+            <!-- Actions rapides compactes -->
+            <div class="detail-card">
                 <div class="card-header">
                     <h5><i class="fas fa-bolt"></i>Actions rapides</h5>
                 </div>
@@ -849,7 +918,7 @@
             </div>
 
             <!-- Informations supplémentaires -->
-            <div class="detail-card mb-4">
+            <div class="detail-card">
                 <div class="card-header">
                     <h5><i class="fas fa-info-circle"></i>Détails</h5>
                 </div>
@@ -931,8 +1000,8 @@
 @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']) && !in_array($transaction->status, ['cancelled', 'no_show', 'completed']))
 <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 12px; border: none;">
-            <div class="modal-header" style="background: var(--gray-50); border-bottom: 1px solid var(--gray-200);">
+        <div class="modal-content">
+            <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="fas fa-ban text-danger me-2"></i>
                     Annuler la réservation
@@ -949,7 +1018,7 @@
                         <textarea name="cancel_reason" class="form-control" rows="3" placeholder="Pourquoi annuler ?"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-0" style="background: var(--gray-50);">
+                <div class="modal-footer">
                     <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">Fermer</button>
                     <button type="submit" class="btn-modern btn-outline-danger-modern">
                         <i class="fas fa-ban me-1"></i>Confirmer l'annulation
@@ -961,7 +1030,7 @@
 </div>
 @endif
 
-<!-- Formulaire annulation masqué (conservé pour compatibilité) -->
+<!-- Formulaire annulation masqué -->
 <form id="cancel-form" method="POST" action="{{ route('transaction.cancel', 0) }}" class="d-none">
     @csrf @method('DELETE')
     <input type="hidden" name="transaction_id" id="cancel-transaction-id-input">
@@ -973,40 +1042,25 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialisation des tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (el) {
         return new bootstrap.Tooltip(el);
     });
     
-    // Confirmation pour le changement de statut
     document.querySelectorAll('.status-select').forEach(select => {
         select.addEventListener('change', function(e) {
             const newStatus = this.value;
             const oldStatus = this.options[this.selectedIndex].dataset.oldStatus || this.value;
             
-            const statusLabels = {
-                'reservation': '📅 Réservation',
-                'active': '🏨 Dans l\'hôtel',
-                'completed': '✅ Terminé',
-                'cancelled': '❌ Annulée',
-                'no_show': '👤 No Show'
-            };
-            
-            const oldLabel = statusLabels[oldStatus] || oldStatus;
-            const newLabel = statusLabels[newStatus] || newStatus;
-            
-            // Confirmation pour cancelled
             if (newStatus === 'cancelled') {
-                if (!confirm(`⚠️ Êtes-vous sûr de vouloir annuler cette réservation ?\n\n${oldLabel} → ${newLabel}`)) {
+                if (!confirm(`⚠️ Êtes-vous sûr de vouloir annuler cette réservation ?`)) {
                     this.value = oldStatus;
                     return false;
                 }
             }
             
-            // Confirmation pour no_show
             if (newStatus === 'no_show') {
-                if (!confirm(`⚠️ Marquer comme "No Show" ?\n\n${oldLabel} → ${newLabel}`)) {
+                if (!confirm(`⚠️ Marquer comme "No Show" ?`)) {
                     this.value = oldStatus;
                     return false;
                 }
