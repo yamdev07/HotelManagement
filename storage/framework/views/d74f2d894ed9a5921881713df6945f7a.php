@@ -13,7 +13,7 @@
                             <span class="badge-text">Luxury Collection</span>
                         </div>
                         <h1 class="hero-title mb-4" data-aos="fade-up" data-aos-delay="100">
-                            Luxury Palace
+                            Cactus Hotel
                         </h1>
                         <p class="hero-subtitle mb-5" data-aos="fade-up" data-aos-delay="200">
                             L'expérience ultime du luxe et de l'élégance en plein cœur de la ville
@@ -23,7 +23,7 @@
                                 Découvrir nos suites
                                 <i class="fas fa-arrow-right ms-2"></i>
                             </a>
-                            <a href="<?php echo e(route('frontend.contact')); ?>" class="btn-modern btn-outline">
+                            <a href="<?php echo e(route('frontend.reservation')); ?>" class="btn-modern btn-outline">
                                 Réserver maintenant
                                 <i class="fas fa-calendar-check ms-2"></i>
                             </a>
@@ -32,22 +32,22 @@
                         <!-- Formulaire intégré dans l'héros -->
                         <div class="booking-in-hero mt-6" data-aos="fade-up" data-aos-delay="400">
                             <div class="booking-form-inline">
-                                <form class="booking-form">
+                                <form action="<?php echo e(route('frontend.rooms')); ?>" method="GET" class="booking-form">
                                     <div class="form-group">
                                         <label>Arrivée</label>
-                                        <input type="date" class="form-input" placeholder="Date d'arrivée">
+                                        <input type="date" name="check_in" class="form-input" id="hero_check_in" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Départ</label>
-                                        <input type="date" class="form-input" placeholder="Date de départ">
+                                        <input type="date" name="check_out" class="form-input" id="hero_check_out" required>
                                     </div>
                                     <div class="form-group">
                                         <label>Invités</label>
-                                        <select class="form-input">
-                                            <option>1 Adulte</option>
-                                            <option>2 Adultes</option>
-                                            <option>3 Adultes</option>
-                                            <option>4+ Adultes</option>
+                                        <select name="guests" class="form-input">
+                                            <option value="1">1 Adulte</option>
+                                            <option value="2" selected>2 Adultes</option>
+                                            <option value="3">3 Adultes</option>
+                                            <option value="4">4 Adultes</option>
                                         </select>
                                     </div>
                                     <button type="submit" class="btn-search">
@@ -138,11 +138,43 @@
                 <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="<?php echo e($loop->index * 100); ?>">
                     <div class="room-card-modern">
                         <div class="room-image-wrapper">
-                            <img src="<?php echo e($room->first_image_url); ?>" 
+                            <?php
+                                // Gestion des images - priorité aux images de la chambre
+                                $roomImage = asset('img/default/default-room.png'); // Image par défaut
+                                
+                                if($room->images && $room->images->count() > 0) {
+                                    $firstImage = $room->images->first();
+                                    $testPath = 'img/room/' . $room->number . '/' . $firstImage->url;
+                                    if(file_exists(public_path($testPath))) {
+                                        $roomImage = asset($testPath);
+                                    } else {
+                                        // Essayer sans le numéro de chambre
+                                        $testPath2 = 'img/room/' . $firstImage->url;
+                                        if(file_exists(public_path($testPath2))) {
+                                            $roomImage = asset($testPath2);
+                                        }
+                                    }
+                                }
+                            ?>
+                            
+                            <img src="<?php echo e($roomImage); ?>" 
                                  alt="<?php echo e($room->name); ?>"
-                                 class="room-image">
+                                 class="room-image"
+                                 onerror="this.onerror=null; this.src='<?php echo e(asset('img/room/gamesetting.png')); ?>';">
+                                 
                             <div class="room-status">
-                                <?php if($room->room_status_id == 1): ?>
+                                <?php
+                                    // Vérifier la disponibilité réelle
+                                    $today = now()->startOfDay();
+                                    $isOccupied = \App\Models\Transaction::where('room_id', $room->id)
+                                        ->where('check_in', '<=', $today)
+                                        ->where('check_out', '>=', $today)
+                                        ->whereIn('status', ['active', 'reservation'])
+                                        ->exists();
+                                    $isAvailable = !$isOccupied && $room->room_status_id == 1;
+                                ?>
+                                
+                                <?php if($isAvailable): ?>
                                 <span class="status-badge available">
                                     <i class="fas fa-check"></i> Disponible
                                 </span>
@@ -169,8 +201,8 @@
                                 </span>
                             </div>
                             
-                            <?php if($room->short_description): ?>
-                            <p class="room-description"><?php echo e(Str::limit($room->short_description, 100)); ?></p>
+                            <?php if($room->view): ?>
+                            <p class="room-description"><?php echo e(Str::limit($room->view, 100)); ?></p>
                             <?php endif; ?>
                             
                             <div class="room-specs">
@@ -181,7 +213,7 @@
                                 <?php if($room->view): ?>
                                 <div class="spec-item">
                                     <i class="fas fa-eye"></i>
-                                    <span><?php echo e($room->view); ?></span>
+                                    <span>Vue exceptionnelle</span>
                                 </div>
                                 <?php endif; ?>
                             </div>
@@ -243,7 +275,7 @@
                         </div>
                         <h3>Spa & Wellness</h3>
                         <p>Centre de bien-être avec soins personnalisés</p>
-                        <a href="#" class="service-link">
+                        <a href="<?php echo e(route('frontend.contact')); ?>?subject=Spa" class="service-link">
                             Découvrir <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
@@ -256,7 +288,7 @@
                         </div>
                         <h3>Conciergerie 24/7</h3>
                         <p>Service dédié pour répondre à tous vos besoins</p>
-                        <a href="#" class="service-link">
+                        <a href="<?php echo e(route('frontend.contact')); ?>?subject=Conciergerie" class="service-link">
                             Découvrir <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
@@ -269,7 +301,7 @@
                         </div>
                         <h3>Transfert VIP</h3>
                         <p>Véhicules de luxe avec chauffeur privé</p>
-                        <a href="#" class="service-link">
+                        <a href="<?php echo e(route('frontend.contact')); ?>?subject=Transfert" class="service-link">
                             Découvrir <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
@@ -572,6 +604,66 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.booking-form {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    align-items: end;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-input {
+    padding: 14px 18px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 15px;
+    transition: var(--transition-smooth);
+    background: var(--white);
+    width: 100%;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--cactus-green);
+    box-shadow: 0 0 0 4px rgba(26, 71, 42, 0.1);
+}
+
+.btn-search {
+    padding: 14px 30px;
+    background: var(--cactus-green);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 52px;
+}
+
+.btn-search:hover {
+    background: var(--cactus-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
 /* Scroll Indicator */
 .scroll-indicator {
     position: absolute;
@@ -695,69 +787,6 @@ body {
 .btn-white-lg:hover {
     background: transparent;
     color: var(--white);
-}
-
-/* ============================================
-   FORMULAIRES DE RÉSERVATION
-   ============================================ */
-.booking-form {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    align-items: end;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.form-group label {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-gray);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.form-input {
-    padding: 14px 18px;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 15px;
-    transition: var(--transition-smooth);
-    background: var(--white);
-    width: 100%;
-}
-
-.form-input:focus {
-    outline: none;
-    border-color: var(--cactus-green);
-    box-shadow: 0 0 0 4px rgba(26, 71, 42, 0.1);
-}
-
-.btn-search {
-    padding: 14px 30px;
-    background: var(--cactus-green);
-    color: var(--white);
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: var(--transition-smooth);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    height: 52px;
-}
-
-.btn-search:hover {
-    background: var(--cactus-light);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
 }
 
 /* ============================================
@@ -1612,9 +1641,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     return false;
                 }
                 
-                // Simulation de recherche
-                alert('Recherche en cours... Redirection vers les disponibilités.');
-                // window.location.href = '<?php echo e(route("frontend.rooms")); ?>?arrival=' + arrivalInput.value + '&departure=' + departureInput.value;
+                // Redirection vers la page des chambres avec les dates
+                window.location.href = '<?php echo e(route("frontend.rooms")); ?>?check_in=' + arrivalInput.value + '&check_out=' + departureInput.value + '&guests=' + (this.querySelector('select[name="guests"]')?.value || '2');
             }
         });
     });

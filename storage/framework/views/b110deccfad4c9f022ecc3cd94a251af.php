@@ -1,8 +1,8 @@
-@extends('frontend.layouts.master')
 
-@section('title', 'Nos Chambres - Hôtel Cactus Palace')
 
-@section('content')
+<?php $__env->startSection('title', 'Nos Chambres - Hôtel Cactus Palace'); ?>
+
+<?php $__env->startSection('content'); ?>
     <!-- Hero Section pour les chambres -->
     <section class="hero-section-rooms">
         <div class="container">
@@ -12,13 +12,13 @@
                     <p class="lead mb-4">Découvrez l'harmonie entre confort luxueux et élégance naturelle</p>
                     <div class="d-flex justify-content-center align-items-center gap-3">
                         <span class="badge bg-success">
-                            <i class="fas fa-bed me-1"></i>{{ $rooms->total() }} Chambres
+                            <i class="fas fa-bed me-1"></i><?php echo e($rooms->total()); ?> Chambres
                         </span>
                         <span class="badge bg-info">
-                            <i class="fas fa-check-circle me-1"></i>{{ $availableCount ?? 0 }} Disponibles
+                            <i class="fas fa-check-circle me-1"></i><?php echo e($availableCount ?? 0); ?> Disponibles
                         </span>
                         <span class="badge bg-warning">
-                            <i class="fas fa-star me-1"></i>{{ $distinctTypes ?? 0 }} Types
+                            <i class="fas fa-star me-1"></i><?php echo e($distinctTypes ?? 0); ?> Types
                         </span>
                     </div>
                 </div>
@@ -29,7 +29,7 @@
     <!-- Section de filtres -->
     <section class="py-4" style="background-color: #E8F5E9;">
         <div class="container">
-            <form action="{{ route('frontend.rooms') }}" method="GET" id="filterForm">
+            <form action="<?php echo e(route('frontend.rooms')); ?>" method="GET" id="filterForm">
                 <div class="row g-3 align-items-center">
                     <div class="col-lg-3">
                         <div class="form-group">
@@ -38,11 +38,11 @@
                             </label>
                             <select class="form-select" id="type" name="type" style="border: 1px solid #C8E6C9;">
                                 <option value="">Tous les types</option>
-                                @foreach($types as $type)
-                                    <option value="{{ $type->id }}" {{ request('type') == $type->id ? 'selected' : '' }}>
-                                        {{ $type->name }} ({{ $type->rooms_count ?? 0 }})
+                                <?php $__currentLoopData = $types; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($type->id); ?>" <?php echo e(request('type') == $type->id ? 'selected' : ''); ?>>
+                                        <?php echo e($type->name); ?> (<?php echo e($type->rooms_count ?? 0); ?>)
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
                         </div>
                     </div>
@@ -54,15 +54,15 @@
                             </label>
                             <select class="form-select" id="capacity" name="capacity" style="border: 1px solid #C8E6C9;">
                                 <option value="">Toute capacité</option>
-                                @for($i = 1; $i <= 5; $i++)
-                                    @php
+                                <?php for($i = 1; $i <= 5; $i++): ?>
+                                    <?php
                                         $count = $roomsByCapacity[$i] ?? 0;
-                                    @endphp
-                                    <option value="{{ $i }}" {{ request('capacity') == $i ? 'selected' : '' }}>
-                                        {{ $i }} personne{{ $i > 1 ? 's' : '' }} ({{ $count }})
+                                    ?>
+                                    <option value="<?php echo e($i); ?>" <?php echo e(request('capacity') == $i ? 'selected' : ''); ?>>
+                                        <?php echo e($i); ?> personne<?php echo e($i > 1 ? 's' : ''); ?> (<?php echo e($count); ?>)
                                     </option>
-                                @endfor
-                                <option value="6" {{ request('capacity') == 6 ? 'selected' : '' }}>6+ personnes</option>
+                                <?php endfor; ?>
+                                <option value="6" <?php echo e(request('capacity') == 6 ? 'selected' : ''); ?>>6+ personnes</option>
                             </select>
                         </div>
                     </div>
@@ -74,20 +74,20 @@
                             </label>
                             <select class="form-select" id="price_range" name="price_range" style="border: 1px solid #C8E6C9;">
                                 <option value="">Tous les prix</option>
-                                <option value="0-50000" {{ request('price_range') == '0-50000' ? 'selected' : '' }}>
-                                    < 50 000 FCFA ({{ $priceRanges['0-50000'] ?? 0 }})
+                                <option value="0-50000" <?php echo e(request('price_range') == '0-50000' ? 'selected' : ''); ?>>
+                                    < 50 000 FCFA (<?php echo e($priceRanges['0-50000'] ?? 0); ?>)
                                 </option>
-                                <option value="50000-100000" {{ request('price_range') == '50000-100000' ? 'selected' : '' }}>
-                                    50k - 100k FCFA ({{ $priceRanges['50000-100000'] ?? 0 }})
+                                <option value="50000-100000" <?php echo e(request('price_range') == '50000-100000' ? 'selected' : ''); ?>>
+                                    50k - 100k FCFA (<?php echo e($priceRanges['50000-100000'] ?? 0); ?>)
                                 </option>
-                                <option value="100000-150000" {{ request('price_range') == '100000-150000' ? 'selected' : '' }}>
-                                    100k - 150k FCFA ({{ $priceRanges['100000-150000'] ?? 0 }})
+                                <option value="100000-150000" <?php echo e(request('price_range') == '100000-150000' ? 'selected' : ''); ?>>
+                                    100k - 150k FCFA (<?php echo e($priceRanges['100000-150000'] ?? 0); ?>)
                                 </option>
-                                <option value="150000-200000" {{ request('price_range') == '150000-200000' ? 'selected' : '' }}>
-                                    150k - 200k FCFA ({{ $priceRanges['150000-200000'] ?? 0 }})
+                                <option value="150000-200000" <?php echo e(request('price_range') == '150000-200000' ? 'selected' : ''); ?>>
+                                    150k - 200k FCFA (<?php echo e($priceRanges['150000-200000'] ?? 0); ?>)
                                 </option>
-                                <option value="200000+" {{ request('price_range') == '200000+' ? 'selected' : '' }}>
-                                    > 200k FCFA ({{ $priceRanges['200000+'] ?? 0 }})
+                                <option value="200000+" <?php echo e(request('price_range') == '200000+' ? 'selected' : ''); ?>>
+                                    > 200k FCFA (<?php echo e($priceRanges['200000+'] ?? 0); ?>)
                                 </option>
                             </select>
                         </div>
@@ -98,7 +98,7 @@
                             <button type="submit" class="btn" style="background-color: #4CAF50; border-color: #4CAF50; color: white; padding: 10px 20px;">
                                 <i class="fas fa-search me-2"></i>Filtrer
                             </button>
-                            <a href="{{ route('frontend.rooms') }}" class="btn" style="background-color: #FF9800; border-color: #FF9800; color: white; padding: 10px 20px;">
+                            <a href="<?php echo e(route('frontend.rooms')); ?>" class="btn" style="background-color: #FF9800; border-color: #FF9800; color: white; padding: 10px 20px;">
                                 <i class="fas fa-redo me-2"></i>Réinitialiser
                             </a>
                         </div>
@@ -109,32 +109,33 @@
     </section>
 
     <!-- Résultats de recherche -->
-    @if(request()->hasAny(['type', 'capacity', 'price_range']))
+    <?php if(request()->hasAny(['type', 'capacity', 'price_range'])): ?>
     <section class="py-3" style="background-color: #F1F8E9;">
         <div class="container">
             <div class="alert alert-success border-0 d-flex align-items-center justify-content-between">
                 <div>
                     <i class="fas fa-filter me-2"></i>
-                    <strong>{{ $rooms->total() }} chambre(s)</strong> correspondant à vos critères
-                    @if(request('type'))
-                        • Type: {{ \App\Models\Type::find(request('type'))->name ?? '' }}
-                    @endif
-                    @if(request('capacity'))
-                        • Capacité: {{ request('capacity') }} personne(s)
-                    @endif
-                    @if(request('price_range'))
-                        • Budget: {{ request('price_range') }} FCFA
-                    @endif
+                    <strong><?php echo e($rooms->total()); ?> chambre(s)</strong> correspondant à vos critères
+                    <?php if(request('type')): ?>
+                        • Type: <?php echo e(\App\Models\Type::find(request('type'))->name ?? ''); ?>
+
+                    <?php endif; ?>
+                    <?php if(request('capacity')): ?>
+                        • Capacité: <?php echo e(request('capacity')); ?> personne(s)
+                    <?php endif; ?>
+                    <?php if(request('price_range')): ?>
+                        • Budget: <?php echo e(request('price_range')); ?> FCFA
+                    <?php endif; ?>
                 </div>
                 <div>
-                    <a href="{{ route('frontend.rooms') }}" class="btn btn-sm btn-outline-success">
+                    <a href="<?php echo e(route('frontend.rooms')); ?>" class="btn btn-sm btn-outline-success">
                         <i class="fas fa-times me-1"></i>Effacer filtres
                     </a>
                 </div>
             </div>
         </div>
     </section>
-    @endif
+    <?php endif; ?>
 
     <!-- Liste des chambres -->
     <section class="py-5">
@@ -176,35 +177,35 @@
 
             <!-- Grille des chambres -->
             <div id="rooms-grid" class="row g-4">
-                @forelse($rooms as $room)
+                <?php $__empty_1 = true; $__currentLoopData = $rooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <div class="col-lg-4 col-md-6 room-item" 
-                     data-price="{{ $room->price }}"
-                     data-name="{{ strtolower($room->name) }}"
-                     data-capacity="{{ $room->capacity }}">
+                     data-price="<?php echo e($room->price); ?>"
+                     data-name="<?php echo e(strtolower($room->name)); ?>"
+                     data-capacity="<?php echo e($room->capacity); ?>">
                     <div class="card room-card h-100 border-0 shadow-sm" style="border-top: 4px solid #4CAF50;">
                         <!-- Badge statut dynamique -->
                         <div class="room-status-badge" style="position: absolute; top: 15px; right: 15px; z-index: 1;">
-                            @if($room->is_available_today)
+                            <?php if($room->is_available_today): ?>
                                 <span class="badge bg-success" style="padding: 6px 12px; font-weight: 600;">
                                     <i class="fas fa-check-circle me-1"></i>Disponible
                                 </span>
-                            @else
+                            <?php else: ?>
                                 <span class="badge bg-danger" style="padding: 6px 12px; font-weight: 600;">
                                     <i class="fas fa-times-circle me-1"></i>Non disponible
                                 </span>
-                            @endif
+                            <?php endif; ?>
                         </div>
                         
                         <!-- Favoris -->
                         <div class="room-favorite" style="position: absolute; top: 15px; left: 15px; z-index: 1;">
-                            <button class="btn btn-sm btn-light favorite-btn" data-room-id="{{ $room->id }}">
+                            <button class="btn btn-sm btn-light favorite-btn" data-room-id="<?php echo e($room->id); ?>">
                                 <i class="far fa-heart"></i>
                             </button>
                         </div>
                         
                         <!-- IMAGE CORRIGÉE - Utilisation du chemin direct -->
                         <div class="room-image-container" style="height: 250px; overflow: hidden;">
-                            @php
+                            <?php
                                 // Image par défaut
                                 $defaultImage = asset('img/default/default-room.png');
                                 $imageUrl = $defaultImage;
@@ -220,22 +221,23 @@
                                         }
                                     }
                                 }
-                            @endphp
+                            ?>
                             
-                            <img src="{{ $imageUrl }}" 
+                            <img src="<?php echo e($imageUrl); ?>" 
                                  class="card-img-top room-image" 
-                                 alt="{{ $room->name }}"
-                                 onerror="this.onerror=null; this.src='{{ asset('img/room/gamesetting.png') }}';"
+                                 alt="<?php echo e($room->name); ?>"
+                                 onerror="this.onerror=null; this.src='<?php echo e(asset('img/room/gamesetting.png')); ?>';"
                                  style="height: 100%; width: 100%; object-fit: cover; transition: transform 0.5s ease;">
                             
                             <!-- Navigation images -->
-                            @if($room->images && $room->images->count() > 1)
+                            <?php if($room->images && $room->images->count() > 1): ?>
                             <div class="image-nav" style="position: absolute; bottom: 10px; right: 10px;">
                                 <span class="badge bg-dark opacity-75">
-                                    <i class="fas fa-images me-1"></i>{{ $room->images->count() }}
+                                    <i class="fas fa-images me-1"></i><?php echo e($room->images->count()); ?>
+
                                 </span>
                             </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
                         
                         <div class="card-body">
@@ -243,26 +245,30 @@
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <div>
                                     <h5 class="card-title mb-1" style="color: #2E7D32; font-weight: 600;">
-                                        {{ $room->name }}
+                                        <?php echo e($room->name); ?>
+
                                     </h5>
                                     <h6 class="text-muted mb-2">
-                                        <i class="fas fa-door-closed me-1"></i>{{ $room->type->name ?? 'Chambre Standard' }}
+                                        <i class="fas fa-door-closed me-1"></i><?php echo e($room->type->name ?? 'Chambre Standard'); ?>
+
                                     </h6>
                                 </div>
                                 <div class="text-end">
                                     <span class="badge" style="background-color: #81C784; color: white;">
-                                        <i class="fas fa-user-friends me-1"></i>{{ $room->capacity }}
+                                        <i class="fas fa-user-friends me-1"></i><?php echo e($room->capacity); ?>
+
                                     </span>
                                     <div class="mt-1">
                                         <span class="badge" style="background-color: #2196F3; color: white;">
-                                            Chambre {{ $room->number }}
+                                            Chambre <?php echo e($room->number); ?>
+
                                         </span>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Thème principal -->
-                            @php
+                            <?php
                                 $description = $room->view;
                                 $theme = '';
                                 if ($description) {
@@ -271,30 +277,32 @@
                                         $theme = trim($parts[0]);
                                     }
                                 }
-                            @endphp
+                            ?>
                             
-                            @if($theme)
+                            <?php if($theme): ?>
                             <div class="room-theme mb-3">
                                 <span class="badge" style="background-color: #E8F5E9; color: #2E7D32; font-weight: 500; border: 1px solid #C8E6C9;">
-                                    <i class="fas fa-leaf me-1"></i>{{ $theme }}
+                                    <i class="fas fa-leaf me-1"></i><?php echo e($theme); ?>
+
                                 </span>
                             </div>
-                            @endif
+                            <?php endif; ?>
                             
                             <!-- Description courte -->
-                            @if($room->view)
+                            <?php if($room->view): ?>
                             <div class="room-description mb-3">
                                 <p class="card-text text-muted mb-1" style="font-size: 0.9rem; line-height: 1.4; min-height: 60px;">
                                     <i class="fas fa-quote-left me-1 text-success"></i>
-                                    {{ Str::limit($room->view, 80) }}
+                                    <?php echo e(Str::limit($room->view, 80)); ?>
+
                                 </p>
                                 <small class="text-muted">
-                                    <a href="{{ route('frontend.room.details', $room->id) }}" class="text-success text-decoration-none">
+                                    <a href="<?php echo e(route('frontend.room.details', $room->id)); ?>" class="text-success text-decoration-none">
                                         Lire la suite <i class="fas fa-arrow-right ms-1"></i>
                                     </a>
                                 </small>
                             </div>
-                            @endif
+                            <?php endif; ?>
                             
                             <!-- Équipements -->
                             <div class="room-equipments mb-3">
@@ -302,19 +310,21 @@
                                     <i class="fas fa-concierge-bell me-1"></i>Équipements
                                 </h6>
                                 <div class="d-flex flex-wrap gap-1">
-                                    @php
+                                    <?php
                                         $facilities = $room->facilities->take(4);
-                                    @endphp
-                                    @foreach($facilities as $facility)
+                                    ?>
+                                    <?php $__currentLoopData = $facilities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $facility): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <span class="badge bg-light text-dark border" style="font-size: 0.75rem;">
-                                            <i class="fas fa-{{ $facility->icon ?? 'check' }} me-1"></i>{{ $facility->name }}
+                                            <i class="fas fa-<?php echo e($facility->icon ?? 'check'); ?> me-1"></i><?php echo e($facility->name); ?>
+
                                         </span>
-                                    @endforeach
-                                    @if($room->facilities->count() > 4)
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if($room->facilities->count() > 4): ?>
                                         <span class="badge bg-light text-dark border" style="font-size: 0.75rem;">
-                                            +{{ $room->facilities->count() - 4 }}
+                                            +<?php echo e($room->facilities->count() - 4); ?>
+
                                         </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             
@@ -323,12 +333,13 @@
                                 <div class="row">
                                     <div class="col-6">
                                         <small class="text-muted d-block">
-                                            <i class="fas fa-expand-arrows-alt me-1"></i> {{ $room->size ?? '25' }} m²
+                                            <i class="fas fa-expand-arrows-alt me-1"></i> <?php echo e($room->size ?? '25'); ?> m²
                                         </small>
                                     </div>
                                     <div class="col-6">
                                         <small class="text-muted d-block">
-                                            <i class="fas fa-building me-1"></i> Étage {{ $room->floor ?? 'RDC' }}
+                                            <i class="fas fa-building me-1"></i> Étage <?php echo e($room->floor ?? 'RDC'); ?>
+
                                         </small>
                                     </div>
                                 </div>
@@ -338,35 +349,36 @@
                             <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
                                 <div>
                                     <span class="h4 mb-0" style="color: #4CAF50;">
-                                        {{ number_format($room->price, 0, ',', ' ') }} FCFA
+                                        <?php echo e(number_format($room->price, 0, ',', ' ')); ?> FCFA
                                     </span>
                                     <small class="text-muted d-block">par nuit</small>
                                 </div>
                                 <div class="d-flex gap-2">
-                                    <a href="{{ route('frontend.room.details', $room->id) }}" 
+                                    <a href="<?php echo e(route('frontend.room.details', $room->id)); ?>" 
                                        class="btn btn-sm" 
                                        style="background-color: #4CAF50; border-color: #4CAF50; color: white;">
                                         <i class="fas fa-eye me-1"></i> Détails
                                     </a>
-                                    @if($room->is_available_today)
-                                        <a href="{{ route('frontend.contact') }}?room_id={{ $room->id }}" 
+                                    <?php if($room->is_available_today): ?>
+                                        <a href="<?php echo e(route('frontend.contact')); ?>?room_id=<?php echo e($room->id); ?>" 
                                            class="btn btn-sm" 
                                            style="color: #4CAF50; border-color: #4CAF50; background-color: transparent;">
                                             <i class="fas fa-calendar-check me-1"></i> Réserver
                                         </a>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             
                             <!-- Prochaine disponibilité si occupée -->
-                            @if(!$room->is_available_today && $room->next_available_date)
+                            <?php if(!$room->is_available_today && $room->next_available_date): ?>
                                 <div class="mt-3">
                                     <small class="text-warning">
                                         <i class="fas fa-calendar-alt me-1"></i>
-                                        Disponible à partir du {{ \Carbon\Carbon::parse($room->next_available_date)->format('d/m/Y') }}
+                                        Disponible à partir du <?php echo e(\Carbon\Carbon::parse($room->next_available_date)->format('d/m/Y')); ?>
+
                                     </small>
                                 </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
                         
                         <!-- Card footer -->
@@ -374,25 +386,25 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <small class="text-muted">
                                     <i class="fas fa-clock me-1"></i>
-                                    @if($room->room_status_id == 1)
+                                    <?php if($room->room_status_id == 1): ?>
                                         <span class="text-success">Prête à accueillir</span>
-                                    @elseif($room->room_status_id == 3)
+                                    <?php elseif($room->room_status_id == 3): ?>
                                         <span class="text-warning">En nettoyage</span>
-                                    @elseif($room->room_status_id == 4)
+                                    <?php elseif($room->room_status_id == 4): ?>
                                         <span class="text-danger">En maintenance</span>
-                                    @else
-                                        <span class="text-secondary">Statut: {{ $room->roomStatus->name ?? 'N/A' }}</span>
-                                    @endif
+                                    <?php else: ?>
+                                        <span class="text-secondary">Statut: <?php echo e($room->roomStatus->name ?? 'N/A'); ?></span>
+                                    <?php endif; ?>
                                 </small>
                                 <small class="text-muted">
                                     <i class="fas fa-star me-1 text-warning"></i>
-                                    {{ $room->average_rating ?? '4.5' }}/5
+                                    <?php echo e($room->average_rating ?? '4.5'); ?>/5
                                 </small>
                             </div>
                         </div>
                     </div>
                 </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="col-12">
                     <div class="text-center py-5" style="background-color: #F1F8E9; border-radius: 10px;">
                         <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
@@ -402,26 +414,27 @@
                         <h4 style="color: #2E7D32;">Aucune chambre trouvée</h4>
                         <p class="text-muted mb-4">Aucune chambre ne correspond à vos critères de recherche.</p>
                         <div class="d-flex justify-content-center gap-3">
-                            <a href="{{ route('frontend.rooms') }}" class="btn" style="background-color: #4CAF50; border-color: #4CAF50; color: white;">
+                            <a href="<?php echo e(route('frontend.rooms')); ?>" class="btn" style="background-color: #4CAF50; border-color: #4CAF50; color: white;">
                                 <i class="fas fa-redo me-1"></i> Voir toutes les chambres
                             </a>
-                            <a href="{{ route('frontend.contact') }}" class="btn btn-outline-success">
+                            <a href="<?php echo e(route('frontend.contact')); ?>" class="btn btn-outline-success">
                                 <i class="fas fa-question-circle me-1"></i> Demander conseil
                             </a>
                         </div>
                     </div>
                 </div>
-                @endforelse
+                <?php endif; ?>
             </div>
 
             <!-- Pagination -->
-            @if($rooms->hasPages())
+            <?php if($rooms->hasPages()): ?>
             <div class="mt-5 pt-4">
                 <nav aria-label="Navigation des chambres" class="d-flex justify-content-center">
-                    {{ $rooms->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
+                    <?php echo e($rooms->onEachSide(1)->links('vendor.pagination.bootstrap-5')); ?>
+
                 </nav>
             </div>
-            @endif
+            <?php endif; ?>
         </div>
     </section>
 
@@ -450,40 +463,42 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($rooms->take(3) as $room)
+                        <?php $__currentLoopData = $rooms->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
                             <td>
-                                <strong>{{ $room->name }}</strong>
-                                <div class="small text-muted">Chambre {{ $room->number }}</div>
+                                <strong><?php echo e($room->name); ?></strong>
+                                <div class="small text-muted">Chambre <?php echo e($room->number); ?></div>
                             </td>
-                            <td>{{ $room->type->name }}</td>
+                            <td><?php echo e($room->type->name); ?></td>
                             <td class="text-center">
                                 <span class="badge" style="background-color: #81C784;">
-                                    {{ $room->capacity }}
+                                    <?php echo e($room->capacity); ?>
+
                                 </span>
                             </td>
-                            <td>{{ $room->size ?? 'N/A' }} m²</td>
+                            <td><?php echo e($room->size ?? 'N/A'); ?> m²</td>
                             <td>
                                 <strong style="color: #4CAF50;">
-                                    {{ number_format($room->price, 0, ',', ' ') }} FCFA
+                                    <?php echo e(number_format($room->price, 0, ',', ' ')); ?> FCFA
                                 </strong>
                             </td>
                             <td>
                                 <div class="d-flex flex-wrap gap-1">
-                                    @foreach($room->facilities->take(3) as $facility)
+                                    <?php $__currentLoopData = $room->facilities->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $facility): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <span class="badge bg-light text-dark" style="font-size: 0.7rem;">
-                                            {{ $facility->name }}
+                                            <?php echo e($facility->name); ?>
+
                                         </span>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </td>
                             <td>
-                                <a href="{{ route('frontend.room.details', $room->id) }}" class="btn btn-sm btn-success">
+                                <a href="<?php echo e(route('frontend.room.details', $room->id)); ?>" class="btn btn-sm btn-success">
                                     <i class="fas fa-eye me-1"></i>Voir
                                 </a>
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
             </div>
@@ -505,7 +520,7 @@
                              style="width: 80px; height: 80px; background-color: #4CAF50;">
                             <i class="fas fa-bed fa-2x text-white"></i>
                         </div>
-                        <h3 style="color: #2E7D32;">{{ $totalRooms ?? 0 }}</h3>
+                        <h3 style="color: #2E7D32;"><?php echo e($totalRooms ?? 0); ?></h3>
                         <h5 style="color: #2E7D32;">Chambres</h5>
                         <p class="text-muted">Types variés pour tous vos besoins</p>
                     </div>
@@ -517,7 +532,7 @@
                              style="width: 80px; height: 80px; background-color: #2196F3;">
                             <i class="fas fa-check-circle fa-2x text-white"></i>
                         </div>
-                        <h3 style="color: #2196F3;">{{ $availableCount ?? 0 }}</h3>
+                        <h3 style="color: #2196F3;"><?php echo e($availableCount ?? 0); ?></h3>
                         <h5 style="color: #2196F3;">Disponibles</h5>
                         <p class="text-muted">Chambres prêtes à vous accueillir</p>
                     </div>
@@ -529,7 +544,7 @@
                              style="width: 80px; height: 80px; background-color: #FF9800;">
                             <i class="fas fa-users fa-2x text-white"></i>
                         </div>
-                        <h3 style="color: #FF9800;">{{ $averageCapacity ?? 2 }}</h3>
+                        <h3 style="color: #FF9800;"><?php echo e($averageCapacity ?? 2); ?></h3>
                         <h5 style="color: #FF9800;">Capacité moyenne</h5>
                         <p class="text-muted">Personnes par chambre</p>
                     </div>
@@ -576,7 +591,7 @@
                         </div>
                         <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
                             <div class="d-grid">
-                                <a href="{{ route('frontend.contact') }}" class="btn btn-lg" style="background-color: #2E7D32; border-color: #2E7D32; color: white;">
+                                <a href="<?php echo e(route('frontend.contact')); ?>" class="btn btn-lg" style="background-color: #2E7D32; border-color: #2E7D32; color: white;">
                                     <i class="fas fa-calendar-check me-2"></i> Demander un devis
                                 </a>
                                 <small class="text-muted mt-2">Réponse sous 24h maximum</small>
@@ -587,9 +602,9 @@
             </div>
         </div>
     </section>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
 .hero-section-rooms {
     background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
@@ -731,9 +746,9 @@
     flex: 1;
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Animation pour les cartes de chambre
@@ -890,4 +905,5 @@ document.addEventListener('DOMContentLoaded', function() {
     restoreFavorites();
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('frontend.layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/frontend/pages/rooms.blade.php ENDPATH**/ ?>

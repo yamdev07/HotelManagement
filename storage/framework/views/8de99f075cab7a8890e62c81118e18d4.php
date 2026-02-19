@@ -1,36 +1,38 @@
-@extends('frontend.layouts.master')
 
-@section('title', $room->name . ' - Hôtel Cactus Palace')
 
-@section('content')
+<?php $__env->startSection('title', $room->name . ' - Hôtel Cactus Palace'); ?>
+
+<?php $__env->startSection('content'); ?>
     <!-- Hero Section avec l'image principale en fond -->
-    <section class="hero-section-room-details" style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('{{ $room->first_image_url ?? asset('img/room/gamesetting.png') }}'); background-size: cover; background-position: center;">
+    <section class="hero-section-room-details" style="background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('<?php echo e($room->first_image_url ?? asset('img/room/gamesetting.png')); ?>'); background-size: cover; background-position: center;">
         <div class="container">
             <div class="row">
                 <div class="col-lg-8 mx-auto text-center text-white">
                     <div class="mb-3">
-                        @for($i = 1; $i <= 5; $i++)
+                        <?php for($i = 1; $i <= 5; $i++): ?>
                             <i class="fas fa-star text-warning"></i>
-                        @endfor
+                        <?php endfor; ?>
                         <span class="ms-2">(24 avis)</span>
                     </div>
-                    <h1 class="display-3 fw-bold mb-3">{{ $room->name }}</h1>
-                    <p class="lead mb-4">{{ $room->view ?? 'Découvrez notre chambre luxueuse' }}</p>
+                    <h1 class="display-3 fw-bold mb-3"><?php echo e($room->name); ?></h1>
+                    <p class="lead mb-4"><?php echo e($room->view ?? 'Découvrez notre chambre luxueuse'); ?></p>
                     
                     <!-- Badges d'informations -->
                     <div class="d-flex justify-content-center flex-wrap gap-3 mt-4">
                         <div class="badge-info-item">
-                            <i class="fas fa-user-friends me-2"></i>{{ $room->capacity }} Personnes
+                            <i class="fas fa-user-friends me-2"></i><?php echo e($room->capacity); ?> Personnes
                         </div>
                         <div class="badge-info-item">
-                            <i class="fas fa-expand-arrows-alt me-2"></i>{{ $room->size ?? '25' }} m²
+                            <i class="fas fa-expand-arrows-alt me-2"></i><?php echo e($room->size ?? '25'); ?> m²
                         </div>
                         <div class="badge-info-item">
-                            <i class="fas fa-bed me-2"></i>{{ $room->type->name ?? 'Standard' }}
+                            <i class="fas fa-bed me-2"></i><?php echo e($room->type->name ?? 'Standard'); ?>
+
                         </div>
                         <div class="badge-info-item">
-                            <i class="fas fa-{{ $room->is_available_today ? 'check-circle' : 'times-circle' }} me-2"></i>
-                            {{ $room->is_available_today ? 'Disponible' : 'Non disponible' }}
+                            <i class="fas fa-<?php echo e($room->is_available_today ? 'check-circle' : 'times-circle'); ?> me-2"></i>
+                            <?php echo e($room->is_available_today ? 'Disponible' : 'Non disponible'); ?>
+
                         </div>
                     </div>
                 </div>
@@ -46,7 +48,7 @@
                 <div class="col-lg-8">
                     <!-- Image principale -->
                     <div class="main-image-container mb-3">
-                        @php
+                        <?php
                             // Image principale par défaut
                             $mainImage = asset('img/room/gamesetting.png');
                             
@@ -58,41 +60,42 @@
                                     $mainImage = asset($testPath);
                                 }
                             }
-                        @endphp
+                        ?>
                         
-                        <img src="{{ $mainImage }}" 
-                             alt="{{ $room->name }}" 
+                        <img src="<?php echo e($mainImage); ?>" 
+                             alt="<?php echo e($room->name); ?>" 
                              id="mainRoomImage"
                              class="img-fluid rounded-4 shadow"
                              style="width: 100%; height: 450px; object-fit: cover;">
                         
                         <!-- Badge de disponibilité sur l'image -->
                         <div class="position-absolute top-0 start-0 m-3">
-                            <span class="badge-availability {{ $room->is_available_today ? 'badge-available' : 'badge-unavailable' }}">
-                                <i class="fas fa-{{ $room->is_available_today ? 'check-circle' : 'times-circle' }} me-1"></i>
-                                {{ $room->is_available_today ? 'Disponible' : 'Non disponible' }}
+                            <span class="badge-availability <?php echo e($room->is_available_today ? 'badge-available' : 'badge-unavailable'); ?>">
+                                <i class="fas fa-<?php echo e($room->is_available_today ? 'check-circle' : 'times-circle'); ?> me-1"></i>
+                                <?php echo e($room->is_available_today ? 'Disponible' : 'Non disponible'); ?>
+
                             </span>
                         </div>
                     </div>
                     
                     <!-- Miniatures -->
-                    @if($room->images && $room->images->count() > 0)
+                    <?php if($room->images && $room->images->count() > 0): ?>
                     <div class="row g-2">
-                        @foreach($room->images as $index => $image)
-                            @php
+                        <?php $__currentLoopData = $room->images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $thumbPath = 'img/room/' . $room->number . '/' . $image->url;
                                 $thumbUrl = file_exists(public_path($thumbPath)) ? asset($thumbPath) : asset('img/room/gamesetting.png');
-                            @endphp
+                            ?>
                             <div class="col-3">
-                                <img src="{{ $thumbUrl }}" 
-                                     alt="Miniature {{ $index+1 }}"
+                                <img src="<?php echo e($thumbUrl); ?>" 
+                                     alt="Miniature <?php echo e($index+1); ?>"
                                      class="img-fluid rounded-3 thumbnail-image"
-                                     style="height: 100px; width: 100%; object-fit: cover; cursor: pointer; {{ $index == 0 ? 'border: 3px solid #4CAF50;' : '' }}"
-                                     onclick="changeMainImage('{{ $thumbUrl }}', this)">
+                                     style="height: 100px; width: 100%; object-fit: cover; cursor: pointer; <?php echo e($index == 0 ? 'border: 3px solid #4CAF50;' : ''); ?>"
+                                     onclick="changeMainImage('<?php echo e($thumbUrl); ?>', this)">
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
-                    @endif
+                    <?php endif; ?>
                     
                     <!-- Description détaillée -->
                     <div class="room-description-card mt-4">
@@ -100,40 +103,40 @@
                             <i class="fas fa-align-left me-2"></i>Description de la chambre
                         </h3>
                         <div class="description-content">
-                            <p class="lead-text">{{ $room->name }} - {{ $room->type->name ?? 'Chambre Standard' }}</p>
-                            <p class="main-description">{{ $room->view ?? 'Profitez d\'un séjour exceptionnel dans cette chambre luxueuse.' }}</p>
+                            <p class="lead-text"><?php echo e($room->name); ?> - <?php echo e($room->type->name ?? 'Chambre Standard'); ?></p>
+                            <p class="main-description"><?php echo e($room->view ?? 'Profitez d\'un séjour exceptionnel dans cette chambre luxueuse.'); ?></p>
                             
-                            @if($room->description)
-                                <p class="full-description">{{ $room->description }}</p>
-                            @endif
+                            <?php if($room->description): ?>
+                                <p class="full-description"><?php echo e($room->description); ?></p>
+                            <?php endif; ?>
                         </div>
                     </div>
                     
                     <!-- Équipements -->
-                    @if($room->facilities && $room->facilities->count() > 0)
+                    <?php if($room->facilities && $room->facilities->count() > 0): ?>
                     <div class="facilities-card mt-4">
                         <h3 class="section-title">
                             <i class="fas fa-concierge-bell me-2"></i>Équipements & Services
                         </h3>
                         <div class="row g-3">
-                            @foreach($room->facilities as $facility)
+                            <?php $__currentLoopData = $room->facilities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $facility): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="col-md-6">
                                 <div class="facility-item">
                                     <div class="facility-icon">
-                                        <i class="fas fa-{{ $facility->icon ?? 'check' }}"></i>
+                                        <i class="fas fa-<?php echo e($facility->icon ?? 'check'); ?>"></i>
                                     </div>
                                     <div class="facility-info">
-                                        <strong>{{ $facility->name }}</strong>
-                                        @if($facility->description)
-                                            <p class="small text-muted mb-0">{{ $facility->description }}</p>
-                                        @endif
+                                        <strong><?php echo e($facility->name); ?></strong>
+                                        <?php if($facility->description): ?>
+                                            <p class="small text-muted mb-0"><?php echo e($facility->description); ?></p>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
                 
                 <!-- Colonne droite - Réservation -->
@@ -148,13 +151,13 @@
                             <!-- Prix -->
                             <div class="price-box text-center mb-4">
                                 <span class="price-label">À partir de</span>
-                                <div class="price-amount">{{ number_format($room->price, 0, ',', ' ') }} FCFA</div>
+                                <div class="price-amount"><?php echo e(number_format($room->price, 0, ',', ' ')); ?> FCFA</div>
                                 <span class="price-period">par nuit</span>
                             </div>
                             
                             <!-- Formulaire de réservation -->
                             <form id="bookingForm">
-                                <input type="hidden" name="room_id" value="{{ $room->id }}">
+                                <input type="hidden" name="room_id" value="<?php echo e($room->id); ?>">
                                 
                                 <!-- Dates -->
                                 <div class="form-group mb-3">
@@ -167,8 +170,8 @@
                                                    class="form-control date-input" 
                                                    id="check_in" 
                                                    name="check_in"
-                                                   value="{{ date('Y-m-d', strtotime('+1 day')) }}"
-                                                   min="{{ date('Y-m-d') }}">
+                                                   value="<?php echo e(date('Y-m-d', strtotime('+1 day'))); ?>"
+                                                   min="<?php echo e(date('Y-m-d')); ?>">
                                             <small class="text-muted">Arrivée</small>
                                         </div>
                                         <div class="col-6">
@@ -176,8 +179,8 @@
                                                    class="form-control date-input" 
                                                    id="check_out" 
                                                    name="check_out"
-                                                   value="{{ date('Y-m-d', strtotime('+2 day')) }}"
-                                                   min="{{ date('Y-m-d', strtotime('+1 day')) }}">
+                                                   value="<?php echo e(date('Y-m-d', strtotime('+2 day'))); ?>"
+                                                   min="<?php echo e(date('Y-m-d', strtotime('+1 day'))); ?>">
                                             <small class="text-muted">Départ</small>
                                         </div>
                                     </div>
@@ -189,11 +192,12 @@
                                         <i class="fas fa-user-friends me-2"></i>Adultes
                                     </label>
                                     <select class="form-select" id="adults" name="adults">
-                                        @for($i = 1; $i <= min($room->capacity, 6); $i++)
-                                            <option value="{{ $i }}" {{ $i == min($room->capacity, 2) ? 'selected' : '' }}>
-                                                {{ $i }} adulte{{ $i > 1 ? 's' : '' }}
+                                        <?php for($i = 1; $i <= min($room->capacity, 6); $i++): ?>
+                                            <option value="<?php echo e($i); ?>" <?php echo e($i == min($room->capacity, 2) ? 'selected' : ''); ?>>
+                                                <?php echo e($i); ?> adulte<?php echo e($i > 1 ? 's' : ''); ?>
+
                                             </option>
-                                        @endfor
+                                        <?php endfor; ?>
                                     </select>
                                 </div>
                                 
@@ -203,9 +207,9 @@
                                         <i class="fas fa-child me-2"></i>Enfants (2-12 ans)
                                     </label>
                                     <select class="form-select" id="children" name="children">
-                                        @for($i = 0; $i <= 3; $i++)
-                                            <option value="{{ $i }}">{{ $i }} enfant{{ $i > 1 ? 's' : '' }}</option>
-                                        @endfor
+                                        <?php for($i = 0; $i <= 3; $i++): ?>
+                                            <option value="<?php echo e($i); ?>"><?php echo e($i); ?> enfant<?php echo e($i > 1 ? 's' : ''); ?></option>
+                                        <?php endfor; ?>
                                     </select>
                                 </div>
                                 
@@ -217,7 +221,7 @@
                                     </div>
                                     <div class="d-flex justify-content-between mb-2">
                                         <span>Prix par nuit:</span>
-                                        <strong>{{ number_format($room->price, 0, ',', ' ') }} FCFA</strong>
+                                        <strong><?php echo e(number_format($room->price, 0, ',', ' ')); ?> FCFA</strong>
                                     </div>
                                     <hr class="my-2">
                                     <div class="d-flex justify-content-between">
@@ -234,7 +238,7 @@
                                         <i class="fas fa-check-circle me-2"></i>Vérifier disponibilité
                                     </button>
                                     
-                                    <a href="{{ route('frontend.contact') }}?room_id={{ $room->id }}" 
+                                    <a href="<?php echo e(route('frontend.contact')); ?>?room_id=<?php echo e($room->id); ?>" 
                                        class="btn-contact">
                                         <i class="fas fa-envelope me-2"></i>Nous contacter
                                     </a>
@@ -270,7 +274,7 @@
     </section>
 
     <!-- Chambres similaires -->
-    @if(isset($relatedRooms) && $relatedRooms->count() > 0)
+    <?php if(isset($relatedRooms) && $relatedRooms->count() > 0): ?>
     <section class="py-5 bg-light">
         <div class="container">
             <div class="text-center mb-5">
@@ -279,11 +283,11 @@
             </div>
             
             <div class="row g-4">
-                @foreach($relatedRooms as $relatedRoom)
+                <?php $__currentLoopData = $relatedRooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $relatedRoom): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="col-md-4">
                     <div class="room-card-similar">
                         <div class="room-card-image">
-                            @php
+                            <?php
                                 $relatedImage = asset('img/default/default-room.png');
                                 if($relatedRoom->images && $relatedRoom->images->count() > 0) {
                                     $testPath = 'img/room/' . $relatedRoom->number . '/' . $relatedRoom->images->first()->url;
@@ -291,40 +295,42 @@
                                         $relatedImage = asset($testPath);
                                     }
                                 }
-                            @endphp
-                            <img src="{{ $relatedImage }}" alt="{{ $relatedRoom->name }}">
-                            <span class="badge-status {{ $relatedRoom->is_available_today ? 'badge-available' : 'badge-unavailable' }}">
-                                {{ $relatedRoom->is_available_today ? 'Disponible' : 'Sur demande' }}
+                            ?>
+                            <img src="<?php echo e($relatedImage); ?>" alt="<?php echo e($relatedRoom->name); ?>">
+                            <span class="badge-status <?php echo e($relatedRoom->is_available_today ? 'badge-available' : 'badge-unavailable'); ?>">
+                                <?php echo e($relatedRoom->is_available_today ? 'Disponible' : 'Sur demande'); ?>
+
                             </span>
                         </div>
                         <div class="room-card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
-                                <h5>{{ $relatedRoom->name }}</h5>
+                                <h5><?php echo e($relatedRoom->name); ?></h5>
                                 <span class="room-capacity">
-                                    <i class="fas fa-user-friends"></i> {{ $relatedRoom->capacity }}
+                                    <i class="fas fa-user-friends"></i> <?php echo e($relatedRoom->capacity); ?>
+
                                 </span>
                             </div>
-                            <p class="text-muted small">{{ $relatedRoom->type->name ?? 'Standard' }}</p>
+                            <p class="text-muted small"><?php echo e($relatedRoom->type->name ?? 'Standard'); ?></p>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>
-                                    <span class="room-price">{{ number_format($relatedRoom->price, 0, ',', ' ') }} FCFA</span>
+                                    <span class="room-price"><?php echo e(number_format($relatedRoom->price, 0, ',', ' ')); ?> FCFA</span>
                                     <small class="text-muted d-block">par nuit</small>
                                 </div>
-                                <a href="{{ route('frontend.room.details', $relatedRoom->id) }}" class="btn-view">
+                                <a href="<?php echo e(route('frontend.room.details', $relatedRoom->id)); ?>" class="btn-view">
                                     <i class="fas fa-eye me-1"></i>Voir
                                 </a>
                             </div>
                         </div>
                     </div>
                 </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </div>
     </section>
-    @endif
-@endsection
+    <?php endif; ?>
+<?php $__env->stopSection(); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
 /* Hero Section */
 .hero-section-room-details {
@@ -689,22 +695,22 @@
     }
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 // Variables pour la galerie
 let currentImageIndex = 0;
 const images = [
-    @if($room->images && $room->images->count() > 0)
-        @foreach($room->images as $image)
-            @php
+    <?php if($room->images && $room->images->count() > 0): ?>
+        <?php $__currentLoopData = $room->images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php
                 $imgPath = 'img/room/' . $room->number . '/' . $image->url;
                 $imgUrl = file_exists(public_path($imgPath)) ? asset($imgPath) : asset('img/room/gamesetting.png');
-            @endphp
-            '{{ $imgUrl }}',
-        @endforeach
-    @endif
+            ?>
+            '<?php echo e($imgUrl); ?>',
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <?php endif; ?>
 ];
 
 // Changer l'image principale
@@ -729,7 +735,7 @@ function calculatePrice() {
     if (!checkin || !checkout) return;
     
     const nights = Math.ceil((new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24));
-    const pricePerNight = {{ $room->price }};
+    const pricePerNight = <?php echo e($room->price); ?>;
     const totalPrice = nights * pricePerNight;
     
     document.getElementById('priceSummary').style.display = 'block';
@@ -750,7 +756,7 @@ function checkAvailability() {
     }
     
     const nights = Math.ceil((new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24));
-    const totalPrice = nights * {{ $room->price }};
+    const totalPrice = nights * <?php echo e($room->price); ?>;
     
     // Ici vous pouvez appeler votre API de vérification
     // Pour l'exemple, on simule une disponibilité
@@ -819,7 +825,7 @@ function showBookingModal(checkin, checkout, nights, totalPrice, adults, childre
                         </div>
                         
                         <div class="d-grid gap-2">
-                            <a href="{{ route('frontend.contact') }}?room_id={{ $room->id }}&checkin=${checkin}&checkout=${checkout}&adults=${adults}&children=${children}" 
+                            <a href="<?php echo e(route('frontend.contact')); ?>?room_id=<?php echo e($room->id); ?>&checkin=${checkin}&checkout=${checkout}&adults=${adults}&children=${children}" 
                                class="btn-check-availability">
                                 <i class="fas fa-calendar-check me-2"></i>Confirmer la réservation
                             </a>
@@ -875,4 +881,5 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('check_out').addEventListener('change', calculatePrice);
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('frontend.layouts.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/frontend/pages/room-details.blade.php ENDPATH**/ ?>
