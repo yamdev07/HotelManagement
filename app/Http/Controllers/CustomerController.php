@@ -97,4 +97,36 @@ class CustomerController extends Controller
             return redirect('customer')->with('failed', 'Cannot delete customer! '.$errorDetails);
         }
     }
+
+    /**
+     * API de recherche de clients pour le check-in direct
+     */
+    public function apiSearch(Request $request)
+    {
+        $search = $request->get('search', '');
+        
+        if (strlen($search) < 2) {
+            return response()->json([]);
+        }
+        
+        $customers = Customer::with('user')
+            ->where('name', 'LIKE', "%{$search}%")
+            ->orWhere('phone', 'LIKE', "%{$search}%")
+            ->orWhereHas('user', function ($query) use ($search) {
+                $query->where('email', 'LIKE', "%{$search}%");
+            })
+            ->limit(10)
+            ->get()
+            ->map(function ($customer) {
+                return [
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'phone' => $customer->phone,
+                    'email' => $customer->user->email ?? null,
+                    'reservation_count' => $customer->transactions()->count(),
+                ];
+            });
+        
+        return response()->json($customers);
+    }
 }

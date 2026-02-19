@@ -425,26 +425,19 @@ class CheckInController extends Controller
         return response()->json($response);
     }
 
-    /**
-     * Traiter un check-in direct
-     */
-    public function processDirectCheckIn(Request $request)
+    
+     public function processDirectCheckIn(Request $request)
     {
         $request->validate([
             'room_id' => 'required|exists:rooms,id',
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
-            'customer_id' => 'nullable|exists:customers,id',
-            'customer_name' => 'required_without:customer_id|string|max:255',
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:50',
             'customer_email' => 'nullable|email|max:255',
-            'customer_phone' => 'nullable|string|max:50',
-            'adults' => 'required|integer|min:1|max:10',
-            'children' => 'nullable|integer|min:0|max:10',
-            'id_type' => 'required|string|in:passeport,cni,permis,autre',
-            'id_number' => 'required|string|max:50',
-            'nationality' => 'required|string|max:50',
-            'special_requests' => 'nullable|string|max:500',
+            'person_count' => 'required|integer|min:1|max:10',
             'notes' => 'nullable|string|max:500',
+            'pay_deposit' => 'nullable|boolean',
         ]);
 
         DB::beginTransaction();
@@ -456,16 +449,17 @@ class CheckInController extends Controller
                 throw new \Exception('La chambre n\'est pas disponible pour cette période.');
             }
 
-            // Créer ou récupérer le client
-            if ($request->customer_id) {
-                $customer = Customer::findOrFail($request->customer_id);
-            } else {
-                $customer = Customer::create([
-                    'name' => $request->customer_name,
-                    'email' => $request->customer_email,
-                    'phone' => $request->customer_phone,
-                ]);
-            }
+            // Créer le client
+            $customer = Customer::create([
+                'name' => $request->customer_name,
+                'email' => $request->customer_email,
+                'phone' => $request->customer_phone,
+                // Ajoutez les champs requis pour votre table customers
+                'address' => 'À renseigner',
+                'gender' => 'Non spécifié',
+                'job' => 'Non spécifié',
+                'birthdate' => now()->subYears(30)->format('Y-m-d'),
+            ]);
 
             // Calculer le nombre de nuits et le prix total
             $checkIn = Carbon::parse($request->check_in);
@@ -473,35 +467,23 @@ class CheckInController extends Controller
             $nights = $checkIn->diffInDays($checkOut);
             $totalPrice = $room->price * $nights;
 
-            // Créer la transaction
+            // 🔴 CRÉER DIRECTEMENT LA TRANSACTION AVEC STATUT 'active'
             $transaction = Transaction::create([
                 'customer_id' => $customer->id,
                 'room_id' => $room->id,
                 'check_in' => $checkIn,
                 'check_out' => $checkOut,
                 'total_price' => $totalPrice,
-                'person_count' => $request->adults + ($request->children ?? 0),
-                'status' => 'reservation',
+                'person_count' => $request->person_count,
+                'status' => 'active', // ← Changé de 'reservation' à 'active'
                 'created_by' => auth()->id(),
+                'actual_check_in' => now(), // Enregistrer l'heure d'arrivée
+                'checked_in_by' => auth()->id(),
+                'notes' => $request->notes,
             ]);
 
-            // Préparer les données de check-in
-            $checkInData = [
-                'adults' => $request->adults,
-                'children' => $request->children ?? 0,
-                'id_type' => $request->id_type,
-                'id_number' => $request->id_number,
-                'nationality' => $request->nationality,
-                'special_requests' => $request->special_requests,
-                'notes' => $request->notes,
-            ];
-
-            // Effectuer le check-in immédiatement
-            $result = $transaction->checkIn(auth()->id(), $checkInData);
-
-            if (! $result['success']) {
-                throw new \Exception($result['error']);
-            }
+            // Mettre à jour le statut de la chambre (optionnel, selon votre logique)
+            $room->update(['room_status_id' => 2]); // 2 = Occupée (à adapter selon votre système)
 
             DB::commit();
 
@@ -538,17 +520,13 @@ class CheckInController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-
-            \Log::error('Erreur check-in direct: '.$e->getMessage(), [
-                'user_id' => auth()->id(),
-                'request' => $request->all(),
-            ]);
-
+            
+            \Log::error('Erreur check-in direct: '.$e->getMessage());
+            
             return back()->with('error', 'Erreur lors du check-in direct: '.$e->getMessage())
                 ->withInput();
         }
     }
-
     /**
      * Générer le message de succès
      */

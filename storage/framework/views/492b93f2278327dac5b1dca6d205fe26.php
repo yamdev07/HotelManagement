@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Room Details')
 
-@push('styles')
+<?php $__env->startSection('title', 'Room Details'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -443,38 +443,35 @@ body {
     .stat-card { flex-direction: column; text-align: center; }
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
-{{-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ --}}
+
 <div class="rd-header">
     <div class="rd-header__inner">
         <div class="rd-header__title">
             <i class="fas fa-bed"></i>
-            Room Details: {{ $room->number }}
+            Room Details: <?php echo e($room->number); ?>
+
         </div>
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('room.index') }}">Rooms</a></li>
-                <li class="breadcrumb-item active">{{ $room->number }}</li>
+                <li class="breadcrumb-item"><a href="<?php echo e(route('dashboard.index')); ?>">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="<?php echo e(route('room.index')); ?>">Rooms</a></li>
+                <li class="breadcrumb-item active"><?php echo e($room->number); ?></li>
             </ol>
         </nav>
     </div>
 </div>
 
-{{-- ══════════════════════════════════════
-     MAIN CONTAINER
-══════════════════════════════════════ --}}
+
 <div class="rd-container">
     <div class="rd-grid">
 
-        {{-- GUEST COLUMN --}}
+        
         <div>
-            @if (!empty($customer))
+            <?php if(!empty($customer)): ?>
             <div class="card">
                 <div class="card__head card__head--blue">
                     <div class="card__title">
@@ -484,16 +481,17 @@ body {
                 </div>
                 <div class="card__body">
                     <img class="guest-avatar" 
-                         src="{{ $customer->user->getAvatar() }}" 
-                         alt="{{ $customer->name }}">
-                    <h4 class="guest-name">{{ $customer->name }}</h4>
+                         src="<?php echo e($customer->user->getAvatar()); ?>" 
+                         alt="<?php echo e($customer->name); ?>">
+                    <h4 class="guest-name"><?php echo e($customer->name); ?></h4>
                     <div class="guest-info">
                         <div class="guest-info__item">
                             <div class="guest-info__icon">
                                 <i class="fas fa-envelope"></i>
                             </div>
                             <div class="guest-info__text">
-                                {{ $customer->user->email }}
+                                <?php echo e($customer->user->email); ?>
+
                             </div>
                         </div>
                         <div class="guest-info__item">
@@ -501,7 +499,8 @@ body {
                                 <i class="fas fa-briefcase"></i>
                             </div>
                             <div class="guest-info__text">
-                                {{ $customer->job ?? 'Not specified' }}
+                                <?php echo e($customer->job ?? 'Not specified'); ?>
+
                             </div>
                         </div>
                         <div class="guest-info__item">
@@ -509,7 +508,8 @@ body {
                                 <i class="fas fa-map-marker-alt"></i>
                             </div>
                             <div class="guest-info__text">
-                                {{ $customer->address ?? 'Not specified' }}
+                                <?php echo e($customer->address ?? 'Not specified'); ?>
+
                             </div>
                         </div>
                         <div class="guest-info__item">
@@ -517,23 +517,25 @@ body {
                                 <i class="fas fa-phone"></i>
                             </div>
                             <div class="guest-info__text">
-                                {{ $customer->phone ?? 'Not specified' }}
+                                <?php echo e($customer->phone ?? 'Not specified'); ?>
+
                             </div>
                         </div>
-                        @if($customer->birthdate)
+                        <?php if($customer->birthdate): ?>
                         <div class="guest-info__item">
                             <div class="guest-info__icon">
                                 <i class="fas fa-birthday-cake"></i>
                             </div>
                             <div class="guest-info__text">
-                                {{ \Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y') }}
+                                <?php echo e(\Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y')); ?>
+
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
-            @else
+            <?php else: ?>
             <div class="card">
                 <div class="card__body">
                     <div class="empty">
@@ -543,10 +545,10 @@ body {
                     </div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
         </div>
 
-        {{-- ROOM INFO COLUMN --}}
+        
         <div>
             <div class="card">
                 <div class="card__head">
@@ -563,13 +565,14 @@ body {
                     <div class="info-grid">
                         <div class="info-card">
                             <div class="info-label">Room Type</div>
-                            <div class="info-value">{{ $room->type->name ?? 'N/A' }}</div>
+                            <div class="info-value"><?php echo e($room->type->name ?? 'N/A'); ?></div>
                         </div>
                         <div class="info-card">
                             <div class="info-label">Status</div>
                             <div>
-                                <span class="badge badge--{{ $room->roomStatus->color ?? 'gray' }}">
-                                    {{ $room->roomStatus->name ?? 'Unknown' }}
+                                <span class="badge badge--<?php echo e($room->roomStatus->color ?? 'gray'); ?>">
+                                    <?php echo e($room->roomStatus->name ?? 'Unknown'); ?>
+
                                 </span>
                             </div>
                         </div>
@@ -582,7 +585,7 @@ body {
                             </div>
                             <div>
                                 <div class="stat-label">Capacity</div>
-                                <div class="stat-value">{{ $room->capacity }}</div>
+                                <div class="stat-value"><?php echo e($room->capacity); ?></div>
                                 <div class="stat-sub">persons</div>
                             </div>
                         </div>
@@ -593,31 +596,32 @@ body {
                             <div>
                                 <div class="stat-label">Price</div>
                                 <div class="stat-value" style="font-size:18px;font-family:'IBM Plex Mono',monospace">
-                                    {{ number_format($room->price, 0, ',', ' ') }}
+                                    <?php echo e(number_format($room->price, 0, ',', ' ')); ?>
+
                                 </div>
                                 <div class="stat-sub">
-                                    ≈ {{ number_format($room->price / 655, 2, ',', ' ') }} €
+                                    ≈ <?php echo e(number_format($room->price / 655, 2, ',', ' ')); ?> €
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    @if($room->view)
+                    <?php if($room->view): ?>
                     <div class="stat-card">
                         <div class="stat-icon" style="background:var(--purple-dim);color:var(--purple)">
                             <i class="fas fa-mountain"></i>
                         </div>
                         <div>
                             <div class="stat-label">View</div>
-                            <div class="stat-value" style="font-size:16px">{{ $room->view }}</div>
+                            <div class="stat-value" style="font-size:16px"><?php echo e($room->view); ?></div>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
 
-        {{-- IMAGES COLUMN --}}
+        
         <div>
             <div class="card">
                 <div class="card__head">
@@ -627,52 +631,53 @@ body {
                     </div>
                 </div>
                 <div class="card__body">
-                    @php
+                    <?php
                         $images = $room->images ?? ($room->image ?? collect());
-                    @endphp
+                    ?>
                     
-                    @if($images && $images->count() > 0)
+                    <?php if($images && $images->count() > 0): ?>
                     <div class="img-grid">
-                        @foreach ($images as $image)
+                        <?php $__currentLoopData = $images; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $image): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="img-card">
-                            <img src="{{ asset('img/room/' . $room->number . '/' . $image->url) }}" 
+                            <img src="<?php echo e(asset('img/room/' . $room->number . '/' . $image->url)); ?>" 
                                  class="img-card__img" 
                                  alt="Room Image"
-                                 onclick="openImageModal('{{ asset('img/room/' . $room->number . '/' . $image->url) }}')">
+                                 onclick="openImageModal('<?php echo e(asset('img/room/' . $room->number . '/' . $image->url)); ?>')">
                             <div class="img-card__foot">
                                 <span class="img-date">
                                     <i class="fas fa-calendar-alt"></i>
-                                    {{ $image->created_at->format('d/m/Y H:i') }}
+                                    <?php echo e($image->created_at->format('d/m/Y H:i')); ?>
+
                                 </span>
-                                @if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin')
-                                <form action="{{ route('image.destroy', $image->id) }}" 
+                                <?php if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin'): ?>
+                                <form action="<?php echo e(route('image.destroy', $image->id)); ?>" 
                                       method="POST"
                                       onsubmit="return confirm('Delete this image?')"
                                       style="display:inline">
-                                    @csrf
-                                    @method('DELETE')
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
                                     <button type="submit" class="btn btn--danger" style="padding:4px 10px;font-size:11px">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
-                    @else
+                    <?php else: ?>
                     <div class="empty">
                         <i class="fas fa-images"></i>
                         <h5>No Images</h5>
                         <p style="margin-bottom:16px">This room doesn't have any images yet</p>
-                        @if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin')
+                        <?php if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin'): ?>
                         <button type="button" class="btn btn--primary" data-bs-toggle="modal" data-bs-target="#imageUploadModal">
                             <i class="fas fa-upload"></i>
                             Upload First Image
                         </button>
-                        @endif
+                        <?php endif; ?>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -680,7 +685,7 @@ body {
     </div>
 </div>
 
-{{-- MODAL UPLOAD --}}
+
 <div class="modal fade" id="imageUploadModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -692,19 +697,33 @@ body {
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form action="{{ route('image.store', ['room' => $room->id]) }}" method="POST" enctype="multipart/form-data">
-                    @csrf
+                <form action="<?php echo e(route('image.store', ['room' => $room->id])); ?>" method="POST" enctype="multipart/form-data">
+                    <?php echo csrf_field(); ?>
                     <div style="margin-bottom:16px">
                         <label for="image" class="form-label">Select Image</label>
                         <input type="file" 
-                               class="form-control @error('image') is-invalid @enderror" 
+                               class="form-control <?php $__errorArgs = ['image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                name="image" 
                                id="image" 
                                accept="image/*" 
                                required>
-                        @error('image')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                        <?php $__errorArgs = ['image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                        <div class="invalid-feedback"><?php echo e($message); ?></div>
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         <div class="form-text">
                             Supported formats: JPG, PNG, GIF. Max size: 2MB.
                         </div>
@@ -719,7 +738,7 @@ body {
     </div>
 </div>
 
-{{-- MODAL VIEW IMAGE --}}
+
 <div class="modal fade" id="imageViewModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -734,9 +753,9 @@ body {
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 function openImageModal(imageUrl) {
     document.getElementById('fullSizeImage').src = imageUrl;
@@ -744,20 +763,28 @@ function openImageModal(imageUrl) {
     modal.show();
 }
 
-@if(session('success'))
-    toastr.success("{{ session('success') }}", "Success");
-@endif
+<?php if(session('success')): ?>
+    toastr.success("<?php echo e(session('success')); ?>", "Success");
+<?php endif; ?>
 
-@if(session('failed'))
-    toastr.error("{{ session('failed') }}", "Failed");
-@endif
+<?php if(session('failed')): ?>
+    toastr.error("<?php echo e(session('failed')); ?>", "Failed");
+<?php endif; ?>
 
-@error('image')
-    toastr.error("{{ $message }}", "Upload Failed");
+<?php $__errorArgs = ['image'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+    toastr.error("<?php echo e($message); ?>", "Upload Failed");
     document.addEventListener('DOMContentLoaded', function() {
         const modal = new bootstrap.Modal(document.getElementById('imageUploadModal'));
         modal.show();
     });
-@enderror
+<?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/room/show.blade.php ENDPATH**/ ?>

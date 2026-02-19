@@ -4,7 +4,7 @@
 
 <style>
 /* ══════════════════════════════════════════════
-   VARIABLES
+   VARIABLES (inchangées)
 ══════════════════════════════════════════════ */
 :root {
     --green-950: #052e16;
@@ -606,7 +606,7 @@
         </div>
     </div>
 
-    <form method="POST" action="{{ route('transaction.store') }}" id="direct-checkin-form">
+    <form method="POST" action="{{ route('checkin.process-direct-checkin') }}" id="direct-checkin-form">
         @csrf
         <input type="hidden" name="checkin_method" value="direct">
 
@@ -647,43 +647,21 @@
                     <div class="form-grid-2">
                         <div class="form-group">
                             <label class="form-label">Nom complet <span class="req">*</span></label>
-                            <input type="text" name="name" id="name" class="form-control-dc @error('name') error @enderror"
-                                   value="{{ old('name') }}" placeholder="Prénom Nom" required>
-                            @error('name')<div class="form-invalid">{{ $message }}</div>@enderror
+                            <input type="text" name="customer_name" id="name" class="form-control-dc @error('customer_name') error @enderror"
+                                   value="{{ old('customer_name') }}" placeholder="Prénom Nom" required>
+                            @error('customer_name')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
                             <label class="form-label">Téléphone <span class="req">*</span></label>
-                            <input type="text" name="phone" id="phone" class="form-control-dc @error('phone') error @enderror"
-                                   value="{{ old('phone') }}" placeholder="+226 xx xx xx xx" required>
-                            @error('phone')<div class="form-invalid">{{ $message }}</div>@enderror
+                            <input type="text" name="customer_phone" id="phone" class="form-control-dc @error('customer_phone') error @enderror"
+                                   value="{{ old('customer_phone') }}" placeholder="+226 xx xx xx xx" required>
+                            @error('customer_phone')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
                             <label class="form-label">Email</label>
-                            <input type="email" name="email" id="email" class="form-control-dc @error('email') error @enderror"
-                                   value="{{ old('email') }}" placeholder="email@exemple.com">
-                            @error('email')<div class="form-invalid">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Nationalité <span class="req">*</span></label>
-                            <input type="text" name="nationality" id="nationality" class="form-control-dc @error('nationality') error @enderror"
-                                   value="{{ old('nationality') }}" placeholder="Ex: Burkinabè" required>
-                            @error('nationality')<div class="form-invalid">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Type de pièce d'identité <span class="req">*</span></label>
-                            <select name="id_type" id="id_type" class="form-control-dc form-control-dc-select @error('id_type') error @enderror" required>
-                                <option value="">Sélectionner…</option>
-                                @foreach($idTypes as $value => $label)
-                                    <option value="{{ $value }}" {{ old('id_type') == $value ? 'selected' : '' }}>{{ $label }}</option>
-                                @endforeach
-                            </select>
-                            @error('id_type')<div class="form-invalid">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Numéro de pièce <span class="req">*</span></label>
-                            <input type="text" name="id_number" id="id_number" class="form-control-dc @error('id_number') error @enderror"
-                                   value="{{ old('id_number') }}" placeholder="BXXXXXXXX" required>
-                            @error('id_number')<div class="form-invalid">{{ $message }}</div>@enderror
+                            <input type="email" name="customer_email" id="email" class="form-control-dc @error('customer_email') error @enderror"
+                                   value="{{ old('customer_email') }}" placeholder="email@exemple.com">
+                            @error('customer_email')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
                     </div>
 
@@ -723,18 +701,11 @@
                             @error('check_out')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Adultes <span class="req">*</span></label>
-                            <input type="number" name="adults" id="adults"
-                                   class="form-control-dc @error('adults') error @enderror"
-                                   value="{{ old('adults', 1) }}" min="1" max="10" required>
-                            @error('adults')<div class="form-invalid">{{ $message }}</div>@enderror
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Enfants</label>
-                            <input type="number" name="children" id="children"
-                                   class="form-control-dc @error('children') error @enderror"
-                                   value="{{ old('children', 0) }}" min="0" max="10">
-                            @error('children')<div class="form-invalid">{{ $message }}</div>@enderror
+                            <label class="form-label">Nombre de personnes <span class="req">*</span></label>
+                            <input type="number" name="person_count" id="person_count"
+                                   class="form-control-dc @error('person_count') error @enderror"
+                                   value="{{ old('person_count', 1) }}" min="1" max="10" required>
+                            @error('person_count')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
                     </div>
 
@@ -925,7 +896,6 @@
                             <div class="summary-row"><span class="summary-key">Nom</span><span class="summary-val" id="s-name">—</span></div>
                             <div class="summary-row"><span class="summary-key">Téléphone</span><span class="summary-val" id="s-phone">—</span></div>
                             <div class="summary-row"><span class="summary-key">Email</span><span class="summary-val" id="s-email">—</span></div>
-                            <div class="summary-row"><span class="summary-key">Nationalité</span><span class="summary-val" id="s-nationality">—</span></div>
                         </div>
                         <div class="summary-box">
                             <div class="summary-box-title" style="color:var(--green-700)">
@@ -972,8 +942,8 @@
 
                     <!-- Demandes spéciales -->
                     <div class="form-group" style="margin-bottom:18px">
-                        <label class="form-label">Demandes spéciales</label>
-                        <textarea name="special_requests" id="special_requests" rows="3"
+                        <label class="form-label">Demandes spéciales / Notes</label>
+                        <textarea name="notes" id="notes" rows="3"
                                   class="form-control-dc" style="height:auto;padding:10px 14px;resize:vertical;"
                                   placeholder="Préférences ou besoins particuliers du client…"></textarea>
                     </div>
@@ -1044,10 +1014,7 @@ function nextStep(next) {
     if (currentStep === 1) {
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
-        const idType = document.getElementById('id_type').value;
-        const idNum = document.getElementById('id_number').value.trim();
-        const nat = document.getElementById('nationality').value.trim();
-        if (!name || !phone || !idType || !idNum || !nat) {
+        if (!name || !phone) {
             showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
             return;
         }
@@ -1059,9 +1026,9 @@ function nextStep(next) {
             showAlert('La date de départ doit être après la date d\'arrivée.', 'error');
             return;
         }
-        const adults = parseInt(document.getElementById('adults').value);
-        if (!adults || adults < 1) {
-            showAlert('Au moins 1 adulte est requis.', 'error');
+        const persons = parseInt(document.getElementById('person_count').value);
+        if (!persons || persons < 1) {
+            showAlert('Au moins 1 personne est requise.', 'error');
             return;
         }
         const diff = co - ci;
@@ -1071,7 +1038,7 @@ function nextStep(next) {
             return;
         }
         calcNights();
-        document.getElementById('filter-capacity').value = adults + parseInt(document.getElementById('children').value || 0);
+        document.getElementById('filter-capacity').value = persons;
         filterRooms();
     }
     if (currentStep === 3) {
@@ -1157,7 +1124,6 @@ function buildSummary() {
     setText('s-name', document.getElementById('name').value);
     setText('s-phone', document.getElementById('phone').value);
     setText('s-email', document.getElementById('email').value || 'Non renseigné');
-    setText('s-nationality', document.getElementById('nationality').value);
     setText('s-room', `Chambre ${selectedRoomNumber}`);
     setText('s-room-type', selectedRoomType);
     setText('s-room-cap', `${selectedRoomCap} personne${selectedRoomCap > 1 ? 's' : ''}`);
@@ -1215,7 +1181,6 @@ function fillCustomer(name, phone, email) {
     document.getElementById('phone').value = phone;
     document.getElementById('email').value = email;
     document.getElementById('customer-results').style.display = 'none';
-    document.getElementById('nationality').focus();
 }
 
 /* ── Toast alerts ────────────────────────────── */
@@ -1253,7 +1218,7 @@ document.addEventListener('DOMContentLoaded', function () {
         calcNights();
     });
     document.getElementById('check_out').addEventListener('change', calcNights);
-    document.getElementById('adults').addEventListener('change', calcNights);
+    document.getElementById('person_count').addEventListener('change', calcNights);
 
     /* Deposit toggle */
     document.getElementById('pay-deposit').addEventListener('change', function () {
