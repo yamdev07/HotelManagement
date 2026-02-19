@@ -66,7 +66,7 @@
                             <i class="fas fa-door-open"></i>
                         </div>
                         <div class="nav-content">
-                            <div class="nav-title">Check-in</div>
+                            <div class="nav-title">Check-in/Check-out</div>
                             <div class="nav-subtitle">Enregistrement clients</div>
                         </div>
                     </a>
@@ -135,7 +135,7 @@
                             <i class="fas fa-shopping-bag"></i>
                         </div>
                         <div class="nav-content">
-                            <div class="nav-title">Transactions</div>
+                            <div class="nav-title">Liste des réservations</div>
                             <div class="nav-subtitle">Réservations & Séjours</div>
                         </div>
                     </a>
@@ -422,12 +422,34 @@
             </nav>
         </div>
 
-        <!-- Sidebar Footer -->
+        <!-- Sidebar Footer - CORRIGÉ ICI -->
         <div class="sidebar-footer">
             <div class="user-profile">
                 <div class="user-avatar">
-                    @if(auth()->user()->avatar)
-                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}">
+                    @php
+                        $avatarPath = null;
+                        
+                        // Vérifier d'abord si l'avatar est dans le champ avatar de l'utilisateur
+                        if (auth()->user()->avatar) {
+                            // Si le chemin commence par /img/user/, c'est un chemin direct
+                            if (str_starts_with(auth()->user()->avatar, '/img/user/')) {
+                                $avatarPath = asset(auth()->user()->avatar);
+                            } 
+                            // Si c'est un chemin stockage (storage)
+                            elseif (str_starts_with(auth()->user()->avatar, 'storage/') || str_contains(auth()->user()->avatar, 'storage/')) {
+                                $avatarPath = asset(auth()->user()->avatar);
+                            }
+                            // Sinon, utiliser storage
+                            else {
+                                $avatarPath = asset('storage/' . auth()->user()->avatar);
+                            }
+                        }
+                    @endphp
+
+                    @if($avatarPath)
+                        <img src="{{ $avatarPath }}" 
+                             alt="{{ auth()->user()->name }}"
+                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=059669&color=fff&size=40';">
                     @else
                         <div class="avatar-placeholder">
                             <i class="fas fa-user"></i>
@@ -480,7 +502,7 @@
 </aside>
 
 <!-- ══════════════════════════════════════════════
-     STYLES CSS
+     STYLES CSS (inchangés)
 ══════════════════════════════════════════════ -->
 <style>
 /* ─── Base ─────────────────────────────────── */

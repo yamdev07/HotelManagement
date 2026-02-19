@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Check-in — Dashboard')
-@section('content')
+
+<?php $__env->startSection('title', 'Check-in — Dashboard'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 /* ══════════════════════════════════════════════
@@ -631,7 +631,7 @@
 
     <!-- Breadcrumb -->
     <nav class="ci-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Check-in</span>
     </nav>
@@ -643,33 +643,33 @@
                 <span class="ci-header-icon"><i class="fas fa-door-open"></i></span>
                 Gestion des Check-in
             </h1>
-            <p class="ci-header-subtitle">Arrivées, séjours en cours et départs du {{ $today->format('d/m/Y') }}</p>
+            <p class="ci-header-subtitle">Arrivées, séjours en cours et départs du <?php echo e($today->format('d/m/Y')); ?></p>
         </div>
         <div class="ci-header-actions">
-            <a href="{{ route('checkin.search') }}" class="btn-ci btn-ci-outline">
+            <a href="<?php echo e(route('checkin.search')); ?>" class="btn-ci btn-ci-outline">
                 <i class="fas fa-search"></i> Rechercher
             </a>
-            <a href="{{ route('checkin.direct') }}" class="btn-ci btn-ci-primary">
+            <a href="<?php echo e(route('checkin.direct')); ?>" class="btn-ci btn-ci-primary">
                 <i class="fas fa-user-plus"></i> Check-in Direct
             </a>
         </div>
     </div>
 
     <!-- Alerts session -->
-    @if(session('success'))
+    <?php if(session('success')): ?>
     <div class="ci-alert ci-alert-success anim-2">
         <span class="ci-alert-icon"><i class="fas fa-check-circle"></i></span>
-        <span>{!! session('success') !!}</span>
+        <span><?php echo session('success'); ?></span>
         <button class="ci-alert-close" onclick="this.parentElement.remove()">✕</button>
     </div>
-    @endif
-    @if(session('error'))
+    <?php endif; ?>
+    <?php if(session('error')): ?>
     <div class="ci-alert ci-alert-error anim-2">
         <span class="ci-alert-icon"><i class="fas fa-exclamation-circle"></i></span>
-        <span>{{ session('error') }}</span>
+        <span><?php echo e(session('error')); ?></span>
         <button class="ci-alert-close" onclick="this.parentElement.remove()">✕</button>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- ─── Stat Cards ──────────────────────── -->
     <div class="stats-grid anim-3">
@@ -677,13 +677,14 @@
             <div class="stat-card-top">
                 <div>
                     <div class="stat-card-label">Arrivées aujourd'hui</div>
-                    <div class="stat-card-value">{{ $stats['arrivals_today'] }}</div>
+                    <div class="stat-card-value"><?php echo e($stats['arrivals_today']); ?></div>
                 </div>
                 <div class="stat-card-icon"><i class="fas fa-calendar-day"></i></div>
             </div>
             <div class="stat-card-meta">
                 <i class="fas fa-clock"></i>
-                Prévues pour {{ $today->format('d/m/Y') }}
+                Prévues pour <?php echo e($today->format('d/m/Y')); ?>
+
             </div>
         </div>
 
@@ -691,7 +692,7 @@
             <div class="stat-card-top">
                 <div>
                     <div class="stat-card-label">Séjours en cours</div>
-                    <div class="stat-card-value">{{ $stats['currently_checked_in'] }}</div>
+                    <div class="stat-card-value"><?php echo e($stats['currently_checked_in']); ?></div>
                 </div>
                 <div class="stat-card-icon"><i class="fas fa-bed"></i></div>
             </div>
@@ -705,7 +706,7 @@
             <div class="stat-card-top">
                 <div>
                     <div class="stat-card-label">Départs aujourd'hui</div>
-                    <div class="stat-card-value">{{ $stats['departures_today'] }}</div>
+                    <div class="stat-card-value"><?php echo e($stats['departures_today']); ?></div>
                 </div>
                 <div class="stat-card-icon"><i class="fas fa-sign-out-alt"></i></div>
             </div>
@@ -719,7 +720,7 @@
             <div class="stat-card-top">
                 <div>
                     <div class="stat-card-label">Chambres disponibles</div>
-                    <div class="stat-card-value">{{ $stats['available_rooms'] }}</div>
+                    <div class="stat-card-value"><?php echo e($stats['available_rooms']); ?></div>
                 </div>
                 <div class="stat-card-icon"><i class="fas fa-door-closed"></i></div>
             </div>
@@ -742,97 +743,100 @@
                         Réservations à venir
                         <span style="font-size:.75rem;font-weight:400;color:var(--slate-400)">Aujourd'hui & Demain</span>
                     </h2>
-                    <span class="ci-card-badge badge-blue">{{ $upcomingReservations->count() }} groupe(s)</span>
+                    <span class="ci-card-badge badge-blue"><?php echo e($upcomingReservations->count()); ?> groupe(s)</span>
                 </div>
 
-                @if($upcomingReservations->isEmpty())
+                <?php if($upcomingReservations->isEmpty()): ?>
                 <div class="ci-empty">
                     <div class="ci-empty-icon"><i class="fas fa-calendar-times"></i></div>
                     <p class="ci-empty-title">Aucune arrivée prévue</p>
                     <p class="ci-empty-text">Pas de réservations pour aujourd'hui ni demain</p>
-                    <a href="{{ route('checkin.search') }}" class="btn-ci btn-ci-primary" style="margin-top:16px;font-size:.82rem;">
+                    <a href="<?php echo e(route('checkin.search')); ?>" class="btn-ci btn-ci-primary" style="margin-top:16px;font-size:.82rem;">
                         <i class="fas fa-search"></i> Chercher des réservations
                     </a>
                 </div>
-                @else
-                    @foreach($upcomingReservations as $date => $reservations)
+                <?php else: ?>
+                    <?php $__currentLoopData = $upcomingReservations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $date => $reservations): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="date-group">
                         <div class="date-group-header">
                             <span class="date-group-label">
                                 <i class="fas fa-calendar-day" style="color:var(--blue-600)"></i>
-                                {{ \Carbon\Carbon::parse($date)->translatedFormat('l d F Y') }}
+                                <?php echo e(\Carbon\Carbon::parse($date)->translatedFormat('l d F Y')); ?>
+
                             </span>
                             <span class="date-group-pill">
                                 <i class="fas fa-ticket-alt"></i>
-                                {{ $reservations->count() }} réservation{{ $reservations->count() > 1 ? 's' : '' }}
+                                <?php echo e($reservations->count()); ?> réservation<?php echo e($reservations->count() > 1 ? 's' : ''); ?>
+
                             </span>
                         </div>
 
-                        @foreach($reservations as $transaction)
-                        @php
+                        <?php $__currentLoopData = $reservations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $transaction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $today = \Carbon\Carbon::today();
                             $checkIn = \Carbon\Carbon::parse($transaction->check_in);
                             $checkInDate = $checkIn->copy()->startOfDay();
-                        @endphp
+                        ?>
                         <div class="res-row">
                             <!-- Guest -->
                             <div class="res-guest">
-                                <div class="res-guest-name">{{ $transaction->customer->name }}</div>
+                                <div class="res-guest-name"><?php echo e($transaction->customer->name); ?></div>
                                 <div class="res-guest-phone">
                                     <i class="fas fa-phone fa-xs" style="color:var(--slate-300)"></i>
-                                    {{ $transaction->customer->phone }}
+                                    <?php echo e($transaction->customer->phone); ?>
+
                                 </div>
                             </div>
 
                             <!-- Room -->
                             <div style="text-align:center;">
-                                <span class="res-room-badge">N° {{ $transaction->room->number }}</span>
-                                <div style="font-size:.68rem;color:var(--slate-400);margin-top:3px;">{{ $transaction->room->type->name ?? 'N/A' }}</div>
+                                <span class="res-room-badge">N° <?php echo e($transaction->room->number); ?></span>
+                                <div style="font-size:.68rem;color:var(--slate-400);margin-top:3px;"><?php echo e($transaction->room->type->name ?? 'N/A'); ?></div>
                             </div>
 
                             <!-- Time -->
                             <div class="res-time">
-                                <span class="res-time-val">{{ $transaction->check_in->format('H:i') }}</span>
+                                <span class="res-time-val"><?php echo e($transaction->check_in->format('H:i')); ?></span>
                                 <span class="res-time-label">Arrivée</span>
-                                @if($today->lessThan($checkInDate))
-                                    <div class="date-indicator upcoming" style="font-size:.6rem;background:var(--amber-100);color:#92400e;padding:2px 4px;border-radius:4px;margin-top:2px;">J-{{ $today->diffInDays($checkInDate) }}</div>
-                                @endif
+                                <?php if($today->lessThan($checkInDate)): ?>
+                                    <div class="date-indicator upcoming" style="font-size:.6rem;background:var(--amber-100);color:#92400e;padding:2px 4px;border-radius:4px;margin-top:2px;">J-<?php echo e($today->diffInDays($checkInDate)); ?></div>
+                                <?php endif; ?>
                             </div>
 
                             <!-- Nights -->
                             <div class="res-nights">
-                                <span class="res-nights-val">{{ $transaction->nights }}n</span>
-                                <span class="res-nights-label">→ {{ $transaction->check_out->format('d/m') }}</span>
+                                <span class="res-nights-val"><?php echo e($transaction->nights); ?>n</span>
+                                <span class="res-nights-label">→ <?php echo e($transaction->check_out->format('d/m')); ?></span>
                             </div>
 
                             <!-- Actions -->
                             <div class="res-actions">
-                                @if($transaction->status == 'reservation' && $today->greaterThanOrEqualTo($checkInDate))
-                                <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn-res btn-res-checkin" onclick="return confirm('Confirmer l\'arrivée de {{ $transaction->customer->name }} ?')">
+                                <?php if($transaction->status == 'reservation' && $today->greaterThanOrEqualTo($checkInDate)): ?>
+                                <form action="<?php echo e(route('transaction.mark-arrived', $transaction)); ?>" method="POST" class="d-inline">
+                                    <?php echo csrf_field(); ?>
+                                    <button type="submit" class="btn-res btn-res-checkin" onclick="return confirm('Confirmer l\'arrivée de <?php echo e($transaction->customer->name); ?> ?')">
                                         <i class="fas fa-door-open"></i> Check-in
                                     </button>
                                 </form>
-                                @elseif($today->lessThan($checkInDate))
-                                <span class="btn-res btn-res-checkin" style="opacity:0.5;cursor:not-allowed;" title="Arrivée prévue le {{ $checkInDate->format('d/m/Y') }}">
+                                <?php elseif($today->lessThan($checkInDate)): ?>
+                                <span class="btn-res btn-res-checkin" style="opacity:0.5;cursor:not-allowed;" title="Arrivée prévue le <?php echo e($checkInDate->format('d/m/Y')); ?>">
                                     <i class="fas fa-clock"></i> Check-in
                                 </span>
-                                @endif
+                                <?php endif; ?>
                                 
-                                <button onclick="quickCheckIn({{ $transaction->id }}, this)" class="btn-res btn-res-quick">
+                                <button onclick="quickCheckIn(<?php echo e($transaction->id); ?>, this)" class="btn-res btn-res-quick">
                                     <i class="fas fa-bolt"></i>
                                 </button>
                                 
-                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-res btn-res-view">
+                                <a href="<?php echo e(route('transaction.show', $transaction)); ?>" class="btn-res btn-res-view">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </div>
                         </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
-                    @endforeach
-                @endif
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -846,84 +850,85 @@
                         <span class="ci-card-title-dot" style="background:var(--green-500)"></span>
                         Dans l'hôtel
                     </h2>
-                    <span class="ci-card-badge badge-green">{{ $activeGuests->count() }} client{{ $activeGuests->count() > 1 ? 's' : '' }}</span>
+                    <span class="ci-card-badge badge-green"><?php echo e($activeGuests->count()); ?> client<?php echo e($activeGuests->count() > 1 ? 's' : ''); ?></span>
                 </div>
 
-                @if($activeGuests->isEmpty())
+                <?php if($activeGuests->isEmpty()): ?>
                 <div class="ci-empty" style="padding: 32px 20px;">
                     <div class="ci-empty-icon" style="width:52px;height:52px;font-size:1.3rem;"><i class="fas fa-users-slash"></i></div>
                     <p class="ci-empty-title" style="font-size:.85rem;">Aucun client en ce moment</p>
                 </div>
-                @else
-                    @foreach($activeGuests as $transaction)
-                    @php
+                <?php else: ?>
+                    <?php $__currentLoopData = $activeGuests; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $transaction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $totalPrice = $transaction->getTotalPrice();
                         $totalPayment = $transaction->getTotalPayment();
                         $remaining = $totalPrice - $totalPayment;
                         $isFullyPaid = $remaining <= 0;
                         $checkOut = \Carbon\Carbon::parse($transaction->check_out);
                         $today = \Carbon\Carbon::today();
-                    @endphp
+                    ?>
                     <div class="guest-card">
                         <div class="guest-card-top">
                             <div>
-                                <div class="guest-card-name">{{ $transaction->customer->name }}</div>
+                                <div class="guest-card-name"><?php echo e($transaction->customer->name); ?></div>
                                 <div class="guest-card-meta">
-                                    <span><i class="fas fa-door-closed"></i> Ch. {{ $transaction->room->number }}</span>
+                                    <span><i class="fas fa-door-closed"></i> Ch. <?php echo e($transaction->room->number); ?></span>
                                     <span style="color:var(--slate-300)">·</span>
-                                    <span><i class="fas fa-clock"></i> {{ $transaction->check_in->diffForHumans() }}</span>
+                                    <span><i class="fas fa-clock"></i> <?php echo e($transaction->check_in->diffForHumans()); ?></span>
                                 </div>
-                                @if(!$isFullyPaid)
+                                <?php if(!$isFullyPaid): ?>
                                 <div class="unpaid-alert" style="background:var(--red-100);padding:2px 8px;border-radius:4px;margin-top:4px;font-size:.7rem;">
                                     <i class="fas fa-exclamation-triangle text-danger me-1"></i>
-                                    <span class="text-danger">Solde: {{ number_format($remaining, 0, ',', ' ') }} CFA</span>
+                                    <span class="text-danger">Solde: <?php echo e(number_format($remaining, 0, ',', ' ')); ?> CFA</span>
                                 </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
-                            <span class="guest-card-room">{{ $transaction->room->type->name ?? 'N/A' }}</span>
+                            <span class="guest-card-room"><?php echo e($transaction->room->type->name ?? 'N/A'); ?></span>
                         </div>
                         <div class="guest-card-footer">
                             <div class="guest-card-departure">
                                 <i class="fas fa-calendar-minus" style="color:var(--amber-500)"></i>
-                                Départ {{ $transaction->check_out->format('d/m à H:i') }}
-                                @if($today->greaterThanOrEqualTo($checkOut->copy()->startOfDay()))
+                                Départ <?php echo e($transaction->check_out->format('d/m à H:i')); ?>
+
+                                <?php if($today->greaterThanOrEqualTo($checkOut->copy()->startOfDay())): ?>
                                     <span class="tag-urgent" style="margin-left:5px;">Dépassé</span>
-                                @endif
+                                <?php endif; ?>
                             </div>
                             <div class="guest-card-actions">
-                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-ghost-sm" title="Voir détails">
+                                <a href="<?php echo e(route('transaction.show', $transaction)); ?>" class="btn-ghost-sm" title="Voir détails">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                @if(!$isFullyPaid)
-                                <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-ghost-sm" style="color:var(--success);" title="Paiement">
+                                <?php if(!$isFullyPaid): ?>
+                                <a href="<?php echo e(route('transaction.payment.create', $transaction)); ?>" class="btn-ghost-sm" style="color:var(--success);" title="Paiement">
                                     <i class="fas fa-money-bill-wave-alt"></i>
                                 </a>
-                                @endif
-                                @if($isFullyPaid)
-                                <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn-ghost-sm btn-ghost-sm-green" title="Check-out" onclick="return confirm('Confirmer le départ de {{ $transaction->customer->name }} ?')">
+                                <?php endif; ?>
+                                <?php if($isFullyPaid): ?>
+                                <form action="<?php echo e(route('transaction.mark-departed', $transaction)); ?>" method="POST" class="d-inline">
+                                    <?php echo csrf_field(); ?>
+                                    <button type="submit" class="btn-ghost-sm btn-ghost-sm-green" title="Check-out" onclick="return confirm('Confirmer le départ de <?php echo e($transaction->customer->name); ?> ?')">
                                         <i class="fas fa-sign-out-alt"></i>
                                     </button>
                                 </form>
-                                @else
+                                <?php else: ?>
                                 <span class="btn-ghost-sm" style="opacity:0.5;cursor:not-allowed;" title="Paiement requis avant départ">
                                     <i class="fas fa-sign-out-alt"></i>
                                 </span>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                    @endforeach
-                @endif
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endif; ?>
 
-                @if($activeGuests->isNotEmpty())
+                <?php if($activeGuests->isNotEmpty()): ?>
                 <div class="ci-card-footer">
-                    <a href="{{ route('transaction.index') }}?status=active" class="btn-ci-footer">
+                    <a href="<?php echo e(route('transaction.index')); ?>?status=active" class="btn-ci-footer">
                         <i class="fas fa-list"></i> Voir tous les séjours
                     </a>
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
 
             <!-- Départs du jour -->
@@ -933,65 +938,66 @@
                         <span class="ci-card-title-dot" style="background:var(--amber-500)"></span>
                         Départs aujourd'hui
                     </h2>
-                    <span class="ci-card-badge badge-amber">{{ $todayDepartures->count() }}</span>
+                    <span class="ci-card-badge badge-amber"><?php echo e($todayDepartures->count()); ?></span>
                 </div>
 
-                @if($todayDepartures->isEmpty())
+                <?php if($todayDepartures->isEmpty()): ?>
                 <div class="ci-empty" style="padding: 28px 20px;">
                     <div class="ci-empty-icon" style="width:52px;height:52px;font-size:1.3rem;color:var(--green-400);background:var(--green-50);"><i class="fas fa-check-circle"></i></div>
                     <p class="ci-empty-title" style="font-size:.85rem;">Aucun départ prévu</p>
                 </div>
-                @else
-                    @foreach($todayDepartures as $transaction)
-                    @php
+                <?php else: ?>
+                    <?php $__currentLoopData = $todayDepartures; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $transaction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $totalPrice = $transaction->getTotalPrice();
                         $totalPayment = $transaction->getTotalPayment();
                         $remaining = $totalPrice - $totalPayment;
                         $isFullyPaid = $remaining <= 0;
-                    @endphp
+                    ?>
                     <div class="dep-row">
                         <div class="dep-row-info">
-                            <div class="dep-row-name">{{ $transaction->customer->name }}</div>
+                            <div class="dep-row-name"><?php echo e($transaction->customer->name); ?></div>
                             <div class="dep-row-room">
                                 <i class="fas fa-door-closed"></i>
-                                Chambre {{ $transaction->room->number }}
-                                @if(!$isFullyPaid)
+                                Chambre <?php echo e($transaction->room->number); ?>
+
+                                <?php if(!$isFullyPaid): ?>
                                 <span class="badge bg-danger ms-2" style="font-size:.6rem;">Impayé</span>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="dep-row-right">
-                            <span class="dep-time-badge">{{ $transaction->check_out->format('H:i') }}</span>
+                            <span class="dep-time-badge"><?php echo e($transaction->check_out->format('H:i')); ?></span>
                             <div class="dep-actions">
-                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-dep-invoice">
+                                <a href="<?php echo e(route('transaction.show', $transaction)); ?>" class="btn-dep-invoice">
                                     <i class="fas fa-file-invoice"></i>
                                 </a>
-                                @if($isFullyPaid)
-                                <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
-                                    @csrf
+                                <?php if($isFullyPaid): ?>
+                                <form action="<?php echo e(route('transaction.mark-departed', $transaction)); ?>" method="POST" class="d-inline">
+                                    <?php echo csrf_field(); ?>
                                     <button type="submit" class="btn-dep-checkout" onclick="return confirm('Confirmer le départ ?')">
                                         <i class="fas fa-sign-out-alt"></i> Out
                                     </button>
                                 </form>
-                                @else
-                                <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-dep-checkout" style="background:var(--red-50);color:var(--red-700);border-color:var(--red-200);">
+                                <?php else: ?>
+                                <a href="<?php echo e(route('transaction.payment.create', $transaction)); ?>" class="btn-dep-checkout" style="background:var(--red-50);color:var(--red-700);border-color:var(--red-200);">
                                     <i class="fas fa-money-bill-wave-alt"></i> Payer
                                 </a>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                    @endforeach
-                @endif
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endif; ?>
             </div>
 
         </div><!-- /right col -->
     </div><!-- /main grid -->
 </div><!-- /ci-page -->
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 /* ── Toast helper ─────────────────────────────── */
 function showToast(msg, type = 'success') {
@@ -1017,7 +1023,7 @@ function quickCheckIn(id, btn) {
     fetch(`/checkin/${id}/quick`, {
         method: 'POST',
         headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         },
@@ -1041,4 +1047,5 @@ function quickCheckIn(id, btn) {
     });
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/checkin/index.blade.php ENDPATH**/ ?>
