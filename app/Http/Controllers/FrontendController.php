@@ -227,6 +227,57 @@ class FrontendController extends Controller
         }
     }
 
+    // API pour obtenir les chambres disponibles
+    public function availableRooms(Request $request)
+    {
+        $checkIn = Carbon::parse($request->check_in)->startOfDay();
+        $checkOut = Carbon::parse($request->check_out)->startOfDay();
+        $adults = $request->adults ?? 1;
+        
+        // Chambres réservées
+        $bookedRoomIds = Transaction::whereIn('status', ['reservation', 'active'])
+            ->where(function ($q) use ($checkIn, $checkOut) {
+                $q->where('check_in', '<', $checkOut)
+                  ->where('check_out', '>', $checkIn);
+            })
+            ->pluck('room_id')
+            ->toArray();
+        
+        // Chambres disponibles
+        $rooms = Room::with('type')
+            ->where('room_status_id', 1)
+            ->whereNotIn('id', $bookedRoomIds)
+            ->where('capacity', '>=', $adults) // Capacité suffisante
+            ->when($request->room_type, function($q) use ($request) {
+                return $q->where('type_id', $request->room_type);
+            })
+            ->when($request->max_price, function($q) use ($request) {
+                return $q->where('price', '<=', $request->max_price);
+            })
+            ->get()
+            ->map(function($room) {
+                return [
+                    'id' => $room->id,
+                    'number' => $room->number,
+                    'name' => $room->name,
+                    'price' => $room->price,
+                    'capacity' => $room->capacity,
+                    'type_id' => $room->type_id,
+                    'type_name' => $room->type->name ?? 'Standard',
+                ];
+            });
+        
+        return response()->json([
+            'rooms' => $rooms,
+            'count' => $rooms->count(),
+            'dates' => [
+                'check_in' => $checkIn->format('Y-m-d'),
+                'check_out' => $checkOut->format('Y-m-d'),
+                'nights' => $checkIn->diffInDays($checkOut)
+            ]
+        ]);
+    }
+
     // Traiter une demande de réservation de chambre
     public function reservationRequest(Request $request)
     {
@@ -239,6 +290,7 @@ class FrontendController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email',
             'phone' => 'required|string|max:20',
+            'address' => 'required|string|max:255',
             'notes' => 'nullable|string|max:500',
         ]);
 
@@ -258,7 +310,7 @@ class FrontendController extends Controller
             if (!$isAvailable) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'La chambre n\'est pas disponible pour les dates sélectionnées.'
+                    'message' => 'La chambre n\'est plus disponible pour les dates sélectionnées.'
                 ], 422);
             }
 
@@ -280,7 +332,7 @@ class FrontendController extends Controller
                     'name' => $validated['name'],
                     'email' => $validated['email'],
                     'phone' => $validated['phone'],
-                    'address' => 'À renseigner',
+                    'address' => $validated['address'],
                     'gender' => 'Non spécifié',
                     'job' => 'Non spécifié',
                     'birthdate' => now()->subYears(30)->format('Y-m-d'),
@@ -297,10 +349,13 @@ class FrontendController extends Controller
                 'total_price' => $totalPrice,
                 'person_count' => ($validated['adults'] ?? 1) + ($validated['children'] ?? 0),
                 'status' => 'reservation',
-                'notes' => "Réservation depuis le site web\n" .
+                'notes' => "Réservation en ligne\n" .
                           "Client: {$validated['name']}\n" .
                           "Email: {$validated['email']}\n" .
                           "Téléphone: {$validated['phone']}\n" .
+                          "Adresse: {$validated['address']}\n" .
+                          "Adultes: {$validated['adults']}\n" .
+                          "Enfants: {$validated['children']}\n" .
                           ($validated['notes'] ?? ''),
                 'created_by' => null,
             ]);
@@ -309,7 +364,7 @@ class FrontendController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Votre demande de réservation a été envoyée avec succès ! Nous vous contacterons dans les plus brefs délais pour confirmation.',
+                'message' => 'Votre réservation a été confirmée avec succès !',
                 'transaction_id' => $transaction->id,
                 'transaction' => [
                     'id' => $transaction->id,
@@ -318,6 +373,7 @@ class FrontendController extends Controller
                     'nights' => $nights,
                     'total_price' => number_format($totalPrice, 0, ',', ' ') . ' FCFA',
                     'room_number' => $room->number,
+                    'room_name' => $room->name,
                 ]
             ]);
 
@@ -343,14 +399,14 @@ class FrontendController extends Controller
         return view('frontend.pages.reservation', compact('roomTypes'));
     }
 
-    // Traiter la demande de réservation
+    // Traiter la demande de réservation (version simple)
     public function submitReservation(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
             'phone' => 'required|string|max:20',
-            'country' => 'nullable|string|max:100',
+            'address' => 'required|string|max:255',
             'check_in' => 'required|date',
             'check_out' => 'required|date|after:check_in',
             'adults' => 'required|integer|min:1',

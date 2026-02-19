@@ -58,6 +58,9 @@ Route::post('/restaurant/reservation', [FrontendController::class, 'restaurantRe
 Route::post('/reservation/request', [FrontendController::class, 'reservationRequest'])->name('frontend.reservation.request');
 Route::get('/reservation', [FrontendController::class, 'reservationForm'])->name('frontend.reservation');
 Route::post('/reservation/submit', [FrontendController::class, 'submitReservation'])->name('frontend.reservation.submit');
+
+Route::get('/api/available-rooms', [FrontendController::class, 'availableRooms'])->name('api.available-rooms');
+
 // ==================== ROUTES D'AUTHENTIFICATION ====================
 Route::view('/login', 'auth.login')->name('login.index');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
