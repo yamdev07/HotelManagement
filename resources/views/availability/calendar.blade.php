@@ -6,20 +6,20 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-    --bg:       #0a0d13;
-    --surf:     #12161e;
-    --surf2:    #181d28;
-    --surf3:    #1e2534;
-    --brd:      rgba(255,255,255,.06);
-    --brd2:     rgba(255,255,255,.12);
-    --txt:      #e4e9f2;
-    --txt2:     #9ca8bd;
-    --txt3:     #5b6782;
-    --acc:      #4a90f7;
-    --grn:      #2dd4bf;
-    --yel:      #fbbf24;
-    --red:      #f87171;
-    --ora:      #fb923c;
+    --bg:       #f8fafc;
+    --surf:     #ffffff;
+    --surf2:    #f1f5f9;
+    --surf3:    #e2e8f0;
+    --brd:      #e2e8f0;
+    --brd2:     #cbd5e1;
+    --txt:      #0f172a;
+    --txt2:     #334155;
+    --txt3:     #64748b;
+    --acc:      #3b82f6;
+    --grn:      #10b981;
+    --yel:      #f59e0b;
+    --red:      #ef4444;
+    --ora:      #f97316;
     --r:        10px;
 }
 
@@ -39,7 +39,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 300;
-    background: rgba(10,13,19,.94);
+    background: rgba(255,255,255,.94);
     backdrop-filter: blur(20px);
     border-bottom: 1px solid var(--brd);
     padding: 14px 24px;
@@ -57,6 +57,7 @@ body {
     font-weight: 800;
     letter-spacing: -.4px;
     margin-bottom: 2px;
+    color: var(--txt);
 }
 .cal-topbar__title p {
     font-size: 12px;
@@ -72,7 +73,7 @@ body {
     align-items: center;
     gap: 2px;
     background: var(--surf2);
-    border: 1px solid var(--brd2);
+    border: 1px solid var(--brd);
     border-radius: 8px;
     padding: 2px;
 }
@@ -120,7 +121,7 @@ body {
     color: white;
 }
 .btn--primary:hover {
-    background: #3a7ee5;
+    background: #2563eb;
     color: white;
 }
 .btn--outline {
@@ -179,6 +180,7 @@ body {
     letter-spacing: -.6px;
     line-height: 1;
     margin-top: 2px;
+    color: var(--txt);
 }
 
 /* ══════════════════════════════════════
@@ -216,7 +218,7 @@ body {
     padding: 8px 12px;
     border-radius: 7px;
     border: 1px solid var(--brd2);
-    background: var(--surf2);
+    background: white;
     color: var(--txt);
     font-size: 13px;
     font-family: 'Manrope', sans-serif;
@@ -226,7 +228,7 @@ body {
 .form-select:focus {
     outline: none;
     border-color: var(--acc);
-    box-shadow: 0 0 0 3px rgba(74,144,247,.15);
+    box-shadow: 0 0 0 3px rgba(59,130,246,.15);
 }
 .filter-actions {
     display: flex;
@@ -256,13 +258,13 @@ body {
     height: 18px;
     border-radius: 4px;
 }
-.legend-sq.avail { background: rgba(45,212,191,.2); border: 1px solid rgba(45,212,191,.4); }
-.legend-sq.occ   { background: rgba(248,113,113,.2); border: 1px solid rgba(248,113,113,.4); }
-.legend-sq.unavail { background: rgba(156,163,175,.2); border: 1px solid rgba(156,163,175,.4); }
-.legend-sq.today { background: rgba(251,191,36,.25); border: 2px solid var(--yel); }
+.legend-sq.avail { background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.3); }
+.legend-sq.occ   { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); }
+.legend-sq.unavail { background: rgba(100,116,139,.15); border: 1px solid rgba(100,116,139,.3); }
+.legend-sq.today { background: rgba(245,158,11,.2); border: 2px solid var(--yel); }
 .legend-item span {
     font-size: 12px;
-    color: var(--txt3);
+    color: var(--txt2);
 }
 .legend-tip {
     margin-left: auto;
@@ -302,7 +304,7 @@ body {
     border-radius: 99px;
 }
 .cal-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,.2);
+    background: var(--brd2);
 }
 
 .cal-table {
@@ -335,7 +337,7 @@ body {
     text-align: left;
     min-width: 260px;
     background: var(--surf2);
-    box-shadow: 2px 0 6px rgba(0,0,0,.3);
+    box-shadow: 2px 0 6px rgba(0,0,0,.05);
 }
 .cal-table th.date-col {
     min-width: 70px;
@@ -348,13 +350,13 @@ body {
 .date-day { font-size: 15px; font-weight: 800; }
 .date-name { font-size: 10px; color: var(--txt3); margin-top: 2px; }
 .th-today {
-    background: rgba(251,191,36,.15) !important;
+    background: rgba(245,158,11,.1) !important;
     border-left: 2px solid var(--yel) !important;
     border-right: 2px solid var(--yel) !important;
-    color: var(--yel) !important;
+    color: #b45309 !important;
 }
 .th-weekend {
-    background: rgba(255,255,255,.02) !important;
+    background: rgba(0,0,0,.02) !important;
 }
 
 .cal-table tbody tr {
@@ -362,7 +364,7 @@ body {
 }
 .cal-table td {
     padding: 0;
-    border-right: 1px solid rgba(255,255,255,.04);
+    border-right: 1px solid var(--brd);
 }
 .cal-table td:last-child {
     border-right: none;
@@ -376,7 +378,7 @@ body {
     background: var(--surf);
     min-width: 260px;
     padding: 12px 14px;
-    box-shadow: 2px 0 6px rgba(0,0,0,.3);
+    box-shadow: 2px 0 6px rgba(0,0,0,.05);
     border-right: 1px solid var(--brd) !important;
 }
 .room-cell__inner {
@@ -388,7 +390,7 @@ body {
     width: 36px;
     height: 36px;
     border-radius: 8px;
-    background: linear-gradient(135deg, var(--acc), #3a7ee5);
+    background: linear-gradient(135deg, var(--acc), #2563eb);
     color: white;
     display: flex;
     align-items: center;
@@ -404,6 +406,7 @@ body {
     font-size: 13px;
     font-weight: 700;
     margin-bottom: 2px;
+    color: var(--txt);
 }
 .room-meta {
     font-size: 11px;
@@ -425,7 +428,7 @@ body {
     padding: 2px 6px;
     border-radius: 4px;
     background: var(--surf3);
-    color: var(--txt3);
+    color: var(--txt2);
     margin-top: 3px;
     display: inline-block;
 }
@@ -473,26 +476,26 @@ body {
 
 /* States */
 .avail-cell.available {
-    background: rgba(45,212,191,.12);
-    border-left: 1px solid rgba(45,212,191,.2);
+    background: rgba(16,185,129,.08);
+    border-left: 1px solid rgba(16,185,129,.15);
 }
 .avail-cell.available i { color: var(--grn); }
 .avail-cell.available:hover {
-    background: rgba(45,212,191,.22);
+    background: rgba(16,185,129,.15);
 }
 
 .avail-cell.occupied {
-    background: rgba(248,113,113,.12);
-    border-left: 1px solid rgba(248,113,113,.2);
+    background: rgba(239,68,68,.08);
+    border-left: 1px solid rgba(239,68,68,.15);
 }
 .avail-cell.occupied i { color: var(--red); }
 .avail-cell.occupied:hover {
-    background: rgba(248,113,113,.22);
+    background: rgba(239,68,68,.15);
 }
 
 .avail-cell.unavailable {
-    background: rgba(156,163,175,.08);
-    border-left: 1px solid rgba(156,163,175,.15);
+    background: rgba(100,116,139,.05);
+    border-left: 1px solid rgba(100,116,139,.1);
     cursor: not-allowed;
 }
 .avail-cell.unavailable i { color: var(--txt3); opacity: .5; }
@@ -502,13 +505,13 @@ body {
 }
 
 .avail-cell.today {
-    background: rgba(251,191,36,.15) !important;
+    background: rgba(245,158,11,.12) !important;
     border-left: 2px solid var(--yel) !important;
     border-right: 2px solid var(--yel) !important;
 }
 
 .avail-cell.weekend {
-    background: rgba(255,255,255,.02);
+    background: rgba(0,0,0,.02);
 }
 
 /* Conflict badge */
@@ -570,8 +573,8 @@ body {
    MODAL
 ══════════════════════════════════════ */
 .modal-content {
-    background: var(--surf2);
-    border: 1px solid var(--brd2);
+    background: var(--surf);
+    border: 1px solid var(--brd);
     color: var(--txt);
 }
 .modal-header {
@@ -585,7 +588,7 @@ body {
     border-top: 1px solid var(--brd);
 }
 .card {
-    background: var(--surf3);
+    background: var(--surf2);
     border: 1px solid var(--brd);
     border-radius: 8px;
 }
@@ -602,23 +605,23 @@ body {
     border: 1px solid;
 }
 .alert-info {
-    background: rgba(74,144,247,.1);
-    border-color: rgba(74,144,247,.3);
+    background: rgba(59,130,246,.1);
+    border-color: rgba(59,130,246,.3);
     color: var(--acc);
 }
 .alert-warning {
-    background: rgba(251,191,36,.1);
-    border-color: rgba(251,191,36,.3);
-    color: var(--yel);
+    background: rgba(245,158,11,.1);
+    border-color: rgba(245,158,11,.3);
+    color: #b45309;
 }
 .alert-danger {
-    background: rgba(248,113,113,.1);
-    border-color: rgba(248,113,113,.3);
+    background: rgba(239,68,68,.1);
+    border-color: rgba(239,68,68,.3);
     color: var(--red);
 }
 .alert-success {
-    background: rgba(45,212,191,.1);
-    border-color: rgba(45,212,191,.3);
+    background: rgba(16,185,129,.1);
+    border-color: rgba(16,185,129,.3);
     color: var(--grn);
 }
 .badge {
@@ -628,22 +631,22 @@ body {
     font-weight: 600;
 }
 .badge.bg-success {
-    background: rgba(45,212,191,.2) !important;
+    background: rgba(16,185,129,.15) !important;
     color: var(--grn) !important;
 }
 .badge.bg-warning {
-    background: rgba(251,191,36,.2) !important;
-    color: var(--yel) !important;
+    background: rgba(245,158,11,.15) !important;
+    color: #b45309 !important;
 }
 .badge.bg-danger {
-    background: rgba(248,113,113,.2) !important;
+    background: rgba(239,68,68,.15) !important;
     color: var(--red) !important;
 }
 .table {
     color: var(--txt);
 }
 .table thead {
-    background: var(--surf);
+    background: var(--surf2);
 }
 .table th {
     border-color: var(--brd);
@@ -656,7 +659,7 @@ body {
     border-color: var(--brd);
 }
 .table-hover tbody tr:hover {
-    background: rgba(255,255,255,.03);
+    background: rgba(0,0,0,.02);
 }
 
 /* ══════════════════════════════════════
@@ -737,7 +740,7 @@ body {
 ══════════════════════════════════════ --}}
 <div class="cal-kpis">
     <div class="kpi-card">
-        <div class="kpi-icon" style="background:rgba(74,144,247,.15);color:var(--acc)">
+        <div class="kpi-icon" style="background:rgba(59,130,246,.1);color:var(--acc)">
             <i class="fas fa-bed"></i>
         </div>
         <div>
@@ -746,7 +749,7 @@ body {
         </div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-icon" style="background:rgba(45,212,191,.15);color:var(--grn)">
+        <div class="kpi-icon" style="background:rgba(16,185,129,.1);color:var(--grn)">
             <i class="fas fa-check-circle"></i>
         </div>
         <div>
@@ -755,16 +758,16 @@ body {
         </div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-icon" style="background:rgba(251,191,36,.15);color:var(--yel)">
+        <div class="kpi-icon" style="background:rgba(245,158,11,.1);color:var(--yel)">
             <i class="fas fa-users"></i>
         </div>
         <div>
             <div class="kpi-label">Occupées</div>
-            <div class="kpi-value" style="color:var(--yel)">{{ $stats['occupied_today'] }}</div>
+            <div class="kpi-value" style="color:#b45309">{{ $stats['occupied_today'] }}</div>
         </div>
     </div>
     <div class="kpi-card">
-        <div class="kpi-icon" style="background:rgba(248,113,113,.15);color:var(--red)">
+        <div class="kpi-icon" style="background:rgba(239,68,68,.1);color:var(--red)">
             <i class="fas fa-times-circle"></i>
         </div>
         <div>
@@ -989,7 +992,7 @@ body {
             'export_type' => 'calendar',
             'month' => $month,
             'year' => $year
-        ]) }}" class="btn btn--outline" style="color:var(--grn);border-color:rgba(45,212,191,.3)">
+        ]) }}" class="btn btn--outline" style="color:var(--grn);border-color:rgba(16,185,129,.3)">
             <i class="fas fa-file-excel"></i>
             Exporter Excel
         </a>
@@ -1076,7 +1079,7 @@ function showOccupancyDetails(roomId, date) {
                     </h5>
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <div class="card" style="border-color:rgba(248,113,113,.3)">
+                            <div class="card" style="border-color:rgba(239,68,68,.3)">
                                 <div class="card-body">
                                     <h6>Informations Chambre</h6>
                                     <div class="mb-2"><small style="color:var(--txt3)">Numéro:</small> <strong>${data.room.number}</strong></div>
@@ -1136,7 +1139,7 @@ function showAvailabilityDetails(roomId, date) {
                     <h5 class="fw-bold mb-3"><i class="fas fa-calendar-check me-2" style="color:var(--grn)"></i>Chambre Disponible</h5>
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <div class="card" style="border-color:rgba(45,212,191,.3)">
+                            <div class="card" style="border-color:rgba(16,185,129,.3)">
                                 <div class="card-body">
                                     <h6>Informations Chambre</h6>
                                     <div class="mb-2"><small style="color:var(--txt3)">Numéro:</small> <strong>${data.room.number}</strong></div>
@@ -1147,7 +1150,7 @@ function showAvailabilityDetails(roomId, date) {
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card" style="border-color:rgba(74,144,247,.3)">
+                            <div class="card" style="border-color:rgba(59,130,246,.3)">
                                 <div class="card-body">
                                     <h6>Réservation</h6>
                                     <div class="mb-2"><small style="color:var(--txt3)">Date:</small> <strong>${new Date(date).toLocaleDateString('fr-FR')}</strong></div>
@@ -1333,7 +1336,7 @@ function showModal(title, content) {
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">${title}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" style="filter:invert(1)"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body" id="detailsModalBody"></div>
                 </div>

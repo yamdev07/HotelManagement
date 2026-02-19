@@ -809,6 +809,12 @@ Route::get('/force-logout-all', function () {
     return redirect('/login')->with('success', 'Déconnexion forcée réussie.');
 });
 
+// ==================== API POUR RECHERCHE DE CLIENTS ====================
+Route::middleware(['auth', 'checkrole:Super,Admin,Receptionist'])->group(function () {
+    Route::get('/api/customers', [CustomerController::class, 'apiSearch'])->name('api.customers.search');
+
+});
+
 // ==================== ROUTE FALLBACK ====================
 Route::fallback(function () {
     if (auth()->check()) {

@@ -4,7 +4,7 @@
 
 <style>
 /* ══════════════════════════════════════════════
-   VARIABLES
+   VARIABLES (inchangées)
 ══════════════════════════════════════════════ */
 :root {
     --green-950: #052e16;
@@ -606,7 +606,7 @@
         </div>
     </div>
 
-    <form method="POST" action="<?php echo e(route('transaction.store')); ?>" id="direct-checkin-form">
+    <form method="POST" action="<?php echo e(route('checkin.process-direct-checkin')); ?>" id="direct-checkin-form">
         <?php echo csrf_field(); ?>
         <input type="hidden" name="checkin_method" value="direct">
 
@@ -647,7 +647,7 @@
                     <div class="form-grid-2">
                         <div class="form-group">
                             <label class="form-label">Nom complet <span class="req">*</span></label>
-                            <input type="text" name="name" id="name" class="form-control-dc <?php $__errorArgs = ['name'];
+                            <input type="text" name="customer_name" id="name" class="form-control-dc <?php $__errorArgs = ['customer_name'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -655,8 +655,8 @@ $message = $__bag->first($__errorArgs[0]); ?> error <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>"
-                                   value="<?php echo e(old('name')); ?>" placeholder="Prénom Nom" required>
-                            <?php $__errorArgs = ['name'];
+                                   value="<?php echo e(old('customer_name')); ?>" placeholder="Prénom Nom" required>
+                            <?php $__errorArgs = ['customer_name'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -667,7 +667,7 @@ unset($__errorArgs, $__bag); ?>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Téléphone <span class="req">*</span></label>
-                            <input type="text" name="phone" id="phone" class="form-control-dc <?php $__errorArgs = ['phone'];
+                            <input type="text" name="customer_phone" id="phone" class="form-control-dc <?php $__errorArgs = ['customer_phone'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -675,8 +675,8 @@ $message = $__bag->first($__errorArgs[0]); ?> error <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>"
-                                   value="<?php echo e(old('phone')); ?>" placeholder="+226 xx xx xx xx" required>
-                            <?php $__errorArgs = ['phone'];
+                                   value="<?php echo e(old('customer_phone')); ?>" placeholder="+226 xx xx xx xx" required>
+                            <?php $__errorArgs = ['customer_phone'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -687,7 +687,7 @@ unset($__errorArgs, $__bag); ?>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Email</label>
-                            <input type="email" name="email" id="email" class="form-control-dc <?php $__errorArgs = ['email'];
+                            <input type="email" name="customer_email" id="email" class="form-control-dc <?php $__errorArgs = ['customer_email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -695,72 +695,8 @@ $message = $__bag->first($__errorArgs[0]); ?> error <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>"
-                                   value="<?php echo e(old('email')); ?>" placeholder="email@exemple.com">
-                            <?php $__errorArgs = ['email'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?><div class="form-invalid"><?php echo e($message); ?></div><?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Nationalité <span class="req">*</span></label>
-                            <input type="text" name="nationality" id="nationality" class="form-control-dc <?php $__errorArgs = ['nationality'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> error <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>"
-                                   value="<?php echo e(old('nationality')); ?>" placeholder="Ex: Burkinabè" required>
-                            <?php $__errorArgs = ['nationality'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?><div class="form-invalid"><?php echo e($message); ?></div><?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Type de pièce d'identité <span class="req">*</span></label>
-                            <select name="id_type" id="id_type" class="form-control-dc form-control-dc-select <?php $__errorArgs = ['id_type'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> error <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>" required>
-                                <option value="">Sélectionner…</option>
-                                <?php $__currentLoopData = $idTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $value => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <option value="<?php echo e($value); ?>" <?php echo e(old('id_type') == $value ? 'selected' : ''); ?>><?php echo e($label); ?></option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </select>
-                            <?php $__errorArgs = ['id_type'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?><div class="form-invalid"><?php echo e($message); ?></div><?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Numéro de pièce <span class="req">*</span></label>
-                            <input type="text" name="id_number" id="id_number" class="form-control-dc <?php $__errorArgs = ['id_number'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> error <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>"
-                                   value="<?php echo e(old('id_number')); ?>" placeholder="BXXXXXXXX" required>
-                            <?php $__errorArgs = ['id_number'];
+                                   value="<?php echo e(old('customer_email')); ?>" placeholder="email@exemple.com">
+                            <?php $__errorArgs = ['customer_email'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -835,9 +771,9 @@ endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Adultes <span class="req">*</span></label>
-                            <input type="number" name="adults" id="adults"
-                                   class="form-control-dc <?php $__errorArgs = ['adults'];
+                            <label class="form-label">Nombre de personnes <span class="req">*</span></label>
+                            <input type="number" name="person_count" id="person_count"
+                                   class="form-control-dc <?php $__errorArgs = ['person_count'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -845,29 +781,8 @@ $message = $__bag->first($__errorArgs[0]); ?> error <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>"
-                                   value="<?php echo e(old('adults', 1)); ?>" min="1" max="10" required>
-                            <?php $__errorArgs = ['adults'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?><div class="form-invalid"><?php echo e($message); ?></div><?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Enfants</label>
-                            <input type="number" name="children" id="children"
-                                   class="form-control-dc <?php $__errorArgs = ['children'];
-$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
-if ($__bag->has($__errorArgs[0])) :
-if (isset($message)) { $__messageOriginal = $message; }
-$message = $__bag->first($__errorArgs[0]); ?> error <?php unset($message);
-if (isset($__messageOriginal)) { $message = $__messageOriginal; }
-endif;
-unset($__errorArgs, $__bag); ?>"
-                                   value="<?php echo e(old('children', 0)); ?>" min="0" max="10">
-                            <?php $__errorArgs = ['children'];
+                                   value="<?php echo e(old('person_count', 1)); ?>" min="1" max="10" required>
+                            <?php $__errorArgs = ['person_count'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -1065,7 +980,6 @@ unset($__errorArgs, $__bag); ?>
                             <div class="summary-row"><span class="summary-key">Nom</span><span class="summary-val" id="s-name">—</span></div>
                             <div class="summary-row"><span class="summary-key">Téléphone</span><span class="summary-val" id="s-phone">—</span></div>
                             <div class="summary-row"><span class="summary-key">Email</span><span class="summary-val" id="s-email">—</span></div>
-                            <div class="summary-row"><span class="summary-key">Nationalité</span><span class="summary-val" id="s-nationality">—</span></div>
                         </div>
                         <div class="summary-box">
                             <div class="summary-box-title" style="color:var(--green-700)">
@@ -1112,8 +1026,8 @@ unset($__errorArgs, $__bag); ?>
 
                     <!-- Demandes spéciales -->
                     <div class="form-group" style="margin-bottom:18px">
-                        <label class="form-label">Demandes spéciales</label>
-                        <textarea name="special_requests" id="special_requests" rows="3"
+                        <label class="form-label">Demandes spéciales / Notes</label>
+                        <textarea name="notes" id="notes" rows="3"
                                   class="form-control-dc" style="height:auto;padding:10px 14px;resize:vertical;"
                                   placeholder="Préférences ou besoins particuliers du client…"></textarea>
                     </div>
@@ -1184,10 +1098,7 @@ function nextStep(next) {
     if (currentStep === 1) {
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
-        const idType = document.getElementById('id_type').value;
-        const idNum = document.getElementById('id_number').value.trim();
-        const nat = document.getElementById('nationality').value.trim();
-        if (!name || !phone || !idType || !idNum || !nat) {
+        if (!name || !phone) {
             showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
             return;
         }
@@ -1199,9 +1110,9 @@ function nextStep(next) {
             showAlert('La date de départ doit être après la date d\'arrivée.', 'error');
             return;
         }
-        const adults = parseInt(document.getElementById('adults').value);
-        if (!adults || adults < 1) {
-            showAlert('Au moins 1 adulte est requis.', 'error');
+        const persons = parseInt(document.getElementById('person_count').value);
+        if (!persons || persons < 1) {
+            showAlert('Au moins 1 personne est requise.', 'error');
             return;
         }
         const diff = co - ci;
@@ -1211,7 +1122,7 @@ function nextStep(next) {
             return;
         }
         calcNights();
-        document.getElementById('filter-capacity').value = adults + parseInt(document.getElementById('children').value || 0);
+        document.getElementById('filter-capacity').value = persons;
         filterRooms();
     }
     if (currentStep === 3) {
@@ -1297,7 +1208,6 @@ function buildSummary() {
     setText('s-name', document.getElementById('name').value);
     setText('s-phone', document.getElementById('phone').value);
     setText('s-email', document.getElementById('email').value || 'Non renseigné');
-    setText('s-nationality', document.getElementById('nationality').value);
     setText('s-room', `Chambre ${selectedRoomNumber}`);
     setText('s-room-type', selectedRoomType);
     setText('s-room-cap', `${selectedRoomCap} personne${selectedRoomCap > 1 ? 's' : ''}`);
@@ -1355,7 +1265,6 @@ function fillCustomer(name, phone, email) {
     document.getElementById('phone').value = phone;
     document.getElementById('email').value = email;
     document.getElementById('customer-results').style.display = 'none';
-    document.getElementById('nationality').focus();
 }
 
 /* ── Toast alerts ────────────────────────────── */
@@ -1393,7 +1302,7 @@ document.addEventListener('DOMContentLoaded', function () {
         calcNights();
     });
     document.getElementById('check_out').addEventListener('change', calcNights);
-    document.getElementById('adults').addEventListener('change', calcNights);
+    document.getElementById('person_count').addEventListener('change', calcNights);
 
     /* Deposit toggle */
     document.getElementById('pay-deposit').addEventListener('change', function () {

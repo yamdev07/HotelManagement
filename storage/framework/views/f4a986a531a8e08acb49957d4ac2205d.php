@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Edit Room')
 
-@push('styles')
+<?php $__env->startSection('title', 'Edit Room'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -436,74 +436,71 @@ body {
     .btn { width: 100%; justify-content: center; }
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
-{{-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ --}}
+
 <div class="re-header">
     <div class="re-header__inner">
         <div>
             <div class="re-header__title">
                 <i class="fas fa-edit"></i>
-                Edit Room: {{ $room->number }}
+                Edit Room: <?php echo e($room->number); ?>
+
             </div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ route('dashboard.index') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('room.index') }}">Rooms</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('room.show', $room->id) }}">{{ $room->number }}</a></li>
+                    <li class="breadcrumb-item"><a href="<?php echo e(route('dashboard.index')); ?>">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="<?php echo e(route('room.index')); ?>">Rooms</a></li>
+                    <li class="breadcrumb-item"><a href="<?php echo e(route('room.show', $room->id)); ?>"><?php echo e($room->number); ?></a></li>
                     <li class="breadcrumb-item active">Edit</li>
                 </ol>
             </nav>
         </div>
-        <a href="{{ route('room.show', $room->id) }}" class="btn btn--outline">
+        <a href="<?php echo e(route('room.show', $room->id)); ?>" class="btn btn--outline">
             <i class="fas fa-eye"></i>
             View Room
         </a>
     </div>
 </div>
 
-{{-- ══════════════════════════════════════
-     MAIN CONTAINER
-══════════════════════════════════════ --}}
+
 <div class="re-container">
 
-    {{-- ALERTS --}}
-    @if($errors->any())
+    
+    <?php if($errors->any()): ?>
     <div class="alert alert--danger">
         <i class="fas fa-exclamation-triangle"></i>
         <div style="flex:1">
             <strong>Please fix the following errors:</strong>
             <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
+                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <li><?php echo e($error); ?></li>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </ul>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    @endif
+    <?php endif; ?>
 
-    @if(session('success'))
+    <?php if(session('success')): ?>
     <div class="alert alert--success">
         <i class="fas fa-check-circle"></i>
-        <span>{{ session('success') }}</span>
+        <span><?php echo e(session('success')); ?></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    @endif
+    <?php endif; ?>
 
-    @if(session('info'))
+    <?php if(session('info')): ?>
     <div class="alert alert--info">
         <i class="fas fa-info-circle"></i>
-        <span>{!! session('info') !!}</span>
+        <span><?php echo session('info'); ?></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    @endif
+    <?php endif; ?>
 
-    {{-- FORM CARD --}}
+    
     <div class="card">
         <div class="card__head">
             <h5 class="card__title">
@@ -512,35 +509,50 @@ body {
             </h5>
         </div>
         <div class="card__body">
-            <form method="POST" action="{{ route('room.update', $room->id) }}">
-                @csrf
-                @method('PUT')
+            <form method="POST" action="<?php echo e(route('room.update', $room->id)); ?>">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
                 
                 <div class="form-grid">
                     
-                    {{-- Room Number --}}
+                    
                     <div class="form-group">
                         <label for="number" class="form-label">
                             <i class="fas fa-hashtag" style="color:var(--blue)"></i>
                             Room Number *
                         </label>
                         <input type="text" 
-                               class="form-control @error('number') is-invalid @enderror" 
+                               class="form-control <?php $__errorArgs = ['number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                id="number" 
                                name="number" 
-                               value="{{ old('number', $room->number) }}" 
+                               value="<?php echo e(old('number', $room->number)); ?>" 
                                placeholder="Example: 101, 201, 301" 
                                required>
-                        @error('number')
+                        <?php $__errorArgs = ['number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         <div class="form-hint">Unique room identifier</div>
                     </div>
                     
-                    {{-- Room Name --}}
+                    
                     <div class="form-group">
                         <label for="name" class="form-label">
                             <i class="fas fa-signature" style="color:var(--blue)"></i>
@@ -548,21 +560,36 @@ body {
                             <span class="optional">(Optional)</span>
                         </label>
                         <input type="text" 
-                               class="form-control @error('name') is-invalid @enderror" 
+                               class="form-control <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                id="name" 
                                name="name" 
-                               value="{{ old('name', $room->name) }}" 
+                               value="<?php echo e(old('name', $room->name)); ?>" 
                                placeholder="Presidential Suite, Ocean View">
-                        @error('name')
+                        <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         <div class="form-hint">Descriptive name for the room</div>
                     </div>
                     
-                    {{-- Room Type --}}
+                    
                     <div class="form-group">
                         <label for="type_id" class="form-label">
                             <i class="fas fa-bed" style="color:var(--blue)"></i>
@@ -570,27 +597,42 @@ body {
                         </label>
                         <select id="type_id" 
                                 name="type_id" 
-                                class="form-select @error('type_id') is-invalid @enderror" 
+                                class="form-select <?php $__errorArgs = ['type_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                 required>
                             <option value="" disabled>-- Select Type --</option>
-                            @foreach ($types as $type)
-                                <option value="{{ $type->id }}" {{ old('type_id', $room->type_id) == $type->id ? 'selected' : '' }}>
-                                    {{ $type->name }} 
-                                    @if($type->base_price)
-                                        - {{ number_format($type->base_price, 0, ',', ' ') }} FCFA
-                                    @endif
+                            <?php $__currentLoopData = $types; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($type->id); ?>" <?php echo e(old('type_id', $room->type_id) == $type->id ? 'selected' : ''); ?>>
+                                    <?php echo e($type->name); ?> 
+                                    <?php if($type->base_price): ?>
+                                        - <?php echo e(number_format($type->base_price, 0, ',', ' ')); ?> FCFA
+                                    <?php endif; ?>
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
-                        @error('type_id')
+                        <?php $__errorArgs = ['type_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                     
-                    {{-- Room Status --}}
+                    
                     <div class="form-group">
                         <label class="form-label">
                             <i class="fas fa-circle" style="color:var(--grn)"></i>
@@ -600,7 +642,7 @@ body {
                         
                         <div class="status-box">
                             <div class="status-display">
-                                @php
+                                <?php
                                     $statusColor = match($room->roomStatus->code ?? '') {
                                         'available' => 'success',
                                         'occupied' => 'danger',
@@ -608,69 +650,74 @@ body {
                                         'maintenance' => 'gray',
                                         default => 'gray'
                                     };
-                                @endphp
+                                ?>
                                 
-                                <span class="status-badge status-badge--{{ $statusColor }}">
-                                    <i class="fas fa-{{ match($room->roomStatus->code ?? '') {
+                                <span class="status-badge status-badge--<?php echo e($statusColor); ?>">
+                                    <i class="fas fa-<?php echo e(match($room->roomStatus->code ?? '') {
                                         'available' => 'check',
                                         'occupied' => 'user',
                                         'reserved' => 'calendar-check',
                                         'maintenance' => 'tools',
                                         default => 'question-circle'
-                                    } }}"></i>
-                                    {{ $room->roomStatus->name ?? 'Unknown' }}
+                                    }); ?>"></i>
+                                    <?php echo e($room->roomStatus->name ?? 'Unknown'); ?>
+
                                 </span>
                                 
                                 <div class="status-info">
-                                    <div class="status-meta">{{ $room->roomStatus->information ?? '' }}</div>
+                                    <div class="status-meta"><?php echo e($room->roomStatus->information ?? ''); ?></div>
                                     
-                                    @if(($room->roomStatus->code ?? '') == 'occupied')
-                                        @php
+                                    <?php if(($room->roomStatus->code ?? '') == 'occupied'): ?>
+                                        <?php
                                             $activeTransaction = $room->transactions()
                                                 ->where('status', 'active')
                                                 ->where('check_in', '<=', now())
                                                 ->where('check_out', '>=', now())
                                                 ->first();
-                                        @endphp
-                                        @if($activeTransaction)
+                                        ?>
+                                        <?php if($activeTransaction): ?>
                                         <div class="status-detail" style="color:var(--red)">
                                             <i class="fas fa-user"></i>
-                                            Client: {{ $activeTransaction->customer->name }}
+                                            Client: <?php echo e($activeTransaction->customer->name); ?>
+
                                         </div>
-                                        @endif
-                                    @elseif(($room->roomStatus->code ?? '') == 'reserved')
-                                        @php
+                                        <?php endif; ?>
+                                    <?php elseif(($room->roomStatus->code ?? '') == 'reserved'): ?>
+                                        <?php
                                             $nextReservation = $room->transactions()
                                                 ->where('status', 'reservation')
                                                 ->where('check_in', '>', now())
                                                 ->orderBy('check_in', 'asc')
                                                 ->first();
-                                        @endphp
-                                        @if($nextReservation)
+                                        ?>
+                                        <?php if($nextReservation): ?>
                                         <div class="status-detail" style="color:var(--yel)">
                                             <i class="fas fa-calendar"></i>
-                                            Arrival: {{ \Carbon\Carbon::parse($nextReservation->check_in)->format('d/m/Y') }}
+                                            Arrival: <?php echo e(\Carbon\Carbon::parse($nextReservation->check_in)->format('d/m/Y')); ?>
+
                                         </div>
-                                        @endif
-                                    @elseif(($room->roomStatus->code ?? '') == 'maintenance')
-                                        @if($room->maintenance_started_at)
+                                        <?php endif; ?>
+                                    <?php elseif(($room->roomStatus->code ?? '') == 'maintenance'): ?>
+                                        <?php if($room->maintenance_started_at): ?>
                                         <div class="status-detail">
                                             <i class="fas fa-clock"></i>
-                                            Since: {{ \Carbon\Carbon::parse($room->maintenance_started_at)->format('d/m/Y H:i') }}
+                                            Since: <?php echo e(\Carbon\Carbon::parse($room->maintenance_started_at)->format('d/m/Y H:i')); ?>
+
                                         </div>
-                                        @endif
-                                        @if($room->maintenance_reason)
+                                        <?php endif; ?>
+                                        <?php if($room->maintenance_reason): ?>
                                         <div class="status-detail">
                                             <i class="fas fa-sticky-note"></i>
-                                            Reason: {{ $room->maintenance_reason }}
+                                            Reason: <?php echo e($room->maintenance_reason); ?>
+
                                         </div>
-                                        @endif
-                                    @endif
+                                        <?php endif; ?>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
                         
-                        <input type="hidden" name="room_status_id" value="{{ $room->room_status_id }}">
+                        <input type="hidden" name="room_status_id" value="<?php echo e($room->room_status_id); ?>">
                         
                         <div class="info-box">
                             <i class="fas fa-info-circle"></i>
@@ -680,42 +727,58 @@ body {
                             </div>
                         </div>
                         
-                        @if(auth()->user()->role == 'Super')
+                        <?php if(auth()->user()->role == 'Super'): ?>
                         <div style="margin-top:12px">
                             <button type="button" class="btn btn--warning" 
-                                    onclick="toggleMaintenance({{ $room->id }}, '{{ $room->roomStatus->code ?? '' }}')">
+                                    onclick="toggleMaintenance(<?php echo e($room->id); ?>, '<?php echo e($room->roomStatus->code ?? ''); ?>')">
                                 <i class="fas fa-tools"></i>
-                                {{ ($room->roomStatus->code ?? '') == 'maintenance' ? 'End Maintenance' : 'Set to Maintenance' }}
+                                <?php echo e(($room->roomStatus->code ?? '') == 'maintenance' ? 'End Maintenance' : 'Set to Maintenance'); ?>
+
                             </button>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                     
-                    {{-- Capacity --}}
+                    
                     <div class="form-group">
                         <label for="capacity" class="form-label">
                             <i class="fas fa-users" style="color:var(--blue)"></i>
                             Capacity *
                         </label>
                         <input type="number" 
-                               class="form-control @error('capacity') is-invalid @enderror" 
+                               class="form-control <?php $__errorArgs = ['capacity'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                id="capacity" 
                                name="capacity" 
-                               value="{{ old('capacity', $room->capacity) }}" 
+                               value="<?php echo e(old('capacity', $room->capacity)); ?>" 
                                placeholder="2, 4, 6" 
                                min="1" 
                                max="10" 
                                required>
-                        @error('capacity')
+                        <?php $__errorArgs = ['capacity'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         <div class="form-hint">Number of guests (1-10)</div>
                     </div>
                     
-                    {{-- Price --}}
+                    
                     <div class="form-group">
                         <label for="price" class="form-label">
                             <i class="fas fa-money-bill-wave" style="color:var(--grn)"></i>
@@ -724,63 +787,93 @@ body {
                         <div class="input-group">
                             <span class="input-group-text">FCFA</span>
                             <input type="number" 
-                                   class="form-control @error('price') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['price'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="price" 
                                    name="price" 
-                                   value="{{ old('price', $room->price) }}" 
+                                   value="<?php echo e(old('price', $room->price)); ?>" 
                                    placeholder="50000" 
                                    min="0" 
                                    required>
                         </div>
-                        @error('price')
+                        <?php $__errorArgs = ['price'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                     
-                    {{-- View Description --}}
+                    
                     <div class="form-group">
                         <label for="view" class="form-label">
                             <i class="fas fa-binoculars" style="color:var(--cyan)"></i>
                             View Description
                         </label>
-                        <textarea class="form-control @error('view') is-invalid @enderror" 
+                        <textarea class="form-control <?php $__errorArgs = ['view'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                   id="view" 
                                   name="view" 
                                   rows="1" 
-                                  placeholder="Sea view, Mountain view, City view">{{ old('view', $room->view) }}</textarea>
-                        @error('view')
+                                  placeholder="Sea view, Mountain view, City view"><?php echo e(old('view', $room->view)); ?></textarea>
+                        <?php $__errorArgs = ['view'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                     
-                    {{-- Meta Info --}}
+                    
                     <div class="form-group">
                         <div class="meta-card">
                             <div class="meta-title">
                                 <i class="fas fa-calendar-alt"></i>
                                 Room Information
                             </div>
-                            <div class="meta-row">Created: {{ $room->created_at->format('d/m/Y H:i') }}</div>
-                            <div class="meta-row">Last Updated: {{ $room->updated_at->format('d/m/Y H:i') }}</div>
+                            <div class="meta-row">Created: <?php echo e($room->created_at->format('d/m/Y H:i')); ?></div>
+                            <div class="meta-row">Last Updated: <?php echo e($room->updated_at->format('d/m/Y H:i')); ?></div>
                         </div>
                     </div>
                     
                 </div>
                 
-                {{-- Actions --}}
+                
                 <div class="actions-bar">
-                    <a href="{{ route('room.index') }}" class="btn btn--outline">
+                    <a href="<?php echo e(route('room.index')); ?>" class="btn btn--outline">
                         <i class="fas fa-times"></i>
                         Cancel
                     </a>
                     <div class="actions-group">
-                        <a href="{{ route('room.show', $room->id) }}" class="btn btn--info">
+                        <a href="<?php echo e(route('room.show', $room->id)); ?>" class="btn btn--info">
                             <i class="fas fa-eye"></i>
                             View
                         </a>
@@ -796,9 +889,9 @@ body {
 
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function toggleMaintenance(roomId, currentStatus) {
@@ -857,7 +950,7 @@ function toggleMaintenance(roomId, currentStatus) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
@@ -900,4 +993,5 @@ function toggleMaintenance(roomId, currentStatus) {
     });
 }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/room/edit.blade.php ENDPATH**/ ?>
