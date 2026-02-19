@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Dashboard Femmes de Chambre')
 
-@push('styles')
+<?php $__env->startSection('title', 'Dashboard Femmes de Chambre'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -619,13 +619,11 @@ body {
     .quick-nav { grid-template-columns: 1fr; }
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
-{{-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ --}}
+
 <div class="hk-header">
     <div class="hk-header__inner">
         <div class="hk-header__title">
@@ -633,11 +631,11 @@ body {
             <p>Gestion du nettoyage et maintenance des chambres</p>
         </div>
         <div class="hk-header__actions">
-            <a href="{{ route('housekeeping.mobile') }}" class="btn btn--outline">
+            <a href="<?php echo e(route('housekeeping.mobile')); ?>" class="btn btn--outline">
                 <i class="fas fa-mobile-alt"></i>
                 Vue Mobile
             </a>
-            <a href="{{ route('housekeeping.daily-report') }}" class="btn btn--primary">
+            <a href="<?php echo e(route('housekeeping.daily-report')); ?>" class="btn btn--primary">
                 <i class="fas fa-file-alt"></i>
                 Rapport Quotidien
             </a>
@@ -645,12 +643,10 @@ body {
     </div>
 </div>
 
-{{-- ══════════════════════════════════════
-     MAIN CONTAINER
-══════════════════════════════════════ --}}
+
 <div class="hk-container">
 
-    {{-- KPI STRIP --}}
+    
     <div class="kpi-strip">
         <div class="kpi-card">
             <div class="kpi-icon" style="background:var(--gray-dim);color:var(--gray)">
@@ -658,7 +654,7 @@ body {
             </div>
             <div>
                 <div class="kpi-label">Total</div>
-                <div class="kpi-value">{{ $stats['total_rooms'] }}</div>
+                <div class="kpi-value"><?php echo e($stats['total_rooms']); ?></div>
             </div>
         </div>
         <div class="kpi-card">
@@ -667,7 +663,7 @@ body {
             </div>
             <div>
                 <div class="kpi-label">À nettoyer</div>
-                <div class="kpi-value" style="color:var(--red)">{{ $stats['dirty_rooms'] }}</div>
+                <div class="kpi-value" style="color:var(--red)"><?php echo e($stats['dirty_rooms']); ?></div>
             </div>
         </div>
         <div class="kpi-card">
@@ -676,7 +672,7 @@ body {
             </div>
             <div>
                 <div class="kpi-label">En nettoyage</div>
-                <div class="kpi-value" style="color:var(--yel)">{{ $stats['cleaning_rooms'] }}</div>
+                <div class="kpi-value" style="color:var(--yel)"><?php echo e($stats['cleaning_rooms']); ?></div>
             </div>
         </div>
         <div class="kpi-card">
@@ -685,7 +681,7 @@ body {
             </div>
             <div>
                 <div class="kpi-label">Nettoyées</div>
-                <div class="kpi-value" style="color:var(--grn)">{{ $stats['clean_rooms'] }}</div>
+                <div class="kpi-value" style="color:var(--grn)"><?php echo e($stats['clean_rooms']); ?></div>
             </div>
         </div>
         <div class="kpi-card">
@@ -694,7 +690,7 @@ body {
             </div>
             <div>
                 <div class="kpi-label">Occupées</div>
-                <div class="kpi-value" style="color:var(--cyan)">{{ $stats['occupied_rooms'] }}</div>
+                <div class="kpi-value" style="color:var(--cyan)"><?php echo e($stats['occupied_rooms']); ?></div>
             </div>
         </div>
         <div class="kpi-card">
@@ -703,18 +699,18 @@ body {
             </div>
             <div>
                 <div class="kpi-label">Maintenance</div>
-                <div class="kpi-value" style="color:var(--purple)">{{ $stats['maintenance_rooms'] }}</div>
+                <div class="kpi-value" style="color:var(--purple)"><?php echo e($stats['maintenance_rooms']); ?></div>
             </div>
         </div>
     </div>
 
-    {{-- MAIN GRID --}}
+    
     <div class="hk-grid">
 
-        {{-- LEFT COLUMN --}}
+        
         <div>
 
-            {{-- Chambres à nettoyer --}}
+            
             <div class="card">
                 <div class="card__head card__head--red">
                     <div class="card__title">
@@ -722,55 +718,56 @@ body {
                         Chambres à nettoyer
                     </div>
                     <div class="card__badge">
-                        <span class="badge badge--light">{{ $roomsByStatus['dirty']->count() }}</span>
-                        <a href="{{ route('housekeeping.to-clean') }}" class="btn-mini btn-mini--light" style="margin-left:8px">
+                        <span class="badge badge--light"><?php echo e($roomsByStatus['dirty']->count()); ?></span>
+                        <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="btn-mini btn-mini--light" style="margin-left:8px">
                             <i class="fas fa-list"></i> Tout voir
                         </a>
                     </div>
                 </div>
                 <div class="card__body">
-                    @if($roomsByStatus['dirty']->count() > 0)
+                    <?php if($roomsByStatus['dirty']->count() > 0): ?>
                     <div class="room-grid">
-                        @foreach($roomsByStatus['dirty']->take(12) as $room)
+                        <?php $__currentLoopData = $roomsByStatus['dirty']->take(12); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="room-card room-card--red">
                             <div class="room-card__head">
-                                <div class="room-card__num">Ch. {{ $room->number }}</div>
+                                <div class="room-card__num">Ch. <?php echo e($room->number); ?></div>
                                 <div class="room-card__badge">
                                     <i class="fas fa-broom"></i>
                                 </div>
                             </div>
                             <div class="room-card__type">
                                 <i class="fas fa-layer-group"></i>
-                                {{ $room->type->name ?? 'Standard' }}
+                                <?php echo e($room->type->name ?? 'Standard'); ?>
+
                             </div>
                             <button class="btn-mini btn-mini--red w-100" 
                                     data-bs-toggle="modal" 
-                                    data-bs-target="#startCleaningModal{{ $room->id }}"
+                                    data-bs-target="#startCleaningModal<?php echo e($room->id); ?>"
                                     style="width:100%">
                                 Démarrer nettoyage
                             </button>
                         </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
-                    @if($roomsByStatus['dirty']->count() > 12)
+                    <?php if($roomsByStatus['dirty']->count() > 12): ?>
                     <div style="text-align:center;margin-top:16px">
-                        <a href="{{ route('housekeeping.to-clean') }}" class="btn-mini btn-mini--red">
-                            Voir les {{ $roomsByStatus['dirty']->count() - 12 }} autres
+                        <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="btn-mini btn-mini--red">
+                            Voir les <?php echo e($roomsByStatus['dirty']->count() - 12); ?> autres
                             <i class="fas fa-arrow-right"></i>
                         </a>
                     </div>
-                    @endif
-                    @else
+                    <?php endif; ?>
+                    <?php else: ?>
                     <div class="empty">
                         <i class="fas fa-check-circle" style="color:var(--grn)"></i>
                         <h6>Aucune chambre à nettoyer</h6>
                         <p>Toutes les chambres sont propres</p>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
-            {{-- Chambres en nettoyage --}}
+            
             <div class="card">
                 <div class="card__head card__head--yellow">
                     <div class="card__title">
@@ -778,14 +775,14 @@ body {
                         En cours de nettoyage
                     </div>
                     <div class="card__badge">
-                        <span class="badge badge--light">{{ $roomsByStatus['cleaning']->count() }}</span>
-                        <a href="{{ route('housekeeping.quick-list', 'cleaning') }}" class="btn-mini btn-mini--light" style="margin-left:8px">
+                        <span class="badge badge--light"><?php echo e($roomsByStatus['cleaning']->count()); ?></span>
+                        <a href="<?php echo e(route('housekeeping.quick-list', 'cleaning')); ?>" class="btn-mini btn-mini--light" style="margin-left:8px">
                             <i class="fas fa-list"></i> Tout voir
                         </a>
                     </div>
                 </div>
                 <div class="card__body">
-                    @if($roomsByStatus['cleaning']->count() > 0)
+                    <?php if($roomsByStatus['cleaning']->count() > 0): ?>
                     <table class="tbl">
                         <thead>
                             <tr>
@@ -797,46 +794,48 @@ body {
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($roomsByStatus['cleaning']->take(10) as $room)
+                            <?php $__currentLoopData = $roomsByStatus['cleaning']->take(10); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td><span class="badge badge--yellow">{{ $room->number }}</span></td>
-                                <td>{{ $room->type->name ?? 'Standard' }}</td>
+                                <td><span class="badge badge--yellow"><?php echo e($room->number); ?></span></td>
+                                <td><?php echo e($room->type->name ?? 'Standard'); ?></td>
                                 <td>
-                                    @if($room->cleaning_started_at)
+                                    <?php if($room->cleaning_started_at): ?>
                                         <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">
-                                            {{ $room->cleaning_started_at->format('H:i') }}
+                                            <?php echo e($room->cleaning_started_at->format('H:i')); ?>
+
                                         </span>
-                                    @else
+                                    <?php else: ?>
                                         <span style="color:var(--txt3)">N/A</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td style="color:var(--txt3);font-size:12px">
-                                    @if($room->cleaning_started_at)
-                                        {{ now()->diffForHumans($room->cleaning_started_at, true) }}
-                                    @endif
+                                    <?php if($room->cleaning_started_at): ?>
+                                        <?php echo e(now()->diffForHumans($room->cleaning_started_at, true)); ?>
+
+                                    <?php endif; ?>
                                 </td>
                                 <td>
-                                    <form action="{{ route('housekeeping.finish-cleaning', $room->id) }}" method="POST" style="display:inline">
-                                        @csrf
+                                    <form action="<?php echo e(route('housekeeping.finish-cleaning', $room->id)); ?>" method="POST" style="display:inline">
+                                        <?php echo csrf_field(); ?>
                                         <button type="submit" class="btn-mini btn-mini--green">
                                             <i class="fas fa-check"></i> Terminer
                                         </button>
                                     </form>
                                 </td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
-                    @else
+                    <?php else: ?>
                     <div class="empty">
                         <i class="fas fa-clock"></i>
                         <h6>Aucune chambre en nettoyage</h6>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
-            {{-- Chambres nettoyées aujourd'hui --}}
+            
             <div class="card">
                 <div class="card__head card__head--green">
                     <div class="card__title">
@@ -844,7 +843,7 @@ body {
                         Chambres nettoyées aujourd'hui
                     </div>
                     <div class="card__badge">
-                        <span class="badge badge--light">{{ now()->format('d/m/Y') }}</span>
+                        <span class="badge badge--light"><?php echo e(now()->format('d/m/Y')); ?></span>
                     </div>
                 </div>
                 <div class="card__body">
@@ -855,12 +854,12 @@ body {
                         <div class="alert__content">
                             <h6>Excellent travail !</h6>
                             <p>
-                                Vous avez nettoyé <strong>{{ $stats['cleaned_today'] }}</strong> chambres aujourd'hui.
-                                @if($stats['cleaned_today'] > 0)
+                                Vous avez nettoyé <strong><?php echo e($stats['cleaned_today']); ?></strong> chambres aujourd'hui.
+                                <?php if($stats['cleaned_today'] > 0): ?>
                                     Continuez comme ça !
-                                @else
+                                <?php else: ?>
                                     Commencez par les chambres à nettoyer.
-                                @endif
+                                <?php endif; ?>
                             </p>
                         </div>
                     </div>
@@ -869,10 +868,10 @@ body {
 
         </div>
 
-        {{-- RIGHT COLUMN --}}
+        
         <div>
 
-            {{-- Départs du jour --}}
+            
             <div class="card">
                 <div class="card__head card__head--cyan">
                     <div class="card__title">
@@ -880,11 +879,11 @@ body {
                         Départs aujourd'hui
                     </div>
                     <div class="card__badge">
-                        <span class="badge badge--light">{{ $todayDepartures->count() }}</span>
+                        <span class="badge badge--light"><?php echo e($todayDepartures->count()); ?></span>
                     </div>
                 </div>
                 <div class="card__body">
-                    @if($todayDepartures->count() > 0)
+                    <?php if($todayDepartures->count() > 0): ?>
                     <table class="tbl">
                         <thead>
                             <tr>
@@ -894,40 +893,42 @@ body {
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($todayDepartures->take(5) as $departure)
+                            <?php $__currentLoopData = $todayDepartures->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $departure): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td><span class="badge badge--cyan">{{ $departure->room->number }}</span></td>
+                                <td><span class="badge badge--cyan"><?php echo e($departure->room->number); ?></span></td>
                                 <td>
                                     <div style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                                        {{ $departure->customer->name }}
+                                        <?php echo e($departure->customer->name); ?>
+
                                     </div>
                                 </td>
                                 <td>
                                     <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">
-                                        {{ $departure->check_out->format('H:i') }}
+                                        <?php echo e($departure->check_out->format('H:i')); ?>
+
                                     </span>
                                 </td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
-                    @if($todayDepartures->count() > 5)
+                    <?php if($todayDepartures->count() > 5): ?>
                     <div style="text-align:center;margin-top:12px">
                         <button class="btn-mini btn-mini--cyan">
-                            Voir les {{ $todayDepartures->count() - 5 }} autres
+                            Voir les <?php echo e($todayDepartures->count() - 5); ?> autres
                         </button>
                     </div>
-                    @endif
-                    @else
+                    <?php endif; ?>
+                    <?php else: ?>
                     <div class="empty" style="padding:32px 20px">
                         <i class="fas fa-calendar-check" style="font-size:32px"></i>
                         <h6>Aucun départ aujourd'hui</h6>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
-            {{-- Arrivées du jour --}}
+            
             <div class="card">
                 <div class="card__head card__head--blue">
                     <div class="card__title">
@@ -935,11 +936,11 @@ body {
                         Arrivées aujourd'hui
                     </div>
                     <div class="card__badge">
-                        <span class="badge badge--light">{{ $todayArrivals->count() }}</span>
+                        <span class="badge badge--light"><?php echo e($todayArrivals->count()); ?></span>
                     </div>
                 </div>
                 <div class="card__body">
-                    @if($todayArrivals->count() > 0)
+                    <?php if($todayArrivals->count() > 0): ?>
                     <table class="tbl">
                         <thead>
                             <tr>
@@ -949,40 +950,42 @@ body {
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($todayArrivals->take(5) as $arrival)
+                            <?php $__currentLoopData = $todayArrivals->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $arrival): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td><span class="badge badge--blue">{{ $arrival->room->number }}</span></td>
+                                <td><span class="badge badge--blue"><?php echo e($arrival->room->number); ?></span></td>
                                 <td>
                                     <div style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
-                                        {{ $arrival->customer->name }}
+                                        <?php echo e($arrival->customer->name); ?>
+
                                     </div>
                                 </td>
                                 <td>
                                     <span style="font-family:'IBM Plex Mono',monospace;font-size:12px">
-                                        {{ $arrival->check_in->format('H:i') }}
+                                        <?php echo e($arrival->check_in->format('H:i')); ?>
+
                                     </span>
                                 </td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
-                    @if($todayArrivals->count() > 5)
+                    <?php if($todayArrivals->count() > 5): ?>
                     <div style="text-align:center;margin-top:12px">
                         <button class="btn-mini btn-mini--blue">
-                            Voir les {{ $todayArrivals->count() - 5 }} autres
+                            Voir les <?php echo e($todayArrivals->count() - 5); ?> autres
                         </button>
                     </div>
-                    @endif
-                    @else
+                    <?php endif; ?>
+                    <?php else: ?>
                     <div class="empty" style="padding:32px 20px">
                         <i class="fas fa-calendar-times" style="font-size:32px"></i>
                         <h6>Aucune arrivée aujourd'hui</h6>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
 
-            {{-- Actions rapides --}}
+            
             <div class="card">
                 <div class="card__head card__head--gray">
                     <div class="card__title">
@@ -992,15 +995,15 @@ body {
                 </div>
                 <div class="card__body">
                     <div style="display:grid;gap:8px">
-                        <a href="{{ route('housekeeping.scan') }}" class="btn-mini btn-mini--blue w-100" style="justify-content:center">
+                        <a href="<?php echo e(route('housekeeping.scan')); ?>" class="btn-mini btn-mini--blue w-100" style="justify-content:center">
                             <i class="fas fa-qrcode"></i>
                             Scanner QR Code
                         </a>
-                        <a href="{{ route('housekeeping.mobile') }}" class="btn-mini btn-mini--cyan w-100" style="justify-content:center">
+                        <a href="<?php echo e(route('housekeeping.mobile')); ?>" class="btn-mini btn-mini--cyan w-100" style="justify-content:center">
                             <i class="fas fa-mobile-alt"></i>
                             Vue Mobile
                         </a>
-                        <a href="{{ route('housekeeping.reports') }}" class="btn-mini btn-mini--green w-100" style="justify-content:center">
+                        <a href="<?php echo e(route('housekeeping.reports')); ?>" class="btn-mini btn-mini--green w-100" style="justify-content:center">
                             <i class="fas fa-chart-bar"></i>
                             Rapports
                         </a>
@@ -1016,7 +1019,7 @@ body {
 
     </div>
 
-    {{-- QUICK NAV --}}
+    
     <div class="card" style="margin-bottom:0">
         <div class="card__head card__head--gray">
             <div class="card__title">
@@ -1026,32 +1029,32 @@ body {
         </div>
         <div class="card__body">
             <div class="quick-nav">
-                <a href="{{ route('housekeeping.to-clean') }}" class="quick-nav__btn quick-nav__btn--red">
+                <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="quick-nav__btn quick-nav__btn--red">
                     <div class="quick-nav__icon"><i class="fas fa-broom"></i></div>
                     <div class="quick-nav__label">À nettoyer</div>
-                    <div class="quick-nav__count">{{ $stats['dirty_rooms'] }} chambres</div>
+                    <div class="quick-nav__count"><?php echo e($stats['dirty_rooms']); ?> chambres</div>
                 </a>
-                <a href="{{ route('housekeeping.quick-list', 'cleaning') }}" class="quick-nav__btn quick-nav__btn--yellow">
+                <a href="<?php echo e(route('housekeeping.quick-list', 'cleaning')); ?>" class="quick-nav__btn quick-nav__btn--yellow">
                     <div class="quick-nav__icon"><i class="fas fa-spinner"></i></div>
                     <div class="quick-nav__label">En nettoyage</div>
-                    <div class="quick-nav__count">{{ $stats['cleaning_rooms'] }} chambres</div>
+                    <div class="quick-nav__count"><?php echo e($stats['cleaning_rooms']); ?> chambres</div>
                 </a>
-                <a href="{{ route('housekeeping.quick-list', 'clean') }}" class="quick-nav__btn quick-nav__btn--green">
+                <a href="<?php echo e(route('housekeeping.quick-list', 'clean')); ?>" class="quick-nav__btn quick-nav__btn--green">
                     <div class="quick-nav__icon"><i class="fas fa-check-circle"></i></div>
                     <div class="quick-nav__label">Nettoyées</div>
-                    <div class="quick-nav__count">{{ $stats['clean_rooms'] }} chambres</div>
+                    <div class="quick-nav__count"><?php echo e($stats['clean_rooms']); ?> chambres</div>
                 </a>
-                <a href="{{ route('housekeeping.quick-list', 'occupied') }}" class="quick-nav__btn quick-nav__btn--cyan">
+                <a href="<?php echo e(route('housekeeping.quick-list', 'occupied')); ?>" class="quick-nav__btn quick-nav__btn--cyan">
                     <div class="quick-nav__icon"><i class="fas fa-users"></i></div>
                     <div class="quick-nav__label">Occupées</div>
-                    <div class="quick-nav__count">{{ $stats['occupied_rooms'] }} chambres</div>
+                    <div class="quick-nav__count"><?php echo e($stats['occupied_rooms']); ?> chambres</div>
                 </a>
-                <a href="{{ route('housekeeping.maintenance') }}" class="quick-nav__btn quick-nav__btn--purple">
+                <a href="<?php echo e(route('housekeeping.maintenance')); ?>" class="quick-nav__btn quick-nav__btn--purple">
                     <div class="quick-nav__icon"><i class="fas fa-tools"></i></div>
                     <div class="quick-nav__label">Maintenance</div>
-                    <div class="quick-nav__count">{{ $stats['maintenance_rooms'] }} chambres</div>
+                    <div class="quick-nav__count"><?php echo e($stats['maintenance_rooms']); ?> chambres</div>
                 </a>
-                <a href="{{ route('housekeeping.daily-report') }}" class="quick-nav__btn quick-nav__btn--blue">
+                <a href="<?php echo e(route('housekeeping.daily-report')); ?>" class="quick-nav__btn quick-nav__btn--blue">
                     <div class="quick-nav__icon"><i class="fas fa-file-alt"></i></div>
                     <div class="quick-nav__label">Rapport</div>
                     <div class="quick-nav__count">Quotidien</div>
@@ -1062,7 +1065,7 @@ body {
 
 </div>
 
-{{-- MODAL MAINTENANCE --}}
+
 <div class="modal fade" id="maintenanceModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -1075,7 +1078,7 @@ body {
             </div>
             <div class="modal-body">
                 <form id="maintenanceForm">
-                    @csrf
+                    <?php echo csrf_field(); ?>
                     <div style="margin-bottom:16px">
                         <label for="room_number" class="form-label">Numéro de chambre</label>
                         <input type="text" class="form-control" id="room_number" 
@@ -1112,9 +1115,9 @@ body {
     </div>
 </div>
 
-{{-- MODALS START CLEANING --}}
-@foreach($roomsByStatus['dirty'] as $room)
-<div class="modal fade" id="startCleaningModal{{ $room->id }}" tabindex="-1" aria-hidden="true">
+
+<?php $__currentLoopData = $roomsByStatus['dirty']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<div class="modal fade" id="startCleaningModal<?php echo e($room->id); ?>" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -1125,7 +1128,7 @@ body {
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Confirmer le début du nettoyage pour la <strong>chambre {{ $room->number }}</strong> ?</p>
+                <p>Confirmer le début du nettoyage pour la <strong>chambre <?php echo e($room->number); ?></strong> ?</p>
                 <div class="alert alert--green" style="background:var(--blue-dim);border-color:rgba(59,130,246,.3);color:var(--blue)">
                     <div class="alert__icon" style="font-size:20px">
                         <i class="fas fa-info-circle"></i>
@@ -1137,8 +1140,8 @@ body {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn--outline" data-bs-dismiss="modal">Annuler</button>
-                <form action="{{ route('housekeeping.start-cleaning', $room->id) }}" method="POST" style="display:inline">
-                    @csrf
+                <form action="<?php echo e(route('housekeeping.start-cleaning', $room->id)); ?>" method="POST" style="display:inline">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="btn-mini btn-mini--red" style="padding:8px 16px">
                         <i class="fas fa-broom"></i>
                         Démarrer nettoyage
@@ -1148,11 +1151,11 @@ body {
         </div>
     </div>
 </div>
-@endforeach
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Tooltips
@@ -1179,4 +1182,5 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => window.location.reload(), 30000);
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/housekeeping/index.blade.php ENDPATH**/ ?>

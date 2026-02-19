@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Room Management')
 
-@push('styles')
+<?php $__env->startSection('title', 'Room Management'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -407,13 +407,11 @@ body {
     .room-price { font-size: 13px; }
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
-{{-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ --}}
+
 <div class="rm-header">
     <div class="rm-header__inner">
         <div>
@@ -421,14 +419,14 @@ body {
                 <h1>Room Management</h1>
             </div>
             <div class="rm-header__stats">
-                <span><strong>{{ $rooms->total() }}</strong> rooms total</span>
-                @if($rooms->total() > 0)
-                    <span>Showing {{ $rooms->firstItem() }}-{{ $rooms->lastItem() }}</span>
-                @endif
+                <span><strong><?php echo e($rooms->total()); ?></strong> rooms total</span>
+                <?php if($rooms->total() > 0): ?>
+                    <span>Showing <?php echo e($rooms->firstItem()); ?>-<?php echo e($rooms->lastItem()); ?></span>
+                <?php endif; ?>
             </div>
         </div>
         <div>
-            <a href="{{ route('room.create') }}" class="btn btn--primary">
+            <a href="<?php echo e(route('room.create')); ?>" class="btn btn--primary">
                 <i class="fas fa-plus"></i>
                 Add New Room
             </a>
@@ -436,29 +434,27 @@ body {
     </div>
 </div>
 
-{{-- ══════════════════════════════════════
-     MAIN CONTAINER
-══════════════════════════════════════ --}}
+
 <div class="rm-container">
 
-    {{-- ALERTS --}}
-    @if(session('success'))
+    
+    <?php if(session('success')): ?>
     <div class="alert alert--success">
         <i class="fas fa-check-circle"></i>
-        <span>{{ session('success') }}</span>
+        <span><?php echo e(session('success')); ?></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    @endif
+    <?php endif; ?>
 
-    @if(session('failed'))
+    <?php if(session('failed')): ?>
     <div class="alert alert--danger">
         <i class="fas fa-exclamation-circle"></i>
-        <span>{{ session('failed') }}</span>
+        <span><?php echo e(session('failed')); ?></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    @endif
+    <?php endif; ?>
 
-    {{-- TABLE CARD --}}
+    
     <div class="card">
         <div class="card__head">
             <div class="card__title">
@@ -480,144 +476,149 @@ body {
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($rooms as $room)
+                    <?php $__empty_1 = true; $__currentLoopData = $rooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <tr>
                         <td>
-                            <span class="room-num">{{ $room->number }}</span>
+                            <span class="room-num"><?php echo e($room->number); ?></span>
                         </td>
                         <td>
                             <div>
                                 <div class="room-name">
-                                    {{ $room->display_name ?? $room->getNameOrNumber() }}
+                                    <?php echo e($room->display_name ?? $room->getNameOrNumber()); ?>
+
                                 </div>
-                                @if($room->name && $room->name !== $room->display_name)
+                                <?php if($room->name && $room->name !== $room->display_name): ?>
                                 <div class="room-meta">
                                     <i class="fas fa-signature"></i>
-                                    {{ $room->name }}
+                                    <?php echo e($room->name); ?>
+
                                 </div>
-                                @endif
-                                @if($room->view)
+                                <?php endif; ?>
+                                <?php if($room->view): ?>
                                 <div class="room-meta">
                                     <i class="fas fa-mountain"></i>
-                                    {{ $room->view }}
+                                    <?php echo e($room->view); ?>
+
                                 </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </td>
                         <td>
                             <div>
-                                <div class="room-type">{{ $room->type->name ?? 'N/A' }}</div>
-                                @if($room->type && $room->type->base_price)
+                                <div class="room-type"><?php echo e($room->type->name ?? 'N/A'); ?></div>
+                                <?php if($room->type && $room->type->base_price): ?>
                                 <div class="room-type__base">
-                                    Base: {{ number_format($room->type->base_price, 0, ',', ' ') }} FCFA
+                                    Base: <?php echo e(number_format($room->type->base_price, 0, ',', ' ')); ?> FCFA
                                 </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </td>
                         <td>
                             <div class="room-capacity">
                                 <i class="fas fa-users"></i>
-                                <span>{{ $room->capacity }} pers.</span>
+                                <span><?php echo e($room->capacity); ?> pers.</span>
                             </div>
                         </td>
                         <td>
                             <div>
-                                <div class="room-price">{{ number_format($room->price, 0, ',', ' ') }} FCFA</div>
-                                @if($room->price > 0)
+                                <div class="room-price"><?php echo e(number_format($room->price, 0, ',', ' ')); ?> FCFA</div>
+                                <?php if($room->price > 0): ?>
                                 <div class="room-price__eur">
-                                    ≈ {{ number_format($room->price / 655, 2, ',', ' ') }} €
+                                    ≈ <?php echo e(number_format($room->price / 655, 2, ',', ' ')); ?> €
                                 </div>
-                                @if($room->type && $room->type->base_price && $room->price != $room->type->base_price)
+                                <?php if($room->type && $room->type->base_price && $room->price != $room->type->base_price): ?>
                                 <div class="room-price__custom">
                                     <i class="fas fa-exclamation-circle"></i>
                                     Custom price
                                 </div>
-                                @endif
-                                @endif
+                                <?php endif; ?>
+                                <?php endif; ?>
                             </div>
                         </td>
                         <td>
                             <div style="display:flex;gap:6px;flex-wrap:wrap">
-                                <span class="badge badge--{{ $room->roomStatus->color ?? 'gray' }}">
-                                    <i class="{{ $room->status_icon ?? 'fa-door-closed' }}"></i>
-                                    {{ $room->roomStatus->name ?? 'Unknown' }}
+                                <span class="badge badge--<?php echo e($room->roomStatus->color ?? 'gray'); ?>">
+                                    <i class="<?php echo e($room->status_icon ?? 'fa-door-closed'); ?>"></i>
+                                    <?php echo e($room->roomStatus->name ?? 'Unknown'); ?>
+
                                 </span>
-                                @if($room->is_available_today)
+                                <?php if($room->is_available_today): ?>
                                 <span class="badge badge--success">
                                     <i class="fas fa-check"></i>
                                     Available
                                 </span>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </td>
                         <td>
                             <div style="display:flex;gap:6px">
-                                <a href="{{ route('room.show', $room->id) }}" 
+                                <a href="<?php echo e(route('room.show', $room->id)); ?>" 
                                    class="btn-action btn-view" 
                                    title="View Details">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 
-                                <a href="{{ route('room.edit', $room->id) }}" 
+                                <a href="<?php echo e(route('room.edit', $room->id)); ?>" 
                                    class="btn-action btn-edit" 
                                    title="Edit Room">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 
-                                @if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin')
+                                <?php if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin'): ?>
                                 <form method="POST" 
-                                      action="{{ route('room.destroy', $room->id) }}"
+                                      action="<?php echo e(route('room.destroy', $room->id)); ?>"
                                       style="display:inline"
-                                      onsubmit="return confirm('Delete room {{ $room->number }}? This action cannot be undone.')">
-                                    @csrf
-                                    @method('DELETE')
+                                      onsubmit="return confirm('Delete room <?php echo e($room->number); ?>? This action cannot be undone.')">
+                                    <?php echo csrf_field(); ?>
+                                    <?php echo method_field('DELETE'); ?>
                                     <button type="submit" 
                                             class="btn-action btn-delete"
                                             title="Delete Room">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </form>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </td>
                     </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="7">
                             <div class="empty">
                                 <i class="fas fa-bed"></i>
                                 <h5>No Rooms Found</h5>
                                 <p>You haven't added any rooms yet</p>
-                                <a href="{{ route('room.create') }}" class="btn btn--primary">
+                                <a href="<?php echo e(route('room.create')); ?>" class="btn btn--primary">
                                     <i class="fas fa-plus"></i>
                                     Add Your First Room
                                 </a>
                             </div>
                         </td>
                     </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
             
-            {{-- PAGINATION --}}
-            @if($rooms->hasPages())
+            
+            <?php if($rooms->hasPages()): ?>
             <div class="pagination-wrap">
                 <div class="pagination-info">
-                    Showing {{ $rooms->firstItem() }} to {{ $rooms->lastItem() }} of {{ $rooms->total() }} entries
+                    Showing <?php echo e($rooms->firstItem()); ?> to <?php echo e($rooms->lastItem()); ?> of <?php echo e($rooms->total()); ?> entries
                 </div>
                 <div>
-                    {{ $rooms->links() }}
+                    <?php echo e($rooms->links()); ?>
+
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 // Auto-hide alerts
 setTimeout(() => {
@@ -634,4 +635,5 @@ document.addEventListener('DOMContentLoaded', () => {
     tooltips.map(el => new bootstrap.Tooltip(el));
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/room/index.blade.php ENDPATH**/ ?>

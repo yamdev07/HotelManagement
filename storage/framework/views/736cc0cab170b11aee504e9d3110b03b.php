@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Recherche de disponibilité')
-@section('content')
+
+<?php $__env->startSection('title', 'Recherche de disponibilité'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
@@ -813,7 +813,7 @@
 <div class="availability-page">
     <!-- Breadcrumb -->
     <div class="breadcrumb-custom">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Disponibilité</span>
     </div>
@@ -828,11 +828,11 @@
         </div>
         
         <div class="header-actions">
-            <a href="{{ route('availability.calendar') }}" class="btn-modern btn-outline-modern">
+            <a href="<?php echo e(route('availability.calendar')); ?>" class="btn-modern btn-outline-modern">
                 <i class="fas fa-calendar-alt me-2"></i>
                 Calendrier
             </a>
-            <a href="{{ route('availability.inventory') }}" class="btn-modern btn-outline-modern">
+            <a href="<?php echo e(route('availability.inventory')); ?>" class="btn-modern btn-outline-modern">
                 <i class="fas fa-clipboard-list me-2"></i>
                 Inventaire
             </a>
@@ -842,15 +842,15 @@
     <!-- Formulaire de recherche -->
     <div class="search-card fade-in">
         <div class="search-card-body">
-            <form method="GET" action="{{ route('availability.search') }}" id="searchForm">
+            <form method="GET" action="<?php echo e(route('availability.search')); ?>" id="searchForm">
                 <div class="search-grid">
                     <div class="form-group-modern">
                         <label class="form-label-modern">Arrivée</label>
                         <input type="date" 
                                name="check_in" 
                                class="form-control-modern" 
-                               value="{{ $checkIn }}"
-                               min="{{ now()->format('Y-m-d') }}"
+                               value="<?php echo e($checkIn); ?>"
+                               min="<?php echo e(now()->format('Y-m-d')); ?>"
                                required>
                     </div>
                     
@@ -859,30 +859,32 @@
                         <input type="date" 
                                name="check_out" 
                                class="form-control-modern" 
-                               value="{{ $checkOut }}"
-                               min="{{ now()->addDay()->format('Y-m-d') }}"
+                               value="<?php echo e($checkOut); ?>"
+                               min="<?php echo e(now()->addDay()->format('Y-m-d')); ?>"
                                required>
                     </div>
                     
                     <div class="form-group-modern">
                         <label class="form-label-modern">Adultes</label>
                         <select name="adults" class="form-select-modern">
-                            @for($i = 1; $i <= 10; $i++)
-                                <option value="{{ $i }}" {{ $adults == $i ? 'selected' : '' }}>
-                                    {{ $i }} {{ $i == 1 ? 'Adulte' : 'Adultes' }}
+                            <?php for($i = 1; $i <= 10; $i++): ?>
+                                <option value="<?php echo e($i); ?>" <?php echo e($adults == $i ? 'selected' : ''); ?>>
+                                    <?php echo e($i); ?> <?php echo e($i == 1 ? 'Adulte' : 'Adultes'); ?>
+
                                 </option>
-                            @endfor
+                            <?php endfor; ?>
                         </select>
                     </div>
                     
                     <div class="form-group-modern">
                         <label class="form-label-modern">Enfants</label>
                         <select name="children" class="form-select-modern">
-                            @for($i = 0; $i <= 5; $i++)
-                                <option value="{{ $i }}" {{ $children == $i ? 'selected' : '' }}>
-                                    {{ $i }} {{ $i == 1 ? 'Enfant' : 'Enfants' }}
+                            <?php for($i = 0; $i <= 5; $i++): ?>
+                                <option value="<?php echo e($i); ?>" <?php echo e($children == $i ? 'selected' : ''); ?>>
+                                    <?php echo e($i); ?> <?php echo e($i == 1 ? 'Enfant' : 'Enfants'); ?>
+
                                 </option>
-                            @endfor
+                            <?php endfor; ?>
                         </select>
                     </div>
                     
@@ -890,11 +892,12 @@
                         <label class="form-label-modern">Type de chambre</label>
                         <select name="room_type_id" class="form-select-modern">
                             <option value="">Tous les types</option>
-                            @foreach($roomTypes as $type)
-                                <option value="{{ $type->id }}" {{ $roomTypeId == $type->id ? 'selected' : '' }}>
-                                    {{ $type->name }}
+                            <?php $__currentLoopData = $roomTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($type->id); ?>" <?php echo e($roomTypeId == $type->id ? 'selected' : ''); ?>>
+                                    <?php echo e($type->name); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
                 </div>
@@ -904,7 +907,7 @@
                         <i class="fas fa-search me-2"></i>
                         Rechercher
                     </button>
-                    <a href="{{ route('availability.search') }}" class="btn-modern btn-outline-modern">
+                    <a href="<?php echo e(route('availability.search')); ?>" class="btn-modern btn-outline-modern">
                         <i class="fas fa-times me-2"></i>
                         Réinitialiser
                     </a>
@@ -913,19 +916,19 @@
         </div>
     </div>
 
-    @if(request()->has('check_in'))
+    <?php if(request()->has('check_in')): ?>
     <!-- Information panel -->
     <div class="row g-4 mb-4">
         <div class="col-md-8">
             <div class="results-count fade-in">
                 <span class="results-count-badge">
-                    {{ count($availableRooms) }} disponible(s)
+                    <?php echo e(count($availableRooms)); ?> disponible(s)
                 </span>
                 <span class="results-count-text">
-                    sur {{ count($availableRooms) + count($unavailableRooms) }} chambres
+                    sur <?php echo e(count($availableRooms) + count($unavailableRooms)); ?> chambres
                 </span>
                 <span class="results-count-badge" style="background: var(--red-100); color: var(--red-600); margin-left: auto;">
-                    {{ $nights }} nuit(s)
+                    <?php echo e($nights); ?> nuit(s)
                 </span>
             </div>
         </div>
@@ -937,7 +940,7 @@
                     </div>
                     <div class="info-content">
                         <div class="info-label">Période</div>
-                        <div class="info-value">{{ \Carbon\Carbon::parse($checkIn)->format('d/m/Y') }} → {{ \Carbon\Carbon::parse($checkOut)->format('d/m/Y') }}</div>
+                        <div class="info-value"><?php echo e(\Carbon\Carbon::parse($checkIn)->format('d/m/Y')); ?> → <?php echo e(\Carbon\Carbon::parse($checkOut)->format('d/m/Y')); ?></div>
                     </div>
                 </div>
                 <div class="info-item">
@@ -946,7 +949,7 @@
                     </div>
                     <div class="info-content">
                         <div class="info-label">Personnes</div>
-                        <div class="info-value">{{ $adults + $children }} ({{ $adults }} adulte(s), {{ $children }} enfant(s))</div>
+                        <div class="info-value"><?php echo e($adults + $children); ?> (<?php echo e($adults); ?> adulte(s), <?php echo e($children); ?> enfant(s))</div>
                     </div>
                 </div>
                 <div class="info-item">
@@ -965,26 +968,26 @@
     <!-- Résultats -->
     <div class="fade-in">
         <!-- Chambres disponibles -->
-        @if(count($availableRooms) > 0)
+        <?php if(count($availableRooms) > 0): ?>
         <div class="card-modern mb-4">
             <div class="card-header-success card-header-modern">
                 <h6>
                     <i class="fas fa-check-circle"></i>
-                    Chambres disponibles ({{ count($availableRooms) }})
+                    Chambres disponibles (<?php echo e(count($availableRooms)); ?>)
                 </h6>
             </div>
             <div class="card-body-modern">
                 <div class="room-grid">
-                    @foreach($availableRooms as $roomData)
+                    <?php $__currentLoopData = $availableRooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $roomData): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="room-card available">
                         <div class="room-card-header">
                             <div>
-                                <div class="room-number">Chambre {{ $roomData['room']->number }}</div>
-                                <span class="room-type">{{ $roomData['room']->type->name ?? 'Standard' }}</span>
+                                <div class="room-number">Chambre <?php echo e($roomData['room']->number); ?></div>
+                                <span class="room-type"><?php echo e($roomData['room']->type->name ?? 'Standard'); ?></span>
                             </div>
                             <div class="room-price">
-                                <div class="room-price-total">{{ number_format($roomData['total_price'], 0, ',', ' ') }} FCFA</div>
-                                <div class="room-price-night">{{ number_format($roomData['price_per_night'], 0, ',', ' ') }} FCFA/nuit</div>
+                                <div class="room-price-total"><?php echo e(number_format($roomData['total_price'], 0, ',', ' ')); ?> FCFA</div>
+                                <div class="room-price-night"><?php echo e(number_format($roomData['price_per_night'], 0, ',', ' ')); ?> FCFA/nuit</div>
                             </div>
                         </div>
                         
@@ -995,7 +998,7 @@
                                         <i class="fas fa-users"></i>
                                     </div>
                                     <div class="feature-text">
-                                        Capacité: <strong>{{ $roomData['room']->capacity }} personnes</strong>
+                                        Capacité: <strong><?php echo e($roomData['room']->capacity); ?> personnes</strong>
                                     </div>
                                 </div>
                                 
@@ -1004,79 +1007,80 @@
                                         <i class="fas fa-bed"></i>
                                     </div>
                                     <div class="feature-text">
-                                        Type: <strong>{{ $roomData['room']->type->name ?? 'Standard' }}</strong>
+                                        Type: <strong><?php echo e($roomData['room']->type->name ?? 'Standard'); ?></strong>
                                     </div>
                                 </div>
                                 
-                                @if($roomData['room']->surface)
+                                <?php if($roomData['room']->surface): ?>
                                 <div class="room-feature">
                                     <div class="feature-icon">
                                         <i class="fas fa-arrows-alt"></i>
                                     </div>
                                     <div class="feature-text">
-                                        Surface: <strong>{{ $roomData['room']->surface }} m²</strong>
+                                        Surface: <strong><?php echo e($roomData['room']->surface); ?> m²</strong>
                                     </div>
                                 </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                             
-                            @if($roomData['room']->facilities->count() > 0)
+                            <?php if($roomData['room']->facilities->count() > 0): ?>
                             <div class="room-facilities">
-                                @foreach($roomData['room']->facilities->take(3) as $facility)
+                                <?php $__currentLoopData = $roomData['room']->facilities->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $facility): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <span class="facility-badge">
-                                        @if($facility->icon)<i class="fas {{ $facility->icon }} me-1"></i>@endif
-                                        {{ $facility->name }}
+                                        <?php if($facility->icon): ?><i class="fas <?php echo e($facility->icon); ?> me-1"></i><?php endif; ?>
+                                        <?php echo e($facility->name); ?>
+
                                     </span>
-                                @endforeach
-                                @if($roomData['room']->facilities->count() > 3)
-                                    <span class="facility-badge">+{{ $roomData['room']->facilities->count() - 3 }}</span>
-                                @endif
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                <?php if($roomData['room']->facilities->count() > 3): ?>
+                                    <span class="facility-badge">+<?php echo e($roomData['room']->facilities->count() - 3); ?></span>
+                                <?php endif; ?>
                             </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
                         
                         <div class="room-card-footer">
-                            <a href="{{ route('availability.room.detail', $roomData['room']->id) }}" 
+                            <a href="<?php echo e(route('availability.room.detail', $roomData['room']->id)); ?>" 
                                class="room-action-btn outline">
                                 <i class="fas fa-eye"></i>
                                 Détails
                             </a>
-                            <a href="{{ route('transaction.reservation.createIdentity', [
+                            <a href="<?php echo e(route('transaction.reservation.createIdentity', [
                                 'room_id' => $roomData['room']->id,
                                 'check_in' => $checkIn,
                                 'check_out' => $checkOut,
                                 'adults' => $adults,
                                 'children' => $children
-                            ]) }}" 
+                            ])); ?>" 
                                class="room-action-btn success">
                                 <i class="fas fa-book"></i>
                                 Réserver
                             </a>
                         </div>
                     </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
         </div>
-        @endif
+        <?php endif; ?>
 
         <!-- Chambres non disponibles - AVEC CONFLITS CORRIGÉS -->
-        @if(count($unavailableRooms) > 0)
+        <?php if(count($unavailableRooms) > 0): ?>
         <div class="card-modern">
             <div class="card-header-danger card-header-modern">
                 <h6>
                     <i class="fas fa-times-circle"></i>
-                    Chambres non disponibles ({{ count($unavailableRooms) }})
+                    Chambres non disponibles (<?php echo e(count($unavailableRooms)); ?>)
                 </h6>
             </div>
             <div class="card-body-modern">
                 <div class="room-grid">
-                    @foreach($unavailableRooms as $room)
+                    <?php $__currentLoopData = $unavailableRooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="room-card unavailable">
                         <div class="room-card-header">
                             <div>
-                                <div class="room-number">Chambre {{ $room->number }}</div>
-                                <span class="room-type">{{ $room->type->name ?? 'Standard' }}</span>
+                                <div class="room-number">Chambre <?php echo e($room->number); ?></div>
+                                <span class="room-type"><?php echo e($room->type->name ?? 'Standard'); ?></span>
                             </div>
                         </div>
                         
@@ -1087,7 +1091,7 @@
                                         <i class="fas fa-users"></i>
                                     </div>
                                     <div class="feature-text">
-                                        Capacité: <strong>{{ $room->capacity }} personnes</strong>
+                                        Capacité: <strong><?php echo e($room->capacity); ?> personnes</strong>
                                     </div>
                                 </div>
                                 
@@ -1096,61 +1100,61 @@
                                         <i class="fas fa-bed"></i>
                                     </div>
                                     <div class="feature-text">
-                                        Type: <strong>{{ $room->type->name ?? 'Standard' }}</strong>
+                                        Type: <strong><?php echo e($room->type->name ?? 'Standard'); ?></strong>
                                     </div>
                                 </div>
                             </div>
                             
                             <!-- Conflits - VERSION CORRIGÉE (basée sur le contrôleur) -->
-                            @if(isset($roomConflicts[$room->id]) && count($roomConflicts[$room->id]) > 0)
+                            <?php if(isset($roomConflicts[$room->id]) && count($roomConflicts[$room->id]) > 0): ?>
                             <div class="conflict-info">
                                 <div class="conflict-header">
                                     <i class="fas fa-exclamation-triangle" style="color: var(--red-500);"></i>
                                     <strong style="color: var(--red-700);">Réservations en conflit</strong>
-                                    <span class="conflict-count-badge">{{ count($roomConflicts[$room->id]) }}</span>
+                                    <span class="conflict-count-badge"><?php echo e(count($roomConflicts[$room->id])); ?></span>
                                 </div>
                                 <div class="conflict-details">
-                                    @foreach($roomConflicts[$room->id] as $conflict)
-                                    @php
+                                    <?php $__currentLoopData = $roomConflicts[$room->id]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $conflict): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         // Les données sont des tableaux selon le contrôleur
                                         $checkIn = $conflict['check_in'] ?? 'N/A';
                                         $checkOut = $conflict['check_out'] ?? 'N/A';
                                         $customerName = $conflict['customer'] ?? 'Client inconnu';
                                         $statusClass = $conflict['status_class'] ?? 'bg-secondary';
                                         $statusLabel = $conflict['status'] ?? 'N/A';
-                                    @endphp
+                                    ?>
                                     
                                     <div class="conflict-item">
                                         <div class="conflict-dates">
                                             <i class="fas fa-calendar-alt" style="color: var(--red-400);"></i>
-                                            <span>{{ \Carbon\Carbon::parse($checkIn)->format('d/m') }} → {{ \Carbon\Carbon::parse($checkOut)->format('d/m') }}</span>
-                                            <span class="status-badge {{ str_replace('badge', 'status', $statusClass) }}">{{ $statusLabel }}</span>
+                                            <span><?php echo e(\Carbon\Carbon::parse($checkIn)->format('d/m')); ?> → <?php echo e(\Carbon\Carbon::parse($checkOut)->format('d/m')); ?></span>
+                                            <span class="status-badge <?php echo e(str_replace('badge', 'status', $statusClass)); ?>"><?php echo e($statusLabel); ?></span>
                                         </div>
                                         <div class="conflict-customer">
                                             <i class="fas fa-user" style="color: var(--red-400);"></i>
-                                            <span>{{ $customerName }}</span>
+                                            <span><?php echo e($customerName); ?></span>
                                         </div>
                                     </div>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                                 
                                 <!-- Lien pour voir tous les conflits -->
-                                <a href="{{ route('availability.room.conflicts', $room->id) }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}" 
+                                <a href="<?php echo e(route('availability.room.conflicts', $room->id)); ?>?check_in=<?php echo e($checkIn); ?>&check_out=<?php echo e($checkOut); ?>" 
                                    class="conflict-link">
                                     <i class="fas fa-external-link-alt"></i>
                                     Voir tous les détails
                                 </a>
                             </div>
-                            @endif
+                            <?php endif; ?>
                         </div>
                         
                         <div class="room-card-footer">
-                            <a href="{{ route('availability.room.detail', $room->id) }}" 
+                            <a href="<?php echo e(route('availability.room.detail', $room->id)); ?>" 
                                class="room-action-btn outline">
                                 <i class="fas fa-eye"></i>
                                 Détails
                             </a>
-                            <a href="{{ route('availability.room.conflicts', $room->id) }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}" 
+                            <a href="<?php echo e(route('availability.room.conflicts', $room->id)); ?>?check_in=<?php echo e($checkIn); ?>&check_out=<?php echo e($checkOut); ?>" 
                                class="room-action-btn danger">
                                 <i class="fas fa-exclamation-triangle"></i>
                                 Conflits
@@ -1158,23 +1162,24 @@
                         </div>
                         
                         <!-- Debug link (admin only) -->
-                        @if(auth()->user() && in_array(auth()->user()->role, ['Super', 'Admin']))
+                        <?php if(auth()->user() && in_array(auth()->user()->role, ['Super', 'Admin'])): ?>
                         <div class="debug-panel">
                             <div class="debug-title">Debug URL</div>
                             <div class="debug-url">
-                                {{ route('availability.room.conflicts', $room->id) }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}
+                                <?php echo e(route('availability.room.conflicts', $room->id)); ?>?check_in=<?php echo e($checkIn); ?>&check_out=<?php echo e($checkOut); ?>
+
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
         </div>
-        @endif
+        <?php endif; ?>
 
         <!-- Aucun résultat -->
-        @if(count($availableRooms) == 0 && count($unavailableRooms) == 0)
+        <?php if(count($availableRooms) == 0 && count($unavailableRooms) == 0): ?>
         <div class="empty-state-modern">
             <i class="fas fa-bed"></i>
             <h4>Aucune chambre trouvée</h4>
@@ -1182,19 +1187,19 @@
                 Aucune chambre ne correspond à vos critères de recherche.<br>
                 Essayez de modifier vos dates ou le type de chambre.
             </p>
-            <a href="{{ route('availability.search') }}" class="btn-modern btn-primary-modern">
+            <a href="<?php echo e(route('availability.search')); ?>" class="btn-modern btn-primary-modern">
                 <i class="fas fa-edit me-2"></i>
                 Modifier la recherche
             </a>
         </div>
-        @endif
+        <?php endif; ?>
     </div>
-    @endif
+    <?php endif; ?>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialisation des tooltips
@@ -1234,4 +1239,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/availability/search.blade.php ENDPATH**/ ?>
