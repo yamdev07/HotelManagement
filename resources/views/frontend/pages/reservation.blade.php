@@ -324,6 +324,30 @@ body {
                                     <label class="form-label">Adresse <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control" name="address" required>
                                 </div>
+                                
+                                {{-- CHAMPS EXISTANTS --}}
+                                <div class="col-md-6">
+                                    <label class="form-label">Genre <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="gender" required>
+                                        <option value="">Sélectionnez votre genre</option>
+                                        <option value="Homme">Homme</option>
+                                        <option value="Femme">Femme</option>
+                                        <option value="Autre">Autre</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Profession <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="job" placeholder="Votre profession" required>
+                                </div>
+                                
+                                {{-- NOUVEAU CHAMP DATE DE NAISSANCE --}}
+                                <div class="col-md-6">
+                                    <label class="form-label">Date de naissance <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" name="birthdate" required 
+                                        max="{{ date('Y-m-d', strtotime('-18 years')) }}" 
+                                        value="{{ date('Y-m-d', strtotime('-30 years')) }}">
+                                    <small class="text-muted">Vous devez avoir au moins 18 ans</small>
+                                </div>
                             </div>
                         </div>
                     </div>

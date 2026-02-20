@@ -226,7 +226,7 @@
                             </div>
                             <div class="info-item">
                                 <i class="fas fa-clock"></i>
-                                <span>Check-out: avant 12h00</span>
+                                <span>Check-out: avant 13h00</span>
                             </div>
                             <div class="info-item">
                                 <i class="fas fa-wifi"></i>

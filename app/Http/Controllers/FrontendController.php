@@ -281,6 +281,11 @@ class FrontendController extends Controller
     // Traiter une demande de réservation de chambre
     public function reservationRequest(Request $request)
     {
+        // LOGS AJOUTÉS
+        Log::info('=== DÉBUT RÉSERVATION ===');
+        Log::info('Données reçues:', $request->all());
+
+        // Validation avec date de naissance
         $validated = $request->validate([
             'room_id' => 'required|exists:rooms,id',
             'check_in' => 'required|date',
@@ -291,33 +296,54 @@ class FrontendController extends Controller
             'email' => 'required|email',
             'phone' => 'required|string|max:20',
             'address' => 'required|string|max:255',
+            'gender' => 'required|string|max:20',
+            'job' => 'required|string|max:100',
+            'birthdate' => 'required|date',
             'notes' => 'nullable|string|max:500',
         ]);
+
+        Log::info('Validation réussie');
+        Log::info('Date naissance brute: ' . $validated['birthdate']);
 
         DB::beginTransaction();
 
         try {
             $room = Room::findOrFail($validated['room_id']);
             
+            Log::info('Chambre trouvée:', ['room_id' => $room->id, 'price' => $room->price]);
+
             $checkIn = Carbon::parse($validated['check_in'])->startOfDay();
             $checkOut = Carbon::parse($validated['check_out'])->startOfDay();
             $nights = $checkIn->diffInDays($checkOut);
             $totalPrice = $room->price * $nights;
 
+            Log::info('Calculs:', [
+                'check_in' => $checkIn, 
+                'check_out' => $checkOut, 
+                'nights' => $nights, 
+                'total' => $totalPrice
+            ]);
+
             // Vérifier la disponibilité
             $isAvailable = $room->isAvailableForPeriod($checkIn, $checkOut);
             
             if (!$isAvailable) {
+                Log::warning('Chambre non disponible pour ces dates');
+                
                 return response()->json([
                     'success' => false,
                     'message' => 'La chambre n\'est plus disponible pour les dates sélectionnées.'
                 ], 422);
             }
 
+            Log::info('Chambre disponible');
+
             // Vérifier si le client existe déjà
             $customer = Customer::where('email', $validated['email'])->first();
             
             if (!$customer) {
+                Log::info('Création nouveau client pour email: ' . $validated['email']);
+                
                 // Créer un utilisateur pour le client
                 $user = User::create([
                     'name' => $validated['name'],
@@ -327,21 +353,64 @@ class FrontendController extends Controller
                     'random_key' => Str::random(60),
                 ]);
 
-                // Créer le client
-                $customer = Customer::create([
+                Log::info('Utilisateur créé avec ID: ' . $user->id);
+
+                // FORMATAGE CORRECT DE LA DATE DE NAISSANCE POUR MYSQL
+                try {
+                    $birthdate = Carbon::parse($validated['birthdate'])->format('Y-m-d');
+                    Log::info('Date naissance formatée pour MySQL: ' . $birthdate);
+                } catch (\Exception $e) {
+                    Log::error('Erreur formatage date: ' . $e->getMessage());
+                    $birthdate = now()->subYears(30)->format('Y-m-d');
+                    Log::info('Date naissance par défaut: ' . $birthdate);
+                }
+
+                // CORRECTION: Conversion du genre pour correspondre à la base de données
+                // La base attend 'Male' ou 'Female' (pas 'Homme' ou 'Femme')
+                $genderValue = match($validated['gender']) {
+                    'Homme', 'Masculin', 'M' => 'Male',
+                    'Femme', 'Féminin', 'F' => 'Female',
+                    default => 'Other'
+                };
+                
+                Log::info('Genre converti: ' . $validated['gender'] . ' -> ' . $genderValue);
+
+                // Création du client avec tous les champs
+                $customerData = [
                     'name' => $validated['name'],
                     'email' => $validated['email'],
                     'phone' => $validated['phone'],
                     'address' => $validated['address'],
-                    'gender' => 'Non spécifié',
-                    'job' => 'Non spécifié',
-                    'birthdate' => now()->subYears(30)->format('Y-m-d'),
+                    'gender' => $genderValue,  // Valeur convertie
+                    'job' => $validated['job'],
+                    'birthdate' => $birthdate,
                     'user_id' => $user->id,
-                ]);
+                ];
+
+                Log::info('Données client:', $customerData);
+                
+                $customer = Customer::create($customerData);
+                
+                Log::info('Nouveau client créé avec ID: ' . $customer->id);
+            } else {
+                Log::info('Client existant trouvé avec ID: ' . $customer->id);
             }
 
+            // Préparer les notes avec toutes les informations
+            $notes = "Réservation en ligne\n" .
+                    "Client: {$validated['name']}\n" .
+                    "Email: {$validated['email']}\n" .
+                    "Téléphone: {$validated['phone']}\n" .
+                    "Adresse: {$validated['address']}\n" .
+                    "Genre: {$validated['gender']}\n" .
+                    "Profession: {$validated['job']}\n" .
+                    "Date naissance: {$validated['birthdate']}\n" .
+                    "Adultes: {$validated['adults']}\n" .
+                    "Enfants: " . ($validated['children'] ?? 0) . "\n" .
+                    ($validated['notes'] ?? '');
+
             // Créer la transaction (réservation)
-            $transaction = Transaction::create([
+            $transactionData = [
                 'customer_id' => $customer->id,
                 'room_id' => $room->id,
                 'check_in' => $checkIn,
@@ -349,18 +418,29 @@ class FrontendController extends Controller
                 'total_price' => $totalPrice,
                 'person_count' => ($validated['adults'] ?? 1) + ($validated['children'] ?? 0),
                 'status' => 'reservation',
-                'notes' => "Réservation en ligne\n" .
-                          "Client: {$validated['name']}\n" .
-                          "Email: {$validated['email']}\n" .
-                          "Téléphone: {$validated['phone']}\n" .
-                          "Adresse: {$validated['address']}\n" .
-                          "Adultes: {$validated['adults']}\n" .
-                          "Enfants: {$validated['children']}\n" .
-                          ($validated['notes'] ?? ''),
+                'notes' => $notes,
                 'created_by' => null,
-            ]);
+            ];
+
+            Log::info('Données transaction:', $transactionData);
+            
+            $transaction = Transaction::create($transactionData);
+
+            Log::info('Transaction créée avec ID: ' . $transaction->id);
 
             DB::commit();
+            
+            Log::info('=== RÉSERVATION RÉUSSIE ===');
+            Log::info('Résumé:', [
+                'client_id' => $customer->id,
+                'client_nom' => $customer->name,
+                'chambre' => $room->name . ' (' . $room->number . ')',
+                'dates' => $checkIn->format('d/m/Y') . ' au ' . $checkOut->format('d/m/Y'),
+                'nuits' => $nights,
+                'total' => number_format($totalPrice, 0, ',', ' ') . ' FCFA',
+                'date_naissance' => $birthdate,
+                'genre_db' => $customer->gender
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -377,13 +457,40 @@ class FrontendController extends Controller
                 ]
             ]);
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            Log::error('ERREUR DE VALIDATION:', [
+                'errors' => $e->errors(),
+                'message' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Veuillez vérifier les informations fournies.',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Illuminate\Database\QueryException $e) {
+            DB::rollBack();
+            Log::error('ERREUR SQL:', [
+                'code' => $e->getCode(),
+                'message' => $e->getMessage(),
+                'sql' => $e->getSql() ?? 'N/A',
+                'bindings' => $e->getBindings() ?? []
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur de base de données. Veuillez réessayer.'
+            ], 500);
+            
         } catch (\Exception $e) {
             DB::rollBack();
             
-            Log::error('Erreur réservation en ligne: ' . $e->getMessage(), [
-                'request' => $request->all(),
-                'trace' => $e->getTraceAsString()
-            ]);
+            Log::error('ERREUR RÉSERVATION: ' . $e->getMessage());
+            Log::error('Type: ' . get_class($e));
+            Log::error('Fichier: ' . $e->getFile() . ' Ligne: ' . $e->getLine());
+            Log::error('Trace: ' . $e->getTraceAsString());
             
             return response()->json([
                 'success' => false,
@@ -391,7 +498,6 @@ class FrontendController extends Controller
             ], 500);
         }
     }
-
     // Afficher le formulaire de réservation
     public function reservationForm()
     {
