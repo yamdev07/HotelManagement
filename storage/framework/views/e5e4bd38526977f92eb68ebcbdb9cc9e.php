@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Profil Client - ' . $customer->name)
-@section('content')
+
+<?php $__env->startSection('title', 'Profil Client - ' . $customer->name); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
@@ -764,9 +764,9 @@
 <div class="profile-page">
     <!-- Breadcrumb -->
     <div class="breadcrumb-custom fade-in">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('customer.index') }}">Clients</a>
+        <a href="<?php echo e(route('customer.index')); ?>">Clients</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Profil client</span>
     </div>
@@ -777,38 +777,38 @@
             <span class="header-icon">
                 <i class="fas fa-user"></i>
             </span>
-            <h1>{{ $customer->name }}</h1>
+            <h1><?php echo e($customer->name); ?></h1>
         </div>
         <p class="header-subtitle">Fiche client détaillée et historique des réservations</p>
     </div>
 
     <!-- Messages d'alerte -->
-    @if(session('success'))
+    <?php if(session('success')): ?>
     <div class="alert-modern alert-success fade-in">
         <div class="alert-icon">
             <i class="fas fa-check"></i>
         </div>
-        <div class="flex-grow-1">{!! session('success') !!}</div>
+        <div class="flex-grow-1"><?php echo session('success'); ?></div>
         <button type="button" class="alert-close" onclick="this.parentElement.remove()">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    @endif
+    <?php endif; ?>
 
-    @if(session('error'))
+    <?php if(session('error')): ?>
     <div class="alert-modern alert-danger fade-in">
         <div class="alert-icon">
             <i class="fas fa-exclamation"></i>
         </div>
-        <div class="flex-grow-1">{{ session('error') }}</div>
+        <div class="flex-grow-1"><?php echo e(session('error')); ?></div>
         <button type="button" class="alert-close" onclick="this.parentElement.remove()">
             <i class="fas fa-times"></i>
         </button>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Statistiques -->
-    @php
+    <?php
         $totalReservations = $customer->transactions->count();
         $activeReservations = $customer->transactions->where('check_out', '>=', now())->count();
         $completedReservations = $customer->transactions->where('check_out', '<', now())->count();
@@ -819,33 +819,34 @@
             $checkOut = \Carbon\Carbon::parse($transaction->check_out);
             $totalNights += $checkIn->diffInDays($checkOut);
         }
-    @endphp
+    ?>
     
     <div class="stats-grid fade-in">
         <div class="stat-card-modern primary stagger-1">
-            <div class="stat-number">{{ $totalReservations }}</div>
+            <div class="stat-number"><?php echo e($totalReservations); ?></div>
             <div class="stat-label">Réservations totales</div>
             <div class="stat-footer">
                 <i class="fas fa-calendar-check"></i>
-                {{ $activeReservations }} en cours
+                <?php echo e($activeReservations); ?> en cours
             </div>
         </div>
         
         <div class="stat-card-modern success stagger-2">
-            <div class="stat-number">{{ $totalNights }}</div>
+            <div class="stat-number"><?php echo e($totalNights); ?></div>
             <div class="stat-label">Nuits passées</div>
             <div class="stat-footer">
                 <i class="fas fa-moon"></i>
-                {{ $totalNights > 0 ? round($totalNights / $totalReservations, 1) : 0 }} nuits/séjour
+                <?php echo e($totalNights > 0 ? round($totalNights / $totalReservations, 1) : 0); ?> nuits/séjour
             </div>
         </div>
         
         <div class="stat-card-modern info stagger-3">
-            <div class="stat-number">{{ $customer->created_at->format('d/m/Y') }}</div>
+            <div class="stat-number"><?php echo e($customer->created_at->format('d/m/Y')); ?></div>
             <div class="stat-label">Client depuis</div>
             <div class="stat-footer">
                 <i class="fas fa-clock"></i>
-                {{ $customer->created_at->diffForHumans() }}
+                <?php echo e($customer->created_at->diffForHumans()); ?>
+
             </div>
         </div>
     </div>
@@ -857,29 +858,30 @@
             <div class="profile-card fade-in stagger-1">
                 <div class="profile-header">
                     <div style="text-align: center;">
-                        @php
+                        <?php
                             $avatarUrl = $customer->user ? $customer->user->getAvatar() : null;
-                        @endphp
+                        ?>
                         
-                        @if($avatarUrl)
-                        <img src="{{ $avatarUrl }}" 
-                             alt="{{ $customer->name }}" 
+                        <?php if($avatarUrl): ?>
+                        <img src="<?php echo e($avatarUrl); ?>" 
+                             alt="<?php echo e($customer->name); ?>" 
                              class="profile-avatar"
-                             onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($customer->name) }}&background=059669&color=fff&size=120'">
-                        @else
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($customer->name) }}&background=059669&color=fff&size=120" 
-                             alt="{{ $customer->name }}" 
+                             onerror="this.src='https://ui-avatars.com/api/?name=<?php echo e(urlencode($customer->name)); ?>&background=059669&color=fff&size=120'">
+                        <?php else: ?>
+                        <img src="https://ui-avatars.com/api/?name=<?php echo e(urlencode($customer->name)); ?>&background=059669&color=fff&size=120" 
+                             alt="<?php echo e($customer->name); ?>" 
                              class="profile-avatar">
-                        @endif
+                        <?php endif; ?>
                         
-                        <h2 class="profile-name">{{ $customer->name }}</h2>
-                        @if($customer->job)
-                        <div class="profile-job">{{ $customer->job }}</div>
-                        @endif
+                        <h2 class="profile-name"><?php echo e($customer->name); ?></h2>
+                        <?php if($customer->job): ?>
+                        <div class="profile-job"><?php echo e($customer->job); ?></div>
+                        <?php endif; ?>
                         
                         <span class="profile-badge">
                             <i class="fas fa-user"></i>
-                            Client #{{ $customer->id }}
+                            Client #<?php echo e($customer->id); ?>
+
                         </span>
                     </div>
                 </div>
@@ -892,7 +894,7 @@
                             Informations de contact
                         </h6>
                         
-                        @if($customer->email)
+                        <?php if($customer->email): ?>
                         <div class="profile-info-item">
                             <div class="profile-info-icon">
                                 <i class="fas fa-envelope"></i>
@@ -900,15 +902,16 @@
                             <div style="flex: 1;">
                                 <div class="profile-info-label">Email</div>
                                 <div class="profile-info-value">
-                                    <a href="mailto:{{ $customer->email }}" class="text-decoration-none" style="color: var(--primary-600);">
-                                        {{ $customer->email }}
+                                    <a href="mailto:<?php echo e($customer->email); ?>" class="text-decoration-none" style="color: var(--primary-600);">
+                                        <?php echo e($customer->email); ?>
+
                                     </a>
                                 </div>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if($customer->phone)
+                        <?php if($customer->phone): ?>
                         <div class="profile-info-item">
                             <div class="profile-info-icon">
                                 <i class="fas fa-phone"></i>
@@ -916,25 +919,26 @@
                             <div style="flex: 1;">
                                 <div class="profile-info-label">Téléphone</div>
                                 <div class="profile-info-value">
-                                    <a href="tel:{{ $customer->phone }}" class="text-decoration-none" style="color: var(--gray-700);">
-                                        {{ $customer->phone }}
+                                    <a href="tel:<?php echo e($customer->phone); ?>" class="text-decoration-none" style="color: var(--gray-700);">
+                                        <?php echo e($customer->phone); ?>
+
                                     </a>
                                 </div>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if($customer->address)
+                        <?php if($customer->address): ?>
                         <div class="profile-info-item">
                             <div class="profile-info-icon">
                                 <i class="fas fa-map-marker-alt"></i>
                             </div>
                             <div style="flex: 1;">
                                 <div class="profile-info-label">Adresse</div>
-                                <div class="profile-info-value">{{ $customer->address }}</div>
+                                <div class="profile-info-value"><?php echo e($customer->address); ?></div>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                     
                     <!-- Informations personnelles -->
@@ -944,19 +948,19 @@
                             Informations personnelles
                         </h6>
                         
-                        @if($customer->gender)
+                        <?php if($customer->gender): ?>
                         <div class="profile-info-item">
                             <div class="profile-info-icon">
                                 <i class="fas fa-venus-mars"></i>
                             </div>
                             <div style="flex: 1;">
                                 <div class="profile-info-label">Genre</div>
-                                <div class="profile-info-value">{{ $customer->gender }}</div>
+                                <div class="profile-info-value"><?php echo e($customer->gender); ?></div>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if($customer->birthdate)
+                        <?php if($customer->birthdate): ?>
                         <div class="profile-info-item">
                             <div class="profile-info-icon">
                                 <i class="fas fa-cake-candles"></i>
@@ -964,24 +968,25 @@
                             <div style="flex: 1;">
                                 <div class="profile-info-label">Date de naissance</div>
                                 <div class="profile-info-value">
-                                    {{ \Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y') }}
-                                    ({{ \Carbon\Carbon::parse($customer->birthdate)->age }} ans)
+                                    <?php echo e(\Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y')); ?>
+
+                                    (<?php echo e(\Carbon\Carbon::parse($customer->birthdate)->age); ?> ans)
                                 </div>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if($customer->job)
+                        <?php if($customer->job): ?>
                         <div class="profile-info-item">
                             <div class="profile-info-icon">
                                 <i class="fas fa-briefcase"></i>
                             </div>
                             <div style="flex: 1;">
                                 <div class="profile-info-label">Profession</div>
-                                <div class="profile-info-value">{{ $customer->job }}</div>
+                                <div class="profile-info-value"><?php echo e($customer->job); ?></div>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                     
                     <!-- Actions rapides -->
@@ -992,7 +997,7 @@
                         </h6>
                         
                         <div class="quick-actions">
-                            <a href="{{ route('customer.edit', $customer->id) }}" class="quick-action-card">
+                            <a href="<?php echo e(route('customer.edit', $customer->id)); ?>" class="quick-action-card">
                                 <div class="quick-action-icon">
                                     <i class="fas fa-edit"></i>
                                 </div>
@@ -1000,7 +1005,7 @@
                                 <div class="quick-action-subtitle">Mettre à jour les infos</div>
                             </a>
                             
-                            <a href="{{ route('transaction.reservation.createIdentity') }}?customer_id={{ $customer->id }}" 
+                            <a href="<?php echo e(route('transaction.reservation.createIdentity')); ?>?customer_id=<?php echo e($customer->id); ?>" 
                                class="quick-action-card">
                                 <div class="quick-action-icon">
                                     <i class="fas fa-calendar-plus"></i>
@@ -1009,7 +1014,7 @@
                                 <div class="quick-action-subtitle">Ajouter un séjour</div>
                             </a>
                             
-                            <a href="{{ route('transaction.reservation.customerReservations', $customer->id) }}" 
+                            <a href="<?php echo e(route('transaction.reservation.customerReservations', $customer->id)); ?>" 
                                class="quick-action-card">
                                 <div class="quick-action-icon">
                                     <i class="fas fa-history"></i>
@@ -1018,7 +1023,7 @@
                                 <div class="quick-action-subtitle">Voir toutes les réservations</div>
                             </a>
                             
-                            <a href="{{ route('customer.index') }}" class="quick-action-card">
+                            <a href="<?php echo e(route('customer.index')); ?>" class="quick-action-card">
                                 <div class="quick-action-icon">
                                     <i class="fas fa-arrow-left"></i>
                                 </div>
@@ -1042,23 +1047,23 @@
                     </h3>
                     <span class="profile-badge mt-2">
                         <i class="fas fa-clock me-1"></i>
-                        {{ $activeReservations }} réservation(s)
+                        <?php echo e($activeReservations); ?> réservation(s)
                     </span>
                 </div>
                 
                 <div class="profile-body">
-                    @php
+                    <?php
                         $activeStays = $customer->transactions()
                             ->where('check_out', '>=', now())
                             ->orderBy('check_in', 'desc')
                             ->with('room')
                             ->get();
-                    @endphp
+                    ?>
                     
-                    @if($activeStays->count() > 0)
+                    <?php if($activeStays->count() > 0): ?>
                         <div class="reservations-grid">
-                            @foreach($activeStays as $transaction)
-                                @php
+                            <?php $__currentLoopData = $activeStays; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $transaction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $isActive = $transaction->check_in <= now() && $transaction->check_out >= now();
                                     $isFuture = $transaction->check_in > now();
                                     
@@ -1068,7 +1073,7 @@
                                     
                                     $totalPrice = $transaction->total_price;
                                     $balance = $transaction->getTotalPrice() - $transaction->getTotalPayment();
-                                @endphp
+                                ?>
                                 
                                 <div class="reservation-card">
                                     <div class="reservation-header">
@@ -1077,14 +1082,15 @@
                                                 <i class="fas fa-bed"></i>
                                             </div>
                                             <div class="reservation-room-info">
-                                                <h6>Chambre {{ $transaction->room->number ?? 'N/A' }}</h6>
-                                                <small>{{ $transaction->room->type->name ?? 'Standard' }}</small>
+                                                <h6>Chambre <?php echo e($transaction->room->number ?? 'N/A'); ?></h6>
+                                                <small><?php echo e($transaction->room->type->name ?? 'Standard'); ?></small>
                                             </div>
                                         </div>
                                         
-                                        <span class="reservation-status {{ $isActive ? 'status-active' : 'status-upcoming' }}">
-                                            <i class="fas {{ $isActive ? 'fa-user-check' : 'fa-calendar' }}"></i>
-                                            {{ $isActive ? 'En cours' : 'À venir' }}
+                                        <span class="reservation-status <?php echo e($isActive ? 'status-active' : 'status-upcoming'); ?>">
+                                            <i class="fas <?php echo e($isActive ? 'fa-user-check' : 'fa-calendar'); ?>"></i>
+                                            <?php echo e($isActive ? 'En cours' : 'À venir'); ?>
+
                                         </span>
                                     </div>
                                     
@@ -1096,8 +1102,8 @@
                                                 </div>
                                                 <div class="reservation-date-info">
                                                     <div class="label">Arrivée</div>
-                                                    <div class="value">{{ $checkIn->format('d/m/Y') }}</div>
-                                                    <div class="time">{{ $checkIn->format('H:i') }}</div>
+                                                    <div class="value"><?php echo e($checkIn->format('d/m/Y')); ?></div>
+                                                    <div class="time"><?php echo e($checkIn->format('H:i')); ?></div>
                                                 </div>
                                             </div>
                                             
@@ -1111,8 +1117,8 @@
                                                 </div>
                                                 <div class="reservation-date-info">
                                                     <div class="label">Départ</div>
-                                                    <div class="value">{{ $checkOut->format('d/m/Y') }}</div>
-                                                    <div class="time">{{ $checkOut->format('H:i') }}</div>
+                                                    <div class="value"><?php echo e($checkOut->format('d/m/Y')); ?></div>
+                                                    <div class="time"><?php echo e($checkOut->format('H:i')); ?></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1120,73 +1126,73 @@
                                         <div class="reservation-details">
                                             <div class="reservation-detail-item">
                                                 <span class="reservation-detail-label">Nuits</span>
-                                                <span class="reservation-detail-value">{{ $nights }}</span>
+                                                <span class="reservation-detail-value"><?php echo e($nights); ?></span>
                                             </div>
                                             
                                             <div class="reservation-detail-item">
                                                 <span class="reservation-detail-label">Personnes</span>
-                                                <span class="reservation-detail-value">{{ $transaction->person_count ?? 1 }}</span>
+                                                <span class="reservation-detail-value"><?php echo e($transaction->person_count ?? 1); ?></span>
                                             </div>
                                             
                                             <div class="reservation-detail-item">
                                                 <span class="reservation-detail-label">Prix total</span>
                                                 <span class="reservation-detail-value">
-                                                    {{ number_format($totalPrice, 0, ',', ' ') }} FCFA
+                                                    <?php echo e(number_format($totalPrice, 0, ',', ' ')); ?> FCFA
                                                 </span>
                                             </div>
                                             
-                                            @if($balance > 0)
+                                            <?php if($balance > 0): ?>
                                             <div class="reservation-detail-item">
                                                 <span class="reservation-detail-label">Solde restant</span>
                                                 <span class="reservation-detail-value" style="color: var(--amber-600);">
-                                                    {{ number_format($balance, 0, ',', ' ') }} FCFA
+                                                    <?php echo e(number_format($balance, 0, ',', ' ')); ?> FCFA
                                                 </span>
                                             </div>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                         
                                         <div class="reservation-footer">
-                                            <a href="{{ route('transaction.show', $transaction->id) }}" 
+                                            <a href="<?php echo e(route('transaction.show', $transaction->id)); ?>" 
                                                class="btn-modern btn-sm-modern btn-outline-modern">
                                                 <i class="fas fa-eye me-1"></i>Détails
                                             </a>
                                             
-                                            @if($balance > 0)
-                                            <a href="{{ route('transaction.payment.create', $transaction->id) }}" 
+                                            <?php if($balance > 0): ?>
+                                            <a href="<?php echo e(route('transaction.payment.create', $transaction->id)); ?>" 
                                                class="btn-modern btn-sm-modern btn-primary-modern">
                                                 <i class="fas fa-credit-card me-1"></i>Paiement
                                             </a>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="text-center py-5">
                             <i class="fas fa-calendar-times fa-3x text-muted mb-3" style="opacity: 0.5;"></i>
                             <h6 class="text-dark mb-2">Aucune réservation en cours</h6>
                             <p class="text-muted mb-4 small">Ce client n'a pas de réservation active ou à venir</p>
-                            <a href="{{ route('transaction.reservation.createIdentity') }}?customer_id={{ $customer->id }}" 
+                            <a href="<?php echo e(route('transaction.reservation.createIdentity')); ?>?customer_id=<?php echo e($customer->id); ?>" 
                                class="btn-modern btn-primary-modern">
                                 <i class="fas fa-plus-circle me-2"></i>Créer une réservation
                             </a>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
             
             <!-- Historique des réservations -->
-            @php
+            <?php
                 $pastStays = $customer->transactions()
                     ->where('check_out', '<', now())
                     ->orderBy('check_out', 'desc')
                     ->with('room')
                     ->take(5)
                     ->get();
-            @endphp
+            ?>
             
-            @if($pastStays->count() > 0)
+            <?php if($pastStays->count() > 0): ?>
             <div class="profile-card fade-in stagger-3 mt-4">
                 <div class="profile-header" style="background: linear-gradient(135deg, var(--gray-600), var(--gray-700));">
                     <h3 class="text-white mb-0" style="font-size: 1.25rem;">
@@ -1195,19 +1201,19 @@
                     </h3>
                     <span class="profile-badge mt-2">
                         <i class="fas fa-check-circle me-1"></i>
-                        {{ $completedReservations }} séjour(s) terminé(s)
+                        <?php echo e($completedReservations); ?> séjour(s) terminé(s)
                     </span>
                 </div>
                 
                 <div class="profile-body">
                     <div class="reservations-grid">
-                        @foreach($pastStays as $transaction)
-                            @php
+                        <?php $__currentLoopData = $pastStays; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $transaction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $checkIn = \Carbon\Carbon::parse($transaction->check_in);
                                 $checkOut = \Carbon\Carbon::parse($transaction->check_out);
                                 $nights = $checkIn->diffInDays($checkOut);
                                 $totalPrice = $transaction->total_price;
-                            @endphp
+                            ?>
                             
                             <div class="reservation-card">
                                 <div class="reservation-header">
@@ -1216,8 +1222,8 @@
                                             <i class="fas fa-bed"></i>
                                         </div>
                                         <div class="reservation-room-info">
-                                            <h6>Chambre {{ $transaction->room->number ?? 'N/A' }}</h6>
-                                            <small>{{ $transaction->room->type->name ?? 'Standard' }}</small>
+                                            <h6>Chambre <?php echo e($transaction->room->number ?? 'N/A'); ?></h6>
+                                            <small><?php echo e($transaction->room->type->name ?? 'Standard'); ?></small>
                                         </div>
                                     </div>
                                     
@@ -1232,12 +1238,12 @@
                                         <div class="d-flex align-items-center gap-3">
                                             <div>
                                                 <small class="text-muted">Du</small>
-                                                <div class="fw-semibold">{{ $checkIn->format('d/m/Y') }}</div>
+                                                <div class="fw-semibold"><?php echo e($checkIn->format('d/m/Y')); ?></div>
                                             </div>
                                             <i class="fas fa-arrow-right text-muted"></i>
                                             <div>
                                                 <small class="text-muted">Au</small>
-                                                <div class="fw-semibold">{{ $checkOut->format('d/m/Y') }}</div>
+                                                <div class="fw-semibold"><?php echo e($checkOut->format('d/m/Y')); ?></div>
                                             </div>
                                         </div>
                                     </div>
@@ -1245,46 +1251,46 @@
                                     <div class="reservation-details">
                                         <div class="reservation-detail-item">
                                             <span class="reservation-detail-label">Nuits</span>
-                                            <span class="reservation-detail-value">{{ $nights }}</span>
+                                            <span class="reservation-detail-value"><?php echo e($nights); ?></span>
                                         </div>
                                         
                                         <div class="reservation-detail-item">
                                             <span class="reservation-detail-label">Total</span>
                                             <span class="reservation-detail-value">
-                                                {{ number_format($totalPrice, 0, ',', ' ') }} FCFA
+                                                <?php echo e(number_format($totalPrice, 0, ',', ' ')); ?> FCFA
                                             </span>
                                         </div>
                                     </div>
                                     
                                     <div class="reservation-footer">
-                                        <a href="{{ route('transaction.show', $transaction->id) }}" 
+                                        <a href="<?php echo e(route('transaction.show', $transaction->id)); ?>" 
                                            class="btn-modern btn-sm-modern btn-outline-modern">
                                             <i class="fas fa-eye me-1"></i>Voir détails
                                         </a>
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                     
-                    @if($completedReservations > 5)
+                    <?php if($completedReservations > 5): ?>
                     <div class="text-center mt-4">
-                        <a href="{{ route('transaction.reservation.customerReservations', $customer->id) }}" 
+                        <a href="<?php echo e(route('transaction.reservation.customerReservations', $customer->id)); ?>" 
                            class="btn-modern btn-outline-modern">
                             <i class="fas fa-history me-2"></i>Voir tout l'historique
                         </a>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1303,19 +1309,19 @@ document.addEventListener('DOMContentLoaded', function() {
         // E pour éditer
         if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
             e.preventDefault();
-            window.location.href = "{{ route('customer.edit', $customer->id) }}";
+            window.location.href = "<?php echo e(route('customer.edit', $customer->id)); ?>";
         }
         
         // N pour nouvelle réservation
         if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
             e.preventDefault();
-            window.location.href = "{{ route('transaction.reservation.createIdentity') }}?customer_id={{ $customer->id }}";
+            window.location.href = "<?php echo e(route('transaction.reservation.createIdentity')); ?>?customer_id=<?php echo e($customer->id); ?>";
         }
         
         // B pour retour à la liste
         if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
             e.preventDefault();
-            window.location.href = "{{ route('customer.index') }}";
+            window.location.href = "<?php echo e(route('customer.index')); ?>";
         }
         
         // ? pour aide
@@ -1337,4 +1343,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/customer/show.blade.php ENDPATH**/ ?>
