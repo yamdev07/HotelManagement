@@ -577,6 +577,15 @@ document.addEventListener('DOMContentLoaded', function() {
     checkOut.value = dayAfter.toISOString().split('T')[0];
     checkOut.min = dayAfter.toISOString().split('T')[0];
     
+    // Check if room_id in URL (coming from rooms page)
+    const urlParams = new URLSearchParams(window.location.search);
+    const preSelectedRoomId = urlParams.get('room_id');
+    
+    if (preSelectedRoomId) {
+        // Auto-trigger availability check
+        checkBtn.click();
+    }
+    
     // Update checkout min
     checkIn.addEventListener('change', function() {
         const nextDay = new Date(this.value);
@@ -620,6 +629,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 roomFilters.style.display = 'block';
                 displayRooms(data.rooms);
+                
+                // Auto-select pre-selected room
+                if (preSelectedRoomId) {
+                    setTimeout(() => {
+                        const roomCard = document.querySelector(`[data-id="${preSelectedRoomId}"]`);
+                        if (roomCard) {
+                            roomCard.click();
+                            roomCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 300);
+                }
             } else {
                 roomFilters.style.display = 'none';
                 roomsList.innerHTML = '<div class="empty-state"><i class="fas fa-bed"></i><h5>Aucune chambre disponible</h5><p class="text-muted">Essayez d\'autres dates</p></div>';
@@ -642,8 +662,9 @@ document.addEventListener('DOMContentLoaded', function() {
         let html = '';
         rooms.forEach(room => {
             const total = room.price * nights;
+            const isPreSelected = preSelectedRoomId == room.id;
             html += `
-                <div class="room-card" data-id="${room.id}" data-price="${room.price}" data-name="${room.name}" data-number="${room.number}" data-type="${room.type_name || ''}">
+                <div class="room-card ${isPreSelected ? 'selected' : ''}" data-id="${room.id}" data-price="${room.price}" data-name="${room.name}" data-number="${room.number}" data-type="${room.type_name || ''}">
                     <div class="room-card-header">
                         <div>
                             <div class="room-name">${room.name}</div>
@@ -689,6 +710,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 updateSummary();
             });
         });
+        
+        // Auto-select if pre-selected
+        if (preSelectedRoomId) {
+            const preSelectedCard = document.querySelector(`[data-id="${preSelectedRoomId}"]`);
+            if (preSelectedCard) {
+                selectedRoom = {
+                    id: preSelectedCard.dataset.id,
+                    price: parseFloat(preSelectedCard.dataset.price),
+                    name: preSelectedCard.dataset.name,
+                    number: preSelectedCard.dataset.number
+                };
+                document.getElementById('selected_room_id').value = selectedRoom.id;
+                updateSummary();
+            }
+        }
     }
     
     // Filters
@@ -773,6 +809,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 submitBtn.disabled = true;
                 selectedRoom = null;
                 allRooms = [];
+                
+                // Remove room_id from URL
+                window.history.replaceState({}, document.title, window.location.pathname);
             } else {
                 alert('Erreur: ' + (data.message || 'Réessayez'));
             }

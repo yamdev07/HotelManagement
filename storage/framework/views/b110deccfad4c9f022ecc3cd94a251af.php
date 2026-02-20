@@ -360,7 +360,7 @@
                                         <i class="fas fa-eye me-1"></i> Détails
                                     </a>
                                     <?php if($room->is_available_today): ?>
-                                        <a href="<?php echo e(route('frontend.contact')); ?>?room_id=<?php echo e($room->id); ?>" 
+                                        <a href="<?php echo e(route('frontend.reservation')); ?>?room_id=<?php echo e($room->id); ?>" 
                                            class="btn btn-sm" 
                                            style="color: #4CAF50; border-color: #4CAF50; background-color: transparent;">
                                             <i class="fas fa-calendar-check me-1"></i> Réserver
