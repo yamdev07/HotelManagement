@@ -349,7 +349,7 @@
                                         <i class="fas fa-eye me-1"></i> Détails
                                     </a>
                                     @if($room->is_available_today)
-                                        <a href="{{ route('frontend.contact') }}?room_id={{ $room->id }}" 
+                                        <a href="{{ route('frontend.reservation') }}?room_id={{ $room->id }}" 
                                            class="btn btn-sm" 
                                            style="color: #4CAF50; border-color: #4CAF50; background-color: transparent;">
                                             <i class="fas fa-calendar-check me-1"></i> Réserver

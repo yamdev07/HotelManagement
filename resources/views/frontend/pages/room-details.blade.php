@@ -152,8 +152,8 @@
                                 <span class="price-period">par nuit</span>
                             </div>
                             
-                            <!-- Formulaire de réservation -->
-                            <form id="bookingForm">
+                            <!-- Formulaire de réservation - Redirige vers /reservation -->
+                            <form action="{{ route('frontend.reservation') }}" method="GET">
                                 <input type="hidden" name="room_id" value="{{ $room->id }}">
                                 
                                 <!-- Dates -->
@@ -183,55 +183,22 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Adultes -->
+                                <!-- Adultes (enfants supprimé) -->
                                 <div class="form-group mb-3">
                                     <label class="form-label">
-                                        <i class="fas fa-user-friends me-2"></i>Adultes
+                                        <i class="fas fa-user-friends me-2"></i>Nombre de personnes
                                     </label>
                                     <select class="form-select" id="adults" name="adults">
-                                        @for($i = 1; $i <= min($room->capacity, 6); $i++)
-                                            <option value="{{ $i }}" {{ $i == min($room->capacity, 2) ? 'selected' : '' }}>
-                                                {{ $i }} adulte{{ $i > 1 ? 's' : '' }}
-                                            </option>
+                                        @for($i = 1; $i <= $room->capacity; $i++)
+                                            <option value="{{ $i }}" {{ $i == 2 ? 'selected' : '' }}>{{ $i }} personne{{ $i > 1 ? 's' : '' }}</option>
                                         @endfor
                                     </select>
                                 </div>
                                 
-                                <!-- Enfants -->
-                                <div class="form-group mb-4">
-                                    <label class="form-label">
-                                        <i class="fas fa-child me-2"></i>Enfants (2-12 ans)
-                                    </label>
-                                    <select class="form-select" id="children" name="children">
-                                        @for($i = 0; $i <= 3; $i++)
-                                            <option value="{{ $i }}">{{ $i }} enfant{{ $i > 1 ? 's' : '' }}</option>
-                                        @endfor
-                                    </select>
-                                </div>
-                                
-                                <!-- Résumé du prix -->
-                                <div class="price-summary mb-4" id="priceSummary" style="display: none;">
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>Nuits:</span>
-                                        <strong id="nightsCount">0</strong>
-                                    </div>
-                                    <div class="d-flex justify-content-between mb-2">
-                                        <span>Prix par nuit:</span>
-                                        <strong>{{ number_format($room->price, 0, ',', ' ') }} FCFA</strong>
-                                    </div>
-                                    <hr class="my-2">
-                                    <div class="d-flex justify-content-between">
-                                        <span class="fw-bold">Total:</span>
-                                        <strong id="totalPrice" class="text-success">0 FCFA</strong>
-                                    </div>
-                                </div>
-                                
-                                <!-- Boutons -->
+                                <!-- Bouton unique - Vérifier et réserver -->
                                 <div class="d-grid gap-3">
-                                    <button type="button" 
-                                            class="btn-check-availability" 
-                                            onclick="checkAvailability()">
-                                        <i class="fas fa-check-circle me-2"></i>Vérifier disponibilité
+                                    <button type="submit" class="btn-check-availability">
+                                        <i class="fas fa-check-circle me-2"></i>Réserver maintenant
                                     </button>
                                     
                                     <a href="{{ route('frontend.contact') }}?room_id={{ $room->id }}" 
@@ -256,7 +223,7 @@
                             </div>
                             <div class="info-item">
                                 <i class="fas fa-clock"></i>
-                                <span>Check-out: avant 12h00</span>
+                                <span>Check-out: avant 13h00</span>
                             </div>
                             <div class="info-item">
                                 <i class="fas fa-wifi"></i>
@@ -510,13 +477,6 @@
     box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
 }
 
-.price-summary {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 10px;
-    border: 1px solid #c8e6c9;
-}
-
 .btn-check-availability {
     background: #4CAF50;
     color: white;
@@ -526,12 +486,16 @@
     font-weight: 600;
     font-size: 1rem;
     transition: all 0.3s ease;
+    text-decoration: none;
+    display: block;
+    text-align: center;
 }
 
 .btn-check-availability:hover {
     background: #2E7D32;
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+    color: white;
 }
 
 .btn-contact {
@@ -544,6 +508,7 @@
     text-decoration: none;
     text-align: center;
     transition: all 0.3s ease;
+    display: block;
 }
 
 .btn-contact:hover {
@@ -653,22 +618,6 @@
     font-weight: 700;
 }
 
-/* Modal */
-.modal-content-custom {
-    border-radius: 20px;
-    overflow: hidden;
-}
-
-.modal-header-custom {
-    background: linear-gradient(135deg, #2E7D32, #4CAF50);
-    color: white;
-    padding: 20px;
-}
-
-.modal-body-custom {
-    padding: 30px;
-}
-
 /* Responsive */
 @media (max-width: 768px) {
     .hero-section-room-details {
@@ -721,158 +670,43 @@ function changeMainImage(src, element) {
     }
 }
 
-// Calcul du prix
-function calculatePrice() {
-    const checkin = document.getElementById('check_in').value;
-    const checkout = document.getElementById('check_out').value;
+// Fonction pour naviguer dans la galerie
+function nextImage() {
+    currentImageIndex = (currentImageIndex + 1) % images.length;
+    document.getElementById('mainRoomImage').src = images[currentImageIndex];
     
-    if (!checkin || !checkout) return;
-    
-    const nights = Math.ceil((new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24));
-    const pricePerNight = {{ $room->price }};
-    const totalPrice = nights * pricePerNight;
-    
-    document.getElementById('priceSummary').style.display = 'block';
-    document.getElementById('nightsCount').textContent = nights;
-    document.getElementById('totalPrice').textContent = totalPrice.toLocaleString('fr-FR') + ' FCFA';
+    // Mettre à jour les miniatures
+    document.querySelectorAll('.thumbnail-image').forEach((thumb, index) => {
+        thumb.style.border = index === currentImageIndex ? '3px solid #4CAF50' : 'none';
+    });
 }
 
-// Vérifier disponibilité
-function checkAvailability() {
-    const checkin = document.getElementById('check_in').value;
-    const checkout = document.getElementById('check_out').value;
-    const adults = document.getElementById('adults').value;
-    const children = document.getElementById('children').value;
+function prevImage() {
+    currentImageIndex = (currentImageIndex - 1 + images.length) % images.length;
+    document.getElementById('mainRoomImage').src = images[currentImageIndex];
     
-    if (!checkin || !checkout) {
-        showAlert('Veuillez sélectionner les dates de séjour.', 'warning');
-        return;
-    }
-    
-    const nights = Math.ceil((new Date(checkout) - new Date(checkin)) / (1000 * 60 * 60 * 24));
-    const totalPrice = nights * {{ $room->price }};
-    
-    // Ici vous pouvez appeler votre API de vérification
-    // Pour l'exemple, on simule une disponibilité
-    
-    showBookingModal(checkin, checkout, nights, totalPrice, adults, children);
+    // Mettre à jour les miniatures
+    document.querySelectorAll('.thumbnail-image').forEach((thumb, index) => {
+        thumb.style.border = index === currentImageIndex ? '3px solid #4CAF50' : 'none';
+    });
 }
 
-// Afficher la modal de réservation
-function showBookingModal(checkin, checkout, nights, totalPrice, adults, children) {
-    // Formater les dates
-    const formatDate = (date) => {
-        return new Date(date).toLocaleDateString('fr-FR', {
-            weekday: 'short',
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
-    };
-    
-    const modalHtml = `
-        <div class="modal fade" id="bookingModal" tabindex="-1">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content modal-content-custom">
-                    <div class="modal-header modal-header-custom">
-                        <h5 class="modal-title">
-                            <i class="fas fa-check-circle me-2"></i>Chambre disponible
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body modal-body-custom">
-                        <div class="text-center mb-4">
-                            <div class="success-animation mb-3">
-                                <i class="fas fa-check-circle fa-4x text-success"></i>
-                            </div>
-                            <h4>Votre chambre est disponible !</h4>
-                        </div>
-                        
-                        <div class="booking-summary p-3 mb-4" style="background: #f8f9fa; border-radius: 10px;">
-                            <div class="row mb-3">
-                                <div class="col-6">
-                                    <small class="text-muted d-block">Arrivée</small>
-                                    <strong>${formatDate(checkin)}</strong>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-muted d-block">Départ</small>
-                                    <strong>${formatDate(checkout)}</strong>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-6">
-                                    <small class="text-muted d-block">Durée</small>
-                                    <strong>${nights} nuit${nights > 1 ? 's' : ''}</strong>
-                                </div>
-                                <div class="col-6">
-                                    <small class="text-muted d-block">Occupants</small>
-                                    <strong>${adults} adulte${adults > 1 ? 's' : ''}${children > 0 ? `, ${children} enfant${children > 1 ? 's' : ''}` : ''}</strong>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-12">
-                                    <small class="text-muted d-block">Prix total</small>
-                                    <h3 class="text-success mb-0">${totalPrice.toLocaleString('fr-FR')} FCFA</h3>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="d-grid gap-2">
-                            <a href="{{ route('frontend.contact') }}?room_id={{ $room->id }}&checkin=${checkin}&checkout=${checkout}&adults=${adults}&children=${children}" 
-                               class="btn-check-availability">
-                                <i class="fas fa-calendar-check me-2"></i>Confirmer la réservation
-                            </a>
-                            <button type="button" class="btn-contact" data-bs-dismiss="modal">
-                                <i class="fas fa-times me-2"></i>Fermer
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Supprimer l'ancienne modal si elle existe
-    const oldModal = document.getElementById('bookingModal');
-    if (oldModal) oldModal.remove();
-    
-    // Ajouter la nouvelle modal
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-    
-    // Afficher la modal
-    const modal = new bootstrap.Modal(document.getElementById('bookingModal'));
-    modal.show();
-}
-
-// Afficher une alerte
-function showAlert(message, type) {
-    const alertDiv = document.createElement('div');
-    alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
-    alertDiv.innerHTML = `
-        <div class="d-flex align-items-center">
-            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
-            <div>${message}</div>
-            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-    
-    document.body.appendChild(alertDiv);
-    
-    setTimeout(() => {
-        alertDiv.remove();
-    }, 5000);
-}
-
-// Initialisation
+// Ajouter les contrôles de navigation
 document.addEventListener('DOMContentLoaded', function() {
-    // Calculer le prix initial
-    calculatePrice();
-    
-    // Écouter les changements de dates
-    document.getElementById('check_in').addEventListener('change', calculatePrice);
-    document.getElementById('check_out').addEventListener('change', calculatePrice);
+    if (images.length > 1) {
+        const container = document.querySelector('.main-image-container');
+        const navHtml = `
+            <div class="position-absolute top-50 start-0 end-0 d-flex justify-content-between px-3" style="transform: translateY(-50%);">
+                <button class="btn btn-light btn-sm rounded-circle shadow" onclick="prevImage()" style="width: 40px; height: 40px;">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="btn btn-light btn-sm rounded-circle shadow" onclick="nextImage()" style="width: 40px; height: 40px;">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', navHtml);
+    }
 });
 </script>
 @endpush

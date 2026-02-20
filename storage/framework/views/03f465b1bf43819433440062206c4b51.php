@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Détails de l\'activité #' . $activity->id)
-@section('content')
+
+<?php $__env->startSection('title', 'Détails de l\'activité #' . $activity->id); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
@@ -470,11 +470,11 @@
 <div class="activity-detail-page">
     <!-- Breadcrumb -->
     <div class="breadcrumb-custom">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('activity.index') }}">Journal d'activités</a>
+        <a href="<?php echo e(route('activity.index')); ?>">Journal d'activités</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Détails #{{ $activity->id }}</span>
+        <span class="current">Détails #<?php echo e($activity->id); ?></span>
     </div>
 
     <!-- En-tête -->
@@ -483,14 +483,14 @@
             <span class="header-icon">
                 <i class="fas fa-info-circle"></i>
             </span>
-            <h1>Détails de l'activité #{{ $activity->id }}</h1>
+            <h1>Détails de l'activité #<?php echo e($activity->id); ?></h1>
         </div>
         <p class="header-subtitle">Informations complètes sur cette action</p>
     </div>
 
     <!-- Actions -->
     <div class="d-flex justify-content-end gap-2 mb-4">
-        <a href="{{ route('activity.index') }}" class="btn-modern btn-outline-modern btn-sm-modern">
+        <a href="<?php echo e(route('activity.index')); ?>" class="btn-modern btn-outline-modern btn-sm-modern">
             <i class="fas fa-arrow-left me-1"></i> Retour
         </a>
         <button onclick="window.print()" class="btn-modern btn-outline-modern btn-sm-modern">
@@ -512,23 +512,23 @@
                 <table class="table-modern">
                     <tr>
                         <th>ID</th>
-                        <td><span class="badge-modern badge-secondary">#{{ $activity->id }}</span></td>
+                        <td><span class="badge-modern badge-secondary">#<?php echo e($activity->id); ?></span></td>
                     </tr>
                     <tr>
                         <th>Date & Heure</th>
                         <td>
-                            <div style="font-weight: 500;">{{ $activity->created_at->format('d/m/Y') }}</div>
-                            <div style="font-size: 0.75rem; color: var(--gray-500);">{{ $activity->created_at->format('H:i:s') }}</div>
+                            <div style="font-weight: 500;"><?php echo e($activity->created_at->format('d/m/Y')); ?></div>
+                            <div style="font-size: 0.75rem; color: var(--gray-500);"><?php echo e($activity->created_at->format('H:i:s')); ?></div>
                         </td>
                     </tr>
                     <tr>
                         <th>Description</th>
-                        <td style="font-weight: 500;">{{ $activity->description }}</td>
+                        <td style="font-weight: 500;"><?php echo e($activity->description); ?></td>
                     </tr>
                     <tr>
                         <th>Événement</th>
                         <td>
-                            @php
+                            <?php
                                 $badgeClass = match($activity->event) {
                                     'created' => 'badge-success',
                                     'updated' => 'badge-warning',
@@ -550,16 +550,17 @@
                                     'restored' => 'fa-undo-alt',
                                     default => 'fa-history'
                                 };
-                            @endphp
-                            <span class="badge-modern {{ $badgeClass }}">
-                                <i class="fas {{ $eventIcon }} me-1"></i>
-                                {{ $eventLabel }}
+                            ?>
+                            <span class="badge-modern <?php echo e($badgeClass); ?>">
+                                <i class="fas <?php echo e($eventIcon); ?> me-1"></i>
+                                <?php echo e($eventLabel); ?>
+
                             </span>
                         </td>
                     </tr>
                     <tr>
                         <th>Log Name</th>
-                        <td><span class="inline-code">{{ $activity->log_name }}</span></td>
+                        <td><span class="inline-code"><?php echo e($activity->log_name); ?></span></td>
                     </tr>
                 </table>
             </div>
@@ -574,35 +575,37 @@
                 </h5>
             </div>
             <div class="card-body-modern">
-                @if($activity->causer)
+                <?php if($activity->causer): ?>
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <div class="avatar-lg-modern">
-                            {{ substr($activity->causer->name, 0, 1) }}
+                            <?php echo e(substr($activity->causer->name, 0, 1)); ?>
+
                         </div>
                         <div>
                             <h5 style="font-weight: 600; color: var(--gray-800); margin-bottom: 4px;">
-                                {{ $activity->causer->name }}
+                                <?php echo e($activity->causer->name); ?>
+
                             </h5>
-                            <p style="color: var(--gray-500); margin: 0;">{{ $activity->causer->email }}</p>
+                            <p style="color: var(--gray-500); margin: 0;"><?php echo e($activity->causer->email); ?></p>
                         </div>
                     </div>
                     <table class="table-modern">
                         <tr>
                             <th>ID</th>
-                            <td>{{ $activity->causer_id }}</td>
+                            <td><?php echo e($activity->causer_id); ?></td>
                         </tr>
                         <tr>
                             <th>Type</th>
-                            <td><span class="inline-code">{{ class_basename($activity->causer_type) }}</span></td>
+                            <td><span class="inline-code"><?php echo e(class_basename($activity->causer_type)); ?></span></td>
                         </tr>
                     </table>
-                @else
+                <?php else: ?>
                     <div class="empty-state-modern">
                         <i class="fas fa-robot"></i>
                         <h5>Action système</h5>
                         <p>Aucun utilisateur associé</p>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
 
@@ -615,8 +618,8 @@
                 </h5>
             </div>
             <div class="card-body-modern">
-                @if($activity->subject)
-                    @php
+                <?php if($activity->subject): ?>
+                    <?php
                         $modelName = class_basename($activity->subject_type);
                         $modelIcon = match($modelName) {
                             'User' => 'fa-user',
@@ -628,41 +631,42 @@
                             'Customer' => 'fa-user-tie',
                             default => 'fa-cube'
                         };
-                    @endphp
+                    ?>
                     
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <div class="avatar-modern" style="width: 48px; height: 48px; font-size: 1.25rem;">
-                            <i class="fas {{ $modelIcon }}"></i>
+                            <i class="fas <?php echo e($modelIcon); ?>"></i>
                         </div>
                         <div>
                             <h5 style="font-weight: 600; color: var(--gray-800); margin-bottom: 4px;">
-                                {{ $modelName }}
+                                <?php echo e($modelName); ?>
+
                             </h5>
-                            <p style="color: var(--gray-500); margin: 0;">ID: {{ $activity->subject_id }}</p>
+                            <p style="color: var(--gray-500); margin: 0;">ID: <?php echo e($activity->subject_id); ?></p>
                         </div>
                     </div>
                     
-                    @if(method_exists($activity->subject, 'getNameAttribute') && $activity->subject->getNameAttribute())
+                    <?php if(method_exists($activity->subject, 'getNameAttribute') && $activity->subject->getNameAttribute()): ?>
                         <div class="info-row">
                             <div class="info-label">Nom</div>
-                            <div class="info-value">{{ $activity->subject->getNameAttribute() }}</div>
+                            <div class="info-value"><?php echo e($activity->subject->getNameAttribute()); ?></div>
                         </div>
-                    @endif
+                    <?php endif; ?>
                     
-                    @if($activity->subject_url)
+                    <?php if($activity->subject_url): ?>
                         <div class="mt-4">
-                            <a href="{{ $activity->subject_url }}" class="btn-modern btn-outline-modern btn-sm-modern">
+                            <a href="<?php echo e($activity->subject_url); ?>" class="btn-modern btn-outline-modern btn-sm-modern">
                                 <i class="fas fa-external-link-alt me-1"></i> Voir l'objet
                             </a>
                         </div>
-                    @endif
-                @else
+                    <?php endif; ?>
+                <?php else: ?>
                     <div class="empty-state-modern">
                         <i class="fas fa-trash-alt"></i>
                         <h5>Objet supprimé</h5>
                         <p>L'objet n'existe plus dans la base de données</p>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
 
@@ -678,28 +682,30 @@
                 <table class="table-modern">
                     <tr>
                         <th>IP Address</th>
-                        <td><span class="inline-code">{{ $activity->properties['ip_address'] ?? 'N/A' }}</span></td>
+                        <td><span class="inline-code"><?php echo e($activity->properties['ip_address'] ?? 'N/A'); ?></span></td>
                     </tr>
                     <tr>
                         <th>User Agent</th>
                         <td style="font-size: 0.75rem; word-break: break-word;">
-                            {{ $activity->properties['user_agent'] ?? 'N/A' }}
+                            <?php echo e($activity->properties['user_agent'] ?? 'N/A'); ?>
+
                         </td>
                     </tr>
                     <tr>
                         <th>URL</th>
                         <td style="font-size: 0.75rem; word-break: break-word;">
-                            {{ $activity->properties['url'] ?? 'N/A' }}
+                            <?php echo e($activity->properties['url'] ?? 'N/A'); ?>
+
                         </td>
                     </tr>
                     <tr>
                         <th>Méthode</th>
                         <td>
-                            @if(isset($activity->properties['method']))
-                                <span class="badge-modern badge-secondary">{{ $activity->properties['method'] }}</span>
-                            @else
+                            <?php if(isset($activity->properties['method'])): ?>
+                                <span class="badge-modern badge-secondary"><?php echo e($activity->properties['method']); ?></span>
+                            <?php else: ?>
                                 <span class="text-muted">N/A</span>
-                            @endif
+                            <?php endif; ?>
                         </td>
                     </tr>
                 </table>
@@ -714,49 +720,49 @@
                 <i class="fas fa-code"></i>
                 Propriétés complètes
             </h5>
-            <span class="badge-modern badge-info">{{ $activity->properties->count() }} propriété(s)</span>
+            <span class="badge-modern badge-info"><?php echo e($activity->properties->count()); ?> propriété(s)</span>
         </div>
         <div class="card-body-modern">
-            @if($activity->properties->count() > 0)
-                <pre class="code-block">{{ json_encode($activity->properties->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+            <?php if($activity->properties->count() > 0): ?>
+                <pre class="code-block"><?php echo e(json_encode($activity->properties->toArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></pre>
                 
-                @if(isset($activity->properties['old']) || isset($activity->properties['attributes']))
+                <?php if(isset($activity->properties['old']) || isset($activity->properties['attributes'])): ?>
                 <div style="margin-top: 20px;">
                     <h6 style="font-weight: 600; color: var(--gray-700); margin-bottom: 12px;">
                         <i class="fas fa-exchange-alt me-2" style="color: var(--primary-500);"></i>
                         Modifications
                     </h6>
                     <div style="background: var(--gray-50); border-radius: 12px; padding: 16px;">
-                        @if(isset($activity->properties['old']))
+                        <?php if(isset($activity->properties['old'])): ?>
                         <div style="margin-bottom: 16px;">
                             <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 8px;">Anciennes valeurs</div>
-                            <pre style="background: var(--gray-800); color: var(--gray-300); padding: 12px; border-radius: 8px; font-size: 0.75rem; max-height: 200px;">{{ json_encode($activity->properties['old'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                            <pre style="background: var(--gray-800); color: var(--gray-300); padding: 12px; border-radius: 8px; font-size: 0.75rem; max-height: 200px;"><?php echo e(json_encode($activity->properties['old'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></pre>
                         </div>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if(isset($activity->properties['attributes']))
+                        <?php if(isset($activity->properties['attributes'])): ?>
                         <div>
                             <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 8px;">Nouvelles valeurs</div>
-                            <pre style="background: var(--gray-800); color: var(--gray-300); padding: 12px; border-radius: 8px; font-size: 0.75rem; max-height: 200px;">{{ json_encode($activity->properties['attributes'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                            <pre style="background: var(--gray-800); color: var(--gray-300); padding: 12px; border-radius: 8px; font-size: 0.75rem; max-height: 200px;"><?php echo e(json_encode($activity->properties['attributes'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></pre>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
-                @endif
-            @else
+                <?php endif; ?>
+            <?php else: ?>
                 <div class="empty-state-modern">
                     <i class="fas fa-inbox"></i>
                     <h5>Aucune propriété</h5>
                     <p>Aucune propriété supplémentaire n'est associée à cette activité</p>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialisation des tooltips
@@ -768,4 +774,5 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Activity details page loaded');
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/activity/show.blade.php ENDPATH**/ ?>
