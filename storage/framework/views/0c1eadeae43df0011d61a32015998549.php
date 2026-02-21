@@ -686,17 +686,67 @@
                         $canMarkArrived = $isAdmin && $status == 'reservation';
                         $canMarkDeparted = $isAdmin && $status == 'active';
                         
+                        // ============ VARIABLES AVEC HEURES ============
+                        $now = \Carbon\Carbon::now();
+                        $checkInDateTime = \Carbon\Carbon::parse($transaction->check_in)->setTime(12, 0, 0);
+                        $checkOutDateTime = \Carbon\Carbon::parse($transaction->check_out)->setTime(12, 0, 0);
+                        
+                        // Heures métier
+                        $checkInTime = $checkInDateTime->copy()->setTime(12, 0, 0);
+                        $checkOutDeadline = $checkOutDateTime->copy()->setTime(12, 0, 0);
+                        $checkOutLargess = $checkOutDateTime->copy()->setTime(14, 0, 0);
+                        
+                        // Vérifications pour l'arrivée
+                        $canMarkArrivedNow = $canMarkArrived && 
+                            $now->isSameDay($checkInDateTime) && 
+                            $now->gte($checkInTime);
+                        
+                        $arrivalNotReached = $status == 'reservation' && 
+                            ($now->lt($checkInDateTime) || !$now->isSameDay($checkInDateTime));
+                        
+                        $arrivalDelay = $arrivalNotReached ? ceil($now->diffInDays($checkInDateTime, false)) : 0;
+                        $arrivalHoursLeft = $arrivalNotReached && $now->isSameDay($checkInDateTime) ? 
+                            $now->diffInHours($checkInTime) : 0;
+                        
+                        // Vérifications pour le départ
+                        $canMarkDepartedNow = $canMarkDeparted && 
+                            $now->isSameDay($checkOutDateTime) && 
+                            $now->gte($checkOutDeadline) && 
+                            $now->lte($checkOutLargess) && 
+                            $isFullyPaid;
+                        
+                        $departureNotReached = $status == 'active' && 
+                            ($now->lt($checkOutDateTime) || !$now->isSameDay($checkOutDateTime));
+                        
+                        $departureDelay = $departureNotReached ? ceil($now->diffInDays($checkOutDateTime, false)) : 0;
+                        $departureHoursLeft = $departureNotReached && $now->isSameDay($checkOutDateTime) ? 
+                            $now->diffInHours($checkOutDeadline) : 0;
+                        
+                        // Messages pour les tooltips
+                        $arrivalTooltip = '';
+                        if ($arrivalNotReached) {
+                            if (!$now->isSameDay($checkInDateTime)) {
+                                $arrivalTooltip = "Arrivée prévue le " . $checkInDateTime->format('d/m/Y');
+                            } elseif ($now->lt($checkInTime)) {
+                                $arrivalTooltip = "Check-in possible à partir de 12h. Encore $arrivalHoursLeft heure(s).";
+                            }
+                        }
+                        
+                        $departureTooltip = '';
+                        if ($departureNotReached) {
+                            if (!$now->isSameDay($checkOutDateTime)) {
+                                $departureTooltip = "Départ prévu le " . $checkOutDateTime->format('d/m/Y');
+                            } elseif ($now->lt($checkOutDeadline)) {
+                                $departureTooltip = "Check-out possible à partir de 12h. Encore $departureHoursLeft heure(s).";
+                            }
+                        } elseif ($status == 'active' && $now->gt($checkOutLargess)) {
+                            $departureTooltip = "⚠️ Départ après 14h - Prolongation nécessaire";
+                        }
+                        
+                        // Anciennes variables conservées pour compatibilité
                         $today = \Carbon\Carbon::today();
                         $checkInDate = $checkIn->copy()->startOfDay();
                         $checkOutDate = $checkOut->copy()->startOfDay();
-                        
-                        $canMarkArrivedNow = $canMarkArrived && $today->greaterThanOrEqualTo($checkInDate);
-                        $arrivalNotReached = $status == 'reservation' && $today->lessThan($checkInDate);
-                        $arrivalDelay = $arrivalNotReached ? $today->diffInDays($checkInDate) : 0;
-                        
-                        $canMarkDepartedNow = $canMarkDeparted && $today->greaterThanOrEqualTo($checkOutDate) && $isFullyPaid;
-                        $departureNotReached = $status == 'active' && $today->lessThan($checkOutDate);
-                        $departureDelay = $departureNotReached ? $today->diffInDays($checkOutDate) : 0;
                     ?>
                     <tr class="<?php echo e(in_array($status, ['cancelled', 'no_show']) ? 'cancelled-row' : ''); ?>">
                         <td><span style="color: var(--gray-500); font-weight: 500;">#<?php echo e($transaction->id); ?></span></td>
@@ -722,23 +772,50 @@
                             <span class="room-badge"><i class="fas fa-door-closed"></i> <?php echo e($transaction->room->number); ?></span>
                         </td>
                         
+                        <!-- COLONNE ARRIVÉE SIMPLIFIÉE -->
                         <td>
                             <div><?php echo e($checkIn->format('d/m/Y')); ?></div>
-                            <small style="color: var(--gray-500);"><?php echo e($checkIn->format('H:i')); ?></small>
-                            <?php if($status == 'reservation' && $today->lessThan($checkInDate)): ?>
-                                <div class="date-indicator upcoming"><i class="fas fa-clock me-1"></i> J-<?php echo e($arrivalDelay); ?></div>
-                            <?php elseif($status == 'reservation' && $today->greaterThanOrEqualTo($checkInDate)): ?>
-                                <div class="date-indicator ready"><i class="fas fa-check-circle me-1"></i> Prêt</div>
+                            <small style="color: var(--gray-500);">12:00</small>
+                            <?php if($status == 'reservation'): ?>
+                                <?php if($now->lt($checkInDateTime)): ?>
+                                    <div class="date-indicator upcoming">
+                                        <i class="fas fa-clock me-1"></i> 
+                                        J-<?php echo e($arrivalDelay); ?>
+
+                                    </div>
+                                <?php elseif($now->gte($checkInDateTime)): ?>
+                                    <div class="date-indicator ready">
+                                        <i class="fas fa-check-circle me-1"></i> Prêt
+                                    </div>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </td>
-                        
+
+                        <!-- COLONNE DÉPART SIMPLIFIÉE -->
                         <td>
                             <div><?php echo e($checkOut->format('d/m/Y')); ?></div>
-                            <small style="color: var(--gray-500);"><?php echo e($checkOut->format('H:i')); ?></small>
-                            <?php if($status == 'active' && $today->lessThan($checkOutDate)): ?>
-                                <div class="date-indicator pending"><i class="fas fa-hourglass-half me-1"></i> J-<?php echo e($departureDelay); ?></div>
-                            <?php elseif($status == 'active' && $today->greaterThanOrEqualTo($checkOutDate)): ?>
-                                <div class="date-indicator overdue"><i class="fas fa-exclamation-triangle me-1"></i> Dépassé</div>
+                            <small style="color: var(--gray-500);">12:00</small>
+                            <?php if($status == 'active'): ?>
+                                <?php if($now->lt($checkOutDateTime)): ?>
+                                    <div class="date-indicator pending">
+                                        <i class="fas fa-hourglass-half me-1"></i> 
+                                        J-<?php echo e($departureDelay); ?>
+
+                                    </div>
+                                <?php elseif($now->gte($checkOutDateTime) && $now->lte($checkOutLargess)): ?>
+                                    <div class="date-indicator ready">
+                                        <i class="fas fa-check-circle me-1"></i> 
+                                        Départ possible
+                                        <?php if($now->gt($checkOutDeadline) && $now->lte($checkOutLargess)): ?>
+                                            <small>(largesse)</small>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php elseif($now->gt($checkOutLargess)): ?>
+                                    <div class="date-indicator overdue">
+                                        <i class="fas fa-exclamation-triangle me-1"></i>
+                                        Dépassé
+                                    </div>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </td>
                         
@@ -859,7 +936,7 @@
                                     </button>
                                 </form>
                                 <?php elseif($arrivalNotReached): ?>
-                                <span class="btn-action disabled" data-bs-toggle="tooltip" title="Arrivée le <?php echo e($checkInDate->format('d/m/Y')); ?>">
+                                <span class="btn-action disabled" data-bs-toggle="tooltip" title="<?php echo e($arrivalTooltip); ?>">
                                     <i class="fas fa-clock"></i>
                                 </span>
                                 <?php endif; ?>
@@ -867,15 +944,15 @@
                                 <?php if($canMarkDepartedNow): ?>
                                 <button type="button" class="btn-action btn-departed mark-departed-btn"
                                         data-transaction-id="<?php echo e($transaction->id); ?>"
-                                        data-check-out="<?php echo e($checkOutDate->format('d/m/Y')); ?>"
+                                        data-check-out="<?php echo e($checkOutDateTime->format('d/m/Y H:i')); ?>"
                                         data-is-fully-paid="<?php echo e($isFullyPaid ? 'true' : 'false'); ?>"
                                         data-remaining="<?php echo e($remaining); ?>"
                                         data-form-action="<?php echo e(route('transaction.mark-departed', $transaction)); ?>"
-                                        data-bs-toggle="tooltip" title="Départ">
+                                        data-bs-toggle="tooltip" title="Départ (largesse jusqu'à 14h)">
                                     <i class="fas fa-sign-out-alt"></i>
                                 </button>
-                                <?php elseif($departureNotReached): ?>
-                                <span class="btn-action disabled" data-bs-toggle="tooltip" title="Départ le <?php echo e($checkOutDate->format('d/m/Y')); ?>">
+                                <?php elseif($departureNotReached || ($status == 'active' && $now->gt($checkOutLargess))): ?>
+                                <span class="btn-action disabled" data-bs-toggle="tooltip" title="<?php echo e($departureTooltip); ?>">
                                     <i class="fas fa-hourglass-half"></i>
                                 </span>
                                 <?php endif; ?>
@@ -1066,7 +1143,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.status-dropdown-item').forEach(item => {
         item.addEventListener('click', function(e) {
             const form = this.closest('form');
-            const transactionId = form.querySelector('input[name="transaction_id"]')?.value || '<?php echo e($transaction->id); ?>';
+            const transactionId = form.querySelector('input[name="transaction_id"]')?.value || '<?php echo e($transaction->id ?? ''); ?>';
             const newStatus = form.querySelector('input[name="status"]').value;
             
             // Confirmation pour cancelled
@@ -1117,25 +1194,57 @@ document.addEventListener('DOMContentLoaded', function() {
             const formAction = this.dataset.formAction;
             const checkOut = this.dataset.checkOut;
             const isPaid = this.dataset.isFullyPaid === 'true';
+            const remaining = this.dataset.remaining;
             
-            // Vérification date
-            const today = new Date(); today.setHours(0,0,0,0);
-            const [d, m, y] = checkOut.split('/');
-            const departure = new Date(y, m-1, d);
+            // Vérification de l'heure
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinutes = now.getMinutes();
             
-            if (today < departure) {
-                Swal.fire('⏳ Date non atteinte', `Départ prévu le ${checkOut}`, 'warning');
+            if (currentHour < 12) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⏳ Trop tôt',
+                    text: 'Check-out possible à partir de 12h',
+                    timer: 3000
+                });
+                return;
+            }
+            
+            if (currentHour >= 14) {
+                Swal.fire({
+                    icon: 'error',
+                    title: '⚠️ Départ après 14h',
+                    text: 'La largesse de 2h est dépassée. Veuillez prolonger le séjour d\'une nuit supplémentaire.',
+                    confirmButtonText: 'Compris'
+                });
                 return;
             }
             
             if (!isPaid) {
-                Swal.fire('❌ Paiement incomplet', 'Le client doit avoir soldé son séjour', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Paiement incomplet',
+                    html: `Solde restant: <strong>${parseInt(remaining).toLocaleString()} CFA</strong>`,
+                    confirmButtonText: 'Aller au paiement',
+                    showCancelButton: true
+                }).then(result => {
+                    if (result.isConfirmed) {
+                        window.location.href = `/transaction/${btn.dataset.transactionId}/payment/create`;
+                    }
+                });
                 return;
+            }
+            
+            // Entre 12h et 14h
+            let message = 'La chambre sera marquée comme à nettoyer.';
+            if (currentHour >= 12 && currentHour < 14) {
+                message = 'Largesse de 2h accordée. La chambre sera marquée comme à nettoyer.';
             }
             
             Swal.fire({
                 title: 'Confirmer le départ ?',
-                text: 'La chambre sera marquée comme à nettoyer',
+                text: message,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Oui, départ',

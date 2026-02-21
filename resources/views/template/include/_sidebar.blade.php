@@ -1,3 +1,6 @@
+<!-- Sidebar Overlay for Mobile -->
+<div id="sidebar-overlay" class="sidebar-overlay"></div>
+
 <!-- Sidebar -->
 <aside id="sidebar" class="sidebar">
 
@@ -24,8 +27,11 @@
 
         <!-- Sidebar Header (mobile) -->
         <div class="sidebar-header">
+            <span class="header-title">
+                <i class="fas fa-bars me-2"></i>Menu
+            </span>
             <button id="toggle-sidebar-sm" class="btn btn-icon">
-                <i class="fas fa-bars"></i>
+                <i class="fas fa-times"></i>
             </button>
         </div>
 
@@ -422,24 +428,20 @@
             </nav>
         </div>
 
-        <!-- Sidebar Footer - CORRIGÉ ICI -->
+        <!-- Sidebar Footer -->
         <div class="sidebar-footer">
             <div class="user-profile">
                 <div class="user-avatar">
                     @php
                         $avatarPath = null;
                         
-                        // Vérifier d'abord si l'avatar est dans le champ avatar de l'utilisateur
                         if (auth()->user()->avatar) {
-                            // Si le chemin commence par /img/user/, c'est un chemin direct
                             if (str_starts_with(auth()->user()->avatar, '/img/user/')) {
                                 $avatarPath = asset(auth()->user()->avatar);
                             } 
-                            // Si c'est un chemin stockage (storage)
                             elseif (str_starts_with(auth()->user()->avatar, 'storage/') || str_contains(auth()->user()->avatar, 'storage/')) {
                                 $avatarPath = asset(auth()->user()->avatar);
                             }
-                            // Sinon, utiliser storage
                             else {
                                 $avatarPath = asset('storage/' . auth()->user()->avatar);
                             }
@@ -489,7 +491,6 @@
                 </div>
             </div>
 
-            <!-- Date/heure -->
             <div class="datetime-info mt-2 pt-2 border-top border-white-10">
                 <small class="text-white-50 d-block">
                     <i class="far fa-clock me-1"></i>
@@ -501,9 +502,6 @@
     </div>
 </aside>
 
-<!-- ══════════════════════════════════════════════
-     STYLES CSS (inchangés)
-══════════════════════════════════════════════ -->
 <style>
 /* ─── Base ─────────────────────────────────── */
 .sidebar {
@@ -514,7 +512,7 @@
     left: 0;
     top: 0;
     height: 100vh;
-    z-index: 1000;
+    z-index: 1001;
     transition: width 0.3s cubic-bezier(.4,0,.2,1), transform 0.3s cubic-bezier(.4,0,.2,1);
     display: flex;
     flex-direction: column;
@@ -577,7 +575,10 @@
     flex-direction: column;
     min-height: 0;
 }
-.sidebar-header { display: none; padding: 0 20px 16px; }
+.sidebar-header { 
+    display: none; 
+    padding: 0 20px 16px; 
+}
 .sidebar-body {
     flex: 1;
     overflow-y: auto;
@@ -632,7 +633,7 @@
     font-weight: 500;
 }
 
-/* ─── Highlight items (Check-in / Réservation) ─ */
+/* ─── Highlight items ─────────────────────────── */
 .nav-item--highlight .nav-icon {
     background: rgba(16,185,129,.18);
     color: #6ee7b7;
@@ -832,41 +833,187 @@
 }
 .sidebar.collapsed .nav-item:hover::before { opacity: 1; }
 
+/* ─── Mobile sidebar overlay ───────────────── */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity .3s;
+    backdrop-filter: blur(2px);
+}
+.sidebar-overlay.show {
+    display: block;
+    opacity: 1;
+}
+
 /* ─── Mobile ────────────────────────────────── */
 @media (max-width: 768px) {
     .sidebar {
-        width: 272px;
+        width: 85vw;
+        max-width: 320px;
         transform: translateX(-100%);
-        box-shadow: 6px 0 32px rgba(0,0,0,.25);
+        box-shadow: 6px 0 32px rgba(0,0,0,.3);
+        height: 100vh;
+        overflow: hidden;
     }
-    .sidebar.show { transform: translateX(0); }
+    .sidebar.show { 
+        transform: translateX(0);
+    }
+    
+    /* Hide desktop toggle */
+    #toggle-sidebar { display: none !important; }
+    
+    /* Show mobile header */
     .sidebar-header {
-        display: flex;
-        justify-content: flex-end;
+        display: flex !important;
+        justify-content: space-between;
+        align-items: center;
         padding: 16px 20px;
         border-bottom: 1px solid rgba(255,255,255,.08);
+        background: rgba(0,0,0,.1);
+        flex-shrink: 0;
+    }
+    .sidebar-header .header-title {
+        color: white;
+        font-size: 1rem;
+        font-weight: 700;
+        display: flex !important;
+        align-items: center;
+        gap: 8px;
     }
     .sidebar-header button {
         background: rgba(255,255,255,.1);
-        color: white; border: none;
-        width: 38px; height: 38px;
+        color: white;
+        border: none;
+        width: 38px;
+        height: 38px;
         border-radius: 8px;
-        display: flex; align-items: center; justify-content: center;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
+        transition: background .2s, transform .2s;
+        font-size: 1.1rem;
+    }
+    .sidebar-header button:hover {
+        background: rgba(255,255,255,.2);
+        transform: rotate(90deg);
+    }
+    
+    /* Logo section - keep visible on mobile */
+    .sidebar-logo { 
+        padding: 14px 20px;
+        border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .sidebar-logo img {
+        height: 36px !important;
+    }
+    .brand-name {
+        font-size: 0.95rem !important;
+    }
+    .brand-subtitle {
+        font-size: 0.7rem !important;
+    }
+    
+    /* Sidebar inner - ensure proper height */
+    .sidebar-inner {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+    }
+    
+    /* Sidebar body - scrollable area */
+    .sidebar-body {
+        flex: 1;
+        overflow-y: auto !important;
+        overflow-x: hidden;
+        padding: 8px 0;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    /* Nav sections - ensure visibility */
+    .nav-section {
+        display: block !important;
+        margin-bottom: 8px;
+    }
+    .nav-section-title {
+        display: block !important;
+        padding: 8px 20px 4px;
+        font-size: 0.65rem;
+    }
+    
+    /* Nav items - ensure proper display */
+    .nav-item {
+        display: flex !important;
+        padding: 10px 20px;
+        margin: 1px 0;
+    }
+    .nav-icon {
+        display: flex !important;
+        width: 36px;
+        height: 36px;
+    }
+    .nav-content {
+        display: block !important;
+    }
+    .nav-title,
+    .nav-subtitle {
+        display: block !important;
+    }
+    
+    /* Footer adjustments */
+    .sidebar-footer {
+        padding: 12px 16px;
+        flex-shrink: 0;
+        border-top: 1px solid rgba(255,255,255,.08);
+    }
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+    }
+    .user-name {
+        font-size: 0.82rem;
+    }
+    .user-role .badge {
+        font-size: 0.62rem;
+    }
+    .datetime-info {
+        margin-top: 8px;
+        padding-top: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sidebar {
+        width: 100vw;
+        max-width: none;
+    }
+    
+    .nav-item {
+        padding: 9px 16px;
+    }
+    .nav-section-title {
+        padding-left: 16px;
+        padding-right: 16px;
     }
 }
 </style>
 
-<!-- ══════════════════════════════════════════════
-     SCRIPT
-══════════════════════════════════════════════ -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const sidebar      = document.getElementById('sidebar');
+    const sidebarOverlay = document.getElementById('sidebar-overlay');
     const toggleBtn    = document.getElementById('toggle-sidebar');
     const toggleBtnSm  = document.getElementById('toggle-sidebar-sm');
 
-    /* ── Ajouter data-tooltip pour collapsed mode ── */
+    /* ── Add data-tooltip for collapsed mode ── */
     document.querySelectorAll('.nav-item').forEach(item => {
         const title = item.querySelector('.nav-title');
         if (title) item.setAttribute('data-tooltip', title.textContent.trim());
@@ -895,33 +1042,43 @@ document.addEventListener('DOMContentLoaded', function () {
         applyCollapsed(true);
     }
 
-    /* ── Toggle mobile ── */
+    /* ── Toggle mobile sidebar ── */
+    function toggleMobileSidebar() {
+        const isOpen = sidebar.classList.toggle('show');
+        sidebarOverlay.classList.toggle('show', isOpen);
+        
+        // Prevent body scroll when sidebar is open
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+    }
+
     if (toggleBtnSm) {
-        toggleBtnSm.addEventListener('click', function () {
-            sidebar.classList.toggle('show');
+        toggleBtnSm.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleMobileSidebar();
         });
     }
 
-    /* ── Close on outside click (mobile) ── */
-    document.addEventListener('click', function (e) {
-        if (window.innerWidth < 768
-            && sidebar
-            && !sidebar.contains(e.target)
-            && e.target !== toggleBtnSm) {
-            sidebar.classList.remove('show');
-        }
-    });
+    /* ── Close on overlay click ── */
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', function () {
+            toggleMobileSidebar();
+        });
+    }
 
-    /* ── Close on nav click (mobile) ── */
+    /* ── Close on nav link click (mobile) ── */
     if (window.innerWidth < 768) {
         document.querySelectorAll('.nav-item[href]').forEach(link => {
             link.addEventListener('click', () => {
-                setTimeout(() => sidebar.classList.remove('show'), 250);
+                setTimeout(() => {
+                    sidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }, 200);
             });
         });
     }
 
-    /* ── Horloge en temps réel ── */
+    /* ── Real-time clock ── */
     function updateClock() {
         const el = document.getElementById('sidebar-datetime');
         if (!el) return;
@@ -932,5 +1089,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     updateClock();
     setInterval(updateClock, 30000);
+
+    /* ── Handle resize ── */
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            sidebar.classList.remove('show');
+            sidebarOverlay.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    });
 });
 </script>

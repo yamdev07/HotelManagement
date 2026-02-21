@@ -287,7 +287,7 @@ unset($__errorArgs, $__bag); ?>
                 <div class="card-body p-0">
                     <div class="map-container">
                         <iframe
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15862.376912314255!2d2.385758007812476!3d6.3572829999999945!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1023540d7b99c067%3A0x2c6d1f2e5b0f6b4a!2sFidjross%C3%A9%2C%20Cotonou%2C%20B%C3%A9nin!5e0!3m2!1sfr!2sfr!4v1699791234567!5m2!1sfr!2sfr"
+                            src="https://www.google.com/maps/place//@6.3576817,2.3924401,17z/data=!4m6!1m5!3m4!2zNsKwMjEnMjcuNyJOIDLCsDIzJzQyLjEiRQ!8m2!3d6.3576817!4d2.395015?hl=fr&entry=ttu&g_ep=EgoyMDI2MDIxNy4wIKXMDSoASAFQAw%3D%3D"
                             width="100%"
                             height="450"
                             style="border:0;"

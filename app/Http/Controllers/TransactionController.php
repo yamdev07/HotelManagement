@@ -347,6 +347,9 @@ class TransactionController extends Controller
      * ✅ MÉTHODE PRINCIPALE : MISE À JOUR DU STATUT
      * =====================================================
      */
+    /**
+     * Mettre à jour le statut d'une transaction
+     */
     public function updateStatus(Request $request, Transaction $transaction)
     {
         if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
@@ -365,35 +368,100 @@ class TransactionController extends Controller
         $oldStatus = $transaction->status;
         $newStatus = $request->status;
 
-        // ✅ VÉRIFICATION DES DATES POUR CHANGEMENT DE STATUT
-        $today = Carbon::today();
-        $checkInDate = Carbon::parse($transaction->check_in)->startOfDay();
-        $checkOutDate = Carbon::parse($transaction->check_out)->startOfDay();
+        // =====================================================
+        // VÉRIFICATION DES HEURES MÉTIER (12h - 14h)
+        // =====================================================
+        $now = Carbon::now();
+        $checkInDay = Carbon::parse($transaction->check_in)->startOfDay(); // Jour d'arrivée
+        $checkOutDay = Carbon::parse($transaction->check_out)->startOfDay(); // Jour de départ
 
-        // Bloquer "active" avant date d'arrivée
-        if ($newStatus === 'active' && $today->lt($checkInDate)) {
-            $daysUntil = $today->diffInDays($checkInDate);
-            $errorMsg = "⏳ Date d'arrivée non atteinte ! " .
-                        "Arrivée prévue le " . $checkInDate->format('d/m/Y') . ". " .
-                        ($daysUntil > 0 ? "Encore " . $daysUntil . " jour(s) à attendre." : "");
-            
-            if ($request->ajax()) {
-                return response()->json(['error' => $errorMsg], 422);
+        // Heures métier
+        $checkInTime = $checkInDay->copy()->setTime(12, 0, 0);   // Check-in à 12h
+        $checkOutDeadline = $checkOutDay->copy()->setTime(12, 0, 0); // Check-out à 12h (théorique)
+        $checkOutLargess = $checkOutDay->copy()->setTime(14, 0, 0);   // Largesse jusqu'à 14h
+
+        // --- Vérification pour le passage en "active" (arrivée) ---
+        if ($newStatus === 'active') {
+            // Vérifier qu'on est bien le jour de l'arrivée
+            if (!$now->isSameDay($checkInDay)) {
+                $errorMsg = "❌ L'arrivée ne peut être marquée que le jour prévu (" . $checkInDay->format('d/m/Y') . ").";
+                
+                if ($request->ajax()) {
+                    return response()->json(['error' => $errorMsg], 422);
+                }
+                return redirect()->back()->with('error', $errorMsg);
             }
-            return redirect()->back()->with('error', $errorMsg);
+
+            // Vérifier qu'on est après 12h
+            if ($now->lt($checkInTime)) {
+                $minutes = $now->diffInMinutes($checkInTime, false);
+                $heures = floor($minutes / 60);
+                $minutesRestantes = $minutes % 60;
+                
+                $errorMsg = sprintf(
+                    "⏳ Check-in possible à partir de 12h. Encore %d heures et %d minutes à attendre.",
+                    $heures,
+                    $minutesRestantes
+                );
+                
+                if ($request->ajax()) {
+                    return response()->json(['error' => $errorMsg], 422);
+                }
+                return redirect()->back()->with('error', $errorMsg);
+            }
+            
+            // Après 12h, autorisé
+            Log::info("✅ Arrivée autorisée à " . $now->format('H:i') . " pour la transaction #" . $transaction->id);
         }
 
-        // Bloquer "completed" avant date de départ
-        if ($newStatus === 'completed' && $today->lt($checkOutDate)) {
-            $daysUntil = $today->diffInDays($checkOutDate);
-            $errorMsg = "⏳ Date de départ non atteinte ! " .
-                        "Départ prévu le " . $checkOutDate->format('d/m/Y') . ". " .
-                        ($daysUntil > 0 ? "Encore " . $daysUntil . " jour(s) de séjour." : "Départ prévu aujourd'hui.");
-            
-            if ($request->ajax()) {
-                return response()->json(['error' => $errorMsg], 422);
+        // --- Vérification pour le passage en "completed" (départ) ---
+        if ($newStatus === 'completed') {
+            // Vérifier qu'on est bien le jour du départ
+            if (!$now->isSameDay($checkOutDay)) {
+                $errorMsg = "❌ Le départ ne peut être marqué que le jour prévu (" . $checkOutDay->format('d/m/Y') . "). " .
+                        "Si le client est encore là, veuillez prolonger le séjour.";
+                
+                if ($request->ajax()) {
+                    return response()->json(['error' => $errorMsg], 422);
+                }
+                return redirect()->back()->with('error', $errorMsg);
             }
-            return redirect()->back()->with('error', $errorMsg);
+
+            // Après 14h : trop tard, doit prolonger
+            if ($now->gt($checkOutLargess)) {
+                $errorMsg = "⚠️ Départ après 14h. La largesse de 2h est dépassée. " .
+                        "Veuillez prolonger le séjour d'une nuit supplémentaire.";
+                
+                if ($request->ajax()) {
+                    return response()->json(['error' => $errorMsg, 'require_extension' => true], 422);
+                }
+                return redirect()->back()->with('error', $errorMsg);
+            }
+
+            // Entre 12h et 14h : largesse accordée (on loggue)
+            if ($now->gte($checkOutDeadline) && $now->lte($checkOutLargess)) {
+                Log::info("✅ Largesse accordée - Départ entre 12h et 14h", [
+                    'transaction_id' => $transaction->id,
+                    'heure_depart' => $now->format('H:i'),
+                    'client' => $transaction->customer->name,
+                    'chambre' => $transaction->room->number ?? 'N/A'
+                ]);
+            }
+            
+            // Avant 12h : trop tôt
+            if ($now->lt($checkOutDeadline)) {
+                $minutes = $now->diffInMinutes($checkOutDeadline, false);
+                
+                $errorMsg = sprintf(
+                    "⏳ Check-out possible à partir de 12h. Encore %d minutes à attendre.",
+                    ceil($minutes)
+                );
+                
+                if ($request->ajax()) {
+                    return response()->json(['error' => $errorMsg], 422);
+                }
+                return redirect()->back()->with('error', $errorMsg);
+            }
         }
 
         // Vérification paiement pour "completed"
@@ -482,7 +550,7 @@ class TransactionController extends Controller
                     $updateData['check_out_actual'] = now();
 
                     // =====================================================
-                    // ✅ CORRECTION MAJEURE : Marquer la chambre comme DIRTY (SALE)
+                    // Marquer la chambre comme DIRTY (SALE)
                     // =====================================================
                     if ($transaction->room) {
                         $transaction->room->update([
@@ -491,7 +559,7 @@ class TransactionController extends Controller
                             'updated_at' => now(),
                         ]);
 
-                        Log::info("✅ DÉPART (updateStatus): Chambre {$transaction->room->number} marquée DIRTY");
+                        Log::info("✅ DÉPART: Chambre {$transaction->room->number} marquée DIRTY");
 
                         if (auth()->user()->role === 'Receptionist') {
                             $this->logReceptionistAction(
@@ -504,6 +572,8 @@ class TransactionController extends Controller
                                     'total_paid' => $transaction->getTotalPayment(),
                                     'payment_status' => 'complet',
                                     'room_status' => 'dirty',
+                                    'departure_time' => now()->format('H:i'),
+                                    'within_largess' => (now()->gte($checkOutDeadline) && now()->lte($checkOutLargess)) ? 'yes' : 'no'
                                 ],
                                 beforeState: $beforeState,
                                 afterState: $this->getTransactionState($transaction, true),
@@ -570,9 +640,14 @@ class TransactionController extends Controller
             $message = $this->getStatusChangeMessage($oldStatus, $newStatus);
 
             if ($newStatus === 'completed') {
+                $largessMessage = "";
+                if ($now->gte($checkOutDeadline) && $now->lte($checkOutLargess)) {
+                    $largessMessage = " (largesse de 2h accordée)";
+                }
+                
                 session()->flash('departure_success', [
                     'title' => '✅ Départ enregistré - Chambre à nettoyer',
-                    'message' => 'Client marqué comme parti. Chambre marquée "À NETTOYER". Housekeeping informé.',
+                    'message' => 'Client marqué comme parti' . $largessMessage . '. Chambre marquée "À NETTOYER". Housekeeping informé.',
                     'transaction_id' => $transaction->id,
                     'room_number' => $transaction->room->number ?? 'N/A',
                     'customer_name' => $transaction->customer->name,
@@ -606,11 +681,13 @@ class TransactionController extends Controller
             return redirect()->back()->with('error', $errorMsg);
         }
     }
-
      /**
      * =====================================================
      * ✅ ACTION RAPIDE : MARQUER COMME ARRIVÉ
      * =====================================================
+     */
+    /**
+     * ACTION RAPIDE : MARQUER COMME ARRIVÉ
      */
     public function markAsArrived(Transaction $transaction)
     {
@@ -623,22 +700,28 @@ class TransactionController extends Controller
                 'Seule une réservation peut être marquée comme arrivée.');
         }
 
-        // ✅ VÉRIFICATION DE LA DATE D'ARRIVÉE
-        $today = Carbon::today();
-        $checkInDate = Carbon::parse($transaction->check_in)->startOfDay();
-        
-        if ($today->lt($checkInDate)) {
-            $daysUntil = $today->diffInDays($checkInDate);
-            $message = "⏳ Date d'arrivée non atteinte ! " .
-                    "Arrivée prévue le " . $checkInDate->format('d/m/Y') . ". ";
+        // =====================================================
+        // VÉRIFICATION DES HEURES MÉTIER (12h)
+        // =====================================================
+        $now = Carbon::now();
+        $checkInDay = Carbon::parse($transaction->check_in)->startOfDay();
+        $checkInTime = $checkInDay->copy()->setTime(12, 0, 0);
+
+        // Vérifier qu'on est bien le jour de l'arrivée
+        if (!$now->isSameDay($checkInDay)) {
+            return redirect()->back()->with('error',
+                "❌ L'arrivée ne peut être marquée que le jour prévu (" . $checkInDay->format('d/m/Y') . ").");
+        }
+
+        // Vérifier qu'on est après 12h
+        if ($now->lt($checkInTime)) {
+            $minutes = $now->diffInMinutes($checkInTime, false);
+            $heures = floor($minutes / 60);
+            $minutesRestantes = $minutes % 60;
             
-            if ($daysUntil > 0) {
-                $message .= "Encore " . $daysUntil . " jour(s) à attendre.";
-            } else {
-                $message .= "Arrivée prévue aujourd'hui.";
-            }
-            
-            return redirect()->back()->with('error', $message);
+            return redirect()->back()->with('error',
+                sprintf("⏳ Check-in possible à partir de 12h. Encore %d heures et %d minutes à attendre.",
+                    $heures, $minutesRestantes));
         }
 
         try {
@@ -653,7 +736,7 @@ class TransactionController extends Controller
 
             if ($transaction->room) {
                 $transaction->room->update(['room_status_id' => self::STATUS_OCCUPIED]);
-                Log::info("Arrivée rapide: Chambre {$transaction->room->number} marquée OCCUPÉE");
+                Log::info("Arrivée rapide: Chambre {$transaction->room->number} marquée OCCUPÉE à " . $now->format('H:i'));
             }
 
             if (auth()->user()->role === 'Receptionist') {
@@ -665,6 +748,7 @@ class TransactionController extends Controller
                         'action' => 'quick_arrival',
                         'time' => now()->format('H:i:s'),
                         'room' => $transaction->room->number ?? 'N/A',
+                        'arrival_time' => $now->format('H:i'),
                     ],
                     beforeState: $beforeState,
                     afterState: $this->getTransactionState($transaction, true),
@@ -675,7 +759,8 @@ class TransactionController extends Controller
             DB::commit();
 
             return redirect()->back()->with('success',
-                "✅ Client marqué comme arrivé ! La chambre <strong>{$transaction->room->number}</strong> est maintenant occupée."
+                "✅ Client marqué comme arrivé à " . $now->format('H:i') . " ! " .
+                "La chambre <strong>{$transaction->room->number}</strong> est maintenant occupée."
             );
 
         } catch (\Exception $e) {
@@ -694,6 +779,9 @@ class TransactionController extends Controller
      * ✅ ACTION RAPIDE : MARQUER COMME PARTI (AVEC DIRTY)
      * =====================================================
      */
+    /**
+     * ACTION RAPIDE : MARQUER COMME PARTI (AVEC DIRTY)
+     */
     public function markAsDeparted(Transaction $transaction)
     {
         if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
@@ -705,30 +793,54 @@ class TransactionController extends Controller
                 'Seul un client dans l\'hôtel peut être marqué comme parti.');
         }
 
-        // ✅ VÉRIFICATION DE LA DATE DE DÉPART
-        $today = Carbon::today();
-        $checkOutDate = Carbon::parse($transaction->check_out)->startOfDay();
-        
-        if ($today->lt($checkOutDate)) {
-            $daysUntil = $today->diffInDays($checkOutDate);
-            $message = "⏳ Date de départ non atteinte ! " .
-                    "Départ prévu le " . $checkOutDate->format('d/m/Y') . ". ";
-            
-            if ($daysUntil > 0) {
-                $message .= "Encore " . $daysUntil . " jour(s) de séjour.";
-            } else {
-                $message .= "Départ prévu aujourd'hui.";
-            }
-            
-            return redirect()->back()->with('error', $message);
-        }
-
+        // Vérifier le paiement complet
         if (! $transaction->isFullyPaid()) {
             $remaining = $transaction->getRemainingPayment();
             $formattedRemaining = number_format($remaining, 0, ',', ' ') . ' CFA';
 
             return redirect()->back()->with('error',
                 "❌ Paiement incomplet ! Solde restant: " . $formattedRemaining);
+        }
+
+        // =====================================================
+        // VÉRIFICATION DES HEURES MÉTIER (12h - 14h)
+        // =====================================================
+        $now = Carbon::now();
+        $checkOutDay = Carbon::parse($transaction->check_out)->startOfDay();
+        $checkOutDeadline = $checkOutDay->copy()->setTime(12, 0, 0);   // Check-out théorique à 12h
+        $checkOutLargess = $checkOutDay->copy()->setTime(14, 0, 0);    // Largesse jusqu'à 14h
+
+        // Vérifier qu'on est bien le jour du départ
+        if (!$now->isSameDay($checkOutDay)) {
+            return redirect()->back()->with('error',
+                "❌ Le départ ne peut être marqué que le jour prévu (" . $checkOutDay->format('d/m/Y') . "). " .
+                "Si le client est encore là, veuillez prolonger le séjour.");
+        }
+
+        // Après 14h : trop tard, doit prolonger
+        if ($now->gt($checkOutLargess)) {
+            return redirect()->back()->with('error',
+                "⚠️ Départ après 14h. La largesse de 2h est dépassée. " .
+                "Veuillez prolonger le séjour d'une nuit supplémentaire.");
+        }
+
+        // Avant 12h : trop tôt
+        if ($now->lt($checkOutDeadline)) {
+            $minutes = $now->diffInMinutes($checkOutDeadline, false);
+            
+            return redirect()->back()->with('error',
+                sprintf("⏳ Check-out possible à partir de 12h. Encore %d minutes à attendre.",
+                    ceil($minutes)));
+        }
+
+        // Entre 12h et 14h : largesse accordée
+        $largessMessage = "";
+        if ($now->gte($checkOutDeadline) && $now->lte($checkOutLargess)) {
+            $largessMessage = " (largesse de 2h accordée)";
+            Log::info("✅ Largesse accordée - Départ rapide entre 12h et 14h", [
+                'transaction_id' => $transaction->id,
+                'heure_depart' => $now->format('H:i')
+            ]);
         }
 
         try {
@@ -742,7 +854,7 @@ class TransactionController extends Controller
             ]);
 
             // =====================================================
-            // ✅ CORRECTION MAJEURE : Marquer la chambre comme DIRTY (SALE)
+            // Marquer la chambre comme DIRTY (SALE)
             // =====================================================
             if ($transaction->room) {
                 $transaction->room->update([
@@ -751,7 +863,7 @@ class TransactionController extends Controller
                     'updated_at' => now(),
                 ]);
 
-                Log::info("✅ DÉPART RAPIDE: Chambre {$transaction->room->number} marquée DIRTY");
+                Log::info("✅ DÉPART RAPIDE: Chambre {$transaction->room->number} marquée DIRTY à " . $now->format('H:i'));
             }
 
             if (auth()->user()->role === 'Receptionist') {
@@ -765,16 +877,18 @@ class TransactionController extends Controller
                         'room' => $transaction->room->number ?? 'N/A',
                         'total_paid' => $transaction->getTotalPayment(),
                         'room_status' => 'dirty',
+                        'departure_time' => $now->format('H:i'),
+                        'within_largess' => ($now->gte($checkOutDeadline) && $now->lte($checkOutLargess)) ? 'yes' : 'no'
                     ],
                     beforeState: $beforeState,
                     afterState: $this->getTransactionState($transaction, true),
-                    notes: 'Client marqué comme parti - Chambre marquée À NETTOYER'
+                    notes: 'Client marqué comme parti - Chambre marquée À NETTOYER' . $largessMessage
                 );
             }
 
             DB::commit();
 
-            $successMessage = "✅ Départ enregistré avec succès ! " .
+            $successMessage = "✅ Départ enregistré à " . $now->format('H:i') . $largessMessage . " ! " .
                             "Chambre " . $transaction->room->number . " marquée comme À NETTOYER. " .
                             "Housekeeping informé - Nettoyage requis.";
 
@@ -791,7 +905,6 @@ class TransactionController extends Controller
                 'Erreur: ' . $e->getMessage());
         }
     }
-
     /**
      * =====================================================
      * ✅ UTILITAIRE : MARQUER UNE CHAMBRE COMME DIRTY
@@ -980,31 +1093,49 @@ class TransactionController extends Controller
         return ! $isExpired && ! in_array($transaction->status, $notAllowedStatus);
     }
 
+    /**
+     * Vérifier si une réservation peut être annulée
+     */
     private function canCancelReservation(Transaction $transaction): bool
     {
         if ($transaction->status == 'cancelled') {
             return false;
         }
 
-        $checkInDate = Carbon::parse($transaction->check_in);
+        $checkInDateTime = Carbon::parse($transaction->check_in); // Déjà avec l'heure (12h)
         $now = Carbon::now();
 
-        if ($checkInDate->isPast()) {
+        // Si la date d'arrivée est passée, on ne peut pas annuler
+        if ($now->gt($checkInDateTime)) {
             return false;
         }
 
-        $hoursBeforeCheckIn = $now->diffInHours($checkInDate, false);
+        // Moins de 2h avant l'arrivée (12h), on bloque l'annulation
+        $hoursBeforeCheckIn = $now->diffInHours($checkInDateTime, false);
         if ($hoursBeforeCheckIn < 2 && $hoursBeforeCheckIn > 0) {
+            Log::info('❌ Annulation impossible - Moins de 2h avant check-in', [
+                'heures_restantes' => $hoursBeforeCheckIn,
+                'check_in' => $checkInDateTime->format('d/m/Y H:i')
+            ]);
             return false;
         }
 
         return true;
     }
-
+    /**
+     * Vérifier si une chambre est disponible (avec prise en compte des heures)
+     */
     private function isRoomAvailable($roomId, $checkIn, $checkOut, $excludeTransactionId = null): bool
     {
-        $requestCheckIn = Carbon::parse($checkIn);
-        $requestCheckOut = Carbon::parse($checkOut);
+        // S'assurer que les dates sont des objets Carbon avec les heures à 12h
+        $requestCheckIn = Carbon::parse($checkIn)->setTime(12, 0, 0);
+        $requestCheckOut = Carbon::parse($checkOut)->setTime(12, 0, 0);
+
+        \Log::info('🔍 Vérification disponibilité avec heures:', [
+            'room_id' => $roomId,
+            'check_in' => $requestCheckIn->format('d/m/Y H:i'),
+            'check_out' => $requestCheckOut->format('d/m/Y H:i')
+        ]);
 
         $existingReservations = Transaction::where('room_id', $roomId)
             ->whereNotIn('status', ['cancelled', 'completed', 'no_show'])
@@ -1017,17 +1148,16 @@ class TransactionController extends Controller
             $resCheckIn = Carbon::parse($reservation->check_in);
             $resCheckOut = Carbon::parse($reservation->check_out);
 
+            // Vérifier si les périodes se chevauchent
             if (
-                ($requestCheckIn >= $resCheckIn && $requestCheckIn < $resCheckOut) ||
-                ($requestCheckOut > $resCheckIn && $requestCheckOut <= $resCheckOut) ||
-                ($requestCheckIn <= $resCheckIn && $requestCheckOut >= $resCheckOut)
+                ($requestCheckIn < $resCheckOut && $requestCheckOut > $resCheckIn)
             ) {
-                Log::info('Conflit de réservation détecté', [
+                Log::info('❌ Conflit de réservation détecté', [
                     'room_id' => $roomId,
-                    'nouvelle_periode' => $requestCheckIn->format('Y-m-d').' à '.$requestCheckOut->format('Y-m-d'),
+                    'nouvelle_periode' => $requestCheckIn->format('d/m/Y H:i').' → '.$requestCheckOut->format('d/m/Y H:i'),
                     'reservation_existante' => [
                         'id' => $reservation->id,
-                        'periode' => $resCheckIn->format('Y-m-d').' à '.$resCheckOut->format('Y-m-d'),
+                        'periode' => $resCheckIn->format('d/m/Y H:i').' → '.$resCheckOut->format('d/m/Y H:i'),
                         'status' => $reservation->status,
                     ],
                 ]);
@@ -1035,6 +1165,11 @@ class TransactionController extends Controller
                 return false;
             }
         }
+
+        Log::info('✅ Chambre disponible', [
+            'room_id' => $roomId,
+            'periode' => $requestCheckIn->format('d/m/Y H:i').' → '.$requestCheckOut->format('d/m/Y H:i')
+        ]);
 
         return true;
     }
@@ -1269,10 +1404,15 @@ class TransactionController extends Controller
                 ->with('error', 'Seules les réservations et séjours en cours peuvent être prolongés.');
         }
 
-        $currentCheckOut = Carbon::parse($transaction->check_out);
+        $currentCheckOut = Carbon::parse($transaction->check_out); // Déjà à 12h
         $today = Carbon::now();
 
-        $suggestedDate = $currentCheckOut->isPast() ? $today->copy()->addDay() : $currentCheckOut->copy()->addDay();
+        // Suggérer une prolongation avec maintien de l'heure à 12h
+        if ($currentCheckOut->isPast()) {
+            $suggestedDate = $today->copy()->setTime(12, 0, 0)->addDay();
+        } else {
+            $suggestedDate = $currentCheckOut->copy()->addDay();
+        }
 
         $transaction->load(['customer.user', 'room.type', 'room.roomStatus']);
 
@@ -1285,13 +1425,16 @@ class TransactionController extends Controller
             abort(403, 'Accès non autorisé.');
         }
 
+        // Récupérer la date actuelle de check-out (déjà à 12h)
+        $currentCheckOut = Carbon::parse($transaction->check_out);
+        
         $validator = Validator::make($request->all(), [
-            'new_check_out' => 'required|date|after:'.$transaction->check_out->format('Y-m-d'),
+            'new_check_out' => 'required|date|after:'.$currentCheckOut->format('Y-m-d'),
             'additional_nights' => 'required|integer|min:1|max:30',
             'notes' => 'nullable|string|max:500',
         ], [
             'new_check_out.required' => 'La nouvelle date de départ est requise',
-            'new_check_out.after' => 'La nouvelle date de départ doit être après la date actuelle ('.$transaction->check_out->format('d/m/Y').')',
+            'new_check_out.after' => 'La nouvelle date de départ doit être après le ' . $currentCheckOut->format('d/m/Y'),
             'additional_nights.required' => 'Le nombre de nuits supplémentaires est requis',
             'additional_nights.min' => 'Vous devez ajouter au moins 1 nuit',
             'additional_nights.max' => 'Vous ne pouvez pas ajouter plus de 30 nuits',
@@ -1303,9 +1446,16 @@ class TransactionController extends Controller
                 ->withInput();
         }
 
-        $newCheckOut = $request->new_check_out;
+        // Forcer la nouvelle date de départ à 12h
+        $newCheckOut = Carbon::parse($request->new_check_out)->setTime(12, 0, 0);
 
-        if (! $this->isRoomAvailable($transaction->room_id, $transaction->check_in->format('Y-m-d'), $newCheckOut, $transaction->id)) {
+        // Vérifier la disponibilité
+        if (! $this->isRoomAvailable(
+            $transaction->room_id, 
+            $transaction->check_in->format('Y-m-d'), 
+            $newCheckOut->format('Y-m-d'), 
+            $transaction->id
+        )) {
             return redirect()->back()
                 ->with('error', 'Cette chambre n\'est pas disponible pour la période de prolongation.')
                 ->withInput();
@@ -1376,7 +1526,7 @@ class TransactionController extends Controller
                     actionData: [
                         'additional_nights' => $additionalNights,
                         'additional_price' => $additionalPrice,
-                        'new_check_out' => $newCheckOut,
+                        'new_check_out' => $newCheckOut->format('d/m/Y H:i'),
                         'old_check_out' => $oldCheckOut,
                         'room_price_per_night' => $roomPricePerNight,
                     ],
@@ -1404,7 +1554,7 @@ class TransactionController extends Controller
             $message .= '<strong>Supplément :</strong> '.
                     number_format($additionalPrice, 0, ',', ' ').' CFA<br>';
             $message .= 'Nouvelle date de départ : <strong>'.
-                    Carbon::parse($newCheckOut)->format('d/m/Y').'</strong><br>';
+                    $newCheckOut->format('d/m/Y H:i').'</strong><br>';
             $message .= '<strong>Ancien total :</strong> '.
                     number_format($oldTotalPrice, 0, ',', ' ').' CFA<br>';
             $message .= '<strong>Nouveau total :</strong> '.
