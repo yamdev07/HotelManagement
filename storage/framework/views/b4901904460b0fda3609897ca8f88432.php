@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Effectuer un Paiement')
-@section('content')
+
+<?php $__env->startSection('title', 'Effectuer un Paiement'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
@@ -805,11 +805,11 @@
 <div class="payment-page">
     <!-- Breadcrumb -->
     <div class="breadcrumb-custom">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.index') }}">Transactions</a>
+        <a href="<?php echo e(route('transaction.index')); ?>">Transactions</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.show', $transaction) }}">#{{ $transaction->id }}</a>
+        <a href="<?php echo e(route('transaction.show', $transaction)); ?>">#<?php echo e($transaction->id); ?></a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Paiement</span>
     </div>
@@ -822,11 +822,11 @@
             </span>
             <h1>Effectuer un paiement</h1>
         </div>
-        <p class="header-subtitle">Transaction #{{ $transaction->id }} · {{ $transaction->customer->name }}</p>
+        <p class="header-subtitle">Transaction #<?php echo e($transaction->id); ?> · <?php echo e($transaction->customer->name); ?></p>
     </div>
 
     <!-- Debug panel (admin only) -->
-    @if(auth()->user()->isAdmin())
+    <?php if(auth()->user()->isAdmin()): ?>
     <div class="debug-panel fade-in d-none" id="debug-panel">
         <div class="debug-title">
             <i class="fas fa-bug me-1"></i> Informations de débogage
@@ -835,29 +835,29 @@
             <div>
                 <div class="debug-item">
                     <span class="debug-label">Transaction ID:</span>
-                    <span class="debug-value">#{{ $transaction->id }}</span>
+                    <span class="debug-value">#<?php echo e($transaction->id); ?></span>
                 </div>
                 <div class="debug-item">
                     <span class="debug-label">Statut:</span>
-                    <span class="debug-value">{{ $transaction->status }}</span>
+                    <span class="debug-value"><?php echo e($transaction->status); ?></span>
                 </div>
                 <div class="debug-item">
                     <span class="debug-label">Total (colonne):</span>
-                    <span class="debug-value">{{ number_format($transaction->total_price, 0, ',', ' ') }} CFA</span>
+                    <span class="debug-value"><?php echo e(number_format($transaction->total_price, 0, ',', ' ')); ?> CFA</span>
                 </div>
             </div>
             <div>
                 <div class="debug-item">
                     <span class="debug-label">Total (calculé):</span>
-                    <span class="debug-value">{{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA</span>
+                    <span class="debug-value"><?php echo e(number_format($transaction->getTotalPrice(), 0, ',', ' ')); ?> CFA</span>
                 </div>
                 <div class="debug-item">
                     <span class="debug-label">Payé (calculé):</span>
-                    <span class="debug-value">{{ number_format($transaction->getTotalPayment(), 0, ',', ' ') }} CFA</span>
+                    <span class="debug-value"><?php echo e(number_format($transaction->getTotalPayment(), 0, ',', ' ')); ?> CFA</span>
                 </div>
                 <div class="debug-item">
                     <span class="debug-label">Reste (calculé):</span>
-                    <span class="debug-value">{{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA</span>
+                    <span class="debug-value"><?php echo e(number_format($transaction->getRemainingPayment(), 0, ',', ' ')); ?> CFA</span>
                 </div>
             </div>
         </div>
@@ -876,7 +876,7 @@
             </button>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Résumé de la transaction -->
     <div class="summary-card fade-in">
@@ -888,7 +888,7 @@
                     </div>
                     <div class="info-content">
                         <div class="info-label">Client</div>
-                        <div class="info-value">{{ $transaction->customer->name }}</div>
+                        <div class="info-value"><?php echo e($transaction->customer->name); ?></div>
                     </div>
                 </div>
                 
@@ -898,7 +898,7 @@
                     </div>
                     <div class="info-content">
                         <div class="info-label">Chambre</div>
-                        <div class="info-value">#{{ $transaction->room->number }} · {{ $transaction->room->type->name ?? 'Standard' }}</div>
+                        <div class="info-value">#<?php echo e($transaction->room->number); ?> · <?php echo e($transaction->room->type->name ?? 'Standard'); ?></div>
                     </div>
                 </div>
                 
@@ -909,10 +909,11 @@
                     <div class="info-content">
                         <div class="info-label">Période</div>
                         <div class="info-value">
-                            {{ $transaction->check_in->format('d/m/Y') }} 
+                            <?php echo e($transaction->check_in->format('d/m/Y')); ?> 
                             <i class="fas fa-arrow-right mx-2"></i>
-                            {{ $transaction->check_out->format('d/m/Y') }}
-                            ({{ $transaction->getNightsAttribute() }} nuits)
+                            <?php echo e($transaction->check_out->format('d/m/Y')); ?>
+
+                            (<?php echo e($transaction->getNightsAttribute()); ?> nuits)
                         </div>
                     </div>
                 </div>
@@ -921,23 +922,23 @@
             <div class="summary-amounts">
                 <div class="amount-row">
                     <span class="amount-label">Total séjour</span>
-                    <span class="amount-value">{{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA</span>
+                    <span class="amount-value"><?php echo e(number_format($transaction->getTotalPrice(), 0, ',', ' ')); ?> CFA</span>
                 </div>
                 <div class="amount-row">
                     <span class="amount-label">Déjà payé</span>
-                    <span class="amount-value">{{ number_format($transaction->getTotalPayment(), 0, ',', ' ') }} CFA</span>
+                    <span class="amount-value"><?php echo e(number_format($transaction->getTotalPayment(), 0, ',', ' ')); ?> CFA</span>
                 </div>
                 <div class="amount-row">
                     <span class="amount-label">Reste à payer</span>
-                    <span class="amount-value amount-total">{{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA</span>
+                    <span class="amount-value amount-total"><?php echo e(number_format($transaction->getRemainingPayment(), 0, ',', ' ')); ?> CFA</span>
                 </div>
                 
                 <div class="progress-container">
                     <div class="progress-bar-modern">
-                        <div class="progress-fill" id="progressBar" style="width: {{ $transaction->getPaymentRate() }}%"></div>
+                        <div class="progress-fill" id="progressBar" style="width: <?php echo e($transaction->getPaymentRate()); ?>%"></div>
                     </div>
                     <div class="progress-text" id="progressText">
-                        {{ number_format($transaction->getPaymentRate(), 1) }}% du séjour payé
+                        <?php echo e(number_format($transaction->getPaymentRate(), 1)); ?>% du séjour payé
                     </div>
                 </div>
             </div>
@@ -945,8 +946,8 @@
     </div>
 
     <!-- Formulaire de paiement -->
-    <form action="{{ route('transaction.payment.store', $transaction) }}" method="POST" id="paymentForm">
-        @csrf
+    <form action="<?php echo e(route('transaction.payment.store', $transaction)); ?>" method="POST" id="paymentForm">
+        <?php echo csrf_field(); ?>
         
         <div class="row g-4">
             <!-- Colonne gauche - Montant -->
@@ -967,15 +968,15 @@
                                        id="amount"
                                        name="amount"
                                        min="100"
-                                       max="{{ $transaction->getRemainingPayment() }}"
+                                       max="<?php echo e($transaction->getRemainingPayment()); ?>"
                                        step="100"
-                                       value="{{ min($transaction->getRemainingPayment(), $transaction->getRemainingPayment()) }}"
+                                       value="<?php echo e(min($transaction->getRemainingPayment(), $transaction->getRemainingPayment())); ?>"
                                        required>
                                 <span class="amount-currency">FCFA</span>
                             </div>
                             
                             <div class="quick-amounts">
-                                @php
+                                <?php
                                     $remaining = $transaction->getRemainingPayment();
                                     $quickAmounts = [
                                         min(1000, $remaining),
@@ -986,17 +987,17 @@
                                         $remaining
                                     ];
                                     $quickAmounts = array_unique(array_filter($quickAmounts));
-                                @endphp
+                                ?>
                                 
-                                @foreach($quickAmounts as $quickAmount)
-                                    @if($quickAmount >= 100)
+                                <?php $__currentLoopData = $quickAmounts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $quickAmount): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if($quickAmount >= 100): ?>
                                         <button type="button" 
-                                                class="quick-amount-btn {{ $quickAmount == $remaining ? 'full' : '' }}"
-                                                data-amount="{{ $quickAmount }}">
-                                            {{ number_format($quickAmount, 0, ',', ' ') }} CFA
+                                                class="quick-amount-btn <?php echo e($quickAmount == $remaining ? 'full' : ''); ?>"
+                                                data-amount="<?php echo e($quickAmount); ?>">
+                                            <?php echo e(number_format($quickAmount, 0, ',', ' ')); ?> CFA
                                         </button>
-                                    @endif
-                                @endforeach
+                                    <?php endif; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
                             
                             <div id="amountInfo" class="mt-3">
@@ -1006,7 +1007,7 @@
                                     </div>
                                     <div>
                                         Reste après paiement: 
-                                        <strong id="remainingAfterValue">{{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA</strong>
+                                        <strong id="remainingAfterValue"><?php echo e(number_format($transaction->getRemainingPayment(), 0, ',', ' ')); ?> CFA</strong>
                                     </div>
                                 </div>
                             </div>
@@ -1031,341 +1032,342 @@
                     <div class="card-body-modern">
                         <!-- Méthodes de paiement -->
                         <div class="methods-grid" id="paymentMethods">
-                            @php
+                            <?php
                                 $paymentMethods = \App\Models\Payment::getPaymentMethods();
-                            @endphp
+                            ?>
                             
-                            @foreach($paymentMethods as $method => $details)
-                                <label class="method-card-modern {{ $loop->first ? 'active' : '' }}" 
-                                       for="method_{{ $method }}">
+                            <?php $__currentLoopData = $paymentMethods; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $method => $details): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <label class="method-card-modern <?php echo e($loop->first ? 'active' : ''); ?>" 
+                                       for="method_<?php echo e($method); ?>">
                                     <input type="radio" 
                                            name="payment_method" 
-                                           id="method_{{ $method }}"
-                                           value="{{ $method }}"
+                                           id="method_<?php echo e($method); ?>"
+                                           value="<?php echo e($method); ?>"
                                            class="method-radio"
-                                           {{ $loop->first ? 'checked' : '' }}
+                                           <?php echo e($loop->first ? 'checked' : ''); ?>
+
                                            required>
-                                    <div class="method-icon-wrapper method-icon-{{ $method == 'cash' ? 'cash' : ($method == 'card' ? 'card' : ($method == 'transfer' ? 'transfer' : ($method == 'mobile_money' ? 'mobile' : ($method == 'fedapay' ? 'fedapay' : 'check')))) }}">
-                                        <i class="fas {{ $details['icon'] }}"></i>
+                                    <div class="method-icon-wrapper method-icon-<?php echo e($method == 'cash' ? 'cash' : ($method == 'card' ? 'card' : ($method == 'transfer' ? 'transfer' : ($method == 'mobile_money' ? 'mobile' : ($method == 'fedapay' ? 'fedapay' : 'check'))))); ?>">
+                                        <i class="fas <?php echo e($details['icon']); ?>"></i>
                                     </div>
-                                    <div class="method-name">{{ $details['label'] }}</div>
-                                    <div class="method-description">{{ $details['description'] }}</div>
+                                    <div class="method-name"><?php echo e($details['label']); ?></div>
+                                    <div class="method-description"><?php echo e($details['description']); ?></div>
                                 </label>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                         
                         <!-- Champs spécifiques -->
-                        <div class="method-fields-modern" id="methodFields">
-                            <!-- Description (toujours visible) -->
-                            <div class="row">
-                                <div class="col-md-12">
-                                    <div class="form-group-modern">
-                                        <label class="form-label-modern">Description (optionnelle)</label>
-                                        <textarea class="form-control-modern" 
-                                                name="description" 
-                                                id="description"
-                                                rows="2"
-                                                placeholder="Informations sur le paiement..."></textarea>
-                                    </div>
-                                </div>
-                            </div>
+<div class="method-fields-modern" id="methodFields">
+    <!-- Description (toujours visible) -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group-modern">
+                <label class="form-label-modern">Description (optionnelle)</label>
+                <textarea class="form-control-modern" 
+                          name="description" 
+                          id="description"
+                          rows="2"
+                          placeholder="Informations sur le paiement..."></textarea>
+            </div>
+        </div>
+    </div>
 
-                            <!-- ===== CHAMPS SPÉCIFIQUES PAR MÉTHODE ===== -->
-                            
-                            <!-- Mobile Money -->
-                            <div id="fields_mobile_money" class="method-fields-group" style="display: none;">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-mobile-alt me-1"></i> Opérateur
-                                            </label>
-                                            <select name="mobile_operator" class="form-control-modern">
-                                                <option value="">-- Sélectionner --</option>
-                                                <option value="MTN">MTN Mobile Money</option>
-                                                <option value="Moov">Moov Money</option>
-                                                <option value="Orange">Orange Money</option>
-                                                <option value="Airtel">Airtel Money</option>
-                                                <option value="Wave">Wave</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-phone me-1"></i> Numéro de téléphone
-                                            </label>
-                                            <input type="tel" name="mobile_number" class="form-control-modern" 
-                                                placeholder="Ex: 01 23 45 67 89">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-user me-1"></i> Nom du compte
-                                            </label>
-                                            <input type="text" name="account_name" class="form-control-modern" 
-                                                placeholder="Nom du titulaire">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-hashtag me-1"></i> ID Transaction
-                                            </label>
-                                            <input type="text" name="mobile_transaction_id" class="form-control-modern" 
-                                                placeholder="ID de transaction">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+    <!-- ===== CHAMPS SPÉCIFIQUES PAR MÉTHODE ===== -->
+    
+    <!-- Mobile Money -->
+    <div id="fields_mobile_money" class="method-fields-group" style="display: none;">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-mobile-alt me-1"></i> Opérateur
+                    </label>
+                    <select name="mobile_operator" class="form-control-modern">
+                        <option value="">-- Sélectionner --</option>
+                        <option value="MTN">MTN Mobile Money</option>
+                        <option value="Moov">Moov Money</option>
+                        <option value="Orange">Orange Money</option>
+                        <option value="Airtel">Airtel Money</option>
+                        <option value="Wave">Wave</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-phone me-1"></i> Numéro de téléphone
+                    </label>
+                    <input type="tel" name="mobile_number" class="form-control-modern" 
+                           placeholder="Ex: 01 23 45 67 89">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-user me-1"></i> Nom du compte
+                    </label>
+                    <input type="text" name="account_name" class="form-control-modern" 
+                           placeholder="Nom du titulaire">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-hashtag me-1"></i> ID Transaction
+                    </label>
+                    <input type="text" name="mobile_transaction_id" class="form-control-modern" 
+                           placeholder="ID de transaction">
+                </div>
+            </div>
+        </div>
+    </div>
 
-                            <!-- Carte Bancaire -->
-                            <div id="fields_card" class="method-fields-group" style="display: none;">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-credit-card me-1"></i> Numéro de carte
-                                            </label>
-                                            <input type="text" name="card_number" class="form-control-modern" 
-                                                placeholder="**** **** **** 1234" maxlength="19">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-calendar me-1"></i> Expiration
-                                            </label>
-                                            <input type="text" name="card_expiry" class="form-control-modern" 
-                                                placeholder="MM/AA">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-lock me-1"></i> CVV
-                                            </label>
-                                            <input type="password" name="card_cvv" class="form-control-modern" 
-                                                placeholder="***" maxlength="3">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-credit-card me-1"></i> Type de carte
-                                            </label>
-                                            <select name="card_type" class="form-control-modern">
-                                                <option value="">-- Choisir --</option>
-                                                <option value="Visa">Visa</option>
-                                                <option value="Mastercard">Mastercard</option>
-                                                <option value="Amex">American Express</option>
-                                                <option value="CB">Carte Bancaire</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-user me-1"></i> Nom du titulaire
-                                            </label>
-                                            <input type="text" name="card_holder" class="form-control-modern" 
-                                                placeholder="Nom sur la carte">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+    <!-- Carte Bancaire -->
+    <div id="fields_card" class="method-fields-group" style="display: none;">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-credit-card me-1"></i> Numéro de carte
+                    </label>
+                    <input type="text" name="card_number" class="form-control-modern" 
+                           placeholder="**** **** **** 1234" maxlength="19">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-calendar me-1"></i> Expiration
+                    </label>
+                    <input type="text" name="card_expiry" class="form-control-modern" 
+                           placeholder="MM/AA">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-lock me-1"></i> CVV
+                    </label>
+                    <input type="password" name="card_cvv" class="form-control-modern" 
+                           placeholder="***" maxlength="3">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-credit-card me-1"></i> Type de carte
+                    </label>
+                    <select name="card_type" class="form-control-modern">
+                        <option value="">-- Choisir --</option>
+                        <option value="Visa">Visa</option>
+                        <option value="Mastercard">Mastercard</option>
+                        <option value="Amex">American Express</option>
+                        <option value="CB">Carte Bancaire</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-user me-1"></i> Nom du titulaire
+                    </label>
+                    <input type="text" name="card_holder" class="form-control-modern" 
+                           placeholder="Nom sur la carte">
+                </div>
+            </div>
+        </div>
+    </div>
 
-                            <!-- Virement Bancaire -->
-                            <div id="fields_transfer" class="method-fields-group" style="display: none;">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-university me-1"></i> Banque
-                                            </label>
-                                            <input type="text" name="bank_name" class="form-control-modern" 
-                                                placeholder="Nom de la banque">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-hashtag me-1"></i> Numéro de compte
-                                            </label>
-                                            <input type="text" name="account_number" class="form-control-modern" 
-                                                placeholder="Numéro de compte">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-qrcode me-1"></i> Code IBAN
-                                            </label>
-                                            <input type="text" name="iban" class="form-control-modern" 
-                                                placeholder="FR76 XXXX XXXX XXXX">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-barcode me-1"></i> Code BIC/SWIFT
-                                            </label>
-                                            <input type="text" name="bic" class="form-control-modern" 
-                                                placeholder="BIC/SWIFT">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-user me-1"></i> Bénéficiaire
-                                            </label>
-                                            <input type="text" name="beneficiary" class="form-control-modern" 
-                                                placeholder="Nom du bénéficiaire">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-calendar me-1"></i> Date de virement
-                                            </label>
-                                            <input type="date" name="transfer_date" class="form-control-modern" 
-                                                value="{{ now()->format('Y-m-d') }}">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+    <!-- Virement Bancaire -->
+    <div id="fields_transfer" class="method-fields-group" style="display: none;">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-university me-1"></i> Banque
+                    </label>
+                    <input type="text" name="bank_name" class="form-control-modern" 
+                           placeholder="Nom de la banque">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-hashtag me-1"></i> Numéro de compte
+                    </label>
+                    <input type="text" name="account_number" class="form-control-modern" 
+                           placeholder="Numéro de compte">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-qrcode me-1"></i> Code IBAN
+                    </label>
+                    <input type="text" name="iban" class="form-control-modern" 
+                           placeholder="FR76 XXXX XXXX XXXX">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-barcode me-1"></i> Code BIC/SWIFT
+                    </label>
+                    <input type="text" name="bic" class="form-control-modern" 
+                           placeholder="BIC/SWIFT">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-user me-1"></i> Bénéficiaire
+                    </label>
+                    <input type="text" name="beneficiary" class="form-control-modern" 
+                           placeholder="Nom du bénéficiaire">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-calendar me-1"></i> Date de virement
+                    </label>
+                    <input type="date" name="transfer_date" class="form-control-modern" 
+                           value="<?php echo e(now()->format('Y-m-d')); ?>">
+                </div>
+            </div>
+        </div>
+    </div>
 
-                            <!-- Fedapay -->
-                            <div id="fields_fedapay" class="method-fields-group" style="display: none;">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-fingerprint me-1"></i> Token Fedapay
-                                            </label>
-                                            <input type="text" name="fedapay_token" class="form-control-modern" 
-                                                placeholder="Token de paiement">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-hashtag me-1"></i> ID Transaction
-                                            </label>
-                                            <input type="text" name="fedapay_transaction_id" class="form-control-modern" 
-                                                placeholder="ID de transaction">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-mobile-alt me-1"></i> Méthode
-                                            </label>
-                                            <select name="fedapay_method" class="form-control-modern">
-                                                <option value="card">Carte bancaire</option>
-                                                <option value="mobile">Mobile Money</option>
-                                                <option value="wallet">Wallet Fedapay</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-check-circle me-1"></i> Statut
-                                            </label>
-                                            <select name="fedapay_status" class="form-control-modern">
-                                                <option value="approved">Approuvé</option>
-                                                <option value="pending">En attente</option>
-                                                <option value="completed">Complété</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+    <!-- Fedapay -->
+    <div id="fields_fedapay" class="method-fields-group" style="display: none;">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-fingerprint me-1"></i> Token Fedapay
+                    </label>
+                    <input type="text" name="fedapay_token" class="form-control-modern" 
+                           placeholder="Token de paiement">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-hashtag me-1"></i> ID Transaction
+                    </label>
+                    <input type="text" name="fedapay_transaction_id" class="form-control-modern" 
+                           placeholder="ID de transaction">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-mobile-alt me-1"></i> Méthode
+                    </label>
+                    <select name="fedapay_method" class="form-control-modern">
+                        <option value="card">Carte bancaire</option>
+                        <option value="mobile">Mobile Money</option>
+                        <option value="wallet">Wallet Fedapay</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-check-circle me-1"></i> Statut
+                    </label>
+                    <select name="fedapay_status" class="form-control-modern">
+                        <option value="approved">Approuvé</option>
+                        <option value="pending">En attente</option>
+                        <option value="completed">Complété</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                            <!-- Chèque -->
-                            <div id="fields_check" class="method-fields-group" style="display: none;">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-hashtag me-1"></i> Numéro de chèque
-                                            </label>
-                                            <input type="text" name="check_number" class="form-control-modern" 
-                                                placeholder="Numéro du chèque">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-university me-1"></i> Banque émettrice
-                                            </label>
-                                            <input type="text" name="issuing_bank" class="form-control-modern" 
-                                                placeholder="Nom de la banque">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-user me-1"></i> Émetteur
-                                            </label>
-                                            <input type="text" name="issuer_name" class="form-control-modern" 
-                                                placeholder="Nom de l'émetteur">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-calendar me-1"></i> Date d'émission
-                                            </label>
-                                            <input type="date" name="issue_date" class="form-control-modern" 
-                                                value="{{ now()->format('Y-m-d') }}">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+    <!-- Chèque -->
+    <div id="fields_check" class="method-fields-group" style="display: none;">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-hashtag me-1"></i> Numéro de chèque
+                    </label>
+                    <input type="text" name="check_number" class="form-control-modern" 
+                           placeholder="Numéro du chèque">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-university me-1"></i> Banque émettrice
+                    </label>
+                    <input type="text" name="issuing_bank" class="form-control-modern" 
+                           placeholder="Nom de la banque">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-user me-1"></i> Émetteur
+                    </label>
+                    <input type="text" name="issuer_name" class="form-control-modern" 
+                           placeholder="Nom de l'émetteur">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-calendar me-1"></i> Date d'émission
+                    </label>
+                    <input type="date" name="issue_date" class="form-control-modern" 
+                           value="<?php echo e(now()->format('Y-m-d')); ?>">
+                </div>
+            </div>
+        </div>
+    </div>
 
-                            <!-- Espèces -->
-                            <div id="fields_cash" class="method-fields-group">
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-user me-1"></i> Reçu par
-                                            </label>
-                                            <input type="text" name="received_by" class="form-control-modern" 
-                                                value="{{ auth()->user()->name }}" readonly>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-check-circle me-1"></i> Monnaie rendue
-                                            </label>
-                                            <input type="text" name="change_given" class="form-control-modern" 
-                                                placeholder="Monnaie à rendre">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+    <!-- Espèces -->
+    <div id="fields_cash" class="method-fields-group">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-user me-1"></i> Reçu par
+                    </label>
+                    <input type="text" name="received_by" class="form-control-modern" 
+                           value="<?php echo e(auth()->user()->name); ?>" readonly>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-modern">
+                    <label class="form-label-modern">
+                        <i class="fas fa-check-circle me-1"></i> Monnaie rendue
+                    </label>
+                    <input type="text" name="change_given" class="form-control-modern" 
+                           placeholder="Monnaie à rendre">
+                </div>
+            </div>
+        </div>
+    </div>
 
-                            <!-- Référence automatique (cachée) -->
-                            <input type="hidden" name="reference" id="reference" value="">
-                            
-                            <div class="alert-modern alert-info mt-3">
-                                <div class="alert-icon">
-                                    <i class="fas fa-info-circle"></i>
-                                </div>
-                                <div>
-                                    <small>
-                                        Une référence de paiement sera générée automatiquement.
-                                        <br>
-                                        <span id="referenceDisplay" class="fw-bold"></span>
-                                    </small>
-                                </div>
-                            </div>
-                        </div>>
+    <!-- Référence automatique (cachée) -->
+    <input type="hidden" name="reference" id="reference" value="">
+    
+    <div class="alert-modern alert-info mt-3">
+        <div class="alert-icon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div>
+            <small>
+                Une référence de paiement sera générée automatiquement.
+                <br>
+                <span id="referenceDisplay" class="fw-bold"></span>
+            </small>
+        </div>
+    </div>
+</div>>
                     </div>
                 </div>
             </div>
@@ -1373,7 +1375,7 @@
         
         <!-- Barre d'actions -->
         <div class="action-bar fade-in">
-            <a href="{{ route('transaction.show', $transaction) }}" class="btn-modern btn-outline-modern">
+            <a href="<?php echo e(route('transaction.show', $transaction)); ?>" class="btn-modern btn-outline-modern">
                 <i class="fas fa-arrow-left me-2"></i>
                 Retour à la transaction
             </a>
@@ -1417,18 +1419,18 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== PAGE DE PAIEMENT INITIALISÉE ===');
     
-    const transactionId = {{ $transaction->id }};
-    const remaining = {{ $transaction->getRemainingPayment() }};
-    const totalPrice = {{ $transaction->getTotalPrice() }};
-    const totalPayment = {{ $transaction->getTotalPayment() }};
+    const transactionId = <?php echo e($transaction->id); ?>;
+    const remaining = <?php echo e($transaction->getRemainingPayment()); ?>;
+    const totalPrice = <?php echo e($transaction->getTotalPrice()); ?>;
+    const totalPayment = <?php echo e($transaction->getTotalPayment()); ?>;
     
     // Éléments DOM
     const amountInput = document.getElementById('amount');
@@ -1730,7 +1732,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 30000);
     
     // Debug panel (admin only)
-    @if(auth()->user()->isAdmin())
+    <?php if(auth()->user()->isAdmin()): ?>
         const debugPanel = document.getElementById('debug-panel');
         
         document.getElementById('hide-debug').addEventListener('click', function() {
@@ -1797,7 +1799,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Erreur:', error);
             }
         });
-    @endif
+    <?php endif; ?>
 });
 // Gérer l'affichage des champs selon la méthode
 function updateMethodFields() {
@@ -1826,4 +1828,5 @@ document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
 // Initialiser
 updateMethodFields();
 </script>
-@endsection 
+<?php $__env->stopSection(); ?> 
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/transaction/payment/create.blade.php ENDPATH**/ ?>

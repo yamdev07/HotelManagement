@@ -169,6 +169,8 @@ class DashboardController extends Controller
             ? round(($occupiedRoomsCount / $totalRoomsCount) * 100, 2)
             : 0;
 
+        $stats['occupancyByType'] = $this->getOccupancyByType();
+
         // Compiler les statistiques
         $stats = [
             // Cartes principales
@@ -461,5 +463,40 @@ class DashboardController extends Controller
             ->count('room_id');
 
         return $totalRooms > 0 ? round(($occupiedRooms / $totalRooms) * 100, 2) : 0;
+    }
+
+    /**
+     * Calculer l'occupation par type de chambre
+     */
+    private function getOccupancyByType()
+    {
+        $roomTypes = \App\Models\Type::with('rooms')->get();
+        $occupancyByType = [];
+        $now = Carbon::now();
+        
+        foreach ($roomTypes as $type) {
+            $totalRooms = $type->rooms->count();
+            if ($totalRooms == 0) continue;
+            
+            $occupiedRooms = Transaction::where('status', 'active')
+                ->whereHas('room', function ($q) use ($type) {
+                    $q->where('type_id', $type->id);
+                })
+                ->where('check_in', '<=', $now)
+                ->where('check_out', '>=', $now)
+                ->distinct('room_id')
+                ->count('room_id');
+            
+            $percentage = round(($occupiedRooms / $totalRooms) * 100, 2);
+            
+            $occupancyByType[] = [
+                'type' => $type->name,
+                'total' => $totalRooms,
+                'occupied' => $occupiedRooms,
+                'percentage' => $percentage,
+            ];
+        }
+        
+        return $occupancyByType;
     }
 }
