@@ -392,78 +392,6 @@
     letter-spacing: 0.5px;
 }
 
-/* Arrivées/Départs */
-.arrivals-departures-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    margin-bottom: 28px;
-}
-
-.guest-item {
-    display: flex;
-    align-items: center;
-    padding: 12px;
-    border-bottom: 1px solid var(--gray-100);
-    transition: background 0.2s;
-}
-
-.guest-item:last-child {
-    border-bottom: none;
-}
-
-.guest-item:hover {
-    background: var(--gray-50);
-}
-
-.guest-avatar-sm {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: var(--primary-100);
-    color: var(--primary-600);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 1rem;
-    margin-right: 12px;
-    flex-shrink: 0;
-}
-
-.guest-info {
-    flex: 1;
-}
-
-.guest-name {
-    font-weight: 600;
-    color: var(--gray-800);
-    font-size: 0.875rem;
-    margin-bottom: 2px;
-}
-
-.guest-email {
-    font-size: 0.688rem;
-    color: var(--gray-500);
-}
-
-.guest-time {
-    font-size: 0.688rem;
-    color: var(--gray-400);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.room-badge-sm {
-    background: var(--gray-100);
-    color: var(--gray-700);
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 0.688rem;
-    font-weight: 600;
-}
-
 /* Tableau */
 .table-container {
     background: white;
@@ -658,20 +586,6 @@
     color: var(--gray-500);
 }
 
-/* Avatar */
-.avatar-sm {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    background: var(--primary-100);
-    color: var(--primary-600);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.875rem;
-}
-
 /* Empty state */
 .empty-state-small {
     text-align: center;
@@ -694,10 +608,6 @@
 @media (max-width: 1024px) {
     .stats-grid {
         grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .arrivals-departures-grid {
-        grid-template-columns: 1fr;
     }
 }
 
@@ -811,112 +721,6 @@
             </div>
             <div class="stat-number">{{ number_format($stats['occupancy_rate'], 1) }}%</div>
             <div class="stat-label">Taux d'occupation</div>
-        </div>
-    </div>
-
-    <!-- Arrivées et départs du jour -->
-    <div class="arrivals-departures-grid">
-        <!-- Arrivées du jour -->
-        <div class="card-modern fade-in">
-            <div class="card-header-success card-header-modern">
-                <h6>
-                    <i class="fas fa-sign-in-alt"></i>
-                    Arrivées du jour
-                </h6>
-                <span class="badge-modern" style="background: white; color: var(--primary-700);">
-                    {{ $todayArrivals->count() }}
-                </span>
-            </div>
-            <div class="card-body-modern p-0">
-                @if($todayArrivals->count() > 0)
-                    <div style="max-height: 300px; overflow-y: auto;">
-                        @foreach($todayArrivals as $arrival)
-                        <div class="guest-item">
-                            <div class="guest-avatar-sm">
-                                {{ substr($arrival->customer->name, 0, 1) }}
-                            </div>
-                            <div class="guest-info">
-                                <div class="guest-name">{{ $arrival->customer->name }}</div>
-                                <div class="guest-email">{{ $arrival->customer->email }}</div>
-                            </div>
-                            <div class="text-end">
-                                <div class="room-badge-sm mb-1">Ch. {{ $arrival->room->number }}</div>
-                                <div class="guest-time">
-                                    <i class="fas fa-clock"></i>
-                                    {{ $arrival->check_in->format('H:i') }}
-                                </div>
-                            </div>
-                            <div class="ms-3">
-                                @php
-                                    try {
-                                        $checkinRoute = route('checkin.show', $arrival->id);
-                                    } catch (\Exception $e) {
-                                        $checkinRoute = "/checkin/{$arrival->id}";
-                                    }
-                                @endphp
-                                <a href="{{ $checkinRoute }}" class="btn-icon-modern" title="Check-in">
-                                    <i class="fas fa-door-open"></i>
-                                </a>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="empty-state-small">
-                        <i class="fas fa-calendar-check"></i>
-                        <h6>Aucune arrivée prévue</h6>
-                        <p class="text-muted small">Aucune arrivée aujourd'hui</p>
-                    </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- Départs du jour -->
-        <div class="card-modern fade-in">
-            <div class="card-header-warning card-header-modern">
-                <h6>
-                    <i class="fas fa-sign-out-alt"></i>
-                    Départs du jour
-                </h6>
-                <span class="badge-modern" style="background: white; color: var(--amber-700);">
-                    {{ $todayDepartures->count() }}
-                </span>
-            </div>
-            <div class="card-body-modern p-0">
-                @if($todayDepartures->count() > 0)
-                    <div style="max-height: 300px; overflow-y: auto;">
-                        @foreach($todayDepartures as $departure)
-                        <div class="guest-item">
-                            <div class="guest-avatar-sm">
-                                {{ substr($departure->customer->name, 0, 1) }}
-                            </div>
-                            <div class="guest-info">
-                                <div class="guest-name">{{ $departure->customer->name }}</div>
-                                <div class="guest-email">{{ $departure->customer->email }}</div>
-                            </div>
-                            <div class="text-end">
-                                <div class="room-badge-sm mb-1">Ch. {{ $departure->room->number }}</div>
-                                <div class="guest-time">
-                                    <i class="fas fa-clock"></i>
-                                    {{ $departure->check_out->format('H:i') }}
-                                </div>
-                            </div>
-                            <div class="ms-3">
-                                <a href="{{ route('transaction.show', $departure->id) }}" class="btn-icon-modern" title="Facture">
-                                    <i class="fas fa-file-invoice"></i>
-                                </a>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="empty-state-small">
-                        <i class="fas fa-calendar-times"></i>
-                        <h6>Aucun départ prévu</h6>
-                        <p class="text-muted small">Aucun départ aujourd'hui</p>
-                    </div>
-                @endif
-            </div>
         </div>
     </div>
 

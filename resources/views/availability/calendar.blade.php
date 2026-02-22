@@ -136,7 +136,7 @@ body {
 }
 
 /* ══════════════════════════════════════
-   KPIs
+   KPIs (rendus cliquables)
 ══════════════════════════════════════ */
 .cal-kpis {
     max-width: 1800px;
@@ -154,9 +154,14 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
-    transition: border-color .2s;
+    transition: all .2s;
+    cursor: pointer;
 }
-.kpi-card:hover { border-color: var(--brd2); }
+.kpi-card:hover { 
+    border-color: var(--acc);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,.05);
+}
 .kpi-icon {
     width: 38px;
     height: 38px;
@@ -237,7 +242,7 @@ body {
 }
 
 /* ══════════════════════════════════════
-   LEGEND
+   LEGEND (rendue cliquable)
 ══════════════════════════════════════ */
 .cal-legend {
     max-width: 1800px;
@@ -252,6 +257,13 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all .14s;
+}
+.legend-item:hover {
+    background: var(--surf2);
 }
 .legend-sq {
     width: 18px;
@@ -259,7 +271,7 @@ body {
     border-radius: 4px;
 }
 .legend-sq.avail { background: rgba(16,185,129,.15); border: 1px solid rgba(16,185,129,.3); }
-.legend-sq.occ   { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); }
+.legend-sq.reserved { background: rgba(239,68,68,.15); border: 1px solid rgba(239,68,68,.3); }
 .legend-sq.unavail { background: rgba(100,116,139,.15); border: 1px solid rgba(100,116,139,.3); }
 .legend-sq.today { background: rgba(245,158,11,.2); border: 2px solid var(--yel); }
 .legend-item span {
@@ -270,6 +282,12 @@ body {
     margin-left: auto;
     font-size: 12px;
     color: var(--txt3);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.legend-tip i {
+    color: var(--acc);
 }
 
 /* ══════════════════════════════════════
@@ -484,12 +502,12 @@ body {
     background: rgba(16,185,129,.15);
 }
 
-.avail-cell.occupied {
+.avail-cell.reserved {
     background: rgba(239,68,68,.08);
     border-left: 1px solid rgba(239,68,68,.15);
 }
-.avail-cell.occupied i { color: var(--red); }
-.avail-cell.occupied:hover {
+.avail-cell.reserved i { color: var(--red); }
+.avail-cell.reserved:hover {
     background: rgba(239,68,68,.15);
 }
 
@@ -676,6 +694,21 @@ body {
 .cal-kpis .kpi-card:nth-child(4) { animation-delay: .20s; }
 
 /* ══════════════════════════════════════
+   INFO BADGE HEURES
+══════════════════════════════════════ */
+.time-badge {
+    background: var(--surf2);
+    color: var(--txt2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-left: 8px;
+}
+
+/* ══════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════ */
 @media (max-width: 1200px) {
@@ -710,7 +743,11 @@ body {
 <div class="cal-topbar">
     <div class="cal-topbar__inner">
         <div class="cal-topbar__title">
-            <h1>Calendrier des disponibilités</h1>
+            <h1>Calendrier des disponibilités
+                <span class="time-badge">
+                    <i class="fas fa-clock"></i> Check-in 12h | Check-out 12h
+                </span>
+            </h1>
             <p>Visualisez les réservations et disponibilités des chambres</p>
         </div>
         <div class="cal-topbar__actions">
@@ -736,10 +773,10 @@ body {
 </div>
 
 {{-- ══════════════════════════════════════
-     KPIs
+     KPIs (rendus cliquables)
 ══════════════════════════════════════ --}}
 <div class="cal-kpis">
-    <div class="kpi-card">
+    <div class="kpi-card" onclick="filterByStatus('all')" title="Voir toutes les chambres">
         <div class="kpi-icon" style="background:rgba(59,130,246,.1);color:var(--acc)">
             <i class="fas fa-bed"></i>
         </div>
@@ -748,7 +785,7 @@ body {
             <div class="kpi-value">{{ $stats['total_rooms'] }}</div>
         </div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card" onclick="filterByStatus('available')" title="Voir les chambres disponibles">
         <div class="kpi-icon" style="background:rgba(16,185,129,.1);color:var(--grn)">
             <i class="fas fa-check-circle"></i>
         </div>
@@ -757,16 +794,16 @@ body {
             <div class="kpi-value" style="color:var(--grn)">{{ $stats['available_today'] }}</div>
         </div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card" onclick="filterByStatus('reserved')" title="Voir les chambres réservées">
         <div class="kpi-icon" style="background:rgba(245,158,11,.1);color:var(--yel)">
-            <i class="fas fa-users"></i>
+            <i class="fas fa-calendar-check"></i>
         </div>
         <div>
-            <div class="kpi-label">Occupées</div>
+            <div class="kpi-label">Réservées</div>
             <div class="kpi-value" style="color:#b45309">{{ $stats['occupied_today'] }}</div>
         </div>
     </div>
-    <div class="kpi-card">
+    <div class="kpi-card" onclick="filterByStatus('unavailable')" title="Voir les chambres indisponibles">
         <div class="kpi-icon" style="background:rgba(239,68,68,.1);color:var(--red)">
             <i class="fas fa-times-circle"></i>
         </div>
@@ -786,7 +823,7 @@ body {
             <div class="filter-grid">
                 <div class="form-group">
                     <label>Type de chambre</label>
-                    <select name="room_type" class="form-select">
+                    <select name="room_type" class="form-select" onchange="this.form.submit()">
                         <option value="">Tous les types</option>
                         @foreach($roomTypes as $type)
                             <option value="{{ $type->id }}" {{ request('room_type') == $type->id ? 'selected' : '' }}>
@@ -799,7 +836,8 @@ body {
                     <label>Numéro de chambre</label>
                     <input type="text" name="room_number" class="form-control" 
                            value="{{ request('room_number') }}"
-                           placeholder="Ex: 101, 102...">
+                           placeholder="Ex: 101, 102..."
+                           onkeyup="filterByRoomNumber(this.value)">
                 </div>
                 <div class="form-group">
                     <label>Mois</label>
@@ -823,22 +861,22 @@ body {
 </div>
 
 {{-- ══════════════════════════════════════
-     LEGEND
+     LEGEND (rendue cliquable)
 ══════════════════════════════════════ --}}
 <div class="cal-legend">
-    <div class="legend-item">
+    <div class="legend-item" onclick="filterByStatus('available')">
         <div class="legend-sq avail"></div>
         <span>Disponible</span>
     </div>
-    <div class="legend-item">
-        <div class="legend-sq occ"></div>
-        <span>Occupée</span>
+    <div class="legend-item" onclick="filterByStatus('reserved')">
+        <div class="legend-sq reserved"></div>
+        <span>Réservée</span>
     </div>
-    <div class="legend-item">
+    <div class="legend-item" onclick="filterByStatus('unavailable')">
         <div class="legend-sq unavail"></div>
         <span>Indisponible</span>
     </div>
-    <div class="legend-item">
+    <div class="legend-item" onclick="window.scrollToToday()">
         <div class="legend-sq today"></div>
         <span>Aujourd'hui</span>
     </div>
@@ -846,14 +884,11 @@ body {
         <div class="badge bg-danger">2+</div>
         <span>Conflit</span>
     </div>
-    <span class="legend-tip">
-        <i class="fas fa-mouse-pointer" style="margin-right:4px"></i>
-        Cliquez sur une cellule pour les détails
-    </span>
+    
 </div>
 
 {{-- ══════════════════════════════════════
-     CALENDAR
+     CALENDAR (CORRIGÉ AVEC data-date)
 ══════════════════════════════════════ --}}
 <div class="cal-wrap">
     <div class="cal-container">
@@ -864,7 +899,7 @@ body {
                         <th class="room-col">
                             <div style="display:flex;justify-content:space-between;align-items:center">
                                 <span>Chambre / Date</span>
-                                <button type="button" class="btn-icon" onclick="scrollToToday()" title="Aller à aujourd'hui">
+                                <button type="button" class="btn-icon" onclick="window.scrollToToday()" title="Aller à aujourd'hui" id="todayButton">
                                     <i class="fas fa-calendar-day"></i>
                                 </button>
                             </div>
@@ -872,7 +907,7 @@ body {
                         @foreach($dates as $dateString => $dateInfo)
                             <th class="date-col {{ $dateInfo['is_today'] ? 'th-today' : '' }} {{ $dateInfo['is_weekend'] ? 'th-weekend' : '' }}"
                                 data-date="{{ $dateString }}"
-                                onclick="scrollToDate('{{ $dateString }}')"
+                                onclick="window.scrollToDate('{{ $dateString }}')"
                                 title="Cliquez pour centrer">
                                 <div class="date-day">{{ $dateInfo['date']->format('d') }}</div>
                                 <div class="date-name">{{ $dateInfo['day_name'] }}</div>
@@ -893,7 +928,7 @@ body {
                         </tr>
                     @else
                         @foreach($calendar as $roomData)
-                            <tr class="room-row" data-room-number="{{ $roomData['room']->number }}">
+                            <tr class="room-row" data-room-number="{{ $roomData['room']->number }}" data-room-status="{{ $roomData['room']->room_status_id }}">
                                 <td class="room-cell">
                                     <div class="room-cell__inner">
                                         <div class="room-badge">{{ $roomData['room']->number }}</div>
@@ -930,6 +965,10 @@ body {
                                         ];
                                         $canReserve = $availability['can_reserve'] ?? false;
                                         $cssClass = $availability['css_class'] ?? 'available';
+                                        // Remplacer 'occupied' par 'reserved' pour la classe CSS
+                                        if ($cssClass === 'occupied') {
+                                            $cssClass = 'reserved';
+                                        }
                                         $reservationCount = $availability['reservation_count'] ?? 0;
                                         $isOccupied = $availability['occupied'] ?? false;
                                     @endphp
@@ -943,9 +982,9 @@ body {
                                         data-is-occupied="{{ $isOccupied ? 'true' : 'false' }}"
                                         data-reservation-count="{{ $reservationCount }}"
                                         data-can-reserve="{{ $canReserve ? 'true' : 'false' }}"
-                                        title="{{ $dateInfo['date']->format('d/m/Y') }} - Chambre {{ $roomData['room']->number }} - {{ $isOccupied ? 'Occupée' : 'Disponible' }}">
+                                        title="{{ $dateInfo['date']->format('d/m/Y') }} - Chambre {{ $roomData['room']->number }} - {{ $isOccupied ? 'Réservée' : 'Disponible' }}">
                                         @if($isOccupied)
-                                            <i class="fas fa-user"></i>
+                                            <i class="fas fa-calendar-check"></i>
                                             @if($reservationCount > 1)
                                                 <div class="conflict-badge">
                                                     {{ $reservationCount }}
@@ -973,11 +1012,11 @@ body {
 ══════════════════════════════════════ --}}
 <div class="cal-actions">
     <div class="btn-group">
-        <button type="button" class="btn btn--outline" onclick="selectDateRange()">
+        <button type="button" class="btn btn--outline" onclick="window.selectDateRange()">
             <i class="fas fa-calendar-range"></i>
             Sélectionner période
         </button>
-        <button type="button" class="btn btn--outline" onclick="checkAllAvailability()">
+        <button type="button" class="btn btn--outline" onclick="window.checkAllAvailability()">
             <i class="fas fa-search"></i>
             Vérifier disponibilité
         </button>
@@ -1003,149 +1042,226 @@ body {
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Tooltips
-    var tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltips.map(function (el) {
-        return new bootstrap.Tooltip(el, { trigger: 'hover', placement: 'top' });
-    });
-    
-    // Variables globales
-    window.selectedCells = [];
-    window.selectionMode = false;
-    window.selectionStart = null;
-    
-    // Gérer les clics sur les cellules
-    document.querySelectorAll('.avail-cell').forEach(function(cell) {
-        cell.addEventListener('click', function(e) {
-            if (window.selectionMode) {
-                handlePeriodSelection(this);
-            } else {
-                const roomId = this.getAttribute('data-room-id');
-                const date = this.getAttribute('data-date');
-                const isOccupied = this.getAttribute('data-is-occupied') === 'true';
-                
-                if (!roomId || !date) return;
-                
-                if (isOccupied) {
-                    showOccupancyDetails(roomId, date);
-                } else {
-                    showAvailabilityDetails(roomId, date);
-                }
-            }
-        });
-    });
-    
-    // Filtrage par numéro
-    const roomNumberInput = document.querySelector('input[name="room_number"]');
-    if (roomNumberInput) {
-        roomNumberInput.addEventListener('input', function() {
-            const rows = document.querySelectorAll('.room-row');
-            const searchText = this.value.toLowerCase().trim();
-            
-            rows.forEach(row => {
-                const roomNum = row.getAttribute('data-room-number');
-                if (searchText === '' || roomNum.toLowerCase().includes(searchText)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
-                }
-            });
-        });
-    }
-});
+// ============ FONCTIONS GLOBALES (DOIVENT ÊTRE DÉFINIES AVANT TOUT) ============
 
-function scrollToDate(dateString) {
+/**
+ * Scroll vers la date d'aujourd'hui
+ */
+window.scrollToToday = function() {
+    console.log('📅 scrollToToday appelé');
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+    
+    console.log('🔍 Recherche de la date:', dateString);
+    window.scrollToDate(dateString);
+    
+    // Mettre en évidence la colonne d'aujourd'hui
+    document.querySelectorAll('.th-today').forEach(el => {
+        el.style.backgroundColor = 'rgba(245,158,11,.3)';
+        el.style.outline = '2px solid #f59e0b';
+        setTimeout(() => {
+            el.style.backgroundColor = '';
+            el.style.outline = '';
+        }, 1500);
+    });
+};
+
+/**
+ * Scroll vers une date spécifique (YYYY-MM-DD)
+ */
+window.scrollToDate = function(dateString) {
+    console.log('📅 scrollToDate appelé avec:', dateString);
+    
+    // Méthode 1: Chercher une cellule de données
     const targetCell = document.querySelector(`.avail-cell[data-date="${dateString}"]`);
+    
     if (targetCell) {
-        targetCell.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        targetCell.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest', 
+            inline: 'center' 
+        });
+        
+        targetCell.style.outline = '2px solid #3b82f6';
+        targetCell.style.backgroundColor = 'rgba(59,130,246,.2)';
+        
+        setTimeout(() => {
+            targetCell.style.outline = '';
+            targetCell.style.backgroundColor = '';
+        }, 1500);
+        
+        console.log('✅ Cellule trouvée, scroll effectué');
+        return;
     }
-}
+    
+    // Méthode 2: Chercher l'en-tête de colonne
+    const headerCell = document.querySelector(`th.date-col[data-date="${dateString}"]`);
+    if (headerCell) {
+        headerCell.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest', 
+            inline: 'center' 
+        });
+        
+        headerCell.style.backgroundColor = 'rgba(59,130,246,.2)';
+        
+        setTimeout(() => {
+            headerCell.style.backgroundColor = '';
+        }, 1500);
+        
+        console.log('✅ En-tête trouvé, scroll effectué');
+        return;
+    }
+    
+    // Méthode 3: Chercher n'importe quel élément avec data-date
+    const elements = document.querySelectorAll(`[data-date="${dateString}"]`);
+    if (elements.length > 0) {
+        elements[0].scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'nearest', 
+            inline: 'center' 
+        });
+        console.log('✅ Élément trouvé, scroll effectué');
+    } else {
+        console.warn('❌ Date non trouvée:', dateString);
+    }
+};
 
-function scrollToToday() {
-    const today = new Date().toISOString().split('T')[0];
-    scrollToDate(today);
-}
-
-function showOccupancyDetails(roomId, date) {
+/**
+ * Afficher les détails d'une chambre réservée
+ */
+window.showOccupancyDetails = function(roomId, date) {
+    console.log('🔍 showOccupancyDetails', { roomId, date });
+    
     fetch(`/availability/calendar-cell-details?room_id=${roomId}&date=${date}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Erreur réseau');
+            return response.json();
+        })
         .then(data => {
             let content = `
                 <div class="p-3">
                     <h5 class="fw-bold mb-3">
-                        <i class="fas fa-calendar-times me-2" style="color:var(--red)"></i>
-                        Chambre Occupée
+                        <i class="fas fa-calendar-times me-2" style="color:#ef4444"></i>
+                        Chambre Réservée
                     </h5>
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card" style="border-color:rgba(239,68,68,.3)">
                                 <div class="card-body">
                                     <h6>Informations Chambre</h6>
-                                    <div class="mb-2"><small style="color:var(--txt3)">Numéro:</small> <strong>${data.room.number}</strong></div>
-                                    <div class="mb-2"><small style="color:var(--txt3)">Type:</small> <strong>${data.room.type}</strong></div>
-                                    <div class="mb-2"><small style="color:var(--txt3)">Capacité:</small> <strong>${data.room.capacity} pers.</strong></div>
-                                    <div class="mb-2"><small style="color:var(--txt3)">Prix/nuit:</small> <strong>${data.room.price} FCFA</strong></div>
-                                    <div class="mb-2"><small style="color:var(--txt3)">Date:</small> <strong>${new Date(date).toLocaleDateString('fr-FR')}</strong></div>
+                                    <div class="mb-2"><small style="color:#64748b">Numéro:</small> <strong>${data.room.number}</strong></div>
+                                    <div class="mb-2"><small style="color:#64748b">Type:</small> <strong>${data.room.type}</strong></div>
+                                    <div class="mb-2"><small style="color:#64748b">Capacité:</small> <strong>${data.room.capacity} pers.</strong></div>
+                                    <div class="mb-2"><small style="color:#64748b">Prix/nuit:</small> <strong>${new Intl.NumberFormat('fr-FR').format(data.room.price)} FCFA</strong></div>
+                                    <div class="mb-2"><small style="color:#64748b">Date:</small> <strong>${new Date(date).toLocaleDateString('fr-FR')}</strong></div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
-                                Cette chambre n'est pas disponible pour cette date.
+                                Cette chambre est réservée pour cette date.
                             </div>
                         </div>
                     </div>
             `;
             
             if (data.reservations && data.reservations.length > 0) {
-                content += `<h6 class="mb-3">Réservations (${data.reservations.length})</h6><div class="table-responsive"><table class="table table-sm table-hover"><thead><tr><th>Client</th><th>Arrivée</th><th>Départ</th><th>Statut</th><th>Actions</th></tr></thead><tbody>`;
+                content += `<h6 class="mb-3">Réservations (${data.reservations.length})</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Client</th>
+                                <th>Arrivée</th>
+                                <th>Départ</th>
+                                <th>Statut</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
                 
                 data.reservations.forEach(r => {
+                    const statusClass = r.status === 'active' ? 'bg-success' : 'bg-warning';
+                    const statusText = r.status === 'active' ? 'En séjour' : 'Réservée';
+                    
                     content += `<tr>
-                        <td><div class="fw-bold">${r.customer.name || 'Client'}</div><small style="color:var(--txt3)">${r.customer.email || ''}</small></td>
+                        <td>
+                            <div class="fw-bold">${r.customer.name || 'Client'}</div>
+                            <small style="color:#64748b">${r.customer.email || ''}</small>
+                        </td>
                         <td>${new Date(r.check_in).toLocaleDateString('fr-FR')}</td>
                         <td>${new Date(r.check_out).toLocaleDateString('fr-FR')}</td>
-                        <td><span class="badge ${r.status === 'active' ? 'bg-success' : 'bg-warning'}">${r.status === 'active' ? 'En séjour' : 'Réservée'}</span></td>
-                        <td><a href="/transactions/${r.id}" class="btn btn--outline btn-sm" target="_blank"><i class="fas fa-external-link-alt"></i></a></td>
+                        <td><span class="badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <a href="/transactions/${r.id}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </td>
                     </tr>`;
                 });
                 
                 content += `</tbody></table></div>`;
                 
                 if (data.reservations.length > 1) {
-                    content += `<div class="alert alert-danger mt-3"><i class="fas fa-exclamation-triangle me-2"></i><strong>ALERTE:</strong> ${data.reservations.length} réservations!</div>`;
+                    content += `<div class="alert alert-danger mt-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>ALERTE:</strong> ${data.reservations.length} réservations en conflit pour cette date !
+                    </div>`;
                 }
             }
             
             content += `<div class="mt-4 d-grid gap-2">
-                <a href="/availability/search?room_type_id=${data.room.type_id}" class="btn btn--primary"><i class="fas fa-search me-2"></i>Chercher une autre chambre</a>
+                <a href="/availability/search?room_type_id=${data.room.type_id}" class="btn btn--primary">
+                    <i class="fas fa-search me-2"></i>Chercher une autre chambre
+                </a>
             </div></div>`;
             
-            showModal('Détails d\'occupation', content);
+            window.showModal('Détails de réservation', content);
         })
         .catch(error => {
-            showModal('Erreur', `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Erreur: ${error.message}</div>`);
+            console.error('Erreur:', error);
+            window.showModal('Erreur', `<div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Erreur: ${error.message}
+            </div>`);
         });
-}
+};
 
-function showAvailabilityDetails(roomId, date) {
+/**
+ * Afficher les détails d'une chambre disponible
+ */
+window.showAvailabilityDetails = function(roomId, date) {
+    console.log('🔍 showAvailabilityDetails', { roomId, date });
+    
     fetch(`/availability/check-availability?room_id=${roomId}&check_in=${date}&check_out=${date}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Erreur réseau');
+            return response.json();
+        })
         .then(data => {
+            const formattedDate = new Date(date).toLocaleDateString('fr-FR');
+            const totalPrice = new Intl.NumberFormat('fr-FR').format(data.total_price);
+            
             let content = `
                 <div class="p-3">
-                    <h5 class="fw-bold mb-3"><i class="fas fa-calendar-check me-2" style="color:var(--grn)"></i>Chambre Disponible</h5>
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-calendar-check me-2" style="color:#10b981"></i>
+                        Chambre Disponible
+                    </h5>
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card" style="border-color:rgba(16,185,129,.3)">
                                 <div class="card-body">
                                     <h6>Informations Chambre</h6>
-                                    <div class="mb-2"><small style="color:var(--txt3)">Numéro:</small> <strong>${data.room.number}</strong></div>
-                                    <div class="mb-2"><small style="color:var(--txt3)">Type:</small> <strong>${data.room.type}</strong></div>
-                                    <div class="mb-2"><small style="color:var(--txt3)">Capacité:</small> <strong>${data.room.capacity} pers.</strong></div>
-                                    <div class="mb-2"><small style="color:var(--txt3)">Prix/nuit:</small> <strong>${data.room.price.toLocaleString()} FCFA</strong></div>
+                                    <div class="mb-2"><small style="color:#64748b">Numéro:</small> <strong>${data.room.number}</strong></div>
+                                    <div class="mb-2"><small style="color:#64748b">Type:</small> <strong>${data.room.type}</strong></div>
+                                    <div class="mb-2"><small style="color:#64748b">Capacité:</small> <strong>${data.room.capacity} pers.</strong></div>
+                                    <div class="mb-2"><small style="color:#64748b">Prix/nuit:</small> <strong>${new Intl.NumberFormat('fr-FR').format(data.room.price)} FCFA</strong></div>
                                 </div>
                             </div>
                         </div>
@@ -1153,79 +1269,132 @@ function showAvailabilityDetails(roomId, date) {
                             <div class="card" style="border-color:rgba(59,130,246,.3)">
                                 <div class="card-body">
                                     <h6>Réservation</h6>
-                                    <div class="mb-2"><small style="color:var(--txt3)">Date:</small> <strong>${new Date(date).toLocaleDateString('fr-FR')}</strong></div>
-                                    <div class="mb-3"><small style="color:var(--txt3)">Prix total:</small> <div class="fs-4 fw-bold" style="color:var(--grn)">${data.total_price.toLocaleString()} FCFA</div></div>
-                                    <div class="alert alert-success"><i class="fas fa-check-circle me-2"></i>Chambre disponible</div>
+                                    <div class="mb-2"><small style="color:#64748b">Date:</small> <strong>${formattedDate}</strong></div>
+                                    <div class="mb-3">
+                                        <small style="color:#64748b">Prix total:</small>
+                                        <div class="fs-4 fw-bold" style="color:#10b981">${totalPrice} FCFA</div>
+                                    </div>
+                                    <div class="alert alert-success">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        Chambre disponible
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="d-grid gap-2">
-                        <a href="/transaction/reservation/createIdentity?room_id=${roomId}&check_in=${date}&check_out=${date}" class="btn btn--primary btn-lg"><i class="fas fa-plus me-2"></i>Réserver cette chambre</a>
-                        <button type="button" class="btn btn--outline" onclick="selectDateRangeFromCell('${roomId}', '${date}')"><i class="fas fa-calendar-range me-2"></i>Sélectionner une période</button>
+                        <a href="/transaction/reservation/createIdentity?room_id=${roomId}&check_in=${date}&check_out=${date}" 
+                           class="btn btn--primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>Réserver cette chambre
+                        </a>
+                        <button type="button" class="btn btn--outline" onclick="window.selectDateRangeFromCell('${roomId}', '${date}')">
+                            <i class="fas fa-calendar-range me-2"></i>Sélectionner une période
+                        </button>
                     </div>
                 </div>
             `;
-            showModal('Chambre disponible', content);
+            
+            window.showModal('Chambre disponible', content);
         })
         .catch(error => {
-            showModal('Erreur', `<div class="alert alert-danger"><i class="fas fa-exclamation-triangle me-2"></i>Erreur: ${error.message}</div>`);
+            console.error('Erreur:', error);
+            window.showModal('Erreur', `<div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                Erreur: ${error.message}
+            </div>`);
         });
-}
+};
 
-function selectDateRange() {
+/**
+ * Sélectionner une période
+ */
+window.selectDateRange = function() {
     window.selectionMode = true;
     window.selectedCells = [];
-    showModal('Sélection de période', `
+    
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    
+    window.showModal('Sélection de période', `
         <div class="p-3">
             <h5 class="fw-bold mb-3"><i class="fas fa-calendar-range me-2"></i>Sélectionner une période</h5>
-            <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Mode sélection activé. Cliquez sur la première date, puis sur la dernière.</div>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Mode sélection activé. Cliquez sur la première date, puis sur la dernière.
+            </div>
             <div class="row mt-3">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Date d'arrivée</label>
-                    <input type="date" id="checkInDate" class="form-control">
+                    <input type="date" id="checkInDate" class="form-control" value="${today}" min="${today}">
                 </div>
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Date de départ</label>
-                    <input type="date" id="checkOutDate" class="form-control">
+                    <input type="date" id="checkOutDate" class="form-control" value="${tomorrow}" min="${tomorrow}">
                 </div>
             </div>
-            <button class="btn btn--primary w-100" onclick="applyDateSelection()"><i class="fas fa-check me-2"></i>Appliquer</button>
+            <button class="btn btn--primary w-100" onclick="window.applyDateSelection()">
+                <i class="fas fa-check me-2"></i>Appliquer
+            </button>
         </div>
     `);
-}
+};
 
-function selectDateRangeFromCell(roomId, startDate) {
+/**
+ * Sélectionner une période à partir d'une cellule
+ */
+window.selectDateRangeFromCell = function(roomId, startDate) {
     window.selectionMode = true;
     window.selectionStart = { roomId, date: startDate };
-    showModal('Sélection de période', `
+    
+    const formattedDate = new Date(startDate).toLocaleDateString('fr-FR');
+    
+    window.showModal('Sélection de période', `
         <div class="p-3">
             <h5 class="fw-bold mb-3"><i class="fas fa-calendar-range me-2"></i>Sélectionner la date de départ</h5>
-            <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Arrivée: <strong>${new Date(startDate).toLocaleDateString('fr-FR')}</strong><br>Cliquez sur la date de départ dans le calendrier.</div>
-            <button class="btn btn--outline w-100" onclick="cancelSelection()"><i class="fas fa-times me-2"></i>Annuler</button>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Arrivée: <strong>${formattedDate}</strong><br>
+                Cliquez sur la date de départ dans le calendrier.
+            </div>
+            <button class="btn btn--outline w-100" onclick="window.cancelSelection()">
+                <i class="fas fa-times me-2"></i>Annuler
+            </button>
         </div>
     `);
-}
+};
 
-function handlePeriodSelection(cell) {
+/**
+ * Gérer la sélection de période
+ */
+window.handlePeriodSelection = function(cell) {
     if (!window.selectionStart) {
+        // Première sélection (date d'arrivée)
         window.selectionStart = {
             roomId: cell.getAttribute('data-room-id'),
             date: cell.getAttribute('data-date'),
             element: cell
         };
-        cell.style.outline = '2px solid var(--acc)';
-        showModal('Sélection de période', `
+        cell.style.outline = '2px solid #3b82f6';
+        
+        const formattedDate = new Date(window.selectionStart.date).toLocaleDateString('fr-FR');
+        
+        window.showModal('Sélection de période', `
             <div class="p-3">
-                <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Arrivée: <strong>${new Date(window.selectionStart.date).toLocaleDateString('fr-FR')}</strong><br>Chambre: <strong>${cell.getAttribute('data-room-number')}</strong><br>Cliquez sur la date de départ.</div>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Arrivée: <strong>${formattedDate}</strong><br>
+                    Chambre: <strong>${cell.getAttribute('data-room-number')}</strong><br>
+                    Cliquez sur la date de départ.
+                </div>
             </div>
         `);
     } else {
+        // Deuxième sélection (date de départ)
         const roomId = cell.getAttribute('data-room-id');
         const endDate = cell.getAttribute('data-date');
         
         if (roomId !== window.selectionStart.roomId) {
-            alert('Sélectionnez la même chambre');
+            alert('❌ Sélectionnez la même chambre');
             return;
         }
         
@@ -1233,25 +1402,31 @@ function handlePeriodSelection(cell) {
         const endDateObj = new Date(endDate);
         
         if (endDateObj <= startDate) {
-            alert('La date de départ doit être après l\'arrivée');
-            resetSelection();
+            alert('❌ La date de départ doit être après l\'arrivée');
+            window.resetSelection();
             return;
         }
         
         const nights = Math.ceil((endDateObj - startDate) / (1000 * 60 * 60 * 24));
         const price = parseInt(cell.getAttribute('data-room-price'));
+        const totalPrice = price * nights;
         
-        showModal('Période sélectionnée', `
+        const formattedStart = startDate.toLocaleDateString('fr-FR');
+        const formattedEnd = endDateObj.toLocaleDateString('fr-FR');
+        const formattedPrice = new Intl.NumberFormat('fr-FR').format(price);
+        const formattedTotal = new Intl.NumberFormat('fr-FR').format(totalPrice);
+        
+        window.showModal('Période sélectionnée', `
             <div class="p-3">
-                <h5 class="fw-bold mb-3"><i class="fas fa-calendar-check me-2"></i>Période sélectionnée</h5>
+                <h5 class="fw-bold mb-3"><i class="fas fa-calendar-check me-2" style="color:#10b981"></i>Période sélectionnée</h5>
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="card">
                             <div class="card-body">
                                 <h6>Détails</h6>
-                                <div class="mb-2"><small style="color:var(--txt3)">Chambre:</small> <strong>${cell.getAttribute('data-room-number')}</strong></div>
-                                <div class="mb-2"><small style="color:var(--txt3)">Type:</small> <strong>${cell.getAttribute('data-room-type')}</strong></div>
-                                <div class="mb-2"><small style="color:var(--txt3)">Prix/nuit:</small> <strong>${price.toLocaleString()} FCFA</strong></div>
+                                <div class="mb-2"><small style="color:#64748b">Chambre:</small> <strong>${cell.getAttribute('data-room-number')}</strong></div>
+                                <div class="mb-2"><small style="color:#64748b">Type:</small> <strong>${cell.getAttribute('data-room-type')}</strong></div>
+                                <div class="mb-2"><small style="color:#64748b">Prix/nuit:</small> <strong>${formattedPrice} FCFA</strong></div>
                             </div>
                         </div>
                     </div>
@@ -1259,84 +1434,113 @@ function handlePeriodSelection(cell) {
                         <div class="card">
                             <div class="card-body">
                                 <h6>Période</h6>
-                                <div class="mb-2"><small style="color:var(--txt3)">Arrivée:</small> <strong>${startDate.toLocaleDateString('fr-FR')}</strong></div>
-                                <div class="mb-2"><small style="color:var(--txt3)">Départ:</small> <strong>${endDateObj.toLocaleDateString('fr-FR')}</strong></div>
-                                <div class="mb-2"><small style="color:var(--txt3)">Durée:</small> <strong>${nights} nuit(s)</strong></div>
-                                <div class="mb-2"><small style="color:var(--txt3)">Total:</small> <div class="fs-4 fw-bold" style="color:var(--grn)">${(price * nights).toLocaleString()} FCFA</div></div>
+                                <div class="mb-2"><small style="color:#64748b">Arrivée:</small> <strong>${formattedStart}</strong></div>
+                                <div class="mb-2"><small style="color:#64748b">Départ:</small> <strong>${formattedEnd}</strong></div>
+                                <div class="mb-2"><small style="color:#64748b">Durée:</small> <strong>${nights} nuit(s)</strong></div>
+                                <div class="mb-2">
+                                    <small style="color:#64748b">Total:</small>
+                                    <div class="fs-4 fw-bold" style="color:#10b981">${formattedTotal} FCFA</div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="d-grid gap-2">
-                    <a href="/transaction/reservation/createIdentity?room_id=${roomId}&check_in=${window.selectionStart.date}&check_out=${endDate}" class="btn btn--primary btn-lg"><i class="fas fa-plus me-2"></i>Réserver cette période</a>
-                    <button class="btn btn--outline" onclick="resetSelection()"><i class="fas fa-redo me-2"></i>Sélectionner une autre période</button>
+                    <a href="/transaction/reservation/createIdentity?room_id=${roomId}&check_in=${window.selectionStart.date}&check_out=${endDate}" 
+                       class="btn btn--primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Réserver cette période
+                    </a>
+                    <button class="btn btn--outline" onclick="window.resetSelection()">
+                        <i class="fas fa-redo me-2"></i>Nouvelle sélection
+                    </button>
                 </div>
             </div>
         `);
         
-        resetSelection();
+        window.resetSelection();
     }
-}
+};
 
-function applyDateSelection() {
-    const checkIn = document.getElementById('checkInDate').value;
-    const checkOut = document.getElementById('checkOutDate').value;
+/**
+ * Appliquer la sélection de dates
+ */
+window.applyDateSelection = function() {
+    const checkIn = document.getElementById('checkInDate')?.value;
+    const checkOut = document.getElementById('checkOutDate')?.value;
     
     if (!checkIn || !checkOut) {
-        alert('Sélectionnez les deux dates');
+        alert('❌ Sélectionnez les deux dates');
         return;
     }
     
     if (new Date(checkOut) <= new Date(checkIn)) {
-        alert('La date de départ doit être après l\'arrivée');
+        alert('❌ La date de départ doit être après l\'arrivée');
         return;
     }
     
     window.location.href = `/availability/search?check_in=${checkIn}&check_out=${checkOut}`;
-}
+};
 
-function cancelSelection() {
-    resetSelection();
+/**
+ * Annuler la sélection
+ */
+window.cancelSelection = function() {
+    window.resetSelection();
     const modal = bootstrap.Modal.getInstance(document.getElementById('detailsModal'));
     if (modal) modal.hide();
-}
+};
 
-function resetSelection() {
+/**
+ * Réinitialiser la sélection
+ */
+window.resetSelection = function() {
     window.selectionMode = false;
     window.selectionStart = null;
     window.selectedCells = [];
     document.querySelectorAll('.avail-cell').forEach(el => {
         el.style.outline = '';
     });
-}
+};
 
-function checkAllAvailability() {
-    const checkIn = prompt('Date d\'arrivée (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
+/**
+ * Vérifier toutes les disponibilités
+ */
+window.checkAllAvailability = function() {
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    
+    const checkIn = prompt('Date d\'arrivée (YYYY-MM-DD):', today);
     if (!checkIn) return;
     
-    const checkOut = prompt('Date de départ (YYYY-MM-DD):', new Date(Date.now() + 86400000).toISOString().split('T')[0]);
+    const checkOut = prompt('Date de départ (YYYY-MM-DD):', tomorrow);
     if (!checkOut) return;
     
     if (new Date(checkOut) <= new Date(checkIn)) {
-        alert('La date de départ doit être après l\'arrivée');
+        alert('❌ La date de départ doit être après l\'arrivée');
         return;
     }
     
     window.location.href = `/availability/search?check_in=${checkIn}&check_out=${checkOut}`;
-}
+};
 
-function showModal(title, content) {
+/**
+ * Afficher une modale
+ */
+window.showModal = function(title, content) {
     let modal = document.getElementById('detailsModal');
+    
     if (!modal) {
         modal = document.createElement('div');
         modal.id = 'detailsModal';
         modal.className = 'modal fade';
+        modal.setAttribute('tabindex', '-1');
+        modal.setAttribute('aria-hidden', 'true');
         modal.innerHTML = `
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">${title}</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        <h5 class="modal-title"></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body" id="detailsModalBody"></div>
                 </div>
@@ -1348,8 +1552,120 @@ function showModal(title, content) {
     document.getElementById('detailsModalBody').innerHTML = content;
     modal.querySelector('.modal-title').textContent = title;
     
+    // Fermer la modale existante si ouverte
+    const existingModal = bootstrap.Modal.getInstance(modal);
+    if (existingModal) {
+        existingModal.hide();
+    }
+    
     const bsModal = new bootstrap.Modal(modal);
     bsModal.show();
-}
+};
+
+// ============ INITIALISATION AU CHARGEMENT ============
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📄 DOM chargé, initialisation...');
+    
+    // Vérifier que Bootstrap est chargé
+    if (typeof bootstrap === 'undefined') {
+        console.error('❌ Bootstrap non chargé !');
+        return;
+    }
+    
+    // Initialiser les tooltips
+    try {
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (el) {
+            return new bootstrap.Tooltip(el, { 
+                trigger: 'hover', 
+                placement: 'top',
+                delay: { show: 100, hide: 100 }
+            });
+        });
+        console.log(`🎯 ${tooltipTriggerList.length} tooltip(s) initialisé(s)`);
+    } catch (e) {
+        console.error('❌ Erreur tooltips:', e);
+    }
+    
+    // Variables globales
+    window.selectedCells = [];
+    window.selectionMode = false;
+    window.selectionStart = null;
+    
+    // Gérer les clics sur les cellules
+    document.querySelectorAll('.avail-cell').forEach(function(cell) {
+        cell.addEventListener('click', function(e) {
+            if (window.selectionMode) {
+                window.handlePeriodSelection(this);
+            } else {
+                const roomId = this.getAttribute('data-room-id');
+                const date = this.getAttribute('data-date');
+                const isOccupied = this.getAttribute('data-is-occupied') === 'true';
+                
+                if (!roomId || !date) return;
+                
+                if (isOccupied) {
+                    window.showOccupancyDetails(roomId, date);
+                } else {
+                    window.showAvailabilityDetails(roomId, date);
+                }
+            }
+        });
+    });
+    
+    // Filtrer par numéro de chambre
+    window.filterByRoomNumber = function(searchText) {
+        const rows = document.querySelectorAll('.room-row');
+        searchText = searchText.toLowerCase().trim();
+        
+        rows.forEach(row => {
+            const roomNum = row.getAttribute('data-room-number');
+            if (searchText === '' || roomNum.toLowerCase().includes(searchText)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    };
+    
+    // Filtrer par statut
+    window.filterByStatus = function(status) {
+        const rows = document.querySelectorAll('.room-row');
+        
+        rows.forEach(row => {
+            if (status === 'all') {
+                row.style.display = '';
+                return;
+            }
+            
+            const roomStatus = row.getAttribute('data-room-status');
+            
+            if (status === 'available' && roomStatus == 1) {
+                row.style.display = '';
+            } else if (status === 'reserved' && roomStatus == 2) {
+                row.style.display = '';
+            } else if (status === 'unavailable' && roomStatus > 2) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    };
+    
+    // Écouter le champ de recherche
+    const roomNumberInput = document.querySelector('input[name="room_number"]');
+    if (roomNumberInput) {
+        roomNumberInput.addEventListener('input', function() {
+            window.filterByRoomNumber(this.value);
+        });
+    }
+    
+    console.log('✅ Initialisation terminée');
+});
+
+// Gestionnaire d'erreurs global
+window.addEventListener('error', function(e) {
+    console.error('❌ Erreur capturée:', e.error?.message || e.message);
+});
 </script>
 @endpush
