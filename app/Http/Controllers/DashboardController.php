@@ -74,8 +74,19 @@ class DashboardController extends Controller
         }
 
         // Obtenir les transactions
-        $transactions = $query->orderBy('check_in', 'asc')->get();
-
+        $transactions = Transaction::with([
+                'customer',
+                'room.type',
+                'room.roomStatus',
+                'payments' => function ($q) {
+                    $q->where('status', 'completed');
+                },
+            ])
+            ->where('status', 'active')
+            ->where('check_in', '<=', Carbon::now())
+            ->where('check_out', '>=', Carbon::now())
+            ->orderBy('check_out', 'asc')
+            ->get();
         Log::info('Dashboard transactions count: '.$transactions->count());
 
         // ====================
