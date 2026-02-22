@@ -118,7 +118,7 @@ class PaymentController extends Controller
     }
 
     /**
-     * Enregistrer un nouveau paiement - VERSION OPTION 2 CORRIGÉE
+     * Enregistrer un nouveau paiement - AVEC DÉTAILS SPÉCIFIQUES
      */
     public function store(Transaction $transaction, Request $request)
     {
@@ -128,7 +128,7 @@ class PaymentController extends Controller
             'remaining_before' => $transaction->getRemainingPayment(),
         ]);
 
-        // Validation simplifiée mais robuste
+        // Validation avec les nouveaux champs (optionnels)
         $validator = Validator::make($request->all(), [
             'amount' => [
                 'required',
@@ -143,6 +143,32 @@ class PaymentController extends Controller
             ],
             'payment_method' => 'required|in:'.implode(',', array_keys(Payment::getPaymentMethods())),
             'description' => 'nullable|string|max:500',
+            
+            // ✅ NOUVEAUX CHAMPS (TOUS OPTIONNELS)
+            'mobile_operator' => 'nullable|string|max:50',
+            'mobile_number' => 'nullable|string|max:20',
+            'account_name' => 'nullable|string|max:100',
+            'transaction_id' => 'nullable|string|max:100',
+            'card_number' => 'nullable|string|max:19',
+            'card_expiry' => 'nullable|string|max:7',
+            'card_cvv' => 'nullable|string|max:4',
+            'card_type' => 'nullable|string|max:50',
+            'card_holder' => 'nullable|string|max:100',
+            'bank_name' => 'nullable|string|max:100',
+            'account_number' => 'nullable|string|max:50',
+            'iban' => 'nullable|string|max:50',
+            'bic' => 'nullable|string|max:20',
+            'beneficiary' => 'nullable|string|max:100',
+            'transfer_date' => 'nullable|date',
+            'fedapay_token' => 'nullable|string|max:100',
+            'fedapay_transaction_id' => 'nullable|string|max:100',
+            'fedapay_method' => 'nullable|string|max:50',
+            'fedapay_status' => 'nullable|string|max:50',
+            'check_number' => 'nullable|string|max:50',
+            'issuing_bank' => 'nullable|string|max:100',
+            'issuer_name' => 'nullable|string|max:100',
+            'issue_date' => 'nullable|date',
+            'received_by' => 'nullable|string|max:100',
         ], [
             'amount.max' => 'Le montant ne peut pas dépasser le solde restant de :max CFA',
             'amount.min' => 'Le montant minimum est de :min CFA',
@@ -181,16 +207,74 @@ class PaymentController extends Controller
             // Générer une référence unique
             $reference = $this->generateUniqueReference($validated['payment_method'], $transaction);
 
+            // ===== CONSTRUIRE LA DESCRIPTION AVEC TOUS LES DÉTAILS =====
+            $baseDescription = $validated['description'] ?? '';
+            $details = [];
+
+            // Collecter les détails selon la méthode
+            switch ($validated['payment_method']) {
+                case 'mobile_money':
+                    if ($request->filled('mobile_operator')) $details[] = "📱 Opérateur: " . $request->mobile_operator;
+                    if ($request->filled('mobile_number')) $details[] = "📞 Tél: " . $request->mobile_number;
+                    if ($request->filled('account_name')) $details[] = "👤 Compte: " . $request->account_name;
+                    if ($request->filled('transaction_id')) $details[] = "🔢 ID Transaction: " . $request->transaction_id;
+                    break;
+                    
+                case 'card':
+                    if ($request->filled('card_number')) $details[] = "💳 Carte: **** " . substr($request->card_number, -4);
+                    if ($request->filled('card_type')) $details[] = "🏦 Type: " . $request->card_type;
+                    if ($request->filled('card_holder')) $details[] = "👤 Titulaire: " . $request->card_holder;
+                    if ($request->filled('card_expiry')) $details[] = "📅 Exp: " . $request->card_expiry;
+                    break;
+                    
+                case 'transfer':
+                    if ($request->filled('bank_name')) $details[] = "🏦 Banque: " . $request->bank_name;
+                    if ($request->filled('account_number')) $details[] = "🔢 Compte: " . $request->account_number;
+                    if ($request->filled('iban')) $details[] = "🌍 IBAN: " . $request->iban;
+                    if ($request->filled('bic')) $details[] = "🔑 BIC: " . $request->bic;
+                    if ($request->filled('beneficiary')) $details[] = "👤 Bénéficiaire: " . $request->beneficiary;
+                    if ($request->filled('transfer_date')) $details[] = "📅 Date virement: " . \Carbon\Carbon::parse($request->transfer_date)->format('d/m/Y');
+                    break;
+                    
+                case 'fedapay':
+                    if ($request->filled('fedapay_token')) $details[] = "🎫 Token: " . $request->fedapay_token;
+                    if ($request->filled('fedapay_transaction_id')) $details[] = "🔢 ID Fedapay: " . $request->fedapay_transaction_id;
+                    if ($request->filled('fedapay_method')) $details[] = "💳 Méthode: " . $request->fedapay_method;
+                    if ($request->filled('fedapay_status')) $details[] = "📊 Statut: " . $request->fedapay_status;
+                    break;
+                    
+                case 'check':
+                    if ($request->filled('check_number')) $details[] = "🔢 Chèque N°: " . $request->check_number;
+                    if ($request->filled('issuing_bank')) $details[] = "🏦 Banque: " . $request->issuing_bank;
+                    if ($request->filled('issuer_name')) $details[] = "👤 Émetteur: " . $request->issuer_name;
+                    if ($request->filled('issue_date')) $details[] = "📅 Date: " . \Carbon\Carbon::parse($request->issue_date)->format('d/m/Y');
+                    break;
+                    
+                case 'cash':
+                    if ($request->filled('received_by')) $details[] = "👤 Reçu par: " . $request->received_by;
+                    break;
+            }
+
+            // Construire la description finale
+            $finalDescription = $baseDescription;
+            if (!empty($details)) {
+                $finalDescription .= "\n\n━━━━━━━━━━━━━━━━━━━━━━\n";
+                $finalDescription .= "📋 DÉTAILS PAIEMENT\n";
+                $finalDescription .= "━━━━━━━━━━━━━━━━━━━━━━\n";
+                $finalDescription .= implode("\n", $details);
+                $finalDescription .= "\n━━━━━━━━━━━━━━━━━━━━━━";
+            }
+
             // Préparer les données avec user_id CORRECT
             $paymentData = [
-                'user_id' => $userId, // ← CORRECTEMENT DÉTERMINÉ
-                'created_by' => auth()->id(), // Celui qui crée le paiement
+                'user_id' => $userId,
+                'created_by' => auth()->id(),
                 'transaction_id' => $transaction->id,
                 'amount' => (float) $validated['amount'],
                 'payment_method' => $validated['payment_method'],
                 'status' => Payment::STATUS_COMPLETED,
                 'reference' => $reference,
-                'description' => $validated['description'] ?? null,
+                'description' => $finalDescription, // ← Description enrichie
             ];
 
             // Création du paiement
@@ -201,13 +285,11 @@ class PaymentController extends Controller
                 'amount' => $payment->amount,
                 'reference' => $payment->reference,
                 'method' => $payment->payment_method,
+                'description_length' => strlen($payment->description),
             ]);
 
             // FORCER la mise à jour des totaux de la transaction
             $this->forceUpdateTransactionTotals($transaction);
-
-            // Si c'est un remboursement (montant négatif), adapter le message
-            $isRefund = $payment->amount < 0;
 
             DB::commit();
 
@@ -218,8 +300,7 @@ class PaymentController extends Controller
                 'is_fully_paid' => $transaction->isFullyPaid(),
             ]);
 
-            // Réponse adaptée au type de requête
-            return $this->handlePaymentResponse($payment, $transaction, $request, $isRefund);
+            return $this->handlePaymentResponse($payment, $transaction, $request, false);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -234,7 +315,6 @@ class PaymentController extends Controller
             return $this->handlePaymentError($e, $request);
         }
     }
-
     /**
      * Méthode intelligente pour obtenir un user_id valide - OPTION 2
      */
