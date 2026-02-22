@@ -533,6 +533,10 @@
     padding: 2px 7px; border-radius: 5px;
     border: 1px solid var(--amber-100);
 }
+.tag-largesse {
+    background: var(--green-50); color: var(--green-700);
+    border-color: var(--green-200);
+}
 
 /* ── Departure row ──────────────────────────── */
 .dep-row {
@@ -555,6 +559,10 @@
     padding: 4px 9px; border-radius: 6px;
     border: 1px solid #fde68a;
 }
+.dep-time-badge-largesse {
+    background: var(--green-100); color: var(--green-800);
+    border-color: var(--green-200);
+}
 .dep-actions { display: flex; gap: 6px; }
 
 .btn-dep-invoice {
@@ -575,6 +583,14 @@
     color: white; border-color: transparent;
     box-shadow: 0 3px 8px rgba(5,150,105,.3);
     transform: translateY(-1px);
+}
+.btn-dep-checkout-late {
+    background: var(--amber-50); color: #92400e;
+    border-color: var(--amber-200);
+}
+.btn-dep-checkout-late:hover {
+    background: linear-gradient(135deg, #b45309, #d97706);
+    color: white;
 }
 
 /* ── Card footer ────────────────────────────── */
@@ -623,6 +639,19 @@
     from { opacity: 0; transform: translateX(20px); }
     to   { opacity: 1; transform: translateX(0); }
 }
+
+/* ── Time badge ─────────────────────────────── */
+.time-badge {
+    background: var(--slate-100);
+    color: var(--slate-600);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: .7rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 10px;
+}
 </style>
 
 <div class="ci-page">
@@ -643,7 +672,12 @@
                 <span class="ci-header-icon"><i class="fas fa-door-open"></i></span>
                 Gestion des Check-in
             </h1>
-            <p class="ci-header-subtitle">Arrivées, séjours en cours et départs du {{ $today->format('d/m/Y') }}</p>
+            <p class="ci-header-subtitle">
+                Arrivées, séjours en cours et départs du {{ $today->format('d/m/Y') }}
+                <span class="time-badge">
+                    <i class="fas fa-clock"></i> Check-in 12h | Check-out 12h (largesse 14h)
+                </span>
+            </p>
         </div>
         <div class="ci-header-actions">
             <a href="{{ route('checkin.search') }}" class="btn-ci btn-ci-outline">
@@ -770,9 +804,20 @@
 
                         @foreach($reservations as $transaction)
                         @php
+                            $now = \Carbon\Carbon::now();
                             $today = \Carbon\Carbon::today();
                             $checkIn = \Carbon\Carbon::parse($transaction->check_in);
                             $checkInDate = $checkIn->copy()->startOfDay();
+                            $checkInTime = $checkIn->copy()->setTime(12, 0, 0);
+                            
+                            $canCheckin = $transaction->status == 'reservation' && 
+                                          $now->isSameDay($checkInDate) && 
+                                          $now->gte($checkInTime);
+                            $checkinTooEarly = $transaction->status == 'reservation' && 
+                                              $now->isSameDay($checkInDate) && 
+                                              $now->lt($checkInTime);
+                            $checkinFuture = $transaction->status == 'reservation' && 
+                                           !$now->isSameDay($checkInDate);
                         @endphp
                         <div class="res-row">
                             <!-- Guest -->
@@ -792,10 +837,12 @@
 
                             <!-- Time -->
                             <div class="res-time">
-                                <span class="res-time-val">{{ $transaction->check_in->format('H:i') }}</span>
+                                <span class="res-time-val">12:00</span>
                                 <span class="res-time-label">Arrivée</span>
-                                @if($today->lessThan($checkInDate))
-                                    <div class="date-indicator upcoming" style="font-size:.6rem;background:var(--amber-100);color:#92400e;padding:2px 4px;border-radius:4px;margin-top:2px;">J-{{ $today->diffInDays($checkInDate) }}</div>
+                                @if($now->lt($checkInDate))
+                                    <div class="date-indicator upcoming" style="font-size:.6rem;background:var(--amber-100);color:#92400e;padding:2px 4px;border-radius:4px;margin-top:2px;">J-{{ $now->diffInDays($checkInDate) }}</div>
+                                @elseif($checkinTooEarly)
+                                    <div class="date-indicator upcoming" style="font-size:.6rem;background:var(--blue-50);color:var(--blue-700);padding:2px 4px;border-radius:4px;margin-top:2px;">Attente 12h</div>
                                 @endif
                             </div>
 
@@ -807,16 +854,20 @@
 
                             <!-- Actions -->
                             <div class="res-actions">
-                                @if($transaction->status == 'reservation' && $today->greaterThanOrEqualTo($checkInDate))
+                                @if($canCheckin)
                                 <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
                                     @csrf
                                     <button type="submit" class="btn-res btn-res-checkin" onclick="return confirm('Confirmer l\'arrivée de {{ $transaction->customer->name }} ?')">
                                         <i class="fas fa-door-open"></i> Check-in
                                     </button>
                                 </form>
-                                @elseif($today->lessThan($checkInDate))
+                                @elseif($checkinTooEarly)
+                                <span class="btn-res btn-res-checkin" style="opacity:0.5;cursor:not-allowed;" title="Check-in possible à partir de 12h aujourd'hui">
+                                    <i class="fas fa-clock"></i> Check-in (12h)
+                                </span>
+                                @elseif($checkinFuture)
                                 <span class="btn-res btn-res-checkin" style="opacity:0.5;cursor:not-allowed;" title="Arrivée prévue le {{ $checkInDate->format('d/m/Y') }}">
-                                    <i class="fas fa-clock"></i> Check-in
+                                    <i class="fas fa-calendar"></i> Check-in
                                 </span>
                                 @endif
                                 
@@ -832,6 +883,14 @@
                         @endforeach
                     </div>
                     @endforeach
+                @endif
+
+                @if($upcomingReservations->isNotEmpty())
+                <div class="ci-card-footer">
+                    <a href="{{ route('transaction.index') }}?status=reservation" class="btn-ci-footer">
+                        <i class="fas fa-list"></i> Voir toutes les réservations
+                    </a>
+                </div>
                 @endif
             </div>
         </div>
@@ -861,8 +920,13 @@
                         $totalPayment = $transaction->getTotalPayment();
                         $remaining = $totalPrice - $totalPayment;
                         $isFullyPaid = $remaining <= 0;
-                        $checkOut = \Carbon\Carbon::parse($transaction->check_out);
-                        $today = \Carbon\Carbon::today();
+                        
+                        $now = \Carbon\Carbon::now();
+                        $checkOutTime = \Carbon\Carbon::parse($transaction->check_out)->setTime(12, 0, 0);
+                        $checkOutLargess = $checkOutTime->copy()->setTime(14, 0, 0);
+                        $canCheckout = $isFullyPaid && $now->gte($checkOutTime) && $now->lte($checkOutLargess);
+                        $isLate = $now->gt($checkOutLargess);
+                        $isInLargess = $now->gte($checkOutTime) && $now->lte($checkOutLargess);
                     @endphp
                     <div class="guest-card">
                         <div class="guest-card-top">
@@ -885,8 +949,11 @@
                         <div class="guest-card-footer">
                             <div class="guest-card-departure">
                                 <i class="fas fa-calendar-minus" style="color:var(--amber-500)"></i>
-                                Départ {{ $transaction->check_out->format('d/m à H:i') }}
-                                @if($today->greaterThanOrEqualTo($checkOut->copy()->startOfDay()))
+                                Départ {{ $transaction->check_out->format('d/m') }} à 12h00
+                                @if($isInLargess)
+                                    <span class="tag-urgent tag-largesse" style="margin-left:5px;">largesse</span>
+                                @endif
+                                @if($isLate)
                                     <span class="tag-urgent" style="margin-left:5px;">Dépassé</span>
                                 @endif
                             </div>
@@ -899,16 +966,20 @@
                                     <i class="fas fa-money-bill-wave-alt"></i>
                                 </a>
                                 @endif
-                                @if($isFullyPaid)
+                                @if($canCheckout)
                                 <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="btn-ghost-sm btn-ghost-sm-green" title="Check-out" onclick="return confirm('Confirmer le départ de {{ $transaction->customer->name }} ?')">
+                                    <button type="submit" class="btn-ghost-sm btn-ghost-sm-green" title="Check-out (largesse)" onclick="return confirm('Confirmer le départ de {{ $transaction->customer->name }} ?')">
                                         <i class="fas fa-sign-out-alt"></i>
                                     </button>
                                 </form>
+                                @elseif($isLate)
+                                <span class="btn-ghost-sm" style="opacity:0.5;cursor:not-allowed;background:var(--amber-50);" title="Départ après 14h - Prolongation nécessaire">
+                                    <i class="fas fa-hourglass-end"></i>
+                                </span>
                                 @else
-                                <span class="btn-ghost-sm" style="opacity:0.5;cursor:not-allowed;" title="Paiement requis avant départ">
-                                    <i class="fas fa-sign-out-alt"></i>
+                                <span class="btn-ghost-sm" style="opacity:0.5;cursor:not-allowed;" title="Check-out possible à partir de 12h">
+                                    <i class="fas fa-clock"></i>
                                 </span>
                                 @endif
                             </div>
@@ -948,6 +1019,13 @@
                         $totalPayment = $transaction->getTotalPayment();
                         $remaining = $totalPrice - $totalPayment;
                         $isFullyPaid = $remaining <= 0;
+                        
+                        $now = \Carbon\Carbon::now();
+                        $checkOutTime = \Carbon\Carbon::parse($transaction->check_out)->setTime(12, 0, 0);
+                        $checkOutLargess = $checkOutTime->copy()->setTime(14, 0, 0);
+                        $canCheckout = $isFullyPaid && $now->gte($checkOutTime) && $now->lte($checkOutLargess);
+                        $isLate = $now->gt($checkOutLargess);
+                        $isInLargess = $now->gte($checkOutTime) && $now->lte($checkOutLargess);
                     @endphp
                     <div class="dep-row">
                         <div class="dep-row-info">
@@ -961,27 +1039,47 @@
                             </div>
                         </div>
                         <div class="dep-row-right">
-                            <span class="dep-time-badge">{{ $transaction->check_out->format('H:i') }}</span>
+                            <span class="dep-time-badge {{ $isInLargess ? 'dep-time-badge-largesse' : '' }}">12:00</span>
                             <div class="dep-actions">
                                 <a href="{{ route('transaction.show', $transaction) }}" class="btn-dep-invoice">
                                     <i class="fas fa-file-invoice"></i>
                                 </a>
-                                @if($isFullyPaid)
+                                @if($canCheckout)
                                 <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
                                     @csrf
                                     <button type="submit" class="btn-dep-checkout" onclick="return confirm('Confirmer le départ ?')">
                                         <i class="fas fa-sign-out-alt"></i> Out
                                     </button>
                                 </form>
-                                @else
+                                @elseif($isLate && $isFullyPaid)
+                                <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <input type="hidden" name="override" value="1">
+                                    <button type="submit" class="btn-dep-checkout btn-dep-checkout-late" onclick="return confirm('Dérogation après 14h ? Confirmer le départ ?')">
+                                        <i class="fas fa-gavel"></i> Dérog.
+                                    </button>
+                                </form>
+                                @elseif(!$isFullyPaid)
                                 <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-dep-checkout" style="background:var(--red-50);color:var(--red-700);border-color:var(--red-200);">
                                     <i class="fas fa-money-bill-wave-alt"></i> Payer
                                 </a>
+                                @else
+                                <span class="btn-dep-checkout" style="opacity:0.5;cursor:not-allowed;" title="Check-out à partir de 12h">
+                                    <i class="fas fa-clock"></i> 12h
+                                </span>
                                 @endif
                             </div>
                         </div>
                     </div>
                     @endforeach
+                @endif
+
+                @if($todayDepartures->isNotEmpty())
+                <div class="ci-card-footer">
+                    <a href="{{ route('transaction.index') }}?check_out={{ $today->format('Y-m-d') }}" class="btn-ci-footer">
+                        <i class="fas fa-door-open"></i> Gérer tous les départs
+                    </a>
+                </div>
                 @endif
             </div>
 

@@ -663,6 +663,17 @@
                                    value="{{ old('customer_email') }}" placeholder="email@exemple.com">
                             @error('customer_email')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
+                        
+                        <!-- ✅ NOUVEAU CHAMP GENRE AJOUTÉ -->
+                        <div class="form-group">
+                            <label class="form-label">Genre <span class="req">*</span></label>
+                            <select name="gender" id="gender" class="form-control-dc @error('gender') error @enderror" required>
+                                <option value="">-- Sélectionnez --</option>
+                                <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>Homme</option>
+                                <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>Femme</option>
+                            </select>
+                            @error('gender')<div class="form-invalid">{{ $message }}</div>@enderror
+                        </div>
                     </div>
 
                     <div class="dc-step-nav">
@@ -896,6 +907,8 @@
                             <div class="summary-row"><span class="summary-key">Nom</span><span class="summary-val" id="s-name">—</span></div>
                             <div class="summary-row"><span class="summary-key">Téléphone</span><span class="summary-val" id="s-phone">—</span></div>
                             <div class="summary-row"><span class="summary-key">Email</span><span class="summary-val" id="s-email">—</span></div>
+                            <!-- ✅ AJOUT DU GENRE DANS LE RÉSUMÉ -->
+                            <div class="summary-row"><span class="summary-key">Genre</span><span class="summary-val" id="s-gender">—</span></div>
                         </div>
                         <div class="summary-box">
                             <div class="summary-box-title" style="color:var(--green-700)">
@@ -921,22 +934,6 @@
                             <div class="summary-row"><span class="summary-key">Prix/nuit</span><span class="summary-val" id="s-price2">—</span></div>
                             <div class="summary-row"><span class="summary-key">Total</span><span class="summary-val" id="s-total" style="color:var(--green-700);font-size:1rem">—</span></div>
                             <div class="summary-row"><span class="summary-key">Méthode</span><span class="summary-val">Direct</span></div>
-                        </div>
-                    </div>
-
-                    <!-- Acompte -->
-                    <div class="deposit-box">
-                        <div class="deposit-box-title">
-                            <i class="fas fa-credit-card"></i> Acompte
-                        </div>
-                        <label class="deposit-check-row">
-                            <input type="checkbox" id="pay-deposit" name="pay_deposit" value="1">
-                            <span class="deposit-check-label">Prendre un acompte de 30% à l'arrivée</span>
-                        </label>
-                        <div class="deposit-amount-row" id="deposit-amount-row">
-                            <i class="fas fa-coins"></i>
-                            Montant de l'acompte :
-                            <strong id="deposit-amount-val">—</strong>
                         </div>
                     </div>
 
@@ -1014,8 +1011,10 @@ function nextStep(next) {
     if (currentStep === 1) {
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
-        if (!name || !phone) {
-            showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
+        const gender = document.getElementById('gender').value;
+        
+        if (!name || !phone || !gender) {
+            showAlert('Veuillez remplir tous les champs obligatoires (nom, téléphone, genre).', 'error');
             return;
         }
     }
@@ -1121,9 +1120,14 @@ function buildSummary() {
     const co = new Date(document.getElementById('check_out').value);
     const fmtDate = d => d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
+    // Récupérer le genre pour l'afficher
+    const genderSelect = document.getElementById('gender');
+    const genderText = genderSelect.value === 'Male' ? 'Homme' : (genderSelect.value === 'Female' ? 'Femme' : '—');
+
     setText('s-name', document.getElementById('name').value);
     setText('s-phone', document.getElementById('phone').value);
     setText('s-email', document.getElementById('email').value || 'Non renseigné');
+    setText('s-gender', genderText);
     setText('s-room', `Chambre ${selectedRoomNumber}`);
     setText('s-room-type', selectedRoomType);
     setText('s-room-cap', `${selectedRoomCap} personne${selectedRoomCap > 1 ? 's' : ''}`);
@@ -1225,10 +1229,13 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('deposit-amount-row').style.display = this.checked ? 'flex' : 'none';
     });
 
-    /* Prevent double submit */
-    document.getElementById('direct-checkin-form').addEventListener('submit', function () {
+    /* Prevent double submit - CORRECTION ICI */
+    document.getElementById('direct-checkin-form').addEventListener('submit', function (e) {
         const btn = document.getElementById('confirm-checkin');
-        if (btn.disabled) { event.preventDefault(); return false; }
+        if (btn.disabled) { 
+            e.preventDefault(); 
+            return false; 
+        }
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement…';
     });

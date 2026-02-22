@@ -428,6 +428,15 @@ class CheckInController extends Controller
     
      public function processDirectCheckIn(Request $request)
     {
+         // 👇 LOG OBLIGATOIRE POUR VOIR SI LA METHODE EST APPELEE
+        \Log::info('🚀🚀🚀 processDirectCheckIn APPELEE', [
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+            'all_data' => $request->all()
+        ]);
+
         $request->validate([
             'room_id' => 'required|exists:rooms,id',
             'check_in' => 'required|date',
@@ -454,11 +463,12 @@ class CheckInController extends Controller
                 'name' => $request->customer_name,
                 'email' => $request->customer_email,
                 'phone' => $request->customer_phone,
-                // Ajoutez les champs requis pour votre table customers
                 'address' => 'À renseigner',
-                'gender' => 'Non spécifié',
+                'gender' => 'male',
                 'job' => 'Non spécifié',
                 'birthdate' => now()->subYears(30)->format('Y-m-d'),
+                'user_id' => auth()->id(),
+
             ]);
 
             // Calculer le nombre de nuits et le prix total
