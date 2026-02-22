@@ -705,6 +705,31 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                         </div>
+                        
+                        <!-- ✅ NOUVEAU CHAMP GENRE AJOUTÉ -->
+                        <div class="form-group">
+                            <label class="form-label">Genre <span class="req">*</span></label>
+                            <select name="gender" id="gender" class="form-control-dc <?php $__errorArgs = ['gender'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> error <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" required>
+                                <option value="">-- Sélectionnez --</option>
+                                <option value="Male" <?php echo e(old('gender') == 'Male' ? 'selected' : ''); ?>>Homme</option>
+                                <option value="Female" <?php echo e(old('gender') == 'Female' ? 'selected' : ''); ?>>Femme</option>
+                            </select>
+                            <?php $__errorArgs = ['gender'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?><div class="form-invalid"><?php echo e($message); ?></div><?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                        </div>
                     </div>
 
                     <div class="dc-step-nav">
@@ -980,6 +1005,8 @@ unset($__errorArgs, $__bag); ?>
                             <div class="summary-row"><span class="summary-key">Nom</span><span class="summary-val" id="s-name">—</span></div>
                             <div class="summary-row"><span class="summary-key">Téléphone</span><span class="summary-val" id="s-phone">—</span></div>
                             <div class="summary-row"><span class="summary-key">Email</span><span class="summary-val" id="s-email">—</span></div>
+                            <!-- ✅ AJOUT DU GENRE DANS LE RÉSUMÉ -->
+                            <div class="summary-row"><span class="summary-key">Genre</span><span class="summary-val" id="s-gender">—</span></div>
                         </div>
                         <div class="summary-box">
                             <div class="summary-box-title" style="color:var(--green-700)">
@@ -1098,8 +1125,10 @@ function nextStep(next) {
     if (currentStep === 1) {
         const name = document.getElementById('name').value.trim();
         const phone = document.getElementById('phone').value.trim();
-        if (!name || !phone) {
-            showAlert('Veuillez remplir tous les champs obligatoires.', 'error');
+        const gender = document.getElementById('gender').value;
+        
+        if (!name || !phone || !gender) {
+            showAlert('Veuillez remplir tous les champs obligatoires (nom, téléphone, genre).', 'error');
             return;
         }
     }
@@ -1205,9 +1234,14 @@ function buildSummary() {
     const co = new Date(document.getElementById('check_out').value);
     const fmtDate = d => d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
+    // Récupérer le genre pour l'afficher
+    const genderSelect = document.getElementById('gender');
+    const genderText = genderSelect.value === 'Male' ? 'Homme' : (genderSelect.value === 'Female' ? 'Femme' : '—');
+
     setText('s-name', document.getElementById('name').value);
     setText('s-phone', document.getElementById('phone').value);
     setText('s-email', document.getElementById('email').value || 'Non renseigné');
+    setText('s-gender', genderText);
     setText('s-room', `Chambre ${selectedRoomNumber}`);
     setText('s-room-type', selectedRoomType);
     setText('s-room-cap', `${selectedRoomCap} personne${selectedRoomCap > 1 ? 's' : ''}`);
@@ -1309,10 +1343,13 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('deposit-amount-row').style.display = this.checked ? 'flex' : 'none';
     });
 
-    /* Prevent double submit */
-    document.getElementById('direct-checkin-form').addEventListener('submit', function () {
+    /* Prevent double submit - CORRECTION ICI */
+    document.getElementById('direct-checkin-form').addEventListener('submit', function (e) {
         const btn = document.getElementById('confirm-checkin');
-        if (btn.disabled) { event.preventDefault(); return false; }
+        if (btn.disabled) { 
+            e.preventDefault(); 
+            return false; 
+        }
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement…';
     });
