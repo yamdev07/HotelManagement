@@ -95,6 +95,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-wrap: wrap;
 }
 
 .header-title h1 {
@@ -115,6 +116,20 @@
     color: white;
     font-size: 1.25rem;
     box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
+}
+
+/* Info badge heures */
+.info-badge {
+    background: var(--blue-50);
+    color: var(--blue-600);
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--blue-200);
 }
 
 /* Boutons */
@@ -193,6 +208,12 @@
 .btn-sm {
     padding: 6px 14px;
     font-size: 0.813rem;
+}
+
+.btn-modern:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
 }
 
 /* Badges statut */
@@ -519,6 +540,9 @@
                 <i class="fas fa-calendar-check"></i>
             </span>
             <h1>Réservation #{{ $transaction->id }}</h1>
+            <span class="info-badge">
+                <i class="fas fa-clock"></i> Check-in 12h | Check-out 12h (largesse 14h)
+            </span>
         </div>
         
         <div class="d-flex gap-2 flex-wrap">
@@ -577,7 +601,7 @@
         <i class="fas fa-calendar-check fa-2x" style="color: var(--amber-600);"></i>
         <div>
             <strong class="d-block mb-1">📅 RÉSERVATION</strong>
-            <p class="mb-0 small">Arrivée prévue : <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y à H:i') }}</strong></p>
+            <p class="mb-0 small">Arrivée prévue : <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }} à 12h00</strong></p>
         </div>
     </div>
     @elseif($transaction->status == 'active')
@@ -585,7 +609,7 @@
         <i class="fas fa-bed fa-2x" style="color: var(--primary-600);"></i>
         <div>
             <strong class="d-block mb-1">🏨 DANS L'HÔTEL</strong>
-            <p class="mb-0 small">Départ prévu : <strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y à H:i') }}</strong>
+            <p class="mb-0 small">Départ prévu : <strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }} à 12h00</strong>
             @if(\Carbon\Carbon::parse($transaction->check_out)->isPast())
                 <br><span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Départ dépassé</span>
             @endif
@@ -628,21 +652,47 @@
     @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
     <div class="quick-actions">
         @if($transaction->status == 'reservation')
-        <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
-            @csrf
-            <button type="submit" class="btn-modern btn-success-modern">
-                <i class="fas fa-sign-in-alt me-1"></i>Arrivée
-            </button>
-        </form>
+            @php
+                $now = \Carbon\Carbon::now();
+                $checkInDateTime = \Carbon\Carbon::parse($transaction->check_in)->setTime(12, 0, 0);
+            @endphp
+            @if($now->gte($checkInDateTime))
+                <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn-modern btn-success-modern">
+                        <i class="fas fa-sign-in-alt me-1"></i>Arrivée
+                    </button>
+                </form>
+            @else
+                <button type="button" class="btn-modern btn-outline-modern" disabled>
+                    <i class="fas fa-clock me-1"></i>Arrivée à 12h
+                </button>
+            @endif
         @endif
         
         @if($transaction->status == 'active')
-        <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
-            @csrf
-            <button type="submit" class="btn-modern btn-success-modern">
-                <i class="fas fa-sign-out-alt me-1"></i>Départ
-            </button>
-        </form>
+            @php
+                $now = \Carbon\Carbon::now();
+                $checkOutDateTime = \Carbon\Carbon::parse($transaction->check_out)->setTime(12, 0, 0);
+                $checkOutLargess = $checkOutDateTime->copy()->setTime(14, 0, 0);
+            @endphp
+            
+            @if($now->gte($checkOutDateTime) && $now->lte($checkOutLargess))
+                <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn-modern btn-success-modern">
+                        <i class="fas fa-sign-out-alt me-1"></i>Départ (largesse)
+                    </button>
+                </form>
+            @elseif($now->gt($checkOutLargess))
+                <button type="button" class="btn-modern btn-warning-modern" data-bs-toggle="modal" data-bs-target="#overrideModal">
+                    <i class="fas fa-gavel me-1"></i>Dérogation départ
+                </button>
+            @else
+                <button type="button" class="btn-modern btn-outline-modern" disabled>
+                    <i class="fas fa-clock me-1"></i>Départ à 12h
+                </button>
+            @endif
         @endif
         
         @if(in_array($transaction->status, ['reservation', 'active']))
@@ -743,7 +793,7 @@
                             <p class="detail-value">
                                 <i class="fas fa-calendar-check me-2" style="color: var(--primary-500);"></i>
                                 {{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}
-                                <span class="text-muted ms-2">{{ \Carbon\Carbon::parse($transaction->check_in)->format('H:i') }}</span>
+                                <span class="text-muted ms-2">12:00</span>
                             </p>
                         </div>
                         <div class="col-md-6">
@@ -751,7 +801,7 @@
                             <p class="detail-value">
                                 <i class="fas fa-calendar-times me-2" style="color: #ef4444;"></i>
                                 {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}
-                                <span class="text-muted ms-2">{{ \Carbon\Carbon::parse($transaction->check_out)->format('H:i') }}</span>
+                                <span class="text-muted ms-2">12:00</span>
                             </p>
                         </div>
                     </div>
@@ -992,6 +1042,44 @@
                     @endif
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal dérogation après 14h -->
+<div class="modal fade" id="overrideModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Dérogation départ après 14h
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir autoriser ce départ après 14h ?</p>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-clock me-2"></i>
+                        Départ prévu : {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }} à 12h00<br>
+                        Heure actuelle : {{ \Carbon\Carbon::now()->format('H:i') }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Raison de la dérogation :</label>
+                        <textarea name="override_reason" class="form-control" rows="2" 
+                                  placeholder="Pourquoi fermer les yeux ?" required></textarea>
+                    </div>
+                    <input type="hidden" name="override" value="1">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-check me-2"></i>Autoriser le départ
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

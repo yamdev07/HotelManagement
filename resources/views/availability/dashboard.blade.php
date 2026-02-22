@@ -256,10 +256,10 @@ body {
     gap: 14px;
 }
 
-/* Grille principale */
+/* Grille principale - MODIFIÉE pour 2 colonnes */
 .grid-main {
     display: grid;
-    grid-template-columns: 2fr 1.4fr 1.4fr;
+    grid-template-columns: 1fr 1fr;
     gap: 14px;
     align-items: start;
 }
@@ -433,42 +433,6 @@ body {
 .tbl tr:hover td { background: var(--gray-50); }
 
 /* ════════════════════════════════════════
-   RESERVATION ROWS
-════════════════════════════════════════ */
-.resa-group { margin-bottom: 12px; }
-.resa-group:last-child { margin-bottom: 0; }
-.resa-date {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 6px;
-}
-.resa-date__lbl {
-    font-size: 10px; font-weight: 700;
-    color: var(--gray-600);
-    text-transform: uppercase;
-    letter-spacing: .5px;
-}
-.resa-row {
-    display: flex; align-items: center; justify-content: space-between; gap: 8px;
-    padding: 8px 12px;
-    border: 1px solid var(--gray-200);
-    border-radius: 6px;
-    margin-bottom: 6px;
-    transition: var(--transition);
-}
-.resa-row:hover {
-    border-color: var(--primary);
-    background: var(--primary-soft);
-}
-.resa-name { font-size: 12.5px; font-weight: 600; color: var(--gray-800); }
-.resa-meta {
-    font-size: 11px; color: var(--gray-500);
-    margin-top: 2px;
-    display: flex; flex-wrap: wrap; gap: 5px;
-}
-.resa-meta span { display: flex; align-items: center; gap: 3px; }
-.resa-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-
-/* ════════════════════════════════════════
    OCCUPATION
 ════════════════════════════════════════ */
 .occ-grid {
@@ -552,10 +516,10 @@ body {
 ════════════════════════════════════════ */
 
 @media (max-width: 1100px) {
-    .grid-main {
-        grid-template-columns: 1fr 1fr;
+    .grid-main,
+    .grid-sec {
+        grid-template-columns: 1fr;
     }
-    .grid-main .card:first-child { grid-column: 1 / -1; }
 }
 
 @media (max-width: 680px) {
@@ -576,10 +540,6 @@ body {
     .db-qabar { padding: 0 12px; gap: 5px; }
     .db-qabar__label { display: none; }
     .qa-sep { display: none; }
-
-    .grid-main,
-    .grid-sec { grid-template-columns: 1fr; }
-    .grid-main .card:first-child { grid-column: auto; }
 
     .card__body { max-height: 260px; }
 }
@@ -694,9 +654,9 @@ body {
      ④ BODY
 ══════════════════════════════════════ --}}
 <div class="db-body">
-    {{-- GRILLE PRINCIPALE --}}
+    {{-- GRILLE PRINCIPALE - MODIFIÉE SANS ARRIVÉES/DÉPARTS --}}
     <div class="grid-main">
-        {{-- Chambres disponibles --}}
+        {{-- Chambres disponibles maintenant --}}
         <div class="card">
             <div class="card__head">
                 <div class="card__icon" style="background:var(--success-light);color:var(--success)">
@@ -761,128 +721,7 @@ body {
             @endif
         </div>
 
-        {{-- Arrivées --}}
-        <div class="card">
-            <div class="card__head">
-                <div class="card__icon" style="background:var(--primary-soft);color:var(--primary)">
-                    <i class="fas fa-sign-in-alt"></i>
-                </div>
-                <span class="card__title">Arrivées — 3 jours</span>
-                <span class="card__badge">
-                    <span class="badge badge--blue">
-                        {{ now()->format('d/m') }} → {{ now()->addDays(3)->format('d/m') }}
-                    </span>
-                </span>
-            </div>
-
-            <div class="card__body">
-                @if(count($upcomingArrivals) > 0)
-                    @foreach($upcomingArrivals as $date => $items)
-                    <div class="resa-group">
-                        <div class="resa-date">
-                            <span class="resa-date__lbl">{{ \Carbon\Carbon::parse($date)->translatedFormat('l d F') }}</span>
-                            <span class="badge badge--blue">{{ $items->count() }}</span>
-                        </div>
-                        @foreach($items as $arrival)
-                        <div class="resa-row">
-                            <div>
-                                <div class="resa-name">{{ $arrival->customer->name ?? 'Client inconnu' }}</div>
-                                <div class="resa-meta">
-                                    <span><i class="fas fa-bed"></i> Ch.{{ $arrival->room->number ?? 'N/A' }}</span>
-                                    <span><i class="fas fa-clock"></i> {{ $arrival->check_in->format('H:i') }}</span>
-                                    <span><i class="fas fa-user-friends"></i> {{ $arrival->person_count ?? 1 }}p.</span>
-                                </div>
-                            </div>
-                            <div class="resa-right">
-                                <span class="badge badge--cyan">{{ $arrival->room->type->name ?? 'N/A' }}</span>
-                                <a href="{{ route('transaction.show', $arrival->id) }}" class="btn btn--blue btn--icon">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                    @endforeach
-                @else
-                <div class="empty">
-                    <i class="fas fa-calendar-times"></i>
-                    <p>Aucune arrivée prévue<br>dans les 3 prochains jours</p>
-                </div>
-                @endif
-            </div>
-
-            @if(count($upcomingArrivals) > 0)
-            <div class="card__foot">
-                <a href="{{ route('availability.calendar') }}" class="btn btn--blue">
-                    <i class="fas fa-calendar-alt"></i> Voir le calendrier
-                </a>
-            </div>
-            @endif
-        </div>
-
-        {{-- Départs --}}
-        <div class="card">
-            <div class="card__head">
-                <div class="card__icon" style="background:var(--success-light);color:var(--success)">
-                    <i class="fas fa-sign-out-alt"></i>
-                </div>
-                <span class="card__title">Départs — 3 jours</span>
-                <span class="card__badge">
-                    <span class="badge badge--green">
-                        {{ now()->format('d/m') }} → {{ now()->addDays(3)->format('d/m') }}
-                    </span>
-                </span>
-            </div>
-
-            <div class="card__body">
-                @if(count($upcomingDepartures) > 0)
-                    @foreach($upcomingDepartures as $date => $items)
-                    <div class="resa-group">
-                        <div class="resa-date">
-                            <span class="resa-date__lbl">{{ \Carbon\Carbon::parse($date)->translatedFormat('l d F') }}</span>
-                            <span class="badge badge--green">{{ $items->count() }}</span>
-                        </div>
-                        @foreach($items as $departure)
-                        <div class="resa-row">
-                            <div>
-                                <div class="resa-name">{{ $departure->customer->name ?? 'Client inconnu' }}</div>
-                                <div class="resa-meta">
-                                    <span><i class="fas fa-bed"></i> Ch.{{ $departure->room->number ?? 'N/A' }}</span>
-                                    <span><i class="fas fa-clock"></i> {{ $departure->check_out->format('H:i') }}</span>
-                                    <span><i class="fas fa-user-friends"></i> {{ $departure->person_count ?? 1 }}p.</span>
-                                </div>
-                            </div>
-                            <div class="resa-right">
-                                <span class="badge badge--cyan">{{ $departure->room->type->name ?? 'N/A' }}</span>
-                                <a href="{{ route('transaction.show', $departure->id) }}" class="btn btn--green btn--icon">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                    @endforeach
-                @else
-                <div class="empty">
-                    <i class="fas fa-calendar-times"></i>
-                    <p>Aucun départ prévu<br>dans les 3 prochains jours</p>
-                </div>
-                @endif
-            </div>
-
-            @if(count($upcomingDepartures) > 0)
-            <div class="card__foot">
-                <a href="{{ route('checkin.index') }}" class="btn btn--green">
-                    <i class="fas fa-door-open"></i> Gérer les check-outs
-                </a>
-            </div>
-            @endif
-        </div>
-    </div>
-
-    {{-- GRILLE SECONDAIRE --}}
-    <div class="grid-sec">
-        {{-- Maintenance / Nettoyage --}}
+        {{-- REMPLACÉ PAR Maintenance / Nettoyage (déplacé ici) --}}
         <div class="card">
             <div class="card__head">
                 <div class="card__icon" style="background:var(--warning-light);color:var(--warning)">
@@ -953,7 +792,10 @@ body {
             </div>
             @endif
         </div>
+    </div>
 
+    {{-- GRILLE SECONDAIRE --}}
+    <div class="grid-sec">
         {{-- Occupation par type --}}
         <div class="card">
             <div class="card__head">
@@ -1003,6 +845,30 @@ body {
                     <p>Aucune donnée d'occupation disponible</p>
                 </div>
                 @endif
+            </div>
+        </div>
+
+        {{-- Carte vide pour équilibrer la grille (optionnelle) --}}
+        <div class="card">
+            <div class="card__head">
+                <div class="card__icon" style="background:var(--primary-soft);color:var(--primary)">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <span class="card__title">Informations</span>
+            </div>
+            <div class="card__body">
+                <div class="empty">
+                    <i class="fas fa-clock" style="color:var(--primary);opacity:.55"></i>
+                    <p>Les arrivées et départs<br>sont gérés dans les sections dédiées</p>
+                    <div class="d-flex gap-2 mt-2">
+                        <a href="{{ route('checkin.index') }}" class="btn btn--blue btn-sm">
+                            <i class="fas fa-door-open"></i> Check-in/out
+                        </a>
+                        <a href="{{ route('availability.calendar') }}" class="btn btn--green btn-sm">
+                            <i class="fas fa-calendar-alt"></i> Calendrier
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
