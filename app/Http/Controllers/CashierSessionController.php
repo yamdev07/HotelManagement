@@ -212,15 +212,26 @@ class CashierSessionController extends Controller
     {
         // Si déjà une session active, non
         if ($activeSession) {
+            \Log::info('CAN START: false - active session exists');
             return false;
         }
 
         // Vérifie le rôle
         $allowedRoles = ['Receptionist', 'Admin', 'Super', 'Cashier'];
-
-        return in_array($user->role, $allowedRoles);
+        
+        $result = in_array($user->role, $allowedRoles);
+        
+        // 🔴 NOUVEAU LOG
+        \Log::info('CAN START SESSION CHECK', [
+            'user_role' => $user->role,
+            'allowed_roles' => $allowedRoles,
+            'in_array' => $result ? 'OUI' : 'NON',
+            'active_session' => $activeSession ? 'OUI' : 'NON',
+            'final_result' => $result ? 'PEUT DÉMARRER' : 'NE PEUT PAS DÉMARRER'
+        ]);
+        
+        return $result;
     }
-
     /**
      * LISTE DES SESSIONS
      */
@@ -312,11 +323,9 @@ class CashierSessionController extends Controller
     {
         $user = Auth::user();
 
-        // Validation
+        // ✅ Validation - PLUS de initial_balance !
         $request->validate([
-            'initial_balance' => 'required|numeric|min:0',
-            'payment_method' => 'required|in:'.implode(',', array_keys(Payment::getPaymentMethods())),
-            'notes' => 'nullable|string|max:500',
+            'notes' => 'nullable|string|max:500', // Seulement notes
         ]);
 
         // Vérifie si une session active existe déjà
@@ -329,36 +338,39 @@ class CashierSessionController extends Controller
         DB::beginTransaction();
 
         try {
-            // Crée la session
+            $now = Carbon::now();
+            $hour = (int)$now->format('H');
+            
+            // Détermination du shift selon l'heure
+            $shiftType = 'morning';
+            
+            if ($hour >= 5 && $hour < 12) {
+                $shiftType = 'morning';
+            } elseif ($hour >= 12 && $hour < 17) {
+                $shiftType = 'afternoon';
+            } elseif ($hour >= 17 && $hour < 22) {
+                $shiftType = 'evening';
+            } elseif ($hour >= 22 || $hour < 5) {
+                $shiftType = 'night';
+            }
+
+            // ✅ Crée UNIQUEMENT la session, PAS de paiement
             $session = CashierSession::create([
                 'user_id' => $user->id,
-                'initial_balance' => $request->initial_balance,
-                'current_balance' => $request->initial_balance,
-                'start_time' => Carbon::now(),
+                'initial_balance' => 0, // Forcer à 0
+                'current_balance' => 0,
+                'start_time' => $now,
                 'status' => 'active',
                 'notes' => $request->notes,
+                'shift_type' => $shiftType,
             ]);
-
-            // Crée un paiement d'ouverture si solde > 0
-            if ($request->initial_balance > 0) {
-                Payment::create([
-                    'user_id' => $user->id,
-                    'created_by' => $user->id,
-                    'cashier_session_id' => $session->id,
-                    'amount' => $request->initial_balance,
-                    'status' => Payment::STATUS_COMPLETED,
-                    'payment_method' => $request->payment_method,
-                    'description' => 'Solde initial - Session #'.$session->id,
-                    'reference' => 'OPEN-'.$session->id.'-'.time(),
-                ]);
-            }
 
             DB::commit();
 
             \Log::info('Session started', [
                 'session_id' => $session->id,
                 'user_id' => $user->id,
-                'initial_balance' => $request->initial_balance,
+                'shift_type' => $shiftType,
             ]);
 
             return redirect()->route('cashier.dashboard')
@@ -377,7 +389,6 @@ class CashierSessionController extends Controller
                 ->withInput();
         }
     }
-
     /**
      * AFFICHAGE D'UNE SESSION
      */

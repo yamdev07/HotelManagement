@@ -13,196 +13,134 @@ use Illuminate\Support\Facades\Log;
 class DashboardController extends Controller
 {
     public function index(Request $request)
-    {
-        Log::info('=== DASHBOARD INDEX - START ===');
+{
+    $dateFilter = $request->get('date_filter', 'today');
+    $statusFilter = $request->get('status', null);
 
-        // Récupérer le paramètre de filtre
-        $dateFilter = $request->get('date_filter', 'today');
-        $statusFilter = $request->get('status', null);
+    $today = Carbon::today();
+    $now = Carbon::now();
 
-        // Base query pour les transactions
-        $query = Transaction::with([
-            'customer',
-            'room.type',
-            'room.roomStatus',
-            'payments' => function ($q) {
-                $q->where('status', 'completed');
-            },
-        ]);
+    $query = Transaction::with([
+        'customer',
+        'room.type',
+        'room.roomStatus',
+        'payments' => function ($q) {
+            $q->where('status', 'completed');
+        },
+    ]);
 
-        // Appliquer le filtre de date
-        $today = Carbon::today();
-        switch ($dateFilter) {
-            case 'today':
-                // Transactions actives aujourd'hui
-                $query->where(function ($q) use ($today) {
-                    $q->where('check_in', '<=', $today->endOfDay())
-                        ->where('check_out', '>=', $today->startOfDay());
-                });
-                break;
+    // --- FILTRE DATE (version sûre date+heure) ---
+    switch ($dateFilter) {
+        case 'today':
+            $query->whereDate('check_in', '<=', $today)
+                  ->whereDate('check_out', '>=', $today);
+            break;
 
-            case 'tomorrow':
-                $tomorrow = $today->copy()->addDay();
-                $query->where(function ($q) use ($tomorrow) {
-                    $q->where('check_in', '<=', $tomorrow->endOfDay())
-                        ->where('check_out', '>=', $tomorrow->startOfDay());
-                });
-                break;
+        case 'tomorrow':
+            $tomorrow = $today->copy()->addDay();
+            $query->whereDate('check_in', '<=', $tomorrow)
+                  ->whereDate('check_out', '>=', $tomorrow);
+            break;
 
-            case 'this_week':
-                $weekStart = $today->copy()->startOfWeek();
-                $weekEnd = $today->copy()->endOfWeek();
-                $query->whereBetween('check_in', [$weekStart, $weekEnd])
-                    ->orWhereBetween('check_out', [$weekStart, $weekEnd])
-                    ->orWhere(function ($q) use ($weekStart, $weekEnd) {
-                        $q->where('check_in', '<=', $weekStart)
-                            ->where('check_out', '>=', $weekEnd);
-                    });
-                break;
+        case 'this_week':
+            $weekStart = $today->copy()->startOfWeek();
+            $weekEnd = $today->copy()->endOfWeek();
+            $query->where(function ($q) use ($weekStart, $weekEnd) {
+                $q->whereBetween('check_in', [$weekStart, $weekEnd])
+                  ->orWhereBetween('check_out', [$weekStart, $weekEnd])
+                  ->orWhere(function ($qq) use ($weekStart, $weekEnd) {
+                      $qq->where('check_in', '<=', $weekStart)
+                         ->where('check_out', '>=', $weekEnd);
+                  });
+            });
+            break;
 
-            case 'all':
-                // Toutes les transactions actives
-                break;
-        }
-
-        // Filtrer par statut si spécifié
-        if ($statusFilter) {
-            $query->where('status', $statusFilter);
-        } else {
-            // Par défaut, exclure les annulées et no show
-            $query->whereNotIn('status', ['cancelled', 'no_show']);
-        }
-
-        // Obtenir les transactions
-        $transactions = Transaction::with([
-                'customer',
-                'room.type',
-                'room.roomStatus',
-                'payments' => function ($q) {
-                    $q->where('status', 'completed');
-                },
-            ])
-            ->where('status', 'active')
-            ->where('check_in', '<=', Carbon::now())
-            ->where('check_out', '>=', Carbon::now())
-            ->orderBy('check_out', 'asc')
-            ->get();
-        Log::info('Dashboard transactions count: '.$transactions->count());
-
-        // ====================
-        // CALCUL DES STATISTIQUES
-        // ====================
-
-        // 1. Transactions actives (dans l'hôtel en ce moment)
-        $activeTransactions = Transaction::where('status', 'active')
-            ->where('check_in', '<=', Carbon::now())
-            ->where('check_out', '>=', Carbon::now())
-            ->count();
-
-        // 2. Arrivées d'aujourd'hui
-        $todayArrivalsCount = Transaction::whereDate('check_in', $today)
-            ->whereIn('status', ['reservation', 'active'])
-            ->whereNotIn('status', ['cancelled', 'no_show'])
-            ->count();
-
-        // 3. Départs d'aujourd'hui
-        $todayDeparturesCount = Transaction::whereDate('check_out', $today)
-            ->where('status', 'active')
-            ->count();
-
-        // 4. Paiements en attente
-        $pendingPaymentTransactions = $transactions->filter(function ($transaction) {
-            $balance = $this->calculateBalance($transaction);
-
-            return $balance > 0;
-        });
-        $pendingPaymentsCount = $pendingPaymentTransactions->count();
-
-        // 5. Paiements urgents (départ dans 24h avec solde positif)
-        $urgentPaymentsCount = $pendingPaymentTransactions->filter(function ($transaction) {
-            $checkOut = Carbon::parse($transaction->check_out);
-            $hoursLeft = $checkOut->diffInHours(Carbon::now(), false);
-
-            return $hoursLeft <= 24 && $hoursLeft > 0;
-        })->count();
-
-        // 6. Complétés aujourd'hui (départ aujourd'hui et complètement payé)
-        $completedTodayCount = $transactions->filter(function ($transaction) use ($today) {
-            $isDepartingToday = Carbon::parse($transaction->check_out)->isSameDay($today);
-            $balance = $this->calculateBalance($transaction);
-
-            return $isDepartingToday && $balance <= 0;
-        })->count();
-
-        // 7. Arrivées de demain
-        $tomorrowArrivalsCount = Transaction::whereDate('check_in', $today->copy()->addDay())
-            ->whereIn('status', ['reservation'])
-            ->count();
-
-        // 8. Départs de demain
-        $tomorrowDeparturesCount = Transaction::whereDate('check_out', $today->copy()->addDay())
-            ->where('status', 'active')
-            ->count();
-
-        // 9. Arrivées après-demain
-        $day2ArrivalsCount = Transaction::whereDate('check_in', $today->copy()->addDays(2))
-            ->whereIn('status', ['reservation'])
-            ->count();
-
-        // 10. Départs après-demain
-        $day2DeparturesCount = Transaction::whereDate('check_out', $today->copy()->addDays(2))
-            ->where('status', 'active')
-            ->count();
-
-        // 11. Chambres disponibles
-        $availableRoomsCount = Room::where('room_status_id', 1)->count();
-
-        // 12. Taux d'occupation
-        $totalRoomsCount = Room::count();
-        $occupiedRoomsCount = Transaction::where('status', 'active')
-            ->where('check_in', '<=', Carbon::now())
-            ->where('check_out', '>=', Carbon::now())
-            ->distinct('room_id')
-            ->count('room_id');
-
-        $occupancyRate = $totalRoomsCount > 0
-            ? round(($occupiedRoomsCount / $totalRoomsCount) * 100, 2)
-            : 0;
-
-        $stats['occupancyByType'] = $this->getOccupancyByType();
-
-        // Compiler les statistiques
-        $stats = [
-            // Cartes principales
-            'activeGuests' => $activeTransactions,
-            'completedToday' => $completedTodayCount,
-            'pendingPayments' => $pendingPaymentsCount,
-            'urgentPayments' => $urgentPaymentsCount,
-
-            // Arrivées et départs
-            'todayArrivals' => $todayArrivalsCount,
-            'todayDepartures' => $todayDeparturesCount,
-            'tomorrowArrivals' => $tomorrowArrivalsCount,
-            'tomorrowDepartures' => $tomorrowDeparturesCount,
-            'day2Arrivals' => $day2ArrivalsCount,
-            'day2Departures' => $day2DeparturesCount,
-
-            // Chambres
-            'availableRooms' => $availableRoomsCount,
-            'occupiedRooms' => $occupiedRoomsCount,
-            'totalRooms' => $totalRoomsCount,
-            'occupancyRate' => $occupancyRate,
-
-            // Filtres actifs
-            'dateFilter' => $dateFilter,
-            'statusFilter' => $statusFilter,
-        ];
-
-        Log::info('Dashboard stats calculated', $stats);
-        Log::info('=== DASHBOARD INDEX - END ===');
-
-        return view('dashboard.index', compact('transactions', 'stats'));
+        case 'all':
+        default:
+            // rien
+            break;
     }
+
+    // --- FILTRE STATUT ---
+    if ($statusFilter) {
+        $query->where('status', $statusFilter);
+    } else {
+        $query->whereNotIn('status', ['cancelled', 'no_show']);
+    }
+
+    // ✅ Clients dans l’hôtel = pas check-out (au sens temps réel)
+    // IMPORTANT: on évite les bugs d'heure en passant par whereDate
+    $inHotelQuery = (clone $query)
+        ->whereIn('status', ['active']) // si tu veux inclure aussi 'reservation', ajoute-le ici
+        ->whereDate('check_in', '<=', $today)
+        ->whereDate('check_out', '>=', $today);
+
+    $transactions = $inHotelQuery
+        ->orderBy('check_out', 'asc')
+        ->get();
+
+    // --- STATS basées sur la même logique ---
+    $activeTransactions = $transactions->count();
+
+    $pendingPaymentTransactions = $transactions->filter(function ($transaction) {
+        return $this->calculateBalance($transaction) > 0;
+    });
+
+    $pendingPaymentsCount = $pendingPaymentTransactions->count();
+
+    $urgentPaymentsCount = $pendingPaymentTransactions->filter(function ($transaction) use ($now) {
+        $checkOut = Carbon::parse($transaction->check_out);
+        $hoursLeft = $checkOut->diffInHours($now, false);
+        return $hoursLeft <= 24 && $hoursLeft > 0;
+    })->count();
+
+    $completedTodayCount = $transactions->filter(function ($transaction) use ($today) {
+        $isDepartingToday = Carbon::parse($transaction->check_out)->isSameDay($today);
+        return $isDepartingToday && $this->calculateBalance($transaction) <= 0;
+    })->count();
+
+    $todayArrivalsCount = Transaction::whereDate('check_in', $today)
+        ->whereIn('status', ['reservation', 'active'])
+        ->whereNotIn('status', ['cancelled', 'no_show'])
+        ->count();
+
+    $todayDeparturesCount = Transaction::whereDate('check_out', $today)
+        ->where('status', 'active')
+        ->count();
+
+    $availableRoomsCount = Room::where('room_status_id', 1)->count();
+    $totalRoomsCount = Room::count();
+
+    $occupiedRoomsCount = Transaction::where('status', 'active')
+        ->whereDate('check_in', '<=', $today)
+        ->whereDate('check_out', '>=', $today)
+        ->distinct('room_id')
+        ->count('room_id');
+
+    $occupancyRate = $totalRoomsCount > 0
+        ? round(($occupiedRoomsCount / $totalRoomsCount) * 100, 2)
+        : 0;
+
+    $stats = [
+        'activeGuests' => $activeTransactions,
+        'completedToday' => $completedTodayCount,
+        'pendingPayments' => $pendingPaymentsCount,
+        'urgentPayments' => $urgentPaymentsCount,
+
+        'todayArrivals' => $todayArrivalsCount,
+        'todayDepartures' => $todayDeparturesCount,
+
+        'availableRooms' => $availableRoomsCount,
+        'occupiedRooms' => $occupiedRoomsCount,
+        'totalRooms' => $totalRoomsCount,
+        'occupancyRate' => $occupancyRate,
+
+        'dateFilter' => $dateFilter,
+        'statusFilter' => $statusFilter,
+    ];
+
+    return view('dashboard.index', compact('transactions', 'stats'));
+}
 
     /**
      * Calculer le solde d'une transaction

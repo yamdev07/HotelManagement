@@ -1057,317 +1057,317 @@
                         </div>
                         
                         <!-- Champs spécifiques -->
-<div class="method-fields-modern" id="methodFields">
-    <!-- Description (toujours visible) -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="form-group-modern">
-                <label class="form-label-modern">Description (optionnelle)</label>
-                <textarea class="form-control-modern" 
-                          name="description" 
-                          id="description"
-                          rows="2"
-                          placeholder="Informations sur le paiement..."></textarea>
-            </div>
-        </div>
-    </div>
+                        <div class="method-fields-modern" id="methodFields">
+                            <!-- Description (toujours visible) -->
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group-modern">
+                                        <label class="form-label-modern">Description (optionnelle)</label>
+                                        <textarea class="form-control-modern" 
+                                                name="description" 
+                                                id="description"
+                                                rows="2"
+                                                placeholder="Informations sur le paiement..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
 
-    <!-- ===== CHAMPS SPÉCIFIQUES PAR MÉTHODE ===== -->
-    
-    <!-- Mobile Money -->
-    <div id="fields_mobile_money" class="method-fields-group" style="display: none;">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-mobile-alt me-1"></i> Opérateur
-                    </label>
-                    <select name="mobile_operator" class="form-control-modern">
-                        <option value="">-- Sélectionner --</option>
-                        <option value="MTN">MTN Mobile Money</option>
-                        <option value="Moov">Moov Money</option>
-                        <option value="Orange">Orange Money</option>
-                        <option value="Airtel">Airtel Money</option>
-                        <option value="Wave">Wave</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-phone me-1"></i> Numéro de téléphone
-                    </label>
-                    <input type="tel" name="mobile_number" class="form-control-modern" 
-                           placeholder="Ex: 01 23 45 67 89">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-user me-1"></i> Nom du compte
-                    </label>
-                    <input type="text" name="account_name" class="form-control-modern" 
-                           placeholder="Nom du titulaire">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-hashtag me-1"></i> ID Transaction
-                    </label>
-                    <input type="text" name="mobile_transaction_id" class="form-control-modern" 
-                           placeholder="ID de transaction">
-                </div>
-            </div>
-        </div>
-    </div>
+                            <!-- ===== CHAMPS SPÉCIFIQUES PAR MÉTHODE ===== -->
+                            
+                            <!-- Mobile Money -->
+                            <div id="fields_mobile_money" class="method-fields-group" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-mobile-alt me-1"></i> Opérateur
+                                            </label>
+                                            <select name="mobile_operator" class="form-control-modern">
+                                                <option value="">-- Sélectionner --</option>
+                                                <option value="MTN">MTN Mobile Money</option>
+                                                <option value="Moov">Moov Money</option>
+                                                <option value="Orange">Orange Money</option>
+                                                <option value="Airtel">Airtel Money</option>
+                                                <option value="Wave">Wave</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-phone me-1"></i> Numéro de téléphone
+                                            </label>
+                                            <input type="tel" name="mobile_number" class="form-control-modern" 
+                                                placeholder="Ex: 01 23 45 67 89">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-user me-1"></i> Nom du compte
+                                            </label>
+                                            <input type="text" name="account_name" class="form-control-modern" 
+                                                placeholder="Nom du titulaire">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-hashtag me-1"></i> ID Transaction
+                                            </label>
+                                            <input type="text" name="mobile_transaction_id" class="form-control-modern" 
+                                                placeholder="ID de transaction">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-    <!-- Carte Bancaire -->
-    <div id="fields_card" class="method-fields-group" style="display: none;">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-credit-card me-1"></i> Numéro de carte
-                    </label>
-                    <input type="text" name="card_number" class="form-control-modern" 
-                           placeholder="**** **** **** 1234" maxlength="19">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-calendar me-1"></i> Expiration
-                    </label>
-                    <input type="text" name="card_expiry" class="form-control-modern" 
-                           placeholder="MM/AA">
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-lock me-1"></i> CVV
-                    </label>
-                    <input type="password" name="card_cvv" class="form-control-modern" 
-                           placeholder="***" maxlength="3">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-credit-card me-1"></i> Type de carte
-                    </label>
-                    <select name="card_type" class="form-control-modern">
-                        <option value="">-- Choisir --</option>
-                        <option value="Visa">Visa</option>
-                        <option value="Mastercard">Mastercard</option>
-                        <option value="Amex">American Express</option>
-                        <option value="CB">Carte Bancaire</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-user me-1"></i> Nom du titulaire
-                    </label>
-                    <input type="text" name="card_holder" class="form-control-modern" 
-                           placeholder="Nom sur la carte">
-                </div>
-            </div>
-        </div>
-    </div>
+                            <!-- Carte Bancaire -->
+                            <div id="fields_card" class="method-fields-group" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-credit-card me-1"></i> Numéro de carte
+                                            </label>
+                                            <input type="text" name="card_number" class="form-control-modern" 
+                                                placeholder="**** **** **** 1234" maxlength="19">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-calendar me-1"></i> Expiration
+                                            </label>
+                                            <input type="text" name="card_expiry" class="form-control-modern" 
+                                                placeholder="MM/AA">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-lock me-1"></i> CVV
+                                            </label>
+                                            <input type="password" name="card_cvv" class="form-control-modern" 
+                                                placeholder="***" maxlength="3">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-credit-card me-1"></i> Type de carte
+                                            </label>
+                                            <select name="card_type" class="form-control-modern">
+                                                <option value="">-- Choisir --</option>
+                                                <option value="Visa">Visa</option>
+                                                <option value="Mastercard">Mastercard</option>
+                                                <option value="Amex">American Express</option>
+                                                <option value="CB">Carte Bancaire</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-user me-1"></i> Nom du titulaire
+                                            </label>
+                                            <input type="text" name="card_holder" class="form-control-modern" 
+                                                placeholder="Nom sur la carte">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-    <!-- Virement Bancaire -->
-    <div id="fields_transfer" class="method-fields-group" style="display: none;">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-university me-1"></i> Banque
-                    </label>
-                    <input type="text" name="bank_name" class="form-control-modern" 
-                           placeholder="Nom de la banque">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-hashtag me-1"></i> Numéro de compte
-                    </label>
-                    <input type="text" name="account_number" class="form-control-modern" 
-                           placeholder="Numéro de compte">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-qrcode me-1"></i> Code IBAN
-                    </label>
-                    <input type="text" name="iban" class="form-control-modern" 
-                           placeholder="FR76 XXXX XXXX XXXX">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-barcode me-1"></i> Code BIC/SWIFT
-                    </label>
-                    <input type="text" name="bic" class="form-control-modern" 
-                           placeholder="BIC/SWIFT">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-user me-1"></i> Bénéficiaire
-                    </label>
-                    <input type="text" name="beneficiary" class="form-control-modern" 
-                           placeholder="Nom du bénéficiaire">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-calendar me-1"></i> Date de virement
-                    </label>
-                    <input type="date" name="transfer_date" class="form-control-modern" 
-                           value="<?php echo e(now()->format('Y-m-d')); ?>">
-                </div>
-            </div>
-        </div>
-    </div>
+                            <!-- Virement Bancaire -->
+                            <div id="fields_transfer" class="method-fields-group" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-university me-1"></i> Banque
+                                            </label>
+                                            <input type="text" name="bank_name" class="form-control-modern" 
+                                                placeholder="Nom de la banque">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-hashtag me-1"></i> Numéro de compte
+                                            </label>
+                                            <input type="text" name="account_number" class="form-control-modern" 
+                                                placeholder="Numéro de compte">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-qrcode me-1"></i> Code IBAN
+                                            </label>
+                                            <input type="text" name="iban" class="form-control-modern" 
+                                                placeholder="FR76 XXXX XXXX XXXX">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-barcode me-1"></i> Code BIC/SWIFT
+                                            </label>
+                                            <input type="text" name="bic" class="form-control-modern" 
+                                                placeholder="BIC/SWIFT">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-user me-1"></i> Bénéficiaire
+                                            </label>
+                                            <input type="text" name="beneficiary" class="form-control-modern" 
+                                                placeholder="Nom du bénéficiaire">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-calendar me-1"></i> Date de virement
+                                            </label>
+                                            <input type="date" name="transfer_date" class="form-control-modern" 
+                                                value="<?php echo e(now()->format('Y-m-d')); ?>">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-    <!-- Fedapay -->
-    <div id="fields_fedapay" class="method-fields-group" style="display: none;">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-fingerprint me-1"></i> Token Fedapay
-                    </label>
-                    <input type="text" name="fedapay_token" class="form-control-modern" 
-                           placeholder="Token de paiement">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-hashtag me-1"></i> ID Transaction
-                    </label>
-                    <input type="text" name="fedapay_transaction_id" class="form-control-modern" 
-                           placeholder="ID de transaction">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-mobile-alt me-1"></i> Méthode
-                    </label>
-                    <select name="fedapay_method" class="form-control-modern">
-                        <option value="card">Carte bancaire</option>
-                        <option value="mobile">Mobile Money</option>
-                        <option value="wallet">Wallet Fedapay</option>
-                    </select>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-check-circle me-1"></i> Statut
-                    </label>
-                    <select name="fedapay_status" class="form-control-modern">
-                        <option value="approved">Approuvé</option>
-                        <option value="pending">En attente</option>
-                        <option value="completed">Complété</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-    </div>
+                            <!-- Fedapay -->
+                            <div id="fields_fedapay" class="method-fields-group" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-fingerprint me-1"></i> Token Fedapay
+                                            </label>
+                                            <input type="text" name="fedapay_token" class="form-control-modern" 
+                                                placeholder="Token de paiement">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-hashtag me-1"></i> ID Transaction
+                                            </label>
+                                            <input type="text" name="fedapay_transaction_id" class="form-control-modern" 
+                                                placeholder="ID de transaction">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-mobile-alt me-1"></i> Méthode
+                                            </label>
+                                            <select name="fedapay_method" class="form-control-modern">
+                                                <option value="card">Carte bancaire</option>
+                                                <option value="mobile">Mobile Money</option>
+                                                <option value="wallet">Wallet Fedapay</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-check-circle me-1"></i> Statut
+                                            </label>
+                                            <select name="fedapay_status" class="form-control-modern">
+                                                <option value="approved">Approuvé</option>
+                                                <option value="pending">En attente</option>
+                                                <option value="completed">Complété</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-    <!-- Chèque -->
-    <div id="fields_check" class="method-fields-group" style="display: none;">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-hashtag me-1"></i> Numéro de chèque
-                    </label>
-                    <input type="text" name="check_number" class="form-control-modern" 
-                           placeholder="Numéro du chèque">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-university me-1"></i> Banque émettrice
-                    </label>
-                    <input type="text" name="issuing_bank" class="form-control-modern" 
-                           placeholder="Nom de la banque">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-user me-1"></i> Émetteur
-                    </label>
-                    <input type="text" name="issuer_name" class="form-control-modern" 
-                           placeholder="Nom de l'émetteur">
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-calendar me-1"></i> Date d'émission
-                    </label>
-                    <input type="date" name="issue_date" class="form-control-modern" 
-                           value="<?php echo e(now()->format('Y-m-d')); ?>">
-                </div>
-            </div>
-        </div>
-    </div>
+                            <!-- Chèque -->
+                            <div id="fields_check" class="method-fields-group" style="display: none;">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-hashtag me-1"></i> Numéro de chèque
+                                            </label>
+                                            <input type="text" name="check_number" class="form-control-modern" 
+                                                placeholder="Numéro du chèque">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-university me-1"></i> Banque émettrice
+                                            </label>
+                                            <input type="text" name="issuing_bank" class="form-control-modern" 
+                                                placeholder="Nom de la banque">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-user me-1"></i> Émetteur
+                                            </label>
+                                            <input type="text" name="issuer_name" class="form-control-modern" 
+                                                placeholder="Nom de l'émetteur">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-calendar me-1"></i> Date d'émission
+                                            </label>
+                                            <input type="date" name="issue_date" class="form-control-modern" 
+                                                value="<?php echo e(now()->format('Y-m-d')); ?>">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-    <!-- Espèces -->
-    <div id="fields_cash" class="method-fields-group">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-user me-1"></i> Reçu par
-                    </label>
-                    <input type="text" name="received_by" class="form-control-modern" 
-                           value="<?php echo e(auth()->user()->name); ?>" readonly>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="form-group-modern">
-                    <label class="form-label-modern">
-                        <i class="fas fa-check-circle me-1"></i> Monnaie rendue
-                    </label>
-                    <input type="text" name="change_given" class="form-control-modern" 
-                           placeholder="Monnaie à rendre">
-                </div>
-            </div>
-        </div>
-    </div>
+                            <!-- Espèces -->
+                            <div id="fields_cash" class="method-fields-group">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-user me-1"></i> Reçu par
+                                            </label>
+                                            <input type="text" name="received_by" class="form-control-modern" 
+                                                value="<?php echo e(auth()->user()->name); ?>" readonly>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group-modern">
+                                            <label class="form-label-modern">
+                                                <i class="fas fa-check-circle me-1"></i> Monnaie rendue
+                                            </label>
+                                            <input type="text" name="change_given" class="form-control-modern" 
+                                                placeholder="Monnaie à rendre">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-    <!-- Référence automatique (cachée) -->
-    <input type="hidden" name="reference" id="reference" value="">
-    
-    <div class="alert-modern alert-info mt-3">
-        <div class="alert-icon">
-            <i class="fas fa-info-circle"></i>
-        </div>
-        <div>
-            <small>
-                Une référence de paiement sera générée automatiquement.
-                <br>
-                <span id="referenceDisplay" class="fw-bold"></span>
-            </small>
-        </div>
-    </div>
-</div>>
+                            <!-- Référence automatique (cachée) -->
+                            <input type="hidden" name="reference" id="reference" value="">
+                            
+                            <div class="alert-modern alert-info mt-3">
+                                <div class="alert-icon">
+                                    <i class="fas fa-info-circle"></i>
+                                </div>
+                                <div>
+                                    <small>
+                                        Une référence de paiement sera générée automatiquement.
+                                        <br>
+                                        <span id="referenceDisplay" class="fw-bold"></span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>>
                     </div>
                 </div>
             </div>

@@ -79,6 +79,9 @@ class Payment extends Model
 
     const STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
 
+    const METHOD_MIXTE = 'mixte'; 
+
+
     // Constantes pour les méthodes de paiement
     const METHOD_CASH = 'cash';
 
@@ -221,6 +224,15 @@ class Payment extends Model
                 'icon' => 'fa-undo-alt',
                 'color' => 'danger',
                 'description' => 'Remboursement au client',
+                'requires_reference' => true,
+                'fields' => [],
+            ],
+
+            self::METHOD_MIXTE => [
+                'label' => 'Mixte (plusieurs moyens)',
+                'icon' => 'fa-random',
+                'color' => 'purple',
+                'description' => 'Combinaison de plusieurs modes de paiement',
                 'requires_reference' => true,
                 'fields' => [],
             ],
@@ -887,4 +899,6 @@ class Payment extends Model
             'can_refund' => $this->can_be_refunded,
         ];
     }
+
+    
 }

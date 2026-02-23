@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use App\Models\CashierSession; 
 
 class PaymentController extends Controller
 {
@@ -128,7 +129,40 @@ class PaymentController extends Controller
             'remaining_before' => $transaction->getRemainingPayment(),
         ]);
 
-        // Validation avec les nouveaux champs (optionnels)
+        // =====================================================
+        // ✅ 1. RÉCUPÉRER LA SESSION ACTIVE DU CAISSIER
+        // =====================================================
+        $activeSession = CashierSession::where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->first();
+
+        if (!$activeSession) {
+            Log::warning('Tentative de paiement sans session active', [
+                'user_id' => auth()->id(),
+                'transaction_id' => $transaction->id
+            ]);
+
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vous devez avoir une session de caisse active pour effectuer un paiement.',
+                    'redirect' => route('cashier.sessions.create')
+                ], 403);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Vous devez avoir une session de caisse active pour effectuer un paiement.')
+                ->with('warning', 'Veuillez démarrer une session depuis le module Caisse.');
+        }
+
+        Log::info('Session active trouvée', [
+            'session_id' => $activeSession->id,
+            'session_balance_before' => $activeSession->current_balance
+        ]);
+
+        // =====================================================
+        // 2. VALIDATION
+        // =====================================================
         $validator = Validator::make($request->all(), [
             'amount' => [
                 'required',
@@ -144,7 +178,7 @@ class PaymentController extends Controller
             'payment_method' => 'required|in:'.implode(',', array_keys(Payment::getPaymentMethods())),
             'description' => 'nullable|string|max:500',
             
-            // ✅ NOUVEAUX CHAMPS (TOUS OPTIONNELS)
+            // Nouveaux champs optionnels
             'mobile_operator' => 'nullable|string|max:50',
             'mobile_number' => 'nullable|string|max:20',
             'account_name' => 'nullable|string|max:100',
@@ -196,22 +230,28 @@ class PaymentController extends Controller
         DB::beginTransaction();
 
         try {
-            // OPTION 2 : Trouver le bon user_id de manière intelligente
+            // =====================================================
+            // 3. DÉTERMINER LE USER_ID VALIDE
+            // =====================================================
             $userId = $this->getValidUserId();
 
             Log::info('Identifiant utilisateur déterminé', [
                 'user_id' => $userId,
                 'auth_user' => auth()->id(),
+                'cashier_session_id' => $activeSession->id,
             ]);
 
-            // Générer une référence unique
+            // =====================================================
+            // 4. GÉNÉRER UNE RÉFÉRENCE UNIQUE
+            // =====================================================
             $reference = $this->generateUniqueReference($validated['payment_method'], $transaction);
 
-            // ===== CONSTRUIRE LA DESCRIPTION AVEC TOUS LES DÉTAILS =====
+            // =====================================================
+            // 5. CONSTRUIRE LA DESCRIPTION AVEC LES DÉTAILS
+            // =====================================================
             $baseDescription = $validated['description'] ?? '';
             $details = [];
 
-            // Collecter les détails selon la méthode
             switch ($validated['payment_method']) {
                 case 'mobile_money':
                     if ($request->filled('mobile_operator')) $details[] = "📱 Opérateur: " . $request->mobile_operator;
@@ -255,7 +295,13 @@ class PaymentController extends Controller
                     break;
             }
 
-            // Construire la description finale
+            $sessionInfo = "🆔 Session #{$activeSession->id} - " . $activeSession->shift_label;
+            if (!empty($details)) {
+                array_unshift($details, $sessionInfo);
+            } else {
+                $details[] = $sessionInfo;
+            }
+
             $finalDescription = $baseDescription;
             if (!empty($details)) {
                 $finalDescription .= "\n\n━━━━━━━━━━━━━━━━━━━━━━\n";
@@ -265,30 +311,47 @@ class PaymentController extends Controller
                 $finalDescription .= "\n━━━━━━━━━━━━━━━━━━━━━━";
             }
 
-            // Préparer les données avec user_id CORRECT
+            // =====================================================
+            // 6. CRÉER LE PAIEMENT AVEC LIEN VERS LA SESSION
+            // =====================================================
             $paymentData = [
                 'user_id' => $userId,
                 'created_by' => auth()->id(),
                 'transaction_id' => $transaction->id,
+                'cashier_session_id' => $activeSession->id, // 👈 LIEN CRUCIAL
                 'amount' => (float) $validated['amount'],
                 'payment_method' => $validated['payment_method'],
                 'status' => Payment::STATUS_COMPLETED,
                 'reference' => $reference,
-                'description' => $finalDescription, // ← Description enrichie
+                'description' => $finalDescription,
             ];
 
-            // Création du paiement
             $payment = Payment::create($paymentData);
 
-            Log::info('Paiement créé', [
+            Log::info('Paiement créé avec lien vers session', [
                 'payment_id' => $payment->id,
+                'cashier_session_id' => $activeSession->id,
                 'amount' => $payment->amount,
                 'reference' => $payment->reference,
                 'method' => $payment->payment_method,
-                'description_length' => strlen($payment->description),
             ]);
 
-            // FORCER la mise à jour des totaux de la transaction
+            // =====================================================
+            // 7. METTRE À JOUR LE SOLDE DE LA SESSION
+            // =====================================================
+            $activeSession->current_balance += $payment->amount;
+            $activeSession->save();
+
+            Log::info('Solde de session mis à jour', [
+                'session_id' => $activeSession->id,
+                'old_balance' => $activeSession->current_balance - $payment->amount,
+                'new_balance' => $activeSession->current_balance,
+                'added_amount' => $payment->amount
+            ]);
+
+            // =====================================================
+            // 8. METTRE À JOUR LA TRANSACTION
+            // =====================================================
             $this->forceUpdateTransactionTotals($transaction);
 
             DB::commit();
@@ -296,6 +359,8 @@ class PaymentController extends Controller
             Log::info('=== PAIEMENT TERMINÉ AVEC SUCCÈS ===', [
                 'payment_id' => $payment->id,
                 'transaction_id' => $transaction->id,
+                'cashier_session_id' => $activeSession->id,
+                'session_balance' => $activeSession->current_balance,
                 'new_remaining' => $transaction->getRemainingPayment(),
                 'is_fully_paid' => $transaction->isFullyPaid(),
             ]);
@@ -310,11 +375,13 @@ class PaymentController extends Controller
                 'trace' => $e->getTraceAsString(),
                 'transaction_id' => $transaction->id,
                 'user_trying' => auth()->id(),
+                'session_id' => $activeSession->id ?? null,
             ]);
 
             return $this->handlePaymentError($e, $request);
         }
     }
+
     /**
      * Méthode intelligente pour obtenir un user_id valide - OPTION 2
      */

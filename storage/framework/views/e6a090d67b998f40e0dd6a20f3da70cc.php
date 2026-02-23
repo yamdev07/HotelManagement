@@ -141,7 +141,7 @@
                             <i class="fas fa-shopping-bag"></i>
                         </div>
                         <div class="nav-content">
-                            <div class="nav-title">Liste des réservations</div>
+                            <div class="nav-title">Liste des Clients</div>
                             <div class="nav-subtitle">Réservations & Séjours</div>
                         </div>
                     </a>

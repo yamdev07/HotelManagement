@@ -853,7 +853,7 @@ class TransactionController extends Controller
     /**
      * ACTION RAPIDE : MARQUER COMME PARTI (AVEC DIRTY)
      */
-    public function markAsDeparted(Transaction $transaction)
+    public function markAsDeparted(Request $request, Transaction $transaction) // AJOUTER Request $request
     {
         if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
             abort(403, 'Accès non autorisé');
@@ -888,11 +888,30 @@ class TransactionController extends Controller
                 "Si le client est encore là, veuillez prolonger le séjour.");
         }
 
-        // Après 14h : trop tard, doit prolonger
-        if ($now->gt($checkOutLargess)) {
+        // =====================================================
+        // ✅ NOUVEAU : GESTION DE LA DÉROGATION
+        // =====================================================
+        $isOverride = $request->has('override') && $request->override == 1;
+
+        // Après 14h : normalement interdit, SAUF si dérogation
+        if ($now->gt($checkOutLargess) && !$isOverride) {
             return redirect()->back()->with('error',
                 "⚠️ Départ après 14h. La largesse de 2h est dépassée. " .
-                "Veuillez prolonger le séjour d'une nuit supplémentaire.");
+                "Veuillez prolonger le séjour d'une nuit supplémentaire ou utiliser une dérogation.");
+        }
+
+        // Si c'est une dérogation après 14h, vérifier la raison
+        if ($isOverride && $now->gt($checkOutLargess)) {
+            $request->validate([
+                'override_reason' => 'required|string|max:500',
+            ]);
+            
+            Log::info('✅ DÉROGATION ACCORDÉE - Départ après 14h', [
+                'transaction_id' => $transaction->id,
+                'heure_depart' => $now->format('H:i'),
+                'raison' => $request->override_reason,
+                'autorise_par' => auth()->user()->name
+            ]);
         }
 
         // Avant 12h : trop tôt
@@ -938,19 +957,27 @@ class TransactionController extends Controller
             }
 
             if (auth()->user()->role === 'Receptionist') {
+                $actionData = [
+                    'action' => 'quick_departure',
+                    'time' => now()->format('H:i:s'),
+                    'room' => $transaction->room->number ?? 'N/A',
+                    'total_paid' => $transaction->getTotalPayment(),
+                    'room_status' => 'dirty',
+                    'departure_time' => $now->format('H:i'),
+                    'within_largess' => ($now->gte($checkOutDeadline) && $now->lte($checkOutLargess)) ? 'yes' : 'no'
+                ];
+                
+                // Ajouter les infos de dérogation si applicable
+                if ($isOverride && $now->gt($checkOutLargess)) {
+                    $actionData['is_override'] = true;
+                    $actionData['override_reason'] = $request->override_reason;
+                }
+
                 $this->logReceptionistAction(
                     actionType: 'checkout',
                     actionSubtype: 'create',
                     actionable: $transaction,
-                    actionData: [
-                        'action' => 'quick_departure',
-                        'time' => now()->format('H:i:s'),
-                        'room' => $transaction->room->number ?? 'N/A',
-                        'total_paid' => $transaction->getTotalPayment(),
-                        'room_status' => 'dirty',
-                        'departure_time' => $now->format('H:i'),
-                        'within_largess' => ($now->gte($checkOutDeadline) && $now->lte($checkOutLargess)) ? 'yes' : 'no'
-                    ],
+                    actionData: $actionData,
                     beforeState: $beforeState,
                     afterState: $this->getTransactionState($transaction, true),
                     notes: 'Client marqué comme parti - Chambre marquée À NETTOYER' . $largessMessage
@@ -959,9 +986,16 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            $successMessage = "✅ Départ enregistré à " . $now->format('H:i') . $largessMessage . " ! " .
-                            "Chambre " . $transaction->room->number . " marquée comme À NETTOYER. " .
-                            "Housekeeping informé - Nettoyage requis.";
+            // Message personnalisé selon le type de départ
+            if ($isOverride && $now->gt($checkOutLargess)) {
+                $successMessage = "✅ DÉROGATION ACCORDÉE - Départ enregistré à " . $now->format('H:i') . " !<br>" .
+                                "Raison: " . $request->override_reason . "<br>" .
+                                "Chambre " . $transaction->room->number . " marquée comme À NETTOYER.";
+            } else {
+                $successMessage = "✅ Départ enregistré à " . $now->format('H:i') . $largessMessage . " !<br>" .
+                                "Chambre " . $transaction->room->number . " marquée comme À NETTOYER. " .
+                                "Housekeeping informé - Nettoyage requis.";
+            }
 
             return redirect()->back()->with('success', $successMessage);
 
