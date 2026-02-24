@@ -63,6 +63,8 @@ class CashierSession extends Model
         'declared_amount' => 'decimal:2',
         'actual_amount' => 'decimal:2',
         'verified_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     protected $appends = [
@@ -95,25 +97,17 @@ class CashierSession extends Model
     ];
 
     const STATUS_ACTIVE = 'active';
-
     const STATUS_CLOSED = 'closed';
-
     const STATUS_PENDING_REVIEW = 'pending_review';
-
     const STATUS_VERIFIED = 'verified';
-
     const STATUS_ABANDONED = 'abandoned';
-
     const STATUS_SUSPENDED = 'suspended';
+    const STATUS_LOCKED = 'locked';
 
     const SHIFT_MORNING = 'morning';
-
     const SHIFT_EVENING = 'evening';
-
     const SHIFT_NIGHT = 'night';
-
     const SHIFT_FULL_DAY = 'full_day';
-
     const SHIFT_CUSTOM = 'custom';
 
     const ALLOWED_DIFFERENCE = 1000; // Tolérance de 1000 CFA
@@ -138,7 +132,8 @@ class CashierSession extends Model
             });
     }
 
-    // Relations
+    // ==================== RELATIONS ====================
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -169,7 +164,8 @@ class CashierSession extends Model
         return $this->hasMany(SessionActivity::class, 'cashier_session_id');
     }
 
-    // Méthodes pratiques
+    // ==================== MÉTHODES DE VÉRIFICATION ====================
+
     public function isActive()
     {
         return $this->status === self::STATUS_ACTIVE;
@@ -215,6 +211,8 @@ class CashierSession extends Model
         return $this->isClosed() && ! $this->isVerified();
     }
 
+    // ==================== MÉTHODES DE CALCUL ====================
+
     public function calculateTheoreticalBalance()
     {
         $totalPayments = $this->payments()
@@ -222,8 +220,7 @@ class CashierSession extends Model
             ->sum('amount');
 
         $totalRefunds = $this->payments()
-            ->where('status', Payment::STATUS_REFUNDED)
-            ->orWhere('status', Payment::STATUS_PARTIALLY_REFUNDED)
+            ->whereIn('status', [Payment::STATUS_REFUNDED, Payment::STATUS_PARTIALLY_REFUNDED])
             ->sum('amount');
 
         return $this->initial_balance + $totalPayments - $totalRefunds;
@@ -331,7 +328,313 @@ class CashierSession extends Model
         ]);
     }
 
-    // Accesseurs
+    // ==================== ACTIONS ====================
+
+    public function openSession($userId, $initialBalance = 0, $notes = '')
+    {
+        $this->user_id = $userId;
+        $this->initial_balance = $initialBalance;
+        $this->current_balance = $initialBalance;
+        $this->status = self::STATUS_ACTIVE;
+        $this->start_time = now();
+        $this->notes = $notes;
+        $this->shift_type = $this->determineShiftType();
+        $this->save();
+
+        activity()
+            ->causedBy(User::find($userId))
+            ->performedOn($this)
+            ->withProperties([
+                'initial_balance' => $initialBalance,
+                'shift' => $this->shift_label,
+                'terminal_id' => $this->terminal_id,
+                'notes' => $notes,
+            ])
+            ->log('a ouvert une session de caisse');
+
+        $this->logActivity('session_started', 'Session ouverte', $this, [
+            'initial_balance' => $initialBalance,
+            'shift' => $this->shift_label,
+        ]);
+
+        return $this;
+    }
+
+    public function closeSession($userId, $finalBalance = null, $closingNotes = '')
+    {
+        if (! $this->canBeClosed()) {
+            return false;
+        }
+
+        $finalBalance = $finalBalance ?? $this->current_balance;
+        $theoreticalBalance = $this->calculateTheoreticalBalance();
+        $difference = $finalBalance - $theoreticalBalance;
+
+        $this->final_balance = $finalBalance;
+        $this->theoretical_balance = $theoreticalBalance;
+        $this->balance_difference = $difference;
+        $this->status = self::STATUS_CLOSED;
+        $this->end_time = now();
+        $this->closed_by = $userId;
+        $this->closing_notes = $closingNotes;
+
+        // Calculer les totaux par méthode
+        $this->calculatePaymentTotals();
+
+        // Déterminer s'il y a un écart
+        if (abs($difference) > self::ALLOWED_DIFFERENCE) {
+            if ($difference > 0) {
+                $this->excess_amount = $difference;
+            } else {
+                $this->shortage_amount = abs($difference);
+            }
+        }
+
+        $this->save();
+
+        activity()
+            ->causedBy(User::find($userId))
+            ->performedOn($this)
+            ->withProperties([
+                'final_balance' => $finalBalance,
+                'theoretical_balance' => $theoreticalBalance,
+                'difference' => $difference,
+                'total_revenue' => $this->getTotalRevenue(),
+                'payment_count' => $this->getPaymentCount(),
+                'transaction_count' => $this->getTransactionCount(),
+                'closing_notes' => $closingNotes,
+            ])
+            ->log('a fermé une session de caisse');
+
+        $this->logActivity('session_closed', 'Session fermée', $this, [
+            'final_balance' => $finalBalance,
+            'difference' => $difference,
+            'duration' => $this->duration ? $this->duration->format('%h heures %i minutes') : 'N/A',
+        ]);
+
+        return $this;
+    }
+
+    public function verifySession($userId, $notes = '')
+    {
+        if (! $this->canBeVerified()) {
+            return false;
+        }
+
+        $oldStatus = $this->status;
+
+        $this->status = self::STATUS_VERIFIED;
+        $this->verified_by = $userId;
+        $this->verified_at = now();
+        $this->save();
+
+        activity()
+            ->causedBy(User::find($userId))
+            ->performedOn($this)
+            ->withProperties([
+                'old_status' => $oldStatus,
+                'new_status' => self::STATUS_VERIFIED,
+                'balance_difference' => $this->balance_difference,
+                'is_balanced' => $this->is_balanced,
+                'verification_notes' => $notes,
+            ])
+            ->log('a vérifié une session de caisse');
+
+        $this->logActivity('session_verified', 'Session vérifiée', $this, [
+            'verified_by' => $this->verification_user_name,
+            'balance_status' => $this->is_balanced ? 'Équilibrée' : 'Déséquilibrée',
+        ]);
+
+        return $this;
+    }
+
+    public function suspendSession($userId, $reason = '')
+    {
+        if (! $this->isActive()) {
+            return false;
+        }
+
+        $oldStatus = $this->status;
+
+        $this->status = self::STATUS_SUSPENDED;
+        $this->save();
+
+        activity()
+            ->causedBy(User::find($userId))
+            ->performedOn($this)
+            ->withProperties([
+                'old_status' => $oldStatus,
+                'new_status' => self::STATUS_SUSPENDED,
+                'reason' => $reason,
+                'suspended_at' => now(),
+            ])
+            ->log('a suspendu une session de caisse');
+
+        $this->logActivity('session_suspended', 'Session suspendue', $this, [
+            'reason' => $reason,
+        ]);
+
+        return $this;
+    }
+
+    public function reopenSession($userId, $reason = '')
+    {
+        if (! $this->canBeReopened()) {
+            return false;
+        }
+
+        $oldStatus = $this->status;
+
+        $this->status = self::STATUS_ACTIVE;
+        $this->end_time = null;
+        $this->closed_by = null;
+        $this->closing_notes = null;
+        $this->save();
+
+        activity()
+            ->causedBy(User::find($userId))
+            ->performedOn($this)
+            ->withProperties([
+                'old_status' => $oldStatus,
+                'new_status' => self::STATUS_ACTIVE,
+                'reason' => $reason,
+            ])
+            ->log('a rouvert une session de caisse');
+
+        $this->logActivity('session_reopened', 'Session rouverte', $this, [
+            'reason' => $reason,
+        ]);
+
+        return $this;
+    }
+
+    public function abandonSession($userId, $reason = '')
+    {
+        if (! $this->isActive() && ! $this->isSuspended()) {
+            return false;
+        }
+
+        $oldStatus = $this->status;
+
+        $this->status = self::STATUS_ABANDONED;
+        $this->end_time = now();
+        $this->closed_by = $userId;
+        $this->closing_notes = 'Session abandonnée: '.$reason;
+        $this->save();
+
+        activity()
+            ->causedBy(User::find($userId))
+            ->performedOn($this)
+            ->withProperties([
+                'old_status' => $oldStatus,
+                'new_status' => self::STATUS_ABANDONED,
+                'reason' => $reason,
+                'abandoned_at' => now(),
+            ])
+            ->log('a abandonné une session de caisse');
+
+        $this->logActivity('session_abandoned', 'Session abandonnée', $this, [
+            'reason' => $reason,
+        ]);
+
+        return $this;
+    }
+
+    private function determineShiftType()
+    {
+        $hour = now()->hour;
+
+        if ($hour >= 6 && $hour < 14) {
+            return self::SHIFT_MORNING;
+        } elseif ($hour >= 14 && $hour < 22) {
+            return self::SHIFT_EVENING;
+        } else {
+            return self::SHIFT_NIGHT;
+        }
+    }
+
+    private function calculatePaymentTotals()
+    {
+        $methods = Payment::getPaymentMethods();
+
+        foreach ($methods as $method => $details) {
+            $total = $this->payments()
+                ->where('status', Payment::STATUS_COMPLETED)
+                ->where('payment_method', $method)
+                ->sum('amount');
+
+            $field = 'total_'.strtolower(str_replace('_', '', $method));
+
+            if (in_array($field, $this->fillable)) {
+                $this->$field = $total;
+            }
+        }
+    }
+
+    // ==================== SCOPES ====================
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', self::STATUS_ACTIVE);
+    }
+
+    public function scopeForUser($query, $userId)
+    {
+        return $query->where('user_id', $userId);
+    }
+
+    public function scopeToday($query)
+    {
+        return $query->whereDate('created_at', today());
+    }
+
+    public function scopeThisWeek($query)
+    {
+        return $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+    }
+
+    public function scopeThisMonth($query)
+    {
+        return $query->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year);
+    }
+
+    public function scopeByStatus($query, $status)
+    {
+        if ($status) {
+            return $query->where('status', $status);
+        }
+
+        return $query;
+    }
+
+    public function scopeByShift($query, $shift)
+    {
+        if ($shift) {
+            return $query->where('shift_type', $shift);
+        }
+
+        return $query;
+    }
+
+    public function scopeWithDiscrepancy($query)
+    {
+        return $query->whereRaw('ABS(balance_difference) > ?', [self::ALLOWED_DIFFERENCE]);
+    }
+
+    public function scopeBalanced($query)
+    {
+        return $query->whereRaw('ABS(balance_difference) <= ?', [self::ALLOWED_DIFFERENCE]);
+    }
+
+    public function scopeUnverified($query)
+    {
+        return $query->where('status', self::STATUS_CLOSED)
+            ->orWhere('status', self::STATUS_PENDING_REVIEW);
+    }
+
+    // ==================== ACCESSORS ====================
+
     public function getDurationAttribute()
     {
         if (! $this->start_time) {
@@ -519,369 +822,6 @@ class CashierSession extends Model
         return $this->verifiedByUser ? $this->verifiedByUser->name : 'Non vérifiée';
     }
 
-    // Actions
-    public function openSession($userId, $initialBalance = 0, $notes = '')
-    {
-        $this->user_id = $userId;
-        $this->initial_balance = $initialBalance;
-        $this->current_balance = $initialBalance;
-        $this->status = self::STATUS_ACTIVE;
-        $this->start_time = now();
-        $this->notes = $notes;
-        $this->shift_type = $this->determineShiftType();
-        $this->save();
-
-        // Log activité
-        activity()
-            ->causedBy(User::find($userId))
-            ->performedOn($this)
-            ->withProperties([
-                'initial_balance' => $initialBalance,
-                'shift' => $this->shift_label,
-                'terminal_id' => $this->terminal_id,
-                'notes' => $notes,
-            ])
-            ->log('a ouvert une session de caisse');
-
-        // Log session
-        $this->logActivity('session_started', 'Session ouverte', $this, [
-            'initial_balance' => $initialBalance,
-            'shift' => $this->shift_label,
-        ]);
-
-        return $this;
-    }
-
-    public function closeSession($userId, $finalBalance = null, $closingNotes = '')
-    {
-        if (! $this->canBeClosed()) {
-            return false;
-        }
-
-        $finalBalance = $finalBalance ?? $this->current_balance;
-        $theoreticalBalance = $this->calculateTheoreticalBalance();
-        $difference = $finalBalance - $theoreticalBalance;
-
-        $this->final_balance = $finalBalance;
-        $this->theoretical_balance = $theoreticalBalance;
-        $this->balance_difference = $difference;
-        $this->status = self::STATUS_CLOSED;
-        $this->end_time = now();
-        $this->closed_by = $userId;
-        $this->closing_notes = $closingNotes;
-
-        // Calculer les totaux par méthode
-        $this->calculatePaymentTotals();
-
-        // Déterminer s'il y a un écart
-        if (abs($difference) > self::ALLOWED_DIFFERENCE) {
-            if ($difference > 0) {
-                $this->excess_amount = $difference;
-            } else {
-                $this->shortage_amount = abs($difference);
-            }
-        }
-
-        $this->save();
-
-        // Log activité
-        activity()
-            ->causedBy(User::find($userId))
-            ->performedOn($this)
-            ->withProperties([
-                'final_balance' => $finalBalance,
-                'theoretical_balance' => $theoreticalBalance,
-                'difference' => $difference,
-                'total_revenue' => $this->getTotalRevenue(),
-                'payment_count' => $this->getPaymentCount(),
-                'transaction_count' => $this->getTransactionCount(),
-                'closing_notes' => $closingNotes,
-            ])
-            ->log('a fermé une session de caisse');
-
-        // Log session
-        $this->logActivity('session_closed', 'Session fermée', $this, [
-            'final_balance' => $finalBalance,
-            'difference' => $difference,
-            'duration' => $this->duration->format('%h heures %i minutes'),
-        ]);
-
-        return $this;
-    }
-
-    public function verifySession($userId, $notes = '')
-    {
-        if (! $this->canBeVerified()) {
-            return false;
-        }
-
-        $oldStatus = $this->status;
-
-        $this->status = self::STATUS_VERIFIED;
-        $this->verified_by = $userId;
-        $this->verified_at = now();
-        $this->save();
-
-        // Log activité
-        activity()
-            ->causedBy(User::find($userId))
-            ->performedOn($this)
-            ->withProperties([
-                'old_status' => $oldStatus,
-                'new_status' => self::STATUS_VERIFIED,
-                'balance_difference' => $this->balance_difference,
-                'is_balanced' => $this->is_balanced,
-                'verification_notes' => $notes,
-            ])
-            ->log('a vérifié une session de caisse');
-
-        // Log session
-        $this->logActivity('session_verified', 'Session vérifiée', $this, [
-            'verified_by' => $this->verification_user_name,
-            'balance_status' => $this->is_balanced ? 'Équilibrée' : 'Déséquilibrée',
-        ]);
-
-        return $this;
-    }
-
-    public function suspendSession($userId, $reason = '')
-    {
-        if (! $this->isActive()) {
-            return false;
-        }
-
-        $oldStatus = $this->status;
-
-        $this->status = self::STATUS_SUSPENDED;
-        $this->save();
-
-        // Log activité
-        activity()
-            ->causedBy(User::find($userId))
-            ->performedOn($this)
-            ->withProperties([
-                'old_status' => $oldStatus,
-                'new_status' => self::STATUS_SUSPENDED,
-                'reason' => $reason,
-                'suspended_at' => now(),
-            ])
-            ->log('a suspendu une session de caisse');
-
-        // Log session
-        $this->logActivity('session_suspended', 'Session suspendue', $this, [
-            'reason' => $reason,
-        ]);
-
-        return $this;
-    }
-
-    public function reopenSession($userId, $reason = '')
-    {
-        if (! $this->canBeReopened()) {
-            return false;
-        }
-
-        $oldStatus = $this->status;
-
-        $this->status = self::STATUS_ACTIVE;
-        $this->end_time = null;
-        $this->closed_by = null;
-        $this->closing_notes = null;
-        $this->save();
-
-        // Log activité
-        activity()
-            ->causedBy(User::find($userId))
-            ->performedOn($this)
-            ->withProperties([
-                'old_status' => $oldStatus,
-                'new_status' => self::STATUS_ACTIVE,
-                'reason' => $reason,
-            ])
-            ->log('a rouvert une session de caisse');
-
-        // Log session
-        $this->logActivity('session_reopened', 'Session rouverte', $this, [
-            'reason' => $reason,
-        ]);
-
-        return $this;
-    }
-
-    public function abandonSession($userId, $reason = '')
-    {
-        if (! $this->isActive() && ! $this->isSuspended()) {
-            return false;
-        }
-
-        $oldStatus = $this->status;
-
-        $this->status = self::STATUS_ABANDONED;
-        $this->end_time = now();
-        $this->closed_by = $userId;
-        $this->closing_notes = 'Session abandonnée: '.$reason;
-        $this->save();
-
-        // Log activité
-        activity()
-            ->causedBy(User::find($userId))
-            ->performedOn($this)
-            ->withProperties([
-                'old_status' => $oldStatus,
-                'new_status' => self::STATUS_ABANDONED,
-                'reason' => $reason,
-                'abandoned_at' => now(),
-            ])
-            ->log('a abandonné une session de caisse');
-
-        // Log session
-        $this->logActivity('session_abandoned', 'Session abandonnée', $this, [
-            'reason' => $reason,
-        ]);
-
-        return $this;
-    }
-
-    private function determineShiftType()
-    {
-        $hour = now()->hour;
-
-        if ($hour >= 6 && $hour < 14) {
-            return self::SHIFT_MORNING;
-        } elseif ($hour >= 14 && $hour < 22) {
-            return self::SHIFT_EVENING;
-        } else {
-            return self::SHIFT_NIGHT;
-        }
-    }
-
-    private function calculatePaymentTotals()
-    {
-        $methods = Payment::getPaymentMethods();
-
-        foreach ($methods as $method => $details) {
-            $total = $this->payments()
-                ->where('status', Payment::STATUS_COMPLETED)
-                ->where('payment_method', $method)
-                ->sum('amount');
-
-            $field = 'total_'.strtolower(str_replace('_', '', $method));
-
-            if (in_array($field, $this->fillable)) {
-                $this->$field = $total;
-            }
-        }
-    }
-
-    // Scopes
-    public function scopeActive($query)
-    {
-        return $query->where('status', self::STATUS_ACTIVE);
-    }
-
-    public function scopeForUser($query, $userId)
-    {
-        return $query->where('user_id', $userId);
-    }
-
-    public function scopeToday($query)
-    {
-        return $query->whereDate('created_at', today());
-    }
-
-    public function scopeThisWeek($query)
-    {
-        return $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
-    }
-
-    public function scopeThisMonth($query)
-    {
-        return $query->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year);
-    }
-
-    public function scopeByStatus($query, $status)
-    {
-        if ($status) {
-            return $query->where('status', $status);
-        }
-
-        return $query;
-    }
-
-    public function scopeByShift($query, $shift)
-    {
-        if ($shift) {
-            return $query->where('shift_type', $shift);
-        }
-
-        return $query;
-    }
-
-    public function scopeWithDiscrepancy($query)
-    {
-        return $query->whereRaw('ABS(balance_difference) > ?', [self::ALLOWED_DIFFERENCE]);
-    }
-
-    public function scopeBalanced($query)
-    {
-        return $query->whereRaw('ABS(balance_difference) <= ?', [self::ALLOWED_DIFFERENCE]);
-    }
-
-    public function scopeUnverified($query)
-    {
-        return $query->where('status', self::STATUS_CLOSED)
-            ->orWhere('status', self::STATUS_PENDING_REVIEW);
-    }
-
-    // Boot
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($session) {
-            if (! $session->status) {
-                $session->status = self::STATUS_ACTIVE;
-            }
-
-            if (! $session->start_time) {
-                $session->start_time = now();
-            }
-
-            if (! $session->shift_type) {
-                $session->shift_type = (new self)->determineShiftType();
-            }
-        });
-
-        static::created(function ($session) {
-            activity()
-                ->causedBy($session->user)
-                ->performedOn($session)
-                ->withProperties([
-                    'session_id' => $session->id,
-                    'initial_balance' => $session->initial_balance,
-                    'user' => $session->user_name,
-                    'shift' => $session->shift_label,
-                ])
-                ->log('a créé une nouvelle session de caisse');
-        });
-
-        static::updated(function ($session) {
-            if ($session->isDirty('status')) {
-                activity()
-                    ->causedBy(auth()->user())
-                    ->performedOn($session)
-                    ->withProperties([
-                        'old_status' => $session->getOriginal('status'),
-                        'new_status' => $session->status,
-                        'session_id' => $session->id,
-                    ])
-                    ->log('a changé le statut de la session');
-            }
-        });
-    }
-
-    // Statistiques
     public function getStatsAttribute()
     {
         return [
@@ -901,13 +841,6 @@ class CashierSession extends Model
         ];
     }
 
-    // Activités
-    public function cashierActivities()
-    {
-        return $this->hasMany(\Spatie\Activitylog\Models\Activity::class, 'subject_id')
-            ->where('subject_type', self::class);
-    }
-
     public function getHistoryAttribute()
     {
         $activities = $this->cashierActivities()->orderBy('created_at', 'desc')->get();
@@ -921,13 +854,6 @@ class CashierSession extends Model
             'transactions' => $this->transactions()->with('customer', 'room')->get(),
             'stats' => $this->stats,
         ];
-    }
-
-    public function saveQuietly(array $options = [])
-    {
-        return static::withoutEvents(function () use ($options) {
-            return $this->save($options);
-        });
     }
 
     public function getSummaryAttribute()
@@ -954,5 +880,128 @@ class CashierSession extends Model
             'verification_user' => $this->verification_user_name,
             'terminal' => $this->terminal_id ?? 'N/A',
         ];
+    }
+
+    // ==================== PROTECTION CONTRE LA MODIFICATION DE START_TIME ====================
+
+    /**
+     * Surcharge de la méthode save pour protéger start_time contre les modifications
+     */
+    public function save(array $options = [])
+    {
+        // Si c'est une mise à jour (session existe déjà)
+        if ($this->exists) {
+            $original = $this->getOriginal('start_time');
+            
+            // Vérifier si quelqu'un essaie de modifier start_time
+            if ($original && $this->start_time != $original) {
+                \Log::warning('🚨 TENTATIVE DE MODIFICATION DE START_TIME BLOQUÉE', [
+                    'session_id' => $this->id,
+                    'original' => $original->format('Y-m-d H:i:s'),
+                    'tentative' => $this->start_time ? $this->start_time->format('Y-m-d H:i:s') : 'null',
+                    'user_id' => auth()->id(),
+                    'url' => request()->fullUrl()
+                ]);
+                
+                // Restaurer la valeur originale
+                $this->start_time = $original;
+            }
+        }
+        
+        return parent::save($options);
+    }
+
+    /**
+     * Surcharge de la méthode update pour empêcher l'écrasement de start_time
+     */
+    public function update(array $attributes = [], array $options = [])
+    {
+        // Si on essaie de mettre à jour start_time, on le retire du tableau
+        if (isset($attributes['start_time'])) {
+            \Log::warning('🚨 TENTATIVE DE MODIFICATION DE START_TIME VIA update()', [
+                'session_id' => $this->id,
+                'start_time_proposed' => $attributes['start_time'],
+                'user_id' => auth()->id()
+            ]);
+            
+            unset($attributes['start_time']);
+        }
+        
+        return parent::update($attributes, $options);
+    }
+
+    /**
+     * Sauvegarde sans déclencher d'événements
+     */
+    public function saveQuietly(array $options = [])
+    {
+        return static::withoutEvents(function () use ($options) {
+            return $this->save($options);
+        });
+    }
+
+    // ==================== BOOT ====================
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($session) {
+            if (! $session->status) {
+                $session->status = self::STATUS_ACTIVE;
+            }
+
+            if (! $session->start_time) {
+                $session->start_time = now(); // ✅ Défini UNE SEULE fois à la création
+            }
+
+            if (! $session->shift_type) {
+                $session->shift_type = (new self)->determineShiftType();
+            }
+        });
+
+        static::created(function ($session) {
+            activity()
+                ->causedBy($session->user)
+                ->performedOn($session)
+                ->withProperties([
+                    'session_id' => $session->id,
+                    'initial_balance' => $session->initial_balance,
+                    'user' => $session->user_name,
+                    'shift' => $session->shift_label,
+                ])
+                ->log('a créé une nouvelle session de caisse');
+        });
+
+        static::updating(function ($session) {
+            $dirty = $session->getDirty();
+            $original = $session->getOriginal();
+            
+            // Log de toutes les modifications (pour débogage)
+            if (!empty($dirty)) {
+                \Log::info('🔄 Mise à jour session', [
+                    'session_id' => $session->id,
+                    'modified_fields' => array_keys($dirty),
+                    'old_start_time' => isset($original['start_time']) ? $original['start_time']->format('Y-m-d H:i:s') : null,
+                    'new_start_time' => isset($dirty['start_time']) ? $session->start_time->format('Y-m-d H:i:s') : 'non modifié',
+                    'old_balance' => $original['current_balance'] ?? null,
+                    'new_balance' => $dirty['current_balance'] ?? 'non modifié'
+                ]);
+            }
+        });
+
+        static::updated(function ($session) {
+            if ($session->isDirty('status')) {
+                activity()
+                    ->causedBy(auth()->user())
+                    ->performedOn($session)
+                    ->withProperties([
+                        'old_status' => $session->getOriginal('status'),
+                        'new_status' => $session->status,
+                        'session_id' => $session->id,
+                    ])
+                    ->log('a changé le statut de la session');
+            }
+        });
     }
 }

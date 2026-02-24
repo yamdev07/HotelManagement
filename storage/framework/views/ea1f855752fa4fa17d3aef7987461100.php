@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Dashboard Caissier')
 
-@push('styles')
+<?php $__env->startSection('title', 'Dashboard Caissier'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -501,9 +501,9 @@ body {
     }
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     
     <!-- Header -->
@@ -515,27 +515,28 @@ body {
                     Dashboard Caissier
                 </h1>
                 <div class="user-info-badge mt-2">
-                    Bonjour, <strong class="mx-1">{{ auth()->user()->name }}</strong>
-                    <span class="role-badge {{ $isAdmin ? 'role-admin' : ($isCashier ? 'role-cashier' : 'role-receptionist') }}">
-                        <i class="fas {{ $isAdmin ? 'fa-crown' : ($isCashier ? 'fa-cash-register' : 'fa-user') }}"></i>
-                        {{ auth()->user()->role }}
+                    Bonjour, <strong class="mx-1"><?php echo e(auth()->user()->name); ?></strong>
+                    <span class="role-badge <?php echo e($isAdmin ? 'role-admin' : ($isCashier ? 'role-cashier' : 'role-receptionist')); ?>">
+                        <i class="fas <?php echo e($isAdmin ? 'fa-crown' : ($isCashier ? 'fa-cash-register' : 'fa-user')); ?>"></i>
+                        <?php echo e(auth()->user()->role); ?>
+
                     </span>
                 </div>
             </div>
             
-            @if($isAdmin && $canStartSession && !$activeSession)
+            <?php if($isAdmin && $canStartSession && !$activeSession): ?>
             <div>
-                <a href="{{ route('cashier.sessions.create') }}" class="btn btn-primary">
+                <a href="<?php echo e(route('cashier.sessions.create')); ?>" class="btn btn-primary">
                     <i class="fas fa-plus me-2"></i>Nouvelle session
                 </a>
             </div>
-            @endif
+            <?php endif; ?>
         </div>
         
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item">
-                    <a href="{{ route('dashboard.index') }}">
+                    <a href="<?php echo e(route('dashboard.index')); ?>">
                         <i class="fas fa-home"></i> Accueil
                     </a>
                 </li>
@@ -545,7 +546,7 @@ body {
     </div>
 
     <!-- Receptionist/Cashier permission notice -->
-    @if(!$isAdmin)
+    <?php if(!$isAdmin): ?>
     <div class="permission-alert">
         <div class="d-flex align-items-start gap-3">
             <div class="permission-alert-icon">
@@ -553,43 +554,43 @@ body {
             </div>
             <div class="flex-grow-1">
                 <h6 class="fw-bold mb-1">
-                    @if($isCashier)
+                    <?php if($isCashier): ?>
                     Mode Caissier
-                    @else
+                    <?php else: ?>
                     Mode Lecture Seule
-                    @endif
+                    <?php endif; ?>
                 </h6>
                 <p class="mb-2 small">
-                    @if($isCashier)
+                    <?php if($isCashier): ?>
                     Vous pouvez gérer votre session et les paiements.
-                    @else
+                    <?php else: ?>
                     Vous pouvez consulter les données mais seuls les administrateurs peuvent effectuer des modifications.
-                    @endif
+                    <?php endif; ?>
                 </p>
                 <div class="permission-badges">
                     <span class="permission-badge">
                         <i class="fas fa-check text-success"></i> Visualisation
                     </span>
-                    @if($isCashier)
+                    <?php if($isCashier): ?>
                     <span class="permission-badge">
                         <i class="fas fa-check text-success"></i> Paiements
                     </span>
                     <span class="permission-badge">
                         <i class="fas fa-times text-danger"></i> Administration
                     </span>
-                    @else
+                    <?php else: ?>
                     <span class="permission-badge">
                         <i class="fas fa-times text-danger"></i> Modification
                     </span>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Active session -->
-    @if($activeSession)
+    <?php if($activeSession): ?>
     <div class="active-session">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
@@ -598,44 +599,45 @@ body {
                 </div>
                 <div>
                     <h5 class="fw-bold mb-2">
-                        Session Active #{{ $activeSession->id }}
-                        @if($activeSession->user_id != auth()->id())
-                        <span class="badge badge-dark-soft">{{ $activeSession->user->name }}</span>
-                        @endif
+                        Session Active #<?php echo e($activeSession->id); ?>
+
+                        <?php if($activeSession->user_id != auth()->id()): ?>
+                        <span class="badge badge-dark-soft"><?php echo e($activeSession->user->name); ?></span>
+                        <?php endif; ?>
                     </h5>
                     <div class="d-flex flex-wrap gap-3">
                         <div class="session-badge">
                             <i class="fas fa-user"></i>
-                            <span>{{ $activeSession->user->name }}</span>
+                            <span><?php echo e($activeSession->user->name); ?></span>
                         </div>
                         <div class="session-badge">
                             <i class="fas fa-clock"></i>
-                            <span>{{ $activeSession->start_time->format('d/m/Y H:i') }}</span>
+                            <span><?php echo e($activeSession->start_time->format('d/m/Y H:i')); ?></span>
                         </div>
                         <div class="session-badge">
                             <i class="fas fa-hourglass-half"></i>
-                            <span>{{ $activeSession->start_time->diffForHumans(now(), true) }}</span>
+                            <span><?php echo e($activeSession->start_time->diffForHumans(now(), true)); ?></span>
                         </div>
                         <div class="session-badge">
                             <i class="fas fa-wallet" style="color:var(--success)"></i>
-                            <strong style="color:var(--success)">{{ number_format($activeSession->current_balance, 0, ',', ' ') }} FCFA</strong>
+                            <strong style="color:var(--success)"><?php echo e(number_format($activeSession->current_balance, 0, ',', ' ')); ?> FCFA</strong>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('cashier.sessions.show', $activeSession) }}" class="btn btn-outline-success">
+                <a href="<?php echo e(route('cashier.sessions.show', $activeSession)); ?>" class="btn btn-outline-success">
                     <i class="fas fa-eye"></i> Détails
                 </a>
-                @if(($isAdmin && $activeSession->user_id == auth()->id()) || $isCashier)
+                <?php if(($isAdmin && $activeSession->user_id == auth()->id()) || $isCashier): ?>
                 <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#closeModal">
                     <i class="fas fa-lock"></i> Clôturer
                 </button>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
     </div>
-    @else
+    <?php else: ?>
     <div class="no-session">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
@@ -645,22 +647,22 @@ body {
                 <div>
                     <h5 class="fw-bold mb-1">Aucune session active</h5>
                     <p class="mb-0 small text-muted">
-                        @if($isAdmin || $isCashier)
+                        <?php if($isAdmin || $isCashier): ?>
                         Démarrez une nouvelle session pour commencer
-                        @else
+                        <?php else: ?>
                         Contactez un administrateur pour démarrer une session
-                        @endif
+                        <?php endif; ?>
                     </p>
                 </div>
             </div>
-            @if(($isAdmin || $isCashier) && $canStartSession)
-            <a href="{{ route('cashier.sessions.create') }}" class="btn btn-warning">
+            <?php if(($isAdmin || $isCashier) && $canStartSession): ?>
+            <a href="<?php echo e(route('cashier.sessions.create')); ?>" class="btn btn-warning">
                 <i class="fas fa-play"></i> Démarrer une session
             </a>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Stats -->
     <div class="row g-3 mb-4">
@@ -669,7 +671,7 @@ body {
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="stat-label">Réservations</div>
-                        <div class="stat-value">{{ $todayStats['totalBookings'] }}</div>
+                        <div class="stat-value"><?php echo e($todayStats['totalBookings']); ?></div>
                         <div class="stat-subtitle">Aujourd'hui</div>
                     </div>
                     <div class="stat-icon" style="background:rgba(59,130,246,0.1);color:var(--primary)">
@@ -684,7 +686,7 @@ body {
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="stat-label">Chiffre d'affaires</div>
-                        <div class="stat-value">{{ number_format($todayStats['revenue'], 0, ',', ' ') }}</div>
+                        <div class="stat-value"><?php echo e(number_format($todayStats['revenue'], 0, ',', ' ')); ?></div>
                         <div class="stat-subtitle">FCFA aujourd'hui</div>
                     </div>
                     <div class="stat-icon" style="background:rgba(16,185,129,0.1);color:var(--success)">
@@ -699,7 +701,7 @@ body {
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="stat-label">Check-ins</div>
-                        <div class="stat-value">{{ $todayStats['checkins'] }}</div>
+                        <div class="stat-value"><?php echo e($todayStats['checkins']); ?></div>
                         <div class="stat-subtitle">Aujourd'hui</div>
                     </div>
                     <div class="stat-icon" style="background:rgba(6,182,212,0.1);color:var(--info)">
@@ -714,7 +716,7 @@ body {
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <div class="stat-label">En attente</div>
-                        <div class="stat-value">{{ $todayStats['pendingPayments'] }}</div>
+                        <div class="stat-value"><?php echo e($todayStats['pendingPayments']); ?></div>
                         <div class="stat-subtitle">Paiements</div>
                     </div>
                     <div class="stat-icon" style="background:rgba(245,158,11,0.1);color:var(--warning)">
@@ -730,23 +732,23 @@ body {
         <li class="nav-item">
             <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pending">
                 <i class="fas fa-clock me-1"></i> Paiements
-                <span class="badge bg-warning">{{ $pendingPayments->count() }}</span>
+                <span class="badge bg-warning"><?php echo e($pendingPayments->count()); ?></span>
             </button>
         </li>
         <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#sessions">
                 <i class="fas fa-history me-1"></i> Mes sessions
-                <span class="badge bg-info">{{ $recentSessions->count() }}</span>
+                <span class="badge bg-info"><?php echo e($recentSessions->count()); ?></span>
             </button>
         </li>
-        @if($isAdmin)
+        <?php if($isAdmin): ?>
         <li class="nav-item">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#all-sessions">
                 <i class="fas fa-users me-1"></i> Toutes les sessions
-                <span class="badge bg-dark">{{ $allSessionsCount ?? 0 }}</span>
+                <span class="badge bg-dark"><?php echo e($allSessionsCount ?? 0); ?></span>
             </button>
         </li>
-        @endif
+        <?php endif; ?>
     </ul>
 
     <!-- Tab content -->
@@ -755,7 +757,7 @@ body {
         <!-- Pending payments -->
         <div class="tab-pane fade show active" id="pending">
             <div class="table-card">
-                @if($activeSession && $activeSession->payments && $activeSession->payments->count() > 0)
+                <?php if($activeSession && $activeSession->payments && $activeSession->payments->count() > 0): ?>
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
@@ -769,23 +771,24 @@ body {
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($activeSession->payments as $payment)
+                            <?php $__currentLoopData = $activeSession->payments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td><strong>#{{ $payment->reference }}</strong></td>
+                                <td><strong>#<?php echo e($payment->reference); ?></strong></td>
                                 <td>
                                     <span class="badge badge-success-soft">
-                                        {{ number_format($payment->amount, 0, ',', ' ') }} FCFA
+                                        <?php echo e(number_format($payment->amount, 0, ',', ' ')); ?> FCFA
                                     </span>
                                 </td>
                                 <td>
-                                    @if($payment->transaction && $payment->transaction->customer)
-                                        {{ $payment->transaction->customer->name }}
-                                    @else
+                                    <?php if($payment->transaction && $payment->transaction->customer): ?>
+                                        <?php echo e($payment->transaction->customer->name); ?>
+
+                                    <?php else: ?>
                                         <span class="text-muted">N/A</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td>
-                                    @php
+                                    <?php
                                         $methodIcon = 'fa-money-bill-wave';
                                         $methodClass = 'method-cash';
                                         if($payment->payment_method == 'card') {
@@ -795,65 +798,66 @@ body {
                                             $methodIcon = 'fa-mobile-alt';
                                             $methodClass = 'method-mobile';
                                         }
-                                    @endphp
-                                    <span class="payment-method-badge {{ $methodClass }}">
-                                        <i class="fas {{ $methodIcon }} me-1"></i>
-                                        {{ $payment->payment_method_label }}
+                                    ?>
+                                    <span class="payment-method-badge <?php echo e($methodClass); ?>">
+                                        <i class="fas <?php echo e($methodIcon); ?> me-1"></i>
+                                        <?php echo e($payment->payment_method_label); ?>
+
                                     </span>
                                 </td>
                                 <td>
-                                    <small>{{ $payment->created_at->format('d/m H:i') }}</small>
+                                    <small><?php echo e($payment->created_at->format('d/m H:i')); ?></small>
                                 </td>
                                 <td>
                                     <a href="#" 
                                        class="btn btn-sm btn-info btn-icon" 
                                        title="Voir détail"
                                        data-bs-toggle="modal" 
-                                       data-bs-target="#paymentModal{{ $payment->id }}">
+                                       data-bs-target="#paymentModal<?php echo e($payment->id); ?>">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                         <tfoot class="bg-light">
                             <tr>
                                 <td colspan="6" class="text-end">
                                     <strong>Total encaissé : 
-                                        {{ number_format($activeSession->current_balance, 0, ',', ' ') }} FCFA
+                                        <?php echo e(number_format($activeSession->current_balance, 0, ',', ' ')); ?> FCFA
                                     </strong>
                                 </td>
                             </tr>
                         </tfoot>
                     </table>
                 </div>
-                @else
+                <?php else: ?>
                 <div class="empty-state">
                     <div class="empty-icon">
                         <i class="fas fa-money-bill-wave"></i>
                     </div>
                     <h5 class="fw-bold mb-2">Aucun paiement</h5>
                     <p class="text-muted">
-                        @if($activeSession)
+                        <?php if($activeSession): ?>
                             Aucun paiement n'a été effectué pendant cette session.
-                        @else
+                        <?php else: ?>
                             Démarrez une session pour commencer à enregistrer des paiements.
-                        @endif
+                        <?php endif; ?>
                     </p>
-                    @if(!$activeSession && ($isAdmin || $isCashier))
-                    <a href="{{ route('cashier.sessions.create') }}" class="btn btn-primary mt-3">
+                    <?php if(!$activeSession && ($isAdmin || $isCashier)): ?>
+                    <a href="<?php echo e(route('cashier.sessions.create')); ?>" class="btn btn-primary mt-3">
                         <i class="fas fa-play me-2"></i>Démarrer une session
                     </a>
-                    @endif
+                    <?php endif; ?>
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
 
         <!-- My sessions -->
         <div class="tab-pane fade" id="sessions">
             <div class="table-card">
-                @if($recentSessions->count() > 0)
+                <?php if($recentSessions->count() > 0): ?>
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
@@ -869,58 +873,60 @@ body {
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($recentSessions as $session)
+                            <?php $__currentLoopData = $recentSessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr>
-                                <td><strong>#{{ $session->id }}</strong></td>
-                                <td>{{ $session->start_time->format('d/m H:i') }}</td>
+                                <td><strong>#<?php echo e($session->id); ?></strong></td>
+                                <td><?php echo e($session->start_time->format('d/m H:i')); ?></td>
                                 <td>
-                                    @if($session->end_time)
-                                    {{ $session->end_time->format('d/m H:i') }}
-                                    @else
+                                    <?php if($session->end_time): ?>
+                                    <?php echo e($session->end_time->format('d/m H:i')); ?>
+
+                                    <?php else: ?>
                                     <span class="badge badge-warning-soft">En cours</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td>
-                                    @if($session->end_time)
+                                    <?php if($session->end_time): ?>
                                     <span class="badge badge-dark-soft">
-                                        @php
+                                        <?php
                                             $minutes = $session->start_time->diffInMinutes($session->end_time);
                                             $hours = floor($minutes / 60);
                                             $remainingMinutes = $minutes % 60;
-                                        @endphp
-                                        @if($hours > 0)
-                                            {{ $hours }}h {{ $remainingMinutes }}min
-                                        @else
-                                            {{ $remainingMinutes }} min
-                                        @endif
+                                        ?>
+                                        <?php if($hours > 0): ?>
+                                            <?php echo e($hours); ?>h <?php echo e($remainingMinutes); ?>min
+                                        <?php else: ?>
+                                            <?php echo e($remainingMinutes); ?> min
+                                        <?php endif; ?>
                                     </span>
-                                    @else
+                                    <?php else: ?>
                                     <span class="badge badge-info-soft">
-                                        {{ $session->start_time->diffForHumans(now(), true) }}
+                                        <?php echo e($session->start_time->diffForHumans(now(), true)); ?>
+
                                     </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
-                                <td>{{ number_format($session->initial_balance, 0, ',', ' ') }} FCFA</td>
-                                <td>{{ number_format($session->final_balance, 0, ',', ' ') }} FCFA</td>
+                                <td><?php echo e(number_format($session->initial_balance, 0, ',', ' ')); ?> FCFA</td>
+                                <td><?php echo e(number_format($session->final_balance, 0, ',', ' ')); ?> FCFA</td>
                                 <td>
-                                    @if($session->status == 'active')
+                                    <?php if($session->status == 'active'): ?>
                                     <span class="badge badge-success-soft">Active</span>
-                                    @else
+                                    <?php else: ?>
                                     <span class="badge badge-dark-soft">Terminée</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td>
-                                    <a href="{{ route('cashier.sessions.show', $session) }}" 
+                                    <a href="<?php echo e(route('cashier.sessions.show', $session)); ?>" 
                                        class="btn btn-sm btn-info btn-icon" title="Voir">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </div>
-                @else
+                <?php else: ?>
                 <div class="empty-state">
                     <div class="empty-icon">
                         <i class="fas fa-history"></i>
@@ -928,21 +934,21 @@ body {
                     <h5 class="fw-bold mb-2">Aucune session</h5>
                     <p class="text-muted">Vous n'avez pas encore de sessions</p>
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
 
         <!-- All sessions (admin) -->
-        @if($isAdmin)
+        <?php if($isAdmin): ?>
         <div class="tab-pane fade" id="all-sessions">
             <div class="filters-row">
                 <div class="row g-2">
                     <div class="col-md-4">
                         <select class="form-select" id="userFilter">
                             <option value="">Tous les utilisateurs</option>
-                            @foreach($allReceptionists as $receptionist)
-                            <option value="{{ $receptionist->id }}">{{ $receptionist->name }}</option>
-                            @endforeach
+                            <?php $__currentLoopData = $allReceptionists; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $receptionist): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($receptionist->id); ?>"><?php echo e($receptionist->name); ?></option>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
                     <div class="col-md-4">
@@ -953,13 +959,13 @@ body {
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <input type="date" class="form-control" id="dateFilter" value="{{ now()->format('Y-m-d') }}">
+                        <input type="date" class="form-control" id="dateFilter" value="<?php echo e(now()->format('Y-m-d')); ?>">
                     </div>
                 </div>
             </div>
             
             <div class="table-card">
-                @if(isset($allSessions) && $allSessions->count() > 0)
+                <?php if(isset($allSessions) && $allSessions->count() > 0): ?>
                 <div class="table-responsive">
                     <table class="table" id="sessionsTable">
                         <thead>
@@ -977,86 +983,91 @@ body {
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($allSessions as $session)
-                            <tr data-user="{{ $session->user_id }}" 
-                                data-status="{{ $session->status }}"
-                                data-date="{{ $session->start_time->format('Y-m-d') }}">
+                            <?php $__currentLoopData = $allSessions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $session): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <tr data-user="<?php echo e($session->user_id); ?>" 
+                                data-status="<?php echo e($session->status); ?>"
+                                data-date="<?php echo e($session->start_time->format('Y-m-d')); ?>">
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
-                                        @if($session->user && $session->user->avatar)
-                                        <img src="{{ $session->user->avatar }}" class="user-avatar" alt="">
-                                        @else
+                                        <?php if($session->user && $session->user->avatar): ?>
+                                        <img src="<?php echo e($session->user->avatar); ?>" class="user-avatar" alt="">
+                                        <?php else: ?>
                                         <div class="user-avatar bg-light d-flex align-items-center justify-content-center">
                                             <i class="fas fa-user text-muted"></i>
                                         </div>
-                                        @endif
+                                        <?php endif; ?>
                                         <div>
-                                            <div class="fw-medium">{{ $session->user->name ?? 'N/A' }}</div>
-                                            <small class="text-muted">{{ $session->user->role ?? 'N/A' }}</small>
+                                            <div class="fw-medium"><?php echo e($session->user->name ?? 'N/A'); ?></div>
+                                            <small class="text-muted"><?php echo e($session->user->role ?? 'N/A'); ?></small>
                                         </div>
                                     </div>
                                 </td>
-                                <td><strong>#{{ $session->id }}</strong></td>
-                                <td>{{ $session->start_time->format('d/m H:i') }}</td>
+                                <td><strong>#<?php echo e($session->id); ?></strong></td>
+                                <td><?php echo e($session->start_time->format('d/m H:i')); ?></td>
                                 <td>
-                                    @if($session->end_time)
-                                    {{ $session->end_time->format('d/m H:i') }}
-                                    @else
+                                    <?php if($session->end_time): ?>
+                                    <?php echo e($session->end_time->format('d/m H:i')); ?>
+
+                                    <?php else: ?>
                                     <span class="badge badge-warning-soft">En cours</span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
                                 <td>
-                                    @if($session->end_time)
+                                    <?php if($session->end_time): ?>
                                     <span class="badge badge-dark-soft">
-                                        @php
+                                        <?php
                                             $minutes = $session->start_time->diffInMinutes($session->end_time);
                                             $hours = floor($minutes / 60);
                                             $remainingMinutes = $minutes % 60;
-                                        @endphp
-                                        @if($hours > 0)
-                                            {{ $hours }}h {{ $remainingMinutes }}min
-                                        @else
-                                            {{ $remainingMinutes }} min
-                                        @endif
+                                        ?>
+                                        <?php if($hours > 0): ?>
+                                            <?php echo e($hours); ?>h <?php echo e($remainingMinutes); ?>min
+                                        <?php else: ?>
+                                            <?php echo e($remainingMinutes); ?> min
+                                        <?php endif; ?>
                                     </span>
-                                    @else
+                                    <?php else: ?>
                                     <span class="badge badge-info-soft">
-                                        {{ $session->start_time->diffForHumans(now(), true) }}
+                                        <?php echo e($session->start_time->diffForHumans(now(), true)); ?>
+
                                     </span>
-                                    @endif
+                                    <?php endif; ?>
                                 </td>
-                                <td>{{ number_format($session->initial_balance, 0, ',', ' ') }}</td>
-                                <td>{{ number_format($session->final_balance, 0, ',', ' ') }}</td>
+                                <td><?php echo e(number_format($session->initial_balance, 0, ',', ' ')); ?></td>
+                                <td><?php echo e(number_format($session->final_balance, 0, ',', ' ')); ?></td>
                                 <td>
-                                    @php
+                                    <?php
                                         $diff = $session->final_balance - $session->initial_balance;
-                                    @endphp
-                                    <span class="badge {{ $diff >= 0 ? 'badge-success-soft' : 'badge-danger-soft' }}">
-                                        {{ $diff >= 0 ? '+' : '' }}{{ number_format($diff, 0, ',', ' ') }}
+                                    ?>
+                                    <span class="badge <?php echo e($diff >= 0 ? 'badge-success-soft' : 'badge-danger-soft'); ?>">
+                                        <?php echo e($diff >= 0 ? '+' : ''); ?><?php echo e(number_format($diff, 0, ',', ' ')); ?>
+
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="badge {{ $session->status == 'active' ? 'badge-success-soft' : 'badge-dark-soft' }}">
-                                        {{ $session->status == 'active' ? 'Active' : 'Terminée' }}
+                                    <span class="badge <?php echo e($session->status == 'active' ? 'badge-success-soft' : 'badge-dark-soft'); ?>">
+                                        <?php echo e($session->status == 'active' ? 'Active' : 'Terminée'); ?>
+
                                     </span>
                                 </td>
                                 <td>
-                                    <a href="{{ route('cashier.sessions.show', $session) }}" 
+                                    <a href="<?php echo e(route('cashier.sessions.show', $session)); ?>" 
                                        class="btn btn-sm btn-info btn-icon" title="Voir détails">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 </td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </div>
                 
                 <!-- Pagination -->
                 <div class="p-3 border-top">
-                    {{ $allSessions->links() }}
+                    <?php echo e($allSessions->links()); ?>
+
                 </div>
-                @else
+                <?php else: ?>
                 <div class="empty-state">
                     <div class="empty-icon">
                         <i class="fas fa-users"></i>
@@ -1064,29 +1075,30 @@ body {
                     <h5 class="fw-bold mb-2">Aucune session</h5>
                     <p class="text-muted">Aucune session n'a été créée</p>
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
-        @endif
+        <?php endif; ?>
         
     </div>
 </div>
 
 <!-- Close modal -->
-@if($activeSession && ($isAdmin || $isCashier) && $activeSession->user_id == auth()->id())
+<?php if($activeSession && ($isAdmin || $isCashier) && $activeSession->user_id == auth()->id()): ?>
 <div class="modal fade" id="closeModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="fas fa-lock text-danger me-2"></i>
-                    Clôturer la session #{{ $activeSession->id }}
+                    Clôturer la session #<?php echo e($activeSession->id); ?>
+
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('cashier.sessions.destroy', $activeSession) }}" method="POST">
-                @csrf
-                @method('DELETE')
+            <form action="<?php echo e(route('cashier.sessions.destroy', $activeSession)); ?>" method="POST">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('DELETE'); ?>
                 <div class="modal-body">
                     <div class="alert alert-warning">
                         <i class="fas fa-exclamation-triangle me-2"></i>
@@ -1098,19 +1110,19 @@ body {
                         <h6 class="fw-bold mb-3">Récapitulatif de la session</h6>
                         <div class="summary-item">
                             <span class="summary-label">Début de session</span>
-                            <span class="summary-value">{{ $activeSession->start_time->format('d/m/Y H:i') }}</span>
+                            <span class="summary-value"><?php echo e($activeSession->start_time->format('d/m/Y H:i')); ?></span>
                         </div>
                         <div class="summary-item">
                             <span class="summary-label">Durée</span>
-                            <span class="summary-value">{{ $activeSession->start_time->diffForHumans(now(), true) }}</span>
+                            <span class="summary-value"><?php echo e($activeSession->start_time->diffForHumans(now(), true)); ?></span>
                         </div>
                         <div class="summary-item">
                             <span class="summary-label">Solde théorique</span>
-                            <span class="summary-value text-success">{{ number_format($activeSession->current_balance, 0, ',', ' ') }} FCFA</span>
+                            <span class="summary-value text-success"><?php echo e(number_format($activeSession->current_balance, 0, ',', ' ')); ?> FCFA</span>
                         </div>
                         <div class="summary-item">
                             <span class="summary-label">Nombre de paiements</span>
-                            <span class="summary-value">{{ $activeSession->payments->count() }}</span>
+                            <span class="summary-value"><?php echo e($activeSession->payments->count()); ?></span>
                         </div>
                     </div>
                     
@@ -1126,15 +1138,15 @@ body {
                                    class="form-control form-control-lg" 
                                    step="0.01" 
                                    min="0"
-                                   value="{{ $activeSession->current_balance }}" 
+                                   value="<?php echo e($activeSession->current_balance); ?>" 
                                    required>
                             <span class="input-group-text">FCFA</span>
                         </div>
                         <div class="form-text" id="balanceHelp">
                             Montant physique présent dans la caisse
-                            @if($activeSession->current_balance > 0)
-                            <br>Solde attendu : <strong>{{ number_format($activeSession->current_balance, 0, ',', ' ') }} FCFA</strong>
-                            @endif
+                            <?php if($activeSession->current_balance > 0): ?>
+                            <br>Solde attendu : <strong><?php echo e(number_format($activeSession->current_balance, 0, ',', ' ')); ?> FCFA</strong>
+                            <?php endif; ?>
                         </div>
                         
                         <!-- Différence indicator -->
@@ -1175,12 +1187,12 @@ body {
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Calcul de la différence en temps réel
     const finalBalanceInput = document.getElementById('finalBalance');
-    const theoreticalBalance = {{ $activeSession->current_balance }};
+    const theoreticalBalance = <?php echo e($activeSession->current_balance); ?>;
     const differenceAlert = document.getElementById('differenceAlert');
     const differenceAmount = document.getElementById('differenceAmount');
     
@@ -1247,7 +1259,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endpush
-@endif
+<?php $__env->stopPush(); ?>
+<?php endif; ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/cashier/dashboard.blade.php ENDPATH**/ ?>
