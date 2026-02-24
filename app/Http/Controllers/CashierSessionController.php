@@ -25,7 +25,7 @@ class CashierSessionController extends Controller
     }
 
     /**
-     * DASHBOARD PERSONNALISÉ - Version corrigée
+     * DASHBOARD PERSONNALISÉ
      */
     public function dashboard()
     {
@@ -40,6 +40,22 @@ class CashierSessionController extends Controller
 
         // Récupère la session active
         $activeSession = $this->getActiveSession($user);
+        
+        // Charger les paiements de la session active
+        if ($activeSession) {
+            $activeSession->load(['payments' => function($query) {
+                $query->with(['transaction.customer'])
+                    ->where('status', Payment::STATUS_COMPLETED)
+                    ->orderBy('created_at', 'desc');
+            }]);
+            
+            \Log::info('Session active avec paiements', [
+                'session_id' => $activeSession->id,
+                'payments_count' => $activeSession->payments->count(),
+                'total' => $activeSession->current_balance,
+                'start_time' => $activeSession->start_time->format('Y-m-d H:i:s')
+            ]);
+        }
 
         // Statistiques du jour
         $todayStats = $this->getTodayStats($user);
@@ -77,7 +93,6 @@ class CashierSessionController extends Controller
             'isReceptionist' => $user->role === 'Receptionist',
             'isAdmin' => $user->role === 'Admin' || $user->role === 'Super',
             'isCashier' => $user->role === 'Cashier',
-            // AJOUTEZ CES VARIABLES
             'allReceptionists' => $allReceptionists,
             'allSessions' => $allSessions,
             'allSessionsCount' => $allSessionsCount,
@@ -92,12 +107,10 @@ class CashierSessionController extends Controller
     private function getActiveSession($user)
     {
         try {
-            // Méthode 1: Via relation si elle existe
             if (method_exists($user, 'activeCashierSession')) {
                 return $user->activeCashierSession;
             }
 
-            // Méthode 2: Direct query
             return CashierSession::where('user_id', $user->id)
                 ->where('status', 'active')
                 ->first();
@@ -113,37 +126,119 @@ class CashierSessionController extends Controller
     }
 
     /**
-     * Statistiques du jour
+     * Statistiques du jour - Adapté pour le profil connecté
      */
     private function getTodayStats($user)
     {
         $today = Carbon::today();
 
         try {
+            // Récupérer la session active de l'utilisateur
+            $activeSession = $this->getActiveSession($user);
+            
+            // Revenu = solde de la session active
+            $userRevenue = $activeSession ? $activeSession->current_balance : 0;
+
+            // =====================================================
+            // 1. RÉSERVATIONS du profil aujourd'hui
+            // Utilise user_id (créateur de la transaction)
+            // =====================================================
+            $reservations = 0;
+            try {
+                $reservations = Transaction::where('user_id', $user->id)
+                    ->whereDate('created_at', $today)
+                    ->count();
+                    
+                \Log::info('Réservations du profil', [
+                    'user_id' => $user->id,
+                    'count' => $reservations
+                ]);
+            } catch (\Exception $e) {
+                \Log::warning('Erreur comptage réservations', ['error' => $e->getMessage()]);
+            }
+
+            // =====================================================
+            // 2. CHECK-INS du profil aujourd'hui
+            // Utilise checked_in_by
+            // =====================================================
+            $checkins = 0;
+            try {
+                $checkins = Transaction::where('checked_in_by', $user->id)
+                    ->whereDate('actual_check_in', $today)
+                    ->where('status', 'active')
+                    ->count();
+                    
+                \Log::info('Check-ins du profil', [
+                    'user_id' => $user->id,
+                    'count' => $checkins
+                ]);
+            } catch (\Exception $e) {
+                \Log::warning('Erreur comptage check-ins', ['error' => $e->getMessage()]);
+            }
+
+            // =====================================================
+            // 3. CHECK-OUTS du profil aujourd'hui
+            // Utilise checked_out_by
+            // =====================================================
+            $checkouts = 0;
+            try {
+                $checkouts = Transaction::where('checked_out_by', $user->id)
+                    ->whereDate('actual_check_out', $today)
+                    ->where('status', 'completed')
+                    ->count();
+                    
+                \Log::info('Check-outs du profil', [
+                    'user_id' => $user->id,
+                    'count' => $checkouts
+                ]);
+            } catch (\Exception $e) {
+                \Log::warning('Erreur comptage check-outs', ['error' => $e->getMessage()]);
+            }
+
+            // =====================================================
+            // 4. PAIEMENTS COMPLÉTÉS du profil aujourd'hui
+            // Utilise user_id dans la table payments
+            // =====================================================
+            $completedPayments = 0;
+            try {
+                $completedPayments = Payment::where('user_id', $user->id)
+                    ->whereDate('created_at', $today)
+                    ->where('status', Payment::STATUS_COMPLETED)
+                    ->count();
+            } catch (\Exception $e) {
+                \Log::warning('Erreur comptage paiements', ['error' => $e->getMessage()]);
+            }
+
+            // =====================================================
+            // 5. PAIEMENTS EN ATTENTE
+            // =====================================================
+            $pendingPayments = Payment::where('status', Payment::STATUS_PENDING)->count();
+
             return [
-                'totalBookings' => Booking::whereDate('created_at', $today)->count(),
-                'checkins' => Booking::whereDate('check_in', $today)->count(),
-                'checkouts' => Booking::whereDate('check_out', $today)->count(),
-                'completedPayments' => Payment::whereDate('created_at', $today)
-                    ->where('status', Payment::STATUS_COMPLETED)
-                    ->count(),
-                'revenue' => Payment::whereDate('created_at', $today)
-                    ->where('status', Payment::STATUS_COMPLETED)
-                    ->sum('amount') ?? 0,
-                'pendingPayments' => Payment::where('status', Payment::STATUS_PENDING)->count(),
+                'totalBookings' => $reservations,
+                'checkins' => $checkins,
+                'checkouts' => $checkouts,
+                'completedPayments' => $completedPayments,
+                'revenue' => $userRevenue,
+                'pendingPayments' => $pendingPayments,
             ];
+            
         } catch (\Exception $e) {
+            \Log::error('Erreur getTodayStats', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id
+            ]);
+            
             return [
                 'totalBookings' => 0,
                 'checkins' => 0,
                 'checkouts' => 0,
                 'completedPayments' => 0,
-                'revenue' => 0,
+                'revenue' => $activeSession->current_balance ?? 0,
                 'pendingPayments' => 0,
             ];
         }
     }
-
     /**
      * Paiements en attente
      */
@@ -158,13 +253,15 @@ class CashierSessionController extends Controller
                     ->get();
             }
 
+            // Pour les non-admins : paiements de l'utilisateur connecté
             return Payment::where('status', Payment::STATUS_PENDING)
-                ->where('created_by', $user->id)
+                ->where('user_id', $user->id)
                 ->with(['transaction.booking.customer', 'transaction.booking.room'])
                 ->orderBy('created_at', 'desc')
                 ->take(5)
                 ->get();
         } catch (\Exception $e) {
+            \Log::error('Erreur getPendingPayments', ['error' => $e->getMessage()]);
             return collect([]);
         }
     }
@@ -210,28 +307,15 @@ class CashierSessionController extends Controller
      */
     private function canUserStartSession($user, $activeSession)
     {
-        // Si déjà une session active, non
         if ($activeSession) {
-            \Log::info('CAN START: false - active session exists');
             return false;
         }
 
-        // Vérifie le rôle
         $allowedRoles = ['Receptionist', 'Admin', 'Super', 'Cashier'];
         
-        $result = in_array($user->role, $allowedRoles);
-        
-        // 🔴 NOUVEAU LOG
-        \Log::info('CAN START SESSION CHECK', [
-            'user_role' => $user->role,
-            'allowed_roles' => $allowedRoles,
-            'in_array' => $result ? 'OUI' : 'NON',
-            'active_session' => $activeSession ? 'OUI' : 'NON',
-            'final_result' => $result ? 'PEUT DÉMARRER' : 'NE PEUT PAS DÉMARRER'
-        ]);
-        
-        return $result;
+        return in_array($user->role, $allowedRoles);
     }
+    
     /**
      * LISTE DES SESSIONS
      */
@@ -260,6 +344,8 @@ class CashierSessionController extends Controller
                     ->where('status', Payment::STATUS_COMPLETED)
                     ->sum('amount') ?? 0;
 
+                // Calculer la durée formatée
+                $session->formatted_duration = $this->formatDuration($session);
                 $session->can_view = $user->role === 'Admin' || $user->role === 'Super' || $session->user_id === $user->id;
 
                 return $session;
@@ -279,13 +365,32 @@ class CashierSessionController extends Controller
     }
 
     /**
+     * Formater la durée d'une session
+     */
+    private function formatDuration($session)
+    {
+        if (!$session->end_time) {
+            return 'En cours';
+        }
+
+        $minutes = $session->start_time->diffInMinutes($session->end_time);
+        $hours = floor($minutes / 60);
+        $remainingMinutes = $minutes % 60;
+
+        if ($hours > 0) {
+            return $hours . 'h ' . $remainingMinutes . 'min';
+        }
+        
+        return $remainingMinutes . ' min';
+    }
+
+    /**
      * FORMULAIRE DE CRÉATION DE SESSION
      */
     public function create()
     {
         $user = Auth::user();
 
-        // Vérifie si l'utilisateur a déjà une session active
         $activeSession = $this->getActiveSession($user);
 
         if ($activeSession) {
@@ -293,7 +398,6 @@ class CashierSessionController extends Controller
                 ->with('warning', 'Vous avez déjà une session active. Veuillez la clôturer avant d\'en démarrer une nouvelle.');
         }
 
-        // Vérifie les permissions
         if (! $this->canUserStartSession($user, $activeSession)) {
             return redirect()->route('cashier.dashboard')
                 ->with('error', 'Vous n\'avez pas les permissions nécessaires pour démarrer une session.');
@@ -323,12 +427,10 @@ class CashierSessionController extends Controller
     {
         $user = Auth::user();
 
-        // ✅ Validation - PLUS de initial_balance !
         $request->validate([
-            'notes' => 'nullable|string|max:500', // Seulement notes
+            'notes' => 'nullable|string|max:500',
         ]);
 
-        // Vérifie si une session active existe déjà
         $activeSession = $this->getActiveSession($user);
         if ($activeSession) {
             return redirect()->back()
@@ -354,10 +456,9 @@ class CashierSessionController extends Controller
                 $shiftType = 'night';
             }
 
-            // ✅ Crée UNIQUEMENT la session, PAS de paiement
             $session = CashierSession::create([
                 'user_id' => $user->id,
-                'initial_balance' => 0, // Forcer à 0
+                'initial_balance' => 0,
                 'current_balance' => 0,
                 'start_time' => $now,
                 'status' => 'active',
@@ -370,11 +471,12 @@ class CashierSessionController extends Controller
             \Log::info('Session started', [
                 'session_id' => $session->id,
                 'user_id' => $user->id,
+                'start_time' => $session->start_time->format('Y-m-d H:i:s'),
                 'shift_type' => $shiftType,
             ]);
 
             return redirect()->route('cashier.dashboard')
-                ->with('success', 'Session démarrée avec succès! ID: #'.$session->id);
+                ->with('success', 'Session démarrée avec succès! ID: #'.$session->id . ' à ' . $now->format('H:i'));
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -389,6 +491,7 @@ class CashierSessionController extends Controller
                 ->withInput();
         }
     }
+    
     /**
      * AFFICHAGE D'UNE SESSION
      */
@@ -396,20 +499,40 @@ class CashierSessionController extends Controller
     {
         $user = Auth::user();
 
-        // Vérifie les permissions
+        \Log::info('=== ACCÈS À SHOW SESSION ===', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'session_id' => $cashierSession->id,
+            'session_user_id' => $cashierSession->user_id,
+            'start_time' => $cashierSession->start_time->format('Y-m-d H:i:s'),
+            'end_time' => $cashierSession->end_time ? $cashierSession->end_time->format('Y-m-d H:i:s') : null,
+        ]);
+
         if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
+            \Log::warning('🔴 ACCÈS REFUSÉ - Permission', [
+                'user_role' => $user->role,
+                'session_user_id' => $cashierSession->user_id,
+                'current_user_id' => $user->id
+            ]);
+            
             return redirect()->route('cashier.dashboard')
                 ->with('error', 'Vous n\'avez pas accès à cette session.');
         }
 
+        \Log::info('✅ ACCÈS AUTORISÉ', [
+            'session_id' => $cashierSession->id
+        ]);
+
         try {
-            // Paiements associés
             $payments = Payment::where('cashier_session_id', $cashierSession->id)
                 ->with(['transaction.booking', 'user'])
                 ->orderBy('created_at', 'desc')
                 ->paginate(15);
 
-            // Statistiques
+            \Log::info('Paiements récupérés', [
+                'count' => $payments->count()
+            ]);
+
             $stats = [
                 'totalPayments' => Payment::where('cashier_session_id', $cashierSession->id)
                     ->where('status', Payment::STATUS_COMPLETED)
@@ -425,7 +548,9 @@ class CashierSessionController extends Controller
                     ->sum('amount') ?? 0,
             ];
 
-            // Méthodes de paiement utilisées
+            // Ajouter la durée formatée
+            $cashierSession->formatted_duration = $this->formatDuration($cashierSession);
+
             $paymentMethods = Payment::where('cashier_session_id', $cashierSession->id)
                 ->where('status', Payment::STATUS_COMPLETED)
                 ->select('payment_method', DB::raw('COUNT(*) as count'), DB::raw('SUM(amount) as total'))
@@ -441,9 +566,10 @@ class CashierSessionController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Error showing session', [
+            \Log::error('🔴 ERREUR show session', [
                 'session_id' => $cashierSession->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return redirect()->route('cashier.sessions.index')
@@ -458,13 +584,11 @@ class CashierSessionController extends Controller
     {
         $user = Auth::user();
 
-        // Vérifie les permissions
         if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
             return redirect()->route('cashier.dashboard')
                 ->with('error', 'Action non autorisée.');
         }
 
-        // Empêche l'édition d'une session clôturée
         if ($cashierSession->status === 'closed') {
             return redirect()->route('cashier.sessions.show', $cashierSession)
                 ->with('error', 'Les sessions clôturées ne peuvent pas être modifiées.');
@@ -483,7 +607,6 @@ class CashierSessionController extends Controller
     {
         $user = Auth::user();
 
-        // Vérifie les permissions
         if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
             return redirect()->route('cashier.dashboard')
                 ->with('error', 'Action non autorisée.');
@@ -520,17 +643,15 @@ class CashierSessionController extends Controller
     /**
      * CLÔTURE D'UNE SESSION
      */
-    public function destroy(CashierSession $cashierSession)
+    public function destroy(Request $request, CashierSession $cashierSession)
     {
         $user = Auth::user();
 
-        // Vérifie les permissions
         if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
             return redirect()->route('cashier.dashboard')
                 ->with('error', 'Action non autorisée.');
         }
 
-        // Vérifie le statut
         if ($cashierSession->status !== 'active') {
             return redirect()->back()
                 ->with('error', 'Cette session n\'est pas active.');
@@ -539,7 +660,6 @@ class CashierSessionController extends Controller
         DB::beginTransaction();
 
         try {
-            // Calculs
             $completedPayments = Payment::where('cashier_session_id', $cashierSession->id)
                 ->where('status', Payment::STATUS_COMPLETED)
                 ->sum('amount') ?? 0;
@@ -550,21 +670,20 @@ class CashierSessionController extends Controller
 
             $theoreticalBalance = $cashierSession->initial_balance + $completedPayments - $refundedPayments;
 
-            // Solde physique (par défaut le solde actuel)
-            $physicalBalance = request('final_balance', $cashierSession->current_balance);
+            $physicalBalance = $request->input('final_balance', $cashierSession->current_balance);
             $difference = $physicalBalance - $theoreticalBalance;
 
-            // Met à jour la session
+            $endTime = Carbon::now();
+
             $cashierSession->update([
                 'final_balance' => $physicalBalance,
                 'theoretical_balance' => $theoreticalBalance,
                 'balance_difference' => $difference,
-                'end_time' => Carbon::now(),
+                'end_time' => $endTime,
                 'status' => 'closed',
-                'closing_notes' => request('closing_notes', ''),
+                'closing_notes' => $request->input('closing_notes', ''),
             ]);
 
-            // Ajustement si différence
             if ($difference != 0) {
                 Payment::create([
                     'user_id' => $user->id,
@@ -580,13 +699,21 @@ class CashierSessionController extends Controller
 
             DB::commit();
 
+            $duration = $cashierSession->start_time->diffInMinutes($endTime);
+            $hours = floor($duration / 60);
+            $minutes = $duration % 60;
+
             \Log::info('Session closed', [
                 'session_id' => $cashierSession->id,
                 'user_id' => $user->id,
+                'start_time' => $cashierSession->start_time->format('Y-m-d H:i:s'),
+                'end_time' => $endTime->format('Y-m-d H:i:s'),
+                'duration' => $duration . ' minutes',
                 'difference' => $difference,
             ]);
 
             $message = 'Session #'.$cashierSession->id.' clôturée avec succès. ';
+            $message .= 'Durée: ' . ($hours > 0 ? $hours . 'h ' : '') . $minutes . 'min. ';
             $message .= 'Différence: '.number_format($difference, 2).' FCFA';
 
             if ($user->role === 'Admin' || $user->role === 'Super') {
@@ -675,7 +802,6 @@ class CashierSessionController extends Controller
     {
         $user = Auth::user();
 
-        // Seulement pour admin/super
         if ($user->role !== 'Admin' && $user->role !== 'Super') {
             return redirect()->route('cashier.dashboard')
                 ->with('error', 'Accès réservé aux administrateurs.');
@@ -724,7 +850,6 @@ class CashierSessionController extends Controller
     {
         $user = Auth::user();
 
-        // Vérifie si déjà une session active
         $activeSession = $this->getActiveSession($user);
         if ($activeSession) {
             return response()->json([
@@ -736,11 +861,13 @@ class CashierSessionController extends Controller
         DB::beginTransaction();
 
         try {
+            $now = Carbon::now();
+            
             $session = CashierSession::create([
                 'user_id' => $user->id,
                 'initial_balance' => $request->initial_balance ?? 0,
                 'current_balance' => $request->initial_balance ?? 0,
-                'start_time' => Carbon::now(),
+                'start_time' => $now,
                 'status' => 'active',
             ]);
 
@@ -750,6 +877,7 @@ class CashierSessionController extends Controller
                 'success' => true,
                 'message' => 'Session démarrée',
                 'session' => $session,
+                'start_time' => $now->format('Y-m-d H:i:s')
             ]);
 
         } catch (\Exception $e) {
@@ -792,7 +920,6 @@ class CashierSessionController extends Controller
                 ]);
             }
 
-            // Liste tous les réceptionnistes
             $receptionists = User::whereIn('role', ['Receptionist', 'Cashier'])
                 ->withCount([
                     'cashierSessions',
@@ -824,13 +951,16 @@ class CashierSessionController extends Controller
             'totalSessions' => CashierSession::where('user_id', $userId)->count(),
             'activeSessions' => CashierSession::where('user_id', $userId)
                 ->where('status', 'active')->count(),
-            'totalRevenue' => Payment::where('created_by', $userId)
+            'totalRevenue' => Payment::where('user_id', $userId)
                 ->where('status', Payment::STATUS_COMPLETED)
                 ->sum('amount') ?? 0,
             'avgSessionDuration' => $this->calculateAverageDuration($userId),
         ];
     }
 
+    /**
+     * Calculer la durée moyenne des sessions
+     */
     private function calculateAverageDuration($userId)
     {
         $sessions = CashierSession::where('user_id', $userId)
@@ -887,12 +1017,10 @@ class CashierSessionController extends Controller
         }
 
         try {
-            // Associer la transaction à la session
             $transaction->update([
                 'cashier_session_id' => $activeSession->id,
             ]);
 
-            // Mettre à jour le solde si paiement associé
             $totalPayment = $transaction->getTotalPayment();
             if ($totalPayment > 0) {
                 $activeSession->current_balance += $totalPayment;
@@ -925,32 +1053,27 @@ class CashierSessionController extends Controller
     {
         $user = Auth::user();
 
-        // Vérifier les permissions
         if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
             return redirect()->route('cashier.dashboard')
                 ->with('error', 'Accès non autorisé.');
         }
 
-        // Vérifier que la session est fermée
         if ($cashierSession->status !== 'closed') {
             return redirect()->route('cashier.sessions.show', $cashierSession)
                 ->with('error', 'La session doit être fermée pour générer le rapport.');
         }
 
         try {
-            // Transactions de la session
             $transactions = Transaction::where('cashier_session_id', $cashierSession->id)
                 ->with(['customer.user', 'room.type', 'payments'])
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            // Paiements de la session
             $payments = Payment::where('cashier_session_id', $cashierSession->id)
                 ->with(['transaction.customer', 'user'])
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            // Analyse par méthode de paiement
             $paymentMethodsAnalysis = [];
             foreach ($payments->groupBy('payment_method') as $method => $methodPayments) {
                 $completedPayments = $methodPayments->where('status', Payment::STATUS_COMPLETED);
@@ -965,7 +1088,6 @@ class CashierSessionController extends Controller
                 ];
             }
 
-            // Analyse par statut de transaction
             $transactionStatusAnalysis = [
                 'total' => $transactions->count(),
                 'active' => $transactions->where('status', 'active')->count(),
@@ -974,31 +1096,6 @@ class CashierSessionController extends Controller
                 'reservation' => $transactions->where('status', 'reservation')->count(),
             ];
 
-            // Analyse horaire
-            $hourlyAnalysis = [];
-            for ($hour = 0; $hour < 24; $hour++) {
-                $hourStart = $cashierSession->start_time->copy()->setHour($hour)->setMinute(0);
-                $hourEnd = $hourStart->copy()->addHour();
-
-                $hourTransactions = $transactions->filter(function ($transaction) use ($hourStart, $hourEnd) {
-                    return $transaction->created_at->between($hourStart, $hourEnd);
-                });
-
-                $hourPayments = $payments->filter(function ($payment) use ($hourStart, $hourEnd) {
-                    return $payment->created_at->between($hourStart, $hourEnd);
-                });
-
-                $hourlyAnalysis[$hour] = [
-                    'hour' => sprintf('%02d:00', $hour),
-                    'transactions' => $hourTransactions->count(),
-                    'payments' => $hourPayments->count(),
-                    'revenue' => $hourPayments->where('status', Payment::STATUS_COMPLETED)->sum('amount'),
-                    'average_payment' => $hourPayments->count() > 0 ?
-                        $hourPayments->where('status', Payment::STATUS_COMPLETED)->sum('amount') / $hourPayments->count() : 0,
-                ];
-            }
-
-            // Résumé financier
             $financialSummary = [
                 'initial_balance' => $cashierSession->initial_balance,
                 'total_payments' => $payments->where('status', Payment::STATUS_COMPLETED)->sum('amount'),
@@ -1010,10 +1107,10 @@ class CashierSessionController extends Controller
                     - abs($payments->where('status', Payment::STATUS_REFUNDED)->sum('amount')),
             ];
 
-            // Performance
             $duration = $cashierSession->start_time->diff($cashierSession->end_time);
             $performance = [
                 'duration_hours' => $duration->h + ($duration->i / 60),
+                'duration_formatted' => $this->formatDuration($cashierSession),
                 'transactions_per_hour' => $duration->h > 0 ?
                     $transactions->count() / $duration->h : $transactions->count(),
                 'revenue_per_hour' => $duration->h > 0 ?
@@ -1028,7 +1125,6 @@ class CashierSessionController extends Controller
                 'payments' => $payments,
                 'paymentMethodsAnalysis' => $paymentMethodsAnalysis,
                 'transactionStatusAnalysis' => $transactionStatusAnalysis,
-                'hourlyAnalysis' => $hourlyAnalysis,
                 'financialSummary' => $financialSummary,
                 'performance' => $performance,
                 'user' => $user,
@@ -1110,7 +1206,6 @@ class CashierSessionController extends Controller
         try {
             $issues = [];
 
-            // Vérifier les transactions sans paiements
             $transactionsWithoutPayments = Transaction::where('cashier_session_id', $cashierSession->id)
                 ->whereDoesntHave('payments')
                 ->count();
@@ -1123,7 +1218,6 @@ class CashierSessionController extends Controller
                 ];
             }
 
-            // Vérifier les paiements en attente
             $pendingPayments = Payment::where('cashier_session_id', $cashierSession->id)
                 ->where('status', Payment::STATUS_PENDING)
                 ->count();
@@ -1136,19 +1230,6 @@ class CashierSessionController extends Controller
                 ];
             }
 
-            // Vérifier la cohérence des totaux
-            $calculatedTheoreticalBalance = $cashierSession->calculateTheoreticalBalance();
-            $balanceDifference = abs($calculatedTheoreticalBalance - $cashierSession->theoretical_balance);
-
-            if ($balanceDifference > 1) { // Tolérance de 1 CFA
-                $issues[] = [
-                    'type' => 'error',
-                    'message' => 'Incohérence dans le solde théorique: Différence de '.number_format($balanceDifference, 2).' CFA',
-                    'severity' => 'high',
-                ];
-            }
-
-            // Vérifier la durée
             if ($cashierSession->isActive()) {
                 $duration = $cashierSession->start_time->diffInHours(now());
                 if ($duration > 12) {
@@ -1164,8 +1245,6 @@ class CashierSessionController extends Controller
                 'success' => true,
                 'issues' => $issues,
                 'session' => $cashierSession,
-                'calculated_theoretical_balance' => $calculatedTheoreticalBalance,
-                'balance_difference' => $balanceDifference,
             ]);
 
         } catch (\Exception $e) {
@@ -1199,7 +1278,6 @@ class CashierSessionController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
-            // Pour Excel/CSV
             if ($format === 'excel' || $format === 'csv') {
                 $data = [
                     'session' => $cashierSession,
@@ -1209,12 +1287,9 @@ class CashierSessionController extends Controller
                     'generated_by' => $user->name,
                 ];
 
-                // Ici, normalement vous utiliseriez un package Excel comme Maatwebsite/Laravel-Excel
-                // Pour l'instant, on retourne une vue
                 return view('cashier.sessions.export', $data);
             }
 
-            // Pour PDF
             if ($format === 'pdf') {
                 $data = [
                     'session' => $cashierSession,
@@ -1223,7 +1298,6 @@ class CashierSessionController extends Controller
                     'user' => $user,
                 ];
 
-                // Normalement, utiliser DomPDF ou un autre package
                 return view('cashier.sessions.pdf-export', $data);
             }
 
@@ -1261,7 +1335,6 @@ class CashierSessionController extends Controller
 
         $newUser = User::findOrFail($request->new_user_id);
 
-        // Vérifier que le nouvel utilisateur a les droits
         if (! in_array($newUser->role, ['Receptionist', 'Admin', 'Super', 'Cashier'])) {
             return redirect()->back()
                 ->with('error', 'Le nouvel utilisateur n\'a pas les droits nécessaires.');
@@ -1272,7 +1345,6 @@ class CashierSessionController extends Controller
         try {
             $oldUserId = $cashierSession->user_id;
 
-            // Mettre à jour la session
             $cashierSession->update([
                 'user_id' => $newUser->id,
                 'notes' => $cashierSession->notes."\n[TRANSFÉRÉ de ".User::find($oldUserId)->name.' à '.$newUser->name.' - '.now()->format('Y-m-d H:i:s').'] Raison: '.$request->reason,
@@ -1305,7 +1377,6 @@ class CashierSessionController extends Controller
     {
         $currentUser = Auth::user();
 
-        // Seuls les admins peuvent voir les sessions des autres
         if ($currentUser->role !== 'Admin' && $currentUser->role !== 'Super' && $currentUser->id != $userId) {
             return response()->json([
                 'success' => false,
@@ -1350,9 +1421,8 @@ class CashierSessionController extends Controller
         try {
             $user = auth()->user();
 
-            // Récupérer la session en cours
             $currentSession = CashierSession::where('user_id', $user->id)
-                ->whereNull('closed_at')
+                ->where('status', 'active')
                 ->first();
 
             if (! $currentSession) {
@@ -1363,7 +1433,6 @@ class CashierSessionController extends Controller
                 ]);
             }
 
-            // Calculer les statistiques
             $totalCash = $currentSession->total_cash ?? 0;
             $totalCard = $currentSession->total_card ?? 0;
             $totalMobile = $currentSession->total_mobile ?? 0;
@@ -1373,7 +1442,6 @@ class CashierSessionController extends Controller
             $totalTransactions = $currentSession->total_transactions ?? 0;
             $totalAmount = $totalCash + $totalCard + $totalMobile + $totalCheque + $totalOther;
 
-            // Récupérer les transactions de la session
             $transactions = Transaction::where('cashier_session_id', $currentSession->id)
                 ->whereDate('created_at', now()->toDateString())
                 ->get();
@@ -1387,7 +1455,7 @@ class CashierSessionController extends Controller
                 'success' => true,
                 'has_session' => true,
                 'session_id' => $currentSession->id,
-                'session_start' => $currentSession->created_at->format('H:i'),
+                'session_start' => $currentSession->start_time->format('H:i'),
                 'stats' => [
                     'total_amount' => number_format($totalAmount, 0, ',', ' ').' CFA',
                     'total_cash' => number_format($totalCash, 0, ',', ' ').' CFA',
@@ -1396,7 +1464,7 @@ class CashierSessionController extends Controller
                     'total_cheque' => number_format($totalCheque, 0, ',', ' ').' CFA',
                     'total_other' => number_format($totalOther, 0, ',', ' ').' CFA',
                     'total_transactions' => $totalTransactions,
-                    'session_duration' => $currentSession->created_at->diffForHumans(now(), true),
+                    'session_duration' => $currentSession->start_time->diffForHumans(now(), true),
                     'today_transactions' => $transactionsCount,
                     'today_amount' => number_format($transactionsAmount, 0, ',', ' ').' CFA',
                 ],
@@ -1411,6 +1479,66 @@ class CashierSessionController extends Controller
                 'message' => 'Erreur serveur',
                 'error' => config('app.debug') ? $e->getMessage() : null,
             ], 500);
+        }
+    }
+
+    /**
+     * Rapport détaillé d'une session
+     */
+    public function report(CashierSession $cashierSession)
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
+            return redirect()->route('cashier.dashboard')
+                ->with('error', 'Vous n\'avez pas accès à ce rapport.');
+        }
+
+        try {
+            $payments = Payment::where('cashier_session_id', $cashierSession->id)
+                ->with(['transaction.customer', 'user'])
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            $totalCompleted = $payments->where('status', Payment::STATUS_COMPLETED)->sum('amount');
+            $totalRefunded = $payments->where('status', Payment::STATUS_REFUNDED)->sum('amount');
+            $paymentCount = $payments->where('status', Payment::STATUS_COMPLETED)->count();
+            
+            $byMethod = $payments->where('status', Payment::STATUS_COMPLETED)
+                ->groupBy('payment_method')
+                ->map(function($group) {
+                    return [
+                        'count' => $group->count(),
+                        'total' => $group->sum('amount'),
+                        'method' => $group->first()->payment_method_label ?? 'Autre',
+                        'icon' => $group->first()->payment_method_icon ?? 'fa-money-bill-wave',
+                    ];
+                });
+
+            $startTime = $cashierSession->start_time;
+            $endTime = $cashierSession->end_time ?? now();
+            $duration = $startTime->diff($endTime);
+            $durationFormatted = $duration->format('%h heures %i minutes');
+
+            return view('cashier.sessions.report', [
+                'session' => $cashierSession,
+                'payments' => $payments,
+                'totalCompleted' => $totalCompleted,
+                'totalRefunded' => $totalRefunded,
+                'paymentCount' => $paymentCount,
+                'byMethod' => $byMethod,
+                'durationFormatted' => $durationFormatted,
+                'user' => $user,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Erreur génération rapport', [
+                'session_id' => $cashierSession->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('cashier.sessions.show', $cashierSession)
+                ->with('error', 'Erreur lors de la génération du rapport: ' . $e->getMessage());
         }
     }
 }

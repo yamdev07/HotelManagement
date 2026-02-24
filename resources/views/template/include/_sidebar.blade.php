@@ -47,6 +47,9 @@
                         }
                         return str_starts_with($currentRoute, $routeName) ? 'active' : '';
                     };
+                    
+                    // Vérifier si l'utilisateur a une session active
+                    $hasActiveSession = isset($activeSession) && $activeSession;
                 @endphp
 
                 <!-- ═══════════════════════════════════════
@@ -409,20 +412,79 @@
                     </a>
                     @endif
 
-                    <!-- Déconnexion -->
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                        @csrf
-                    </form>
-                    <a href="#" class="nav-item nav-item--logout"
-                       onclick="event.preventDefault(); if(confirm('Déconnecter votre session ?')) { document.getElementById('logout-form').submit(); } return false;">
-                        <div class="nav-icon">
-                            <i class="fas fa-sign-out-alt"></i>
+                    <!-- ═══════════════════════════════════════
+                         DÉCONNEXION AVEC PROTECTION
+                         ═══════════════════════════════════════ -->
+                    @if($hasActiveSession)
+                        <!-- Version bloquée - session active -->
+                        <div class="nav-item nav-item--logout"
+                             onclick="event.preventDefault(); 
+                                      if (typeof Swal !== 'undefined') {
+                                          Swal.fire({
+                                              title: '⚠️ Session Active',
+                                              html: 'Vous avez une session active <strong>#{{ $activeSession->id }}</strong>.<br><br>' +
+                                                    'Veuillez la clôturer avant de vous déconnecter.',
+                                              icon: 'warning',
+                                              confirmButtonColor: '#10b981',
+                                              confirmButtonText: 'Compris',
+                                              showCancelButton: true,
+                                              cancelButtonText: 'Aller à la session',
+                                              cancelButtonColor: '#3b82f6'
+                                          }).then((result) => {
+                                              if (result.dismiss === Swal.DismissReason.cancel) {
+                                                  window.location.href = '{{ route("cashier.sessions.show", $activeSession) }}';
+                                              }
+                                          });
+                                      } else {
+                                          alert('❌ Session active #{{ $activeSession->id }}. Veuillez clôturer avant de vous déconnecter.');
+                                      }"
+                             style="cursor: pointer; opacity: 0.7;"
+                             title="Déconnexion impossible - Clôturez d'abord votre session #{{ $activeSession->id }}">
+                            <div class="nav-icon">
+                                <i class="fas fa-sign-out-alt" style="color: #ef4444;"></i>
+                            </div>
+                            <div class="nav-content">
+                                <div class="nav-title" style="color: #ef4444;">Déconnexion (bloquée)</div>
+                                <div class="nav-subtitle">Session #{{ $activeSession->id }} active</div>
+                            </div>
                         </div>
-                        <div class="nav-content">
-                            <div class="nav-title">Déconnexion</div>
-                            <div class="nav-subtitle">Quitter la session</div>
-                        </div>
-                    </a>
+                    @else
+                        <!-- Version normale - pas de session active -->
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            @csrf
+                        </form>
+                        <a href="#" class="nav-item nav-item--logout"
+                           onclick="event.preventDefault(); 
+                                    if (typeof Swal !== 'undefined') {
+                                        Swal.fire({
+                                            title: 'Déconnexion',
+                                            text: 'Voulez-vous vraiment vous déconnecter ?',
+                                            icon: 'question',
+                                            showCancelButton: true,
+                                            confirmButtonColor: '#10b981',
+                                            cancelButtonColor: '#64748b',
+                                            confirmButtonText: 'Oui, déconnecter',
+                                            cancelButtonText: 'Annuler'
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                document.getElementById('logout-form').submit();
+                                            }
+                                        });
+                                    } else {
+                                        if (confirm('Déconnecter votre session ?')) {
+                                            document.getElementById('logout-form').submit();
+                                        }
+                                    }
+                                    return false;">
+                            <div class="nav-icon">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </div>
+                            <div class="nav-content">
+                                <div class="nav-title">Déconnexion</div>
+                                <div class="nav-subtitle">Quitter la session</div>
+                            </div>
+                        </a>
+                    @endif
                 </div>
 
             </nav>
@@ -481,10 +543,10 @@
                                 <span class="badge bg-secondary">{{ auth()->user()->role }}</span>
                         @endswitch
                     </div>
-                    @if(auth()->user()->role == 'Receptionist' && auth()->user()->is_active_session)
+                    @if($hasActiveSession)
                     <div class="session-indicator mt-1">
                         <small class="text-success">
-                            <i class="fas fa-circle fa-xs"></i> Session active
+                            <i class="fas fa-circle fa-xs"></i> Session #{{ $activeSession->id }} active
                         </small>
                     </div>
                     @endif
@@ -502,6 +564,7 @@
     </div>
 </aside>
 
+<!-- Le CSS et JavaScript restent identiques -->
 <style>
 /* ─── Base ─────────────────────────────────── */
 .sidebar {

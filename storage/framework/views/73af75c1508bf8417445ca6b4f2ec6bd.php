@@ -1,3 +1,12 @@
+<?php
+    // Récupérer la session active si l'utilisateur est connecté
+    $activeSession = null;
+    if (auth()->check()) {
+        $activeSession = \App\Models\CashierSession::where('user_id', auth()->id())
+            ->where('status', 'active')
+            ->first();
+    }
+?>
 <!doctype html>
 <html lang="en">
 
@@ -13,8 +22,10 @@
     
     <?php echo app('Illuminate\Foundation\Vite')('resources/sass/app.scss'); ?>
 
-        
+    
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
+    
     <?php echo $__env->yieldPushContent('styles'); ?>
     
     <title><?php echo $__env->yieldContent('title'); ?> - Hotel Admin</title>
@@ -64,6 +75,9 @@
     
     <!-- Vite / App JS -->
     <?php echo app('Illuminate\Foundation\Vite')('resources/js/app.js'); ?>
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Initialize Tooltips and Components -->
     <script>
@@ -265,6 +279,66 @@
             
         })();
     </script>
+
+    <?php echo $__env->yieldPushContent('scripts'); ?>
+    
+    
+   <script>
+    (function() {
+        'use strict';
+        
+        // Protection contre la déconnexion avec session active
+        <?php if($activeSession): ?>
+        console.log('🔒 Session active détectée #<?php echo e($activeSession->id); ?> - Déconnexion bloquée');
+        
+        // Bloquer tous les formulaires de déconnexion
+        document.addEventListener('click', function(e) {
+            const isLogoutButton = e.target.closest('form[action*="logout"] button, a[href*="logout"], .nav-link:has(i.fa-sign-out-alt)');
+            
+            if (isLogoutButton) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                Swal.fire({
+                    title: '⚠️ Session Active',
+                    html: 'Vous avez une session active <strong>#<?php echo e($activeSession->id); ?></strong>.<br><br>' +
+                          'Veuillez la clôturer avant de vous déconnecter.',
+                    icon: 'warning',
+                    confirmButtonColor: '#10b981',
+                    confirmButtonText: 'Compris',
+                    showCancelButton: true,
+                    cancelButtonText: 'Aller à la session',
+                    cancelButtonColor: '#3b82f6'
+                }).then((result) => {
+                    if (result.dismiss === Swal.DismissReason.cancel) {
+                        window.location.href = '<?php echo e(route("cashier.sessions.show", $activeSession)); ?>';
+                    }
+                });
+                
+                return false;
+            }
+        }, true);
+        
+        // ❌ SUPPRIMER COMPLÈTEMENT LE beforeunload
+        window.onbeforeunload = null;
+        
+        // Désactiver visuellement les liens de déconnexion
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoutElements = document.querySelectorAll('form[action*="logout"], a[href*="logout"], .nav-link:has(i.fa-sign-out-alt)');
+            logoutElements.forEach(el => {
+                el.style.opacity = '0.6';
+                el.style.pointerEvents = 'none';
+                el.title = 'Session active - Déconnexion impossible';
+            });
+        });
+        
+        <?php else: ?>
+        // ✅ PAS de session active : navigation normale
+        window.onbeforeunload = null;
+        console.log('✅ Aucune session active - navigation normale');
+        <?php endif; ?>
+    })();
+</script>
 
     <?php echo $__env->yieldContent('footer'); ?>
 </body>
