@@ -155,6 +155,15 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         Route::get('/{customer}/{room}/{from}/{to}/confirmation', [TransactionRoomReservationController::class, 'confirmation'])->name('confirmation');
         Route::post('/{customer}/{room}/payDownPayment', [TransactionRoomReservationController::class, 'payDownPayment'])->name('payDownPayment');
         Route::get('/customer/{customer}/reservations', [TransactionRoomReservationController::class, 'showCustomerReservations'])->name('customerReservations');
+         Route::get('/api/checkouts-today', [TransactionRoomReservationController::class, 'getRoomsBeingCheckedOutToday'])
+        ->name('api.checkouts-today');  
+        Route::post('/api/check-room-availability', [TransactionRoomReservationController::class, 'checkRoomAvailabilityToday'])
+            ->name('api.check-room-availability');
+        Route::post('/create-waiting', [TransactionRoomReservationController::class, 'createWaitingReservation'])
+            ->name('create-waiting')
+            ->middleware('checkrole:Super,Admin,Receptionist');
+        Route::get('/{customer}/with-checkouts', [TransactionRoomReservationController::class, 'showAvailableRoomsWithCheckouts'])
+            ->name('with-checkouts');
     });
 
     // ==================== CLIENTS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
@@ -227,25 +236,38 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         // Groupe pour les routes avec paramètre {transaction} et segments supplémentaires
         Route::prefix('{transaction}')->group(function () {
             // Routes avec segments supplémentaires
-            Route::get('/edit', [TransactionController::class, 'edit'])->name('edit');
-            Route::get('/invoice', [TransactionController::class, 'invoice'])->name('invoice');
-            Route::get('/history', [TransactionController::class, 'history'])->name('history');
-            Route::get('/extend', [TransactionController::class, 'extend'])->name('extend');
-            Route::post('/extend', [TransactionController::class, 'processExtend'])->name('extend.process');
+            Route::get('/edit', [TransactionController::class, 'edit'])->name('edit')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::get('/invoice', [TransactionController::class, 'invoice'])->name('invoice')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::get('/history', [TransactionController::class, 'history'])->name('history')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::get('/extend', [TransactionController::class, 'extend'])->name('extend')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::post('/extend', [TransactionController::class, 'processExtend'])->name('extend.process')
+                ->middleware('checkrole:Super,Admin,Receptionist');
 
             // Gestion des statuts
-            Route::put('/update-status', [TransactionController::class, 'updateStatus'])->name('updateStatus');
-            Route::post('/arrived', [TransactionController::class, 'markAsArrived'])->name('mark-arrived');
-            Route::post('/departed', [TransactionController::class, 'markAsDeparted'])->name('mark-departed');
+            Route::put('/update-status', [TransactionController::class, 'updateStatus'])->name('updateStatus')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::post('/arrived', [TransactionController::class, 'markAsArrived'])->name('mark-arrived')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::post('/departed', [TransactionController::class, 'markAsDeparted'])->name('mark-departed')
+                ->middleware('checkrole:Super,Admin,Receptionist');
 
             // API/AJAX
-            Route::get('/check-payment', [TransactionController::class, 'checkPaymentStatus'])->name('check-payment');
-            Route::get('/can-complete', [TransactionController::class, 'checkIfCanComplete'])->name('can-complete');
-            Route::get('/check-availability', [TransactionController::class, 'checkAvailability'])->name('checkAvailability');
-            Route::get('/details', [TransactionController::class, 'showDetails'])->name('showDetails');
+            Route::get('/check-payment', [TransactionController::class, 'checkPaymentStatus'])->name('check-payment')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::get('/can-complete', [TransactionController::class, 'checkIfCanComplete'])->name('can-complete')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::get('/check-availability', [TransactionController::class, 'checkAvailability'])->name('checkAvailability')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::get('/details', [TransactionController::class, 'showDetails'])->name('showDetails')
+                ->middleware('checkrole:Super,Admin,Receptionist');
 
             // RESTful routes
-            Route::put('/', [TransactionController::class, 'update'])->name('update');
+            Route::put('/', [TransactionController::class, 'update'])->name('update')
+                ->middleware('checkrole:Super,Admin,Receptionist'); // ← ICI LA CORRECTION
 
             // Actions critiques nécessitant autorisation
             Route::middleware('checkrole:Super,Admin')->group(function () {
@@ -258,12 +280,12 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
                 ->middleware('checkrole:Super,Admin');
 
             // IMPORTANT: La route show DOIT ÊTRE ICI, DANS LE GROUPE
-            Route::get('/', [TransactionController::class, 'show'])->name('show');
+            Route::get('/', [TransactionController::class, 'show'])->name('show')
+                ->middleware('checkrole:Super,Admin,Receptionist');
         });
 
-        // SUPPRIMEZ CETTE LIGNE CI-DESSOUS CAR ELLE EST DÉJÀ DANS LE GROUPE CI-DESSUS
-        // Route::get('/{transaction}', [TransactionController::class, 'show'])->name('show');
-    });
+    }); 
+    
     // ==================== ÉQUIPEMENTS ====================
     // Seulement pour admins
     Route::resource('facility', FacilityController::class)->middleware('checkrole:Super,Admin');
@@ -326,7 +348,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
 
             // Suppression seulement pour admins
             Route::delete('/', [CashierSessionController::class, 'destroy'])->name('sessions.destroy')
-                ->middleware('checkrole:Super,Admin');
+                ->middleware('checkrole:Super,Admin,Receptionist');
 
             Route::get('/report', [CashierSessionController::class, 'report'])->name('sessions.report');
         });

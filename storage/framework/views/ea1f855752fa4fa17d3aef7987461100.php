@@ -629,7 +629,7 @@ body {
                 <a href="<?php echo e(route('cashier.sessions.show', $activeSession)); ?>" class="btn btn-outline-success">
                     <i class="fas fa-eye"></i> Détails
                 </a>
-                <?php if(($isAdmin && $activeSession->user_id == auth()->id()) || $isCashier): ?>
+                <?php if(($isAdmin && $activeSession->user_id == auth()->id()) || $isCashier || $isReceptionist): ?>
                 <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#closeModal">
                     <i class="fas fa-lock"></i> Clôturer
                 </button>
@@ -1084,7 +1084,7 @@ body {
 </div>
 
 <!-- Close modal -->
-<?php if($activeSession && ($isAdmin || $isCashier) && $activeSession->user_id == auth()->id()): ?>
+<?php if($activeSession && ($isAdmin || $isCashier || $isReceptionist) && $activeSession->user_id == auth()->id()): ?>
 <div class="modal fade" id="closeModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">

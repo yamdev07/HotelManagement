@@ -92,7 +92,7 @@ class CashierSessionController extends Controller
             'currentTime' => now()->format('d/m/Y H:i:s'),
             'isReceptionist' => $user->role === 'Receptionist',
             'isAdmin' => $user->role === 'Admin' || $user->role === 'Super',
-            'isCashier' => $user->role === 'Cashier',
+            'isCashier' => $user->role === 'Receptionist' || $user->role === 'Admin' || $user->role === 'Super', // CORRIGÉ
             'allReceptionists' => $allReceptionists,
             'allSessions' => $allSessions,
             'allSessionsCount' => $allSessionsCount,
