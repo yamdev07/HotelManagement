@@ -13,7 +13,8 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        \App\Console\Commands\ProcessWaitingReservations::class, // NOUVEAU
+        \App\Console\Commands\UpdateTransactionStatuses::class, // Si vous l'avez
     ];
 
     /**
@@ -23,8 +24,20 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // Exécute la commande tous les jours à 01:00 du matin
+        // Mise à jour des statuts tous les jours à 01:00
         $schedule->command('transactions:update-statuses')->dailyAt('01:00');
+        
+        // ✅ Traiter les réservations en attente toutes les 15 minutes
+        $schedule->command('hotel:process-waiting-reservations')
+                 ->everyFifteenMinutes()
+                 ->withoutOverlapping()
+                 ->appendOutputTo(storage_path('logs/waiting-reservations.log'));
+        
+        // ✅ Vérifier les no-show tous les jours à 02:00
+        $schedule->command('hotel:process-no-shows')->dailyAt('02:00');
+        
+        // ✅ Nettoyer les vieux logs toutes les semaines
+        $schedule->command('model:prune')->weekly();
     }
 
     /**

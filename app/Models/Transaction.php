@@ -60,6 +60,10 @@ class Transaction extends Model
 
     const STATUS_NO_SHOW = 'no_show';
 
+    const STATUS_PENDING_CHECKOUT = 'pending_checkout'; 
+
+    const STATUS_RESERVED_WAITING = 'reserved_waiting'; 
+
     // Types de pièces d'identité
     const ID_TYPE_PASSPORT = 'passeport';
 
@@ -1209,6 +1213,121 @@ class Transaction extends Model
             ])
             ->log('a marqué comme no-show');
 
+        return true;
+    }
+
+    /**
+     * Vérifie si la transaction est en attente de check-out
+     */
+    public function isPendingCheckout()
+    {
+        return $this->status === self::STATUS_PENDING_CHECKOUT;
+    }
+
+    /**
+     * Vérifie si la transaction est une réservation en attente
+     */
+    public function isReservedWaiting()
+    {
+        return $this->status === self::STATUS_RESERVED_WAITING;
+    }
+
+    /**
+     * Créer une réservation pour une chambre qui sera libérée aujourd'hui
+     */
+    public static function createWaitingReservation($data)
+    {
+        DB::beginTransaction();
+        
+        try {
+            $transaction = self::create([
+                'user_id' => $data['user_id'],
+                'customer_id' => $data['customer_id'],
+                'room_id' => $data['room_id'],
+                'check_in' => $data['check_in'],
+                'check_out' => $data['check_out'],
+                'check_in_time' => $data['check_in_time'] ?? '14:00:00',
+                'check_out_time' => $data['check_out_time'] ?? '12:00:00',
+                'status' => self::STATUS_RESERVED_WAITING,
+                'person_count' => $data['person_count'] ?? 1,
+                'total_price' => $data['total_price'],
+                'total_payment' => 0,
+                'notes' => $data['notes'] . ' | En attente du check-out du client actuel',
+                'special_requests' => $data['special_requests'] ?? null,
+                'id_type' => $data['id_type'] ?? null,
+                'id_number' => $data['id_number'] ?? null,
+                'nationality' => $data['nationality'] ?? null,
+            ]);
+            
+            DB::commit();
+            
+            return $transaction;
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Confirmer la réservation après le check-out
+     */
+    public function confirmAfterCheckout()
+    {
+        if ($this->status !== self::STATUS_RESERVED_WAITING) {
+            return false;
+        }
+        
+        $this->status = self::STATUS_RESERVATION;
+        $this->notes = $this->notes . ' | Confirmée après check-out';
+        $this->save();
+        
+        activity()
+            ->performedOn($this)
+            ->log('Réservation confirmée après libération de la chambre');
+        
+        return true;
+    }
+
+    /**
+     * Vérifier si la chambre sera disponible pour la période demandée
+     */
+    public static function isRoomAvailableForPeriod($roomId, $checkIn, $checkOut, $excludeTransactionId = null)
+    {
+        $checkIn = Carbon::parse($checkIn)->startOfDay();
+        $checkOut = Carbon::parse($checkOut)->startOfDay();
+        
+        // Vérifier les transactions qui pourraient bloquer
+        $conflictingTransactions = self::where('room_id', $roomId)
+            ->whereNotIn('status', [self::STATUS_CANCELLED, self::STATUS_NO_SHOW, self::STATUS_COMPLETED])
+            ->where(function($query) use ($checkIn, $checkOut) {
+                $query->where('check_in', '<', $checkOut)
+                    ->where('check_out', '>', $checkIn);
+            });
+        
+        if ($excludeTransactionId) {
+            $conflictingTransactions->where('id', '!=', $excludeTransactionId);
+        }
+        
+        $conflicts = $conflictingTransactions->get();
+        
+        foreach ($conflicts as $conflict) {
+            // Si la transaction conflictuelle se termine le jour du check-in
+            if ($conflict->check_out->format('Y-m-d') == $checkIn->format('Y-m-d')) {
+                // OK - le client part le jour de l'arrivée
+                continue;
+            }
+            
+            // Si la transaction conflictuelle commence le jour du check-out
+            if ($conflict->check_in->format('Y-m-d') == $checkOut->format('Y-m-d')) {
+                // OK - le nouveau client part le jour où l'autre arrive
+                continue;
+            }
+            
+            // Autre conflit → non disponible
+            return false;
+        }
+        
         return true;
     }
 }

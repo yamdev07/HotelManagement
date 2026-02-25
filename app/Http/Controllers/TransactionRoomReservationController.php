@@ -759,4 +759,272 @@ class TransactionRoomReservationController extends Controller
             'reservations' => $reservations,
         ]);
     }
+
+    /**
+     * Récupère les chambres occupées qui seront libérées aujourd'hui
+     * Pour les afficher dans le formulaire de réservation
+     */
+    public function getRoomsBeingCheckedOutToday()
+    {
+        try {
+            $today = Carbon::today();
+            
+            $checkoutsToday = Transaction::where('status', 'active')
+                ->whereDate('check_out', $today)
+                ->with(['room', 'room.type', 'customer'])
+                ->orderBy('check_out_time', 'asc')
+                ->get();
+            
+            $rooms = [];
+            
+            foreach ($checkoutsToday as $transaction) {
+                $room = $transaction->room;
+                if (!$room) continue;
+                
+                $checkoutTime = $transaction->check_out_time ?? '12:00';
+                $checkoutTimeCarbon = Carbon::parse($checkoutTime);
+                
+                // Vérifier si le client actuel est toujours là
+                $stillOccupied = $transaction->actual_check_out ? false : true;
+                
+                $rooms[] = [
+                    'transaction_id' => $transaction->id,
+                    'room' => $room,
+                    'room_id' => $room->id,
+                    'room_number' => $room->number,
+                    'room_name' => $room->display_name,
+                    'room_type' => $room->type->name ?? 'Standard',
+                    'room_price' => $room->price,
+                    'room_price_formatted' => $room->formatted_price,
+                    'room_capacity' => $room->capacity,
+                    'customer_id' => $transaction->customer_id,
+                    'customer_name' => $transaction->customer->name ?? 'Inconnu',
+                    'customer_phone' => $transaction->customer->phone ?? '',
+                    'check_in' => $transaction->check_in->format('d/m/Y'),
+                    'check_out' => $transaction->check_out->format('d/m/Y'),
+                    'checkout_time' => $checkoutTime,
+                    'checkout_time_formatted' => $checkoutTimeCarbon->format('H:i'),
+                    'will_be_available_at' => $checkoutTimeCarbon->format('H:i'),
+                    'minutes_until_available' => max(0, $checkoutTimeCarbon->diffInMinutes(now(), false)),
+                    'is_available_now' => $checkoutTimeCarbon->lte(now()) && !$stillOccupied,
+                    'still_occupied' => $stillOccupied,
+                    'needs_cleaning' => $room->needsCleaning(),
+                    'status_label' => $room->status_label,
+                    'status_color' => $room->status_color,
+                ];
+            }
+            
+            // Séparer ceux qui sont déjà disponibles
+            $availableNow = array_filter($rooms, fn($r) => $r['is_available_now']);
+            $availableLater = array_filter($rooms, fn($r) => !$r['is_available_now']);
+            
+            return response()->json([
+                'success' => true,
+                'total' => count($rooms),
+                'available_now' => count($availableNow),
+                'available_later' => count($availableLater),
+                'available_now_rooms' => array_values($availableNow),
+                'available_later_rooms' => array_values($availableLater),
+                'all_rooms' => $rooms,
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Erreur récupération chambres à libérer:', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Vérifie si une chambre spécifique sera libérée aujourd'hui
+     */
+    public function checkRoomAvailabilityToday(Request $request)
+    {
+        $request->validate([
+            'room_id' => 'required|exists:rooms,id',
+        ]);
+        
+        $room = Room::find($request->room_id);
+        
+        // Vérifier si la chambre est occupée aujourd'hui
+        $currentTransaction = Transaction::where('room_id', $room->id)
+            ->where('status', 'active')
+            ->whereDate('check_in', '<=', now())
+            ->whereDate('check_out', '>=', now())
+            ->first();
+        
+        if (!$currentTransaction) {
+            return response()->json([
+                'is_occupied' => false,
+                'message' => 'Chambre disponible maintenant'
+            ]);
+        }
+        
+        // Chambre occupée, vérifier si elle part aujourd'hui
+        $checkoutToday = $currentTransaction->check_out->isToday();
+        
+        if (!$checkoutToday) {
+            return response()->json([
+                'is_occupied' => true,
+                'message' => 'Chambre occupée jusqu\'au ' . $currentTransaction->check_out->format('d/m/Y')
+            ]);
+        }
+        
+        // Elle part aujourd'hui
+        $checkoutTime = $currentTransaction->check_out_time ?? '12:00';
+        $checkoutTimeCarbon = Carbon::parse($checkoutTime);
+        
+        return response()->json([
+            'is_occupied' => true,
+            'is_checking_out_today' => true,
+            'checkout_time' => $checkoutTime,
+            'checkout_time_formatted' => $checkoutTimeCarbon->format('H:i'),
+            'current_guest' => $currentTransaction->customer->name ?? 'Inconnu',
+            'will_be_available_at' => $checkoutTimeCarbon->format('H:i'),
+            'is_available_now' => $checkoutTimeCarbon->lte(now()),
+            'minutes_until_available' => max(0, $checkoutTimeCarbon->diffInMinutes(now(), false)),
+        ]);
+    }
+
+    /**
+     * Crée une réservation en attente (pour chambre à libérer aujourd'hui)
+     */
+    public function createWaitingReservation(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'customer_id' => 'required|exists:customers,id',
+            'room_id' => 'required|exists:rooms,id',
+            'check_in' => 'required|date',
+            'check_out' => 'required|date|after:check_in',
+            'check_in_time' => 'nullable|date_format:H:i',
+            'person_count' => 'required|integer|min:1',
+            'downPayment' => 'nullable|numeric|min:0',
+            'payment_method' => 'nullable|string|in:cash,card,mobile_money',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+        $user = auth()->user();
+        $room = Room::find($validated['room_id']);
+        
+        try {
+            DB::beginTransaction();
+            
+            $checkIn = Carbon::parse($validated['check_in'])->setTime(12, 0, 0);
+            $checkOut = Carbon::parse($validated['check_out'])->setTime(12, 0, 0);
+            $days = $checkIn->diffInDays($checkOut);
+            $totalPrice = $room->price * $days;
+            
+            // Créer la transaction avec statut "reserved_waiting"
+            $transaction = Transaction::create([
+                'user_id' => $user->id,
+                'customer_id' => $validated['customer_id'],
+                'room_id' => $validated['room_id'],
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
+                'check_in_time' => $validated['check_in_time'] ?? '14:00:00',
+                'check_out_time' => '12:00:00',
+                'status' => 'reserved_waiting',
+                'person_count' => $validated['person_count'],
+                'total_price' => $totalPrice,
+                'total_payment' => $validated['downPayment'] ?? 0,
+                'notes' => ($validated['notes'] ?? '') . ' | En attente du check-out du client actuel',
+            ]);
+            
+            // Créer le paiement si acompte
+            if (($validated['downPayment'] ?? 0) > 0) {
+                Payment::create([
+                    'user_id' => $user->id,
+                    'transaction_id' => $transaction->id,
+                    'amount' => $validated['downPayment'],
+                    'payment_method' => $validated['payment_method'] ?? 'cash',
+                    'reference' => 'WAIT-'.$transaction->id.'-'.time(),
+                    'status' => 'completed',
+                    'notes' => 'Acompte pour réservation en attente',
+                ]);
+            }
+            
+            DB::commit();
+            
+            \Log::info('✅ Réservation en attente créée', [
+                'transaction_id' => $transaction->id,
+                'room' => $room->number,
+                'customer_id' => $validated['customer_id']
+            ]);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Réservation en attente créée. Vous serez notifié quand la chambre sera disponible.',
+                'transaction_id' => $transaction->id,
+                'redirect' => route('transaction.show', $transaction)
+            ]);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Erreur création réservation en attente:', [
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Erreur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Affiche les chambres à libérer dans le formulaire de réservation
+     */
+    public function showAvailableRoomsWithCheckouts(Customer $customer, Request $request)
+    {
+        $stayFrom = $request->check_in ?? now()->format('Y-m-d');
+        $stayUntil = $request->check_out ?? now()->addDays(1)->format('Y-m-d');
+        
+        // Chambres disponibles normalement
+        $occupiedRoomId = $this->getOccupiedRoomID($stayFrom, $stayUntil);
+        $availableRooms = $this->reservationRepository->getUnocuppiedroom(
+            new Request(['check_in' => $stayFrom, 'check_out' => $stayUntil]), 
+            $occupiedRoomId
+        );
+        
+        // Chambres qui seront libérées aujourd'hui
+        $checkoutsToday = Transaction::where('status', 'active')
+            ->whereDate('check_out', Carbon::today())
+            ->with(['room', 'customer'])
+            ->get();
+        
+        $roomsBeingCheckedOut = [];
+        foreach ($checkoutsToday as $checkout) {
+            $room = $checkout->room;
+            if (!$room) continue;
+            
+            $roomsBeingCheckedOut[] = [
+                'room' => $room,
+                'checkout_time' => $checkout->check_out_time ?? '12:00',
+                'current_guest' => $checkout->customer->name ?? 'Inconnu',
+                'will_be_available_at' => Carbon::parse($checkout->check_out_time ?? '12:00')->format('H:i'),
+            ];
+        }
+        
+        return view('transaction.reservation.choose-room-with-checkouts', [
+            'customer' => $customer,
+            'availableRooms' => $availableRooms,
+            'roomsBeingCheckedOut' => $roomsBeingCheckedOut,
+            'stayFrom' => $stayFrom,
+            'stayUntil' => $stayUntil,
+            'hasWaitingRooms' => count($roomsBeingCheckedOut) > 0,
+        ]);
+    }
 }

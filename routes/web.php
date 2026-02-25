@@ -155,6 +155,15 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         Route::get('/{customer}/{room}/{from}/{to}/confirmation', [TransactionRoomReservationController::class, 'confirmation'])->name('confirmation');
         Route::post('/{customer}/{room}/payDownPayment', [TransactionRoomReservationController::class, 'payDownPayment'])->name('payDownPayment');
         Route::get('/customer/{customer}/reservations', [TransactionRoomReservationController::class, 'showCustomerReservations'])->name('customerReservations');
+         Route::get('/api/checkouts-today', [TransactionRoomReservationController::class, 'getRoomsBeingCheckedOutToday'])
+        ->name('api.checkouts-today');  
+        Route::post('/api/check-room-availability', [TransactionRoomReservationController::class, 'checkRoomAvailabilityToday'])
+            ->name('api.check-room-availability');
+        Route::post('/create-waiting', [TransactionRoomReservationController::class, 'createWaitingReservation'])
+            ->name('create-waiting')
+            ->middleware('checkrole:Super,Admin,Receptionist');
+        Route::get('/{customer}/with-checkouts', [TransactionRoomReservationController::class, 'showAvailableRoomsWithCheckouts'])
+            ->name('with-checkouts');
     });
 
     // ==================== CLIENTS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================

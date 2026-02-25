@@ -1065,4 +1065,300 @@ class Room extends Model
             ];
         });
     }
+
+    /**
+     * Vérifie si la chambre sera disponible pour une date donnée
+     * Prend en compte les check-outs du jour même
+     */
+    public function isAvailableForDate($date, $excludeTransactionId = null)
+    {
+        $date = Carbon::parse($date)->startOfDay();
+        
+        // Vérifier le statut de la chambre
+        if ($this->room_status_id == self::STATUS_MAINTENANCE) {
+            return false;
+        }
+        
+        // Chercher une transaction active pour cette date
+        $transaction = $this->transactions()
+            ->whereNotIn('status', ['cancelled', 'no_show', 'completed'])
+            ->where('check_in', '<=', $date)
+            ->where('check_out', '>', $date);
+            
+        if ($excludeTransactionId) {
+            $transaction->where('id', '!=', $excludeTransactionId);
+        }
+        
+        $activeTransaction = $transaction->first();
+        
+        // Pas de transaction active → disponible
+        if (!$activeTransaction) {
+            return true;
+        }
+        
+        // Transaction active trouvée
+        // Vérifier si c'est le jour du check-out
+        if ($activeTransaction->check_out->format('Y-m-d') == $date->format('Y-m-d')) {
+            // C'est le jour du check-out, la chambre sera disponible après le check-out
+            return true;
+        }
+        
+        // La chambre est occupée pour toute la journée
+        return false;
+    }
+
+    /**
+     * Vérifie la disponibilité pour une période avec gestion des check-outs
+     */
+    public function isAvailableForPeriodWithCheckout($checkIn, $checkOut, $excludeTransactionId = null)
+    {
+        $checkIn = Carbon::parse($checkIn)->startOfDay();
+        $checkOut = Carbon::parse($checkOut)->startOfDay();
+        
+        // Vérifier le statut de la chambre
+        if ($this->room_status_id == self::STATUS_MAINTENANCE) {
+            return false;
+        }
+        
+        // Récupérer toutes les transactions qui pourraient chevaucher
+        $transactions = $this->transactions()
+            ->whereNotIn('status', ['cancelled', 'no_show', 'completed'])
+            ->where('check_in', '<', $checkOut)
+            ->where('check_out', '>', $checkIn);
+            
+        if ($excludeTransactionId) {
+            $transactions->where('id', '!=', $excludeTransactionId);
+        }
+        
+        $conflictingTransactions = $transactions->get();
+        
+        foreach ($conflictingTransactions as $transaction) {
+            // Si la transaction se termine le jour du check-in
+            if ($transaction->check_out->format('Y-m-d') == $checkIn->format('Y-m-d')) {
+                // OK - le client part le jour de l'arrivée
+                continue;
+            }
+            
+            // Si la transaction commence le jour du check-out
+            if ($transaction->check_in->format('Y-m-d') == $checkOut->format('Y-m-d')) {
+                // OK - le nouveau client part le jour où l'autre arrive
+                continue;
+            }
+            
+            // Si la transaction couvre plus d'un jour qui nous concerne
+            if ($transaction->check_in->lt($checkOut) && $transaction->check_out->gt($checkIn)) {
+                // Vérifier si c'est une réservation qui commence aujourd'hui
+                if ($transaction->check_in->format('Y-m-d') == now()->format('Y-m-d')) {
+                    continue; // C'est une nouvelle réservation, pas un conflit
+                }
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    /**
+     * Récupère l'heure de check-out prévue pour aujourd'hui
+     */
+    public function getTodayCheckoutTime()
+    {
+        $today = now()->format('Y-m-d');
+        
+        $transaction = $this->transactions()
+            ->whereIn('status', ['active', 'reservation'])
+            ->whereDate('check_out', $today)
+            ->first();
+        
+        if ($transaction) {
+            return $transaction->check_out_time ?? '12:00:00';
+        }
+        
+        return null;
+    }
+
+    /**
+     * Vérifie si la chambre est en attente de check-out aujourd'hui
+     */
+    public function isPendingCheckoutToday()
+    {
+        $today = now()->format('Y-m-d');
+        
+        return $this->transactions()
+            ->whereIn('status', ['active', 'reservation'])
+            ->whereDate('check_out', $today)
+            ->exists();
+    }
+
+    // Dans app/Models/Room.php - Ajoutez ces méthodes à la fin de la classe
+
+/**
+ * Récupère les chambres occupées qui seront libérées aujourd'hui
+ * 
+ * @return array Liste des chambres avec leurs informations de libération
+ */
+public static function getRoomsBeingCheckedOutToday()
+{
+    $today = Carbon::today();
+    
+    // Trouver les transactions actives qui check-out aujourd'hui
+    $checkingOutTransactions = Transaction::where('status', 'active')
+        ->whereDate('check_out', $today)
+        ->with(['room', 'customer'])
+        ->get();
+    
+    $rooms = [];
+    
+    foreach ($checkingOutTransactions as $transaction) {
+        $room = $transaction->room;
+        if ($room) {
+            $rooms[] = [
+                'room' => $room,
+                'transaction' => $transaction,
+                'room_id' => $room->id,
+                'room_number' => $room->number,
+                'room_name' => $room->display_name,
+                'room_type' => $room->type->name ?? 'Standard',
+                'room_price' => $room->formatted_price,
+                'current_guest' => $transaction->customer->name ?? 'Inconnu',
+                'current_guest_id' => $transaction->customer_id,
+                'checkout_time' => $transaction->check_out_time ?? '12:00',
+                'checkout_time_formatted' => Carbon::parse($transaction->check_out_time ?? '12:00')->format('H:i'),
+                'will_be_available_at' => Carbon::parse($transaction->check_out_time ?? '12:00')->format('H:i'),
+                'needs_cleaning' => $room->needsCleaning(),
+                'status_label' => $room->status_label,
+                'status_color' => $room->status_color,
+                'transaction_id' => $transaction->id,
+                'transaction_reference' => '#TRX-' . $transaction->id,
+            ];
+        }
+    }
+    
+    // Trier par heure de libération
+    usort($rooms, function($a, $b) {
+        return strcmp($a['checkout_time'], $b['checkout_time']);
+    });
+    
+    return $rooms;
+}
+
+/**
+ * Récupère les chambres qui seront disponibles après une certaine heure
+ * 
+ * @param string $time Heure limite (ex: '14:00')
+ * @return array Liste des chambres disponibles après cette heure
+ */
+public static function getRoomsAvailableAfter($time = '12:00')
+{
+    $today = Carbon::today();
+    $targetTime = Carbon::parse($time);
+    
+    $transactions = Transaction::where('status', 'active')
+        ->whereDate('check_out', $today)
+        ->whereTime('check_out_time', '<=', $targetTime->format('H:i:s'))
+        ->with(['room', 'customer'])
+        ->get();
+    
+    $rooms = [];
+    
+    foreach ($transactions as $transaction) {
+        $room = $transaction->room;
+        if ($room) {
+            $rooms[] = [
+                'room' => $room,
+                'available_from' => Carbon::parse($transaction->check_out_time ?? '12:00')->format('H:i'),
+                'current_guest' => $transaction->customer->name ?? 'Inconnu',
+            ];
+        }
+    }
+    
+    return $rooms;
+}
+
+/**
+ * Compte le nombre de chambres à libérer aujourd'hui
+ * 
+ * @return int
+ */
+public static function countRoomsBeingCheckedOutToday()
+{
+    return Transaction::where('status', 'active')
+        ->whereDate('check_out', Carbon::today())
+        ->count();
+}
+
+/**
+ * Récupère les détails d'une chambre spécifique si elle est à libérer aujourd'hui
+ * 
+ * @param int $roomId ID de la chambre
+ * @return array|null
+ */
+public function getCheckoutDetailsToday()
+{
+    $today = Carbon::today();
+    
+    $transaction = $this->transactions()
+        ->where('status', 'active')
+        ->whereDate('check_out', $today)
+        ->with('customer')
+        ->first();
+    
+    if (!$transaction) {
+        return null;
+    }
+    
+    return [
+        'is_checking_out_today' => true,
+        'checkout_time' => $transaction->check_out_time ?? '12:00',
+        'checkout_time_formatted' => Carbon::parse($transaction->check_out_time ?? '12:00')->format('H:i'),
+        'current_guest' => $transaction->customer->name ?? 'Inconnu',
+        'current_guest_id' => $transaction->customer_id,
+        'transaction_id' => $transaction->id,
+        'will_be_available_at' => Carbon::parse($transaction->check_out_time ?? '12:00')->format('H:i'),
+    ];
+}
+
+/**
+ * Récupère les chambres à libérer aujourd'hui regroupées par heure
+ * 
+ * @return array
+ */
+public static function getRoomsBeingCheckedOutGroupedByHour()
+{
+    $rooms = self::getRoomsBeingCheckedOutToday();
+    
+    $grouped = [];
+    foreach ($rooms as $room) {
+        $hour = substr($room['checkout_time'], 0, 5); // Format HH:ii
+        if (!isset($grouped[$hour])) {
+            $grouped[$hour] = [
+                'time' => $hour,
+                'count' => 0,
+                'rooms' => []
+            ];
+        }
+        $grouped[$hour]['count']++;
+        $grouped[$hour]['rooms'][] = $room;
+    }
+    
+    // Trier par heure
+    ksort($grouped);
+    
+    return $grouped;
+}
+
+/**
+ * Récupère les chambres à libérer aujourd'hui pour un type spécifique
+ * 
+ * @param int $typeId ID du type de chambre
+ * @return array
+ */
+public static function getRoomsBeingCheckedOutByType($typeId)
+{
+    $rooms = self::getRoomsBeingCheckedOutToday();
+    
+    return array_filter($rooms, function($room) use ($typeId) {
+        return $room['room']->type_id == $typeId;
+    });
+}
 }
