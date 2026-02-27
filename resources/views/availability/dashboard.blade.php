@@ -804,175 +804,169 @@ body {
         </div>
     </div>
 
-    {{-- ═══════════════════════════════════════════════════════════════
-         SECTION SPÉCIALE : CHAMBRES SALES (OCCUPÉES / NON OCCUPÉES)
-    ═══════════════════════════════════════════════════════════════════ --}}
-    <div class="card" style="margin:10px 0 20px; border-left:4px solid #f59e0b;">
-        <div class="card__head" style="background:var(--warning-light); border-bottom-color:rgba(245, 158, 11, 0.2);">
-            <div class="card__icon" style="background:rgba(245, 158, 11, 0.2); color:#b45309;">
-                <i class="fas fa-broom"></i>
+   {{-- ═══════════════════════════════════════════════════════════════
+     SECTION SPÉCIALE : CHAMBRES SALES (OCCUPÉES / NON OCCUPÉES)
+═══════════════════════════════════════════════════════════════════ --}}
+<div class="card" style="margin:10px 0 20px; border-left:4px solid #f59e0b;">
+    <div class="card__head" style="background:var(--warning-light); border-bottom-color:rgba(245, 158, 11, 0.2);">
+        <div class="card__icon" style="background:rgba(245, 158, 11, 0.2); color:#b45309;">
+            <i class="fas fa-broom"></i>
+        </div>
+        <span class="card__title" style="color:#b45309;">Chambres sales - Disponibilité après nettoyage</span>
+        <span class="card__badge">
+            <span class="badge badge--yellow">{{ $stats['dirty_rooms'] ?? 0 }} sale(s)</span>
+        </span>
+    </div>
+
+    <div class="card__body card__body--nogrow" style="padding:18px 15px;">
+        @php
+            // ✅ UTILISER LES COLLECTIONS DU CONTROLEUR
+            $dirtyOccupied = $dirtyOccupied ?? collect();
+            $dirtyUnoccupied = $dirtyUnoccupied ?? collect();
+            $departingToday = $todayDepartures ?? collect();
+            $roomsToBeFreed = $roomsToBeFreed ?? collect();
+            
+            // Debug silencieux (visible dans les logs)
+            if($dirtyOccupied->count() == 0 && $dirtyUnoccupied->count() > 0) {
+                \Log::info('VUE: dirtyOccupied vide mais dirtyUnoccupied contient:', $dirtyUnoccupied->pluck('number')->toArray());
+            }
+        @endphp
+
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:15px;">
+            {{-- 1. Sales OCCUPÉES (client encore présent) --}}
+            <div style="background:var(--danger-light); border-radius:12px; padding:14px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span style="background:var(--danger); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-user"></i>
+                    </span>
+                    <div>
+                        <h4 style="font-size:13px; font-weight:700; color:#b91c1c; margin:0;">Occupées (sales)</h4>
+                        <p style="font-size:11px; color:var(--gray-600); margin:2px 0 0;">Client présent - À nettoyer après départ</p>
+                    </div>
+                </div>
+
+                @if($dirtyOccupied->count() > 0)
+                    <div style="background:white; border-radius:8px; padding:8px;">
+                        @foreach($dirtyOccupied->take(3) as $room)
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--gray-200);">
+                            <div>
+                                <span style="font-weight:600;">Ch. {{ $room->number }}</span>
+                                <span style="font-size:10px; color:var(--gray-500); margin-left:5px;">{{ $room->type->name ?? 'Std' }}</span>
+                            </div>
+                            <span class="badge badge--red">{{ $room->capacity }}p</span>
+                        </div>
+                        @endforeach
+                        @if($dirtyOccupied->count() > 3)
+                        <div style="text-align:center; margin-top:8px;">
+                            <a href="{{ route('housekeeping.to-clean') }}" class="btn btn--red btn-sm">+{{ $dirtyOccupied->count()-3 }} autres</a>
+                        </div>
+                        @endif
+                    </div>
+                    <div style="margin-top:10px; font-size:11px; color:var(--gray-600);">
+                        <i class="fas fa-clock"></i> Seront nettoyées après check-out
+                    </div>
+                @else
+                    <div style="background:white; border-radius:8px; padding:20px; text-align:center;">
+                        <i class="fas fa-check-circle" style="color:var(--success); font-size:20px;"></i>
+                        <p style="margin:5px 0 0; font-size:12px;">Aucune chambre avec client présent</p>
+                    </div>
+                @endif
             </div>
-            <span class="card__title" style="color:#b45309;">Chambres sales - Disponibilité après nettoyage</span>
-            <span class="card__badge">
-                <span class="badge badge--yellow">{{ $stats['dirty_rooms'] ?? 0 }} sale(s)</span>
-            </span>
+
+            {{-- 2. Sales NON OCCUPÉES (client parti) --}}
+            <div style="background:var(--warning-light); border-radius:12px; padding:14px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span style="background:var(--warning); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-door-open"></i>
+                    </span>
+                    <div>
+                        <h4 style="font-size:13px; font-weight:700; color:#b45309; margin:0;">Non occupées (sales)</h4>
+                        <p style="font-size:11px; color:var(--gray-600); margin:2px 0 0;">Client parti - À nettoyer maintenant</p>
+                    </div>
+                </div>
+
+                @if($dirtyUnoccupied->count() > 0)
+                    <div style="background:white; border-radius:8px; padding:8px;">
+                        @foreach($dirtyUnoccupied->take(3) as $room)
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--gray-200);">
+                            <div>
+                                <span style="font-weight:600;">Ch. {{ $room->number }}</span>
+                                <span style="font-size:10px; color:var(--gray-500); margin-left:5px;">{{ $room->type->name ?? 'Std' }}</span>
+                            </div>
+                            <a href="{{ route('housekeeping.start-cleaning', $room->id) }}" class="btn btn--green btn-sm">
+                                <i class="fas fa-broom"></i> Nettoyer
+                            </a>
+                        </div>
+                        @endforeach
+                        @if($dirtyUnoccupied->count() > 3)
+                        <div style="text-align:center; margin-top:8px;">
+                            <a href="{{ route('housekeeping.to-clean') }}" class="btn btn--yellow btn-sm">+{{ $dirtyUnoccupied->count()-3 }} autres</a>
+                        </div>
+                        @endif
+                    </div>
+                @else
+                    <div style="background:white; border-radius:8px; padding:20px; text-align:center;">
+                        <i class="fas fa-check-circle" style="color:var(--success); font-size:20px;"></i>
+                        <p style="margin:5px 0 0; font-size:12px;">Aucune chambre à nettoyer</p>
+                    </div>
+                @endif
+            </div>
+
+            {{-- 3. Départs aujourd'hui --}}
+            <div style="background:var(--info-light); border-radius:12px; padding:14px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                    <span style="background:var(--info); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </span>
+                    <div>
+                        <h4 style="font-size:13px; font-weight:700; color:var(--info); margin:0;">Départs aujourd'hui</h4>
+                        <p style="font-size:11px; color:var(--gray-600); margin:2px 0 0;">Seront libres après 12h</p>
+                    </div>
+                </div>
+
+                @if($roomsToBeFreed->count() > 0)
+                    <div style="background:white; border-radius:8px; padding:8px;">
+                        @foreach($roomsToBeFreed->take(3) as $room)
+                        <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--gray-200);">
+                            <div>
+                                <span style="font-weight:600;">Ch. {{ $room->number }}</span>
+                                <span style="font-size:10px; color:var(--gray-500); margin-left:5px;">{{ $room->type->name ?? 'Std' }}</span>
+                            </div>
+                            <span class="badge badge--cyan">12h</span>
+                        </div>
+                        @endforeach
+                        @if($roomsToBeFreed->count() > 3)
+                        <div style="text-align:center; margin-top:8px;">
+                            <a href="{{ route('checkin.index') }}" class="btn btn--blue btn-sm">+{{ $roomsToBeFreed->count()-3 }} autres</a>
+                        </div>
+                        @endif
+                    </div>
+                    <div style="margin-top:10px; font-size:11px; color:var(--gray-600);">
+                        <i class="fas fa-clock"></i> Largesse jusqu'à 14h
+                    </div>
+                @else
+                    <div style="background:white; border-radius:8px; padding:20px; text-align:center;">
+                        <i class="fas fa-calendar-check" style="color:var(--gray-400); font-size:20px;"></i>
+                        <p style="margin:5px 0 0; font-size:12px;">Aucun départ prévu aujourd'hui</p>
+                    </div>
+                @endif
+            </div>
         </div>
 
-        <div class="card__body card__body--nogrow" style="padding:18px 15px;">
-            @php
-                $dirtyRooms = $roomsByStatus['dirty'] ?? collect();
-                
-                // Séparer les sales occupées des sales non occupées
-                $dirtyOccupied = $dirtyRooms->filter(function($room) {
-                    return ($room->is_occupied ?? false) || $room->room_status_id == 2;
-                });
-                
-                $dirtyUnoccupied = $dirtyRooms->filter(function($room) {
-                    return !(($room->is_occupied ?? false) || $room->room_status_id == 2);
-                });
-                
-                // Ajouter les chambres qui seront libérées aujourd'hui (départs)
-                $departingToday = $todayDepartures ?? collect();
-                $roomsToBeFreed = $departingToday->map(function($departure) {
-                    return $departure->room;
-                })->filter();
-            @endphp
-
-            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:15px;">
-                {{-- 1. Sales OCCUPÉES --}}
-                <div style="background:var(--danger-light); border-radius:12px; padding:14px;">
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                        <span style="background:var(--danger); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
-                            <i class="fas fa-user"></i>
-                        </span>
-                        <div>
-                            <h4 style="font-size:13px; font-weight:700; color:#b91c1c; margin:0;">Occupées (sales)</h4>
-                            <p style="font-size:11px; color:var(--gray-600); margin:2px 0 0;">À nettoyer après départ</p>
-                        </div>
-                    </div>
-
-                    @if($dirtyOccupied->count() > 0)
-                        <div style="background:white; border-radius:8px; padding:8px;">
-                            @foreach($dirtyOccupied->take(3) as $room)
-                            <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--gray-200);">
-                                <div>
-                                    <span style="font-weight:600;">Ch. {{ $room->number }}</span>
-                                    <span style="font-size:10px; color:var(--gray-500); margin-left:5px;">{{ $room->type->name ?? 'Std' }}</span>
-                                </div>
-                                <span class="badge badge--red">{{ $room->capacity }}p</span>
-                            </div>
-                            @endforeach
-                            @if($dirtyOccupied->count() > 3)
-                            <div style="text-align:center; margin-top:8px;">
-                                <a href="{{ route('housekeeping.to-clean') }}" class="btn btn--red btn-sm">+{{ $dirtyOccupied->count()-3 }} autres</a>
-                            </div>
-                            @endif
-                        </div>
-                        <div style="margin-top:10px; font-size:11px; color:var(--gray-600);">
-                            <i class="fas fa-clock"></i> Seront libres après check-out
-                        </div>
-                    @else
-                        <div style="background:white; border-radius:8px; padding:20px; text-align:center;">
-                            <i class="fas fa-check-circle" style="color:var(--success); font-size:20px;"></i>
-                            <p style="margin:5px 0 0; font-size:12px;">Aucune chambre sale occupée</p>
-                        </div>
-                    @endif
-                </div>
-
-                {{-- 2. Sales NON OCCUPÉES --}}
-                <div style="background:var(--warning-light); border-radius:12px; padding:14px;">
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                        <span style="background:var(--warning); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
-                            <i class="fas fa-door-open"></i>
-                        </span>
-                        <div>
-                            <h4 style="font-size:13px; font-weight:700; color:#b45309; margin:0;">Non occupées (sales)</h4>
-                            <p style="font-size:11px; color:var(--gray-600); margin:2px 0 0;">Disponibles après nettoyage</p>
-                        </div>
-                    </div>
-
-                    @if($dirtyUnoccupied->count() > 0)
-                        <div style="background:white; border-radius:8px; padding:8px;">
-                            @foreach($dirtyUnoccupied->take(3) as $room)
-                            <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--gray-200);">
-                                <div>
-                                    <span style="font-weight:600;">Ch. {{ $room->number }}</span>
-                                    <span style="font-size:10px; color:var(--gray-500); margin-left:5px;">{{ $room->type->name ?? 'Std' }}</span>
-                                </div>
-                                <a href="{{ route('housekeeping.start-cleaning', $room->id) }}" class="btn btn--green btn-sm">
-                                    <i class="fas fa-broom"></i> Nettoyer
-                                </a>
-                            </div>
-                            @endforeach
-                            @if($dirtyUnoccupied->count() > 3)
-                            <div style="text-align:center; margin-top:8px;">
-                                <a href="{{ route('housekeeping.to-clean') }}" class="btn btn--yellow btn-sm">+{{ $dirtyUnoccupied->count()-3 }} autres</a>
-                            </div>
-                            @endif
-                        </div>
-                    @else
-                        <div style="background:white; border-radius:8px; padding:20px; text-align:center;">
-                            <i class="fas fa-check-circle" style="color:var(--success); font-size:20px;"></i>
-                            <p style="margin:5px 0 0; font-size:12px;">Aucune chambre sale non occupée</p>
-                        </div>
-                    @endif
-                </div>
-
-                {{-- 3. À LIBÉRER AUJOURD'HUI --}}
-                <div style="background:var(--info-light); border-radius:12px; padding:14px;">
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                        <span style="background:var(--info); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
-                            <i class="fas fa-sign-out-alt"></i>
-                        </span>
-                        <div>
-                            <h4 style="font-size:13px; font-weight:700; color:var(--info); margin:0;">Départs aujourd'hui</h4>
-                            <p style="font-size:11px; color:var(--gray-600); margin:2px 0 0;">Seront libres après 12h</p>
-                        </div>
-                    </div>
-
-                    @if($roomsToBeFreed->count() > 0)
-                        <div style="background:white; border-radius:8px; padding:8px;">
-                            @foreach($roomsToBeFreed->take(3) as $room)
-                            <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--gray-200);">
-                                <div>
-                                    <span style="font-weight:600;">Ch. {{ $room->number }}</span>
-                                    <span style="font-size:10px; color:var(--gray-500); margin-left:5px;">{{ $room->type->name ?? 'Std' }}</span>
-                                </div>
-                                <span class="badge badge--cyan">12h</span>
-                            </div>
-                            @endforeach
-                            @if($roomsToBeFreed->count() > 3)
-                            <div style="text-align:center; margin-top:8px;">
-                                <a href="{{ route('checkin.index') }}" class="btn btn--blue btn-sm">+{{ $roomsToBeFreed->count()-3 }} autres</a>
-                            </div>
-                            @endif
-                        </div>
-                        <div style="margin-top:10px; font-size:11px; color:var(--gray-600);">
-                            <i class="fas fa-clock"></i> Largesse jusqu'à 14h
-                        </div>
-                    @else
-                        <div style="background:white; border-radius:8px; padding:20px; text-align:center;">
-                            <i class="fas fa-calendar-check" style="color:var(--gray-400); font-size:20px;"></i>
-                            <p style="margin:5px 0 0; font-size:12px;">Aucun départ prévu aujourd'hui</p>
-                        </div>
-                    @endif
-                </div>
+        {{-- Récapitulatif --}}
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid var(--gray-200);">
+            <div style="display:flex; gap:20px;">
+                <span><i class="fas fa-bed" style="color:var(--gray-500);"></i> Total sales: <strong>{{ $stats['dirty_rooms'] ?? 0 }}</strong></span>
+                <span><i class="fas fa-user" style="color:#b91c1c;"></i> Clients présents: <strong>{{ $dirtyOccupied->count() }}</strong></span>
+                <span><i class="fas fa-door-open" style="color:#b45309;"></i> À nettoyer maintenant: <strong>{{ $dirtyUnoccupied->count() }}</strong></span>
+                <span><i class="fas fa-sign-out-alt" style="color:var(--info);"></i> Départs: <strong>{{ $roomsToBeFreed->count() }}</strong></span>
             </div>
-
-            {{-- Récapitulatif --}}
-            <div style="display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid var(--gray-200);">
-                <div style="display:flex; gap:20px;">
-                    <span><i class="fas fa-bed" style="color:var(--gray-500);"></i> Total sales: <strong>{{ $stats['dirty_rooms'] ?? 0 }}</strong></span>
-                    <span><i class="fas fa-user" style="color:#b91c1c;"></i> Occupées: <strong>{{ $dirtyOccupied->count() }}</strong></span>
-                    <span><i class="fas fa-door-open" style="color:#b45309;"></i> Non occupées: <strong>{{ $dirtyUnoccupied->count() }}</strong></span>
-                    <span><i class="fas fa-sign-out-alt" style="color:var(--info);"></i> Départs: <strong>{{ $roomsToBeFreed->count() }}</strong></span>
-                </div>
-                <a href="{{ route('housekeeping.to-clean') }}" class="btn btn--yellow">
-                    <i class="fas fa-broom"></i> Gérer le nettoyage
-                </a>
-            </div>
+            <a href="{{ route('housekeeping.to-clean') }}" class="btn btn--yellow">
+                <i class="fas fa-broom"></i> Gérer le nettoyage
+            </a>
         </div>
     </div>
+</div>
 
     {{-- GRILLE SECONDAIRE --}}
     <div class="grid-sec">
