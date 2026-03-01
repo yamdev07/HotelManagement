@@ -21,13 +21,17 @@
     --dark: #1e293b;
     --gray-50: #f8fafc;
     --gray-100: #f1f5f9;
-    --gray-200: #e2e8f0;
-    --gray-300: #cbd5e1;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
     --gray-400: #94a3b8;
     --gray-500: #64748b;
     --gray-600: #475569;
     --gray-700: #334155;
     --gray-800: #1e293b;
+    --amber-50: #fffbeb;
+    --amber-100: #fef3c7;
+    --amber-500: #f59e0b;
+    --amber-600: #d97706;
     --radius: 12px;
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.05);
     --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
@@ -123,6 +127,11 @@
     background: var(--danger-light);
     color: #b91c1c;
     border: 1px solid rgba(239, 68, 68, 0.15);
+}
+.badge-late {
+    background: var(--amber-50);
+    color: var(--amber-600);
+    border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 /* ────────── LÉGENDE STATUTS ────────── */
@@ -352,6 +361,37 @@
     background: var(--gray-100);
     color: var(--gray-700);
 }
+.btn-late {
+    background: var(--amber-50);
+    color: var(--amber-600);
+    border-color: rgba(245, 158, 11, 0.2);
+}
+.btn-late:hover {
+    background: var(--amber-500);
+    border-color: var(--amber-500);
+    color: white;
+}
+.btn-warning-action {
+    background: var(--warning-light);
+    color: var(--warning);
+    border-color: rgba(245, 158, 11, 0.2);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    transition: var(--transition);
+    text-decoration: none;
+    cursor: pointer;
+}
+.btn-warning-action:hover {
+    background: var(--warning);
+    border-color: var(--warning);
+    color: white;
+    transform: translateY(-2px);
+}
 .btn-action.disabled {
     opacity: 0.4;
     cursor: not-allowed;
@@ -384,6 +424,10 @@
 .date-indicator.pending {
     background: var(--info-light);
     color: #1e40af;
+}
+.date-indicator.late {
+    background: var(--amber-50);
+    color: var(--amber-600);
 }
 
 /* ────────── ALERTE IMPAYÉ ────────── */
@@ -578,6 +622,7 @@
         <span class="legend-badge"><i class="fas fa-circle text-danger"></i> Annulée</span>
         <span class="legend-badge"><i class="fas fa-circle text-secondary"></i> No Show</span>
         <span class="legend-badge"><i class="fas fa-exclamation-triangle text-warning"></i> Terminé mais impayé</span>
+        <span class="legend-badge"><i class="fas fa-clock text-warning"></i> Late checkout</span>
     </div>
 
     <!-- Formulaire de recherche -->
@@ -681,7 +726,6 @@
                         
                         $canPay = !in_array($status, ['cancelled', 'no_show']) && !$isFullyPaid && $isAdmin;
                         $canMarkArrived = $isAdmin && $status == 'reservation';
-                        $canMarkDeparted = $isAdmin && $status == 'active';
                         
                         // ============ VARIABLES AVEC HEURES ============
                         $now = \Carbon\Carbon::now();
@@ -692,6 +736,7 @@
                         $checkInTime = $checkInDateTime->copy()->setTime(12, 0, 0);
                         $checkOutDeadline = $checkOutDateTime->copy()->setTime(12, 0, 0);
                         $checkOutLargess = $checkOutDateTime->copy()->setTime(14, 0, 0);
+                        $lateCheckoutEnd = $checkOutDateTime->copy()->setTime(20, 0, 0);
                         
                         // Vérifications pour l'arrivée
                         $canMarkArrivedNow = $canMarkArrived && 
@@ -705,19 +750,54 @@
                         $arrivalHoursLeft = $arrivalNotReached && $now->isSameDay($checkInDateTime) ? 
                             $now->diffInHours($checkInTime) : 0;
                         
-                        // Vérifications pour le départ
-                        $canMarkDepartedNow = $canMarkDeparted && 
-                            $now->isSameDay($checkOutDateTime) && 
-                            $now->gte($checkOutDeadline) && 
-                            $now->lte($checkOutLargess) && 
-                            $isFullyPaid;
+                        // Vérification pour late checkout
+                        $isLateCheckout = $transaction->late_checkout ?? false;
+                        $expectedCheckoutTime = $transaction->expected_checkout_time ?? '12:00:00';
+                        $lateCheckoutFee = $transaction->late_checkout_fee ?? 0;
                         
-                        $departureNotReached = $status == 'active' && 
-                            ($now->lt($checkOutDateTime) || !$now->isSameDay($checkOutDateTime));
+                       // ✅ Vérifier si le supplément late checkout est payé
+                        $latePayment = $transaction->payments->first(function($p) {
+                            // Vérifier dans la référence (LATE-XXX)
+                            $hasLateReference = $p->reference && str_contains($p->reference, 'LATE-');
+                            
+                            // Vérifier dans la description
+                            $hasLateDescription = $p->description && 
+                                (str_contains(strtolower($p->description), 'late checkout') || 
+                                str_contains(strtolower($p->description), 'late'));
+                            
+                            return ($hasLateReference || $hasLateDescription) && $p->status == 'completed';
+                        });
+                        $isLatePaid = !is_null($latePayment);
                         
-                        $departureDelay = $departureNotReached ? ceil($now->diffInDays($checkOutDateTime, false)) : 0;
-                        $departureHoursLeft = $departureNotReached && $now->isSameDay($checkOutDateTime) ? 
-                            $now->diffInHours($checkOutDeadline) : 0;
+                        // ✅ Logique pour le départ
+                        $canDepart = false;
+                        $departureButtonType = '';
+                        $departureButtonTitle = '';
+                        
+                        if ($status == 'active') {
+                            // CAS 1: Départ normal entre 12h et 14h (largesse) - GRATUIT
+                            if ($now->isSameDay($checkOutDateTime) && $now->gte($checkOutDeadline) && $now->lte($checkOutLargess) && $isFullyPaid) {
+                                $canDepart = true;
+                                $departureButtonType = 'btn-departed';
+                                $departureButtonTitle = 'Départ (largesse jusqu\'à 14h)';
+                            }
+                            // CAS 2: Late checkout après 14h, SI PAYÉ
+                            elseif ($isLateCheckout && $isLatePaid && $now->isSameDay($checkOutDateTime) && $now->gte($checkOutLargess) && $now->lt($lateCheckoutEnd)) {
+                                $canDepart = true;
+                                $departureButtonType = 'btn-departed';
+                                $departureButtonTitle = 'Départ (late checkout)';
+                            }
+                            // CAS 3: Late checkout mais NON PAYÉ
+                            elseif ($isLateCheckout && !$isLatePaid) {
+                                $departureButtonType = 'disabled';
+                                $departureButtonTitle = 'Supplément late checkout de ' . number_format($lateCheckoutFee, 0, ',', ' ') . ' FCFA en attente';
+                            }
+                            // CAS 4: Après 14h sans late checkout
+                            elseif ($now->isSameDay($checkOutDateTime) && $now->gt($checkOutLargess) && !$isLateCheckout) {
+                                $departureButtonType = 'extend';
+                                $departureButtonTitle = 'Départ après 14h - Prolonger';
+                            }
+                        }
                         
                         // Messages pour les tooltips
                         $arrivalTooltip = '';
@@ -730,14 +810,14 @@
                         }
                         
                         $departureTooltip = '';
-                        if ($departureNotReached) {
-                            if (!$now->isSameDay($checkOutDateTime)) {
-                                $departureTooltip = "Départ prévu le " . $checkOutDateTime->format('d/m/Y');
-                            } elseif ($now->lt($checkOutDeadline)) {
-                                $departureTooltip = "Check-out possible à partir de 12h. Encore $departureHoursLeft heure(s).";
+                        if (!$canDepart && $departureButtonType != 'disabled' && $departureButtonType != 'extend') {
+                            if ($status == 'active') {
+                                if (!$now->isSameDay($checkOutDateTime)) {
+                                    $departureTooltip = "Départ prévu le " . $checkOutDateTime->format('d/m/Y');
+                                } elseif ($now->lt($checkOutDeadline)) {
+                                    $departureTooltip = "Check-out possible à partir de 12h. Encore " . $now->diffInHours($checkOutDeadline) . " heure(s).";
+                                }
                             }
-                        } elseif ($status == 'active' && $now->gt($checkOutLargess)) {
-                            $departureTooltip = "⚠️ Départ après 14h - Prolongation nécessaire";
                         }
                         
                         // Anciennes variables conservées pour compatibilité
@@ -768,7 +848,7 @@
                             <span class="room-badge"><i class="fas fa-door-closed"></i> {{ $transaction->room->number }}</span>
                         </td>
                         
-                        <!-- COLONNE ARRIVÉE SIMPLIFIÉE -->
+                        <!-- COLONNE ARRIVÉE -->
                         <td>
                             <div>{{ $checkIn->format('d/m/Y') }}</div>
                             <small style="color: var(--gray-500);">12:00</small>
@@ -786,29 +866,42 @@
                             @endif
                         </td>
 
-                        <!-- COLONNE DÉPART SIMPLIFIÉE -->
+                        <!-- COLONNE DÉPART AVEC HEURE MISE À JOUR -->
                         <td>
                             <div>{{ $checkOut->format('d/m/Y') }}</div>
-                            <small style="color: var(--gray-500);">12:00</small>
-                            @if($status == 'active')
-                                @if($now->lt($checkOutDateTime))
-                                    <div class="date-indicator pending">
-                                        <i class="fas fa-hourglass-half me-1"></i> 
-                                        J-{{ $departureDelay }}
-                                    </div>
-                                @elseif($now->gte($checkOutDateTime) && $now->lte($checkOutLargess))
-                                    <div class="date-indicator ready">
-                                        <i class="fas fa-check-circle me-1"></i> 
-                                        Départ possible
-                                        @if($now->gt($checkOutDeadline) && $now->lte($checkOutLargess))
-                                            <small>(largesse)</small>
+                            @if($isLateCheckout)
+                                <small style="color: var(--amber-600); font-weight: 600;">{{ $expectedCheckoutTime }}</small>
+                                <div class="date-indicator late">
+                                    <i class="fas fa-clock me-1"></i> Late
+                                    @if($lateCheckoutFee > 0)
+                                        <span class="ms-1">(+{{ number_format($lateCheckoutFee, 0, ',', ' ') }} FCFA)</span>
+                                        @if(!$isLatePaid)
+                                            <span class="ms-1 text-danger">(non payé)</span>
                                         @endif
-                                    </div>
-                                @elseif($now->gt($checkOutLargess))
-                                    <div class="date-indicator overdue">
-                                        <i class="fas fa-exclamation-triangle me-1"></i>
-                                        Dépassé
-                                    </div>
+                                    @endif
+                                </div>
+                            @else
+                                <small style="color: var(--gray-500);">12:00</small>
+                                @if($status == 'active')
+                                    @if($now->lt($checkOutDateTime))
+                                        <div class="date-indicator pending">
+                                            <i class="fas fa-hourglass-half me-1"></i> 
+                                            J-{{ ceil($now->diffInDays($checkOutDateTime, false)) }}
+                                        </div>
+                                    @elseif($now->gte($checkOutDateTime) && $now->lte($checkOutLargess))
+                                        <div class="date-indicator ready">
+                                            <i class="fas fa-check-circle me-1"></i> 
+                                            Départ possible
+                                            @if($now->gt($checkOutDeadline) && $now->lte($checkOutLargess))
+                                                <small>(largesse)</small>
+                                            @endif
+                                        </div>
+                                    @elseif($now->gt($checkOutLargess))
+                                        <div class="date-indicator overdue">
+                                            <i class="fas fa-exclamation-triangle me-1"></i>
+                                            Dépassé
+                                        </div>
+                                    @endif
                                 @endif
                             @endif
                         </td>
@@ -839,15 +932,17 @@
                             @if($isAdmin)
                             <!-- Badge cliquable avec dropdown pour changer le statut -->
                             <div class="dropdown">
-                                <button class="badge-statut badge-{{ $status == 'reservation' ? 'reservation' : ($status == 'active' ? 'active' : ($status == 'completed' ? 'completed' : ($status == 'cancelled' ? 'cancelled' : 'no_show'))) }} dropdown-toggle" 
+                                <button class="badge-statut {{ $isLateCheckout ? 'badge-late' : ($status == 'reservation' ? 'badge-reservation' : ($status == 'active' ? 'badge-active' : ($status == 'completed' ? 'badge-completed' : ($status == 'cancelled' ? 'badge-cancelled' : 'badge-no_show')))) }} dropdown-toggle" 
                                         type="button" data-bs-toggle="dropdown" style="border: none;">
-                                    @if($status == 'reservation') 📅
+                                    @if($isLateCheckout)
+                                        <i class="fas fa-clock"></i>
+                                    @elseif($status == 'reservation') 📅
                                     @elseif($status == 'active') 🏨
                                     @elseif($status == 'completed') ✅
                                     @elseif($status == 'cancelled') ❌
                                     @else 👤
                                     @endif
-                                    {{ $status == 'reservation' ? 'Réservation' : ($status == 'active' ? 'Dans hôtel' : ($status == 'completed' ? 'Terminé' : ($status == 'cancelled' ? 'Annulée' : 'No Show'))) }}
+                                    {{ $isLateCheckout ? 'Late checkout' : ($status == 'reservation' ? 'Réservation' : ($status == 'active' ? 'Dans hôtel' : ($status == 'completed' ? 'Terminé' : ($status == 'cancelled' ? 'Annulée' : 'No Show')))) }}
                                 </button>
                                 <ul class="dropdown-menu status-dropdown-menu">
                                     <li>
@@ -899,14 +994,16 @@
                                 </ul>
                             </div>
                             @else
-                            <span class="badge-statut badge-{{ $status == 'reservation' ? 'reservation' : ($status == 'active' ? 'active' : ($status == 'completed' ? 'completed' : ($status == 'cancelled' ? 'cancelled' : 'no_show'))) }}">
-                                @if($status == 'reservation') 📅
+                            <span class="badge-statut {{ $isLateCheckout ? 'badge-late' : ($status == 'reservation' ? 'badge-reservation' : ($status == 'active' ? 'badge-active' : ($status == 'completed' ? 'badge-completed' : ($status == 'cancelled' ? 'badge-cancelled' : 'badge-no_show')))) }}">
+                                @if($isLateCheckout)
+                                    <i class="fas fa-clock"></i>
+                                @elseif($status == 'reservation') 📅
                                 @elseif($status == 'active') 🏨
                                 @elseif($status == 'completed') ✅
                                 @elseif($status == 'cancelled') ❌
                                 @else 👤
                                 @endif
-                                {{ $status == 'reservation' ? 'Réservation' : ($status == 'active' ? 'Dans hôtel' : ($status == 'completed' ? 'Terminé' : ($status == 'cancelled' ? 'Annulée' : 'No Show'))) }}
+                                {{ $isLateCheckout ? 'Late checkout' : ($status == 'reservation' ? 'Réservation' : ($status == 'active' ? 'Dans hôtel' : ($status == 'completed' ? 'Terminé' : ($status == 'cancelled' ? 'Annulée' : 'No Show')))) }}
                             </span>
                             @endif
                         </td>
@@ -932,20 +1029,35 @@
                                 </span>
                                 @endif
                                 
-                                @if($canMarkDepartedNow)
-                                <button type="button" class="btn-action btn-departed mark-departed-btn"
-                                        data-transaction-id="{{ $transaction->id }}"
-                                        data-check-out="{{ $checkOutDateTime->format('d/m/Y H:i') }}"
-                                        data-is-fully-paid="{{ $isFullyPaid ? 'true' : 'false' }}"
-                                        data-remaining="{{ $remaining }}"
-                                        data-form-action="{{ route('transaction.mark-departed', $transaction) }}"
-                                        data-bs-toggle="tooltip" title="Départ (largesse jusqu'à 14h)">
-                                    <i class="fas fa-sign-out-alt"></i>
-                                </button>
-                                @elseif($departureNotReached || ($status == 'active' && $now->gt($checkOutLargess)))
-                                <span class="btn-action disabled" data-bs-toggle="tooltip" title="{{ $departureTooltip }}">
-                                    <i class="fas fa-hourglass-half"></i>
-                                </span>
+                                {{-- BOUTON DÉPART --}}
+                                @if($canDepart)
+                                    <button type="button" class="btn-action btn-departed mark-departed-btn"
+                                            data-transaction-id="{{ $transaction->id }}"
+                                            data-check-out="{{ $checkOutDateTime->format('d/m/Y H:i') }}"
+                                            data-is-fully-paid="{{ $isFullyPaid ? 'true' : 'false' }}"
+                                            data-remaining="{{ $remaining }}"
+                                            data-form-action="{{ route('transaction.mark-departed', $transaction) }}"
+                                            data-bs-toggle="tooltip" title="{{ $departureButtonTitle }}">
+                                        <i class="fas fa-sign-out-alt"></i>
+                                    </button>
+                                @elseif($departureButtonType == 'disabled')
+                                    <span class="btn-action disabled" data-bs-toggle="tooltip" title="{{ $departureButtonTitle }}">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </span>
+                                @elseif($departureButtonType == 'extend')
+                                    <a href="{{ route('transaction.extend', $transaction) }}" class="btn-warning-action" data-bs-toggle="tooltip" title="{{ $departureButtonTitle }}">
+                                        <i class="fas fa-calendar-plus"></i>
+                                    </a>
+                                @elseif($status == 'active' && $departureTooltip)
+                                    <span class="btn-action disabled" data-bs-toggle="tooltip" title="{{ $departureTooltip }}">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </span>
+                                @endif
+                                
+                                @if($isLateCheckout && $isAdmin)
+                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-action btn-late" data-bs-toggle="tooltip" title="Voir détails late checkout">
+                                    <i class="fas fa-clock"></i>
+                                </a>
                                 @endif
                                 
                                 @if($isSuperAdmin || ($isReceptionist && !in_array($status, ['cancelled', 'no_show', 'completed'])))
@@ -1025,13 +1137,22 @@
                         
                         $isAdmin = in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']);
                         $canPay = !in_array($status, ['cancelled', 'no_show']) && !$isFullyPaid && $isAdmin;
+                        
+                        $isLateCheckout = $transaction->late_checkout ?? false;
+                        $expectedCheckoutTime = $transaction->expected_checkout_time ?? '12:00:00';
                     @endphp
                     <tr class="{{ in_array($status, ['cancelled', 'no_show']) ? 'cancelled-row' : '' }}">
                         <td><span style="color: var(--gray-500);">#{{ $transaction->id }}</span></td>
                         <td>{{ $transaction->customer->name }}</td>
                         <td><span class="room-badge">{{ $transaction->room->number }}</span></td>
-                        <td>{{ $checkIn->format('d/m/Y') }}</td>
-                        <td>{{ $checkOut->format('d/m/Y') }}</td>
+                        <td>{{ $checkIn->format('d/m/Y') }} 12:00</td>
+                        <td>{{ $checkOut->format('d/m/Y') }} 
+                            @if($isLateCheckout)
+                                <span class="badge-late">{{ $expectedCheckoutTime }}</span>
+                            @else
+                                12:00
+                            @endif
+                        </td>
                         <td><span class="nights-badge">{{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}</span></td>
                         <td class="price price-positive">{{ number_format($totalPrice, 0, ',', ' ') }} CFA</td>
                         <td class="price price-success">{{ number_format($totalPayment, 0, ',', ' ') }} CFA</td>
@@ -1043,14 +1164,16 @@
                             @endif
                         </td>
                         <td class="text-center">
-                            <span class="badge-statut badge-{{ $status == 'reservation' ? 'reservation' : ($status == 'active' ? 'active' : ($status == 'completed' ? 'completed' : ($status == 'cancelled' ? 'cancelled' : 'no_show'))) }}">
-                                @if($status == 'reservation') 📅
+                            <span class="badge-statut {{ $isLateCheckout ? 'badge-late' : ($status == 'reservation' ? 'badge-reservation' : ($status == 'active' ? 'badge-active' : ($status == 'completed' ? 'badge-completed' : ($status == 'cancelled' ? 'badge-cancelled' : 'badge-no_show')))) }}">
+                                @if($isLateCheckout) 
+                                    <i class="fas fa-clock"></i> 
+                                @elseif($status == 'reservation') 📅
                                 @elseif($status == 'active') 🏨
                                 @elseif($status == 'completed') ✅
                                 @elseif($status == 'cancelled') ❌
                                 @else 👤
                                 @endif
-                                {{ $status == 'reservation' ? 'Réservation' : ($status == 'active' ? 'Dans hôtel' : ($status == 'completed' ? 'Terminé' : ($status == 'cancelled' ? 'Annulée' : 'No Show'))) }}
+                                {{ $isLateCheckout ? 'Late' : ($status == 'reservation' ? 'Réservation' : ($status == 'active' ? 'Dans hôtel' : ($status == 'completed' ? 'Terminé' : ($status == 'cancelled' ? 'Annulée' : 'No Show')))) }}
                             </span>
                         </td>
                         <td>
@@ -1200,11 +1323,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            if (currentHour >= 14) {
+            if (currentHour >= 20) {
                 Swal.fire({
                     icon: 'error',
-                    title: '⚠️ Départ après 14h',
-                    text: 'La largesse de 2h est dépassée. Veuillez prolonger le séjour d\'une nuit supplémentaire.',
+                    title: '⚠️ Après 20h',
+                    text: 'Départ impossible après 20h. Veuillez prolonger le séjour.',
                     confirmButtonText: 'Compris'
                 });
                 return;
@@ -1225,9 +1348,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            // Entre 12h et 14h
+            // Message selon la période
             let message = 'La chambre sera marquée comme à nettoyer.';
-            if (currentHour >= 12 && currentHour < 14) {
+            if (currentHour >= 14 && currentHour < 20) {
+                message = 'Late checkout - La chambre sera marquée comme à nettoyer.';
+            } else if (currentHour >= 12 && currentHour < 14) {
                 message = 'Largesse de 2h accordée. La chambre sera marquée comme à nettoyer.';
             }
             
@@ -1251,5 +1376,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+</script>
+<script>
+// Rafraîchir la page après une action
+@if(session('success') || session('error') || session('warning') || session('info'))
+    setTimeout(function() {
+        location.reload();
+    }, 2000);
+@endif
 </script>
 @endsection

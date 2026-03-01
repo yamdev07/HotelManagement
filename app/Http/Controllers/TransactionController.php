@@ -853,7 +853,7 @@ class TransactionController extends Controller
     /**
      * ACTION RAPIDE : MARQUER COMME PARTI (AVEC DIRTY)
      */
-    public function markAsDeparted(Request $request, Transaction $transaction) // AJOUTER Request $request
+    public function markAsDeparted(Request $request, Transaction $transaction)
     {
         if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
             abort(403, 'Accès non autorisé');
@@ -874,12 +874,13 @@ class TransactionController extends Controller
         }
 
         // =====================================================
-        // VÉRIFICATION DES HEURES MÉTIER (12h - 14h)
+        // VÉRIFICATION DES HEURES MÉTIER (12h - 14h) + LATE CHECKOUT
         // =====================================================
         $now = Carbon::now();
         $checkOutDay = Carbon::parse($transaction->check_out)->startOfDay();
         $checkOutDeadline = $checkOutDay->copy()->setTime(12, 0, 0);   // Check-out théorique à 12h
         $checkOutLargess = $checkOutDay->copy()->setTime(14, 0, 0);    // Largesse jusqu'à 14h
+        $lateCheckoutEnd = $checkOutDay->copy()->setTime(20, 0, 0);    // Fin du late checkout
 
         // Vérifier qu'on est bien le jour du départ
         if (!$now->isSameDay($checkOutDay)) {
@@ -888,16 +889,28 @@ class TransactionController extends Controller
                 "Si le client est encore là, veuillez prolonger le séjour.");
         }
 
-        // =====================================================
-        // ✅ NOUVEAU : GESTION DE LA DÉROGATION
-        // =====================================================
+        // ✅ NOUVELLE LOGIQUE : GESTION DU LATE CHECKOUT
         $isOverride = $request->has('override') && $request->override == 1;
 
-        // Après 14h : normalement interdit, SAUF si dérogation
-        if ($now->gt($checkOutLargess) && !$isOverride) {
+        // CAS 1: C'est un late checkout (entre 14h et 20h) → AUTORISÉ
+        if ($transaction->late_checkout && $now->gt($checkOutLargess) && $now->lt($lateCheckoutEnd)) {
+            // Late checkout autorisé sans dérogation
+            Log::info("✅ Late checkout autorisé", [
+                'transaction_id' => $transaction->id,
+                'heure_depart' => $now->format('H:i'),
+                'heure_prevue' => $transaction->expected_checkout_time
+            ]);
+        }
+        // CAS 2: Après 14h mais PAS de late checkout → INTERDIT, sauf dérogation
+        elseif ($now->gt($checkOutLargess) && !$isOverride) {
             return redirect()->back()->with('error',
                 "⚠️ Départ après 14h. La largesse de 2h est dépassée. " .
                 "Veuillez prolonger le séjour d'une nuit supplémentaire ou utiliser une dérogation.");
+        }
+        // CAS 3: Après 20h → INTERDIT dans tous les cas
+        elseif ($now->gte($lateCheckoutEnd)) {
+            return redirect()->back()->with('error',
+                "⚠️ Départ après 20h. Veuillez prolonger le séjour d'une nuit supplémentaire.");
         }
 
         // Si c'est une dérogation après 14h, vérifier la raison
@@ -933,6 +946,11 @@ class TransactionController extends Controller
             ]);
         }
 
+        // Entre 14h et 20h avec late checkout
+        if ($transaction->late_checkout && $now->gt($checkOutLargess) && $now->lt($lateCheckoutEnd)) {
+            $largessMessage = " (late checkout)";
+        }
+
         try {
             DB::beginTransaction();
 
@@ -964,7 +982,8 @@ class TransactionController extends Controller
                     'total_paid' => $transaction->getTotalPayment(),
                     'room_status' => 'dirty',
                     'departure_time' => $now->format('H:i'),
-                    'within_largess' => ($now->gte($checkOutDeadline) && $now->lte($checkOutLargess)) ? 'yes' : 'no'
+                    'within_largess' => ($now->gte($checkOutDeadline) && $now->lte($checkOutLargess)) ? 'yes' : 'no',
+                    'is_late_checkout' => $transaction->late_checkout ? true : false,
                 ];
                 
                 // Ajouter les infos de dérogation si applicable
@@ -990,6 +1009,9 @@ class TransactionController extends Controller
             if ($isOverride && $now->gt($checkOutLargess)) {
                 $successMessage = "✅ DÉROGATION ACCORDÉE - Départ enregistré à " . $now->format('H:i') . " !<br>" .
                                 "Raison: " . $request->override_reason . "<br>" .
+                                "Chambre " . $transaction->room->number . " marquée comme À NETTOYER.";
+            } elseif ($transaction->late_checkout && $now->gt($checkOutLargess)) {
+                $successMessage = "✅ Late checkout effectué à " . $now->format('H:i') . " !<br>" .
                                 "Chambre " . $transaction->room->number . " marquée comme À NETTOYER.";
             } else {
                 $successMessage = "✅ Départ enregistré à " . $now->format('H:i') . $largessMessage . " !<br>" .
@@ -1498,6 +1520,9 @@ class TransactionController extends Controller
             ->with('info', 'Fonction d\'exportation à implémenter');
     }
 
+    /**
+     * Afficher le formulaire de prolongation
+     */
     public function extend(Transaction $transaction)
     {
         if (! in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])) {
@@ -1509,7 +1534,7 @@ class TransactionController extends Controller
                 ->with('error', 'Seules les réservations et séjours en cours peuvent être prolongés.');
         }
 
-        $currentCheckOut = Carbon::parse($transaction->check_out); // Déjà à 12h
+        $currentCheckOut = Carbon::parse($transaction->check_out);
         $today = Carbon::now();
 
         // Suggérer une prolongation avec maintien de l'heure à 12h
@@ -1524,13 +1549,16 @@ class TransactionController extends Controller
         return view('transaction.extend', compact('transaction', 'suggestedDate'));
     }
 
+    /**
+     * Traiter la prolongation
+     */
     public function processExtend(Request $request, Transaction $transaction)
     {
         if (! in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])) {
             abort(403, 'Accès non autorisé.');
         }
 
-        // Récupérer la date actuelle de check-out (déjà à 12h)
+        // Récupérer la date actuelle de check-out
         $currentCheckOut = Carbon::parse($transaction->check_out);
         
         $validator = Validator::make($request->all(), [
@@ -1551,7 +1579,7 @@ class TransactionController extends Controller
                 ->withInput();
         }
 
-        // Forcer la nouvelle date de départ à 12h
+        // ✅ FORCER LA NOUVELLE DATE DE DÉPART À 12h00 (heure normale)
         $newCheckOut = Carbon::parse($request->new_check_out)->setTime(12, 0, 0);
 
         // Vérifier la disponibilité
@@ -1569,28 +1597,52 @@ class TransactionController extends Controller
         try {
             DB::beginTransaction();
 
+            // ✅ SAUVEGARDER LES ANCIENNES VALEURS
             $oldCheckOut = $transaction->check_out->format('Y-m-d H:i:s');
             $oldTotalPrice = $transaction->total_price;
             $oldNights = Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out);
+            $oldLateCheckout = $transaction->late_checkout;
+            $oldExpectedTime = $transaction->expected_checkout_time;
+            $oldLateFee = $transaction->late_checkout_fee;
 
             $additionalNights = $request->additional_nights;
             $roomPricePerNight = $transaction->room->price;
             $additionalPrice = $additionalNights * $roomPricePerNight;
 
-            $transaction->update([
-                'check_out' => $newCheckOut,
-                'notes' => ($transaction->notes ? $transaction->notes."\n---\n" : '').
-                        'Prolongation: '.now()->format('d/m/Y H:i').
-                        ' - '.$additionalNights.' nuit(s) supplémentaire(s)'.
-                        ($request->notes ? ' - '.$request->notes : ''),
-            ]);
+            // ✅ PRÉPARER LES NOTES DE BASE
+            $notes = $transaction->notes ?? '';
+            $baseNote = "\n---\nProlongation: " . now()->format('d/m/Y H:i') . 
+                        " - " . $additionalNights . " nuit(s) supplémentaire(s)" .
+                        ($request->notes ? ' - ' . $request->notes : '');
 
+            // ✅ PRÉPARER LES DONNÉES DE MISE À JOUR
+            // RETOUR À LA NORMALE : 12h00, pas de late checkout
+            $updateData = [
+                'check_out' => $newCheckOut,                    // ✅ Nouvelle date à 12h00
+                'late_checkout' => false,                        // ✅ DÉSACTIVER LATE CHECKOUT
+                'expected_checkout_time' => '12:00:00',          // ✅ RETOUR À 12h00 (VALEUR PAR DÉFAUT)
+                'late_checkout_fee' => null,                     // ✅ SUPPRIMER LE SUPPLÉMENT
+                'notes' => $notes . $baseNote,
+            ];
+
+            // ✅ SI C'ÉTAIT UN LATE CHECKOUT, AJOUTER UNE NOTE EXPLICATIVE
+            if ($oldLateCheckout) {
+                $updateData['notes'] .= "\n[" . now()->format('d/m/Y H:i') . "] ✅ LATE CHECKOUT ANNULÉ AUTOMATIQUEMENT - Retour à l'heure normale (12h00)";
+            }
+
+            // ✅ METTRE À JOUR LA TRANSACTION
+            $transaction->update($updateData);
+
+            // ✅ FORCER LE RAFRAÎCHISSEMENT
             $transaction->refresh();
+            
+            // ✅ RECALCULER LE PRIX TOTAL
             $newTotalPrice = $transaction->getTotalPrice();
             $expectedNewPrice = $oldTotalPrice + $additionalPrice;
 
+            // ✅ CORRIGER LE PRIX SI NÉCESSAIRE
             if (abs($newTotalPrice - $expectedNewPrice) > 1) {
-                Log::warning("Incohérence prix prolongation transaction #{$transaction->id}", [
+                Log::info("Correction prix prolongation transaction #{$transaction->id}", [
                     'old_price' => $oldTotalPrice,
                     'additional_price' => $additionalPrice,
                     'expected_new_price' => $expectedNewPrice,
@@ -1599,8 +1651,10 @@ class TransactionController extends Controller
                 $transaction->total_price = $expectedNewPrice;
                 $transaction->save();
                 $newTotalPrice = $expectedNewPrice;
+                $transaction->refresh();
             }
 
+            // ✅ CRÉER L'HISTORIQUE COMPLET
             History::create([
                 'transaction_id' => $transaction->id,
                 'user_id' => auth()->id(),
@@ -1610,12 +1664,18 @@ class TransactionController extends Controller
                     'check_out' => $oldCheckOut,
                     'total_price' => $oldTotalPrice,
                     'nights' => $oldNights,
+                    'late_checkout' => $oldLateCheckout,
+                    'expected_checkout_time' => $oldExpectedTime,
+                    'late_checkout_fee' => $oldLateFee,
                     'room_price_per_night' => $roomPricePerNight,
                 ]),
                 'new_values' => json_encode([
                     'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
                     'total_price' => $newTotalPrice,
                     'nights' => Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out),
+                    'late_checkout' => false,
+                    'expected_checkout_time' => '12:00:00',          // ✅ RETOUR À 12h00
+                    'late_checkout_fee' => null,
                     'room_price_per_night' => $roomPricePerNight,
                     'additional_nights' => $additionalNights,
                     'additional_price' => $additionalPrice,
@@ -1623,6 +1683,7 @@ class TransactionController extends Controller
                 'notes' => $request->notes,
             ]);
 
+            // ✅ LOG RÉCEPTIONNISTE
             if (auth()->user()->role === 'Receptionist') {
                 $this->logReceptionistAction(
                     actionType: 'reservation',
@@ -1634,36 +1695,60 @@ class TransactionController extends Controller
                         'new_check_out' => $newCheckOut->format('d/m/Y H:i'),
                         'old_check_out' => $oldCheckOut,
                         'room_price_per_night' => $roomPricePerNight,
+                        'late_checkout_removed' => $oldLateCheckout ? true : false,
+                        'old_late_time' => $oldExpectedTime,
+                        'old_late_fee' => $oldLateFee,
                     ],
                     beforeState: [
                         'check_out' => $oldCheckOut,
                         'total_price' => $oldTotalPrice,
                         'nights' => $oldNights,
+                        'late_checkout' => $oldLateCheckout,
+                        'expected_checkout_time' => $oldExpectedTime,
+                        'late_checkout_fee' => $oldLateFee,
                     ],
                     afterState: [
                         'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
                         'total_price' => $newTotalPrice,
                         'nights' => Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out),
+                        'late_checkout' => false,
+                        'expected_checkout_time' => '12:00:00',      // ✅ RETOUR À 12h00
+                        'late_checkout_fee' => null,
                         'notes' => $transaction->notes,
                     ],
                     notes: 'Prolongation de '.$additionalNights.' nuit(s) - '.
-                        number_format($additionalPrice, 0, ',', ' ').' CFA'
+                        number_format($additionalPrice, 0, ',', ' ').' CFA' .
+                        ($oldLateCheckout ? ' (Late checkout annulé)' : '')
                 );
             }
 
             DB::commit();
 
-            $message = '✅ Séjour prolongé avec succès !<br>';
-            $message .= "<strong>+{$additionalNights} nuit(s)</strong> ajoutée(s) à ".
-                    number_format($roomPricePerNight, 0, ',', ' ').' CFA/nuit<br>';
-            $message .= '<strong>Supplément :</strong> '.
-                    number_format($additionalPrice, 0, ',', ' ').' CFA<br>';
-            $message .= 'Nouvelle date de départ : <strong>'.
-                    $newCheckOut->format('d/m/Y H:i').'</strong><br>';
-            $message .= '<strong>Ancien total :</strong> '.
-                    number_format($oldTotalPrice, 0, ',', ' ').' CFA<br>';
-            $message .= '<strong>Nouveau total :</strong> '.
-                    number_format($newTotalPrice, 0, ',', ' ').' CFA';
+            // ✅ CONSTRUIRE LE MESSAGE DE SUCCÈS
+            $message = '✅ <strong>Séjour prolongé avec succès !</strong><br>';
+            $message .= "<strong>+{$additionalNights} nuit(s)</strong> ajoutée(s) à " .
+                    number_format($roomPricePerNight, 0, ',', ' ') . ' CFA/nuit<br>';
+            $message .= '<strong>Supplément :</strong> ' .
+                    number_format($additionalPrice, 0, ',', ' ') . ' CFA<br>';
+            $message .= 'Nouvelle date de départ : <strong>' .
+                    $newCheckOut->format('d/m/Y H:i') . '</strong><br>';
+            
+            if ($oldLateCheckout) {
+                $message .= '<br><div style="background-color: #17a2b8; color: white; padding: 10px; border-radius: 5px; margin: 10px 0;">';
+                $message .= '🔄 <strong>Late checkout automatiquement annulé</strong><br>';
+                $message .= 'Ancienne heure : ' . $oldExpectedTime . ' - Supplément de ' . 
+                            number_format($oldLateFee, 0, ',', ' ') . ' FCFA supprimé<br>';
+                $message .= 'Retour à l\'heure normale : <strong>12h00</strong>';
+                $message .= '</div>';
+            }
+            
+            $message .= '<strong>Ancien total :</strong> ' .
+                    number_format($oldTotalPrice, 0, ',', ' ') . ' CFA<br>';
+            $message .= '<strong>Nouveau total :</strong> ' .
+                    number_format($newTotalPrice, 0, ',', ' ') . ' CFA';
+
+            // ✅ METTRE À JOUR LE STATUT DES PAIEMENTS
+            $transaction->updatePaymentStatus();
 
             return redirect()->route('transaction.show', $transaction)
                 ->with('success', $message);
@@ -1673,10 +1758,123 @@ class TransactionController extends Controller
             Log::error('Erreur prolongation séjour:', [
                 'error' => $e->getMessage(),
                 'transaction_id' => $transaction->id,
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return redirect()->back()
-                ->with('error', 'Erreur lors de la prolongation: '.$e->getMessage());
+                ->with('error', 'Erreur lors de la prolongation: ' . $e->getMessage());
+        }
+    }
+    /**
+     * Traiter un late checkout (départ après 14h)
+     */
+    public function lateCheckout(Request $request, Transaction $transaction)
+    {
+        try {
+            $request->validate([
+                'late_checkout_time' => 'required|date_format:H:i|after:14:00|before_or_equal:20:00',
+                'late_fee' => 'required|numeric|min:0',
+                'notes' => 'nullable|string|max:500',
+            ]);
+
+            // Vérifier que la transaction est active
+            if ($transaction->status != 'active') {
+                return back()->with('error', 'Seules les réservations actives peuvent bénéficier d\'un late checkout.');
+            }
+
+            // Vérifier que le départ est aujourd'hui
+            if (!$transaction->check_out->isToday()) {
+                return back()->with('error', 'Le late checkout n\'est possible que pour les départs d\'aujourd\'hui.');
+            }
+
+            // Vérifier que le late checkout n'est pas déjà enregistré
+            if ($transaction->late_checkout) {
+                return back()->with('error', 'Un late checkout est déjà enregistré pour cette réservation.');
+            }
+
+            DB::beginTransaction();
+
+            try {
+                // Sauvegarder l'ancienne heure pour l'historique
+                $oldCheckOut = $transaction->check_out->format('Y-m-d H:i:s');
+                $oldTotalPrice = $transaction->total_price;
+
+                // Calculer le nouveau total
+                $newTotal = $transaction->total_price + $request->late_fee;
+                
+                // Créer la nouvelle date de départ avec l'heure choisie
+                $newCheckOut = $transaction->check_out->format('Y-m-d') . ' ' . $request->late_checkout_time . ':00';
+                
+                // Préparer les notes
+                $notes = $transaction->checkout_notes ?? '';
+                $newNote = "\n[" . now()->format('d/m/Y H:i') . "] ✅ LATE CHECKOUT - Départ reporté à {$request->late_checkout_time}";
+                
+                // Mettre à jour la transaction
+                $transaction->update([
+                    'late_checkout' => true,
+                    'expected_checkout_time' => $request->late_checkout_time,
+                    'check_out' => $newCheckOut,
+                    'total_price' => $newTotal,
+                    'late_checkout_fee' => $request->late_fee,
+                    'checkout_notes' => $notes . $newNote,
+                ]);
+
+                // ✅ CRÉER UN PAIEMENT POUR LE SUPPLÉMENT
+                if ($request->late_fee > 0) {
+                    $payment = Payment::create([
+                        'transaction_id' => $transaction->id,
+                        'customer_id' => $transaction->customer_id,
+                        'amount' => $request->late_fee,
+                        'payment_method' => 'cash', // ou 'pending' si pas encore payé
+                        'status' => 'pending', // En attente de paiement
+                        'reference' => 'LATE-' . $transaction->id . '-' . time(),
+                        'description' => 'Supplément late checkout du ' . now()->format('d/m/Y') . ' - Départ à ' . $request->late_checkout_time,                        'created_by' => auth()->id(),
+                    ]);
+
+                    // Ajouter une note sur le paiement
+                    $transaction->notes = ($transaction->notes ? $transaction->notes . "\n" : '') . 
+                        "Supplément late checkout de " . number_format($request->late_fee, 0, ',', ' ') . " CFA créé (en attente)";
+                    $transaction->save();
+                }
+
+                DB::commit();
+
+                // Log activité
+                activity()
+                    ->performedOn($transaction)
+                    ->causedBy(auth()->user())
+                    ->withProperties([
+                        'late_time' => $request->late_checkout_time,
+                        'fee' => $request->late_fee,
+                        'old_check_out' => $oldCheckOut,
+                        'new_check_out' => $newCheckOut,
+                        'payment_created' => $request->late_fee > 0,
+                        'notes' => $request->notes
+                    ])
+                    ->log('Late checkout enregistré avec paiement');
+
+                $message = '✅ <strong>Late checkout enregistré avec succès !</strong><br>' .
+                        'Nouvelle heure de départ : <strong>' . $request->late_checkout_time . '</strong><br>';
+                
+                if ($request->late_fee > 0) {
+                    $message .= 'Supplément de <strong>' . number_format($request->late_fee, 0, ',', ' ') . ' FCFA</strong> ajouté à la facture.<br>';
+                    $message .= '💳 <strong>Paiement créé</strong> - En attente de règlement.';
+                } else {
+                    $message .= 'Aucun supplément facturé.';
+                }
+
+                return redirect()->back()->with('success', $message);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return back()->withErrors($e->validator)->withInput();
+        } catch (\Exception $e) {
+            \Log::error('Late checkout error: ' . $e->getMessage());
+            return back()->with('error', 'Erreur lors du late checkout: ' . $e->getMessage());
         }
     }
 }

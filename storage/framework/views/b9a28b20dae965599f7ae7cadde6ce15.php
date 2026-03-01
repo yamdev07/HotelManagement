@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Détails de la Réservation #' . $transaction->id)
-@section('content')
+
+<?php $__env->startSection('title', 'Détails de la Réservation #' . $transaction->id); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
@@ -540,11 +540,11 @@
 <div class="detail-page">
     <!-- Breadcrumb -->
     <div class="breadcrumb-custom">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.index') }}">Réservations</a>
+        <a href="<?php echo e(route('transaction.index')); ?>">Réservations</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">#{{ $transaction->id }}</span>
+        <span class="current">#<?php echo e($transaction->id); ?></span>
     </div>
 
     <!-- En-tête -->
@@ -553,82 +553,87 @@
             <span class="header-icon">
                 <i class="fas fa-calendar-check"></i>
             </span>
-            <h1>Réservation #{{ $transaction->id }}</h1>
+            <h1>Réservation #<?php echo e($transaction->id); ?></h1>
             <span class="info-badge">
                 <i class="fas fa-clock"></i> Check-in 12h | Check-out 12h (largesse 14h)
             </span>
             
-            {{-- Affichage si late checkout --}}
-            @if($transaction->late_checkout)
+            
+            <?php if($transaction->late_checkout): ?>
                 <span class="badge-late">
-                    <i class="fas fa-clock"></i> Late checkout: {{ $transaction->expected_checkout_time }}
-                    @if($transaction->late_checkout_fee)
-                        (+{{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA)
-                    @endif
+                    <i class="fas fa-clock"></i> Late checkout: <?php echo e($transaction->expected_checkout_time); ?>
+
+                    <?php if($transaction->late_checkout_fee): ?>
+                        (+<?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA)
+                    <?php endif; ?>
                 </span>
-            @endif
+            <?php endif; ?>
         </div>
         
         <div class="d-flex gap-2 flex-wrap">
-            @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
-            <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST" class="d-inline">
-                @csrf
-                @method('PUT')
+            <?php if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])): ?>
+            <form action="<?php echo e(route('transaction.updateStatus', $transaction)); ?>" method="POST" class="d-inline">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
                 <select name="status" class="status-select" onchange="this.form.submit()">
-                    <option value="reservation" {{ $transaction->status == 'reservation' ? 'selected' : '' }}>📅 Réservation</option>
-                    <option value="active" {{ $transaction->status == 'active' ? 'selected' : '' }}>🏨 Dans l'hôtel</option>
-                    <option value="completed" {{ $transaction->status == 'completed' ? 'selected' : '' }}>✅ Terminé</option>
-                    <option value="cancelled" {{ $transaction->status == 'cancelled' ? 'selected' : '' }}>❌ Annulée</option>
-                    <option value="no_show" {{ $transaction->status == 'no_show' ? 'selected' : '' }}>👤 No Show</option>
+                    <option value="reservation" <?php echo e($transaction->status == 'reservation' ? 'selected' : ''); ?>>📅 Réservation</option>
+                    <option value="active" <?php echo e($transaction->status == 'active' ? 'selected' : ''); ?>>🏨 Dans l'hôtel</option>
+                    <option value="completed" <?php echo e($transaction->status == 'completed' ? 'selected' : ''); ?>>✅ Terminé</option>
+                    <option value="cancelled" <?php echo e($transaction->status == 'cancelled' ? 'selected' : ''); ?>>❌ Annulée</option>
+                    <option value="no_show" <?php echo e($transaction->status == 'no_show' ? 'selected' : ''); ?>>👤 No Show</option>
                 </select>
             </form>
-            @endif
+            <?php endif; ?>
             
-            <a href="{{ route('transaction.index') }}" class="btn-modern btn-outline-modern">
+            <a href="<?php echo e(route('transaction.index')); ?>" class="btn-modern btn-outline-modern">
                 <i class="fas fa-arrow-left me-2"></i>Retour
             </a>
         </div>
     </div>
 
     <!-- Messages de session -->
-    @if(session('success'))
+    <?php if(session('success')): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <i class="fas fa-check-circle me-2"></i> {!! session('success') !!}
+        <i class="fas fa-check-circle me-2"></i> <?php echo session('success'); ?>
+
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    @endif
+    <?php endif; ?>
     
-    @if(session('error') || session('failed'))
+    <?php if(session('error') || session('failed')): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-circle me-2"></i> {{ session('error') ?? session('failed') }}
+        <i class="fas fa-exclamation-circle me-2"></i> <?php echo e(session('error') ?? session('failed')); ?>
+
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    @endif
+    <?php endif; ?>
     
-    @if(session('warning'))
+    <?php if(session('warning')): ?>
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle me-2"></i> {{ session('warning') }}
+        <i class="fas fa-exclamation-triangle me-2"></i> <?php echo e(session('warning')); ?>
+
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    @endif
+    <?php endif; ?>
     
-    @if(session('info'))
+    <?php if(session('info')): ?>
     <div class="alert alert-info alert-dismissible fade show" role="alert">
-        <i class="fas fa-info-circle me-2"></i> {{ session('info') }}
+        <i class="fas fa-info-circle me-2"></i> <?php echo e(session('info')); ?>
+
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Alerte statut avec heure mise à jour -->
-    @if($transaction->status == 'reservation')
+    <?php if($transaction->status == 'reservation'): ?>
     <div class="alert-status alert-status-reservation">
         <i class="fas fa-calendar-check fa-2x" style="color: var(--amber-600);"></i>
         <div>
             <strong class="d-block mb-1">📅 RÉSERVATION</strong>
-            <p class="mb-0 small">Arrivée prévue : <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }} à 12h00</strong></p>
+            <p class="mb-0 small">Arrivée prévue : <strong><?php echo e(\Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y')); ?> à 12h00</strong></p>
         </div>
     </div>
-    @elseif($transaction->status == 'active')
+    <?php elseif($transaction->status == 'active'): ?>
     <div class="alert-status alert-status-active">
         <i class="fas fa-bed fa-2x" style="color: var(--primary-600);"></i>
         <div>
@@ -636,47 +641,48 @@
             <p class="mb-0 small">
                 Départ prévu : 
                 <strong>
-                    {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }} 
-                    @if($transaction->late_checkout)
-                        à <span style="color: var(--amber-600);">{{ $transaction->expected_checkout_time }}</span>
-                        @if($transaction->late_checkout_fee)
-                            <span class="badge-late" style="margin-left: 8px;">+{{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA</span>
-                        @endif
-                    @else
+                    <?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?> 
+                    <?php if($transaction->late_checkout): ?>
+                        à <span style="color: var(--amber-600);"><?php echo e($transaction->expected_checkout_time); ?></span>
+                        <?php if($transaction->late_checkout_fee): ?>
+                            <span class="badge-late" style="margin-left: 8px;">+<?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA</span>
+                        <?php endif; ?>
+                    <?php else: ?>
                         à 12h00
-                    @endif
+                    <?php endif; ?>
                 </strong>
             </p>
         </div>
     </div>
-    @elseif($transaction->status == 'completed')
+    <?php elseif($transaction->status == 'completed'): ?>
     <div class="alert-status alert-status-completed">
         <i class="fas fa-check-circle fa-2x" style="color: var(--blue-600);"></i>
         <div>
             <strong class="d-block mb-1">✅ SÉJOUR TERMINÉ</strong>
             <p class="mb-0 small">
-                Client parti le <strong>{{ \Carbon\Carbon::parse($transaction->check_out_actual ?? $transaction->check_out)->format('d/m/Y à H:i') }}</strong>
-                @if($transaction->late_checkout)
-                    <br><span class="badge-late"><i class="fas fa-clock"></i> Late checkout: {{ $transaction->expected_checkout_time }} ({{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA)</span>
-                @endif
+                Client parti le <strong><?php echo e(\Carbon\Carbon::parse($transaction->check_out_actual ?? $transaction->check_out)->format('d/m/Y à H:i')); ?></strong>
+                <?php if($transaction->late_checkout): ?>
+                    <br><span class="badge-late"><i class="fas fa-clock"></i> Late checkout: <?php echo e($transaction->expected_checkout_time); ?> (<?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA)</span>
+                <?php endif; ?>
             </p>
         </div>
     </div>
-    @elseif($transaction->status == 'cancelled')
+    <?php elseif($transaction->status == 'cancelled'): ?>
     <div class="alert-status alert-status-cancelled">
         <i class="fas fa-ban fa-2x" style="color: #b91c1c;"></i>
         <div>
             <strong class="d-block mb-1">❌ ANNULÉE</strong>
-            @if($transaction->cancelled_at)
-            <p class="mb-0 small">Annulée le <strong>{{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y à H:i') }}</strong>
-                @if($transaction->cancel_reason)
-                <br>Raison : {{ $transaction->cancel_reason }}
-                @endif
+            <?php if($transaction->cancelled_at): ?>
+            <p class="mb-0 small">Annulée le <strong><?php echo e(\Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y à H:i')); ?></strong>
+                <?php if($transaction->cancel_reason): ?>
+                <br>Raison : <?php echo e($transaction->cancel_reason); ?>
+
+                <?php endif; ?>
             </p>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
-    @elseif($transaction->status == 'no_show')
+    <?php elseif($transaction->status == 'no_show'): ?>
     <div class="alert-status alert-status-no_show">
         <i class="fas fa-user-slash fa-2x" style="color: var(--gray-500);"></i>
         <div>
@@ -684,32 +690,32 @@
             <p class="mb-0 small">Client ne s'est pas présenté</p>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Actions rapides -->
-    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
+    <?php if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])): ?>
     <div class="quick-actions">
-        @if($transaction->status == 'reservation')
-            @php
+        <?php if($transaction->status == 'reservation'): ?>
+            <?php
                 $now = \Carbon\Carbon::now();
                 $checkInDateTime = \Carbon\Carbon::parse($transaction->check_in)->setTime(12, 0, 0);
-            @endphp
-            @if($now->gte($checkInDateTime))
-                <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
-                    @csrf
+            ?>
+            <?php if($now->gte($checkInDateTime)): ?>
+                <form action="<?php echo e(route('transaction.mark-arrived', $transaction)); ?>" method="POST" class="d-inline">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="btn-modern btn-success-modern">
                         <i class="fas fa-sign-in-alt me-1"></i>Arrivée
                     </button>
                 </form>
-            @else
+            <?php else: ?>
                 <button type="button" class="btn-modern btn-outline-modern" disabled>
                     <i class="fas fa-clock me-1"></i>Arrivée à 12h
                 </button>
-            @endif
-        @endif
+            <?php endif; ?>
+        <?php endif; ?>
         
-        @if($transaction->status == 'active')
-            @php
+        <?php if($transaction->status == 'active'): ?>
+            <?php
                 $now = \Carbon\Carbon::now();
                 $checkOutDate = \Carbon\Carbon::parse($transaction->check_out)->setTime(12, 0, 0);
                 $checkOutLargess = $checkOutDate->copy()->setTime(14, 0, 0);
@@ -723,100 +729,101 @@
                            $p->status == 'completed';
                 });
                 $isLatePaid = !is_null($latePayment);
-            @endphp
+            ?>
             
-            {{-- 12h - 14h : Départ avec largesse (GRATUIT) --}}
-            @if($now->gte($checkOutDate) && $now->lte($checkOutLargess))
-                <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
-                    @csrf
+            
+            <?php if($now->gte($checkOutDate) && $now->lte($checkOutLargess)): ?>
+                <form action="<?php echo e(route('transaction.mark-departed', $transaction)); ?>" method="POST" class="d-inline">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="btn-modern btn-success-modern">
                         <i class="fas fa-sign-out-alt me-1"></i>Départ (largesse)
                     </button>
                 </form>
             
-            {{-- 14h - 20h : Gestion du late checkout --}}
-            @elseif($now->gt($checkOutLargess) && $now->lt($lateCheckoutEnd))
-                @if(!$transaction->late_checkout)
-                    {{-- Pas encore en late checkout --}}
+            
+            <?php elseif($now->gt($checkOutLargess) && $now->lt($lateCheckoutEnd)): ?>
+                <?php if(!$transaction->late_checkout): ?>
+                    
                     <button type="button" class="btn-modern btn-warning-modern" data-bs-toggle="modal" data-bs-target="#lateCheckoutModal">
                         <i class="fas fa-clock me-1"></i>Late checkout
                     </button>
-                @else
-                    {{-- Déjà en late checkout --}}
-                    @if($isLatePaid)
-                        {{-- ✅ Late checkout payé → bouton départ actif --}}
-                        <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
-                            @csrf
+                <?php else: ?>
+                    
+                    <?php if($isLatePaid): ?>
+                        
+                        <form action="<?php echo e(route('transaction.mark-departed', $transaction)); ?>" method="POST" class="d-inline">
+                            <?php echo csrf_field(); ?>
                             <button type="submit" class="btn-modern btn-success-modern">
                                 <i class="fas fa-sign-out-alt me-1"></i>Départ (late checkout)
                             </button>
                         </form>
-                    @else
-                        {{-- ❌ Late checkout non payé --}}
+                    <?php else: ?>
+                        
                         <span class="btn-modern btn-outline-modern disabled" 
                               data-bs-toggle="tooltip" 
-                              title="Supplément late checkout de {{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA en attente">
+                              title="Supplément late checkout de <?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA en attente">
                             <i class="fas fa-clock me-1"></i>Départ bloqué
                         </span>
-                    @endif
-                @endif
+                    <?php endif; ?>
+                <?php endif; ?>
             
-            {{-- Après 20h : Forcer prolongation --}}
-            @elseif($now->gte($lateCheckoutEnd) && !$transaction->late_checkout)
-                <a href="{{ route('transaction.extend', $transaction) }}" class="btn-modern btn-warning-modern">
+            
+            <?php elseif($now->gte($lateCheckoutEnd) && !$transaction->late_checkout): ?>
+                <a href="<?php echo e(route('transaction.extend', $transaction)); ?>" class="btn-modern btn-warning-modern">
                     <i class="fas fa-calendar-plus me-1"></i>Prolonger d'une nuit
                 </a>
             
-            {{-- Après 20h avec late checkout --}}
-            @elseif($now->gte($lateCheckoutEnd) && $transaction->late_checkout)
+            
+            <?php elseif($now->gte($lateCheckoutEnd) && $transaction->late_checkout): ?>
                 <span class="btn-modern btn-outline-modern disabled" 
                       data-bs-toggle="tooltip" 
                       title="Départ après 20h - Prolongation nécessaire">
                     <i class="fas fa-clock me-1"></i>Départ impossible
                 </span>
             
-            {{-- Déjà en late checkout mais avant 14h (cas normal) --}}
-            @elseif($transaction->late_checkout && $now->lt($checkOutLargess))
+            
+            <?php elseif($transaction->late_checkout && $now->lt($checkOutLargess)): ?>
                 <span class="btn-modern btn-outline-modern disabled" 
                       data-bs-toggle="tooltip" 
-                      title="Départ prévu à {{ $transaction->expected_checkout_time }}">
-                    <i class="fas fa-clock me-1"></i>Départ à {{ $transaction->expected_checkout_time }}
+                      title="Départ prévu à <?php echo e($transaction->expected_checkout_time); ?>">
+                    <i class="fas fa-clock me-1"></i>Départ à <?php echo e($transaction->expected_checkout_time); ?>
+
                 </span>
             
-            {{-- Autres cas --}}
-            @else
+            
+            <?php else: ?>
                 <button type="button" class="btn-modern btn-outline-modern" disabled>
                     <i class="fas fa-clock me-1"></i>Départ à 12h
                 </button>
-            @endif
-        @endif
+            <?php endif; ?>
+        <?php endif; ?>
         
-        @if(in_array($transaction->status, ['reservation', 'active']))
-        <a href="{{ route('transaction.extend', $transaction) }}" class="btn-modern btn-warning-modern">
+        <?php if(in_array($transaction->status, ['reservation', 'active'])): ?>
+        <a href="<?php echo e(route('transaction.extend', $transaction)); ?>" class="btn-modern btn-warning-modern">
             <i class="fas fa-calendar-plus me-1"></i>Prolonger
         </a>
-        @endif
+        <?php endif; ?>
         
-        @if(!in_array($transaction->status, ['cancelled', 'no_show', 'completed']))
-        <a href="{{ route('transaction.edit', $transaction) }}" class="btn-modern btn-outline-modern">
+        <?php if(!in_array($transaction->status, ['cancelled', 'no_show', 'completed'])): ?>
+        <a href="<?php echo e(route('transaction.edit', $transaction)); ?>" class="btn-modern btn-outline-modern">
             <i class="fas fa-edit me-1"></i>Modifier
         </a>
-        @endif
+        <?php endif; ?>
         
-        @if($remaining > 0 && !in_array($transaction->status, ['cancelled', 'no_show']))
-        <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-modern btn-primary-modern">
+        <?php if($remaining > 0 && !in_array($transaction->status, ['cancelled', 'no_show'])): ?>
+        <a href="<?php echo e(route('transaction.payment.create', $transaction)); ?>" class="btn-modern btn-primary-modern">
             <i class="fas fa-money-bill-wave me-1"></i>Paiement
         </a>
-        @endif
+        <?php endif; ?>
         
-        @if(!in_array($transaction->status, ['cancelled', 'no_show', 'completed']))
+        <?php if(!in_array($transaction->status, ['cancelled', 'no_show', 'completed'])): ?>
         <button type="button" class="btn-modern btn-outline-danger-modern" 
                 data-bs-toggle="modal" data-bs-target="#cancelModal">
             <i class="fas fa-ban me-1"></i>Annuler
         </button>
-        @endif
+        <?php endif; ?>
     </div>
-    @endif
+    <?php endif; ?>
 
     <div class="row">
         <!-- Colonne gauche -->
@@ -829,34 +836,35 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center gap-4 mb-4">
                         <div class="client-avatar">
-                            @if($transaction->customer->user && $transaction->customer->user->getAvatar())
-                                <img src="{{ $transaction->customer->user->getAvatar() }}" alt="{{ $transaction->customer->name }}">
-                            @else
-                                {{ strtoupper(substr($transaction->customer->name, 0, 1)) }}
-                            @endif
+                            <?php if($transaction->customer->user && $transaction->customer->user->getAvatar()): ?>
+                                <img src="<?php echo e($transaction->customer->user->getAvatar()); ?>" alt="<?php echo e($transaction->customer->name); ?>">
+                            <?php else: ?>
+                                <?php echo e(strtoupper(substr($transaction->customer->name, 0, 1))); ?>
+
+                            <?php endif; ?>
                         </div>
                         <div>
-                            <h4 class="mb-1" style="color: var(--gray-800); font-weight: 600;">{{ $transaction->customer->name }}</h4>
-                            <p class="text-muted small mb-0">{{ $transaction->customer->email ?? 'Email non renseigné' }}</p>
+                            <h4 class="mb-1" style="color: var(--gray-800); font-weight: 600;"><?php echo e($transaction->customer->name); ?></h4>
+                            <p class="text-muted small mb-0"><?php echo e($transaction->customer->email ?? 'Email non renseigné'); ?></p>
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6">
                             <p class="detail-label">Téléphone</p>
-                            <p class="detail-value">{{ $transaction->customer->phone ?? 'Non renseigné' }}</p>
+                            <p class="detail-value"><?php echo e($transaction->customer->phone ?? 'Non renseigné'); ?></p>
                         </div>
                         <div class="col-md-6">
                             <p class="detail-label">NIC/ID</p>
-                            <p class="detail-value">{{ $transaction->customer->nik ?? 'Non renseigné' }}</p>
+                            <p class="detail-value"><?php echo e($transaction->customer->nik ?? 'Non renseigné'); ?></p>
                         </div>
                     </div>
                     
                     <div class="d-flex gap-2 mt-2">
-                        <a href="{{ route('customer.show', $transaction->customer) }}" class="btn-modern btn-outline-modern btn-sm">
+                        <a href="<?php echo e(route('customer.show', $transaction->customer)); ?>" class="btn-modern btn-outline-modern btn-sm">
                             <i class="fas fa-eye me-1"></i>Voir profil
                         </a>
-                        <a href="{{ route('transaction.reservation.customerReservations', $transaction->customer) }}" class="btn-modern btn-outline-modern btn-sm">
+                        <a href="<?php echo e(route('transaction.reservation.customerReservations', $transaction->customer)); ?>" class="btn-modern btn-outline-modern btn-sm">
                             <i class="fas fa-history me-1"></i>Historique
                         </a>
                     </div>
@@ -872,16 +880,17 @@
                     <div class="row mb-4">
                         <div class="col-md-6 text-center mb-3 mb-md-0">
                             <p class="detail-label">Chambre</p>
-                            <span class="room-badge-large">{{ $transaction->room->number }}</span>
-                            <p class="text-muted small mt-2">{{ $transaction->room->type->name ?? 'Type non spécifié' }}</p>
+                            <span class="room-badge-large"><?php echo e($transaction->room->number); ?></span>
+                            <p class="text-muted small mt-2"><?php echo e($transaction->room->type->name ?? 'Type non spécifié'); ?></p>
                         </div>
                         <div class="col-md-6 text-center">
                             <p class="detail-label">Durée du séjour</p>
                             <span class="room-badge-large" style="background: var(--gray-100); color: var(--gray-700); border-color: var(--gray-200);">
-                                {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}
-                                @if($transaction->late_checkout)
+                                <?php echo e($nights); ?> nuit<?php echo e($nights > 1 ? 's' : ''); ?>
+
+                                <?php if($transaction->late_checkout): ?>
                                     <br><small class="text-warning">(dont late checkout)</small>
-                                @endif
+                                <?php endif; ?>
                             </span>
                         </div>
                     </div>
@@ -891,7 +900,8 @@
                             <p class="detail-label">Arrivée</p>
                             <p class="detail-value">
                                 <i class="fas fa-calendar-check me-2" style="color: var(--primary-500);"></i>
-                                {{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}
+                                <?php echo e(\Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y')); ?>
+
                                 <span class="text-muted ms-2">12:00</span>
                             </p>
                         </div>
@@ -899,13 +909,14 @@
                             <p class="detail-label">Départ</p>
                             <p class="detail-value">
                                 <i class="fas fa-calendar-times me-2" style="color: #ef4444;"></i>
-                                {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}
+                                <?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?>
+
                                 <span class="text-muted ms-2">
-                                    @if($transaction->late_checkout)
-                                        <strong style="color: var(--amber-600);">{{ $transaction->expected_checkout_time }}</strong>
-                                    @else
+                                    <?php if($transaction->late_checkout): ?>
+                                        <strong style="color: var(--amber-600);"><?php echo e($transaction->expected_checkout_time); ?></strong>
+                                    <?php else: ?>
                                         12:00
-                                    @endif
+                                    <?php endif; ?>
                                 </span>
                             </p>
                         </div>
@@ -917,18 +928,20 @@
                         <div class="col-md-6">
                             <p class="detail-label">Statut chambre</p>
                             <p class="detail-value">
-                                @if($transaction->room->roomStatus)
-                                <span class="status-badge {{ $transaction->room->roomStatus->name == 'Occupée' ? 'status-active' : ($transaction->room->roomStatus->name == 'Disponible' ? 'status-completed' : 'status-reservation') }}">
-                                    {{ $transaction->room->roomStatus->name }}
+                                <?php if($transaction->room->roomStatus): ?>
+                                <span class="status-badge <?php echo e($transaction->room->roomStatus->name == 'Occupée' ? 'status-active' : ($transaction->room->roomStatus->name == 'Disponible' ? 'status-completed' : 'status-reservation')); ?>">
+                                    <?php echo e($transaction->room->roomStatus->name); ?>
+
                                 </span>
-                                @endif
+                                <?php endif; ?>
                             </p>
                         </div>
                         <div class="col-md-6">
                             <p class="detail-label">Statut réservation</p>
                             <p class="detail-value">
-                                <span class="status-badge status-{{ $transaction->status }}">
-                                    {{ $transaction->status_label }}
+                                <span class="status-badge status-<?php echo e($transaction->status); ?>">
+                                    <?php echo e($transaction->status_label); ?>
+
                                 </span>
                             </p>
                         </div>
@@ -940,157 +953,163 @@
             <div class="detail-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5><i class="fas fa-money-bill-wave"></i>Paiements</h5>
-                    <span class="status-badge {{ $isFullyPaid ? 'status-active' : ($remaining > 0 ? 'status-reservation' : 'status-completed') }}">
-                        {{ $isFullyPaid ? 'Soldé' : ($remaining > 0 ? 'En attente' : 'Aucune dette') }}
+                    <span class="status-badge <?php echo e($isFullyPaid ? 'status-active' : ($remaining > 0 ? 'status-reservation' : 'status-completed')); ?>">
+                        <?php echo e($isFullyPaid ? 'Soldé' : ($remaining > 0 ? 'En attente' : 'Aucune dette')); ?>
+
                     </span>
                 </div>
                 <div class="card-body">
                     <!-- Résumé financier avec late checkout -->
                     <div class="row g-3 mb-4">
-                        @php
+                        <?php
                             $totalInitial = $totalPrice - ($transaction->late_checkout_fee ?? 0);
-                        @endphp
+                        ?>
                         
                         <div class="col-md-3">
                             <div class="stat-box">
                                 <p class="stat-label">Total initial</p>
-                                <p class="stat-value">{{ number_format($totalInitial, 0, ',', ' ') }} CFA</p>
+                                <p class="stat-value"><?php echo e(number_format($totalInitial, 0, ',', ' ')); ?> CFA</p>
                             </div>
                         </div>
                         
-                        @if($transaction->late_checkout_fee > 0)
+                        <?php if($transaction->late_checkout_fee > 0): ?>
                         <div class="col-md-3">
                             <div class="stat-box" style="background: var(--amber-50); border-color: var(--amber-200);">
                                 <p class="stat-label">Supplément late</p>
-                                <p class="stat-value" style="color: var(--amber-600);">+ {{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} CFA</p>
-                                <small class="text-muted">{{ $transaction->expected_checkout_time ?? 'N/A' }}</small>
+                                <p class="stat-value" style="color: var(--amber-600);">+ <?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> CFA</p>
+                                <small class="text-muted"><?php echo e($transaction->expected_checkout_time ?? 'N/A'); ?></small>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                         
                         <div class="col-md-3">
                             <div class="stat-box">
                                 <p class="stat-label">Total final</p>
-                                <p class="stat-value stat-value-primary">{{ number_format($totalPrice, 0, ',', ' ') }} CFA</p>
+                                <p class="stat-value stat-value-primary"><?php echo e(number_format($totalPrice, 0, ',', ' ')); ?> CFA</p>
                             </div>
                         </div>
                         
                         <div class="col-md-3">
                             <div class="stat-box">
                                 <p class="stat-label">Payé</p>
-                                <p class="stat-value stat-value-success">{{ number_format($totalPayment, 0, ',', ' ') }} CFA</p>
+                                <p class="stat-value stat-value-success"><?php echo e(number_format($totalPayment, 0, ',', ' ')); ?> CFA</p>
                             </div>
                         </div>
                         
                         <div class="col-md-3">
                             <div class="stat-box">
                                 <p class="stat-label">Reste</p>
-                                <p class="stat-value {{ $remaining > 0 ? 'stat-value-danger' : 'stat-value-success' }}">
-                                    @if($remaining > 0)
-                                        {{ number_format($remaining, 0, ',', ' ') }} CFA
-                                    @else
+                                <p class="stat-value <?php echo e($remaining > 0 ? 'stat-value-danger' : 'stat-value-success'); ?>">
+                                    <?php if($remaining > 0): ?>
+                                        <?php echo e(number_format($remaining, 0, ',', ' ')); ?> CFA
+                                    <?php else: ?>
                                         -
-                                    @endif
+                                    <?php endif; ?>
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     <!-- Liste des paiements -->
-                    @if($payments && $payments->count() > 0)
+                    <?php if($payments && $payments->count() > 0): ?>
                         <p class="detail-label mb-3">Historique des paiements</p>
                         <div class="timeline">
-                            @foreach($payments as $payment)
+                            <?php $__currentLoopData = $payments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="timeline-item">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
                                             <h6 class="mb-1" style="font-weight: 600;">
-                                                Paiement #{{ $payment->id }}
-                                                @if(str_contains($payment->description ?? '', 'Late checkout') || str_contains($payment->reference ?? '', 'LATE-'))
+                                                Paiement #<?php echo e($payment->id); ?>
+
+                                                <?php if(str_contains($payment->description ?? '', 'Late checkout') || str_contains($payment->reference ?? '', 'LATE-')): ?>
                                                     <span class="badge-late" style="margin-left: 8px;">Late checkout</span>
-                                                @endif
-                                                <span class="payment-status-{{ $payment->status }}" style="margin-left: 8px;">
-                                                    {{ $payment->status === 'completed' ? '✓' : ($payment->status === 'pending' ? '⏳' : '✗') }}
-                                                    {{ $payment->status === 'completed' ? 'Payé' : ($payment->status === 'pending' ? 'En attente' : 'Annulé') }}
+                                                <?php endif; ?>
+                                                <span class="payment-status-<?php echo e($payment->status); ?>" style="margin-left: 8px;">
+                                                    <?php echo e($payment->status === 'completed' ? '✓' : ($payment->status === 'pending' ? '⏳' : '✗')); ?>
+
+                                                    <?php echo e($payment->status === 'completed' ? 'Payé' : ($payment->status === 'pending' ? 'En attente' : 'Annulé')); ?>
+
                                                 </span>
                                             </h6>
                                             <p class="text-muted small mb-1">
                                                 <i class="fas fa-calendar me-1"></i>
-                                                {{ \Carbon\Carbon::parse($payment->created_at)->format('d/m/Y à H:i') }}
+                                                <?php echo e(\Carbon\Carbon::parse($payment->created_at)->format('d/m/Y à H:i')); ?>
+
                                             </p>
-                                            @if($payment->payment_method)
+                                            <?php if($payment->payment_method): ?>
                                                 <p class="text-muted small mb-1">
                                                     <i class="fas fa-credit-card me-1"></i>
-                                                    {{ ucfirst($payment->payment_method) }}
+                                                    <?php echo e(ucfirst($payment->payment_method)); ?>
+
                                                 </p>
-                                            @endif
-                                            @if($payment->description)
-                                                <p class="text-muted small mb-0">Note: {{ $payment->description }}</p>
-                                            @endif
+                                            <?php endif; ?>
+                                            <?php if($payment->description): ?>
+                                                <p class="text-muted small mb-0">Note: <?php echo e($payment->description); ?></p>
+                                            <?php endif; ?>
                                         </div>
                                         <div class="text-end">
                                             <p class="fw-bold text-success mb-1" style="font-size: 1.1rem;">
-                                                {{ number_format($payment->amount, 0, ',', ' ') }} CFA
+                                                <?php echo e(number_format($payment->amount, 0, ',', ' ')); ?> CFA
                                             </p>
-                                            <a href="{{ route('payment.invoice', $payment) }}" class="btn-modern btn-outline-modern btn-sm" target="_blank">
+                                            <a href="<?php echo e(route('payment.invoice', $payment)); ?>" class="btn-modern btn-outline-modern btn-sm" target="_blank">
                                                 <i class="fas fa-receipt"></i> Reçu
                                             </a>
-                                            @if($payment->status == 'pending')
-                                                <button onclick="markPaymentAsPaid({{ $payment->id }})" class="btn btn-sm btn-success mt-1">
+                                            <?php if($payment->status == 'pending'): ?>
+                                                <button onclick="markPaymentAsPaid(<?php echo e($payment->id); ?>)" class="btn btn-sm btn-success mt-1">
                                                     <i class="fas fa-check"></i> Marquer payé
                                                 </button>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="text-center py-5">
                             <i class="fas fa-money-bill-wave fa-3x mb-3" style="color: var(--gray-300);"></i>
                             <h5 style="color: var(--gray-600);">Aucun paiement</h5>
                             <p class="text-muted small">Aucun paiement n'a été effectué pour cette réservation.</p>
-                            @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']) && $remaining > 0 && !in_array($transaction->status, ['cancelled', 'no_show']))
-                                <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-modern btn-primary-modern mt-2">
+                            <?php if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']) && $remaining > 0 && !in_array($transaction->status, ['cancelled', 'no_show'])): ?>
+                                <a href="<?php echo e(route('transaction.payment.create', $transaction)); ?>" class="btn-modern btn-primary-modern mt-2">
                                     <i class="fas fa-plus me-1"></i>Ajouter un paiement
                                 </a>
-                            @endif
+                            <?php endif; ?>
                         </div>
-                    @endif
+                    <?php endif; ?>
                     
-                    {{-- Alert si late checkout non payé --}}
-                    @if($transaction->late_checkout_fee > 0 && $transaction->status == 'active')
-                        @php
+                    
+                    <?php if($transaction->late_checkout_fee > 0 && $transaction->status == 'active'): ?>
+                        <?php
                             $remainingWithLate = $totalPrice - $totalPayment;
                             $latePayment = $payments->first(function($p) {
                                 return ($p->reference && str_contains($p->reference, 'LATE-')) || 
                                        ($p->description && str_contains($p->description, 'Late checkout'));
                             });
-                        @endphp
-                        @if($remainingWithLate > 0 && (!$latePayment || $latePayment->status == 'pending'))
+                        ?>
+                        <?php if($remainingWithLate > 0 && (!$latePayment || $latePayment->status == 'pending')): ?>
                             <div class="alert alert-warning mt-3" style="border-left: 4px solid var(--amber-500);">
                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                     <div>
                                         <i class="fas fa-clock me-2" style="color: var(--amber-600);"></i>
                                         <strong>Late checkout enregistré</strong><br>
                                         <span class="small">
-                                            Départ à <strong>{{ $transaction->expected_checkout_time }}</strong> - 
-                                            Supplément de <strong>{{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA</strong>
-                                            @if($latePayment && $latePayment->status == 'pending')
+                                            Départ à <strong><?php echo e($transaction->expected_checkout_time); ?></strong> - 
+                                            Supplément de <strong><?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA</strong>
+                                            <?php if($latePayment && $latePayment->status == 'pending'): ?>
                                                 <br><span class="text-info">Paiement en attente</span>
-                                            @endif
+                                            <?php endif; ?>
                                         </span>
                                     </div>
-                                    @if(!$latePayment)
-                                        <a href="{{ route('transaction.payment.create', $transaction) }}?amount={{ $transaction->late_checkout_fee }}" 
+                                    <?php if(!$latePayment): ?>
+                                        <a href="<?php echo e(route('transaction.payment.create', $transaction)); ?>?amount=<?php echo e($transaction->late_checkout_fee); ?>" 
                                            class="btn btn-sm btn-warning">
                                             <i class="fas fa-money-bill-wave me-1"></i>Créer un paiement
                                         </a>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                        @endif
-                    @endif
+                        <?php endif; ?>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -1104,24 +1123,24 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ route('transaction.history', $transaction) }}" class="btn-modern btn-outline-modern w-100">
+                        <a href="<?php echo e(route('transaction.history', $transaction)); ?>" class="btn-modern btn-outline-modern w-100">
                             <i class="fas fa-history me-1"></i>Historique
                         </a>
                         
-                        @if($payments && $payments->count() > 0)
-                        <a href="{{ route('transaction.invoice', $transaction) }}" class="btn-modern btn-outline-modern w-100" target="_blank">
+                        <?php if($payments && $payments->count() > 0): ?>
+                        <a href="<?php echo e(route('transaction.invoice', $transaction)); ?>" class="btn-modern btn-outline-modern w-100" target="_blank">
                             <i class="fas fa-file-invoice me-1"></i>Facture
                         </a>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if($transaction->status == 'cancelled' && in_array(auth()->user()->role, ['Super', 'Admin']))
-                        <form action="{{ route('transaction.restore', $transaction) }}" method="POST">
-                            @csrf
+                        <?php if($transaction->status == 'cancelled' && in_array(auth()->user()->role, ['Super', 'Admin'])): ?>
+                        <form action="<?php echo e(route('transaction.restore', $transaction)); ?>" method="POST">
+                            <?php echo csrf_field(); ?>
                             <button type="submit" class="btn-modern btn-warning-modern w-100" onclick="return confirm('Restaurer cette réservation ?')">
                                 <i class="fas fa-undo me-1"></i>Restaurer
                             </button>
                         </form>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -1133,48 +1152,49 @@
                 </div>
                 <div class="card-body">
                     <p class="detail-label">Nombre de personnes</p>
-                    <p class="detail-value">{{ $transaction->person_count ?? 1 }} personne{{ ($transaction->person_count ?? 1) > 1 ? 's' : '' }}</p>
+                    <p class="detail-value"><?php echo e($transaction->person_count ?? 1); ?> personne<?php echo e(($transaction->person_count ?? 1) > 1 ? 's' : ''); ?></p>
                     
                     <p class="detail-label">Prix par nuit</p>
-                    <p class="detail-value">{{ number_format($transaction->room->price, 0, ',', ' ') }} CFA</p>
+                    <p class="detail-value"><?php echo e(number_format($transaction->room->price, 0, ',', ' ')); ?> CFA</p>
                     
-                    @if($transaction->late_checkout_fee)
+                    <?php if($transaction->late_checkout_fee): ?>
                     <p class="detail-label">Supplément late checkout</p>
-                    <p class="detail-value" style="color: var(--amber-600);">+ {{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} CFA</p>
-                    @endif
+                    <p class="detail-value" style="color: var(--amber-600);">+ <?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> CFA</p>
+                    <?php endif; ?>
                     
-                    {{-- Heure de départ effective --}}
-                    @if($transaction->expected_checkout_time && $transaction->late_checkout)
+                    
+                    <?php if($transaction->expected_checkout_time && $transaction->late_checkout): ?>
                     <p class="detail-label">Heure de départ</p>
                     <p class="detail-value" style="color: var(--amber-600);">
-                        <i class="fas fa-clock me-1"></i> {{ $transaction->expected_checkout_time }}
+                        <i class="fas fa-clock me-1"></i> <?php echo e($transaction->expected_checkout_time); ?>
+
                     </p>
-                    @endif
+                    <?php endif; ?>
                     
                     <p class="detail-label">Créée le</p>
-                    <p class="detail-value">{{ \Carbon\Carbon::parse($transaction->created_at)->format('d/m/Y à H:i') }}</p>
+                    <p class="detail-value"><?php echo e(\Carbon\Carbon::parse($transaction->created_at)->format('d/m/Y à H:i')); ?></p>
                     
-                    @if($transaction->user)
+                    <?php if($transaction->user): ?>
                     <p class="detail-label">Créée par</p>
-                    <p class="detail-value">{{ $transaction->user->name }}</p>
-                    @endif
+                    <p class="detail-value"><?php echo e($transaction->user->name); ?></p>
+                    <?php endif; ?>
                     
-                    @if($transaction->updated_at != $transaction->created_at)
+                    <?php if($transaction->updated_at != $transaction->created_at): ?>
                     <p class="detail-label">Dernière modification</p>
-                    <p class="detail-value">{{ \Carbon\Carbon::parse($transaction->updated_at)->format('d/m/Y à H:i') }}</p>
-                    @endif
+                    <p class="detail-value"><?php echo e(\Carbon\Carbon::parse($transaction->updated_at)->format('d/m/Y à H:i')); ?></p>
+                    <?php endif; ?>
                     
-                    @if($transaction->notes)
+                    <?php if($transaction->notes): ?>
                     <div class="divider"></div>
                     <p class="detail-label">Notes</p>
-                    <p class="detail-value" style="white-space: pre-line;">{{ $transaction->notes }}</p>
-                    @endif
+                    <p class="detail-value" style="white-space: pre-line;"><?php echo e($transaction->notes); ?></p>
+                    <?php endif; ?>
                     
-                    @if($transaction->checkout_notes && $transaction->late_checkout)
+                    <?php if($transaction->checkout_notes && $transaction->late_checkout): ?>
                     <div class="divider"></div>
                     <p class="detail-label">Notes départ</p>
-                    <p class="detail-value" style="white-space: pre-line; color: var(--amber-700);">📝 {{ $transaction->checkout_notes }}</p>
-                    @endif
+                    <p class="detail-value" style="white-space: pre-line; color: var(--amber-700);">📝 <?php echo e($transaction->checkout_notes); ?></p>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -1188,62 +1208,63 @@
                         <div class="col-6">
                             <div class="stat-box p-3">
                                 <p class="stat-label">Nuits</p>
-                                <p class="stat-value">{{ $nights }}</p>
-                                @if($transaction->late_checkout)
+                                <p class="stat-value"><?php echo e($nights); ?></p>
+                                <?php if($transaction->late_checkout): ?>
                                     <small class="text-warning">+ late checkout</small>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="stat-box p-3">
                                 <p class="stat-label">Paiements</p>
-                                <p class="stat-value">{{ $payments ? $payments->count() : 0 }}</p>
+                                <p class="stat-value"><?php echo e($payments ? $payments->count() : 0); ?></p>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="stat-box p-3">
                                 <p class="stat-label">Total</p>
-                                <p class="stat-value stat-value-primary">{{ number_format($totalPrice, 0, ',', ' ') }} CFA</p>
+                                <p class="stat-value stat-value-primary"><?php echo e(number_format($totalPrice, 0, ',', ' ')); ?> CFA</p>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="stat-box p-3">
                                 <p class="stat-label">Payé</p>
-                                <p class="stat-value stat-value-success">{{ number_format($totalPayment, 0, ',', ' ') }} CFA</p>
+                                <p class="stat-value stat-value-success"><?php echo e(number_format($totalPayment, 0, ',', ' ')); ?> CFA</p>
                             </div>
                         </div>
                     </div>
                     
-                    @if($remaining > 0)
+                    <?php if($remaining > 0): ?>
                     <div class="divider"></div>
                     <div class="text-center">
                         <p class="detail-label mb-1">Reste à payer</p>
-                        <p class="stat-value stat-value-danger h4">{{ number_format($remaining, 0, ',', ' ') }} CFA</p>
-                        @if($transaction->late_checkout_fee > 0)
-                            <small class="text-muted">dont {{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} CFA de late checkout</small>
-                        @endif
+                        <p class="stat-value stat-value-danger h4"><?php echo e(number_format($remaining, 0, ',', ' ')); ?> CFA</p>
+                        <?php if($transaction->late_checkout_fee > 0): ?>
+                            <small class="text-muted">dont <?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> CFA de late checkout</small>
+                        <?php endif; ?>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-{{-- MODAL LATE CHECKOUT - MONTANT LIBRE --}}
-@if($transaction->status == 'active' && !$transaction->late_checkout)
+
+<?php if($transaction->status == 'active' && !$transaction->late_checkout): ?>
 <div class="modal fade" id="lateCheckoutModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header" style="background: var(--amber-100);">
                 <h5 class="modal-title">
                     <i class="fas fa-clock text-warning me-2"></i>
-                    Late checkout - Chambre {{ $transaction->room->number }}
+                    Late checkout - Chambre <?php echo e($transaction->room->number); ?>
+
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('transaction.late-checkout', $transaction) }}" method="POST">
-                @csrf
+            <form action="<?php echo e(route('transaction.late-checkout', $transaction)); ?>" method="POST">
+                <?php echo csrf_field(); ?>
                 <div class="modal-body">
                     <div class="alert alert-info" style="background: var(--blue-50); border-color: var(--blue-200);">
                         <i class="fas fa-info-circle me-2 text-info"></i>
@@ -1253,7 +1274,7 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">Départ normal</label>
                         <p class="form-control-plaintext">
-                            {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }} à 12h00
+                            <?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?> à 12h00
                         </p>
                     </div>
                     
@@ -1270,11 +1291,11 @@
                         </select>
                     </div>
                     
-                    {{-- BOUTONS DE SUGGESTION RAPIDE --}}
+                    
                     <div class="mb-3">
                         <label class="form-label fw-bold">Suggestions de montant</label>
                         <div class="d-flex flex-wrap gap-2 mb-2">
-                            @php
+                            <?php
                                 $prixNuit = $transaction->room->price;
                                 $suggestions = [
                                     '0' => 'Gratuit',
@@ -1283,29 +1304,29 @@
                                     round($prixNuit * 0.75) => '75%',
                                     $prixNuit => '100% (nuit)',
                                 ];
-                            @endphp
+                            ?>
                             
-                            @foreach($suggestions as $montant => $label)
+                            <?php $__currentLoopData = $suggestions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $montant => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <button type="button" class="btn btn-sm btn-outline-primary" 
-                                        onclick="document.getElementById('lateFee').value = '{{ $montant }}'">
-                                    {{ $label }}<br>
-                                    <small>{{ number_format($montant, 0, ',', ' ') }} FCFA</small>
+                                        onclick="document.getElementById('lateFee').value = '<?php echo e($montant); ?>'">
+                                    <?php echo e($label); ?><br>
+                                    <small><?php echo e(number_format($montant, 0, ',', ' ')); ?> FCFA</small>
                                 </button>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                     </div>
                     
-                    {{-- CHAMP DE SAISIE LIBRE --}}
+                    
                     <div class="mb-3">
                         <label class="form-label fw-bold">Supplément (FCFA) - <span class="text-primary">LIBRE</span></label>
                         <div class="input-group">
                             <span class="input-group-text">FCFA</span>
                             <input type="number" name="late_fee" id="lateFee" class="form-control form-control-lg" 
-                                   value="{{ round($transaction->room->price * 0.5) }}" min="0" step="100" 
+                                   value="<?php echo e(round($transaction->room->price * 0.5)); ?>" min="0" step="100" 
                                    style="font-size: 1.2rem; font-weight: 600;" required>
                         </div>
                         <small class="text-muted">
-                            Prix nuit: {{ number_format($transaction->room->price, 0, ',', ' ') }} FCFA<br>
+                            Prix nuit: <?php echo e(number_format($transaction->room->price, 0, ',', ' ')); ?> FCFA<br>
                             <span class="text-warning">💡 L'hôtel décide : 0, 5000, 10000, 25000... (pas de limite)</span>
                         </small>
                     </div>
@@ -1329,7 +1350,7 @@
 
 <script>
 document.getElementById('lateTimeSelect')?.addEventListener('change', function() {
-    const pricePerNight = {{ $transaction->room->price }};
+    const pricePerNight = <?php echo e($transaction->room->price); ?>;
     const hour = parseInt(this.value.split(':')[0]);
     
     // Suggestion basée sur l'heure (mais l'utilisateur peut modifier)
@@ -1349,10 +1370,10 @@ document.getElementById('lateTimeSelect')?.addEventListener('change', function()
     }
 });
 </script>
-@endif
+<?php endif; ?>
 
 <!-- Modal d'annulation -->
-@if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']) && !in_array($transaction->status, ['cancelled', 'no_show', 'completed']))
+<?php if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']) && !in_array($transaction->status, ['cancelled', 'no_show', 'completed'])): ?>
 <div class="modal fade" id="cancelModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -1363,9 +1384,9 @@ document.getElementById('lateTimeSelect')?.addEventListener('change', function()
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('transaction.cancel', $transaction) }}" method="POST">
-                @csrf
-                @method('DELETE')
+            <form action="<?php echo e(route('transaction.cancel', $transaction)); ?>" method="POST">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('DELETE'); ?>
                 <div class="modal-body">
                     <p class="mb-3">Êtes-vous sûr de vouloir annuler cette réservation ?</p>
                     <div class="mb-3">
@@ -1383,23 +1404,23 @@ document.getElementById('lateTimeSelect')?.addEventListener('change', function()
         </div>
     </div>
 </div>
-@endif
+<?php endif; ?>
 
 <!-- Formulaire annulation masqué -->
-<form id="cancel-form" method="POST" action="{{ route('transaction.cancel', 0) }}" class="d-none">
-    @csrf @method('DELETE')
+<form id="cancel-form" method="POST" action="<?php echo e(route('transaction.cancel', 0)); ?>" class="d-none">
+    <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
     <input type="hidden" name="transaction_id" id="cancel-transaction-id-input">
     <input type="hidden" name="cancel_reason" id="cancel-reason-input">
 </form>
 
-{{-- Script pour marquer un paiement comme payé --}}
+
 <script>
 function markPaymentAsPaid(paymentId) {
     if (confirm('Confirmer le paiement de ce supplément ?')) {
         fetch(`/payments/${paymentId}/mark-paid`, {
             method: 'POST',
             headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             }
@@ -1418,9 +1439,9 @@ function markPaymentAsPaid(paymentId) {
     }
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1453,10 +1474,11 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <script>
 // Rafraîchir la page après une action (late checkout, prolongation, etc.)
-@if(session('success') || session('error') || session('warning') || session('info'))
+<?php if(session('success') || session('error') || session('warning') || session('info')): ?>
     setTimeout(function() {
         location.reload();
     }, 1500); // Rafraîchit après 1.5 secondes
-@endif
+<?php endif; ?>
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/transaction/show.blade.php ENDPATH**/ ?>
