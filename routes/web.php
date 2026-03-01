@@ -247,6 +247,12 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
             Route::post('/extend', [TransactionController::class, 'processExtend'])->name('extend.process')
                 ->middleware('checkrole:Super,Admin,Receptionist');
 
+            // === AJOUTEZ LA ROUTE LATE CHECKOUT ICI ===
+            Route::post('/late-checkout', [TransactionController::class, 'lateCheckout'])
+                ->name('late-checkout')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            // ===========================================
+
             // Gestion des statuts
             Route::put('/update-status', [TransactionController::class, 'updateStatus'])->name('updateStatus')
                 ->middleware('checkrole:Super,Admin,Receptionist');
@@ -267,7 +273,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
 
             // RESTful routes
             Route::put('/', [TransactionController::class, 'update'])->name('update')
-                ->middleware('checkrole:Super,Admin,Receptionist'); // ← ICI LA CORRECTION
+                ->middleware('checkrole:Super,Admin,Receptionist');
 
             // Actions critiques nécessitant autorisation
             Route::middleware('checkrole:Super,Admin')->group(function () {
@@ -283,9 +289,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
             Route::get('/', [TransactionController::class, 'show'])->name('show')
                 ->middleware('checkrole:Super,Admin,Receptionist');
         });
-
-    }); 
-    
+    });
     // ==================== ÉQUIPEMENTS ====================
     // Seulement pour admins
     Route::resource('facility', FacilityController::class)->middleware('checkrole:Super,Admin');
@@ -295,6 +299,11 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         Route::get('/', [PaymentController::class, 'index'])->name('index');
 
         Route::get('/{payment}/details', [PaymentController::class, 'getDetails'])->name('details');
+
+         // ✅ AJOUTEZ LA ROUTE ICI (vers ligne 660-670)
+        Route::post('/{payment}/mark-paid', [PaymentController::class, 'markAsPaid'])
+            ->name('mark-paid')
+            ->middleware('checkrole:Super,Admin,Receptionist');
 
 
         // Routes avec paramètre {payment}

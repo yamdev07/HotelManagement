@@ -37,6 +37,10 @@ class Transaction extends Model
         'id_type',
         'id_number',
         'nationality',
+        'late_checkout_fee',
+        'late_checkout',
+        'expected_checkout_time',
+
     ];
 
     protected $casts = [
@@ -612,35 +616,38 @@ class Transaction extends Model
     }
 
     /**
-     * Calculer le prix total - MÉTHODE CORRECTE
+     * Calculer le prix total - Inclut le supplément late checkout si présent
      */
     public function getTotalPrice()
     {
-        // SI le champ total_price existe et est positif, vérifier sa cohérence
-        if ($this->total_price && $this->total_price > 0) {
-            $calculated = $this->calculateTotalPrice();
-
-            // Si différence > 1 CFA, corriger
-            if (abs($calculated - (float) $this->total_price) > 1) {
-                \Log::info("Correction automatique prix transaction #{$this->id}", [
-                    'ancien' => $this->total_price,
-                    'calculé' => $calculated,
-                    'différence' => $calculated - $this->total_price,
-                ]);
-
-                $this->total_price = $calculated;
-                $this->saveQuietly();
-            }
-
-            return (float) $this->total_price;
+        // 1. Calculer le prix de base (nuits * prix chambre)
+        $basePrice = $this->calculateTotalPrice();
+        
+        // 2. Vérifier s'il y a un supplément late checkout
+        $hasLateCheckout = $this->late_checkout ?? false;
+        $lateFee = (float) ($this->late_checkout_fee ?? 0);
+        
+        // 3. Prix total = base + (late fee seulement si late checkout actif)
+        $totalWithLate = $basePrice;
+        if ($hasLateCheckout && $lateFee > 0) {
+            $totalWithLate = $basePrice + $lateFee;
         }
-
-        // Sinon, calculer et sauvegarder
-        $calculated = $this->calculateTotalPrice();
-        $this->total_price = $calculated;
-        $this->saveQuietly();
-
-        return (float) $calculated;
+        
+        // 4. Si le champ total_price existe et est différent, le mettre à jour
+        if ($this->total_price && abs($totalWithLate - (float) $this->total_price) > 1) {
+            \Log::info("Correction prix transaction #{$this->id}", [
+                'base_price' => $basePrice,
+                'has_late_checkout' => $hasLateCheckout,
+                'late_fee' => $lateFee,
+                'ancien' => $this->total_price,
+                'nouveau' => $totalWithLate,
+            ]);
+            
+            $this->total_price = $totalWithLate;
+            $this->saveQuietly();
+        }
+        
+        return (float) ($this->total_price ?? $totalWithLate);
     }
 
     /**

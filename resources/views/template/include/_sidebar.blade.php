@@ -53,6 +53,38 @@
                 @endphp
 
                 <!-- ═══════════════════════════════════════
+                     TABLEAU DE BORD
+                     ═══════════════════════════════════════ -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Tableau de Bord</div>
+
+                    <a href="{{ route('dashboard.index') }}"
+                       class="nav-item {{ $activeClass('dashboard.index') }}">
+                        <div class="nav-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Dashboard</div>
+                            <div class="nav-subtitle">Vue d'ensemble</div>
+                        </div>
+                    </a>
+
+                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
+                        @if(Route::has('availability.dashboard'))
+                        <a href="{{ route('availability.dashboard') }}"
+                           class="nav-item {{ $activeClass('availability.', false) }}">
+                            <div class="nav-icon">
+                                <i class="fas fa-th-large"></i>
+                            </div>
+                            <div class="nav-content">
+                                <div class="nav-title">Disponibilité</div>
+                                <div class="nav-subtitle">Inventaire en temps réel</div>
+                            </div>
+                        </a>
+                        @endif
+                    @endif
+                </div>
+                <!-- ═══════════════════════════════════════
                      ACTIONS RAPIDES — Check-in & Réservation
                      ═══════════════════════════════════════ -->
                 @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
@@ -97,38 +129,6 @@
                 </div>
                 @endif
 
-                <!-- ═══════════════════════════════════════
-                     TABLEAU DE BORD
-                     ═══════════════════════════════════════ -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Tableau de Bord</div>
-
-                    <a href="{{ route('dashboard.index') }}"
-                       class="nav-item {{ $activeClass('dashboard.index') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-chart-pie"></i>
-                        </div>
-                        <div class="nav-content">
-                            <div class="nav-title">Dashboard</div>
-                            <div class="nav-subtitle">Vue d'ensemble</div>
-                        </div>
-                    </a>
-
-                    @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
-                        @if(Route::has('availability.dashboard'))
-                        <a href="{{ route('availability.dashboard') }}"
-                           class="nav-item {{ $activeClass('availability.', false) }}">
-                            <div class="nav-icon">
-                                <i class="fas fa-th-large"></i>
-                            </div>
-                            <div class="nav-content">
-                                <div class="nav-title">Disponibilité</div>
-                                <div class="nav-subtitle">Inventaire en temps réel</div>
-                            </div>
-                        </a>
-                        @endif
-                    @endif
-                </div>
 
                 <!-- ═══════════════════════════════════════
                      OPÉRATIONS

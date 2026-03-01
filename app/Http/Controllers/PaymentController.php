@@ -1170,4 +1170,82 @@ class PaymentController extends Controller
         
         return $colors[$status] ?? 'secondary';
     }
+
+    /**
+     * Marquer un paiement comme payé (pour les late checkouts)
+     */
+    public function markAsPaid(Payment $payment)
+    {
+        try {
+            // Vérifier les permissions
+            if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Accès non autorisé'
+                ], 403);
+            }
+
+            // Vérifier que le paiement est en attente
+            if ($payment->status !== 'pending') {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Ce paiement ne peut pas être marqué comme payé (statut: ' . $payment->status . ')'
+                ], 400);
+            }
+
+            DB::beginTransaction();
+
+            try {
+                // Mettre à jour le paiement
+                $payment->update([
+                    'status' => 'completed',
+                    'paid_at' => now(),
+                    'verified_at' => now(),
+                    'verified_by' => auth()->id(),
+                ]);
+
+                // Mettre à jour la transaction associée
+                if ($payment->transaction) {
+                    $payment->transaction->updatePaymentStatus();
+                    $payment->transaction->refresh();
+                }
+
+                // Journaliser l'action
+                Log::info('✅ Paiement late checkout marqué comme payé', [
+                    'payment_id' => $payment->id,
+                    'transaction_id' => $payment->transaction_id,
+                    'amount' => $payment->amount,
+                    'user' => auth()->user()->name,
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Paiement marqué comme payé avec succès',
+                    'data' => [
+                        'payment_id' => $payment->id,
+                        'status' => 'completed',
+                        'paid_at' => now()->format('d/m/Y H:i'),
+                    ]
+                ]);
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+
+        } catch (\Exception $e) {
+            Log::error('❌ Erreur markAsPaid:', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Erreur: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

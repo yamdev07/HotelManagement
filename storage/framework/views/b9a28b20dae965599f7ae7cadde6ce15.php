@@ -257,6 +257,20 @@
     border: 1px solid var(--gray-200);
 }
 
+/* Badge late checkout */
+.badge-late {
+    background: var(--amber-100);
+    color: var(--amber-700);
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--amber-200);
+}
+
 /* Cartes */
 .detail-card {
     background: white;
@@ -543,6 +557,17 @@
             <span class="info-badge">
                 <i class="fas fa-clock"></i> Check-in 12h | Check-out 12h (largesse 14h)
             </span>
+            
+            
+            <?php if($transaction->late_checkout): ?>
+                <span class="badge-late">
+                    <i class="fas fa-clock"></i> Late checkout: <?php echo e($transaction->expected_checkout_time); ?>
+
+                    <?php if($transaction->late_checkout_fee): ?>
+                        (+<?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA)
+                    <?php endif; ?>
+                </span>
+            <?php endif; ?>
         </div>
         
         <div class="d-flex gap-2 flex-wrap">
@@ -599,7 +624,7 @@
     </div>
     <?php endif; ?>
 
-    <!-- Alerte statut -->
+    <!-- Alerte statut avec heure mise à jour -->
     <?php if($transaction->status == 'reservation'): ?>
     <div class="alert-status alert-status-reservation">
         <i class="fas fa-calendar-check fa-2x" style="color: var(--amber-600);"></i>
@@ -613,10 +638,19 @@
         <i class="fas fa-bed fa-2x" style="color: var(--primary-600);"></i>
         <div>
             <strong class="d-block mb-1">🏨 DANS L'HÔTEL</strong>
-            <p class="mb-0 small">Départ prévu : <strong><?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?> à 12h00</strong>
-            <?php if(\Carbon\Carbon::parse($transaction->check_out)->isPast()): ?>
-                <br><span class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i>Départ dépassé</span>
-            <?php endif; ?>
+            <p class="mb-0 small">
+                Départ prévu : 
+                <strong>
+                    <?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?> 
+                    <?php if($transaction->late_checkout): ?>
+                        à <span style="color: var(--amber-600);"><?php echo e($transaction->expected_checkout_time); ?></span>
+                        <?php if($transaction->late_checkout_fee): ?>
+                            <span class="badge-late" style="margin-left: 8px;">+<?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA</span>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        à 12h00
+                    <?php endif; ?>
+                </strong>
             </p>
         </div>
     </div>
@@ -625,7 +659,12 @@
         <i class="fas fa-check-circle fa-2x" style="color: var(--blue-600);"></i>
         <div>
             <strong class="d-block mb-1">✅ SÉJOUR TERMINÉ</strong>
-            <p class="mb-0 small">Client parti, séjour terminé</p>
+            <p class="mb-0 small">
+                Client parti le <strong><?php echo e(\Carbon\Carbon::parse($transaction->check_out_actual ?? $transaction->check_out)->format('d/m/Y à H:i')); ?></strong>
+                <?php if($transaction->late_checkout): ?>
+                    <br><span class="badge-late"><i class="fas fa-clock"></i> Late checkout: <?php echo e($transaction->expected_checkout_time); ?> (<?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA)</span>
+                <?php endif; ?>
+            </p>
         </div>
     </div>
     <?php elseif($transaction->status == 'cancelled'): ?>
@@ -678,21 +717,80 @@
         <?php if($transaction->status == 'active'): ?>
             <?php
                 $now = \Carbon\Carbon::now();
-                $checkOutDateTime = \Carbon\Carbon::parse($transaction->check_out)->setTime(12, 0, 0);
-                $checkOutLargess = $checkOutDateTime->copy()->setTime(14, 0, 0);
+                $checkOutDate = \Carbon\Carbon::parse($transaction->check_out)->setTime(12, 0, 0);
+                $checkOutLargess = $checkOutDate->copy()->setTime(14, 0, 0);
+                $lateCheckoutStart = $checkOutDate->copy()->setTime(14, 0, 0);
+                $lateCheckoutEnd = $checkOutDate->copy()->setTime(20, 0, 0);
+                
+                // ✅ Vérifier si le supplément late checkout est payé
+                $latePayment = $transaction->payments->first(function($p) {
+                    return (($p->reference && str_contains($p->reference, 'LATE-')) || 
+                           ($p->description && str_contains($p->description, 'Late checkout'))) && 
+                           $p->status == 'completed';
+                });
+                $isLatePaid = !is_null($latePayment);
             ?>
             
-            <?php if($now->gte($checkOutDateTime) && $now->lte($checkOutLargess)): ?>
+            
+            <?php if($now->gte($checkOutDate) && $now->lte($checkOutLargess)): ?>
                 <form action="<?php echo e(route('transaction.mark-departed', $transaction)); ?>" method="POST" class="d-inline">
                     <?php echo csrf_field(); ?>
                     <button type="submit" class="btn-modern btn-success-modern">
                         <i class="fas fa-sign-out-alt me-1"></i>Départ (largesse)
                     </button>
                 </form>
-            <?php elseif($now->gt($checkOutLargess)): ?>
-                <button type="button" class="btn-modern btn-warning-modern" data-bs-toggle="modal" data-bs-target="#overrideModal">
-                    <i class="fas fa-gavel me-1"></i>Dérogation départ
-                </button>
+            
+            
+            <?php elseif($now->gt($checkOutLargess) && $now->lt($lateCheckoutEnd)): ?>
+                <?php if(!$transaction->late_checkout): ?>
+                    
+                    <button type="button" class="btn-modern btn-warning-modern" data-bs-toggle="modal" data-bs-target="#lateCheckoutModal">
+                        <i class="fas fa-clock me-1"></i>Late checkout
+                    </button>
+                <?php else: ?>
+                    
+                    <?php if($isLatePaid): ?>
+                        
+                        <form action="<?php echo e(route('transaction.mark-departed', $transaction)); ?>" method="POST" class="d-inline">
+                            <?php echo csrf_field(); ?>
+                            <button type="submit" class="btn-modern btn-success-modern">
+                                <i class="fas fa-sign-out-alt me-1"></i>Départ (late checkout)
+                            </button>
+                        </form>
+                    <?php else: ?>
+                        
+                        <span class="btn-modern btn-outline-modern disabled" 
+                              data-bs-toggle="tooltip" 
+                              title="Supplément late checkout de <?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA en attente">
+                            <i class="fas fa-clock me-1"></i>Départ bloqué
+                        </span>
+                    <?php endif; ?>
+                <?php endif; ?>
+            
+            
+            <?php elseif($now->gte($lateCheckoutEnd) && !$transaction->late_checkout): ?>
+                <a href="<?php echo e(route('transaction.extend', $transaction)); ?>" class="btn-modern btn-warning-modern">
+                    <i class="fas fa-calendar-plus me-1"></i>Prolonger d'une nuit
+                </a>
+            
+            
+            <?php elseif($now->gte($lateCheckoutEnd) && $transaction->late_checkout): ?>
+                <span class="btn-modern btn-outline-modern disabled" 
+                      data-bs-toggle="tooltip" 
+                      title="Départ après 20h - Prolongation nécessaire">
+                    <i class="fas fa-clock me-1"></i>Départ impossible
+                </span>
+            
+            
+            <?php elseif($transaction->late_checkout && $now->lt($checkOutLargess)): ?>
+                <span class="btn-modern btn-outline-modern disabled" 
+                      data-bs-toggle="tooltip" 
+                      title="Départ prévu à <?php echo e($transaction->expected_checkout_time); ?>">
+                    <i class="fas fa-clock me-1"></i>Départ à <?php echo e($transaction->expected_checkout_time); ?>
+
+                </span>
+            
+            
             <?php else: ?>
                 <button type="button" class="btn-modern btn-outline-modern" disabled>
                     <i class="fas fa-clock me-1"></i>Départ à 12h
@@ -773,7 +871,7 @@
                 </div>
             </div>
 
-            <!-- Chambre et dates -->
+            <!-- Chambre et dates avec heure mise à jour -->
             <div class="detail-card">
                 <div class="card-header">
                     <h5><i class="fas fa-bed"></i>Informations Séjour</h5>
@@ -790,6 +888,9 @@
                             <span class="room-badge-large" style="background: var(--gray-100); color: var(--gray-700); border-color: var(--gray-200);">
                                 <?php echo e($nights); ?> nuit<?php echo e($nights > 1 ? 's' : ''); ?>
 
+                                <?php if($transaction->late_checkout): ?>
+                                    <br><small class="text-warning">(dont late checkout)</small>
+                                <?php endif; ?>
                             </span>
                         </div>
                     </div>
@@ -810,7 +911,13 @@
                                 <i class="fas fa-calendar-times me-2" style="color: #ef4444;"></i>
                                 <?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?>
 
-                                <span class="text-muted ms-2">12:00</span>
+                                <span class="text-muted ms-2">
+                                    <?php if($transaction->late_checkout): ?>
+                                        <strong style="color: var(--amber-600);"><?php echo e($transaction->expected_checkout_time); ?></strong>
+                                    <?php else: ?>
+                                        12:00
+                                    <?php endif; ?>
+                                </span>
                             </p>
                         </div>
                     </div>
@@ -842,7 +949,7 @@
                 </div>
             </div>
 
-            <!-- Paiements -->
+            <!-- Paiements avec affichage du supplément late checkout -->
             <div class="detail-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5><i class="fas fa-money-bill-wave"></i>Paiements</h5>
@@ -852,20 +959,43 @@
                     </span>
                 </div>
                 <div class="card-body">
-                    <!-- Résumé financier -->
+                    <!-- Résumé financier avec late checkout -->
                     <div class="row g-3 mb-4">
+                        <?php
+                            $totalInitial = $totalPrice - ($transaction->late_checkout_fee ?? 0);
+                        ?>
+                        
                         <div class="col-md-3">
                             <div class="stat-box">
-                                <p class="stat-label">Total</p>
+                                <p class="stat-label">Total initial</p>
+                                <p class="stat-value"><?php echo e(number_format($totalInitial, 0, ',', ' ')); ?> CFA</p>
+                            </div>
+                        </div>
+                        
+                        <?php if($transaction->late_checkout_fee > 0): ?>
+                        <div class="col-md-3">
+                            <div class="stat-box" style="background: var(--amber-50); border-color: var(--amber-200);">
+                                <p class="stat-label">Supplément late</p>
+                                <p class="stat-value" style="color: var(--amber-600);">+ <?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> CFA</p>
+                                <small class="text-muted"><?php echo e($transaction->expected_checkout_time ?? 'N/A'); ?></small>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        
+                        <div class="col-md-3">
+                            <div class="stat-box">
+                                <p class="stat-label">Total final</p>
                                 <p class="stat-value stat-value-primary"><?php echo e(number_format($totalPrice, 0, ',', ' ')); ?> CFA</p>
                             </div>
                         </div>
+                        
                         <div class="col-md-3">
                             <div class="stat-box">
                                 <p class="stat-label">Payé</p>
                                 <p class="stat-value stat-value-success"><?php echo e(number_format($totalPayment, 0, ',', ' ')); ?> CFA</p>
                             </div>
                         </div>
+                        
                         <div class="col-md-3">
                             <div class="stat-box">
                                 <p class="stat-label">Reste</p>
@@ -875,17 +1005,6 @@
                                     <?php else: ?>
                                         -
                                     <?php endif; ?>
-                                </p>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stat-box">
-                                <p class="stat-label">Taux</p>
-                                <?php
-                                    $paymentRate = $totalPrice > 0 ? ($totalPayment / $totalPrice * 100) : 0;
-                                ?>
-                                <p class="stat-value <?php echo e($paymentRate >= 100 ? 'stat-value-success' : ($paymentRate >= 50 ? 'stat-value-primary' : 'stat-value-danger')); ?>">
-                                    <?php echo e(number_format($paymentRate, 1)); ?>%
                                 </p>
                             </div>
                         </div>
@@ -902,10 +1021,13 @@
                                             <h6 class="mb-1" style="font-weight: 600;">
                                                 Paiement #<?php echo e($payment->id); ?>
 
+                                                <?php if(str_contains($payment->description ?? '', 'Late checkout') || str_contains($payment->reference ?? '', 'LATE-')): ?>
+                                                    <span class="badge-late" style="margin-left: 8px;">Late checkout</span>
+                                                <?php endif; ?>
                                                 <span class="payment-status-<?php echo e($payment->status); ?>" style="margin-left: 8px;">
                                                     <?php echo e($payment->status === 'completed' ? '✓' : ($payment->status === 'pending' ? '⏳' : '✗')); ?>
 
-                                                    <?php echo e($payment->status === 'completed' ? 'Complet' : ($payment->status === 'pending' ? 'En attente' : 'Annulé')); ?>
+                                                    <?php echo e($payment->status === 'completed' ? 'Payé' : ($payment->status === 'pending' ? 'En attente' : 'Annulé')); ?>
 
                                                 </span>
                                             </h6>
@@ -921,8 +1043,8 @@
 
                                                 </p>
                                             <?php endif; ?>
-                                            <?php if($payment->notes): ?>
-                                                <p class="text-muted small mb-0">Note: <?php echo e($payment->notes); ?></p>
+                                            <?php if($payment->description): ?>
+                                                <p class="text-muted small mb-0">Note: <?php echo e($payment->description); ?></p>
                                             <?php endif; ?>
                                         </div>
                                         <div class="text-end">
@@ -932,6 +1054,11 @@
                                             <a href="<?php echo e(route('payment.invoice', $payment)); ?>" class="btn-modern btn-outline-modern btn-sm" target="_blank">
                                                 <i class="fas fa-receipt"></i> Reçu
                                             </a>
+                                            <?php if($payment->status == 'pending'): ?>
+                                                <button onclick="markPaymentAsPaid(<?php echo e($payment->id); ?>)" class="btn btn-sm btn-success mt-1">
+                                                    <i class="fas fa-check"></i> Marquer payé
+                                                </button>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -948,6 +1075,40 @@
                                 </a>
                             <?php endif; ?>
                         </div>
+                    <?php endif; ?>
+                    
+                    
+                    <?php if($transaction->late_checkout_fee > 0 && $transaction->status == 'active'): ?>
+                        <?php
+                            $remainingWithLate = $totalPrice - $totalPayment;
+                            $latePayment = $payments->first(function($p) {
+                                return ($p->reference && str_contains($p->reference, 'LATE-')) || 
+                                       ($p->description && str_contains($p->description, 'Late checkout'));
+                            });
+                        ?>
+                        <?php if($remainingWithLate > 0 && (!$latePayment || $latePayment->status == 'pending')): ?>
+                            <div class="alert alert-warning mt-3" style="border-left: 4px solid var(--amber-500);">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div>
+                                        <i class="fas fa-clock me-2" style="color: var(--amber-600);"></i>
+                                        <strong>Late checkout enregistré</strong><br>
+                                        <span class="small">
+                                            Départ à <strong><?php echo e($transaction->expected_checkout_time); ?></strong> - 
+                                            Supplément de <strong><?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA</strong>
+                                            <?php if($latePayment && $latePayment->status == 'pending'): ?>
+                                                <br><span class="text-info">Paiement en attente</span>
+                                            <?php endif; ?>
+                                        </span>
+                                    </div>
+                                    <?php if(!$latePayment): ?>
+                                        <a href="<?php echo e(route('transaction.payment.create', $transaction)); ?>?amount=<?php echo e($transaction->late_checkout_fee); ?>" 
+                                           class="btn btn-sm btn-warning">
+                                            <i class="fas fa-money-bill-wave me-1"></i>Créer un paiement
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
@@ -984,7 +1145,7 @@
                 </div>
             </div>
 
-            <!-- Informations supplémentaires -->
+            <!-- Informations supplémentaires avec heure de départ -->
             <div class="detail-card">
                 <div class="card-header">
                     <h5><i class="fas fa-info-circle"></i>Détails</h5>
@@ -995,6 +1156,20 @@
                     
                     <p class="detail-label">Prix par nuit</p>
                     <p class="detail-value"><?php echo e(number_format($transaction->room->price, 0, ',', ' ')); ?> CFA</p>
+                    
+                    <?php if($transaction->late_checkout_fee): ?>
+                    <p class="detail-label">Supplément late checkout</p>
+                    <p class="detail-value" style="color: var(--amber-600);">+ <?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> CFA</p>
+                    <?php endif; ?>
+                    
+                    
+                    <?php if($transaction->expected_checkout_time && $transaction->late_checkout): ?>
+                    <p class="detail-label">Heure de départ</p>
+                    <p class="detail-value" style="color: var(--amber-600);">
+                        <i class="fas fa-clock me-1"></i> <?php echo e($transaction->expected_checkout_time); ?>
+
+                    </p>
+                    <?php endif; ?>
                     
                     <p class="detail-label">Créée le</p>
                     <p class="detail-value"><?php echo e(\Carbon\Carbon::parse($transaction->created_at)->format('d/m/Y à H:i')); ?></p>
@@ -1014,6 +1189,12 @@
                     <p class="detail-label">Notes</p>
                     <p class="detail-value" style="white-space: pre-line;"><?php echo e($transaction->notes); ?></p>
                     <?php endif; ?>
+                    
+                    <?php if($transaction->checkout_notes && $transaction->late_checkout): ?>
+                    <div class="divider"></div>
+                    <p class="detail-label">Notes départ</p>
+                    <p class="detail-value" style="white-space: pre-line; color: var(--amber-700);">📝 <?php echo e($transaction->checkout_notes); ?></p>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -1028,6 +1209,9 @@
                             <div class="stat-box p-3">
                                 <p class="stat-label">Nuits</p>
                                 <p class="stat-value"><?php echo e($nights); ?></p>
+                                <?php if($transaction->late_checkout): ?>
+                                    <small class="text-warning">+ late checkout</small>
+                                <?php endif; ?>
                             </div>
                         </div>
                         <div class="col-6">
@@ -1055,6 +1239,9 @@
                     <div class="text-center">
                         <p class="detail-label mb-1">Reste à payer</p>
                         <p class="stat-value stat-value-danger h4"><?php echo e(number_format($remaining, 0, ',', ' ')); ?> CFA</p>
+                        <?php if($transaction->late_checkout_fee > 0): ?>
+                            <small class="text-muted">dont <?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> CFA de late checkout</small>
+                        <?php endif; ?>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -1063,44 +1250,127 @@
     </div>
 </div>
 
-<!-- Modal dérogation après 14h -->
-<div class="modal fade" id="overrideModal" tabindex="-1">
-    <div class="modal-dialog">
+
+<?php if($transaction->status == 'active' && !$transaction->late_checkout): ?>
+<div class="modal fade" id="lateCheckoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header bg-warning">
+            <div class="modal-header" style="background: var(--amber-100);">
                 <h5 class="modal-title">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    Dérogation départ après 14h
+                    <i class="fas fa-clock text-warning me-2"></i>
+                    Late checkout - Chambre <?php echo e($transaction->room->number); ?>
+
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="<?php echo e(route('transaction.mark-departed', $transaction)); ?>" method="POST">
+            <form action="<?php echo e(route('transaction.late-checkout', $transaction)); ?>" method="POST">
                 <?php echo csrf_field(); ?>
                 <div class="modal-body">
-                    <p>Êtes-vous sûr de vouloir autoriser ce départ après 14h ?</p>
-                    <div class="alert alert-warning">
-                        <i class="fas fa-clock me-2"></i>
-                        Départ prévu : <?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?> à 12h00<br>
-                        Heure actuelle : <?php echo e(\Carbon\Carbon::now()->format('H:i')); ?>
-
+                    <div class="alert alert-info" style="background: var(--blue-50); border-color: var(--blue-200);">
+                        <i class="fas fa-info-circle me-2 text-info"></i>
+                        <strong>L'hôtel décide du montant</strong> - Suggestions: 0 (gratuit), 25%, 50%, 75%, 100%
                     </div>
+                    
                     <div class="mb-3">
-                        <label class="form-label">Raison de la dérogation :</label>
-                        <textarea name="override_reason" class="form-control" rows="2" 
-                                  placeholder="Pourquoi fermer les yeux ?" required></textarea>
+                        <label class="form-label fw-bold">Départ normal</label>
+                        <p class="form-control-plaintext">
+                            <?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?> à 12h00
+                        </p>
                     </div>
-                    <input type="hidden" name="override" value="1">
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Nouvelle heure de départ</label>
+                        <select name="late_checkout_time" class="form-select" id="lateTimeSelect" required>
+                            <option value="">Choisir une heure</option>
+                            <option value="15:00">15h00</option>
+                            <option value="16:00">16h00</option>
+                            <option value="17:00">17h00</option>
+                            <option value="18:00">18h00</option>
+                            <option value="19:00">19h00</option>
+                            <option value="20:00">20h00</option>
+                        </select>
+                    </div>
+                    
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Suggestions de montant</label>
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            <?php
+                                $prixNuit = $transaction->room->price;
+                                $suggestions = [
+                                    '0' => 'Gratuit',
+                                    round($prixNuit * 0.25) => '25%',
+                                    round($prixNuit * 0.5) => '50%',
+                                    round($prixNuit * 0.75) => '75%',
+                                    $prixNuit => '100% (nuit)',
+                                ];
+                            ?>
+                            
+                            <?php $__currentLoopData = $suggestions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $montant => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <button type="button" class="btn btn-sm btn-outline-primary" 
+                                        onclick="document.getElementById('lateFee').value = '<?php echo e($montant); ?>'">
+                                    <?php echo e($label); ?><br>
+                                    <small><?php echo e(number_format($montant, 0, ',', ' ')); ?> FCFA</small>
+                                </button>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        </div>
+                    </div>
+                    
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Supplément (FCFA) - <span class="text-primary">LIBRE</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">FCFA</span>
+                            <input type="number" name="late_fee" id="lateFee" class="form-control form-control-lg" 
+                                   value="<?php echo e(round($transaction->room->price * 0.5)); ?>" min="0" step="100" 
+                                   style="font-size: 1.2rem; font-weight: 600;" required>
+                        </div>
+                        <small class="text-muted">
+                            Prix nuit: <?php echo e(number_format($transaction->room->price, 0, ',', ' ')); ?> FCFA<br>
+                            <span class="text-warning">💡 L'hôtel décide : 0, 5000, 10000, 25000... (pas de limite)</span>
+                        </small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Notes (optionnel)</label>
+                        <textarea name="notes" class="form-control" rows="2" 
+                                  placeholder="Raison du late checkout..."></textarea>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-warning">
-                        <i class="fas fa-check me-2"></i>Autoriser le départ
+                    <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn-modern btn-warning-modern">
+                        <i class="fas fa-check me-2"></i>Confirmer late checkout
                     </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
+
+<script>
+document.getElementById('lateTimeSelect')?.addEventListener('change', function() {
+    const pricePerNight = <?php echo e($transaction->room->price); ?>;
+    const hour = parseInt(this.value.split(':')[0]);
+    
+    // Suggestion basée sur l'heure (mais l'utilisateur peut modifier)
+    let suggestedPercentage = 0.5; // 50% par défaut
+    if (hour <= 15) suggestedPercentage = 0.4;
+    else if (hour <= 17) suggestedPercentage = 0.5;
+    else if (hour <= 19) suggestedPercentage = 0.6;
+    else if (hour == 20) suggestedPercentage = 0.7;
+    
+    // Met à jour mais ne force pas
+    const suggestedAmount = Math.round(pricePerNight * suggestedPercentage);
+    const currentValue = document.getElementById('lateFee').value;
+    
+    // Ne change que si l'utilisateur n'a pas déjà modifié
+    if (currentValue == Math.round(pricePerNight * 0.5)) {
+        document.getElementById('lateFee').value = suggestedAmount;
+    }
+});
+</script>
+<?php endif; ?>
 
 <!-- Modal d'annulation -->
 <?php if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']) && !in_array($transaction->status, ['cancelled', 'no_show', 'completed'])): ?>
@@ -1142,6 +1412,33 @@
     <input type="hidden" name="transaction_id" id="cancel-transaction-id-input">
     <input type="hidden" name="cancel_reason" id="cancel-reason-input">
 </form>
+
+
+<script>
+function markPaymentAsPaid(paymentId) {
+    if (confirm('Confirmer le paiement de ce supplément ?')) {
+        fetch(`/payments/${paymentId}/mark-paid`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Erreur: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Erreur: ' + error);
+        });
+    }
+}
+</script>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('footer'); ?>
@@ -1174,6 +1471,14 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+</script>
+<script>
+// Rafraîchir la page après une action (late checkout, prolongation, etc.)
+<?php if(session('success') || session('error') || session('warning') || session('info')): ?>
+    setTimeout(function() {
+        location.reload();
+    }, 1500); // Rafraîchit après 1.5 secondes
+<?php endif; ?>
 </script>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/transaction/show.blade.php ENDPATH**/ ?>

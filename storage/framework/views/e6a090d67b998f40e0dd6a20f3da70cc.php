@@ -53,6 +53,38 @@
                 ?>
 
                 <!-- ═══════════════════════════════════════
+                     TABLEAU DE BORD
+                     ═══════════════════════════════════════ -->
+                <div class="nav-section">
+                    <div class="nav-section-title">Tableau de Bord</div>
+
+                    <a href="<?php echo e(route('dashboard.index')); ?>"
+                       class="nav-item <?php echo e($activeClass('dashboard.index')); ?>">
+                        <div class="nav-icon">
+                            <i class="fas fa-chart-pie"></i>
+                        </div>
+                        <div class="nav-content">
+                            <div class="nav-title">Dashboard</div>
+                            <div class="nav-subtitle">Vue d'ensemble</div>
+                        </div>
+                    </a>
+
+                    <?php if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])): ?>
+                        <?php if(Route::has('availability.dashboard')): ?>
+                        <a href="<?php echo e(route('availability.dashboard')); ?>"
+                           class="nav-item <?php echo e($activeClass('availability.', false)); ?>">
+                            <div class="nav-icon">
+                                <i class="fas fa-th-large"></i>
+                            </div>
+                            <div class="nav-content">
+                                <div class="nav-title">Disponibilité</div>
+                                <div class="nav-subtitle">Inventaire en temps réel</div>
+                            </div>
+                        </a>
+                        <?php endif; ?>
+                    <?php endif; ?>
+                </div>
+                <!-- ═══════════════════════════════════════
                      ACTIONS RAPIDES — Check-in & Réservation
                      ═══════════════════════════════════════ -->
                 <?php if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])): ?>
@@ -97,38 +129,6 @@
                 </div>
                 <?php endif; ?>
 
-                <!-- ═══════════════════════════════════════
-                     TABLEAU DE BORD
-                     ═══════════════════════════════════════ -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Tableau de Bord</div>
-
-                    <a href="<?php echo e(route('dashboard.index')); ?>"
-                       class="nav-item <?php echo e($activeClass('dashboard.index')); ?>">
-                        <div class="nav-icon">
-                            <i class="fas fa-chart-pie"></i>
-                        </div>
-                        <div class="nav-content">
-                            <div class="nav-title">Dashboard</div>
-                            <div class="nav-subtitle">Vue d'ensemble</div>
-                        </div>
-                    </a>
-
-                    <?php if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])): ?>
-                        <?php if(Route::has('availability.dashboard')): ?>
-                        <a href="<?php echo e(route('availability.dashboard')); ?>"
-                           class="nav-item <?php echo e($activeClass('availability.', false)); ?>">
-                            <div class="nav-icon">
-                                <i class="fas fa-th-large"></i>
-                            </div>
-                            <div class="nav-content">
-                                <div class="nav-title">Disponibilité</div>
-                                <div class="nav-subtitle">Inventaire en temps réel</div>
-                            </div>
-                        </a>
-                        <?php endif; ?>
-                    <?php endif; ?>
-                </div>
 
                 <!-- ═══════════════════════════════════════
                      OPÉRATIONS
