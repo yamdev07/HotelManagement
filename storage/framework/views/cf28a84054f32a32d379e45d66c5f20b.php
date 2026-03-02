@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Rapports & Analytics')
 
-@section('content')
+<?php $__env->startSection('title', 'Rapports & Analytics'); ?>
+
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid py-4">
 
     <!-- ================================================ -->
@@ -29,26 +29,26 @@
     <!-- ================================================ -->
     <div class="card shadow-sm border-0 rounded-3 mb-4">
         <div class="card-body">
-            <form method="GET" action="{{ route('reports.index') }}" class="row g-3 align-items-end">
+            <form method="GET" action="<?php echo e(route('reports.index')); ?>" class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label">Période</label>
                     <select name="period" class="form-select" id="periodSelect">
-                        <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>Aujourd'hui</option>
-                        <option value="yesterday" {{ request('period') == 'yesterday' ? 'selected' : '' }}>Hier</option>
-                        <option value="week" {{ request('period') == 'week' ? 'selected' : '' }}>Cette semaine</option>
-                        <option value="month" {{ request('period') == 'month' ? 'selected' : '' }}>Ce mois</option>
-                        <option value="quarter" {{ request('period') == 'quarter' ? 'selected' : '' }}>Ce trimestre</option>
-                        <option value="year" {{ request('period') == 'year' ? 'selected' : '' }}>Cette année</option>
-                        <option value="custom" {{ request('period') == 'custom' ? 'selected' : '' }}>Personnalisé</option>
+                        <option value="today" <?php echo e(request('period') == 'today' ? 'selected' : ''); ?>>Aujourd'hui</option>
+                        <option value="yesterday" <?php echo e(request('period') == 'yesterday' ? 'selected' : ''); ?>>Hier</option>
+                        <option value="week" <?php echo e(request('period') == 'week' ? 'selected' : ''); ?>>Cette semaine</option>
+                        <option value="month" <?php echo e(request('period') == 'month' ? 'selected' : ''); ?>>Ce mois</option>
+                        <option value="quarter" <?php echo e(request('period') == 'quarter' ? 'selected' : ''); ?>>Ce trimestre</option>
+                        <option value="year" <?php echo e(request('period') == 'year' ? 'selected' : ''); ?>>Cette année</option>
+                        <option value="custom" <?php echo e(request('period') == 'custom' ? 'selected' : ''); ?>>Personnalisé</option>
                     </select>
                 </div>
-                <div class="col-md-3" id="dateRangeStart" style="{{ request('period') == 'custom' ? '' : 'display: none;' }}">
+                <div class="col-md-3" id="dateRangeStart" style="<?php echo e(request('period') == 'custom' ? '' : 'display: none;'); ?>">
                     <label class="form-label">Date début</label>
-                    <input type="date" name="date_from" class="form-control" value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}">
+                    <input type="date" name="date_from" class="form-control" value="<?php echo e(request('date_from', now()->startOfMonth()->format('Y-m-d'))); ?>">
                 </div>
-                <div class="col-md-3" id="dateRangeEnd" style="{{ request('period') == 'custom' ? '' : 'display: none;' }}">
+                <div class="col-md-3" id="dateRangeEnd" style="<?php echo e(request('period') == 'custom' ? '' : 'display: none;'); ?>">
                     <label class="form-label">Date fin</label>
-                    <input type="date" name="date_to" class="form-control" value="{{ request('date_to', now()->format('Y-m-d')) }}">
+                    <input type="date" name="date_to" class="form-control" value="<?php echo e(request('date_to', now()->format('Y-m-d'))); ?>">
                 </div>
                 <div class="col-md-3">
                     <button type="submit" class="btn btn-hotel-primary w-100">
@@ -73,12 +73,12 @@
                     </div>
                     <div class="ms-3">
                         <h6 class="text-muted mb-1">Chiffre d'affaires</h6>
-                        <h4 class="fw-bold">{{ number_format($totalRevenue ?? 0, 0, ',', ' ') }} CFA</h4>
-                        @if(isset($revenueGrowth))
-                        <small class="text-{{ $revenueGrowth >= 0 ? 'success' : 'danger' }}">
-                            <i class="fas fa-arrow-{{ $revenueGrowth >= 0 ? 'up' : 'down' }} me-1"></i>{{ abs($revenueGrowth) }}%
+                        <h4 class="fw-bold"><?php echo e(number_format($totalRevenue ?? 0, 0, ',', ' ')); ?> CFA</h4>
+                        <?php if(isset($revenueGrowth)): ?>
+                        <small class="text-<?php echo e($revenueGrowth >= 0 ? 'success' : 'danger'); ?>">
+                            <i class="fas fa-arrow-<?php echo e($revenueGrowth >= 0 ? 'up' : 'down'); ?> me-1"></i><?php echo e(abs($revenueGrowth)); ?>%
                         </small>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -93,8 +93,8 @@
                     </div>
                     <div class="ms-3">
                         <h6 class="text-muted mb-1">Paiements encaissés</h6>
-                        <h4 class="fw-bold">{{ number_format($totalPaymentsAmount ?? 0, 0, ',', ' ') }} CFA</h4>
-                        <small class="text-muted">{{ $paymentsCount ?? 0 }} transactions</small>
+                        <h4 class="fw-bold"><?php echo e(number_format($totalPaymentsAmount ?? 0, 0, ',', ' ')); ?> CFA</h4>
+                        <small class="text-muted"><?php echo e($paymentsCount ?? 0); ?> transactions</small>
                     </div>
                 </div>
             </div>
@@ -109,7 +109,7 @@
                     </div>
                     <div class="ms-3">
                         <h6 class="text-muted mb-1">Prix moyen / nuit</h6>
-                        <h4 class="fw-bold">{{ number_format($averageNightRate ?? 0, 0, ',', ' ') }} CFA</h4>
+                        <h4 class="fw-bold"><?php echo e(number_format($averageNightRate ?? 0, 0, ',', ' ')); ?> CFA</h4>
                     </div>
                 </div>
             </div>
@@ -124,7 +124,7 @@
                     </div>
                     <div class="ms-3">
                         <h6 class="text-muted mb-1">RevPAR</h6>
-                        <h4 class="fw-bold">{{ number_format($revPAR ?? 0, 0, ',', ' ') }} CFA</h4>
+                        <h4 class="fw-bold"><?php echo e(number_format($revPAR ?? 0, 0, ',', ' ')); ?> CFA</h4>
                     </div>
                 </div>
             </div>
@@ -146,8 +146,8 @@
                     </div>
                     <div class="ms-3">
                         <h6 class="text-muted mb-1">Taux d'occupation</h6>
-                        <h4 class="fw-bold">{{ $occupancyRate ?? 0 }}%</h4>
-                        <small class="text-muted">{{ $occupiedRooms ?? 0 }}/{{ $totalRooms ?? 0 }} chambres</small>
+                        <h4 class="fw-bold"><?php echo e($occupancyRate ?? 0); ?>%</h4>
+                        <small class="text-muted"><?php echo e($occupiedRooms ?? 0); ?>/<?php echo e($totalRooms ?? 0); ?> chambres</small>
                     </div>
                 </div>
             </div>
@@ -162,7 +162,7 @@
                     </div>
                     <div class="ms-3">
                         <h6 class="text-muted mb-1">Arrivées / Départs</h6>
-                        <h4 class="fw-bold">{{ $checkinsCount ?? 0 }} / {{ $checkoutsCount ?? 0 }}</h4>
+                        <h4 class="fw-bold"><?php echo e($checkinsCount ?? 0); ?> / <?php echo e($checkoutsCount ?? 0); ?></h4>
                     </div>
                 </div>
             </div>
@@ -177,7 +177,7 @@
                     </div>
                     <div class="ms-3">
                         <h6 class="text-muted mb-1">Nuitées vendues</h6>
-                        <h4 class="fw-bold">{{ $totalNights ?? 0 }}</h4>
+                        <h4 class="fw-bold"><?php echo e($totalNights ?? 0); ?></h4>
                     </div>
                 </div>
             </div>
@@ -192,7 +192,7 @@
                     </div>
                     <div class="ms-3">
                         <h6 class="text-muted mb-1">Séjour moyen</h6>
-                        <h4 class="fw-bold">{{ $averageStayLength ?? 0 }} nuits</h4>
+                        <h4 class="fw-bold"><?php echo e($averageStayLength ?? 0); ?> nuits</h4>
                     </div>
                 </div>
             </div>
@@ -210,7 +210,7 @@
             <div class="card shadow-sm border-0 rounded-3 h-100">
                 <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
                     <h6 class="fw-bold mb-0">📈 Évolution du chiffre d'affaires</h6>
-                    <span class="badge bg-primary">{{ $periodLabel ?? 'Période sélectionnée' }}</span>
+                    <span class="badge bg-primary"><?php echo e($periodLabel ?? 'Période sélectionnée'); ?></span>
                 </div>
                 <div class="card-body">
                     <canvas id="revenueChart" style="height: 300px;"></canvas>
@@ -227,12 +227,12 @@
                 <div class="card-body">
                     <canvas id="paymentChart" style="height: 250px;"></canvas>
                     <div class="mt-3 small">
-                        @foreach($paymentSummary ?? [] as $method)
+                        <?php $__currentLoopData = $paymentSummary ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $method): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="d-flex justify-content-between mb-1">
-                            <span><i class="{{ $method['icon'] }} me-1"></i>{{ $method['label'] }}</span>
-                            <span class="fw-bold">{{ number_format($method['percentage'], 1) }}%</span>
+                            <span><i class="<?php echo e($method['icon']); ?> me-1"></i><?php echo e($method['label']); ?></span>
+                            <span class="fw-bold"><?php echo e(number_format($method['percentage'], 1)); ?>%</span>
                         </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
             </div>
@@ -293,7 +293,7 @@
             <div class="card shadow-sm border-0 rounded-3">
                 <div class="card-header bg-white border-0 d-flex justify-content-between">
                     <h6 class="fw-bold mb-0">🏆 Top 5 chambres les plus rentables</h6>
-                    <a href="{{ route('room.index') }}" class="text-decoration-none small">Voir tout</a>
+                    <a href="<?php echo e(route('room.index')); ?>" class="text-decoration-none small">Voir tout</a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -307,23 +307,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($topRooms ?? [] as $room)
+                                <?php $__empty_1 = true; $__currentLoopData = $topRooms ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
                                     <td>
-                                        <strong>{{ $room['number'] }}</strong>
-                                        <small class="d-block text-muted">{{ $room['name'] }}</small>
+                                        <strong><?php echo e($room['number']); ?></strong>
+                                        <small class="d-block text-muted"><?php echo e($room['name']); ?></small>
                                     </td>
-                                    <td>{{ $room['type'] }}</td>
-                                    <td>{{ $room['nights'] }}</td>
-                                    <td class="text-end fw-bold">{{ number_format($room['revenue'], 0, ',', ' ') }} CFA</td>
+                                    <td><?php echo e($room['type']); ?></td>
+                                    <td><?php echo e($room['nights']); ?></td>
+                                    <td class="text-end fw-bold"><?php echo e(number_format($room['revenue'], 0, ',', ' ')); ?> CFA</td>
                                 </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="4" class="text-center py-4 text-muted">
                                         <i class="fas fa-info-circle me-2"></i>Aucune donnée disponible
                                     </td>
                                 </tr>
-                                @endforelse
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -336,7 +336,7 @@
             <div class="card shadow-sm border-0 rounded-3">
                 <div class="card-header bg-white border-0 d-flex justify-content-between">
                     <h6 class="fw-bold mb-0">👥 Top 5 clients</h6>
-                    <a href="{{ route('customer.index') }}" class="text-decoration-none small">Voir tout</a>
+                    <a href="<?php echo e(route('customer.index')); ?>" class="text-decoration-none small">Voir tout</a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -350,23 +350,23 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($topCustomers ?? [] as $customer)
+                                <?php $__empty_1 = true; $__currentLoopData = $topCustomers ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $customer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
                                     <td>
-                                        <strong>{{ $customer['name'] }}</strong>
-                                        <small class="d-block text-muted">{{ $customer['email'] }}</small>
+                                        <strong><?php echo e($customer['name']); ?></strong>
+                                        <small class="d-block text-muted"><?php echo e($customer['email']); ?></small>
                                     </td>
-                                    <td>{{ $customer['stays'] }}</td>
-                                    <td>{{ $customer['nights'] }}</td>
-                                    <td class="text-end fw-bold">{{ number_format($customer['spent'], 0, ',', ' ') }} CFA</td>
+                                    <td><?php echo e($customer['stays']); ?></td>
+                                    <td><?php echo e($customer['nights']); ?></td>
+                                    <td class="text-end fw-bold"><?php echo e(number_format($customer['spent'], 0, ',', ' ')); ?> CFA</td>
                                 </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="4" class="text-center py-4 text-muted">
                                         <i class="fas fa-info-circle me-2"></i>Aucune donnée disponible
                                     </td>
                                 </tr>
-                                @endforelse
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -385,7 +385,7 @@
             <div class="card shadow-sm border-0 rounded-3">
                 <div class="card-header bg-white border-0 d-flex justify-content-between">
                     <h6 class="fw-bold mb-0">👤 Performance des réceptionnistes</h6>
-                    <a href="{{ route('receptionist.stats') }}" class="text-decoration-none small">Détails</a>
+                    <a href="<?php echo e(route('receptionist.stats')); ?>" class="text-decoration-none small">Détails</a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -402,35 +402,35 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($receptionistPerformance ?? [] as $recep)
+                                <?php $__empty_1 = true; $__currentLoopData = $receptionistPerformance ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $recep): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
                                     <td>
-                                        <strong>{{ $recep['name'] }}</strong>
+                                        <strong><?php echo e($recep['name']); ?></strong>
                                     </td>
-                                    <td>{{ $recep['sessions'] }}</td>
-                                    <td>{{ $recep['checkins'] }}</td>
-                                    <td>{{ $recep['checkouts'] }}</td>
-                                    <td>{{ $recep['reservations'] }}</td>
-                                    <td class="text-end fw-bold">{{ number_format($recep['total'], 0, ',', ' ') }} CFA</td>
+                                    <td><?php echo e($recep['sessions']); ?></td>
+                                    <td><?php echo e($recep['checkins']); ?></td>
+                                    <td><?php echo e($recep['checkouts']); ?></td>
+                                    <td><?php echo e($recep['reservations']); ?></td>
+                                    <td class="text-end fw-bold"><?php echo e(number_format($recep['total'], 0, ',', ' ')); ?> CFA</td>
                                     <td class="text-center">
                                         <div class="progress" style="height: 20px;">
                                             <div class="progress-bar bg-success" role="progressbar" 
-                                                style="width: {{ $recep['productivity'] }}%;" 
-                                                aria-valuenow="{{ $recep['productivity'] }}" 
+                                                style="width: <?php echo e($recep['productivity']); ?>%;" 
+                                                aria-valuenow="<?php echo e($recep['productivity']); ?>" 
                                                 aria-valuemin="0" 
                                                 aria-valuemax="100">
-                                                {{ $recep['productivity'] }}%
+                                                <?php echo e($recep['productivity']); ?>%
                                             </div>
                                         </div>
                                     </td>
                                 </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="7" class="text-center py-4 text-muted">
                                         <i class="fas fa-info-circle me-2"></i>Aucune donnée disponible
                                     </td>
                                 </tr>
-                                @endforelse
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -449,7 +449,7 @@
             <div class="card shadow-sm border-0 rounded-3">
                 <div class="card-header bg-white border-0 d-flex justify-content-between">
                     <h6 class="fw-bold mb-0">💰 Synthèse détaillée des paiements</h6>
-                    <a href="{{ route('payment.index') }}" class="text-decoration-none small">Voir tout</a>
+                    <a href="<?php echo e(route('payment.index')); ?>" class="text-decoration-none small">Voir tout</a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -464,25 +464,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($paymentSummary ?? [] as $method)
+                                <?php $__currentLoopData = $paymentSummary ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $method): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
                                     <td>
-                                        <i class="{{ $method['icon'] }} me-2"></i>{{ $method['label'] }}
+                                        <i class="<?php echo e($method['icon']); ?> me-2"></i><?php echo e($method['label']); ?>
+
                                     </td>
-                                    <td class="text-end fw-bold">{{ number_format($method['amount'], 0, ',', ' ') }} CFA</td>
-                                    <td class="text-end">{{ number_format($method['percentage'], 1) }}%</td>
-                                    <td class="text-end">{{ $method['count'] }}</td>
-                                    <td class="text-end">{{ number_format($method['average'], 0, ',', ' ') }} CFA</td>
+                                    <td class="text-end fw-bold"><?php echo e(number_format($method['amount'], 0, ',', ' ')); ?> CFA</td>
+                                    <td class="text-end"><?php echo e(number_format($method['percentage'], 1)); ?>%</td>
+                                    <td class="text-end"><?php echo e($method['count']); ?></td>
+                                    <td class="text-end"><?php echo e(number_format($method['average'], 0, ',', ' ')); ?> CFA</td>
                                 </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                             <tfoot class="bg-light fw-bold">
                                 <tr>
                                     <td>TOTAL</td>
-                                    <td class="text-end">{{ number_format($totalPaymentsAmount ?? 0, 0, ',', ' ') }} CFA</td>
+                                    <td class="text-end"><?php echo e(number_format($totalPaymentsAmount ?? 0, 0, ',', ' ')); ?> CFA</td>
                                     <td class="text-end">100%</td>
-                                    <td class="text-end">{{ $paymentsCount ?? 0 }}</td>
-                                    <td class="text-end">{{ number_format($averagePayment ?? 0, 0, ',', ' ') }} CFA</td>
+                                    <td class="text-end"><?php echo e($paymentsCount ?? 0); ?></td>
+                                    <td class="text-end"><?php echo e(number_format($averagePayment ?? 0, 0, ',', ' ')); ?> CFA</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -502,7 +503,7 @@
             <div class="card shadow-sm border-0 rounded-3">
                 <div class="card-header bg-white border-0 d-flex justify-content-between">
                     <h6 class="fw-bold mb-0">🔄 Dernières transactions</h6>
-                    <a href="{{ route('transaction.index') }}" class="text-decoration-none small">Voir tout</a>
+                    <a href="<?php echo e(route('transaction.index')); ?>" class="text-decoration-none small">Voir tout</a>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -519,16 +520,16 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @forelse($recentTransactions ?? [] as $transaction)
+                                <?php $__empty_1 = true; $__currentLoopData = $recentTransactions ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $transaction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
-                                    <td>#{{ $transaction->id }}</td>
-                                    <td>{{ $transaction->customer->name ?? 'N/A' }}</td>
-                                    <td>{{ $transaction->room->number ?? 'N/A' }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</td>
-                                    <td class="text-end fw-bold">{{ number_format($transaction->total_price, 0, ',', ' ') }} CFA</td>
+                                    <td>#<?php echo e($transaction->id); ?></td>
+                                    <td><?php echo e($transaction->customer->name ?? 'N/A'); ?></td>
+                                    <td><?php echo e($transaction->room->number ?? 'N/A'); ?></td>
+                                    <td><?php echo e(\Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y')); ?></td>
+                                    <td><?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?></td>
+                                    <td class="text-end fw-bold"><?php echo e(number_format($transaction->total_price, 0, ',', ' ')); ?> CFA</td>
                                     <td>
-                                        @php
+                                        <?php
                                             $statusColors = [
                                                 'reservation' => 'info',
                                                 'active' => 'success',
@@ -536,19 +537,20 @@
                                                 'cancelled' => 'danger',
                                                 'no_show' => 'warning'
                                             ];
-                                        @endphp
-                                        <span class="badge bg-{{ $statusColors[$transaction->status] ?? 'secondary' }}">
-                                            {{ $transaction->status }}
+                                        ?>
+                                        <span class="badge bg-<?php echo e($statusColors[$transaction->status] ?? 'secondary'); ?>">
+                                            <?php echo e($transaction->status); ?>
+
                                         </span>
                                     </td>
                                 </tr>
-                                @empty
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="7" class="text-center py-4 text-muted">
                                         <i class="fas fa-info-circle me-2"></i>Aucune transaction récente
                                     </td>
                                 </tr>
-                                @endforelse
+                                <?php endif; ?>
                             </tbody>
                         </table>
                     </div>
@@ -559,9 +561,9 @@
     </div>
 
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('scripts')
+<?php $__env->startSection('scripts'); ?>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -578,19 +580,19 @@
     // ================================================
     // CHART DATA FROM CONTROLLER
     // ================================================
-    const revenueData = {!! json_encode($revenueChartData ?? []) !!};
-    const revenueLabels = {!! json_encode($revenueChartLabels ?? []) !!};
+    const revenueData = <?php echo json_encode($revenueChartData ?? []); ?>;
+    const revenueLabels = <?php echo json_encode($revenueChartLabels ?? []); ?>;
     
-    const paymentData = {!! json_encode($paymentChartData ?? []) !!};
-    const paymentLabels = {!! json_encode($paymentChartLabels ?? []) !!};
+    const paymentData = <?php echo json_encode($paymentChartData ?? []); ?>;
+    const paymentLabels = <?php echo json_encode($paymentChartLabels ?? []); ?>;
     
-    const occupied = {{ $occupiedRooms ?? 0 }};
-    const available = {{ $availableRooms ?? 0 }};
+    const occupied = <?php echo e($occupiedRooms ?? 0); ?>;
+    const available = <?php echo e($availableRooms ?? 0); ?>;
     
-    const roomStatusData = {!! json_encode($roomStatusData ?? []) !!};
-    const roomStatusLabels = {!! json_encode($roomStatusLabels ?? []) !!};
+    const roomStatusData = <?php echo json_encode($roomStatusData ?? []); ?>;
+    const roomStatusLabels = <?php echo json_encode($roomStatusLabels ?? []); ?>;
     
-    const checkoutTimesData = {!! json_encode($checkoutTimesData ?? [0, 0, 0]) !!};
+    const checkoutTimesData = <?php echo json_encode($checkoutTimesData ?? [0, 0, 0]); ?>;
 
     // ================================================
     // CHART 1: REVENUE LINE CHART
@@ -789,7 +791,7 @@
         const element = document.querySelector('.container-fluid');
         const opt = {
             margin: [0.5, 0.5, 0.5, 0.5],
-            filename: 'rapport-hotel-{{ now()->format('Y-m-d') }}.pdf',
+            filename: 'rapport-hotel-<?php echo e(now()->format('Y-m-d')); ?>.pdf',
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, letterRendering: true },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
@@ -824,4 +826,5 @@
         line-height: 20px;
     }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/reports/index.blade.php ENDPATH**/ ?>

@@ -427,6 +427,13 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
     // ==================== RAPPORTS ====================
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
+    // ==================== STATISTIQUES RÉCEPTIONNISTES ====================
+    Route::prefix('receptionist')->name('receptionist.')->middleware(['auth', 'checkrole:Super,Admin,Receptionist'])->group(function () {
+        Route::get('/stats', [ReceptionistSessionController::class, 'getPersonalStats'])->name('stats');
+        Route::get('/history', [ReceptionistSessionController::class, 'getSessionHistory'])->name('history');
+        Route::get('/session/{id}', [ReceptionistSessionController::class, 'getSessionDetails'])->name('session.details');
+    });
+
     // ==================== RÉSERVATIONS CLIENTS ====================
     Route::get('/my-reservations', [TransactionController::class, 'myReservations'])->name('transaction.myReservations')
         ->middleware('checkrole:Customer');
