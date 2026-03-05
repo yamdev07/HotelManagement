@@ -1242,8 +1242,8 @@
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <form action="{{ route('transaction.late-checkout', $transaction) }}" method="POST">
-                @csrf
+                    <form action="/transaction/{{ $transaction->id }}/late-checkout" method="POST">
+                        @csrf
                 <div class="modal-body">
                     <div class="alert alert-info" style="background: var(--blue-50); border-color: var(--blue-200);">
                         <i class="fas fa-info-circle me-2 text-info"></i>
