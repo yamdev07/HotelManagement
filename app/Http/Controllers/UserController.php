@@ -141,19 +141,45 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        // Seuls les "Super" peuvent supprimer des utilisateurs
-        if (Auth::user()->role !== 'Super') {
-            abort(403, 'Only Super Admin can delete users.');
+        // Vérification des permissions (Super ou Admin)
+        if (!in_array(Auth::user()->role, ['Super', 'Admin'])) {
+            abort(403, 'Seuls les Super Admins et Admins peuvent supprimer des utilisateurs.');
+        }
+
+        // Empêcher la suppression de son propre compte
+        if (Auth::user()->id === $user->id) {
+            return redirect()->route('user.index')
+                ->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
+        }
+
+        // Vérifier si l'utilisateur a des transactions actives
+        if ($user->role === 'Customer') {
+            $customer = Customer::where('user_id', $user->id)->first();
+            
+            if ($customer) {
+                $activeTransactions = $customer->transactions()
+                    ->whereIn('status', ['reservation', 'active'])
+                    ->count();
+                
+                if ($activeTransactions > 0) {
+                    return redirect()->route('user.index')
+                        ->with('error', 'Ce client a des réservations actives. Impossible de supprimer.');
+                }
+            }
         }
 
         activity()->causedBy(auth()->user())->log('User '.$user->name.' deleted');
 
         try {
-            $user->delete();
+            // Soft delete ou suppression définitive ?
+            $user->delete(); // Suppression définitive
 
-            return redirect()->route('user.index')->with('success', 'User '.$user->name.' deleted!');
+            return redirect()->route('user.index')
+                ->with('success', 'Utilisateur '.$user->name.' supprimé avec succès!');
+                
         } catch (\Exception $e) {
-            return redirect()->route('user.index')->with('failed', 'User '.$user->name.' cannot be deleted! Error: '.$e->getMessage());
+            return redirect()->route('user.index')
+                ->with('error', 'Impossible de supprimer '.$user->name.'. Erreur: '.$e->getMessage());
         }
     }
 

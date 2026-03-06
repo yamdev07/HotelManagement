@@ -645,14 +645,36 @@ class CashierSessionController extends Controller
      */
     public function destroy(Request $request, CashierSession $cashierSession)
     {
+        // AJOUTEZ CE DÉBOGAGE AU DÉBUT
+        \Log::info('=== TENTATIVE DE CLÔTURE DÉTAILLÉE ===', [
+            'user_id' => auth()->id(),
+            'user_role' => auth()->user()->role,
+            'session_id' => $cashierSession->id,
+            'session_user_id' => $cashierSession->user_id,
+            'session_status' => $cashierSession->status,
+            'current_balance' => $cashierSession->current_balance,
+            'initial_balance' => $cashierSession->initial_balance,
+            'request_data' => $request->all(),
+            'request_method' => $request->method(),
+            'request_url' => $request->url(),
+            'csrf_token' => $request->session()->token(),
+        ]);
+
         $user = Auth::user();
 
+        // Vérification des permissions
         if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
+            \Log::warning('🔴 PERMISSION REFUSÉE', [
+                'user_role' => $user->role,
+                'session_user_id' => $cashierSession->user_id,
+                'current_user_id' => $user->id
+            ]);
             return redirect()->route('cashier.dashboard')
                 ->with('error', 'Action non autorisée.');
         }
 
         if ($cashierSession->status !== 'active') {
+            \Log::warning('🔴 SESSION NON ACTIVE', ['status' => $cashierSession->status]);
             return redirect()->back()
                 ->with('error', 'Cette session n\'est pas active.');
         }
@@ -660,6 +682,7 @@ class CashierSessionController extends Controller
         DB::beginTransaction();
 
         try {
+            // Calculer les paiements
             $completedPayments = Payment::where('cashier_session_id', $cashierSession->id)
                 ->where('status', Payment::STATUS_COMPLETED)
                 ->sum('amount') ?? 0;
@@ -669,32 +692,61 @@ class CashierSessionController extends Controller
                 ->sum('amount') ?? 0;
 
             $theoreticalBalance = $cashierSession->initial_balance + $completedPayments - $refundedPayments;
-
+            
             $physicalBalance = $request->input('final_balance', $cashierSession->current_balance);
             $difference = $physicalBalance - $theoreticalBalance;
 
+            \Log::info('💰 CALCULS DE CLÔTURE', [
+                'completed_payments' => $completedPayments,
+                'refunded_payments' => $refundedPayments,
+                'initial_balance' => $cashierSession->initial_balance,
+                'theoretical_balance' => $theoreticalBalance,
+                'physical_balance' => $physicalBalance,
+                'current_balance' => $cashierSession->current_balance,
+                'difference' => $difference
+            ]);
+
             $endTime = Carbon::now();
 
-            $cashierSession->update([
+            $updateData = [
                 'final_balance' => $physicalBalance,
                 'theoretical_balance' => $theoreticalBalance,
                 'balance_difference' => $difference,
                 'end_time' => $endTime,
                 'status' => 'closed',
-                'closing_notes' => $request->input('closing_notes', ''),
-            ]);
+                'updated_at' => $endTime,
+            ];
 
-            if ($difference != 0) {
-                Payment::create([
+            // Ajouter closing_notes si présent
+            if ($request->has('closing_notes')) {
+                $updateData['closing_notes'] = $request->input('closing_notes');
+            }
+
+            // Mettre à jour les notes
+            $notes = $cashierSession->notes ? $cashierSession->notes . "\n" : '';
+            $updateData['notes'] = $notes . "Clôturée le " . $endTime->format('d/m/Y H:i') . " par " . $user->name;
+
+            \Log::info('📝 MISE À JOUR SESSION', $updateData);
+
+            $cashierSession->update($updateData);
+
+            // Créer un paiement d'ajustement si différence
+            if (abs($difference) > 0.01) {
+                \Log::info('💰 CRÉATION PAIEMENT AJUSTEMENT', ['difference' => $difference]);
+                
+                $payment = Payment::create([
                     'user_id' => $user->id,
                     'created_by' => $user->id,
+                    'transaction_id' => null,
                     'cashier_session_id' => $cashierSession->id,
                     'amount' => abs($difference),
+                    'payment_method' => 'cash',
                     'status' => Payment::STATUS_COMPLETED,
-                    'payment_method' => Payment::METHOD_CASH,
                     'description' => $difference > 0 ? 'Excédent à la clôture' : 'Manquant à la clôture',
-                    'reference' => 'CLOSE-'.$cashierSession->id.'-'.time(),
+                    'reference' => 'ADJ-' . $cashierSession->id . '-' . time(),
                 ]);
+                
+                \Log::info('✅ PAIEMENT AJUSTEMENT CRÉÉ', ['payment_id' => $payment->id]);
             }
 
             DB::commit();
@@ -703,22 +755,17 @@ class CashierSessionController extends Controller
             $hours = floor($duration / 60);
             $minutes = $duration % 60;
 
-            \Log::info('Session closed', [
+            \Log::info('✅ SESSION CLÔTURÉE AVEC SUCCÈS', [
                 'session_id' => $cashierSession->id,
-                'user_id' => $user->id,
-                'start_time' => $cashierSession->start_time->format('Y-m-d H:i:s'),
-                'end_time' => $endTime->format('Y-m-d H:i:s'),
                 'duration' => $duration . ' minutes',
-                'difference' => $difference,
+                'difference' => $difference
             ]);
 
-            $message = 'Session #'.$cashierSession->id.' clôturée avec succès. ';
+            $message = '✅ Session #'.$cashierSession->id.' clôturée avec succès. ';
             $message .= 'Durée: ' . ($hours > 0 ? $hours . 'h ' : '') . $minutes . 'min. ';
-            $message .= 'Différence: '.number_format($difference, 2).' FCFA';
-
-            if ($user->role === 'Admin' || $user->role === 'Super') {
-                return redirect()->route('cashier.sessions.index')
-                    ->with('success', $message);
+            
+            if (abs($difference) > 0.01) {
+                $message .= 'Différence: ' . number_format($difference, 0, ',', ' ') . ' FCFA';
             }
 
             return redirect()->route('cashier.dashboard')
@@ -727,13 +774,14 @@ class CashierSessionController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Error closing session', [
+            \Log::error('❌ ERREUR CLÔTURE SESSION', [
                 'session_id' => $cashierSession->id,
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
 
             return redirect()->back()
-                ->with('error', 'Erreur lors de la clôture: '.$e->getMessage());
+                ->with('error', 'Erreur lors de la clôture: ' . $e->getMessage());
         }
     }
 

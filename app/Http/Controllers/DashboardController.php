@@ -214,13 +214,15 @@ class DashboardController extends Controller
                         'check_out' => $transaction->check_out->format('d/m/Y'),
                         'is_checking_out_today' => Carbon::parse($transaction->check_out)->isToday(),
                         'is_new_arrival' => Carbon::parse($transaction->check_in)->isToday(),
-                        'total_price' => $transaction->total_price,
-                        'total_payment' => $transaction->payments->sum('amount'),
+                        'total_price' => $transaction->getTotalPrice(),
+                        'total_payment' => $transaction->getTotalPayment(),
                         'balance' => $balance,
                         'balance_formatted' => number_format($balance, 0, ',', ' ').' CFA',
-                        'is_paid' => $balance <= 0,
-                        'payment_url' => route('transaction.payment.create', $transaction),
-                        'edit_url' => route('transaction.edit', $transaction),
+                        'is_paid' => $transaction->isFullyPaid(),
+                        'payment_url' => url("/transaction/{$transaction->id}/payment/create"),
+                        'edit_url' => url("/transaction/{$transaction->id}/edit"),
+                        'invoice_url' => url("/transaction/{$transaction->id}/invoice"),
+                        'show_url' => url("/transaction/{$transaction->id}"),
                     ];
                 });
 
@@ -251,7 +253,6 @@ class DashboardController extends Controller
             ], 500);
         }
     }
-
     /**
      * Méthode pour debug
      */

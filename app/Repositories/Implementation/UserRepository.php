@@ -23,21 +23,29 @@ class UserRepository implements UserRepositoryInterface
 
     public function showUser($request)
     {
-        return User::whereIn('role', ['Super', 'Admin'])->orderBy('id', 'DESC')
+        return User::whereIn('role', ['Super', 'Admin', 'Receptionist', 'Housekeeping']) // ✅ TOUS les rôles sauf Customer
+            ->orderBy('id', 'DESC')
             ->when($request->qu, function ($query) use ($request) {
-                $query->where('email', 'LIKE', '%'.$request->qu.'%');
+                $query->where(function ($q) use ($request) {
+                    $q->where('email', 'LIKE', '%'.$request->qu.'%')
+                      ->orWhere('name', 'LIKE', '%'.$request->qu.'%'); // ✅ Ajout de la recherche par nom
+                });
             })
-            ->paginate(5, ['*'], 'users')
+            ->paginate(10, ['*'], 'users') // Passez à 10 par page pour plus de cohérence
             ->appends($request->all());
     }
 
     public function showCustomer($request)
     {
-        return User::where('role', 'Customer')->orderBy('id', 'DESC')
+        return User::where('role', 'Customer')
+            ->orderBy('id', 'DESC')
             ->when($request->qc, function ($query) use ($request) {
-                $query->where('email', 'LIKE', '%'.$request->qc.'%');
+                $query->where(function ($q) use ($request) {
+                    $q->where('email', 'LIKE', '%'.$request->qc.'%')
+                      ->orWhere('name', 'LIKE', '%'.$request->qc.'%'); // ✅ Ajout de la recherche par nom
+                });
             })
-            ->paginate(5, ['*'], 'customers')
+            ->paginate(10, ['*'], 'customers')
             ->appends($request->all());
     }
 }

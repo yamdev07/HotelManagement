@@ -235,6 +235,11 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
 
         // Groupe pour les routes avec paramètre {transaction} et segments supplémentaires
         Route::prefix('{transaction}')->group(function () {
+            // === ROUTE LATE CHECKOUT ===
+            Route::post('/late-checkout', [TransactionController::class, 'lateCheckout'])
+                ->name('late-checkout')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+
             // Routes avec segments supplémentaires
             Route::get('/edit', [TransactionController::class, 'edit'])->name('edit')
                 ->middleware('checkrole:Super,Admin,Receptionist');
@@ -246,12 +251,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
                 ->middleware('checkrole:Super,Admin,Receptionist');
             Route::post('/extend', [TransactionController::class, 'processExtend'])->name('extend.process')
                 ->middleware('checkrole:Super,Admin,Receptionist');
-
-            // === AJOUTEZ LA ROUTE LATE CHECKOUT ICI ===
-            Route::post('/late-checkout', [TransactionController::class, 'lateCheckout'])
-                ->name('late-checkout')
-                ->middleware('checkrole:Super,Admin,Receptionist');
-            // ===========================================
 
             // Gestion des statuts
             Route::put('/update-status', [TransactionController::class, 'updateStatus'])->name('updateStatus')
@@ -299,12 +298,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         Route::get('/', [PaymentController::class, 'index'])->name('index');
 
         Route::get('/{payment}/details', [PaymentController::class, 'getDetails'])->name('details');
-
-         // ✅ AJOUTEZ LA ROUTE ICI (vers ligne 660-670)
-        Route::post('/{payment}/mark-paid', [PaymentController::class, 'markAsPaid'])
-            ->name('mark-paid')
-            ->middleware('checkrole:Super,Admin,Receptionist');
-
 
         // Routes avec paramètre {payment}
         Route::prefix('{payment}')->group(function () {
@@ -355,7 +348,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
             Route::get('/', [CashierSessionController::class, 'show'])->name('sessions.show');
             Route::put('/close', [CashierSessionController::class, 'close'])->name('sessions.close');
 
-            // Suppression seulement pour admins
+            // ✅ CORRIGÉ : Ajout du middleware checkrole pour les réceptionnistes
             Route::delete('/', [CashierSessionController::class, 'destroy'])->name('sessions.destroy')
                 ->middleware('checkrole:Super,Admin,Receptionist');
 
@@ -426,13 +419,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
 
     // ==================== RAPPORTS ====================
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
-
-    // ==================== STATISTIQUES RÉCEPTIONNISTES ====================
-    Route::prefix('receptionist')->name('receptionist.')->middleware(['auth', 'checkrole:Super,Admin,Receptionist'])->group(function () {
-        Route::get('/stats', [ReceptionistSessionController::class, 'getPersonalStats'])->name('stats');
-        Route::get('/history', [ReceptionistSessionController::class, 'getSessionHistory'])->name('history');
-        Route::get('/session/{id}', [ReceptionistSessionController::class, 'getSessionDetails'])->name('session.details');
-    });
 
     // ==================== RÉSERVATIONS CLIENTS ====================
     Route::get('/my-reservations', [TransactionController::class, 'myReservations'])->name('transaction.myReservations')
@@ -520,19 +506,8 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist']], f
     Route::get('/checkin-dashboard', [DashboardController::class, 'checkinDashboard'])->name('checkin.dashboard');
 
     // ==================== CAISSE RÉCEPTION ====================
-    Route::prefix('cashier')->name('cashier.')->group(function () {
-        // Routes sans paramètres d'abord
-        Route::get('/open-session', [CashierSessionController::class, 'openSession'])->name('open-session');
-        Route::post('/start-session', [CashierSessionController::class, 'startSession'])->name('start-session');
-        Route::get('/my-sessions', [CashierSessionController::class, 'mySessions'])->name('my-sessions');
-        Route::get('/reception-dashboard', [CashierSessionController::class, 'receptionDashboard'])->name('reception-dashboard');
-
-        // Routes avec paramètre {cashierSession}
-        Route::prefix('close-session/{cashierSession}')->group(function () {
-            Route::post('/', [CashierSessionController::class, 'closeSession'])->name('close-session');
-            Route::get('/report', [CashierSessionController::class, 'sessionReport'])->name('session-report');
-        });
-    });
+    // ⚠️ CES ROUTES ONT ÉTÉ SUPPRIMÉES CAR ELLES ÉTAIENT EN DOUBLE
+    // Elles sont déjà définies dans le groupe principal plus haut
 });
 
 // ==================== HOUSEKEEPING POUR RÉCEPTION ====================
@@ -543,7 +518,7 @@ Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'check
     Route::get('/to-clean', [HousekeepingController::class, 'toClean'])->name('to-clean');
     Route::get('/quick-list/{status}', [HousekeepingController::class, 'quickList'])->name('quick-list');
 
-     // ✅ AJOUTE CETTE ROUTE ICI (vers ligne 1030)
+     // ✅ AJOUTE CETTE ROUTE ICI
     Route::post('/room/{room}/mark-cleaned', [HousekeepingController::class, 'markAsCleaned'])
         ->name('mark-cleaned')
         ->middleware('checkrole:Super,Admin,Housekeeping');
@@ -622,6 +597,18 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Housekeeping']], f
 Route::get('/admin', function () {
     return redirect()->route('dashboard.index');
 })->name('admin');
+
+// ==================== STATISTIQUES RÉCEPTIONNISTES ====================
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist']], function () {
+    Route::prefix('receptionist')->name('receptionist.')->group(function () {
+        Route::get('/stats', [App\Http\Controllers\ReceptionistSessionController::class, 'getPersonalStats'])
+            ->name('stats');
+        Route::get('/history', [App\Http\Controllers\ReceptionistSessionController::class, 'getSessionHistory'])
+            ->name('history');
+        Route::get('/session/{id}', [App\Http\Controllers\ReceptionistSessionController::class, 'getSessionDetails'])
+            ->name('session.details');
+    });
+});
 
 // ==================== ROUTES DEBUG ====================
 if (env('APP_DEBUG', false)) {
