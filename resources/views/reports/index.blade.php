@@ -74,11 +74,6 @@
                     <div class="ms-3">
                         <h6 class="text-muted mb-1">Chiffre d'affaires</h6>
                         <h4 class="fw-bold">{{ number_format($totalRevenue ?? 0, 0, ',', ' ') }} CFA</h4>
-                        @if(isset($revenueGrowth))
-                        <small class="text-{{ $revenueGrowth >= 0 ? 'success' : 'danger' }}">
-                            <i class="fas fa-arrow-{{ $revenueGrowth >= 0 ? 'up' : 'down' }} me-1"></i>{{ abs($revenueGrowth) }}%
-                        </small>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -230,7 +225,7 @@
                         @foreach($paymentSummary ?? [] as $method)
                         <div class="d-flex justify-content-between mb-1">
                             <span><i class="{{ $method['icon'] }} me-1"></i>{{ $method['label'] }}</span>
-                            <span class="fw-bold">{{ number_format($method['percentage'], 1) }}%</span>
+                            <span class="fw-bold">{{ number_format($method['percentage'] ?? 0, 1) }}%</span>
                         </div>
                         @endforeach
                     </div>
@@ -310,12 +305,14 @@
                                 @forelse($topRooms ?? [] as $room)
                                 <tr>
                                     <td>
-                                        <strong>{{ $room['number'] }}</strong>
+                                        <strong>{{ $room['number'] ?? 'N/A' }}</strong>
+                                        @if(!empty($room['name']))
                                         <small class="d-block text-muted">{{ $room['name'] }}</small>
+                                        @endif
                                     </td>
-                                    <td>{{ $room['type'] }}</td>
-                                    <td>{{ $room['nights'] }}</td>
-                                    <td class="text-end fw-bold">{{ number_format($room['revenue'], 0, ',', ' ') }} CFA</td>
+                                    <td>{{ $room['type'] ?? 'N/A' }}</td>
+                                    <td>{{ $room['nights'] ?? 0 }}</td>
+                                    <td class="text-end fw-bold">{{ number_format($room['revenue'] ?? 0, 0, ',', ' ') }} CFA</td>
                                 </tr>
                                 @empty
                                 <tr>
@@ -353,12 +350,14 @@
                                 @forelse($topCustomers ?? [] as $customer)
                                 <tr>
                                     <td>
-                                        <strong>{{ $customer['name'] }}</strong>
+                                        <strong>{{ $customer['name'] ?? 'N/A' }}</strong>
+                                        @if(!empty($customer['email']))
                                         <small class="d-block text-muted">{{ $customer['email'] }}</small>
+                                        @endif
                                     </td>
-                                    <td>{{ $customer['stays'] }}</td>
-                                    <td>{{ $customer['nights'] }}</td>
-                                    <td class="text-end fw-bold">{{ number_format($customer['spent'], 0, ',', ' ') }} CFA</td>
+                                    <td>{{ $customer['stays'] ?? 0 }}</td>
+                                    <td>{{ $customer['nights'] ?? 0 }}</td>
+                                    <td class="text-end fw-bold">{{ number_format($customer['spent'] ?? 0, 0, ',', ' ') }} CFA</td>
                                 </tr>
                                 @empty
                                 <tr>
@@ -404,22 +403,20 @@
                             <tbody>
                                 @forelse($receptionistPerformance ?? [] as $recep)
                                 <tr>
-                                    <td>
-                                        <strong>{{ $recep['name'] }}</strong>
-                                    </td>
-                                    <td>{{ $recep['sessions'] }}</td>
-                                    <td>{{ $recep['checkins'] }}</td>
-                                    <td>{{ $recep['checkouts'] }}</td>
-                                    <td>{{ $recep['reservations'] }}</td>
-                                    <td class="text-end fw-bold">{{ number_format($recep['total'], 0, ',', ' ') }} CFA</td>
+                                    <td><strong>{{ $recep['name'] ?? 'N/A' }}</strong></td>
+                                    <td>{{ $recep['sessions'] ?? 0 }}</td>
+                                    <td>{{ $recep['checkins'] ?? 0 }}</td>
+                                    <td>{{ $recep['checkouts'] ?? 0 }}</td>
+                                    <td>{{ $recep['reservations'] ?? 0 }}</td>
+                                    <td class="text-end fw-bold">{{ number_format($recep['total'] ?? 0, 0, ',', ' ') }} CFA</td>
                                     <td class="text-center">
                                         <div class="progress" style="height: 20px;">
                                             <div class="progress-bar bg-success" role="progressbar" 
-                                                style="width: {{ $recep['productivity'] }}%;" 
-                                                aria-valuenow="{{ $recep['productivity'] }}" 
+                                                style="width: {{ $recep['productivity'] ?? 0 }}%;" 
+                                                aria-valuenow="{{ $recep['productivity'] ?? 0 }}" 
                                                 aria-valuemin="0" 
                                                 aria-valuemax="100">
-                                                {{ $recep['productivity'] }}%
+                                                {{ $recep['productivity'] ?? 0 }}%
                                             </div>
                                         </div>
                                     </td>
@@ -467,12 +464,12 @@
                                 @foreach($paymentSummary ?? [] as $method)
                                 <tr>
                                     <td>
-                                        <i class="{{ $method['icon'] }} me-2"></i>{{ $method['label'] }}
+                                        <i class="{{ $method['icon'] ?? 'fas fa-circle' }} me-2"></i>{{ $method['label'] ?? 'N/A' }}
                                     </td>
-                                    <td class="text-end fw-bold">{{ number_format($method['amount'], 0, ',', ' ') }} CFA</td>
-                                    <td class="text-end">{{ number_format($method['percentage'], 1) }}%</td>
-                                    <td class="text-end">{{ $method['count'] }}</td>
-                                    <td class="text-end">{{ number_format($method['average'], 0, ',', ' ') }} CFA</td>
+                                    <td class="text-end fw-bold">{{ number_format($method['amount'] ?? 0, 0, ',', ' ') }} CFA</td>
+                                    <td class="text-end">{{ number_format($method['percentage'] ?? 0, 1) }}%</td>
+                                    <td class="text-end">{{ $method['count'] ?? 0 }}</td>
+                                    <td class="text-end">{{ number_format($method['average'] ?? 0, 0, ',', ' ') }} CFA</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -526,7 +523,7 @@
                                     <td>{{ $transaction->room->number ?? 'N/A' }}</td>
                                     <td>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</td>
                                     <td>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</td>
-                                    <td class="text-end fw-bold">{{ number_format($transaction->total_price, 0, ',', ' ') }} CFA</td>
+                                    <td class="text-end fw-bold">{{ number_format($transaction->total_price ?? 0, 0, ',', ' ') }} CFA</td>
                                     <td>
                                         @php
                                             $statusColors = [
@@ -569,217 +566,270 @@
     // ================================================
     // DATE RANGE TOGGLE
     // ================================================
-    document.getElementById('periodSelect').addEventListener('change', function() {
-        const isCustom = this.value === 'custom';
-        document.getElementById('dateRangeStart').style.display = isCustom ? 'block' : 'none';
-        document.getElementById('dateRangeEnd').style.display = isCustom ? 'block' : 'none';
+    document.addEventListener('DOMContentLoaded', function() {
+        const periodSelect = document.getElementById('periodSelect');
+        if (periodSelect) {
+            periodSelect.addEventListener('change', function() {
+                const isCustom = this.value === 'custom';
+                document.getElementById('dateRangeStart').style.display = isCustom ? 'block' : 'none';
+                document.getElementById('dateRangeEnd').style.display = isCustom ? 'block' : 'none';
+            });
+        }
     });
 
     // ================================================
     // CHART DATA FROM CONTROLLER
     // ================================================
-    const revenueData = {!! json_encode($revenueChartData ?? []) !!};
-    const revenueLabels = {!! json_encode($revenueChartLabels ?? []) !!};
+    const revenueLabels = @json($revenueChartLabels ?? []);
+    const revenueData = @json($revenueChartData ?? []);
     
-    const paymentData = {!! json_encode($paymentChartData ?? []) !!};
-    const paymentLabels = {!! json_encode($paymentChartLabels ?? []) !!};
+    const paymentLabels = @json($paymentChartLabels ?? []);
+    const paymentData = @json($paymentChartData ?? []);
     
     const occupied = {{ $occupiedRooms ?? 0 }};
     const available = {{ $availableRooms ?? 0 }};
     
-    const roomStatusData = {!! json_encode($roomStatusData ?? []) !!};
-    const roomStatusLabels = {!! json_encode($roomStatusLabels ?? []) !!};
+    const roomStatusLabels = @json($roomStatusLabels ?? []);
+    const roomStatusData = @json($roomStatusData ?? []);
     
-    const checkoutTimesData = {!! json_encode($checkoutTimesData ?? [0, 0, 0]) !!};
+    const checkoutTimesData = @json($checkoutTimesData ?? [0, 0, 0]);
 
     // ================================================
     // CHART 1: REVENUE LINE CHART
     // ================================================
     if (document.getElementById('revenueChart')) {
-        new Chart(document.getElementById('revenueChart'), {
-            type: 'line',
-            data: {
-                labels: revenueLabels,
-                datasets: [{
-                    label: 'Chiffre d\'affaires (CFA)',
-                    data: revenueData,
-                    borderWidth: 3,
-                    borderColor: '#0d6efd',
-                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
-                    fill: true,
-                    tension: 0.3,
-                    pointBackgroundColor: '#0d6efd',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return context.raw.toLocaleString() + ' CFA';
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+        
+        // Si pas de données, afficher un message
+        if (!revenueData || revenueData.length === 0 || revenueData.every(v => v === 0)) {
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'center';
+            ctx.fillText('Aucune donnée disponible pour cette période', ctx.canvas.width/2, ctx.canvas.height/2);
+        } else {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: revenueLabels,
+                    datasets: [{
+                        label: 'Chiffre d\'affaires (CFA)',
+                        data: revenueData,
+                        borderWidth: 3,
+                        borderColor: '#0d6efd',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointBackgroundColor: '#0d6efd',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return (context.raw || 0).toLocaleString() + ' CFA';
+                                }
                             }
                         }
-                    }
-                },
-                scales: {
-                    y: {
-                        ticks: {
-                            callback: function(value) {
-                                return value.toLocaleString() + ' CFA';
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + ' CFA';
+                                }
                             }
                         }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     // ================================================
     // CHART 2: PAYMENT METHODS DOUGHNUT
     // ================================================
     if (document.getElementById('paymentChart')) {
-        new Chart(document.getElementById('paymentChart'), {
-            type: 'doughnut',
-            data: {
-                labels: paymentLabels,
-                datasets: [{
-                    data: paymentData,
-                    backgroundColor: [
-                        '#28a745', // cash - green
-                        '#dc3545', // card - red
-                        '#17a2b8', // mobile - cyan
-                        '#ffc107', // transfer - yellow
-                        '#6f42c1', // fedapay - purple
-                        '#fd7e14', // check - orange
-                        '#6c757d'  // other - gray
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                let value = context.raw || 0;
-                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                return `${label}: ${value.toLocaleString()} CFA (${percentage}%)`;
+        const ctx = document.getElementById('paymentChart').getContext('2d');
+        
+        if (!paymentData || paymentData.length === 0 || paymentData.every(v => v === 0)) {
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'center';
+            ctx.fillText('Aucun paiement pour cette période', ctx.canvas.width/2, ctx.canvas.height/2);
+        } else {
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: paymentLabels,
+                    datasets: [{
+                        data: paymentData,
+                        backgroundColor: [
+                            '#28a745', // cash - green
+                            '#dc3545', // card - red
+                            '#17a2b8', // mobile - cyan
+                            '#ffc107', // transfer - yellow
+                            '#6f42c1', // fedapay - purple
+                            '#fd7e14', // check - orange
+                            '#6c757d'  // other - gray
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.raw || 0;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value.toLocaleString()} CFA (${percentage}%)`;
+                                }
                             }
                         }
-                    }
-                },
-                cutout: '65%'
-            }
-        });
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
     }
 
     // ================================================
     // CHART 3: OCCUPANCY PIE CHART
     // ================================================
     if (document.getElementById('occupancyChart')) {
-        new Chart(document.getElementById('occupancyChart'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Occupées', 'Disponibles'],
-                datasets: [{
-                    data: [occupied, available],
-                    backgroundColor: ['#dc3545', '#28a745'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.label || '';
-                                let value = context.raw || 0;
-                                let total = occupied + available;
-                                let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                return `${label}: ${value} chambres (${percentage}%)`;
+        const ctx = document.getElementById('occupancyChart').getContext('2d');
+        const total = occupied + available;
+        
+        if (total === 0) {
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'center';
+            ctx.fillText('Aucune chambre disponible', ctx.canvas.width/2, ctx.canvas.height/2);
+        } else {
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Occupées', 'Disponibles'],
+                    datasets: [{
+                        data: [occupied, available],
+                        backgroundColor: ['#dc3545', '#28a745'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.raw || 0;
+                                    let total = occupied + available;
+                                    let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} chambres (${percentage}%)`;
+                                }
                             }
                         }
-                    }
-                },
-                cutout: '65%'
-            }
-        });
+                    },
+                    cutout: '65%'
+                }
+            });
+        }
     }
 
     // ================================================
     // CHART 4: ROOM STATUS CHART
     // ================================================
     if (document.getElementById('roomStatusChart')) {
-        new Chart(document.getElementById('roomStatusChart'), {
-            type: 'bar',
-            data: {
-                labels: roomStatusLabels,
-                datasets: [{
-                    label: 'Nombre de chambres',
-                    data: roomStatusData,
-                    backgroundColor: [
-                        '#28a745', // disponible - green
-                        '#dc3545', // occupée - red
-                        '#ffc107', // maintenance - yellow
-                        '#17a2b8', // réservée - cyan
-                        '#6f42c1', // nettoyage - purple
-                        '#6c757d'  // sale - gray
-                    ],
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
+        const ctx = document.getElementById('roomStatusChart').getContext('2d');
+        
+        if (!roomStatusData || roomStatusData.length === 0 || roomStatusData.every(v => v === 0)) {
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'center';
+            ctx.fillText('Aucune donnée de statut', ctx.canvas.width/2, ctx.canvas.height/2);
+        } else {
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: roomStatusLabels,
+                    datasets: [{
+                        label: 'Nombre de chambres',
+                        data: roomStatusData,
+                        backgroundColor: [
+                            '#28a745', // disponible - green
+                            '#dc3545', // occupée - red
+                            '#ffc107', // maintenance - yellow
+                            '#17a2b8', // réservée - cyan
+                            '#6f42c1', // nettoyage - purple
+                            '#6c757d'  // sale - gray
+                        ],
+                        borderRadius: 5
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: { stepSize: 1 }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 }
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
     }
 
     // ================================================
     // CHART 5: CHECKOUT TIMES CHART
     // ================================================
     if (document.getElementById('checkoutTimesChart')) {
-        new Chart(document.getElementById('checkoutTimesChart'), {
-            type: 'pie',
-            data: {
-                labels: ['Avant 12h', '12h-14h (largesse)', 'Après 14h (late checkout)'],
-                datasets: [{
-                    data: checkoutTimesData,
-                    backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom' }
+        const ctx = document.getElementById('checkoutTimesChart').getContext('2d');
+        
+        if (!checkoutTimesData || checkoutTimesData.every(v => v === 0)) {
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#999';
+            ctx.textAlign = 'center';
+            ctx.fillText('Aucun départ enregistré', ctx.canvas.width/2, ctx.canvas.height/2);
+        } else {
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Avant 12h', '12h-14h (largesse)', 'Après 14h (late checkout)'],
+                    datasets: [{
+                        data: checkoutTimesData,
+                        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     // ================================================

@@ -598,6 +598,18 @@ Route::get('/admin', function () {
     return redirect()->route('dashboard.index');
 })->name('admin');
 
+// ==================== STATISTIQUES RÉCEPTIONNISTES ====================
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist']], function () {
+    Route::prefix('receptionist')->name('receptionist.')->group(function () {
+        Route::get('/stats', [App\Http\Controllers\ReceptionistSessionController::class, 'getPersonalStats'])
+            ->name('stats');
+        Route::get('/history', [App\Http\Controllers\ReceptionistSessionController::class, 'getSessionHistory'])
+            ->name('history');
+        Route::get('/session/{id}', [App\Http\Controllers\ReceptionistSessionController::class, 'getSessionDetails'])
+            ->name('session.details');
+    });
+});
+
 // ==================== ROUTES DEBUG ====================
 if (env('APP_DEBUG', false)) {
     Route::get('/test-delete-customer/{id}', function ($id) {
