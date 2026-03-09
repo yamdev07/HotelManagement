@@ -1337,4 +1337,106 @@ class Transaction extends Model
         
         return true;
     }
+
+    // Dans app/Models/Transaction.php
+
+    /**
+     * Vérifier si le supplément late checkout est payé
+     */
+    public function isLateCheckoutPaid(): bool
+    {
+        // Si pas de late checkout ou pas de frais, considéré comme payé
+        if (!$this->late_checkout || !$this->late_checkout_fee || $this->late_checkout_fee <= 0) {
+            return true;
+        }
+        
+        try {
+            // Chercher un paiement complété pour ce late checkout
+            $latePayment = $this->completedPayments()
+                ->where(function($query) {
+                    $query->where('reference', 'like', 'LATE-' . $this->id . '%')
+                        ->orWhere('description', 'like', '%Late checkout%')
+                        ->orWhere('description', 'like', '%late checkout%');
+                })
+                ->where('amount', '>=', $this->late_checkout_fee)
+                ->first();
+            
+            $isPaid = !is_null($latePayment);
+            
+            \Log::info("Vérification paiement late checkout #{$this->id}", [
+                'late_checkout' => $this->late_checkout,
+                'late_fee' => $this->late_checkout_fee,
+                'payment_found' => $isPaid,
+                'payment_id' => $latePayment?->id,
+                'payment_amount' => $latePayment?->amount,
+                'payment_status' => $latePayment?->status,
+            ]);
+            
+            return $isPaid;
+            
+        } catch (\Exception $e) {
+            \Log::error("Erreur vérification late checkout #{$this->id}: " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Obtenir le statut détaillé du paiement late checkout
+     */
+    public function getLateCheckoutPaymentStatus(): array
+    {
+        if (!$this->late_checkout || !$this->late_checkout_fee) {
+            return [
+                'has_late_checkout' => false,
+                'is_paid' => true,
+                'message' => 'Pas de late checkout',
+            ];
+        }
+        
+        $latePayment = $this->completedPayments()
+            ->where(function($query) {
+                $query->where('reference', 'like', 'LATE-' . $this->id . '%')
+                    ->orWhere('description', 'like', '%Late checkout%');
+            })
+            ->first();
+        
+        if ($latePayment) {
+            return [
+                'has_late_checkout' => true,
+                'is_paid' => true,
+                'payment_id' => $latePayment->id,
+                'amount' => $latePayment->amount,
+                'payment_method' => $latePayment->payment_method,
+                'paid_at' => $latePayment->created_at,
+                'message' => 'Late checkout payé',
+            ];
+        }
+        
+        // Chercher un paiement en attente
+        $pendingPayment = $this->payments()
+            ->where(function($query) {
+                $query->where('reference', 'like', 'LATE-' . $this->id . '%')
+                    ->orWhere('description', 'like', '%Late checkout%');
+            })
+            ->where('status', 'pending')
+            ->first();
+        
+        if ($pendingPayment) {
+            return [
+                'has_late_checkout' => true,
+                'is_paid' => false,
+                'is_pending' => true,
+                'pending_payment_id' => $pendingPayment->id,
+                'amount' => $pendingPayment->amount,
+                'message' => 'Late checkout en attente de paiement',
+            ];
+        }
+        
+        return [
+            'has_late_checkout' => true,
+            'is_paid' => false,
+            'amount_due' => $this->late_checkout_fee,
+            'message' => 'Late checkout non payé',
+        ];
+    }
 }
