@@ -845,11 +845,7 @@ class TransactionController extends Controller
                 'Erreur: ' . $e->getMessage());
         }
     }
-    /**
-     * =====================================================
-     * ✅ ACTION RAPIDE : MARQUER COMME PARTI (AVEC DIRTY)
-     * =====================================================
-     */
+
     /**
      * ACTION RAPIDE : MARQUER COMME PARTI (AVEC DIRTY)
      */
@@ -859,18 +855,26 @@ class TransactionController extends Controller
             abort(403, 'Accès non autorisé');
         }
 
-        if ($transaction->status !== 'active') {
-            return redirect()->back()->with('error',
-                'Seul un client dans l\'hôtel peut être marqué comme parti.');
+        // ✅ VÉRIFICATION QUE LA MÉTHODE canBeMarkedAsDeparted EXISTE DANS LE MODÈLE
+        if (!method_exists($transaction, 'canBeMarkedAsDeparted')) {
+            // Fallback à la vérification manuelle si la méthode n'existe pas
+            $canDepart = $this->manualCheckCanDepart($transaction);
+        } else {
+            $canDepart = $transaction->canBeMarkedAsDeparted();
         }
-
-        // Vérifier le paiement complet
-        if (! $transaction->isFullyPaid()) {
-            $remaining = $transaction->getRemainingPayment();
-            $formattedRemaining = number_format($remaining, 0, ',', ' ') . ' CFA';
-
-            return redirect()->back()->with('error',
-                "❌ Paiement incomplet ! Solde restant: " . $formattedRemaining);
+        
+        if (!$canDepart['can_depart']) {
+            $errorMessage = "❌ " . $canDepart['reason'];
+            
+            if (isset($canDepart['details']['amount_due'])) {
+                $errorMessage .= " - Montant dû: " . number_format($canDepart['details']['amount_due'], 0, ',', ' ') . " CFA";
+            } elseif (isset($canDepart['details']['remaining'])) {
+                $errorMessage .= " - Reste: " . number_format($canDepart['details']['remaining'], 0, ',', ' ') . " CFA";
+            } elseif (isset($canDepart['details']['is_pending'])) {
+                $errorMessage .= " - Paiement en attente (ID: " . ($canDepart['details']['pending_payment_id'] ?? '') . ")";
+            }
+            
+            return redirect()->back()->with('error', $errorMessage);
         }
 
         // =====================================================
@@ -889,12 +893,28 @@ class TransactionController extends Controller
                 "Si le client est encore là, veuillez prolonger le séjour.");
         }
 
-        // ✅ NOUVELLE LOGIQUE : GESTION DU LATE CHECKOUT
+        // ✅ GESTION DU LATE CHECKOUT
         $isOverride = $request->has('override') && $request->override == 1;
 
         // CAS 1: C'est un late checkout (entre 14h et 20h) → AUTORISÉ
         if ($transaction->late_checkout && $now->gt($checkOutLargess) && $now->lt($lateCheckoutEnd)) {
-            // Late checkout autorisé sans dérogation
+            // Vérifier une dernière fois que le paiement est bien fait
+            if ($transaction->late_checkout_fee > 0) {
+                $latePayment = $transaction->completedPayments()
+                    ->where(function($query) {
+                        $query->where('reference', 'like', 'LATE-%')
+                            ->orWhere('description', 'like', '%Late checkout%');
+                    })
+                    ->where('amount', '>=', $transaction->late_checkout_fee)
+                    ->first();
+
+                if (!$latePayment) {
+                    return redirect()->back()->with('error',
+                        "❌ Supplément late checkout non payé !\n" .
+                        "Montant: " . number_format($transaction->late_checkout_fee, 0, ',', ' ') . " CFA");
+                }
+            }
+            
             Log::info("✅ Late checkout autorisé", [
                 'transaction_id' => $transaction->id,
                 'heure_depart' => $now->format('H:i'),
@@ -904,8 +924,11 @@ class TransactionController extends Controller
         // CAS 2: Après 14h mais PAS de late checkout → INTERDIT, sauf dérogation
         elseif ($now->gt($checkOutLargess) && !$isOverride) {
             return redirect()->back()->with('error',
-                "⚠️ Départ après 14h. La largesse de 2h est dépassée. " .
-                "Veuillez prolonger le séjour d'une nuit supplémentaire ou utiliser une dérogation.");
+                "⚠️ Départ après 14h. La largesse de 2h est dépassée.\n" .
+                "Options:\n" .
+                "- Prolonger d'une nuit (bouton Prolonger)\n" .
+                "- Activer un late checkout (bouton Late checkout)\n" .
+                "- Utiliser une dérogation (avec raison)");
         }
         // CAS 3: Après 20h → INTERDIT dans tous les cas
         elseif ($now->gte($lateCheckoutEnd)) {
@@ -956,14 +979,13 @@ class TransactionController extends Controller
 
             $beforeState = $this->getTransactionState($transaction);
 
+            // ✅ Mettre à jour le statut de la transaction
             $transaction->update([
                 'status' => 'completed',
                 'check_out_actual' => now(),
             ]);
 
-            // =====================================================
-            // Marquer la chambre comme DIRTY (SALE)
-            // =====================================================
+            // ✅ Marquer la chambre comme DIRTY (SALE)
             if ($transaction->room) {
                 $transaction->room->update([
                     'room_status_id' => self::STATUS_DIRTY, // 6 = À nettoyer
@@ -974,6 +996,26 @@ class TransactionController extends Controller
                 Log::info("✅ DÉPART RAPIDE: Chambre {$transaction->room->number} marquée DIRTY à " . $now->format('H:i'));
             }
 
+            // ✅ Si c'était un late checkout, marquer tous les paiements en attente comme complétés
+            if ($transaction->late_checkout && $transaction->late_checkout_fee > 0) {
+                $pendingLatePayments = $transaction->payments()
+                    ->where(function($query) {
+                        $query->where('reference', 'like', 'LATE-%')
+                            ->orWhere('description', 'like', '%Late checkout%');
+                    })
+                    ->where('status', 'pending')
+                    ->get();
+
+                foreach ($pendingLatePayments as $pendingPayment) {
+                    $pendingPayment->markAsCompleted(auth()->id());
+                    Log::info("✅ Paiement late checkout marqué comme payé automatiquement", [
+                        'payment_id' => $pendingPayment->id,
+                        'transaction_id' => $transaction->id
+                    ]);
+                }
+            }
+
+            // ✅ Log réceptionniste
             if (auth()->user()->role === 'Receptionist') {
                 $actionData = [
                     'action' => 'quick_departure',
@@ -1005,14 +1047,15 @@ class TransactionController extends Controller
 
             DB::commit();
 
-            // Message personnalisé selon le type de départ
+            // ✅ Message personnalisé selon le type de départ
             if ($isOverride && $now->gt($checkOutLargess)) {
                 $successMessage = "✅ DÉROGATION ACCORDÉE - Départ enregistré à " . $now->format('H:i') . " !<br>" .
                                 "Raison: " . $request->override_reason . "<br>" .
                                 "Chambre " . $transaction->room->number . " marquée comme À NETTOYER.";
             } elseif ($transaction->late_checkout && $now->gt($checkOutLargess)) {
                 $successMessage = "✅ Late checkout effectué à " . $now->format('H:i') . " !<br>" .
-                                "Chambre " . $transaction->room->number . " marquée comme À NETTOYER.";
+                                "Chambre " . $transaction->room->number . " marquée comme À NETTOYER.<br>" .
+                                "Supplément de " . number_format($transaction->late_checkout_fee, 0, ',', ' ') . " CFA encaissé.";
             } else {
                 $successMessage = "✅ Départ enregistré à " . $now->format('H:i') . $largessMessage . " !<br>" .
                                 "Chambre " . $transaction->room->number . " marquée comme À NETTOYER. " .
@@ -1026,11 +1069,76 @@ class TransactionController extends Controller
             Log::error('Erreur marquage parti:', [
                 'error' => $e->getMessage(),
                 'transaction_id' => $transaction->id,
+                'trace' => $e->getTraceAsString()
             ]);
 
             return redirect()->back()->with('error',
-                'Erreur: ' . $e->getMessage());
+                'Erreur lors du départ: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Méthode de secours pour vérifier manuellement si le départ est possible
+     */
+    private function manualCheckCanDepart(Transaction $transaction): array
+    {
+        $result = [
+            'can_depart' => false,
+            'reason' => '',
+            'details' => []
+        ];
+        
+        if ($transaction->status !== 'active') {
+            $result['reason'] = 'Le client n\'est pas dans l\'hôtel';
+            return $result;
+        }
+        
+        // Vérifier le late checkout
+        if ($transaction->late_checkout && $transaction->late_checkout_fee > 0) {
+            $latePayment = $transaction->completedPayments()
+                ->where(function($query) {
+                    $query->where('reference', 'like', 'LATE-%')
+                        ->orWhere('description', 'like', '%Late checkout%');
+                })
+                ->where('amount', '>=', $transaction->late_checkout_fee)
+                ->first();
+            
+            if (!$latePayment) {
+                // Vérifier s'il y a un paiement en attente
+                $pendingPayment = $transaction->payments()
+                    ->where(function($query) {
+                        $query->where('reference', 'like', 'LATE-%')
+                            ->orWhere('description', 'like', '%Late checkout%');
+                    })
+                    ->where('status', 'pending')
+                    ->first();
+                
+                if ($pendingPayment) {
+                    $result['reason'] = 'Supplément late checkout en attente de paiement';
+                    $result['details'] = [
+                        'is_pending' => true,
+                        'pending_payment_id' => $pendingPayment->id,
+                        'amount_due' => $pendingPayment->amount
+                    ];
+                } else {
+                    $result['reason'] = 'Supplément late checkout non payé';
+                    $result['details'] = [
+                        'amount_due' => $transaction->late_checkout_fee
+                    ];
+                }
+                return $result;
+            }
+        }
+        
+        // Vérifier le paiement global
+        if (!$transaction->isFullyPaid()) {
+            $result['reason'] = 'Paiement incomplet';
+            $result['details']['remaining'] = $transaction->getRemainingPayment();
+            return $result;
+        }
+        
+        $result['can_depart'] = true;
+        return $result;
     }
     /**
      * =====================================================
@@ -1774,6 +1882,7 @@ class TransactionController extends Controller
             $request->validate([
                 'late_checkout_time' => 'required|date_format:H:i|after:14:00|before_or_equal:20:00',
                 'late_fee' => 'required|numeric|min:0',
+                'payment_method' => 'required|string|in:cash,card,mobile_money,bank_transfer,fedapay',
                 'notes' => 'nullable|string|max:500',
             ]);
 
@@ -1798,12 +1907,10 @@ class TransactionController extends Controller
                 // Sauvegarder l'ancienne heure pour l'historique
                 $oldCheckOut = $transaction->check_out->format('Y-m-d H:i:s');
                 $oldTotalPrice = $transaction->total_price;
+                $oldNights = $transaction->getNightsAttribute();
 
-                // Calculer le nouveau total
-                $newTotal = $transaction->total_price + $request->late_fee;
-                
                 // Créer la nouvelle date de départ avec l'heure choisie
-                $newCheckOut = $transaction->check_out->format('Y-m-d') . ' ' . $request->late_checkout_time . ':00';
+                $newCheckOut = Carbon::parse($transaction->check_out->format('Y-m-d') . ' ' . $request->late_checkout_time . ':00');
                 
                 // Préparer les notes
                 $notes = $transaction->checkout_notes ?? '';
@@ -1814,28 +1921,62 @@ class TransactionController extends Controller
                     'late_checkout' => true,
                     'expected_checkout_time' => $request->late_checkout_time,
                     'check_out' => $newCheckOut,
-                    'total_price' => $newTotal,
+                    'total_price' => $transaction->total_price + $request->late_fee,
                     'late_checkout_fee' => $request->late_fee,
-                    'checkout_notes' => $notes . $newNote,
+                    'checkout_notes' => $notes . $newNote . ($request->notes ? " - " . $request->notes : ""),
                 ]);
 
-                // ✅ CRÉER UN PAIEMENT POUR LE SUPPLÉMENT
+                // ✅ CRÉER LE PAIEMENT POUR LE SUPPLÉMENT - SANS LES COLONNES MANQUANTES
+                $payment = null;
                 if ($request->late_fee > 0) {
                     $payment = Payment::create([
                         'transaction_id' => $transaction->id,
                         'customer_id' => $transaction->customer_id,
                         'amount' => $request->late_fee,
-                        'payment_method' => 'cash', // ou 'pending' si pas encore payé
-                        'status' => 'pending', // En attente de paiement
+                        'payment_method' => $request->payment_method,
+                        'status' => Payment::STATUS_COMPLETED, // ✅ COMPLETED directement
                         'reference' => 'LATE-' . $transaction->id . '-' . time(),
-                        'description' => 'Supplément late checkout du ' . now()->format('d/m/Y') . ' - Départ à ' . $request->late_checkout_time,                        'created_by' => auth()->id(),
+                        'description' => 'Supplément late checkout du ' . now()->format('d/m/Y') . 
+                                    ' - Départ à ' . $request->late_checkout_time,
+                        'created_by' => auth()->id(),
+                        'user_id' => auth()->id(),
+                        // ✅ On enlève payment_date, verified_at, verified_by
                     ]);
 
-                    // Ajouter une note sur le paiement
-                    $transaction->notes = ($transaction->notes ? $transaction->notes . "\n" : '') . 
-                        "Supplément late checkout de " . number_format($request->late_fee, 0, ',', ' ') . " CFA créé (en attente)";
-                    $transaction->save();
+                    Log::info("✅ Paiement late checkout créé et marqué comme payé", [
+                        'transaction_id' => $transaction->id,
+                        'payment_id' => $payment->id,
+                        'amount' => $request->late_fee,
+                        'status' => 'completed'
+                    ]);
                 }
+
+                // ✅ CRÉER UN HISTORIQUE
+                History::create([
+                    'transaction_id' => $transaction->id,
+                    'user_id' => auth()->id(),
+                    'action' => 'late_checkout',
+                    'description' => 'Late checkout enregistré - Départ à ' . $request->late_checkout_time,
+                    'old_values' => json_encode([
+                        'check_out' => $oldCheckOut,
+                        'total_price' => $oldTotalPrice,
+                        'nights' => $oldNights,
+                    ]),
+                    'new_values' => json_encode([
+                        'check_out' => $newCheckOut->format('Y-m-d H:i:s'),
+                        'total_price' => $transaction->total_price,
+                        'nights' => $transaction->getNightsAttribute(),
+                        'late_checkout_time' => $request->late_checkout_time,
+                        'late_fee' => $request->late_fee,
+                        'payment_id' => $payment?->id,
+                        'payment_status' => 'completed',
+                    ]),
+                    'notes' => $request->notes,
+                ]);
+
+                // ✅ METTRE À JOUR LE STATUT DE LA TRANSACTION
+                $transaction->updatePaymentStatus();
+                $transaction->refresh();
 
                 DB::commit();
 
@@ -1846,27 +1987,44 @@ class TransactionController extends Controller
                     ->withProperties([
                         'late_time' => $request->late_checkout_time,
                         'fee' => $request->late_fee,
+                        'payment_method' => $request->payment_method,
+                        'payment_id' => $payment?->id,
+                        'payment_status' => 'completed',
                         'old_check_out' => $oldCheckOut,
-                        'new_check_out' => $newCheckOut,
-                        'payment_created' => $request->late_fee > 0,
+                        'new_check_out' => $newCheckOut->format('Y-m-d H:i:s'),
                         'notes' => $request->notes
                     ])
-                    ->log('Late checkout enregistré avec paiement');
+                    ->log('Late checkout enregistré et payé');
 
-                $message = '✅ <strong>Late checkout enregistré avec succès !</strong><br>' .
-                        'Nouvelle heure de départ : <strong>' . $request->late_checkout_time . '</strong><br>';
+                // ✅ CONSTRUIRE LE MESSAGE DE SUCCÈS
+                $message = '<div class="alert alert-success" style="border-left: 4px solid #10b981;">';
+                $message .= '<h5 class="mb-3"><i class="fas fa-check-circle text-success me-2"></i> Late checkout enregistré et payé avec succès !</h5>';
+                $message .= '<div class="mb-2"><strong>Nouvelle heure de départ :</strong> ' . $request->late_checkout_time . '</div>';
                 
                 if ($request->late_fee > 0) {
-                    $message .= 'Supplément de <strong>' . number_format($request->late_fee, 0, ',', ' ') . ' FCFA</strong> ajouté à la facture.<br>';
-                    $message .= '💳 <strong>Paiement créé</strong> - En attente de règlement.';
+                    $message .= '<div class="mb-2"><strong>Supplément :</strong> ' . number_format($request->late_fee, 0, ',', ' ') . ' FCFA</div>';
+                    $message .= '<div class="mb-2"><strong>Méthode :</strong> ' . ucfirst($request->payment_method) . '</div>';
+                    $message .= '<div class="alert alert-success mt-2 mb-0 p-2" style="background-color: #d4edda;">';
+                    $message .= '<i class="fas fa-check-circle me-2 text-success"></i>';
+                    $message .= '<strong>Paiement effectué</strong> - Le client peut maintenant partir.';
+                    $message .= '</div>';
                 } else {
-                    $message .= 'Aucun supplément facturé.';
+                    $message .= '<div class="alert alert-info mt-2 mb-0 p-2">';
+                    $message .= '<i class="fas fa-info-circle me-2"></i>';
+                    $message .= 'Aucun supplément facturé (largesse exceptionnelle)';
+                    $message .= '</div>';
                 }
+                $message .= '</div>';
 
                 return redirect()->back()->with('success', $message);
 
             } catch (\Exception $e) {
                 DB::rollBack();
+                Log::error('Erreur lors de la création du late checkout:', [
+                    'error' => $e->getMessage(),
+                    'transaction_id' => $transaction->id,
+                    'trace' => $e->getTraceAsString()
+                ]);
                 throw $e;
             }
 

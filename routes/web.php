@@ -297,6 +297,10 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [PaymentController::class, 'index'])->name('index');
 
+        Route::post('/{payment}/mark-paid', [PaymentController::class, 'markAsPaid'])
+            ->name('mark-paid')
+            ->middleware('checkrole:Super,Admin,Receptionist');
+
         Route::get('/{payment}/details', [PaymentController::class, 'getDetails'])->name('details');
 
         // Routes avec paramètre {payment}
