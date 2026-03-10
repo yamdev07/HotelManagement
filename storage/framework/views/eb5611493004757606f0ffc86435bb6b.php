@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Housekeeping Mobile')
 
-@push('styles')
+<?php $__env->startSection('title', 'Housekeeping Mobile'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -749,11 +749,11 @@ body {
     }
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
-{{-- Header --}}
+
 <div class="mobile-header">
     <div class="mobile-header__top">
         <div class="mobile-header__title">
@@ -762,161 +762,163 @@ body {
             </div>
             <div class="mobile-header__text">
                 <h1>Housekeeping</h1>
-                <p>{{ now()->format('l d F Y') }}</p>
+                <p><?php echo e(now()->format('l d F Y')); ?></p>
             </div>
         </div>
         <div class="mobile-header__actions">
-            <a href="{{ route('housekeeping.index') }}" class="btn-mobile btn-mobile-outline">
+            <a href="<?php echo e(route('housekeeping.index')); ?>" class="btn-mobile btn-mobile-outline">
                 <i class="fas fa-desktop"></i>
             </a>
-            <a href="{{ route('housekeeping.scan') }}" class="btn-mobile btn-mobile-primary">
+            <a href="<?php echo e(route('housekeeping.scan')); ?>" class="btn-mobile btn-mobile-primary">
                 <i class="fas fa-qrcode"></i>
             </a>
         </div>
     </div>
     
-    {{-- Search --}}
+    
     <div class="search-bar">
         <input type="text" class="search-input" id="searchRooms" placeholder="Rechercher une chambre...">
     </div>
 </div>
 
-{{-- Stats rapides --}}
+
 <div class="stats-grid">
     <div class="stat-card dirty">
-        <div class="stat-card__value">{{ $stats['dirty'] ?? 0 }}</div>
+        <div class="stat-card__value"><?php echo e($stats['dirty'] ?? 0); ?></div>
         <div class="stat-card__label">À nettoyer</div>
     </div>
     <div class="stat-card cleaning">
-        <div class="stat-card__value">{{ $stats['cleaning'] ?? 0 }}</div>
+        <div class="stat-card__value"><?php echo e($stats['cleaning'] ?? 0); ?></div>
         <div class="stat-card__label">En cours</div>
     </div>
     <div class="stat-card clean">
-        <div class="stat-card__value">{{ $stats['clean'] ?? 0 }}</div>
+        <div class="stat-card__value"><?php echo e($stats['clean'] ?? 0); ?></div>
         <div class="stat-card__label">Nettoyées</div>
     </div>
     <div class="stat-card occupied">
-        <div class="stat-card__value">{{ $stats['occupied'] ?? 0 }}</div>
+        <div class="stat-card__value"><?php echo e($stats['occupied'] ?? 0); ?></div>
         <div class="stat-card__label">Occupées</div>
     </div>
 </div>
 
-{{-- Départs du jour --}}
-@if(($todayDepartures ?? collect())->count() > 0)
+
+<?php if(($todayDepartures ?? collect())->count() > 0): ?>
 <div class="section">
     <div class="section__header">
         <div class="section__title">
             <i class="fas fa-sign-out-alt"></i>
             Départs aujourd'hui
         </div>
-        <span class="section__badge">{{ $todayDepartures->count() }}</span>
+        <span class="section__badge"><?php echo e($todayDepartures->count()); ?></span>
     </div>
-    @foreach($todayDepartures->take(3) as $departure)
+    <?php $__currentLoopData = $todayDepartures->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $departure): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <div class="side-item">
         <div class="side-item__header">
-            <div class="side-item__room">#{{ $departure->room->number }}</div>
+            <div class="side-item__room">#<?php echo e($departure->room->number); ?></div>
             <div class="side-item__badge departure">
                 <i class="fas fa-clock"></i> 12h00
             </div>
         </div>
         <div class="side-item__info">
-            <span class="side-item__name">{{ $departure->customer->name ?? 'Client' }}</span>
+            <span class="side-item__name"><?php echo e($departure->customer->name ?? 'Client'); ?></span>
             <span class="side-item__time">
-                <i class="fas fa-bed"></i> {{ $departure->room->type->name ?? 'Standard' }}
+                <i class="fas fa-bed"></i> <?php echo e($departure->room->type->name ?? 'Standard'); ?>
+
             </span>
         </div>
     </div>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
-@endif
+<?php endif; ?>
 
-{{-- Chambres à nettoyer --}}
+
 <div class="section">
     <div class="section__header">
         <div class="section__title">
             <i class="fas fa-broom"></i>
             À nettoyer
         </div>
-        <span class="section__badge">{{ $dirtyRooms->count() }}</span>
+        <span class="section__badge"><?php echo e($dirtyRooms->count()); ?></span>
     </div>
     
-    @if($dirtyRooms->count() > 0)
-        @foreach($dirtyRooms as $room)
+    <?php if($dirtyRooms->count() > 0): ?>
+        <?php $__currentLoopData = $dirtyRooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <div class="room-card dirty">
             <div class="room-card__content">
                 <div class="room-card__header">
-                    <div class="room-card__number">#{{ $room->number }}</div>
+                    <div class="room-card__number">#<?php echo e($room->number); ?></div>
                     <div class="room-card__badge dirty">
                         <i class="fas fa-broom"></i>
                     </div>
                 </div>
-                <div class="room-card__type">{{ $room->type->name ?? 'Chambre Standard' }}</div>
+                <div class="room-card__type"><?php echo e($room->type->name ?? 'Chambre Standard'); ?></div>
                 <div class="room-card__meta">
                     <i class="fas fa-user"></i>
-                    <span>{{ $room->capacity }} pers.</span>
-                    @if($room->floor)
+                    <span><?php echo e($room->capacity); ?> pers.</span>
+                    <?php if($room->floor): ?>
                     <i class="fas fa-layer-group"></i>
-                    <span>Étage {{ $room->floor }}</span>
-                    @endif
+                    <span>Étage <?php echo e($room->floor); ?></span>
+                    <?php endif; ?>
                 </div>
                 <div class="room-card__status dirty">
                     <i class="fas fa-exclamation-circle"></i>
                     À nettoyer
                 </div>
                 <div class="room-actions">
-                    <form action="{{ route('housekeeping.start-cleaning', $room->id) }}" method="POST" style="flex: 1;">
-                        @csrf
+                    <form action="<?php echo e(route('housekeeping.start-cleaning', $room->id)); ?>" method="POST" style="flex: 1;">
+                        <?php echo csrf_field(); ?>
                         <button type="submit" class="btn-action btn-action-primary">
                             <i class="fas fa-play"></i>
                             Commencer
                         </button>
                     </form>
-                    <button class="btn-action btn-action-outline" onclick="openMaintenanceModal('{{ $room->number }}')">
+                    <button class="btn-action btn-action-outline" onclick="openMaintenanceModal('<?php echo e($room->number); ?>')">
                         <i class="fas fa-tools"></i>
                     </button>
                 </div>
             </div>
         </div>
-        @endforeach
-    @else
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+    <?php else: ?>
         <div class="empty-state">
             <i class="fas fa-check-circle" style="color: var(--clean);"></i>
             <h4>Aucune chambre à nettoyer</h4>
             <p>Toutes les chambres sont propres</p>
         </div>
-    @endif
+    <?php endif; ?>
 </div>
 
-{{-- Chambres en cours --}}
-@if($cleaningRooms->count() > 0)
+
+<?php if($cleaningRooms->count() > 0): ?>
 <div class="section">
     <div class="section__header">
         <div class="section__title">
             <i class="fas fa-spinner"></i>
             En cours
         </div>
-        <span class="section__badge">{{ $cleaningRooms->count() }}</span>
+        <span class="section__badge"><?php echo e($cleaningRooms->count()); ?></span>
     </div>
     
-    @foreach($cleaningRooms as $room)
-    @php
+    <?php $__currentLoopData = $cleaningRooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+    <?php
         $startTime = $room->cleaning_started_at ?? now();
         $duration = $startTime->diffForHumans(now(), true);
-    @endphp
+    ?>
     <div class="room-card cleaning">
         <div class="room-card__content">
             <div class="room-card__header">
-                <div class="room-card__number">#{{ $room->number }}</div>
+                <div class="room-card__number">#<?php echo e($room->number); ?></div>
                 <div class="room-card__badge cleaning">
                     <i class="fas fa-spinner"></i>
                 </div>
             </div>
-            <div class="room-card__type">{{ $room->type->name ?? 'Chambre Standard' }}</div>
+            <div class="room-card__type"><?php echo e($room->type->name ?? 'Chambre Standard'); ?></div>
             <div class="room-card__meta">
                 <i class="fas fa-clock"></i>
                 <span class="timer-badge">
                     <i class="fas fa-hourglass-half"></i>
-                    {{ $duration }}
+                    <?php echo e($duration); ?>
+
                 </span>
             </div>
             <div class="room-card__status cleaning">
@@ -924,8 +926,8 @@ body {
                 En nettoyage
             </div>
             <div class="room-actions">
-                <form action="{{ route('housekeeping.mark-cleaned', $room->id) }}" method="POST" style="flex: 1;">
-                    @csrf
+                <form action="<?php echo e(route('housekeeping.mark-cleaned', $room->id)); ?>" method="POST" style="flex: 1;">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="btn-action btn-action-success">
                         <i class="fas fa-check"></i>
                         Terminer
@@ -934,41 +936,42 @@ body {
             </div>
         </div>
     </div>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
-@endif
+<?php endif; ?>
 
-{{-- Arrivées du jour --}}
-@if(($todayArrivals ?? collect())->count() > 0)
+
+<?php if(($todayArrivals ?? collect())->count() > 0): ?>
 <div class="section">
     <div class="section__header">
         <div class="section__title">
             <i class="fas fa-sign-in-alt"></i>
             Arrivées aujourd'hui
         </div>
-        <span class="section__badge">{{ $todayArrivals->count() }}</span>
+        <span class="section__badge"><?php echo e($todayArrivals->count()); ?></span>
     </div>
-    @foreach($todayArrivals->take(3) as $arrival)
+    <?php $__currentLoopData = $todayArrivals->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $arrival): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
     <div class="side-item">
         <div class="side-item__header">
-            <div class="side-item__room">#{{ $arrival->room->number }}</div>
+            <div class="side-item__room">#<?php echo e($arrival->room->number); ?></div>
             <div class="side-item__badge arrival">
                 <i class="fas fa-clock"></i> 14h00
             </div>
         </div>
         <div class="side-item__info">
-            <span class="side-item__name">{{ $arrival->customer->name ?? 'Client' }}</span>
+            <span class="side-item__name"><?php echo e($arrival->customer->name ?? 'Client'); ?></span>
             <span class="side-item__time">
-                <i class="fas fa-bed"></i> {{ $arrival->room->type->name ?? 'Standard' }}
+                <i class="fas fa-bed"></i> <?php echo e($arrival->room->type->name ?? 'Standard'); ?>
+
             </span>
         </div>
     </div>
-    @endforeach
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 </div>
-@endif
+<?php endif; ?>
 
-{{-- Statistiques par raison de maintenance --}}
-@if(isset($stats['maintenance_by_reason']) && count($stats['maintenance_by_reason']) > 0)
+
+<?php if(isset($stats['maintenance_by_reason']) && count($stats['maintenance_by_reason']) > 0): ?>
 <div class="section">
     <div class="section__header">
         <div class="section__title">
@@ -977,18 +980,19 @@ body {
         </div>
     </div>
     <div class="reason-tags">
-        @foreach($stats['maintenance_by_reason'] as $reason => $count)
+        <?php $__currentLoopData = $stats['maintenance_by_reason']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $reason => $count): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <span class="reason-tag">
-            {{ $reason }}: {{ $count }}
+            <?php echo e($reason); ?>: <?php echo e($count); ?>
+
         </span>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </div>
 </div>
-@endif
+<?php endif; ?>
 
-{{-- Actions rapides --}}
+
 <div class="quick-actions-grid">
-    <a href="{{ route('housekeeping.to-clean') }}" class="quick-action-item">
+    <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="quick-action-item">
         <i class="fas fa-list"></i>
         <span>Liste</span>
         <small>complète</small>
@@ -998,19 +1002,19 @@ body {
         <span>Maintenance</span>
         <small>signaler</small>
     </button>
-    <a href="{{ route('housekeeping.scan') }}" class="quick-action-item">
+    <a href="<?php echo e(route('housekeeping.scan')); ?>" class="quick-action-item">
         <i class="fas fa-qrcode"></i>
         <span>Scanner</span>
         <small>QR code</small>
     </a>
-    <a href="{{ route('housekeeping.reports') }}" class="quick-action-item">
+    <a href="<?php echo e(route('housekeeping.reports')); ?>" class="quick-action-item">
         <i class="fas fa-chart-bar"></i>
         <span>Rapports</span>
         <small>stats</small>
     </a>
 </div>
 
-{{-- Résumé du jour --}}
+
 <div class="summary-card">
     <div class="summary-card__header">
         <i class="fas fa-calendar-day"></i>
@@ -1021,20 +1025,20 @@ body {
             <i class="fas fa-trophy"></i>
         </div>
         <div class="summary-card__stats">
-            <h3>{{ $stats['cleaned_today'] ?? 0 }}</h3>
+            <h3><?php echo e($stats['cleaned_today'] ?? 0); ?></h3>
             <p>chambres nettoyées</p>
         </div>
     </div>
-    @php
+    <?php
         $totalRooms = ($stats['dirty'] ?? 0) + ($stats['cleaning'] ?? 0) + ($stats['clean'] ?? 0);
         $progress = $totalRooms > 0 ? round(($stats['clean'] ?? 0) / $totalRooms * 100) : 0;
-    @endphp
+    ?>
     <div class="summary-card__progress">
-        <div class="summary-card__progress-bar" style="width: {{ $progress }}%"></div>
+        <div class="summary-card__progress-bar" style="width: <?php echo e($progress); ?>%"></div>
     </div>
 </div>
 
-{{-- Modal Maintenance --}}
+
 <div class="modal fade" id="maintenanceModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -1078,9 +1082,9 @@ body {
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 // Variables globales
 let currentRoomNumber = '';
@@ -1114,7 +1118,7 @@ function submitMaintenance() {
                 const csrfToken = document.createElement('input');
                 csrfToken.type = 'hidden';
                 csrfToken.name = '_token';
-                csrfToken.value = '{{ csrf_token() }}';
+                csrfToken.value = '<?php echo e(csrf_token()); ?>';
                 form.appendChild(csrfToken);
                 
                 const reasonInput = document.createElement('input');
@@ -1169,4 +1173,5 @@ window.addEventListener('beforeunload', function() {
     clearInterval(refreshInterval);
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/housekeeping/mobile.blade.php ENDPATH**/ ?>

@@ -1051,4 +1051,62 @@ class HousekeepingController extends Controller
         // Simple placeholder pour l'instant
         return back()->with('info', 'Fonctionnalité d\'export en développement.');
     }
+
+    /**
+     * Marquer une chambre comme nettoyée en un clic
+     */
+    public function cleanRoom(Room $room)
+    {
+        DB::beginTransaction();
+        
+        try {
+            $oldStatus = $room->room_status_id;
+            $user = Auth::user();
+            
+            // Vérifier si la chambre est occupée
+            $isOccupied = $this->isRoomOccupied($room->id);
+            
+            // Déterminer le nouveau statut
+            $newStatus = $isOccupied ? self::STATUS_OCCUPIED : self::STATUS_AVAILABLE;
+            
+            $updateData = [
+                'room_status_id' => $newStatus,
+                'needs_cleaning' => 0,
+                'updated_at' => now(),
+            ];
+            
+            // Ajouter les colonnes si elles existent
+            if (Schema::hasColumn('rooms', 'last_cleaned_at')) {
+                $updateData['last_cleaned_at'] = now();
+            }
+            
+            if (Schema::hasColumn('rooms', 'cleaned_by')) {
+                $updateData['cleaned_by'] = $user->id;
+            }
+            
+            $room->update($updateData);
+            
+            // Notification à la réception
+            $statusText = $newStatus == self::STATUS_AVAILABLE ? 'DISPONIBLE' : 'OCCUPÉE';
+            $this->notifyReception(
+                $room,
+                'room_cleaned',
+                "✅ Chambre {$room->number} nettoyée par {$user->name} - Statut: {$statusText}"
+            );
+            
+            DB::commit();
+            
+            return back()->with('success', "Chambre {$room->number} marquée comme nettoyée !");
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('Erreur nettoyage rapide: '.$e->getMessage(), [
+                'room_id' => $room->id,
+                'user_id' => Auth::id(),
+            ]);
+            
+            return back()->with('error', 'Erreur: '.$e->getMessage());
+        }
+    }
 }

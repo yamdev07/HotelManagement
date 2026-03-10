@@ -522,7 +522,10 @@ Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'check
     Route::get('/to-clean', [HousekeepingController::class, 'toClean'])->name('to-clean');
     Route::get('/quick-list/{status}', [HousekeepingController::class, 'quickList'])->name('quick-list');
 
-     // ✅ AJOUTE CETTE ROUTE ICI
+    Route::post('/room/{room}/clean', [HousekeepingController::class, 'cleanRoom'])
+        ->name('clean-room')
+        ->middleware('checkrole:Super,Admin,Housekeeping');
+
     Route::post('/room/{room}/mark-cleaned', [HousekeepingController::class, 'markAsCleaned'])
         ->name('mark-cleaned')
         ->middleware('checkrole:Super,Admin,Housekeeping');
