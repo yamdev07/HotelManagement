@@ -899,6 +899,126 @@ class Payment extends Model
             'can_refund' => $this->can_be_refunded,
         ];
     }
+    /**
+     * Marquer un paiement late checkout comme complété
+     */
+    public function markLateCheckoutAsCompleted(): array
+    {
+        try {
+            if ($this->status === self::STATUS_COMPLETED) {
+                return [
+                    'success' => false,
+                    'message' => 'Ce paiement est déjà complété',
+                ];
+            }
 
+            DB::beginTransaction();
+
+            $oldStatus = $this->status;
+
+            // Mettre à jour le paiement
+            $this->update([
+                'status' => self::STATUS_COMPLETED,
+                'verified_by' => auth()->id(),
+                'verified_at' => now(),
+                'payment_date' => now(),
+            ]);
+
+            // Mettre à jour le total de la transaction
+            if ($this->transaction) {
+                $this->transaction->updatePaymentStatus();
+                
+                // Ajouter une note à la transaction
+                $transaction = $this->transaction;
+                $note = "\n[" . now()->format('d/m/Y H:i') . "] ✅ Supplément late checkout de " .
+                        number_format($this->amount, 0, ',', ' ') . " CFA payé";
+                
+                $transaction->notes = ($transaction->notes ? $transaction->notes . $note : $note);
+                $transaction->saveQuietly();
+
+                // Vérifier si c'est un late checkout et logger
+                if ($this->isLateCheckoutPayment()) {
+                    Log::info("✅ Late checkout payé pour transaction #{$transaction->id}", [
+                        'payment_id' => $this->id,
+                        'amount' => $this->amount,
+                        'late_checkout_time' => $transaction->expected_checkout_time,
+                    ]);
+
+                    // Logger l'activité spécifique
+                    activity()
+                        ->causedBy(auth()->user())
+                        ->performedOn($transaction)
+                        ->withProperties([
+                            'payment_id' => $this->id,
+                            'amount' => $this->amount,
+                            'late_checkout_time' => $transaction->expected_checkout_time,
+                            'old_payment_status' => $oldStatus,
+                            'new_payment_status' => self::STATUS_COMPLETED,
+                        ])
+                        ->log('Paiement late checkout confirmé');
+                }
+            }
+
+            DB::commit();
+
+            return [
+                'success' => true,
+                'message' => 'Paiement late checkout marqué comme complété avec succès',
+                'payment' => $this->fresh(),
+                'transaction' => $this->transaction ? [
+                    'id' => $this->transaction->id,
+                    'total_paid' => $this->transaction->getTotalPayment(),
+                    'remaining' => $this->transaction->getRemainingPayment(),
+                    'is_fully_paid' => $this->transaction->isFullyPaid(),
+                ] : null,
+            ];
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Erreur marquage paiement late checkout: ' . $e->getMessage(), [
+                'payment_id' => $this->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return [
+                'success' => false,
+                'message' => 'Erreur: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Vérifier si c'est un paiement late checkout
+     */
+    public function isLateCheckoutPayment(): bool
+    {
+        return str_contains($this->reference ?? '', 'LATE-') || 
+            str_contains($this->description ?? '', 'Late checkout') ||
+            str_contains($this->description ?? '', 'late checkout');
+    }
+
+    /**
+     * Obtenir les détails du paiement late checkout
+     */
+    public function getLateCheckoutDetailsAttribute(): ?array
+    {
+        if (!$this->isLateCheckoutPayment()) {
+            return null;
+        }
+
+        return [
+            'is_late_checkout' => true,
+            'reference' => $this->reference,
+            'amount' => $this->amount,
+            'formatted_amount' => $this->formatted_amount,
+            'status' => $this->status,
+            'status_text' => $this->status_text,
+            'created_at' => $this->created_at->format('d/m/Y H:i'),
+            'paid_at' => $this->payment_date?->format('d/m/Y H:i'),
+            'transaction_id' => $this->transaction_id,
+            'customer_name' => $this->transaction?->customer?->name,
+            'room_number' => $this->transaction?->room?->number,
+        ];
+    }
     
 }

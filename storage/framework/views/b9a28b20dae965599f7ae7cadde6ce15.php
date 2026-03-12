@@ -180,6 +180,16 @@
     transform: translateY(-1px);
 }
 
+.btn-info-modern {
+    background: var(--blue-500);
+    color: white;
+}
+
+.btn-info-modern:hover {
+    background: var(--blue-600);
+    transform: translateY(-1px);
+}
+
 .btn-outline-modern {
     background: white;
     color: var(--gray-700);
@@ -269,6 +279,34 @@
     align-items: center;
     gap: 6px;
     border: 1px solid var(--amber-200);
+}
+
+/* Badge early checkout */
+.badge-early {
+    background: var(--blue-100);
+    color: var(--blue-700);
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--blue-200);
+}
+
+/* Badge paiement en attente */
+.badge-pending {
+    background: #fff3cd;
+    color: #856404;
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid #ffeeba;
 }
 
 /* Cartes */
@@ -427,6 +465,10 @@
     color: var(--blue-600);
 }
 
+.stat-value-warning {
+    color: var(--amber-600);
+}
+
 /* Sélecteur statut */
 .status-select {
     padding: 8px 16px;
@@ -506,7 +548,44 @@
     font-weight: 600;
 }
 
-/* Garder les styles existants pour compatibilité */
+/* Toast notification */
+.toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    min-width: 300px;
+    max-width: 400px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Loader */
+.loader {
+    border: 3px solid #f3f3f3;
+    border-radius: 50%;
+    border-top: 3px solid var(--primary-500);
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 .alert.alert-success {
     border-radius: 12px;
     background: var(--primary-50);
@@ -519,6 +598,13 @@
     background: #fee2e2;
     border-color: #fecaca;
     color: #b91c1c;
+}
+
+.alert.alert-warning {
+    border-radius: 12px;
+    background: #fff3cd;
+    border-color: #ffeeba;
+    color: #856404;
 }
 
 .modal-content {
@@ -565,6 +651,16 @@
 
                     <?php if($transaction->late_checkout_fee): ?>
                         (+<?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA)
+                    <?php endif; ?>
+                </span>
+            <?php endif; ?>
+            
+            
+            <?php if($transaction->early_checkout): ?>
+                <span class="badge-early">
+                    <i class="fas fa-clock"></i> Early checkout - Départ anticipé
+                    <?php if($transaction->early_checkout_refund): ?>
+                        (Remboursé: <?php echo e(number_format($transaction->early_checkout_refund, 0, ',', ' ')); ?> FCFA)
                     <?php endif; ?>
                 </span>
             <?php endif; ?>
@@ -647,6 +743,8 @@
                         <?php if($transaction->late_checkout_fee): ?>
                             <span class="badge-late" style="margin-left: 8px;">+<?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA</span>
                         <?php endif; ?>
+                    <?php elseif($transaction->early_checkout): ?>
+                        <span class="badge-early" style="margin-left: 8px;">Départ anticipé</span>
                     <?php else: ?>
                         à 12h00
                     <?php endif; ?>
@@ -663,6 +761,12 @@
                 Client parti le <strong><?php echo e(\Carbon\Carbon::parse($transaction->check_out_actual ?? $transaction->check_out)->format('d/m/Y à H:i')); ?></strong>
                 <?php if($transaction->late_checkout): ?>
                     <br><span class="badge-late"><i class="fas fa-clock"></i> Late checkout: <?php echo e($transaction->expected_checkout_time); ?> (<?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA)</span>
+                <?php endif; ?>
+                <?php if($transaction->early_checkout): ?>
+                    <br><span class="badge-early"><i class="fas fa-clock"></i> Early checkout - Départ anticipé</span>
+                    <?php if($transaction->early_checkout_refund): ?>
+                        <br><small>Remboursé: <?php echo e(number_format($transaction->early_checkout_refund, 0, ',', ' ')); ?> FCFA</small>
+                    <?php endif; ?>
                 <?php endif; ?>
             </p>
         </div>
@@ -719,17 +823,43 @@
                 $now = \Carbon\Carbon::now();
                 $checkOutDate = \Carbon\Carbon::parse($transaction->check_out)->setTime(12, 0, 0);
                 $checkOutLargess = $checkOutDate->copy()->setTime(14, 0, 0);
-                $lateCheckoutStart = $checkOutDate->copy()->setTime(14, 0, 0);
                 $lateCheckoutEnd = $checkOutDate->copy()->setTime(20, 0, 0);
+                $today = \Carbon\Carbon::today();
+                $scheduledCheckOut = \Carbon\Carbon::parse($transaction->check_out)->startOfDay();
                 
-                // ✅ Vérifier si le supplément late checkout est payé
-                $latePayment = $transaction->payments->first(function($p) {
-                    return (($p->reference && str_contains($p->reference, 'LATE-')) || 
-                           ($p->description && str_contains($p->description, 'Late checkout'))) && 
-                           $p->status == 'completed';
-                });
-                $isLatePaid = !is_null($latePayment);
+                // ✅ Vérification plus robuste du paiement late checkout
+                $latePayment = null;
+                $isLatePaid = false;
+                $hasPendingLatePayment = false;
+                
+                if ($transaction->late_checkout && $transaction->late_checkout_fee > 0) {
+                    foreach ($transaction->payments as $payment) {
+                        $isLateReference = $payment->reference && str_contains($payment->reference, 'LATE-');
+                        $isLateDescription = $payment->description && (
+                            str_contains($payment->description, 'Late checkout') || 
+                            str_contains($payment->description, 'late checkout')
+                        );
+                        
+                        if ($isLateReference || $isLateDescription) {
+                            if ($payment->status == 'completed') {
+                                $latePayment = $payment;
+                                $isLatePaid = true;
+                                break;
+                            } elseif ($payment->status == 'pending') {
+                                $hasPendingLatePayment = true;
+                                $latePayment = $payment;
+                            }
+                        }
+                    }
+                }
             ?>
+            
+            
+            <?php if($today->lt($scheduledCheckOut)): ?>
+                <button type="button" class="btn-modern btn-info-modern" data-bs-toggle="modal" data-bs-target="#earlyCheckoutModal">
+                    <i class="fas fa-clock me-1"></i>Early checkout
+                </button>
+            <?php endif; ?>
             
             
             <?php if($now->gte($checkOutDate) && $now->lte($checkOutLargess)): ?>
@@ -757,13 +887,22 @@
                                 <i class="fas fa-sign-out-alt me-1"></i>Départ (late checkout)
                             </button>
                         </form>
+                    <?php elseif($hasPendingLatePayment): ?>
+                        
+                        <div class="d-inline-block" data-bs-toggle="tooltip" 
+                             title="Paiement en attente - Cliquez sur 'Marquer payé' dans la liste des paiements">
+                            <span class="btn-modern btn-outline-modern disabled">
+                                <i class="fas fa-clock me-1"></i>Départ (paiement en attente)
+                            </span>
+                        </div>
                     <?php else: ?>
                         
-                        <span class="btn-modern btn-outline-modern disabled" 
-                              data-bs-toggle="tooltip" 
-                              title="Supplément late checkout de <?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA en attente">
-                            <i class="fas fa-clock me-1"></i>Départ bloqué
-                        </span>
+                        <div class="d-inline-block" data-bs-toggle="tooltip" 
+                             title="Supplément late checkout de <?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA non payé">
+                            <span class="btn-modern btn-outline-modern disabled">
+                                <i class="fas fa-ban me-1"></i>Départ bloqué
+                            </span>
+                        </div>
                     <?php endif; ?>
                 <?php endif; ?>
             
@@ -890,6 +1029,8 @@
 
                                 <?php if($transaction->late_checkout): ?>
                                     <br><small class="text-warning">(dont late checkout)</small>
+                                <?php elseif($transaction->early_checkout): ?>
+                                    <br><small class="text-info">(early checkout)</small>
                                 <?php endif; ?>
                             </span>
                         </div>
@@ -914,6 +1055,8 @@
                                 <span class="text-muted ms-2">
                                     <?php if($transaction->late_checkout): ?>
                                         <strong style="color: var(--amber-600);"><?php echo e($transaction->expected_checkout_time); ?></strong>
+                                    <?php elseif($transaction->early_checkout): ?>
+                                        <strong style="color: var(--blue-600);">Early checkout</strong>
                                     <?php else: ?>
                                         12:00
                                     <?php endif; ?>
@@ -982,6 +1125,16 @@
                         </div>
                         <?php endif; ?>
                         
+                        <?php if($transaction->early_checkout_refund > 0): ?>
+                        <div class="col-md-3">
+                            <div class="stat-box" style="background: var(--blue-50); border-color: var(--blue-200);">
+                                <p class="stat-label">Remboursement</p>
+                                <p class="stat-value" style="color: var(--blue-600);">- <?php echo e(number_format($transaction->early_checkout_refund, 0, ',', ' ')); ?> CFA</p>
+                                <small class="text-muted">Early checkout</small>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                        
                         <div class="col-md-3">
                             <div class="stat-box">
                                 <p class="stat-label">Total final</p>
@@ -1015,21 +1168,36 @@
                         <p class="detail-label mb-3">Historique des paiements</p>
                         <div class="timeline">
                             <?php $__currentLoopData = $payments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
+                                    $isLatePayment = (str_contains($payment->reference ?? '', 'LATE-') || 
+                                                      str_contains($payment->description ?? '', 'Late checkout') ||
+                                                      str_contains($payment->description ?? '', 'late checkout'));
+                                    
+                                    $isRefundPayment = (str_contains($payment->reference ?? '', 'REFUND-') || 
+                                                       str_contains($payment->description ?? '', 'Remboursement') ||
+                                                       $payment->amount < 0);
+                                ?>
                                 <div class="timeline-item">
                                     <div class="d-flex justify-content-between align-items-start">
                                         <div>
                                             <h6 class="mb-1" style="font-weight: 600;">
                                                 Paiement #<?php echo e($payment->id); ?>
 
-                                                <?php if(str_contains($payment->description ?? '', 'Late checkout') || str_contains($payment->reference ?? '', 'LATE-')): ?>
+                                                <?php if($isLatePayment): ?>
                                                     <span class="badge-late" style="margin-left: 8px;">Late checkout</span>
                                                 <?php endif; ?>
-                                                <span class="payment-status-<?php echo e($payment->status); ?>" style="margin-left: 8px;">
-                                                    <?php echo e($payment->status === 'completed' ? '✓' : ($payment->status === 'pending' ? '⏳' : '✗')); ?>
-
-                                                    <?php echo e($payment->status === 'completed' ? 'Payé' : ($payment->status === 'pending' ? 'En attente' : 'Annulé')); ?>
-
-                                                </span>
+                                                <?php if($isRefundPayment): ?>
+                                                    <span class="badge-early" style="margin-left: 8px;">Remboursement</span>
+                                                <?php endif; ?>
+                                                <?php if($payment->status == 'pending'): ?>
+                                                    <span class="badge-pending" style="margin-left: 8px;">
+                                                        <i class="fas fa-clock me-1"></i>En attente
+                                                    </span>
+                                                <?php elseif($payment->status == 'completed'): ?>
+                                                    <span class="badge-late" style="background: var(--primary-100); color: var(--primary-700); margin-left: 8px;">
+                                                        <i class="fas fa-check-circle me-1"></i>Payé
+                                                    </span>
+                                                <?php endif; ?>
                                             </h6>
                                             <p class="text-muted small mb-1">
                                                 <i class="fas fa-calendar me-1"></i>
@@ -1039,7 +1207,7 @@
                                             <?php if($payment->payment_method): ?>
                                                 <p class="text-muted small mb-1">
                                                     <i class="fas fa-credit-card me-1"></i>
-                                                    <?php echo e(ucfirst($payment->payment_method)); ?>
+                                                    <?php echo e(ucfirst($payment->payment_method_label ?? $payment->payment_method)); ?>
 
                                                 </p>
                                             <?php endif; ?>
@@ -1048,8 +1216,8 @@
                                             <?php endif; ?>
                                         </div>
                                         <div class="text-end">
-                                            <p class="fw-bold text-success mb-1" style="font-size: 1.1rem;">
-                                                <?php echo e(number_format($payment->amount, 0, ',', ' ')); ?> CFA
+                                            <p class="fw-bold mb-1" style="font-size: 1.1rem; <?php echo e($payment->status == 'pending' ? 'color: var(--amber-600);' : ($payment->amount > 0 ? 'color: var(--primary-600);' : 'color: var(--blue-600);')); ?>">
+                                                <?php echo e($payment->amount > 0 ? '+' : '-'); ?> <?php echo e(number_format(abs($payment->amount), 0, ',', ' ')); ?> CFA
                                             </p>
                                             <a href="<?php echo e(route('payment.invoice', $payment)); ?>" class="btn-modern btn-outline-modern btn-sm" target="_blank">
                                                 <i class="fas fa-receipt"></i> Reçu
@@ -1082,8 +1250,8 @@
                         <?php
                             $remainingWithLate = $totalPrice - $totalPayment;
                             $latePayment = $payments->first(function($p) {
-                                return ($p->reference && str_contains($p->reference, 'LATE-')) || 
-                                       ($p->description && str_contains($p->description, 'Late checkout'));
+                                return (($p->reference && str_contains($p->reference, 'LATE-')) || 
+                                       ($p->description && (str_contains($p->description, 'Late checkout') || str_contains($p->description, 'late checkout'))));
                             });
                         ?>
                         <?php if($remainingWithLate > 0 && (!$latePayment || $latePayment->status == 'pending')): ?>
@@ -1096,7 +1264,9 @@
                                             Départ à <strong><?php echo e($transaction->expected_checkout_time); ?></strong> - 
                                             Supplément de <strong><?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> FCFA</strong>
                                             <?php if($latePayment && $latePayment->status == 'pending'): ?>
-                                                <br><span class="text-info">Paiement en attente</span>
+                                                <br><span class="text-info"><i class="fas fa-info-circle me-1"></i>Paiement en attente - Cliquez sur "Marquer payé"</span>
+                                            <?php elseif(!$latePayment): ?>
+                                                <br><span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>Aucun paiement créé</span>
                                             <?php endif; ?>
                                         </span>
                                     </div>
@@ -1109,6 +1279,25 @@
                                 </div>
                             </div>
                         <?php endif; ?>
+                    <?php endif; ?>
+                    
+                    
+                    <?php if($transaction->early_checkout && $transaction->early_checkout_refund > 0 && $transaction->status == 'active'): ?>
+                        <div class="alert alert-info mt-3" style="border-left: 4px solid var(--blue-500); background: var(--blue-50);">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    <i class="fas fa-clock me-2" style="color: var(--blue-600);"></i>
+                                    <strong>Early checkout enregistré</strong><br>
+                                    <span class="small">
+                                        Départ anticipé - Remboursement de <strong><?php echo e(number_format($transaction->early_checkout_refund, 0, ',', ' ')); ?> FCFA</strong>
+                                        <?php if($transaction->early_checkout_reason): ?>
+                                            <br>Raison: <?php echo e($transaction->early_checkout_reason); ?>
+
+                                        <?php endif; ?>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -1162,6 +1351,11 @@
                     <p class="detail-value" style="color: var(--amber-600);">+ <?php echo e(number_format($transaction->late_checkout_fee, 0, ',', ' ')); ?> CFA</p>
                     <?php endif; ?>
                     
+                    <?php if($transaction->early_checkout_refund): ?>
+                    <p class="detail-label">Remboursement early checkout</p>
+                    <p class="detail-value" style="color: var(--blue-600);">- <?php echo e(number_format($transaction->early_checkout_refund, 0, ',', ' ')); ?> CFA</p>
+                    <?php endif; ?>
+                    
                     
                     <?php if($transaction->expected_checkout_time && $transaction->late_checkout): ?>
                     <p class="detail-label">Heure de départ</p>
@@ -1190,6 +1384,12 @@
                     <p class="detail-value" style="white-space: pre-line;"><?php echo e($transaction->notes); ?></p>
                     <?php endif; ?>
                     
+                    <?php if($transaction->early_checkout_reason): ?>
+                    <div class="divider"></div>
+                    <p class="detail-label">Raison early checkout</p>
+                    <p class="detail-value" style="color: var(--blue-700);"><?php echo e($transaction->early_checkout_reason); ?></p>
+                    <?php endif; ?>
+                    
                     <?php if($transaction->checkout_notes && $transaction->late_checkout): ?>
                     <div class="divider"></div>
                     <p class="detail-label">Notes départ</p>
@@ -1211,6 +1411,8 @@
                                 <p class="stat-value"><?php echo e($nights); ?></p>
                                 <?php if($transaction->late_checkout): ?>
                                     <small class="text-warning">+ late checkout</small>
+                                <?php elseif($transaction->early_checkout): ?>
+                                    <small class="text-info">early checkout</small>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -1251,44 +1453,206 @@
 </div>
 
 
+<?php if($transaction->status == 'active' && \Carbon\Carbon::today()->lt(\Carbon\Carbon::parse($transaction->check_out)->startOfDay()) && !$transaction->early_checkout): ?>
+<div class="modal fade" id="earlyCheckoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--blue-500), var(--blue-400)); color: white;">
+                <h5 class="modal-title">
+                    <i class="fas fa-clock me-2"></i>
+                    Early checkout - Départ anticipé
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="<?php echo e(route('transaction.early-checkout', $transaction)); ?>" method="POST">
+                <?php echo csrf_field(); ?>
+                <div class="modal-body">
+                    <?php
+                        $plannedNights = $nights;
+                        $actualNights = \Carbon\Carbon::parse($transaction->check_in)->diffInDays(\Carbon\Carbon::today());
+                        $nightsShort = $plannedNights - $actualNights;
+                        $totalPaid = $totalPayment;
+                        $roomPrice = $transaction->room->price;
+                        $newTotalPrice = $roomPrice * $actualNights;
+                        $potentialRefund = max(0, $totalPaid - $newTotalPrice);
+                    ?>
+                    
+                    <div class="alert alert-info mb-4" style="background: var(--blue-50); border-color: var(--blue-200);">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="fas fa-info-circle fa-2x text-info"></i>
+                            <div>
+                                <strong>Résumé du séjour</strong><br>
+                                Client: <strong><?php echo e($transaction->customer->name); ?></strong><br>
+                                Chambre: <strong><?php echo e($transaction->room->number); ?></strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <p class="stat-label">Nuités prévues</p>
+                                <p class="stat-value"><?php echo e($plannedNights); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <p class="stat-label">Nuités effectuées</p>
+                                <p class="stat-value"><?php echo e($actualNights); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <p class="stat-label">Nuités non utilisées</p>
+                                <p class="stat-value"><?php echo e($nightsShort); ?></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <p class="stat-label">Total payé</p>
+                                <p class="stat-value stat-value-success"><?php echo e(number_format($totalPaid, 0, ',', ' ')); ?> FCFA</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-calculator me-2"></i>
+                        <strong>Calcul du remboursement potentiel:</strong><br>
+                        - Nouveau total (<?php echo e($actualNights); ?> nuits): <?php echo e(number_format($newTotalPrice, 0, ',', ' ')); ?> FCFA<br>
+                        - Déjà payé: <?php echo e(number_format($totalPaid, 0, ',', ' ')); ?> FCFA<br>
+                        - Remboursement maximum: <strong class="text-success"><?php echo e(number_format($potentialRefund, 0, ',', ' ')); ?> FCFA</strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-hand-holding-usd text-info me-1"></i>
+                            Politique de remboursement
+                        </label>
+                        <select name="refund_policy" class="form-select form-select-lg" id="refundPolicy" required>
+                            <option value="full">Remboursement intégral (<?php echo e(number_format($potentialRefund, 0, ',', ' ')); ?> FCFA)</option>
+                            <option value="partial">Remboursement partiel</option>
+                            <option value="none">Aucun remboursement</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="refundAmountSection">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-money-bill-wave text-success me-1"></i>
+                            Montant du remboursement (FCFA)
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-light">FCFA</span>
+                            <input type="number" name="refund_amount" id="refundAmount" class="form-control" 
+                                   value="<?php echo e($potentialRefund); ?>" min="0" max="<?php echo e($potentialRefund); ?>" step="100">
+                        </div>
+                        <small class="text-muted">Maximum: <?php echo e(number_format($potentialRefund, 0, ',', ' ')); ?> FCFA</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-credit-card text-primary me-1"></i>
+                            Méthode de remboursement
+                        </label>
+                        <select name="payment_method" class="form-select form-select-lg" required>
+                            <option value="cash">Espèces</option>
+                            <option value="card">Carte bancaire</option>
+                            <option value="mobile_money">Mobile Money</option>
+                            <option value="bank_transfer">Virement</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-pen text-secondary me-1"></i>
+                            Raison du départ anticipé
+                        </label>
+                        <textarea name="early_checkout_reason" class="form-control" rows="3" 
+                                  placeholder="Ex: Urgence, Changement de programme, Insatisfaction..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn-modern btn-info-modern">
+                        <i class="fas fa-check me-2"></i>Confirmer early checkout
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('refundPolicy')?.addEventListener('change', function() {
+    const section = document.getElementById('refundAmountSection');
+    if (this.value === 'partial') {
+        section.style.display = 'block';
+    } else {
+        section.style.display = 'none';
+    }
+});
+
+// Initialiser l'affichage
+if (document.getElementById('refundPolicy')?.value !== 'partial') {
+    document.getElementById('refundAmountSection').style.display = 'none';
+}
+</script>
+<?php endif; ?>
+
+
 <?php if($transaction->status == 'active' && !$transaction->late_checkout): ?>
 <div class="modal fade" id="lateCheckoutModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
-            <div class="modal-header" style="background: var(--amber-100);">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--amber-500), var(--amber-400)); color: white;">
                 <h5 class="modal-title">
-                    <i class="fas fa-clock text-warning me-2"></i>
+                    <i class="fas fa-clock me-2"></i>
                     Late checkout - Chambre <?php echo e($transaction->room->number); ?>
 
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form action="<?php echo e(route('transaction.late-checkout', $transaction)); ?>" method="POST">
+            <form action="<?php echo e(route('transaction.late-checkout', $transaction)); ?>" method="POST" id="lateCheckoutForm">
                 <?php echo csrf_field(); ?>
                 <div class="modal-body">
-                    <div class="alert alert-info" style="background: var(--blue-50); border-color: var(--blue-200);">
+                    <div class="alert alert-info mb-4" style="background: var(--blue-50); border-color: var(--blue-200);">
                         <i class="fas fa-info-circle me-2 text-info"></i>
-                        <strong>L'hôtel décide du montant</strong> - Suggestions: 0 (gratuit), 25%, 50%, 75%, 100%
+                        <strong>Client: <?php echo e($transaction->customer->name); ?></strong><br>
+                        Départ normal: <?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?> à 12h00
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Départ normal</label>
-                        <p class="form-control-plaintext">
-                            <?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?> à 12h00
-                        </p>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Nouvelle heure de départ</label>
-                        <select name="late_checkout_time" class="form-select" id="lateTimeSelect" required>
-                            <option value="">Choisir une heure</option>
-                            <option value="15:00">15h00</option>
-                            <option value="16:00">16h00</option>
-                            <option value="17:00">17h00</option>
-                            <option value="18:00">18h00</option>
-                            <option value="19:00">19h00</option>
-                            <option value="20:00">20h00</option>
-                        </select>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-clock text-warning me-1"></i>
+                                    Nouvelle heure de départ
+                                </label>
+                                <select name="late_checkout_time" class="form-select form-select-lg" id="lateTimeSelect" required>
+                                    <option value="">Choisir une heure</option>
+                                    <option value="15:00">15h00</option>
+                                    <option value="16:00">16h00</option>
+                                    <option value="17:00">17h00</option>
+                                    <option value="18:00">18h00</option>
+                                    <option value="19:00">19h00</option>
+                                    <option value="20:00">20h00</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-money-bill-wave text-success me-1"></i>
+                                    Méthode de paiement
+                                </label>
+                                <select name="payment_method" class="form-select form-select-lg" required>
+                                    <option value="cash">Espèces</option>
+                                    <option value="card">Carte bancaire</option>
+                                    <option value="mobile_money">Mobile Money</option>
+                                    <option value="transfer">Virement</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     
                     
@@ -1307,8 +1671,8 @@
                             ?>
                             
                             <?php $__currentLoopData = $suggestions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $montant => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <button type="button" class="btn btn-sm btn-outline-primary" 
-                                        onclick="document.getElementById('lateFee').value = '<?php echo e($montant); ?>'">
+                                <button type="button" class="btn btn-sm btn-outline-primary suggestion-btn" 
+                                        data-amount="<?php echo e($montant); ?>">
                                     <?php echo e($label); ?><br>
                                     <small><?php echo e(number_format($montant, 0, ',', ' ')); ?> FCFA</small>
                                 </button>
@@ -1318,16 +1682,17 @@
                     
                     
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Supplément (FCFA) - <span class="text-primary">LIBRE</span></label>
-                        <div class="input-group">
-                            <span class="input-group-text">FCFA</span>
-                            <input type="number" name="late_fee" id="lateFee" class="form-control form-control-lg" 
-                                   value="<?php echo e(round($transaction->room->price * 0.5)); ?>" min="0" step="100" 
+                        <label class="form-label fw-bold">
+                            Supplément (FCFA) - <span class="text-primary">LIBRE</span>
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-light">FCFA</span>
+                            <input type="number" name="late_fee" id="lateFee" class="form-control" 
+                                   value="<?php echo e(round($prixNuit * 0.5)); ?>" min="0" step="100" 
                                    style="font-size: 1.2rem; font-weight: 600;" required>
                         </div>
                         <small class="text-muted">
-                            Prix nuit: <?php echo e(number_format($transaction->room->price, 0, ',', ' ')); ?> FCFA<br>
-                            <span class="text-warning">💡 L'hôtel décide : 0, 5000, 10000, 25000... (pas de limite)</span>
+                            Prix nuit: <?php echo e(number_format($prixNuit, 0, ',', ' ')); ?> FCFA
                         </small>
                     </div>
                     
@@ -1353,21 +1718,25 @@ document.getElementById('lateTimeSelect')?.addEventListener('change', function()
     const pricePerNight = <?php echo e($transaction->room->price); ?>;
     const hour = parseInt(this.value.split(':')[0]);
     
-    // Suggestion basée sur l'heure (mais l'utilisateur peut modifier)
-    let suggestedPercentage = 0.5; // 50% par défaut
+    let suggestedPercentage = 0.5;
     if (hour <= 15) suggestedPercentage = 0.4;
     else if (hour <= 17) suggestedPercentage = 0.5;
     else if (hour <= 19) suggestedPercentage = 0.6;
     else if (hour == 20) suggestedPercentage = 0.7;
     
-    // Met à jour mais ne force pas
     const suggestedAmount = Math.round(pricePerNight * suggestedPercentage);
     const currentValue = document.getElementById('lateFee').value;
     
-    // Ne change que si l'utilisateur n'a pas déjà modifié
     if (currentValue == Math.round(pricePerNight * 0.5)) {
         document.getElementById('lateFee').value = suggestedAmount;
     }
+});
+
+// Gestionnaires pour les boutons de suggestion
+document.querySelectorAll('.suggestion-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.getElementById('lateFee').value = this.dataset.amount;
+    });
 });
 </script>
 <?php endif; ?>
@@ -1416,27 +1785,88 @@ document.getElementById('lateTimeSelect')?.addEventListener('change', function()
 
 <script>
 function markPaymentAsPaid(paymentId) {
-    if (confirm('Confirmer le paiement de ce supplément ?')) {
-        fetch(`/payments/${paymentId}/mark-paid`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            }
-        })
+    if (!confirm('Confirmer le paiement de ce supplément ?')) {
+        return;
+    }
+    
+    // Afficher un indicateur de chargement
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+    btn.disabled = true;
+    
+    console.log('Tentative de paiement pour:', paymentId);
+    
+    fetch(`/payments/${paymentId}/mark-paid`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        console.log('Status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Réponse:', data);
+        
+        if (data.success) {
+            // Toast de succès
+            showToast('success', 'Paiement confirmé !', 'Le paiement a été marqué comme payé avec succès.');
+            
+            // Recharger après un délai
+            setTimeout(() => {
+                location.reload();
+            }, 1500);
+        } else {
+            // Restaurer le bouton
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            
+            // Afficher l'erreur
+            showToast('error', 'Erreur', data.error || data.message || 'Erreur inconnue');
+        }
+    })
+    .catch(error => {
+        console.error('Erreur réseau:', error);
+        
+        // Restaurer le bouton
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+        showToast('error', 'Erreur de communication', error.toString());
+    });
+}
+
+// Fonction pour afficher les toasts
+function showToast(type, title, message) {
+    // Utiliser SweetAlert2 si disponible
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            icon: type,
+            title: title,
+            text: message,
+            timer: 3000,
+            showConfirmButton: false
+        });
+    } else {
+        // Fallback vers alert
+        alert(title + ': ' + message);
+    }
+}
+
+// Fonction pour vérifier le statut du late checkout
+function checkLateCheckoutStatus(transactionId) {
+    fetch(`/transaction/${transactionId}/late-checkout-status`)
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                location.reload();
-            } else {
-                alert('Erreur: ' + data.error);
+            if (data.success && data.data.has_late_checkout) {
+                console.log('Statut late checkout:', data.data);
             }
         })
-        .catch(error => {
-            alert('Erreur: ' + error);
-        });
-    }
+        .catch(error => console.error('Erreur vérification late checkout:', error));
 }
 </script>
 <?php $__env->stopSection(); ?>
@@ -1445,39 +1875,44 @@ function markPaymentAsPaid(paymentId) {
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les tooltips Bootstrap
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (el) {
         return new bootstrap.Tooltip(el);
     });
     
+    // Gestionnaire pour le changement de statut
     document.querySelectorAll('.status-select').forEach(select => {
         select.addEventListener('change', function(e) {
             const newStatus = this.value;
             const oldStatus = this.options[this.selectedIndex].dataset.oldStatus || this.value;
             
             if (newStatus === 'cancelled') {
-                if (!confirm(`⚠️ Êtes-vous sûr de vouloir annuler cette réservation ?`)) {
+                if (!confirm('⚠️ Êtes-vous sûr de vouloir annuler cette réservation ?')) {
                     this.value = oldStatus;
                     return false;
                 }
             }
             
             if (newStatus === 'no_show') {
-                if (!confirm(`⚠️ Marquer comme "No Show" ?`)) {
+                if (!confirm('⚠️ Marquer comme "No Show" ?')) {
                     this.value = oldStatus;
                     return false;
                 }
             }
         });
     });
+    
+    // Vérifier le statut du late checkout au chargement
+    const transactionId = <?php echo e($transaction->id); ?>;
+    checkLateCheckoutStatus(transactionId);
 });
-</script>
-<script>
-// Rafraîchir la page après une action (late checkout, prolongation, etc.)
+
+// Rafraîchir la page après une action
 <?php if(session('success') || session('error') || session('warning') || session('info')): ?>
     setTimeout(function() {
         location.reload();
-    }, 1500); // Rafraîchit après 1.5 secondes
+    }, 2000);
 <?php endif; ?>
 </script>
 <?php $__env->stopSection(); ?>

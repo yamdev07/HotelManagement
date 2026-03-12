@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Rapport de Session #' . $session->id)
 
-@push('styles')
+<?php $__env->startSection('title', 'Rapport de Session #' . $session->id); ?>
+
+<?php $__env->startPush('styles'); ?>
 <!-- Font Awesome 6 -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
@@ -726,25 +726,27 @@ tr:last-child td {
     .signature-line { width: 100%; }
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="report-wrapper">
     <div class="report-card">
         
         <!-- EN-TÊTE -->
         <div class="report-header">
             <div class="header-title">
-                <h1>Rapport de Session #{{ $session->id }}</h1>
+                <h1>Rapport de Session #<?php echo e($session->id); ?></h1>
                 <p>
                     <i class="fas fa-circle"></i>
-                    {{ now()->format('d/m/Y H:i') }} • {{ auth()->user()->name }}
+                    <?php echo e(now()->format('d/m/Y H:i')); ?> • <?php echo e(auth()->user()->name); ?>
+
                 </p>
             </div>
             
-            <div class="header-badge {{ $session->status }}">
-                <i class="fas fa-{{ $session->status == 'active' ? 'play' : 'check-circle' }}"></i>
-                {{ $session->status == 'active' ? 'Session active' : 'Fermée' }}
+            <div class="header-badge <?php echo e($session->status); ?>">
+                <i class="fas fa-<?php echo e($session->status == 'active' ? 'play' : 'check-circle'); ?>"></i>
+                <?php echo e($session->status == 'active' ? 'Session active' : 'Fermée'); ?>
+
             </div>
         </div>
 
@@ -754,7 +756,7 @@ tr:last-child td {
                 <div class="info-icon"><i class="fas fa-user"></i></div>
                 <div class="info-content">
                     <div class="info-label">RÉCEPTIONNISTE</div>
-                    <div class="info-value">{{ $session->user->name }}</div>
+                    <div class="info-value"><?php echo e($session->user->name); ?></div>
                 </div>
             </div>
 
@@ -762,7 +764,7 @@ tr:last-child td {
                 <div class="info-icon"><i class="fas fa-calendar"></i></div>
                 <div class="info-content">
                     <div class="info-label">DATE</div>
-                    <div class="info-value">{{ $session->start_time->format('d/m/Y') }}</div>
+                    <div class="info-value"><?php echo e($session->start_time->format('d/m/Y')); ?></div>
                 </div>
             </div>
 
@@ -770,7 +772,7 @@ tr:last-child td {
                 <div class="info-icon"><i class="fas fa-clock"></i></div>
                 <div class="info-content">
                     <div class="info-label">HORAIRES</div>
-                    <div class="info-value">{{ $session->start_time->format('H:i') }}-{{ $session->end_time ? $session->end_time->format('H:i') : '...' }}</div>
+                    <div class="info-value"><?php echo e($session->start_time->format('H:i')); ?>-<?php echo e($session->end_time ? $session->end_time->format('H:i') : '...'); ?></div>
                 </div>
             </div>
 
@@ -778,7 +780,7 @@ tr:last-child td {
                 <div class="info-icon"><i class="fas fa-coins"></i></div>
                 <div class="info-content">
                     <div class="info-label">SOLDE INITIAL</div>
-                    <div class="info-value">{{ number_format($session->initial_balance, 0, ',', ' ') }}</div>
+                    <div class="info-value"><?php echo e(number_format($session->initial_balance, 0, ',', ' ')); ?></div>
                 </div>
             </div>
         </div>
@@ -790,10 +792,10 @@ tr:last-child td {
                     <span class="kpi-title">Encaissé</span>
                     <span class="kpi-icon"><i class="fas fa-arrow-up"></i></span>
                 </div>
-                <div class="kpi-value">{{ number_format($totalCompleted, 0, ',', ' ') }}</div>
+                <div class="kpi-value"><?php echo e(number_format($totalCompleted, 0, ',', ' ')); ?></div>
                 <div class="kpi-footer">
                     <span>FCFA</span>
-                    <span class="kpi-badge success">{{ $paymentCount }} paiements</span>
+                    <span class="kpi-badge success"><?php echo e($paymentCount); ?> paiements</span>
                 </div>
             </div>
 
@@ -802,7 +804,7 @@ tr:last-child td {
                     <span class="kpi-title">Remboursé</span>
                     <span class="kpi-icon"><i class="fas fa-arrow-down"></i></span>
                 </div>
-                <div class="kpi-value">{{ number_format($totalRefunded, 0, ',', ' ') }}</div>
+                <div class="kpi-value"><?php echo e(number_format($totalRefunded, 0, ',', ' ')); ?></div>
                 <div class="kpi-footer">
                     <span>FCFA</span>
                 </div>
@@ -813,11 +815,11 @@ tr:last-child td {
                     <span class="kpi-title">Solde actuel</span>
                     <span class="kpi-icon"><i class="fas fa-wallet"></i></span>
                 </div>
-                <div class="kpi-value">{{ number_format($session->final_balance ?? $session->current_balance, 0, ',', ' ') }}</div>
+                <div class="kpi-value"><?php echo e(number_format($session->final_balance ?? $session->current_balance, 0, ',', ' ')); ?></div>
                 <div class="kpi-footer">
-                    @if($session->balance_difference != 0)
-                    <span>Écart: {{ number_format(abs($session->balance_difference), 0, ',', ' ') }}</span>
-                    @endif
+                    <?php if($session->balance_difference != 0): ?>
+                    <span>Écart: <?php echo e(number_format(abs($session->balance_difference), 0, ',', ' ')); ?></span>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -826,7 +828,7 @@ tr:last-child td {
                     <span class="kpi-title">Moyenne</span>
                     <span class="kpi-icon"><i class="fas fa-chart-line"></i></span>
                 </div>
-                <div class="kpi-value">{{ $paymentCount > 0 ? number_format($totalCompleted / $paymentCount, 0, ',', ' ') : 0 }}</div>
+                <div class="kpi-value"><?php echo e($paymentCount > 0 ? number_format($totalCompleted / $paymentCount, 0, ',', ' ') : 0); ?></div>
                 <div class="kpi-footer">
                     <span>FCFA/tx</span>
                 </div>
@@ -834,38 +836,38 @@ tr:last-child td {
         </div>
 
         <!-- RÉPARTITION DES PAIEMENTS -->
-        @if(isset($byMethod) && $byMethod->count() > 0)
+        <?php if(isset($byMethod) && $byMethod->count() > 0): ?>
         <div class="section-header">
             <div class="section-title">
                 <i class="fas fa-chart-pie"></i>
                 <h2>Répartition</h2>
             </div>
-            <span class="section-count">{{ $paymentCount }} tx</span>
+            <span class="section-count"><?php echo e($paymentCount); ?> tx</span>
         </div>
 
         <div class="methods-grid">
-            @foreach($byMethod as $method)
-            @php
+            <?php $__currentLoopData = $byMethod; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $method): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php
                 $methodName = strtolower($method['method'] ?? '');
                 $isCash = str_contains($methodName, 'cash') || str_contains($methodName, 'espèces') || $method['method'] == 'Espèces';
                 $percentage = $paymentCount > 0 ? round(($method['count'] / $paymentCount) * 100) : 0;
-            @endphp
+            ?>
             <div class="method-card">
-                <div class="method-name">{{ $method['method'] }}</div>
+                <div class="method-name"><?php echo e($method['method']); ?></div>
                 <div class="method-stats">
-                    <span class="method-amount">{{ number_format($method['total'], 0, ',', ' ') }}</span>
-                    <span class="method-count">{{ $method['count'] }} tx</span>
+                    <span class="method-amount"><?php echo e(number_format($method['total'], 0, ',', ' ')); ?></span>
+                    <span class="method-count"><?php echo e($method['count']); ?> tx</span>
                 </div>
                 <div class="method-progress">
-                    <div class="method-progress-bar {{ $isCash ? 'success' : '' }}" style="width: {{ $percentage }}%"></div>
+                    <div class="method-progress-bar <?php echo e($isCash ? 'success' : ''); ?>" style="width: <?php echo e($percentage); ?>%"></div>
                 </div>
             </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </div>
-        @endif
+        <?php endif; ?>
 
         <!-- TABLEAU DES PAIEMENTS (VERSION COMPACTE) -->
-        @if($payments->count() > 0)
+        <?php if($payments->count() > 0): ?>
         <div class="section-header">
             <div class="section-title">
                 <i class="fas fa-list"></i>
@@ -887,8 +889,8 @@ tr:last-child td {
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($payments->take(15) as $payment) {{-- Limiter à 15 lignes max --}}
-                        @php
+                        <?php $__currentLoopData = $payments->take(15); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $payment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?> 
+                        <?php
                             $isCompleted = $payment->status == 'completed';
                             $isCash = $payment->payment_method == 'cash';
                             
@@ -902,66 +904,69 @@ tr:last-child td {
                                 $methodClass = 'mobile';
                                 $methodIcon = 'fa-mobile-alt';
                             }
-                        @endphp
-                        <tr data-status="{{ $payment->status }}" data-method="{{ $payment->payment_method }}">
-                            <td><span style="font-family: monospace;">{{ substr($payment->reference, -8) }}</span></td>
-                            <td>{{ $payment->created_at->format('d/m H:i') }}</td>
+                        ?>
+                        <tr data-status="<?php echo e($payment->status); ?>" data-method="<?php echo e($payment->payment_method); ?>">
+                            <td><span style="font-family: monospace;"><?php echo e(substr($payment->reference, -8)); ?></span></td>
+                            <td><?php echo e($payment->created_at->format('d/m H:i')); ?></td>
                             <td>
-                                @if($payment->transaction && $payment->transaction->customer)
-                                    {{ Str::limit($payment->transaction->customer->name, 15) }}
-                                @else
+                                <?php if($payment->transaction && $payment->transaction->customer): ?>
+                                    <?php echo e(Str::limit($payment->transaction->customer->name, 15)); ?>
+
+                                <?php else: ?>
                                     —
-                                @endif
+                                <?php endif; ?>
                             </td>
                             <td>
-                                <span class="method-badge {{ $methodClass }}">
-                                    <i class="fas {{ $methodIcon }}"></i>
+                                <span class="method-badge <?php echo e($methodClass); ?>">
+                                    <i class="fas <?php echo e($methodIcon); ?>"></i>
                                 </span>
                             </td>
                             <td>
-                                <span class="amount {{ $payment->amount > 0 ? 'positive' : '' }}">
-                                    {{ number_format($payment->amount, 0, ',', ' ') }}
+                                <span class="amount <?php echo e($payment->amount > 0 ? 'positive' : ''); ?>">
+                                    <?php echo e(number_format($payment->amount, 0, ',', ' ')); ?>
+
                                 </span>
                             </td>
                             <td>
-                                <span class="badge {{ $isCompleted ? 'success' : '' }}">
-                                    {{ $isCompleted ? '✓' : '⏱' }}
+                                <span class="badge <?php echo e($isCompleted ? 'success' : ''); ?>">
+                                    <?php echo e($isCompleted ? '✓' : '⏱'); ?>
+
                                 </span>
                             </td>
                         </tr>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </tbody>
                 </table>
             </div>
             
             <div class="table-footer">
                 <div class="table-totals">
-                    <div><span class="total-label">Total</span> <span class="total-value">{{ $paymentCount }}</span></div>
-                    <div><span class="total-label">Montant</span> <span class="total-value success">{{ number_format($totalCompleted, 0, ',', ' ') }}</span></div>
+                    <div><span class="total-label">Total</span> <span class="total-value"><?php echo e($paymentCount); ?></span></div>
+                    <div><span class="total-label">Montant</span> <span class="total-value success"><?php echo e(number_format($totalCompleted, 0, ',', ' ')); ?></span></div>
                 </div>
                 <div>
-                    <span class="badge success">✓ {{ $payments->where('status', 'completed')->count() }}</span>
-                    <span class="badge">⏱ {{ $payments->where('status', 'pending')->count() }}</span>
+                    <span class="badge success">✓ <?php echo e($payments->where('status', 'completed')->count()); ?></span>
+                    <span class="badge">⏱ <?php echo e($payments->where('status', 'pending')->count()); ?></span>
                 </div>
             </div>
         </div>
-        @endif
+        <?php endif; ?>
 
         <!-- RÉSUMÉ FINANCIER -->
         <div class="summary-grid">
             <div class="summary-item">
                 <div class="summary-label">Solde initial</div>
-                <div class="summary-value">{{ number_format($session->initial_balance, 0, ',', ' ') }}</div>
+                <div class="summary-value"><?php echo e(number_format($session->initial_balance, 0, ',', ' ')); ?></div>
             </div>
             
             <div class="summary-item">
                 <div class="summary-label">Total encaissé</div>
-                <div class="summary-value success">{{ number_format($totalCompleted, 0, ',', ' ') }}</div>
+                <div class="summary-value success"><?php echo e(number_format($totalCompleted, 0, ',', ' ')); ?></div>
             </div>
             
             <div class="summary-item">
                 <div class="summary-label">Solde final</div>
-                <div class="summary-value">{{ number_format($session->final_balance ?? $session->current_balance, 0, ',', ' ') }}</div>
+                <div class="summary-value"><?php echo e(number_format($session->final_balance ?? $session->current_balance, 0, ',', ' ')); ?></div>
             </div>
         </div>
 
@@ -971,7 +976,7 @@ tr:last-child td {
                 <div class="signature-item">
                     <div class="signature-title">Réceptionniste</div>
                     <div class="signature-line"></div>
-                    <span class="signature-name">{{ $session->user->name }}</span>
+                    <span class="signature-name"><?php echo e($session->user->name); ?></span>
                 </div>
                 <div class="signature-item">
                     <div class="signature-title">Supérieur</div>
@@ -986,7 +991,7 @@ tr:last-child td {
             </div>
             
             <div class="footer-actions">
-                <a href="{{ route('cashier.sessions.show', $session) }}" class="btn btn-secondary">
+                <a href="<?php echo e(route('cashier.sessions.show', $session)); ?>" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Retour
                 </a>
                 <button onclick="window.print()" class="btn btn-primary">
@@ -1013,4 +1018,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/cashier/sessions/report.blade.php ENDPATH**/ ?>

@@ -1,8 +1,8 @@
-@extends('template.invoicemaster')
 
-@section('title', 'Facture de Paiement')
 
-@section('head')
+<?php $__env->startSection('title', 'Facture de Paiement'); ?>
+
+<?php $__env->startSection('head'); ?>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Maven+Pro&display=swap');
 
@@ -324,9 +324,9 @@
     
     <!-- Bibliothèque pour générer le PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container py-5">
     <!-- Boutons d'action -->
     <div class="action-buttons no-print">
@@ -338,7 +338,7 @@
         </button>
     </div>
 
-    @php
+    <?php
         // Récupérer la transaction
         $transaction = $payment->transaction;
         
@@ -394,7 +394,7 @@
         
         // ✅ Déterminer le statut global
         $isFullyPaid = $remaining <= 0;
-    @endphp
+    ?>
 
     <div class="invoice-container" id="invoice-content">
         <!-- En-tête de la facture -->
@@ -402,25 +402,27 @@
             <div class="row" style="display: flex; align-items: center;">
                 <div style="flex: 1;">
                     <div style="display: flex; align-items: center;">
-                        <img src="{{ asset('img/logo/sip.png') }}" width="60" style="margin-right: 15px;">
+                        <img src="<?php echo e(asset('img/logo/sip.png')); ?>" width="60" style="margin-right: 15px;">
                         <div>
                             <h1 style="font-size: 28px; font-weight: bold; margin: 0;">FACTURE</h1>
-                            <p style="font-size: 14px; opacity: 0.9; margin: 5px 0 0;">N° INV-{{ $transaction->id }}</p>
+                            <p style="font-size: 14px; opacity: 0.9; margin: 5px 0 0;">N° INV-<?php echo e($transaction->id); ?></p>
                         </div>
                     </div>
                 </div>
                 <div style="text-align: right;">
-                    @if($hasLateCheckout)
+                    <?php if($hasLateCheckout): ?>
                         <span class="status-badge status-late">
                             <i class="fas fa-clock mr-1"></i> DÉPART TARDIF
                         </span>
-                    @else
-                        <span class="status-badge {{ $isFullyPaid ? 'status-paid' : 'status-pending' }}">
-                            {{ $isFullyPaid ? '✓ PAYÉ' : '⏱ EN ATTENTE' }}
+                    <?php else: ?>
+                        <span class="status-badge <?php echo e($isFullyPaid ? 'status-paid' : 'status-pending'); ?>">
+                            <?php echo e($isFullyPaid ? '✓ PAYÉ' : '⏱ EN ATTENTE'); ?>
+
                         </span>
-                    @endif
+                    <?php endif; ?>
                     <p style="font-size: 14px; opacity: 0.9; margin: 10px 0 0;">
-                        Date d'émission : {{ date('d/m/Y') }}
+                        Date d'émission : <?php echo e(date('d/m/Y')); ?>
+
                     </p>
                 </div>
             </div>
@@ -462,19 +464,23 @@
                     <div class="info-box">
                         <p class="mb-2">
                             <strong style="color: #28a745;">ID Client :</strong> 
-                            {{ $transaction->customer->id }}
+                            <?php echo e($transaction->customer->id); ?>
+
                         </p>
                         <p class="mb-2">
                             <strong style="color: #28a745;">Nom :</strong> 
-                            {{ $transaction->customer->name }}
+                            <?php echo e($transaction->customer->name); ?>
+
                         </p>
                         <p class="mb-2">
                             <strong style="color: #28a745;">Profession :</strong> 
-                            {{ $transaction->customer->job ?? 'Non spécifié' }}
+                            <?php echo e($transaction->customer->job ?? 'Non spécifié'); ?>
+
                         </p>
                         <p class="mb-0">
                             <strong style="color: #28a745;">Adresse :</strong> 
-                            {{ $transaction->customer->address ?? 'Non spécifié' }}
+                            <?php echo e($transaction->customer->address ?? 'Non spécifié'); ?>
+
                         </p>
                     </div>
                 </div>
@@ -486,32 +492,36 @@
                     <div class="info-box">
                         <p class="mb-2">
                             <strong style="color: #28a745;">Arrivée :</strong> 
-                            {{ $transaction->check_in->format('d/m/Y H:i') }}
+                            <?php echo e($transaction->check_in->format('d/m/Y H:i')); ?>
+
                         </p>
                         <p class="mb-2">
                             <strong style="color: #28a745;">Départ prévu :</strong> 
-                            {{ $transaction->check_out->format('d/m/Y H:i') }}
+                            <?php echo e($transaction->check_out->format('d/m/Y H:i')); ?>
+
                         </p>
                         
-                        @if($hasLateCheckout)
+                        <?php if($hasLateCheckout): ?>
                             <p class="mb-2">
                                 <strong style="color: #dc3545;">Départ effectif :</strong> 
-                                {{ \Carbon\Carbon::parse($transaction->check_out_actual)->format('d/m/Y H:i') }}
+                                <?php echo e(\Carbon\Carbon::parse($transaction->check_out_actual)->format('d/m/Y H:i')); ?>
+
                             </p>
                             <p class="mb-0">
                                 <strong style="color: #dc3545;">Dépassement :</strong> 
-                                @if($extraHours > 24)
-                                    {{ floor($extraHours/24) }} jour(s) et {{ $extraHours % 24 }} heure(s)
-                                @else
-                                    {{ $extraHours }} heure(s)
-                                @endif
+                                <?php if($extraHours > 24): ?>
+                                    <?php echo e(floor($extraHours/24)); ?> jour(s) et <?php echo e($extraHours % 24); ?> heure(s)
+                                <?php else: ?>
+                                    <?php echo e($extraHours); ?> heure(s)
+                                <?php endif; ?>
                             </p>
-                        @else
+                        <?php else: ?>
                             <p class="mb-0">
                                 <strong style="color: #28a745;">Durée :</strong> 
-                                {{ $transaction->getDateDifferenceWithPlural() }}
+                                <?php echo e($transaction->getDateDifferenceWithPlural()); ?>
+
                             </p>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -535,20 +545,21 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    Chambre {{ $transaction->room->number }} - 
-                                    {{ $transaction->room->type->name ?? 'Standard' }}
+                                    Chambre <?php echo e($transaction->room->number); ?> - 
+                                    <?php echo e($transaction->room->type->name ?? 'Standard'); ?>
+
                                 </td>
                                 <td class="text-center">
-                                    {{ number_format($transaction->room->price, 0, ',', ' ') }} FCFA
+                                    <?php echo e(number_format($transaction->room->price, 0, ',', ' ')); ?> FCFA
                                 </td>
-                                <td class="text-center">{{ $transaction->getDateDifferenceWithPlural() }}</td>
+                                <td class="text-center"><?php echo e($transaction->getDateDifferenceWithPlural()); ?></td>
                                 <td class="text-right font-weight-bold" style="color: #28a745;">
-                                    {{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} FCFA
+                                    <?php echo e(number_format($transaction->getTotalPrice(), 0, ',', ' ')); ?> FCFA
                                 </td>
                             </tr>
                             
                             <!-- Frais de late checkout -->
-                            @if($hasLateCheckout && $extraCharge > 0)
+                            <?php if($hasLateCheckout && $extraCharge > 0): ?>
                             <tr style="background-color: #fff3cd;">
                                 <td colspan="4" class="p-0">
                                     <div class="late-checkout-box mb-0">
@@ -558,19 +569,19 @@
                                         </div>
                                         <div style="display: flex; margin-top: 10px;">
                                             <div style="flex: 1;">
-                                                <small>Dépassement : {{ $extraHours }} heure(s)</small><br>
-                                                <small>Tarif appliqué : {{ $extraChargeRate }}</small>
+                                                <small>Dépassement : <?php echo e($extraHours); ?> heure(s)</small><br>
+                                                <small>Tarif appliqué : <?php echo e($extraChargeRate); ?></small>
                                             </div>
                                             <div style="text-align: right;">
                                                 <strong style="font-size: 16px; color: #dc3545;">
-                                                    + {{ number_format($extraCharge, 0, ',', ' ') }} FCFA
+                                                    + <?php echo e(number_format($extraCharge, 0, ',', ' ')); ?> FCFA
                                                 </strong>
                                             </div>
                                         </div>
                                     </div>
                                 </td>
                             </tr>
-                            @endif
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -582,11 +593,11 @@
                     <i class="fas fa-history"></i>
                     HISTORIQUE DES PAIEMENTS
                     <span style="margin-left: auto; font-size: 12px; color: #666;">
-                        {{ $allPayments->count() }} paiement(s)
+                        <?php echo e($allPayments->count()); ?> paiement(s)
                     </span>
                 </h6>
                 
-                @if($allPayments->count() > 0)
+                <?php if($allPayments->count() > 0): ?>
                 <div style="overflow-x: auto;">
                     <table class="table table-bordered payment-history-table">
                         <thead>
@@ -599,8 +610,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($allPayments as $paymentItem)
-                            @php
+                            <?php $__currentLoopData = $allPayments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $paymentItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 // Déterminer la classe de la méthode
                                 $methodClass = 'method-other';
                                 $methodIcon = 'fa-money-bill-wave';
@@ -627,44 +638,45 @@
                                         $methodIcon = 'fa-bolt';
                                         break;
                                 }
-                            @endphp
+                            ?>
                             <tr>
-                                <td>{{ $paymentItem->created_at->format('d/m/Y H:i') }}</td>
-                                <td><small>{{ $paymentItem->reference }}</small></td>
+                                <td><?php echo e($paymentItem->created_at->format('d/m/Y H:i')); ?></td>
+                                <td><small><?php echo e($paymentItem->reference); ?></small></td>
                                 <td>
-                                    <span class="payment-method-badge {{ $methodClass }}">
-                                        <i class="fas {{ $methodIcon }} mr-1"></i>
-                                        {{ $paymentItem->payment_method_label ?? $paymentItem->payment_method }}
+                                    <span class="payment-method-badge <?php echo e($methodClass); ?>">
+                                        <i class="fas <?php echo e($methodIcon); ?> mr-1"></i>
+                                        <?php echo e($paymentItem->payment_method_label ?? $paymentItem->payment_method); ?>
+
                                     </span>
                                 </td>
                                 <td class="text-right font-weight-bold" style="color: #28a745;">
-                                    {{ number_format($paymentItem->amount, 0, ',', ' ') }} FCFA
+                                    <?php echo e(number_format($paymentItem->amount, 0, ',', ' ')); ?> FCFA
                                 </td>
                                 <td>
-                                    <small>{{ $paymentItem->user->name ?? $paymentItem->createdBy->name ?? 'Système' }}</small>
+                                    <small><?php echo e($paymentItem->user->name ?? $paymentItem->createdBy->name ?? 'Système'); ?></small>
                                 </td>
                             </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             
                             <!-- Ligne de total des paiements -->
                             <tr style="background-color: #e8f5e9; font-weight: bold;">
                                 <td colspan="3" class="text-right">TOTAL PAYÉ</td>
                                 <td class="text-right" style="color: #28a745; font-size: 16px;">
-                                    {{ number_format($totalPayments, 0, ',', ' ') }} FCFA
+                                    <?php echo e(number_format($totalPayments, 0, ',', ' ')); ?> FCFA
                                 </td>
                                 <td></td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                @else
+                <?php else: ?>
                 <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107;">
                     <p class="mb-0 text-center">
                         <i class="fas fa-exclamation-triangle mr-2"></i>
                         Aucun paiement enregistré pour cette transaction
                     </p>
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
 
             <!-- Récapitulatif des montants -->
@@ -673,31 +685,31 @@
                     <div class="info-box">
                         <p class="mb-1 text-muted">Total Séjour</p>
                         <p class="mb-0 amount" style="color: #28a745;">
-                            {{ number_format($totalSejour, 0, ',', ' ') }} FCFA
+                            <?php echo e(number_format($totalSejour, 0, ',', ' ')); ?> FCFA
                         </p>
-                        @if($hasLateCheckout && $extraCharge > 0)
-                        <small class="text-muted">(dont {{ number_format($extraCharge, 0, ',', ' ') }} FCFA de frais)</small>
-                        @endif
+                        <?php if($hasLateCheckout && $extraCharge > 0): ?>
+                        <small class="text-muted">(dont <?php echo e(number_format($extraCharge, 0, ',', ' ')); ?> FCFA de frais)</small>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div style="flex: 1; text-align: center;">
                     <div class="info-box">
                         <p class="mb-1 text-muted">Total Payé</p>
                         <p class="mb-0 amount" style="color: #28a745;">
-                            {{ number_format($totalPayments, 0, ',', ' ') }} FCFA
+                            <?php echo e(number_format($totalPayments, 0, ',', ' ')); ?> FCFA
                         </p>
-                        <small class="text-muted">{{ $allPayments->count() }} paiement(s)</small>
+                        <small class="text-muted"><?php echo e($allPayments->count()); ?> paiement(s)</small>
                     </div>
                 </div>
                 <div style="flex: 1; text-align: center;">
                     <div class="info-box">
                         <p class="mb-1 text-muted">Solde Restant</p>
-                        <p class="mb-0 amount" style="color: {{ $remaining <= 0 ? '#28a745' : '#dc3545' }};">
-                            {{ number_format($remaining, 0, ',', ' ') }} FCFA
+                        <p class="mb-0 amount" style="color: <?php echo e($remaining <= 0 ? '#28a745' : '#dc3545'); ?>;">
+                            <?php echo e(number_format($remaining, 0, ',', ' ')); ?> FCFA
                         </p>
-                        @if($remaining <= 0)
+                        <?php if($remaining <= 0): ?>
                         <small class="text-success">✓ Facture soldée</small>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -708,27 +720,27 @@
                     <div>
                         <h5 style="margin: 0 0 5px;">RÉCAPITULATIF FINAL</h5>
                         <p style="margin: 0; opacity: 0.8; font-size: 13px;">
-                            @if($hasLateCheckout && $extraCharge > 0)
+                            <?php if($hasLateCheckout && $extraCharge > 0): ?>
                                 <i class="fas fa-info-circle mr-1"></i> Inclut les frais de late checkout
-                            @else
+                            <?php else: ?>
                                 Solde à payer
-                            @endif
+                            <?php endif; ?>
                         </p>
                     </div>
                     <div style="text-align: right;">
                         <h2 style="margin: 0 0 5px; font-size: 28px;">
-                            @if($remaining <= 0)
-                                {{ number_format(0, 0, ',', ' ') }} FCFA
-                            @else
-                                {{ number_format($remaining, 0, ',', ' ') }} FCFA
-                            @endif
+                            <?php if($remaining <= 0): ?>
+                                <?php echo e(number_format(0, 0, ',', ' ')); ?> FCFA
+                            <?php else: ?>
+                                <?php echo e(number_format($remaining, 0, ',', ' ')); ?> FCFA
+                            <?php endif; ?>
                         </h2>
                         <p style="margin: 0; opacity: 0.8; font-size: 13px;">
-                            @if($remaining <= 0)
+                            <?php if($remaining <= 0): ?>
                                 <i class="fas fa-check-circle mr-1"></i> Facture entièrement réglée
-                            @else
+                            <?php else: ?>
                                 Reste à payer avant le départ
-                            @endif
+                            <?php endif; ?>
                         </p>
                     </div>
                 </div>
@@ -776,7 +788,8 @@
                     <p class="small text-muted mb-0">
                         <strong style="color: #28a745;">Signature et cachet :</strong><br>
                         <span style="margin-top: 30px; display: inline-block; border-top: 1px solid #28a745; padding-top: 8px; width: 150px;">
-                            {{ $transaction->user->name ?? '____________________' }}
+                            <?php echo e($transaction->user->name ?? '____________________'); ?>
+
                         </span>
                     </p>
                 </div>
@@ -809,7 +822,7 @@ function downloadPDF() {
     // Options pour le PDF
     const opt = {
         margin:       0.5,
-        filename:     'Facture_INV-{{ $transaction->id }}.pdf',
+        filename:     'Facture_INV-<?php echo e($transaction->id); ?>.pdf',
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { 
             scale: 2,
@@ -879,4 +892,5 @@ document.addEventListener('keydown', function(e) {
 
 <!-- Ajout d'icônes FontAwesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.invoicemaster', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/payment/invoice.blade.php ENDPATH**/ ?>

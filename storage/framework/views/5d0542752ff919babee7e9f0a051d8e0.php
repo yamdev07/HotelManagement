@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Chambres en Maintenance')
 
-@push('styles')
+<?php $__env->startSection('title', 'Chambres en Maintenance'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -457,9 +457,9 @@ body {
     }
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="container-fluid px-4">
     <!-- En-tête -->
@@ -472,7 +472,7 @@ body {
             <p class="text-muted mb-0">Gestion des chambres en réparation et maintenance</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('housekeeping.index') }}" class="btn btn-outline">
+            <a href="<?php echo e(route('housekeeping.index')); ?>" class="btn btn-outline">
                 <i class="fas fa-arrow-left me-2"></i>
                 Retour
             </a>
@@ -489,7 +489,7 @@ body {
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="stat-label">Total Maintenance</div>
-                    <div class="stat-number">{{ $stats['total_maintenance'] ?? 0 }}</div>
+                    <div class="stat-number"><?php echo e($stats['total_maintenance'] ?? 0); ?></div>
                 </div>
                 <div class="stat-icon">
                     <i class="fas fa-tools fa-2x"></i>
@@ -505,11 +505,12 @@ body {
                 <div>
                     <div class="stat-label">Plus ancienne</div>
                     <div class="stat-number" style="font-size: 20px;">
-                        @if(isset($stats['longest_maintenance']) && $stats['longest_maintenance'])
-                            {{ \Carbon\Carbon::parse($stats['longest_maintenance'])->diffForHumans(['parts' => 1]) }}
-                        @else
+                        <?php if(isset($stats['longest_maintenance']) && $stats['longest_maintenance']): ?>
+                            <?php echo e(\Carbon\Carbon::parse($stats['longest_maintenance'])->diffForHumans(['parts' => 1])); ?>
+
+                        <?php else: ?>
                             N/A
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="stat-icon">
@@ -525,7 +526,7 @@ body {
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="stat-label">En cours</div>
-                    <div class="stat-number">{{ $stats['in_progress'] ?? 0 }}</div>
+                    <div class="stat-number"><?php echo e($stats['in_progress'] ?? 0); ?></div>
                 </div>
                 <div class="stat-icon">
                     <i class="fas fa-spinner fa-2x"></i>
@@ -540,7 +541,7 @@ body {
             <div class="d-flex justify-content-between align-items-start">
                 <div>
                     <div class="stat-label">Planifiées</div>
-                    <div class="stat-number">{{ $stats['scheduled'] ?? 0 }}</div>
+                    <div class="stat-number"><?php echo e($stats['scheduled'] ?? 0); ?></div>
                 </div>
                 <div class="stat-icon">
                     <i class="fas fa-calendar-alt fa-2x"></i>
@@ -553,7 +554,7 @@ body {
     </div>
 
     <!-- Statistiques par raison -->
-    @if(isset($stats['maintenance_by_reason']) && count($stats['maintenance_by_reason']) > 0)
+    <?php if(isset($stats['maintenance_by_reason']) && count($stats['maintenance_by_reason']) > 0): ?>
     <div class="row mb-4">
         <div class="col-12">
             <div class="secondary-card">
@@ -563,18 +564,18 @@ body {
                 </div>
                 <div class="card-body">
                     <div class="d-flex flex-wrap gap-2">
-                        @foreach($stats['maintenance_by_reason'] as $reason => $count)
+                        <?php $__currentLoopData = $stats['maintenance_by_reason']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $reason => $count): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <span class="badge" style="background: var(--primary-100); color: var(--primary-700); padding: 8px 16px;">
                             <i class="fas fa-tag me-1"></i>
-                            {{ $reason }}: <strong>{{ $count }}</strong>
+                            <?php echo e($reason); ?>: <strong><?php echo e($count); ?></strong>
                         </span>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Liste des chambres en maintenance -->
     <div class="row">
@@ -583,14 +584,14 @@ body {
                 <div class="card-header">
                     <div>
                         <i class="fas fa-tools me-2"></i>
-                        <strong>Chambres en maintenance ({{ $maintenanceRooms->count() }})</strong>
+                        <strong>Chambres en maintenance (<?php echo e($maintenanceRooms->count()); ?>)</strong>
                     </div>
                     <div class="text-white-50">
-                        <small>Mis à jour: {{ now()->format('H:i') }}</small>
+                        <small>Mis à jour: <?php echo e(now()->format('H:i')); ?></small>
                     </div>
                 </div>
 
-                @if($maintenanceRooms->count() > 0)
+                <?php if($maintenanceRooms->count() > 0): ?>
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <thead>
@@ -605,102 +606,107 @@ body {
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($maintenanceRooms as $room)
-                                @php
+                                <?php $__currentLoopData = $maintenanceRooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $startDate = \Carbon\Carbon::parse($room->maintenance_started_at);
                                     $duration = $startDate->diffForHumans(now(), true);
                                     $isLongTerm = $startDate->diffInDays(now()) > 3;
-                                @endphp
-                                <tr class="{{ $isLongTerm ? 'table-warning' : '' }}">
+                                ?>
+                                <tr class="<?php echo e($isLongTerm ? 'table-warning' : ''); ?>">
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="room-badge me-3">
-                                                {{ $room->number }}
+                                                <?php echo e($room->number); ?>
+
                                             </div>
                                             <div>
-                                                <div class="fw-bold">{{ $room->type->name ?? 'Standard' }}</div>
-                                                <small class="text-muted">Étage: {{ $room->floor ?? 'N/A' }}</small>
+                                                <div class="fw-bold"><?php echo e($room->type->name ?? 'Standard'); ?></div>
+                                                <small class="text-muted">Étage: <?php echo e($room->floor ?? 'N/A'); ?></small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
                                         <span class="badge" style="background: var(--primary-100); color: var(--primary-700);">
-                                            {{ $room->type->name ?? 'Standard' }}
+                                            <?php echo e($room->type->name ?? 'Standard'); ?>
+
                                         </span>
                                     </td>
                                     <td>
                                         <div class="text-truncate" style="max-width: 200px;" 
                                              data-bs-toggle="tooltip" 
-                                             title="{{ $room->maintenance_reason }}">
-                                            {{ $room->maintenance_reason }}
+                                             title="<?php echo e($room->maintenance_reason); ?>">
+                                            <?php echo e($room->maintenance_reason); ?>
+
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="fw-bold">{{ $startDate->format('d/m/Y') }}</div>
-                                        <small class="text-muted">{{ $startDate->format('H:i') }}</small>
+                                        <div class="fw-bold"><?php echo e($startDate->format('d/m/Y')); ?></div>
+                                        <small class="text-muted"><?php echo e($startDate->format('H:i')); ?></small>
                                     </td>
                                     <td>
-                                        <span class="badge bg-{{ $isLongTerm ? 'warning' : 'info' }}">
+                                        <span class="badge bg-<?php echo e($isLongTerm ? 'warning' : 'info'); ?>">
                                             <i class="fas fa-clock me-1"></i>
-                                            {{ $duration }}
+                                            <?php echo e($duration); ?>
+
                                         </span>
-                                        @if($room->estimated_maintenance_duration)
+                                        <?php if($room->estimated_maintenance_duration): ?>
                                             <small class="d-block text-muted mt-1">
-                                                Estimé: {{ $room->estimated_maintenance_duration }}h
+                                                Estimé: <?php echo e($room->estimated_maintenance_duration); ?>h
                                             </small>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td>
-                                        @php
+                                        <?php
                                             $requestedBy = \App\Models\User::find($room->maintenance_requested_by);
-                                        @endphp
-                                        @if($requestedBy)
+                                        ?>
+                                        <?php if($requestedBy): ?>
                                             <div class="d-flex align-items-center">
                                                 <div class="avatar-sm me-2">
                                                     <div class="avatar-title bg-light">
-                                                        {{ substr($requestedBy->name, 0, 1) }}
+                                                        <?php echo e(substr($requestedBy->name, 0, 1)); ?>
+
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <div class="fw-bold small">{{ $requestedBy->name }}</div>
-                                                    <small class="text-muted">{{ $requestedBy->role }}</small>
+                                                    <div class="fw-bold small"><?php echo e($requestedBy->name); ?></div>
+                                                    <small class="text-muted"><?php echo e($requestedBy->role); ?></small>
                                                 </div>
                                             </div>
-                                        @else
+                                        <?php else: ?>
                                             <span class="text-muted">Inconnu</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td style="text-align: center;">
                                         <div class="btn-group" role="group">
                                             <button class="btn btn-outline-primary"
                                                     data-bs-toggle="modal" 
-                                                    data-bs-target="#detailsModal{{ $room->id }}"
+                                                    data-bs-target="#detailsModal<?php echo e($room->id); ?>"
                                                     title="Voir détails">
                                                 <i class="fas fa-eye"></i>
                                             </button>
-                                            <a href="{{ route('housekeeping.maintenance-form', $room->id) }}"
+                                            <a href="<?php echo e(route('housekeeping.maintenance-form', $room->id)); ?>"
                                                class="btn btn-outline-warning"
                                                title="Modifier">
                                                 <i class="fas fa-edit"></i>
                                             </a>
-                                            <form action="{{ route('housekeeping.end-maintenance', $room->id) }}" 
+                                            <form action="<?php echo e(route('housekeeping.end-maintenance', $room->id)); ?>" 
                                                   method="POST" class="d-inline">
-                                                @csrf
+                                                <?php echo csrf_field(); ?>
                                                 <button type="submit" 
                                                         class="btn btn-success"
                                                         title="Terminer"
-                                                        onclick="return confirm('Terminer la maintenance de la chambre {{ $room->number }} ?')">
+                                                        onclick="return confirm('Terminer la maintenance de la chambre <?php echo e($room->number); ?> ?')">
                                                     <i class="fas fa-check"></i>
                                                 </button>
                                             </form>
                                         </div>
                                     </td>
                                 </tr>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
                         </table>
                     </div>
-                @else
+                <?php else: ?>
                     <div class="empty-state">
                         <i class="fas fa-check-circle"></i>
                         <h4>Aucune chambre en maintenance</h4>
@@ -710,13 +716,13 @@ body {
                             Ajouter une maintenance
                         </button>
                     </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
     </div>
 
     <!-- Résumé et analyses -->
-    @if($maintenanceRooms->count() > 0)
+    <?php if($maintenanceRooms->count() > 0): ?>
     <div class="row mt-4">
         <div class="col-md-6">
             <div class="secondary-card">
@@ -725,41 +731,44 @@ body {
                     <strong>Maintenance longue durée (> 3 jours)</strong>
                 </div>
                 <div class="card-body p-0">
-                    @php
+                    <?php
                         $longTerm = $maintenanceRooms->filter(function($room) {
                             return \Carbon\Carbon::parse($room->maintenance_started_at)->diffInDays(now()) > 3;
                         });
-                    @endphp
-                    @if($longTerm->count() > 0)
+                    ?>
+                    <?php if($longTerm->count() > 0): ?>
                         <div class="list-group list-group-flush">
-                            @foreach($longTerm as $room)
+                            <?php $__currentLoopData = $longTerm; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <div class="list-group-item">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div>
                                         <h6 class="mb-1 fw-bold">
                                             <span class="room-badge me-2" style="width: 32px; height: 32px; font-size: 14px;">
-                                                {{ $room->number }}
+                                                <?php echo e($room->number); ?>
+
                                             </span>
-                                            {{ $room->type->name ?? 'Standard' }}
+                                            <?php echo e($room->type->name ?? 'Standard'); ?>
+
                                         </h6>
-                                        <small class="text-muted">{{ $room->maintenance_reason }}</small>
+                                        <small class="text-muted"><?php echo e($room->maintenance_reason); ?></small>
                                     </div>
                                     <div class="text-end">
                                         <span class="badge" style="background: rgba(239,68,68,0.1); color: var(--danger-500);">
                                             <i class="fas fa-clock me-1"></i>
-                                            {{ \Carbon\Carbon::parse($room->maintenance_started_at)->diffForHumans(now(), true) }}
+                                            <?php echo e(\Carbon\Carbon::parse($room->maintenance_started_at)->diffForHumans(now(), true)); ?>
+
                                         </span>
                                     </div>
                                 </div>
                             </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="text-center py-4">
                             <i class="fas fa-check-circle fa-3x" style="color: var(--primary-200); margin-bottom: 12px;"></i>
                             <p class="text-muted mb-0">Aucune maintenance longue durée</p>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -771,39 +780,39 @@ body {
                     <strong>Répartition par type de chambre</strong>
                 </div>
                 <div class="card-body">
-                    @php
+                    <?php
                         $byType = $maintenanceRooms->groupBy(function($room) {
                             return $room->type->name ?? 'Inconnu';
                         })->map->count();
-                    @endphp
-                    @if($byType->count() > 0)
-                        @foreach($byType as $type => $count)
+                    ?>
+                    <?php if($byType->count() > 0): ?>
+                        <?php $__currentLoopData = $byType; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type => $count): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="mb-3">
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold" style="color: var(--gray-700);">{{ $type }}</span>
+                                <span class="fw-bold" style="color: var(--gray-700);"><?php echo e($type); ?></span>
                                 <span class="badge" style="background: var(--primary-100); color: var(--primary-700);">
-                                    {{ $count }} chambre(s)
+                                    <?php echo e($count); ?> chambre(s)
                                 </span>
                             </div>
                             <div class="progress">
-                                @php
+                                <?php
                                     $percentage = ($count / $maintenanceRooms->count()) * 100;
-                                @endphp
-                                <div class="progress-bar" style="width: {{ $percentage }}%;"></div>
+                                ?>
+                                <div class="progress-bar" style="width: <?php echo e($percentage); ?>%;"></div>
                             </div>
                         </div>
-                        @endforeach
-                    @else
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    <?php else: ?>
                         <div class="text-center py-4">
                             <i class="fas fa-chart-pie fa-3x" style="color: var(--primary-200); margin-bottom: 12px;"></i>
                             <p class="text-muted mb-0">Aucune donnée disponible</p>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 </div>
 
 <!-- Modal Ajouter Maintenance -->
@@ -818,22 +827,23 @@ body {
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="" method="POST" id="addMaintenanceForm">
-                @csrf
+                <?php echo csrf_field(); ?>
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="room_select" class="form-label fw-semibold">Chambre *</label>
                         <select class="form-select" id="room_select" name="room_id" required>
                             <option value="">Sélectionner une chambre</option>
-                            @php
+                            <?php
                                 $availableRooms = \App\Models\Room::where('room_status_id', '!=', \App\Models\Room::STATUS_MAINTENANCE)
                                     ->orderBy('number')
                                     ->get();
-                            @endphp
-                            @foreach($availableRooms as $room)
-                                <option value="{{ $room->id }}">
-                                    Chambre {{ $room->number }} - {{ $room->type->name ?? 'Standard' }}
+                            ?>
+                            <?php $__currentLoopData = $availableRooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($room->id); ?>">
+                                    Chambre <?php echo e($room->number); ?> - <?php echo e($room->type->name ?? 'Standard'); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
                     <div class="mb-3">
@@ -877,14 +887,15 @@ body {
 </div>
 
 <!-- Modals pour détails -->
-@foreach($maintenanceRooms as $room)
-<div class="modal fade" id="detailsModal{{ $room->id }}" tabindex="-1" aria-hidden="true">
+<?php $__currentLoopData = $maintenanceRooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+<div class="modal fade" id="detailsModal<?php echo e($room->id); ?>" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content" style="border-radius: 20px;">
             <div class="modal-header" style="border-bottom: 1px solid var(--gray-200);">
                 <h5 class="modal-title fw-bold">
                     <i class="fas fa-info-circle me-2" style="color: var(--primary-500);"></i>
-                    Détails maintenance - Chambre {{ $room->number }}
+                    Détails maintenance - Chambre <?php echo e($room->number); ?>
+
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -895,11 +906,12 @@ body {
                             <label class="text-muted small mb-1">Chambre</label>
                             <div class="d-flex align-items-center">
                                 <div class="room-badge me-3" style="width: 48px; height: 48px;">
-                                    {{ $room->number }}
+                                    <?php echo e($room->number); ?>
+
                                 </div>
                                 <div>
-                                    <div class="fw-bold fs-5">{{ $room->type->name ?? 'Standard' }}</div>
-                                    <small class="text-muted">Étage: {{ $room->floor ?? 'N/A' }}</small>
+                                    <div class="fw-bold fs-5"><?php echo e($room->type->name ?? 'Standard'); ?></div>
+                                    <small class="text-muted">Étage: <?php echo e($room->floor ?? 'N/A'); ?></small>
                                 </div>
                             </div>
                         </div>
@@ -907,7 +919,7 @@ body {
                             <label class="text-muted small mb-1">Capacité</label>
                             <div class="fw-bold">
                                 <i class="fas fa-users me-2" style="color: var(--primary-500);"></i>
-                                {{ $room->capacity }} personnes
+                                <?php echo e($room->capacity); ?> personnes
                             </div>
                         </div>
                     </div>
@@ -925,19 +937,21 @@ body {
                             <label class="text-muted small mb-1">Début maintenance</label>
                             <div class="fw-bold">
                                 <i class="fas fa-calendar me-2" style="color: var(--primary-500);"></i>
-                                {{ \Carbon\Carbon::parse($room->maintenance_started_at)->format('d/m/Y H:i') }}
+                                <?php echo e(\Carbon\Carbon::parse($room->maintenance_started_at)->format('d/m/Y H:i')); ?>
+
                             </div>
                         </div>
                         <div class="mb-3">
                             <label class="text-muted small mb-1">Durée</label>
                             <div class="fw-bold">
                                 <i class="fas fa-clock me-2" style="color: var(--primary-500);"></i>
-                                {{ \Carbon\Carbon::parse($room->maintenance_started_at)->diffForHumans(now(), true) }}
-                                @if($room->estimated_maintenance_duration)
+                                <?php echo e(\Carbon\Carbon::parse($room->maintenance_started_at)->diffForHumans(now(), true)); ?>
+
+                                <?php if($room->estimated_maintenance_duration): ?>
                                     <small class="d-block text-muted mt-1">
-                                        Estimé: {{ $room->estimated_maintenance_duration }} heures
+                                        Estimé: <?php echo e($room->estimated_maintenance_duration); ?> heures
                                     </small>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -947,82 +961,88 @@ body {
                     <label class="text-muted small mb-1">Raison de la maintenance</label>
                     <div class="alert" style="background: var(--primary-50); border: 1px solid var(--primary-100); color: var(--primary-700);">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        {{ $room->maintenance_reason }}
+                        <?php echo e($room->maintenance_reason); ?>
+
                     </div>
                 </div>
                 
-                @if($room->additional_notes)
+                <?php if($room->additional_notes): ?>
                 <div class="mb-3">
                     <label class="text-muted small mb-1">Notes supplémentaires</label>
                     <div class="card bg-light" style="border: none;">
                         <div class="card-body">
-                            {{ $room->additional_notes }}
+                            <?php echo e($room->additional_notes); ?>
+
                         </div>
                     </div>
                 </div>
-                @endif
+                <?php endif; ?>
                 
                 <div class="row">
                     <div class="col-md-6">
                         <label class="text-muted small mb-1">Demandé par</label>
-                        @php
+                        <?php
                             $requestedBy = \App\Models\User::find($room->maintenance_requested_by);
-                        @endphp
-                        @if($requestedBy)
+                        ?>
+                        <?php if($requestedBy): ?>
                         <div class="d-flex align-items-center">
                             <div class="avatar-lg me-3">
                                 <div class="avatar-title bg-light">
-                                    {{ substr($requestedBy->name, 0, 1) }}
+                                    <?php echo e(substr($requestedBy->name, 0, 1)); ?>
+
                                 </div>
                             </div>
                             <div>
-                                <div class="fw-bold">{{ $requestedBy->name }}</div>
-                                <div class="text-muted small">{{ $requestedBy->email }}</div>
+                                <div class="fw-bold"><?php echo e($requestedBy->name); ?></div>
+                                <div class="text-muted small"><?php echo e($requestedBy->email); ?></div>
                                 <span class="badge" style="background: var(--primary-100); color: var(--primary-700);">
-                                    {{ $requestedBy->role }}
+                                    <?php echo e($requestedBy->role); ?>
+
                                 </span>
                             </div>
                         </div>
-                        @else
+                        <?php else: ?>
                         <span class="text-muted">Inconnu</span>
-                        @endif
+                        <?php endif; ?>
                     </div>
-                    @if($room->maintenance_resolved_by)
+                    <?php if($room->maintenance_resolved_by): ?>
                     <div class="col-md-6">
                         <label class="text-muted small mb-1">Résolu par</label>
-                        @php
+                        <?php
                             $resolvedBy = \App\Models\User::find($room->maintenance_resolved_by);
-                        @endphp
-                        @if($resolvedBy)
+                        ?>
+                        <?php if($resolvedBy): ?>
                         <div class="d-flex align-items-center">
                             <div class="avatar-lg me-3">
                                 <div class="avatar-title" style="background: var(--success-500); color: white;">
-                                    {{ substr($resolvedBy->name, 0, 1) }}
+                                    <?php echo e(substr($resolvedBy->name, 0, 1)); ?>
+
                                 </div>
                             </div>
                             <div>
-                                <div class="fw-bold">{{ $resolvedBy->name }}</div>
-                                <div class="text-muted small">{{ $resolvedBy->email }}</div>
+                                <div class="fw-bold"><?php echo e($resolvedBy->name); ?></div>
+                                <div class="text-muted small"><?php echo e($resolvedBy->email); ?></div>
                                 <span class="badge" style="background: var(--success-500); color: white;">
-                                    {{ $resolvedBy->role }}
+                                    <?php echo e($resolvedBy->role); ?>
+
                                 </span>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="modal-footer" style="border-top: 1px solid var(--gray-200);">
                 <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Fermer</button>
-                <a href="{{ route('housekeeping.maintenance-form', $room->id) }}" class="btn btn-warning">
+                <a href="<?php echo e(route('housekeeping.maintenance-form', $room->id)); ?>" class="btn btn-warning">
                     <i class="fas fa-edit me-2"></i>
                     Modifier
                 </a>
-                <form action="{{ route('housekeeping.end-maintenance', $room->id) }}" method="POST" class="d-inline">
-                    @csrf
+                <form action="<?php echo e(route('housekeeping.end-maintenance', $room->id)); ?>" method="POST" class="d-inline">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="btn btn-success"
-                            onclick="return confirm('Terminer la maintenance de la chambre {{ $room->number }} ?')">
+                            onclick="return confirm('Terminer la maintenance de la chambre <?php echo e($room->number); ?> ?')">
                         <i class="fas fa-check me-2"></i>
                         Terminer
                     </button>
@@ -1031,11 +1051,11 @@ body {
         </div>
     </div>
 </div>
-@endforeach
+<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialiser les tooltips
@@ -1065,7 +1085,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Construire l'URL correcte
-            const action = "{{ route('housekeeping.mark-maintenance', ':roomId') }}".replace(':roomId', roomId);
+            const action = "<?php echo e(route('housekeeping.mark-maintenance', ':roomId')); ?>".replace(':roomId', roomId);
             addMaintenanceForm.setAttribute('action', action);
             
             // Confirmation
@@ -1094,4 +1114,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 120000);
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/housekeeping/maintenance.blade.php ENDPATH**/ ?>

@@ -233,12 +233,22 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         Route::get('/export/{type}', [TransactionController::class, 'export'])->name('export')
             ->middleware('checkrole:Super,Admin');
 
-        // Groupe pour les routes avec paramètre {transaction} et segments supplémentaires
-        Route::prefix('{transaction}')->group(function () {
-            // === ROUTE LATE CHECKOUT ===
-            Route::post('/late-checkout', [TransactionController::class, 'lateCheckout'])
-                ->name('late-checkout')
-                ->middleware('checkrole:Super,Admin,Receptionist');
+          // Groupe pour les routes avec paramètre {transaction} et segments supplémentaires
+    Route::prefix('{transaction}')->group(function () {
+        // === ROUTES LATE CHECKOUT ET EARLY CHECKOUT ===
+        Route::post('/late-checkout', [TransactionController::class, 'lateCheckout'])
+            ->name('late-checkout')
+            ->middleware('checkrole:Super,Admin,Receptionist');
+            
+        // ✅ AJOUTEZ ICI LA ROUTE EARLY CHECKOUT
+        Route::post('/early-checkout', [TransactionController::class, 'earlyCheckout'])
+            ->name('early-checkout')
+            ->middleware('checkrole:Super,Admin,Receptionist');
+            
+        // ✅ AJOUTEZ ICI LA ROUTE POUR VÉRIFIER LA POSSIBILITÉ D'EARLY CHECKOUT
+        Route::get('/check-early-checkout', [TransactionController::class, 'checkEarlyCheckoutPossibility'])
+            ->name('check-early-checkout')
+            ->middleware('checkrole:Super,Admin,Receptionist');
 
             // Routes avec segments supplémentaires
             Route::get('/edit', [TransactionController::class, 'edit'])->name('edit')
@@ -296,6 +306,10 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
     // ==================== PAIEMENTS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
     Route::prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [PaymentController::class, 'index'])->name('index');
+
+        Route::post('/{payment}/mark-paid', [PaymentController::class, 'markAsPaid'])
+            ->name('mark-paid')
+            ->middleware('checkrole:Super,Admin,Receptionist');
 
         Route::get('/{payment}/details', [PaymentController::class, 'getDetails'])->name('details');
 
@@ -518,7 +532,10 @@ Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'check
     Route::get('/to-clean', [HousekeepingController::class, 'toClean'])->name('to-clean');
     Route::get('/quick-list/{status}', [HousekeepingController::class, 'quickList'])->name('quick-list');
 
-     // ✅ AJOUTE CETTE ROUTE ICI
+    Route::post('/room/{room}/clean', [HousekeepingController::class, 'cleanRoom'])
+        ->name('clean-room')
+        ->middleware('checkrole:Super,Admin,Housekeeping');
+
     Route::post('/room/{room}/mark-cleaned', [HousekeepingController::class, 'markAsCleaned'])
         ->name('mark-cleaned')
         ->middleware('checkrole:Super,Admin,Housekeeping');

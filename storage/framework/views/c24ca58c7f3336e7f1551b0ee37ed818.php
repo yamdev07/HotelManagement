@@ -1,6 +1,5 @@
-@extends('template.master')
-@section('title', 'Room Status')
-@section('content')
+<?php $__env->startSection('title', 'Room Status'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
@@ -628,7 +627,7 @@
 <div class="roomstatus-page">
     <!-- Breadcrumb -->
     <div class="breadcrumb-pro">
-        <a href="{{ route('dashboard.index') }}">
+        <a href="<?php echo e(route('dashboard.index')); ?>">
             <i class="fas fa-home fa-xs me-1"></i>Dashboard
         </a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
@@ -653,18 +652,18 @@
     </div>
 
     <!-- Statistics -->
-    @php
+    <?php
         // Simuler des statistiques - à remplacer par vos vraies données
         $totalStatuses = 8;
         $availableCount = 3;
         $occupiedCount = 2;
         $maintenanceCount = 2;
         $cleaningCount = 1;
-    @endphp
+    ?>
     
     <div class="stats-grid">
         <div class="stat-card primary">
-            <div class="stat-number">{{ $totalStatuses }}</div>
+            <div class="stat-number"><?php echo e($totalStatuses); ?></div>
             <div class="stat-label">Statuts totaux</div>
             <div class="stat-footer">
                 <i class="fas fa-tags"></i>
@@ -673,7 +672,7 @@
         </div>
         
         <div class="stat-card success">
-            <div class="stat-number">{{ $availableCount }}</div>
+            <div class="stat-number"><?php echo e($availableCount); ?></div>
             <div class="stat-label">Disponibles</div>
             <div class="stat-footer">
                 <i class="fas fa-check-circle"></i>
@@ -682,7 +681,7 @@
         </div>
         
         <div class="stat-card warning">
-            <div class="stat-number">{{ $occupiedCount }}</div>
+            <div class="stat-number"><?php echo e($occupiedCount); ?></div>
             <div class="stat-label">Occupés</div>
             <div class="stat-footer">
                 <i class="fas fa-user"></i>
@@ -691,7 +690,7 @@
         </div>
         
         <div class="stat-card info">
-            <div class="stat-number">{{ $maintenanceCount + $cleaningCount }}</div>
+            <div class="stat-number"><?php echo e($maintenanceCount + $cleaningCount); ?></div>
             <div class="stat-label">Hors service</div>
             <div class="stat-footer">
                 <i class="fas fa-tools"></i>
@@ -706,7 +705,7 @@
             <span class="filter-badge">
                 <i class="fas fa-toggle-on"></i>
                 Tous les statuts
-                <span class="badge-count">{{ $totalStatuses }}</span>
+                <span class="badge-count"><?php echo e($totalStatuses); ?></span>
             </span>
         </div>
         
@@ -731,7 +730,7 @@
             </h3>
             <span class="card-badge">
                 <i class="fas fa-list"></i>
-                {{ $totalStatuses }} enregistrés
+                <?php echo e($totalStatuses); ?> enregistrés
             </span>
         </div>
         
@@ -788,9 +787,9 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css">
 <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <!-- DataTables -->
@@ -1068,4 +1067,5 @@ function deleteStatus(id, name) {
     });
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/roomstatus/index.blade.php ENDPATH**/ ?>
