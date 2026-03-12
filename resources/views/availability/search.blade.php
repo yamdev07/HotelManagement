@@ -621,7 +621,7 @@
     transform: translateY(-2px);
 }
 
-/* Conflict info - MIS À JOUR */
+/* Conflict info - VERSION CORRIGÉE SANS CARBON PARSE */
 .conflict-info {
     margin-top: 16px;
     padding: 16px;
@@ -667,6 +667,7 @@
     gap: 8px;
     color: var(--gray-700);
     font-weight: 500;
+    flex-wrap: wrap;
 }
 
 .conflict-customer {
@@ -1060,7 +1061,7 @@
         </div>
         @endif
 
-        <!-- Chambres non disponibles - AVEC CONFLITS CORRIGÉS -->
+        <!-- Chambres non disponibles - VERSION CORRIGÉE -->
         @if(count($unavailableRooms) > 0)
         <div class="card-modern">
             <div class="card-header-danger card-header-modern">
@@ -1101,7 +1102,7 @@
                                 </div>
                             </div>
                             
-                            <!-- Conflits - VERSION CORRIGÉE (basée sur le contrôleur) -->
+                            <!-- Conflits - VERSION CORRIGÉE SANS CARBON PARSE -->
                             @if(isset($roomConflicts[$room->id]) && count($roomConflicts[$room->id]) > 0)
                             <div class="conflict-info">
                                 <div class="conflict-header">
@@ -1112,18 +1113,33 @@
                                 <div class="conflict-details">
                                     @foreach($roomConflicts[$room->id] as $conflict)
                                     @php
-                                        // Les données sont des tableaux selon le contrôleur
-                                        $checkIn = $conflict['check_in'] ?? 'N/A';
-                                        $checkOut = $conflict['check_out'] ?? 'N/A';
+                                        // Récupérer les dates
+                                        $checkInRaw = $conflict['check_in'] ?? 'N/A';
+                                        $checkOutRaw = $conflict['check_out'] ?? 'N/A';
                                         $customerName = $conflict['customer'] ?? 'Client inconnu';
                                         $statusClass = $conflict['status_class'] ?? 'bg-secondary';
                                         $statusLabel = $conflict['status'] ?? 'N/A';
+                                        
+                                        // Extraire uniquement le jour/mois sans utiliser Carbon
+                                        if ($checkInRaw != 'N/A' && strpos($checkInRaw, '/') !== false) {
+                                            $partsIn = explode('/', $checkInRaw);
+                                            $checkInDisplay = $partsIn[0] . '/' . $partsIn[1];
+                                        } else {
+                                            $checkInDisplay = $checkInRaw;
+                                        }
+                                        
+                                        if ($checkOutRaw != 'N/A' && strpos($checkOutRaw, '/') !== false) {
+                                            $partsOut = explode('/', $checkOutRaw);
+                                            $checkOutDisplay = $partsOut[0] . '/' . $partsOut[1];
+                                        } else {
+                                            $checkOutDisplay = $checkOutRaw;
+                                        }
                                     @endphp
                                     
                                     <div class="conflict-item">
                                         <div class="conflict-dates">
                                             <i class="fas fa-calendar-alt" style="color: var(--red-400);"></i>
-                                            <span>{{ \Carbon\Carbon::parse($checkIn)->format('d/m') }} → {{ \Carbon\Carbon::parse($checkOut)->format('d/m') }}</span>
+                                            <span>{{ $checkInDisplay }} → {{ $checkOutDisplay }}</span>
                                             <span class="status-badge {{ str_replace('badge', 'status', $statusClass) }}">{{ $statusLabel }}</span>
                                         </div>
                                         <div class="conflict-customer">
@@ -1134,11 +1150,10 @@
                                     @endforeach
                                 </div>
                                 
-                                <!-- Lien pour voir tous les conflits -->
-                                <a href="{{ route('availability.room.conflicts', $room->id) }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}" 
+                                <!-- Lien pour voir tous les conflits - CORRIGÉ AVEC request() -->
+                                <a href="{{ route('availability.room.conflicts', $room->id) }}?check_in={{ request('check_in') }}&check_out={{ request('check_out') }}"
                                    class="conflict-link">
-                                    <i class="fas fa-external-link-alt"></i>
-                                    Voir tous les détails
+                                    <i class="fas fa-external-link-alt"></i> Voir tous les détails
                                 </a>
                             </div>
                             @endif
@@ -1150,19 +1165,20 @@
                                 <i class="fas fa-eye"></i>
                                 Détails
                             </a>
-                            <a href="{{ route('availability.room.conflicts', $room->id) }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}" 
+                            <!-- Bouton Conflits - CORRIGÉ AVEC request() -->
+                            <a href="{{ route('availability.room.conflicts', $room->id) }}?check_in={{ request('check_in') }}&check_out={{ request('check_out') }}" 
                                class="room-action-btn danger">
                                 <i class="fas fa-exclamation-triangle"></i>
                                 Conflits
                             </a>
                         </div>
                         
-                        <!-- Debug link (admin only) -->
+                        <!-- Debug link (admin only) - CORRIGÉ AVEC request() -->
                         @if(auth()->user() && in_array(auth()->user()->role, ['Super', 'Admin']))
                         <div class="debug-panel">
                             <div class="debug-title">Debug URL</div>
                             <div class="debug-url">
-                                {{ route('availability.room.conflicts', $room->id) }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}
+                                {{ route('availability.room.conflicts', $room->id) }}?check_in={{ request('check_in') }}&check_out={{ request('check_out') }}
                             </div>
                         </div>
                         @endif
