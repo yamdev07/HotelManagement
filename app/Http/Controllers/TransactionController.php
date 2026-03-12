@@ -443,13 +443,13 @@ class TransactionController extends Controller
         // VÉRIFICATION DES HEURES MÉTIER (12h - 14h)
         // =====================================================
         $now = Carbon::now();
-        $checkInDay = Carbon::parse($transaction->check_in)->startOfDay(); // Jour d'arrivée
-        $checkOutDay = Carbon::parse($transaction->check_out)->startOfDay(); // Jour de départ
+        $checkInDay = Carbon::parse($transaction->check_in)->startOfDay(); 
+        $checkOutDay = Carbon::parse($transaction->check_out)->startOfDay(); 
 
         // Heures métier
-        $checkInTime = $checkInDay->copy()->setTime(12, 0, 0);   // Check-in à 12h
-        $checkOutDeadline = $checkOutDay->copy()->setTime(12, 0, 0); // Check-out à 12h (théorique)
-        $checkOutLargess = $checkOutDay->copy()->setTime(14, 0, 0);   // Largesse jusqu'à 14h
+        $checkInTime = $checkInDay->copy()->setTime(12, 0, 0);   
+        $checkOutDeadline = $checkOutDay->copy()->setTime(12, 0, 0); 
+        $checkOutLargess = $checkOutDay->copy()->setTime(14, 0, 0);   
 
         // --- Vérification pour le passage en "active" (arrivée) ---
         if ($newStatus === 'active') {
@@ -625,7 +625,7 @@ class TransactionController extends Controller
                     // =====================================================
                     if ($transaction->room) {
                         $transaction->room->update([
-                            'room_status_id' => self::STATUS_DIRTY, // 6 = À nettoyer
+                            'room_status_id' => self::STATUS_DIRTY, 
                             'needs_cleaning' => 1,
                             'updated_at' => now(),
                         ]);
@@ -752,11 +752,7 @@ class TransactionController extends Controller
             return redirect()->back()->with('error', $errorMsg);
         }
     }
-     /**
-     * =====================================================
-     * ✅ ACTION RAPIDE : MARQUER COMME ARRIVÉ
-     * =====================================================
-     */
+
     /**
      * ACTION RAPIDE : MARQUER COMME ARRIVÉ
      */
@@ -882,9 +878,9 @@ class TransactionController extends Controller
         // =====================================================
         $now = Carbon::now();
         $checkOutDay = Carbon::parse($transaction->check_out)->startOfDay();
-        $checkOutDeadline = $checkOutDay->copy()->setTime(12, 0, 0);   // Check-out théorique à 12h
-        $checkOutLargess = $checkOutDay->copy()->setTime(14, 0, 0);    // Largesse jusqu'à 14h
-        $lateCheckoutEnd = $checkOutDay->copy()->setTime(20, 0, 0);    // Fin du late checkout
+        $checkOutDeadline = $checkOutDay->copy()->setTime(12, 0, 0);   
+        $checkOutLargess = $checkOutDay->copy()->setTime(14, 0, 0);    
+        $lateCheckoutEnd = $checkOutDay->copy()->setTime(20, 0, 0);
 
         // Vérifier qu'on est bien le jour du départ
         if (!$now->isSameDay($checkOutDay)) {
@@ -988,7 +984,7 @@ class TransactionController extends Controller
             // ✅ Marquer la chambre comme DIRTY (SALE)
             if ($transaction->room) {
                 $transaction->room->update([
-                    'room_status_id' => self::STATUS_DIRTY, // 6 = À nettoyer
+                    'room_status_id' => self::STATUS_DIRTY, 
                     'needs_cleaning' => 1,
                     'updated_at' => now(),
                 ]);
@@ -1337,7 +1333,7 @@ class TransactionController extends Controller
             return false;
         }
 
-        $checkInDateTime = Carbon::parse($transaction->check_in); // Déjà avec l'heure (12h)
+        $checkInDateTime = Carbon::parse($transaction->check_in); 
         $now = Carbon::now();
 
         // Si la date d'arrivée est passée, on ne peut pas annuler
@@ -1726,10 +1722,10 @@ class TransactionController extends Controller
             // ✅ PRÉPARER LES DONNÉES DE MISE À JOUR
             // RETOUR À LA NORMALE : 12h00, pas de late checkout
             $updateData = [
-                'check_out' => $newCheckOut,                    // ✅ Nouvelle date à 12h00
-                'late_checkout' => false,                        // ✅ DÉSACTIVER LATE CHECKOUT
-                'expected_checkout_time' => '12:00:00',          // ✅ RETOUR À 12h00 (VALEUR PAR DÉFAUT)
-                'late_checkout_fee' => null,                     // ✅ SUPPRIMER LE SUPPLÉMENT
+                'check_out' => $newCheckOut,                    
+                'late_checkout' => false,                        
+                'expected_checkout_time' => '12:00:00',          
+                'late_checkout_fee' => null,                     
                 'notes' => $notes . $baseNote,
             ];
 
@@ -1782,7 +1778,7 @@ class TransactionController extends Controller
                     'total_price' => $newTotalPrice,
                     'nights' => Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out),
                     'late_checkout' => false,
-                    'expected_checkout_time' => '12:00:00',          // ✅ RETOUR À 12h00
+                    'expected_checkout_time' => '12:00:00',
                     'late_checkout_fee' => null,
                     'room_price_per_night' => $roomPricePerNight,
                     'additional_nights' => $additionalNights,
@@ -1820,7 +1816,7 @@ class TransactionController extends Controller
                         'total_price' => $newTotalPrice,
                         'nights' => Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out),
                         'late_checkout' => false,
-                        'expected_checkout_time' => '12:00:00',      // ✅ RETOUR À 12h00
+                        'expected_checkout_time' => '12:00:00',
                         'late_checkout_fee' => null,
                         'notes' => $transaction->notes,
                     ],
@@ -2034,5 +2030,311 @@ class TransactionController extends Controller
             \Log::error('Late checkout error: ' . $e->getMessage());
             return back()->with('error', 'Erreur lors du late checkout: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * =====================================================
+     * ✅ EARLY CHECKOUT - Départ anticipé (CORRIGÉ)
+     * =====================================================
+     */
+    public function earlyCheckout(Request $request, Transaction $transaction)
+    {
+        if (! $this->hasPermission(['Super', 'Admin', 'Receptionist'])) {
+            abort(403, 'Accès non autorisé.');
+        }
+
+        // Vérifier que la transaction est active
+        if ($transaction->status !== 'active') {
+            return redirect()->back()->with('error', 
+                '❌ Seul un séjour en cours peut être marqué comme early checkout.');
+        }
+
+        // Vérifier qu'on est avant la date prévue
+        $today = Carbon::today();
+        $scheduledCheckOut = Carbon::parse($transaction->check_out)->startOfDay();
+        
+        if (!$today->lt($scheduledCheckOut)) {
+            return redirect()->back()->with('error', 
+                '❌ Early checkout ne peut être utilisé que pour un départ avant la date prévue. ' .
+                'Utilisez "Check-out normal" pour aujourd\'hui ou "Late checkout" pour après 14h.');
+        }
+
+        $request->validate([
+            'early_checkout_reason' => 'nullable|string|max:500',
+            'refund_policy' => 'nullable|in:full,partial,none',
+            'refund_amount' => 'nullable|numeric|min:0|max:' . $transaction->getTotalPayment(),
+            'payment_method' => 'required_if:refund_amount,>0|in:cash,card,mobile_money,bank_transfer',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // =====================================================
+            // 1. SAUVEGARDER L'ÉTAT AVANT
+            // =====================================================
+            $beforeState = [
+                'status' => $transaction->status,
+                'check_in' => $transaction->check_in->format('Y-m-d H:i:s'),
+                'check_out' => $transaction->check_out->format('Y-m-d H:i:s'),
+                'total_price' => $transaction->total_price,
+                'total_paid' => $transaction->getTotalPayment(),
+                'room_status' => $transaction->room->room_status_id ?? null,
+                'nights_planned' => $transaction->getDateDifferenceWithPlural(),
+            ];
+
+            $plannedCheckOut = Carbon::parse($transaction->check_out);
+            
+            // ✅ FORCER LES TYPES NUMÉRIQUES
+            $plannedNights = (int) $transaction->getDateDifferenceWithPlural();
+            $actualNights = (int) Carbon::parse($transaction->check_in)->diffInDays($today);
+            
+            // =====================================================
+            // 2. CALCULER LE NOUVEAU PRIX
+            // =====================================================
+            $roomPrice = (float) $transaction->room->price;
+            $newTotalPrice = $roomPrice * $actualNights;
+            $oldTotalPrice = (float) $transaction->total_price;
+            $priceDifference = $oldTotalPrice - $newTotalPrice;
+            
+            $totalPaid = (float) $transaction->getTotalPayment();
+            $refundAmount = 0;
+            
+            // =====================================================
+            // 3. DÉTERMINER LA POLITIQUE DE REMBOURSEMENT
+            // =====================================================
+            $refundPolicy = $request->refund_policy ?? 'none';
+            $refundReason = '';
+            
+            switch ($refundPolicy) {
+                case 'full':
+                    $refundAmount = (float) min($priceDifference, $totalPaid);
+                    $refundReason = 'Remboursement intégral selon politique d\'annulation';
+                    break;
+                    
+                case 'partial':
+                    $refundAmount = (float) ($request->refund_amount ?? 0);
+                    $refundReason = 'Remboursement partiel selon politique d\'annulation';
+                    break;
+                    
+                case 'none':
+                    $refundAmount = 0;
+                    $refundReason = 'Aucun remboursement selon politique d\'annulation';
+                    break;
+            }
+
+            // =====================================================
+            // 4. CRÉER LE REMBOURSEMENT SI NÉCESSAIRE (CORRIGÉ)
+            // =====================================================
+            if ($refundAmount > 0) {
+                $description = 'Remboursement early checkout - ' . 
+                            $actualNights . ' nuit(s) sur ' . $plannedNights . ' prévue(s)';
+                
+                if ($request->early_checkout_reason) {
+                    $description .= ' - Raison: ' . $request->early_checkout_reason;
+                }
+                
+                $refundPayment = Payment::create([
+                    'transaction_id' => $transaction->id,
+                    'customer_id' => $transaction->customer_id,
+                    'user_id' => auth()->id(),
+                    'created_by' => auth()->id(),
+                    'amount' => -$refundAmount,
+                    'payment_method' => $request->payment_method,
+                    'status' => Payment::STATUS_COMPLETED,
+                    'reference' => 'REFUND-EARLY-' . $transaction->id . '-' . time(),
+                    'description' => $description,
+                    // ✅ PAS DE CHAMP 'notes' !
+                ]);
+
+                Log::info("💰 Remboursement early checkout créé", [
+                    'transaction_id' => $transaction->id,
+                    'amount' => $refundAmount,
+                    'payment_id' => $refundPayment->id,
+                ]);
+            }
+
+            // =====================================================
+            // 5. METTRE À JOUR LA TRANSACTION
+            // =====================================================
+            $notes = $transaction->notes ?? '';
+            $newNote = "\n[" . now()->format('d/m/Y H:i') . "] ✅ EARLY CHECKOUT - Départ anticipé de " . 
+                    ($plannedNights - $actualNights) . " nuit(s)";
+            
+            if ($refundAmount > 0) {
+                $newNote .= " - Remboursé: " . number_format($refundAmount, 0, ',', ' ') . " CFA";
+            }
+
+            $transaction->update([
+                'status' => 'completed',
+                'check_out_actual' => now(),
+                'total_price' => $newTotalPrice,
+                'early_checkout' => true,
+                'early_checkout_reason' => $request->early_checkout_reason,
+                'early_checkout_refund' => $refundAmount,
+                'notes' => $notes . $newNote . ($request->notes ? ' - ' . $request->notes : ''),
+            ]);
+
+            // =====================================================
+            // 6. MARQUER LA CHAMBRE COMME DIRTY
+            // =====================================================
+            if ($transaction->room) {
+                $this->markRoomAsDirty($transaction->room, $transaction);
+                
+                Log::info("🧹 EARLY CHECKOUT: Chambre {$transaction->room->number} marquée DIRTY", [
+                    'room_id' => $transaction->room->id,
+                    'transaction_id' => $transaction->id,
+                ]);
+            }
+
+            // =====================================================
+            // 7. CRÉER L'HISTORIQUE
+            // =====================================================
+            History::create([
+                'transaction_id' => $transaction->id,
+                'user_id' => auth()->id(),
+                'action' => 'early_checkout',
+                'description' => 'Départ anticipé de ' . ($plannedNights - $actualNights) . ' nuit(s)',
+                'old_values' => json_encode($beforeState),
+                'new_values' => json_encode([
+                    'status' => 'completed',
+                    'check_out_actual' => now()->format('Y-m-d H:i:s'),
+                    'total_price' => $newTotalPrice,
+                    'nights_actual' => $actualNights,
+                    'early_checkout' => true,
+                    'early_checkout_reason' => $request->early_checkout_reason,
+                    'refund_amount' => $refundAmount,
+                    'refund_policy' => $refundPolicy,
+                    'room_status' => self::STATUS_DIRTY,
+                ]),
+                'notes' => $request->notes,
+            ]);
+
+            // =====================================================
+            // 8. LOG RÉCEPTIONNISTE
+            // =====================================================
+            if (auth()->user()->role === 'Receptionist') {
+                $this->logReceptionistAction(
+                    actionType: 'checkout',
+                    actionSubtype: 'early_checkout',
+                    actionable: $transaction,
+                    actionData: [
+                        'early_checkout_reason' => $request->early_checkout_reason,
+                        'nights_planned' => $plannedNights,
+                        'nights_actual' => $actualNights,
+                        'nights_short' => $plannedNights - $actualNights,
+                        'refund_amount' => $refundAmount,
+                        'refund_policy' => $refundPolicy,
+                        'old_total_price' => $oldTotalPrice,
+                        'new_total_price' => $newTotalPrice,
+                        'price_difference' => $priceDifference,
+                    ],
+                    beforeState: $beforeState,
+                    afterState: [
+                        'status' => 'completed',
+                        'check_out_actual' => now()->format('Y-m-d H:i:s'),
+                        'total_price' => $newTotalPrice,
+                        'early_checkout' => true,
+                        'early_checkout_reason' => $request->early_checkout_reason,
+                        'refund_amount' => $refundAmount,
+                    ],
+                    notes: 'Early checkout - Départ anticipé'
+                );
+            }
+
+            DB::commit();
+
+            // =====================================================
+            // 9. CONSTRUIRE LE MESSAGE DE SUCCÈS
+            // =====================================================
+            $message = '<div class="alert alert-success" style="border-left: 4px solid #17a2b8;">';
+            $message .= '<h5 class="mb-3"><i class="fas fa-clock me-2 text-info"></i> Early checkout enregistré avec succès !</h5>';
+            
+            $message .= '<div class="mb-2"><strong>Client :</strong> ' . $transaction->customer->name . '</div>';
+            $message .= '<div class="mb-2"><strong>Chambre :</strong> ' . $transaction->room->number . '</div>';
+            $message .= '<div class="mb-2"><strong>Départ anticipé :</strong> ' . ($plannedNights - $actualNights) . ' nuit(s) avant la date prévue</div>';
+            $message .= '<div class="mb-2"><strong>Nuités effectives :</strong> ' . $actualNights . ' / ' . $plannedNights . '</div>';
+            
+            $message .= '<hr>';
+            $message .= '<div class="mb-2"><strong>Ancien total :</strong> ' . number_format($oldTotalPrice, 0, ',', ' ') . ' CFA</div>';
+            $message .= '<div class="mb-2"><strong>Nouveau total :</strong> ' . number_format($newTotalPrice, 0, ',', ' ') . ' CFA</div>';
+            
+            if ($refundAmount > 0) {
+                $message .= '<div class="alert alert-info mt-2 mb-0 p-2">';
+                $message .= '<i class="fas fa-undo-alt me-2"></i>';
+                $message .= '<strong>Remboursement :</strong> ' . number_format($refundAmount, 0, ',', ' ') . ' CFA par ' . $request->payment_method;
+                $message .= '<br><small>' . $refundReason . '</small>';
+                $message .= '</div>';
+            } else {
+                $message .= '<div class="alert alert-warning mt-2 mb-0 p-2">';
+                $message .= '<i class="fas fa-exclamation-triangle me-2"></i>';
+                $message .= '<strong>Aucun remboursement</strong> selon la politique d\'annulation';
+                $message .= '</div>';
+            }
+            
+            $message .= '<div class="mt-2"><i class="fas fa-broom me-2 text-success"></i> Chambre marquée <strong>À NETTOYER</strong></div>';
+            $message .= '</div>';
+
+            return redirect()->route('transaction.show', $transaction)
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('❌ Erreur early checkout:', [
+                'error' => $e->getMessage(),
+                'transaction_id' => $transaction->id,
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Erreur lors du early checkout: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Vérifier si un early checkout est possible
+     */
+    public function checkEarlyCheckoutPossibility(Transaction $transaction)
+    {
+        if ($transaction->status !== 'active') {
+            return [
+                'possible' => false,
+                'reason' => 'Le client n\'est pas actuellement dans l\'hôtel'
+            ];
+        }
+
+        $today = Carbon::today();
+        $scheduledCheckOut = Carbon::parse($transaction->check_out)->startOfDay();
+        
+        if (!$today->lt($scheduledCheckOut)) {
+            return [
+                'possible' => false,
+                'reason' => 'La date de départ prévue est aujourd\'hui ou déjà passée'
+            ];
+        }
+
+        $plannedNights = $transaction->getDateDifferenceWithPlural();
+        $actualNights = Carbon::parse($transaction->check_in)->diffInDays($today);
+        $nightsShort = $plannedNights - $actualNights;
+
+        $totalPaid = $transaction->getTotalPayment();
+        $roomPrice = $transaction->room->price;
+        $newTotalPrice = $roomPrice * $actualNights;
+        $potentialRefund = max(0, $totalPaid - $newTotalPrice);
+
+        return [
+            'possible' => true,
+            'details' => [
+                'planned_check_out' => $transaction->check_out->format('d/m/Y'),
+                'today' => $today->format('d/m/Y'),
+                'planned_nights' => $plannedNights,
+                'actual_nights' => $actualNights,
+                'nights_short' => $nightsShort,
+                'total_paid' => $totalPaid,
+                'new_total_price' => $newTotalPrice,
+                'potential_refund' => $potentialRefund,
+                'room_price_per_night' => $roomPrice,
+            ]
+        ];
     }
 }

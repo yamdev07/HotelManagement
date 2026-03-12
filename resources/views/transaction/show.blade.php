@@ -180,6 +180,16 @@
     transform: translateY(-1px);
 }
 
+.btn-info-modern {
+    background: var(--blue-500);
+    color: white;
+}
+
+.btn-info-modern:hover {
+    background: var(--blue-600);
+    transform: translateY(-1px);
+}
+
 .btn-outline-modern {
     background: white;
     color: var(--gray-700);
@@ -269,6 +279,20 @@
     align-items: center;
     gap: 6px;
     border: 1px solid var(--amber-200);
+}
+
+/* Badge early checkout */
+.badge-early {
+    background: var(--blue-100);
+    color: var(--blue-700);
+    padding: 4px 12px;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--blue-200);
 }
 
 /* Badge paiement en attente */
@@ -629,6 +653,16 @@
                     @endif
                 </span>
             @endif
+            
+            {{-- Affichage si early checkout --}}
+            @if($transaction->early_checkout)
+                <span class="badge-early">
+                    <i class="fas fa-clock"></i> Early checkout - Départ anticipé
+                    @if($transaction->early_checkout_refund)
+                        (Remboursé: {{ number_format($transaction->early_checkout_refund, 0, ',', ' ') }} FCFA)
+                    @endif
+                </span>
+            @endif
         </div>
         
         <div class="d-flex gap-2 flex-wrap">
@@ -704,6 +738,8 @@
                         @if($transaction->late_checkout_fee)
                             <span class="badge-late" style="margin-left: 8px;">+{{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA</span>
                         @endif
+                    @elseif($transaction->early_checkout)
+                        <span class="badge-early" style="margin-left: 8px;">Départ anticipé</span>
                     @else
                         à 12h00
                     @endif
@@ -720,6 +756,12 @@
                 Client parti le <strong>{{ \Carbon\Carbon::parse($transaction->check_out_actual ?? $transaction->check_out)->format('d/m/Y à H:i') }}</strong>
                 @if($transaction->late_checkout)
                     <br><span class="badge-late"><i class="fas fa-clock"></i> Late checkout: {{ $transaction->expected_checkout_time }} ({{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA)</span>
+                @endif
+                @if($transaction->early_checkout)
+                    <br><span class="badge-early"><i class="fas fa-clock"></i> Early checkout - Départ anticipé</span>
+                    @if($transaction->early_checkout_refund)
+                        <br><small>Remboursé: {{ number_format($transaction->early_checkout_refund, 0, ',', ' ') }} FCFA</small>
+                    @endif
                 @endif
             </p>
         </div>
@@ -776,6 +818,8 @@
                 $checkOutDate = \Carbon\Carbon::parse($transaction->check_out)->setTime(12, 0, 0);
                 $checkOutLargess = $checkOutDate->copy()->setTime(14, 0, 0);
                 $lateCheckoutEnd = $checkOutDate->copy()->setTime(20, 0, 0);
+                $today = \Carbon\Carbon::today();
+                $scheduledCheckOut = \Carbon\Carbon::parse($transaction->check_out)->startOfDay();
                 
                 // ✅ Vérification plus robuste du paiement late checkout
                 $latePayment = null;
@@ -802,19 +846,14 @@
                         }
                     }
                 }
-                
-                // Debug silencieux
-                if (!$isLatePaid && $transaction->late_checkout) {
-                    \Log::info('Debug late checkout', [
-                        'transaction_id' => $transaction->id,
-                        'late_checkout' => $transaction->late_checkout,
-                        'late_fee' => $transaction->late_checkout_fee,
-                        'is_late_paid' => $isLatePaid,
-                        'has_pending' => $hasPendingLatePayment,
-                        'payments_count' => $transaction->payments->count(),
-                    ]);
-                }
             @endphp
+            
+            {{-- BOUTON EARLY CHECKOUT (avant la date prévue) --}}
+            @if($today->lt($scheduledCheckOut))
+                <button type="button" class="btn-modern btn-info-modern" data-bs-toggle="modal" data-bs-target="#earlyCheckoutModal">
+                    <i class="fas fa-clock me-1"></i>Early checkout
+                </button>
+            @endif
             
             {{-- 12h - 14h : Départ avec largesse (GRATUIT) --}}
             @if($now->gte($checkOutDate) && $now->lte($checkOutLargess))
@@ -981,6 +1020,8 @@
                                 {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}
                                 @if($transaction->late_checkout)
                                     <br><small class="text-warning">(dont late checkout)</small>
+                                @elseif($transaction->early_checkout)
+                                    <br><small class="text-info">(early checkout)</small>
                                 @endif
                             </span>
                         </div>
@@ -1003,6 +1044,8 @@
                                 <span class="text-muted ms-2">
                                     @if($transaction->late_checkout)
                                         <strong style="color: var(--amber-600);">{{ $transaction->expected_checkout_time }}</strong>
+                                    @elseif($transaction->early_checkout)
+                                        <strong style="color: var(--blue-600);">Early checkout</strong>
                                     @else
                                         12:00
                                     @endif
@@ -1068,6 +1111,16 @@
                         </div>
                         @endif
                         
+                        @if($transaction->early_checkout_refund > 0)
+                        <div class="col-md-3">
+                            <div class="stat-box" style="background: var(--blue-50); border-color: var(--blue-200);">
+                                <p class="stat-label">Remboursement</p>
+                                <p class="stat-value" style="color: var(--blue-600);">- {{ number_format($transaction->early_checkout_refund, 0, ',', ' ') }} CFA</p>
+                                <small class="text-muted">Early checkout</small>
+                            </div>
+                        </div>
+                        @endif
+                        
                         <div class="col-md-3">
                             <div class="stat-box">
                                 <p class="stat-label">Total final</p>
@@ -1105,6 +1158,10 @@
                                     $isLatePayment = (str_contains($payment->reference ?? '', 'LATE-') || 
                                                       str_contains($payment->description ?? '', 'Late checkout') ||
                                                       str_contains($payment->description ?? '', 'late checkout'));
+                                    
+                                    $isRefundPayment = (str_contains($payment->reference ?? '', 'REFUND-') || 
+                                                       str_contains($payment->description ?? '', 'Remboursement') ||
+                                                       $payment->amount < 0);
                                 @endphp
                                 <div class="timeline-item">
                                     <div class="d-flex justify-content-between align-items-start">
@@ -1113,6 +1170,9 @@
                                                 Paiement #{{ $payment->id }}
                                                 @if($isLatePayment)
                                                     <span class="badge-late" style="margin-left: 8px;">Late checkout</span>
+                                                @endif
+                                                @if($isRefundPayment)
+                                                    <span class="badge-early" style="margin-left: 8px;">Remboursement</span>
                                                 @endif
                                                 @if($payment->status == 'pending')
                                                     <span class="badge-pending" style="margin-left: 8px;">
@@ -1139,8 +1199,8 @@
                                             @endif
                                         </div>
                                         <div class="text-end">
-                                            <p class="fw-bold mb-1" style="font-size: 1.1rem; {{ $payment->status == 'pending' ? 'color: var(--amber-600);' : 'color: var(--primary-600);' }}">
-                                                {{ number_format($payment->amount, 0, ',', ' ') }} CFA
+                                            <p class="fw-bold mb-1" style="font-size: 1.1rem; {{ $payment->status == 'pending' ? 'color: var(--amber-600);' : ($payment->amount > 0 ? 'color: var(--primary-600);' : 'color: var(--blue-600);') }}">
+                                                {{ $payment->amount > 0 ? '+' : '-' }} {{ number_format(abs($payment->amount), 0, ',', ' ') }} CFA
                                             </p>
                                             <a href="{{ route('payment.invoice', $payment) }}" class="btn-modern btn-outline-modern btn-sm" target="_blank">
                                                 <i class="fas fa-receipt"></i> Reçu
@@ -1203,6 +1263,24 @@
                             </div>
                         @endif
                     @endif
+                    
+                    {{-- Alert si early checkout avec remboursement --}}
+                    @if($transaction->early_checkout && $transaction->early_checkout_refund > 0 && $transaction->status == 'active')
+                        <div class="alert alert-info mt-3" style="border-left: 4px solid var(--blue-500); background: var(--blue-50);">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                <div>
+                                    <i class="fas fa-clock me-2" style="color: var(--blue-600);"></i>
+                                    <strong>Early checkout enregistré</strong><br>
+                                    <span class="small">
+                                        Départ anticipé - Remboursement de <strong>{{ number_format($transaction->early_checkout_refund, 0, ',', ' ') }} FCFA</strong>
+                                        @if($transaction->early_checkout_reason)
+                                            <br>Raison: {{ $transaction->early_checkout_reason }}
+                                        @endif
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -1255,6 +1333,11 @@
                     <p class="detail-value" style="color: var(--amber-600);">+ {{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} CFA</p>
                     @endif
                     
+                    @if($transaction->early_checkout_refund)
+                    <p class="detail-label">Remboursement early checkout</p>
+                    <p class="detail-value" style="color: var(--blue-600);">- {{ number_format($transaction->early_checkout_refund, 0, ',', ' ') }} CFA</p>
+                    @endif
+                    
                     {{-- Heure de départ effective --}}
                     @if($transaction->expected_checkout_time && $transaction->late_checkout)
                     <p class="detail-label">Heure de départ</p>
@@ -1282,6 +1365,12 @@
                     <p class="detail-value" style="white-space: pre-line;">{{ $transaction->notes }}</p>
                     @endif
                     
+                    @if($transaction->early_checkout_reason)
+                    <div class="divider"></div>
+                    <p class="detail-label">Raison early checkout</p>
+                    <p class="detail-value" style="color: var(--blue-700);">{{ $transaction->early_checkout_reason }}</p>
+                    @endif
+                    
                     @if($transaction->checkout_notes && $transaction->late_checkout)
                     <div class="divider"></div>
                     <p class="detail-label">Notes départ</p>
@@ -1303,6 +1392,8 @@
                                 <p class="stat-value">{{ $nights }}</p>
                                 @if($transaction->late_checkout)
                                     <small class="text-warning">+ late checkout</small>
+                                @elseif($transaction->early_checkout)
+                                    <small class="text-info">early checkout</small>
                                 @endif
                             </div>
                         </div>
@@ -1341,6 +1432,152 @@
         </div>
     </div>
 </div>
+
+{{-- MODAL EARLY CHECKOUT --}}
+@if($transaction->status == 'active' && \Carbon\Carbon::today()->lt(\Carbon\Carbon::parse($transaction->check_out)->startOfDay()) && !$transaction->early_checkout)
+<div class="modal fade" id="earlyCheckoutModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--blue-500), var(--blue-400)); color: white;">
+                <h5 class="modal-title">
+                    <i class="fas fa-clock me-2"></i>
+                    Early checkout - Départ anticipé
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ route('transaction.early-checkout', $transaction) }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    @php
+                        $plannedNights = $nights;
+                        $actualNights = \Carbon\Carbon::parse($transaction->check_in)->diffInDays(\Carbon\Carbon::today());
+                        $nightsShort = $plannedNights - $actualNights;
+                        $totalPaid = $totalPayment;
+                        $roomPrice = $transaction->room->price;
+                        $newTotalPrice = $roomPrice * $actualNights;
+                        $potentialRefund = max(0, $totalPaid - $newTotalPrice);
+                    @endphp
+                    
+                    <div class="alert alert-info mb-4" style="background: var(--blue-50); border-color: var(--blue-200);">
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="fas fa-info-circle fa-2x text-info"></i>
+                            <div>
+                                <strong>Résumé du séjour</strong><br>
+                                Client: <strong>{{ $transaction->customer->name }}</strong><br>
+                                Chambre: <strong>{{ $transaction->room->number }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <p class="stat-label">Nuités prévues</p>
+                                <p class="stat-value">{{ $plannedNights }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <p class="stat-label">Nuités effectuées</p>
+                                <p class="stat-value">{{ $actualNights }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <p class="stat-label">Nuités non utilisées</p>
+                                <p class="stat-value">{{ $nightsShort }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-box">
+                                <p class="stat-label">Total payé</p>
+                                <p class="stat-value stat-value-success">{{ number_format($totalPaid, 0, ',', ' ') }} FCFA</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <i class="fas fa-calculator me-2"></i>
+                        <strong>Calcul du remboursement potentiel:</strong><br>
+                        - Nouveau total ({{ $actualNights }} nuits): {{ number_format($newTotalPrice, 0, ',', ' ') }} FCFA<br>
+                        - Déjà payé: {{ number_format($totalPaid, 0, ',', ' ') }} FCFA<br>
+                        - Remboursement maximum: <strong class="text-success">{{ number_format($potentialRefund, 0, ',', ' ') }} FCFA</strong>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-hand-holding-usd text-info me-1"></i>
+                            Politique de remboursement
+                        </label>
+                        <select name="refund_policy" class="form-select form-select-lg" id="refundPolicy" required>
+                            <option value="full">Remboursement intégral ({{ number_format($potentialRefund, 0, ',', ' ') }} FCFA)</option>
+                            <option value="partial">Remboursement partiel</option>
+                            <option value="none">Aucun remboursement</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3" id="refundAmountSection">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-money-bill-wave text-success me-1"></i>
+                            Montant du remboursement (FCFA)
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-light">FCFA</span>
+                            <input type="number" name="refund_amount" id="refundAmount" class="form-control" 
+                                   value="{{ $potentialRefund }}" min="0" max="{{ $potentialRefund }}" step="100">
+                        </div>
+                        <small class="text-muted">Maximum: {{ number_format($potentialRefund, 0, ',', ' ') }} FCFA</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-credit-card text-primary me-1"></i>
+                            Méthode de remboursement
+                        </label>
+                        <select name="payment_method" class="form-select form-select-lg" required>
+                            <option value="cash">Espèces</option>
+                            <option value="card">Carte bancaire</option>
+                            <option value="mobile_money">Mobile Money</option>
+                            <option value="bank_transfer">Virement</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            <i class="fas fa-pen text-secondary me-1"></i>
+                            Raison du départ anticipé
+                        </label>
+                        <textarea name="early_checkout_reason" class="form-control" rows="3" 
+                                  placeholder="Ex: Urgence, Changement de programme, Insatisfaction..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn-modern btn-info-modern">
+                        <i class="fas fa-check me-2"></i>Confirmer early checkout
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('refundPolicy')?.addEventListener('change', function() {
+    const section = document.getElementById('refundAmountSection');
+    if (this.value === 'partial') {
+        section.style.display = 'block';
+    } else {
+        section.style.display = 'none';
+    }
+});
+
+// Initialiser l'affichage
+if (document.getElementById('refundPolicy')?.value !== 'partial') {
+    document.getElementById('refundAmountSection').style.display = 'none';
+}
+</script>
+@endif
 
 {{-- MODAL LATE CHECKOUT - MONTANT LIBRE --}}
 @if($transaction->status == 'active' && !$transaction->late_checkout)

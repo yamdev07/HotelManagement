@@ -233,12 +233,22 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
         Route::get('/export/{type}', [TransactionController::class, 'export'])->name('export')
             ->middleware('checkrole:Super,Admin');
 
-        // Groupe pour les routes avec paramètre {transaction} et segments supplémentaires
-        Route::prefix('{transaction}')->group(function () {
-            // === ROUTE LATE CHECKOUT ===
-            Route::post('/late-checkout', [TransactionController::class, 'lateCheckout'])
-                ->name('late-checkout')
-                ->middleware('checkrole:Super,Admin,Receptionist');
+          // Groupe pour les routes avec paramètre {transaction} et segments supplémentaires
+    Route::prefix('{transaction}')->group(function () {
+        // === ROUTES LATE CHECKOUT ET EARLY CHECKOUT ===
+        Route::post('/late-checkout', [TransactionController::class, 'lateCheckout'])
+            ->name('late-checkout')
+            ->middleware('checkrole:Super,Admin,Receptionist');
+            
+        // ✅ AJOUTEZ ICI LA ROUTE EARLY CHECKOUT
+        Route::post('/early-checkout', [TransactionController::class, 'earlyCheckout'])
+            ->name('early-checkout')
+            ->middleware('checkrole:Super,Admin,Receptionist');
+            
+        // ✅ AJOUTEZ ICI LA ROUTE POUR VÉRIFIER LA POSSIBILITÉ D'EARLY CHECKOUT
+        Route::get('/check-early-checkout', [TransactionController::class, 'checkEarlyCheckoutPossibility'])
+            ->name('check-early-checkout')
+            ->middleware('checkrole:Super,Admin,Receptionist');
 
             // Routes avec segments supplémentaires
             Route::get('/edit', [TransactionController::class, 'edit'])->name('edit')
