@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Journal d\'activités')
-@section('content')
+
+<?php $__env->startSection('title', 'Journal d\'activités'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -659,14 +659,14 @@
 
 <div class="act-page">
 
-    {{-- Breadcrumb --}}
+    
     <div class="breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Journal d'activités</span>
     </div>
 
-    {{-- En-tête --}}
+    
     <div class="page-header anim-2">
         <div class="header-title">
             <span class="header-icon"><i class="fas fa-history"></i></span>
@@ -675,14 +675,14 @@
         <p class="header-subtitle">Consultez l'historique des actions système</p>
     </div>
 
-    {{-- Statistiques --}}
+    
     <div class="stats-grid anim-3">
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-history"></i></div>
             <div class="stat-content">
                 <div class="stat-label">Total activités</div>
-                <div class="stat-value">{{ $activities->total() }}</div>
-                <div class="stat-change"><i class="fas fa-calendar-alt"></i> {{ $activities->lastPage() }} pages</div>
+                <div class="stat-value"><?php echo e($activities->total()); ?></div>
+                <div class="stat-change"><i class="fas fa-calendar-alt"></i> <?php echo e($activities->lastPage()); ?> pages</div>
             </div>
         </div>
         
@@ -690,12 +690,12 @@
             <div class="stat-icon"><i class="fas fa-calendar-week"></i></div>
             <div class="stat-content">
                 <div class="stat-label">Cette semaine</div>
-                <div class="stat-value">{{ $weeklyCount ?? 0 }}</div>
-                <div class="stat-change {{ isset($weeklyChange) && $weeklyChange > 0 ? 'positive' : '' }}">
-                    @if(isset($weeklyChange))
-                        <i class="fas {{ $weeklyChange > 0 ? 'fa-arrow-up' : 'fa-arrow-down' }}"></i>
-                        {{ abs($weeklyChange) }}%
-                    @endif
+                <div class="stat-value"><?php echo e($weeklyCount ?? 0); ?></div>
+                <div class="stat-change <?php echo e(isset($weeklyChange) && $weeklyChange > 0 ? 'positive' : ''); ?>">
+                    <?php if(isset($weeklyChange)): ?>
+                        <i class="fas <?php echo e($weeklyChange > 0 ? 'fa-arrow-up' : 'fa-arrow-down'); ?>"></i>
+                        <?php echo e(abs($weeklyChange)); ?>%
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -704,23 +704,23 @@
             <div class="stat-icon"><i class="fas fa-users"></i></div>
             <div class="stat-content">
                 <div class="stat-label">Utilisateurs actifs</div>
-                <div class="stat-value">{{ $activeUsersCount ?? $users->count() }}</div>
+                <div class="stat-value"><?php echo e($activeUsersCount ?? $users->count()); ?></div>
                 <div class="stat-change"><i class="fas fa-clock"></i> 24h</div>
             </div>
         </div>
     </div>
 
-    {{-- Filtres --}}
+    
     <div class="filter-section anim-4">
-        <form method="GET" action="{{ route('activity.index') }}" id="filterForm">
+        <form method="GET" action="<?php echo e(route('activity.index')); ?>" id="filterForm">
             <div class="filter-grid">
                 <div class="form-group">
                     <label class="form-label">Utilisateur</label>
                     <select name="user_id" class="form-select">
                         <option value="">Tous</option>
-                        @foreach($users as $user)
-                            <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
-                        @endforeach
+                        <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($user->id); ?>" <?php echo e(request('user_id') == $user->id ? 'selected' : ''); ?>><?php echo e($user->name); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                 </div>
                 
@@ -728,35 +728,35 @@
                     <label class="form-label">Événement</label>
                     <select name="event" class="form-select">
                         <option value="">Tous</option>
-                        <option value="created" {{ request('event') == 'created' ? 'selected' : '' }}>Création</option>
-                        <option value="updated" {{ request('event') == 'updated' ? 'selected' : '' }}>Modification</option>
-                        <option value="deleted" {{ request('event') == 'deleted' ? 'selected' : '' }}>Suppression</option>
+                        <option value="created" <?php echo e(request('event') == 'created' ? 'selected' : ''); ?>>Création</option>
+                        <option value="updated" <?php echo e(request('event') == 'updated' ? 'selected' : ''); ?>>Modification</option>
+                        <option value="deleted" <?php echo e(request('event') == 'deleted' ? 'selected' : ''); ?>>Suppression</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Date début</label>
-                    <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
+                    <input type="date" name="date_from" class="form-control" value="<?php echo e(request('date_from')); ?>">
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Date fin</label>
-                    <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                    <input type="date" name="date_to" class="form-control" value="<?php echo e(request('date_to')); ?>">
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Objet</label>
                     <select name="subject_type" class="form-select">
                         <option value="">Tous</option>
-                        <option value="App\Models\User" {{ request('subject_type') == 'App\Models\User' ? 'selected' : '' }}>Utilisateurs</option>
-                        <option value="App\Models\Room" {{ request('subject_type') == 'App\Models\Room' ? 'selected' : '' }}>Chambres</option>
-                        <option value="App\Models\Transaction" {{ request('subject_type') == 'App\Models\Transaction' ? 'selected' : '' }}>Transactions</option>
+                        <option value="App\Models\User" <?php echo e(request('subject_type') == 'App\Models\User' ? 'selected' : ''); ?>>Utilisateurs</option>
+                        <option value="App\Models\Room" <?php echo e(request('subject_type') == 'App\Models\Room' ? 'selected' : ''); ?>>Chambres</option>
+                        <option value="App\Models\Transaction" <?php echo e(request('subject_type') == 'App\Models\Transaction' ? 'selected' : ''); ?>>Transactions</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Recherche</label>
-                    <input type="text" name="search" class="form-control" placeholder="Description..." value="{{ request('search') }}">
+                    <input type="text" name="search" class="form-control" placeholder="Description..." value="<?php echo e(request('search')); ?>">
                 </div>
             </div>
             
@@ -764,7 +764,7 @@
                 <button type="submit" class="btn btn-green">
                     <i class="fas fa-filter"></i> Filtrer
                 </button>
-                <a href="{{ route('activity.index') }}" class="btn btn-gray">
+                <a href="<?php echo e(route('activity.index')); ?>" class="btn btn-gray">
                     <i class="fas fa-times"></i> Réinitialiser
                 </a>
                 <button type="button" class="btn btn-gray" data-bs-toggle="modal" data-bs-target="#cleanupModal">
@@ -776,23 +776,23 @@
                         <i class="fas fa-download"></i> Exporter
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="{{ route('activity.export', ['format' => 'csv']) }}"><i class="fas fa-file-csv"></i> CSV</a></li>
-                        <li><a class="dropdown-item" href="{{ route('activity.export', ['format' => 'json']) }}"><i class="fas fa-file-code"></i> JSON</a></li>
+                        <li><a class="dropdown-item" href="<?php echo e(route('activity.export', ['format' => 'csv'])); ?>"><i class="fas fa-file-csv"></i> CSV</a></li>
+                        <li><a class="dropdown-item" href="<?php echo e(route('activity.export', ['format' => 'json'])); ?>"><i class="fas fa-file-code"></i> JSON</a></li>
                     </ul>
                 </div>
             </div>
         </form>
         
-        @if(request()->anyFilled(['user_id', 'event', 'date_from', 'date_to', 'search', 'subject_type']))
+        <?php if(request()->anyFilled(['user_id', 'event', 'date_from', 'date_to', 'search', 'subject_type'])): ?>
             <div class="filter-badge mt-4">
                 <i class="fas fa-info-circle"></i>
-                <span>{{ $activities->total() }} résultat(s) trouvé(s)</span>
-                <a href="{{ route('activity.index') }}" class="btn-icon" style="width:auto; padding:0 6px;"><i class="fas fa-times"></i></a>
+                <span><?php echo e($activities->total()); ?> résultat(s) trouvé(s)</span>
+                <a href="<?php echo e(route('activity.index')); ?>" class="btn-icon" style="width:auto; padding:0 6px;"><i class="fas fa-times"></i></a>
             </div>
-        @endif
+        <?php endif; ?>
     </div>
 
-    {{-- Tableau --}}
+    
     <div class="table-container">
         <div class="table-responsive">
             <table class="table">
@@ -808,8 +808,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse ($activities as $activity)
-                        @php
+                    <?php $__empty_1 = true; $__currentLoopData = $activities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php
                             $eventColor = match($activity->event) {
                                 'created' => 'badge-green',
                                 'updated' => 'badge-gray',
@@ -836,72 +836,73 @@
                                 'Transaction' => 'fa-receipt',
                                 default => 'fa-cube'
                             };
-                        @endphp
+                        ?>
                         
                         <tr>
-                            <td><span class="badge-number">{{ ($activities->currentPage() - 1) * $activities->perPage() + $loop->iteration }}</span></td>
+                            <td><span class="badge-number"><?php echo e(($activities->currentPage() - 1) * $activities->perPage() + $loop->iteration); ?></span></td>
                             
                             <td>
-                                <div style="font-weight:500;">{{ $activity->created_at->format('d/m/Y') }}</div>
-                                <div style="font-size:.7rem; color:var(--gray-500);">{{ $activity->created_at->format('H:i:s') }}</div>
+                                <div style="font-weight:500;"><?php echo e($activity->created_at->format('d/m/Y')); ?></div>
+                                <div style="font-size:.7rem; color:var(--gray-500);"><?php echo e($activity->created_at->format('H:i:s')); ?></div>
                             </td>
                             
                             <td>
-                                <div style="font-weight:500;">{{ $activity->description }}</div>
-                                @if($activity->properties->count() > 0)
+                                <div style="font-weight:500;"><?php echo e($activity->description); ?></div>
+                                <?php if($activity->properties->count() > 0): ?>
                                     <button class="btn btn-sm btn-gray" 
                                             data-bs-toggle="collapse" 
-                                            data-bs-target="#details-{{ $activity->id }}">
+                                            data-bs-target="#details-<?php echo e($activity->id); ?>">
                                         <i class="fas fa-code"></i> Détails
                                     </button>
-                                    <div class="collapse details-collapse" id="details-{{ $activity->id }}">
-                                        <pre class="details-pre">{{ json_encode($activity->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                    <div class="collapse details-collapse" id="details-<?php echo e($activity->id); ?>">
+                                        <pre class="details-pre"><?php echo e(json_encode($activity->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); ?></pre>
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </td>
                             
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="avatar">
-                                        @if($activity->causer && $activity->causer->avatar)
-                                            <img src="{{ asset('storage/' . $activity->causer->avatar) }}" alt="">
-                                        @else
+                                        <?php if($activity->causer && $activity->causer->avatar): ?>
+                                            <img src="<?php echo e(asset('storage/' . $activity->causer->avatar)); ?>" alt="">
+                                        <?php else: ?>
                                             <i class="fas fa-user"></i>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                     <div>
-                                        <div style="font-weight:500;">{{ $activity->causer->name ?? 'Système' }}</div>
-                                        <div style="font-size:.65rem; color:var(--gray-500);">{{ $activity->causer->email ?? '' }}</div>
+                                        <div style="font-weight:500;"><?php echo e($activity->causer->name ?? 'Système'); ?></div>
+                                        <div style="font-size:.65rem; color:var(--gray-500);"><?php echo e($activity->causer->email ?? ''); ?></div>
                                     </div>
                                 </div>
                             </td>
                             
                             <td>
                                 <div class="object-badge">
-                                    <i class="fas {{ $modelIcon }}"></i>
-                                    <span>{{ $modelName }}</span>
+                                    <i class="fas <?php echo e($modelIcon); ?>"></i>
+                                    <span><?php echo e($modelName); ?></span>
                                 </div>
                             </td>
                             
                             <td>
-                                <span class="badge {{ $eventColor }}">
-                                    <i class="fas {{ $eventIcon }}"></i>
-                                    {{ $eventLabel }}
+                                <span class="badge <?php echo e($eventColor); ?>">
+                                    <i class="fas <?php echo e($eventIcon); ?>"></i>
+                                    <?php echo e($eventLabel); ?>
+
                                 </span>
                             </td>
                             
                             <td class="text-center">
                                 <div class="d-flex gap-1 justify-content-center">
-                                    <button class="btn-icon" onclick="showActivityDetails({{ $activity->id }})" title="Détails">
+                                    <button class="btn-icon" onclick="showActivityDetails(<?php echo e($activity->id); ?>)" title="Détails">
                                         <i class="fas fa-search"></i>
                                     </button>
-                                    <a href="{{ route('activity.show', $activity->id) }}" class="btn-icon" title="Ouvrir">
+                                    <a href="<?php echo e(route('activity.show', $activity->id)); ?>" class="btn-icon" title="Ouvrir">
                                         <i class="fas fa-external-link-alt"></i>
                                     </a>
                                 </div>
                             </td>
                         </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="7">
                                 <div class="empty-state">
@@ -911,55 +912,56 @@
                                 </div>
                             </td>
                         </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
 
-        {{-- Pagination --}}
-        @if($activities->hasPages())
+        
+        <?php if($activities->hasPages()): ?>
         <div style="padding: 16px 22px; border-top: 1.5px solid var(--gray-200);">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                 <div style="font-size:.75rem; color:var(--gray-500);">
-                    {{ $activities->firstItem() }} - {{ $activities->lastItem() }} sur {{ $activities->total() }}
+                    <?php echo e($activities->firstItem()); ?> - <?php echo e($activities->lastItem()); ?> sur <?php echo e($activities->total()); ?>
+
                 </div>
                 
                 <ul class="pagination-modern">
-                    <li class="page-item {{ $activities->onFirstPage() ? 'disabled' : '' }}">
-                        <a class="page-link" href="{{ $activities->url(1) }}"><i class="fas fa-angle-double-left"></i></a>
+                    <li class="page-item <?php echo e($activities->onFirstPage() ? 'disabled' : ''); ?>">
+                        <a class="page-link" href="<?php echo e($activities->url(1)); ?>"><i class="fas fa-angle-double-left"></i></a>
                     </li>
-                    <li class="page-item {{ $activities->onFirstPage() ? 'disabled' : '' }}">
-                        <a class="page-link" href="{{ $activities->previousPageUrl() }}"><i class="fas fa-angle-left"></i></a>
+                    <li class="page-item <?php echo e($activities->onFirstPage() ? 'disabled' : ''); ?>">
+                        <a class="page-link" href="<?php echo e($activities->previousPageUrl()); ?>"><i class="fas fa-angle-left"></i></a>
                     </li>
                     
-                    @for($i = max(1, $activities->currentPage() - 2); $i <= min($activities->lastPage(), $activities->currentPage() + 2); $i++)
-                        <li class="page-item {{ $i == $activities->currentPage() ? 'active' : '' }}">
-                            <a class="page-link" href="{{ $activities->url($i) }}">{{ $i }}</a>
+                    <?php for($i = max(1, $activities->currentPage() - 2); $i <= min($activities->lastPage(), $activities->currentPage() + 2); $i++): ?>
+                        <li class="page-item <?php echo e($i == $activities->currentPage() ? 'active' : ''); ?>">
+                            <a class="page-link" href="<?php echo e($activities->url($i)); ?>"><?php echo e($i); ?></a>
                         </li>
-                    @endfor
+                    <?php endfor; ?>
                     
-                    <li class="page-item {{ !$activities->hasMorePages() ? 'disabled' : '' }}">
-                        <a class="page-link" href="{{ $activities->nextPageUrl() }}"><i class="fas fa-angle-right"></i></a>
+                    <li class="page-item <?php echo e(!$activities->hasMorePages() ? 'disabled' : ''); ?>">
+                        <a class="page-link" href="<?php echo e($activities->nextPageUrl()); ?>"><i class="fas fa-angle-right"></i></a>
                     </li>
-                    <li class="page-item {{ !$activities->hasMorePages() ? 'disabled' : '' }}">
-                        <a class="page-link" href="{{ $activities->url($activities->lastPage()) }}"><i class="fas fa-angle-double-right"></i></a>
+                    <li class="page-item <?php echo e(!$activities->hasMorePages() ? 'disabled' : ''); ?>">
+                        <a class="page-link" href="<?php echo e($activities->url($activities->lastPage())); ?>"><i class="fas fa-angle-double-right"></i></a>
                     </li>
                 </ul>
                 
                 <div class="d-flex align-items-center gap-2">
                     <span style="font-size:.7rem; color:var(--gray-500);">Lignes:</span>
                     <select class="per-page-select" onchange="changePerPage(this)">
-                        <option value="10" {{ $activities->perPage() == 10 ? 'selected' : '' }}>10</option>
-                        <option value="25" {{ $activities->perPage() == 25 ? 'selected' : '' }}>25</option>
-                        <option value="50" {{ $activities->perPage() == 50 ? 'selected' : '' }}>50</option>
+                        <option value="10" <?php echo e($activities->perPage() == 10 ? 'selected' : ''); ?>>10</option>
+                        <option value="25" <?php echo e($activities->perPage() == 25 ? 'selected' : ''); ?>>25</option>
+                        <option value="50" <?php echo e($activities->perPage() == 50 ? 'selected' : ''); ?>>50</option>
                     </select>
                 </div>
             </div>
         </div>
-        @endif
+        <?php endif; ?>
     </div>
 
-    {{-- Modal détails --}}
+    
     <div class="modal fade" id="activityModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -975,7 +977,7 @@
         </div>
     </div>
 
-    {{-- Modal nettoyage --}}
+    
     <div class="modal fade" id="cleanupModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -983,8 +985,8 @@
                     <h5 class="modal-title"><i class="fas fa-broom me-2" style="color:var(--green-600);"></i> Nettoyer les logs</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('activity.cleanup') }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('activity.cleanup')); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <div class="modal-body">
                         <p style="margin-bottom:16px;">Supprimer les logs plus anciens que :</p>
                         <div class="form-group mb-4">
@@ -993,7 +995,7 @@
                         </div>
                         <div class="alert alert-green">
                             <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
-                            <div>Cette action est irréversible. {{ $activities->total() }} logs analysés.</div>
+                            <div>Cette action est irréversible. <?php echo e($activities->total()); ?> logs analysés.</div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -1036,4 +1038,5 @@ function changePerPage(select) {
 }
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/activity/index.blade.php ENDPATH**/ ?>
