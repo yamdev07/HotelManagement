@@ -3,86 +3,97 @@
 @section('content')
 
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   DESIGN SYSTEM (identique à la page check-in)
-═══════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    --primary-50: #ecfdf5;
-    --primary-100: #d1fae5;
-    --primary-400: #34d399;
-    --primary-500: #10b981;
-    --primary-600: #059669;
-    --primary-700: #047857;
-    --primary-800: #065f46;
+    /* ── 4 COULEURS (vert, rouge, gris, blanc) ── */
+    --green-50:  #f0faf0;
+    --green-100: #d4edda;
+    --green-500: #2e8540;
+    --green-600: #1e6b2e;
+    --green-700: #155221;
 
-    --amber-50: #fffbeb;
-    --amber-100: #fef3c7;
-    --amber-400: #fbbf24;
-    --amber-500: #f59e0b;
-    --amber-600: #d97706;
+    --red-50:    #fee2e2;
+    --red-100:   #fecaca;
+    --red-500:   #b91c1c;
+    --red-600:   #991b1b;
 
-    --blue-50: #eff6ff;
-    --blue-100: #dbeafe;
-    --blue-500: #3b82f6;
-    --blue-600: #2563eb;
+    --gray-50:   #f8f9f8;
+    --gray-100:  #eff0ef;
+    --gray-200:  #dde0dd;
+    --gray-300:  #c2c7c2;
+    --gray-400:  #9ba09b;
+    --gray-500:  #737873;
+    --gray-600:  #545954;
+    --gray-700:  #3a3e3a;
+    --gray-800:  #252825;
+    --gray-900:  #131513;
 
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-400: #9ca3af;
-    --gray-500: #6b7280;
-    --gray-600: #4b5563;
-    --gray-700: #374151;
-    --gray-800: #1f2937;
-    --gray-900: #111827;
+    --white:     #ffffff;
+    --surface:   #f7f9f7;
 
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s ease;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Layout principal */
 .search-page {
-    background: var(--gray-50);
+    background: var(--surface);
     min-height: 100vh;
     padding: 24px 32px;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font);
+    color: var(--gray-800);
 }
 
-/* Breadcrumb */
-.breadcrumb-custom {
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+.anim-3 { animation: fadeSlide .4s .16s ease both; }
+.anim-4 { animation: fadeSlide .4s .24s ease both; }
+
+/* ══════════════════════════════════════════════
+   BREADCRUMB
+══════════════════════════════════════════════ */
+.breadcrumb {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.813rem;
+    font-size: .8rem;
     color: var(--gray-400);
     margin-bottom: 20px;
 }
-
-.breadcrumb-custom a {
+.breadcrumb a {
     color: var(--gray-400);
     text-decoration: none;
-    transition: color 0.2s;
+    transition: var(--transition);
 }
-
-.breadcrumb-custom a:hover {
-    color: var(--primary-600);
+.breadcrumb a:hover {
+    color: var(--green-600);
 }
-
-.breadcrumb-custom .separator {
+.breadcrumb .sep {
     color: var(--gray-300);
 }
-
-.breadcrumb-custom .current {
+.breadcrumb .active {
     color: var(--gray-600);
     font-weight: 500;
 }
 
-/* En-tête */
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
 .page-header {
     display: flex;
     align-items: center;
@@ -91,260 +102,267 @@
     flex-wrap: wrap;
     gap: 16px;
 }
-
 .header-title {
     display: flex;
     align-items: center;
     gap: 12px;
 }
-
-.header-title h1 {
-    font-size: 1.875rem;
-    font-weight: 600;
-    color: var(--gray-800);
-    margin: 0;
-}
-
 .header-icon {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
+    background: var(--green-600);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 1.25rem;
-    box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
+    box-shadow: 0 4px 10px rgba(46,133,64,.3);
 }
-
+.header-title h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+}
+.header-title em {
+    font-style: normal;
+    color: var(--green-600);
+}
 .header-subtitle {
     color: var(--gray-500);
-    font-size: 0.875rem;
+    font-size: .8rem;
     margin: 6px 0 0 60px;
 }
 
+/* ══════════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════════ */
 .btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 10px;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--r);
+    font-size: .8rem;
     font-weight: 500;
-    font-size: 0.875rem;
     border: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition);
     text-decoration: none;
 }
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
+.btn-green {
+    background: var(--green-600);
     color: white;
-    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.3);
 }
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, var(--primary-800), var(--primary-600));
+.btn-green:hover {
+    background: var(--green-700);
     transform: translateY(-1px);
-    box-shadow: 0 6px 8px -1px rgba(5, 150, 105, 0.4);
     color: white;
-    text-decoration: none;
 }
-
+.btn-gray {
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+}
+.btn-gray:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+}
 .btn-outline {
-    background: white;
-    color: var(--gray-700);
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow-sm);
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
 }
-
 .btn-outline:hover {
-    background: var(--gray-50);
-    border-color: var(--gray-300);
-    color: var(--gray-900);
-    transform: translateY(-1px);
-    text-decoration: none;
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+}
+.btn-sm {
+    padding: 6px 12px;
+    font-size: .7rem;
 }
 
-/* Search Container */
+/* ══════════════════════════════════════════════
+   SEARCH CONTAINER
+══════════════════════════════════════════════ */
 .search-container {
-    background: linear-gradient(135deg, #065f46 0%, #059669 100%);
-    border-radius: 20px;
-    padding: 30px;
+    background: linear-gradient(135deg, var(--green-700), var(--green-600));
+    border-radius: var(--rxl);
+    padding: 28px;
+    margin-bottom: 24px;
     color: white;
-    margin-bottom: 30px;
-    box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.4);
+    box-shadow: var(--shadow-md);
 }
-
 .search-container h4 {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 20px;
 }
-
-.search-container .input-group {
-    background: white;
-    border-radius: 50px;
+.search-container h4 i {
+    margin-right: 8px;
+}
+.search-input-group {
+    display: flex;
+    background: var(--white);
+    border-radius: 100px;
     overflow: hidden;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,.1);
 }
-
-.search-container .input-group-text {
-    background: white;
+.search-input-group span {
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    color: var(--green-600);
+}
+.search-input-group input {
+    flex: 1;
     border: none;
-    color: var(--primary-600);
-    padding-left: 20px;
+    padding: 14px 0;
+    font-size: .9rem;
+    color: var(--gray-800);
 }
-
-.search-container .form-control {
+.search-input-group input:focus {
+    outline: none;
+}
+.search-input-group button {
+    background: var(--white);
     border: none;
-    padding: 15px 5px 15px 0;
-    font-size: 1rem;
-}
-
-.search-container .form-control:focus {
-    box-shadow: none;
-}
-
-.search-container .btn-light {
-    border-radius: 50px;
-    padding: 12px;
+    padding: 0 24px;
     font-weight: 600;
-    background: white;
-    border: none;
-    transition: all 0.2s;
+    color: var(--green-600);
+    cursor: pointer;
+    transition: var(--transition);
+}
+.search-input-group button:hover {
+    background: var(--green-50);
 }
 
-.search-container .btn-light:hover {
-    background: var(--gray-100);
-    transform: translateY(-1px);
-}
-
-/* Quick filters */
+/* ── Quick filters ── */
 .quick-filters {
     margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
 }
-
-.quick-filter-badge {
+.filter-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 14px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 30px;
-    font-size: 0.813rem;
+    padding: 6px 16px;
+    background: rgba(255,255,255,.15);
+    border: 1.5px solid rgba(255,255,255,.2);
+    border-radius: 100px;
+    font-size: .75rem;
     font-weight: 500;
     color: white;
     cursor: pointer;
-    transition: all 0.2s;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: var(--transition);
 }
-
-.quick-filter-badge:hover {
-    background: rgba(255, 255, 255, 0.3);
+.filter-badge:hover {
+    background: rgba(255,255,255,.25);
     transform: translateY(-1px);
 }
 
-/* Loading indicator */
+/* ══════════════════════════════════════════════
+   LOADING INDICATOR
+══════════════════════════════════════════════ */
 .search-loading {
     display: none;
 }
-
 .search-loading.active {
     display: block;
 }
-
 .loading-spinner {
     text-align: center;
     padding: 40px;
 }
-
 .spinner {
     width: 40px;
     height: 40px;
     border: 3px solid var(--gray-200);
-    border-top-color: var(--primary-600);
+    border-top-color: var(--green-600);
     border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+    animation: spin .8s linear infinite;
     margin: 0 auto 16px;
 }
-
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
 
-/* Cards */
+/* ══════════════════════════════════════════════
+   CARD
+══════════════════════════════════════════════ */
 .card {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--gray-200);
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rxl);
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
     margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
 }
-
 .card-header {
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--gray-100);
+    padding: 16px 22px;
+    border-bottom: 1.5px solid var(--gray-200);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: white;
+    background: var(--white);
 }
-
 .card-header h5 {
-    font-size: 1rem;
+    font-size: .95rem;
     font-weight: 600;
-    color: var(--gray-700);
+    color: var(--gray-800);
     margin: 0;
     display: flex;
     align-items: center;
     gap: 8px;
 }
-
+.card-header h5 i {
+    color: var(--green-600);
+}
 .card-body {
-    padding: 24px;
+    padding: 22px;
 }
 
-/* Résultats de recherche */
+/* ══════════════════════════════════════════════
+   RESULTS
+══════════════════════════════════════════════ */
 .search-results {
     max-height: 600px;
     overflow-y: auto;
     padding-right: 8px;
 }
-
 .search-results::-webkit-scrollbar {
     width: 6px;
 }
-
 .search-results::-webkit-scrollbar-track {
     background: var(--gray-100);
     border-radius: 10px;
 }
-
 .search-results::-webkit-scrollbar-thumb {
     background: var(--gray-300);
     border-radius: 10px;
 }
-
 .search-results::-webkit-scrollbar-thumb:hover {
     background: var(--gray-400);
 }
 
 .reservation-item {
-    border: 1px solid var(--gray-200);
-    border-radius: 16px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
     padding: 20px;
     margin-bottom: 16px;
-    transition: all 0.2s;
-    background: white;
+    transition: var(--transition);
+    background: var(--white);
+    animation: fadeSlide .3s ease both;
 }
-
 .reservation-item:hover {
-    border-color: var(--primary-300);
-    box-shadow: var(--shadow-md);
+    border-color: var(--green-300);
     transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
 
 .reservation-header {
@@ -355,330 +373,209 @@
     flex-wrap: wrap;
     gap: 10px;
 }
-
 .reservation-id {
     font-weight: 700;
-    color: var(--primary-600);
-    font-size: 1rem;
-    background: var(--primary-50);
+    color: var(--green-700);
+    font-size: .85rem;
+    background: var(--green-50);
     padding: 4px 12px;
-    border-radius: 20px;
+    border-radius: 100px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    border: 1.5px solid var(--green-200);
 }
-
 .reservation-status {
     padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
+    border-radius: 100px;
+    font-size: .68rem;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
 }
-
-.status-reservation { 
-    background: var(--amber-100); 
-    color: var(--amber-700);
-    border: 1px solid var(--amber-200);
-}
-.status-active { 
-    background: var(--primary-100); 
-    color: var(--primary-700);
-    border: 1px solid var(--primary-200);
-}
-.status-completed { 
-    background: var(--blue-100); 
-    color: var(--blue-700);
-    border: 1px solid var(--blue-200);
-}
+.status-reservation { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+.status-active { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+.status-completed { background: var(--gray-100); color: var(--gray-600); border: 1.5px solid var(--gray-200); }
 
 .customer-avatar {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--primary-600), var(--primary-400));
+    background: var(--green-600);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 600;
-    font-size: 1.25rem;
-    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.2);
+    font-size: 1.2rem;
+    box-shadow: 0 4px 8px rgba(46,133,64,.2);
 }
 
 .room-badge {
-    background: var(--primary-50);
-    color: var(--primary-700);
+    background: var(--green-50);
+    color: var(--green-700);
     padding: 4px 12px;
-    border-radius: 20px;
+    border-radius: 100px;
     font-weight: 600;
-    font-size: 0.813rem;
+    font-size: .75rem;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    border: 1px solid var(--primary-100);
+    border: 1.5px solid var(--green-200);
 }
 
-/* Empty state */
+/* ── Badge ── */
+.badge {
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: .65rem;
+    font-weight: 600;
+}
+.badge-green { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+
+/* ══════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════ */
 .empty-state {
     text-align: center;
-    padding: 60px 20px;
+    padding: 48px 20px;
 }
-
-.empty-state-icon {
-    font-size: 4rem;
+.empty-icon {
+    font-size: 3.5rem;
     color: var(--gray-300);
+    margin-bottom: 16px;
+}
+.empty-state h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 4px;
+}
+.empty-state p {
+    color: var(--gray-400);
     margin-bottom: 20px;
 }
 
-.empty-state h4 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--gray-600);
-    margin-bottom: 8px;
-}
-
-.empty-state p {
-    color: var(--gray-400);
-    margin-bottom: 24px;
-}
-
-/* Guide cards */
+/* ══════════════════════════════════════════════
+   GUIDE CARDS
+══════════════════════════════════════════════ */
 .guide-card {
     text-align: center;
     padding: 20px;
-    border-radius: 12px;
     background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
     height: 100%;
-    transition: all 0.2s;
+    transition: var(--transition);
 }
-
 .guide-card:hover {
+    border-color: var(--green-300);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
 }
-
 .guide-card i {
     font-size: 2rem;
     margin-bottom: 12px;
+    color: var(--green-600);
 }
-
 .guide-card h6 {
-    font-size: 0.875rem;
+    font-size: .8rem;
     font-weight: 600;
     color: var(--gray-700);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 }
-
 .guide-card p {
-    font-size: 0.75rem;
-    color: var(--gray-400);
+    font-size: .7rem;
+    color: var(--gray-500);
     margin: 0;
 }
 
-/* Buttons group */
-.btn-group-custom {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.btn-sm {
-    padding: 6px 14px;
-    font-size: 0.813rem;
-    border-radius: 8px;
-}
-
-.btn-success {
-    background: var(--primary-600);
-    color: white;
-    border: none;
-}
-
-.btn-success:hover {
-    background: var(--primary-700);
-}
-
-.btn-outline-success {
-    background: white;
-    color: var(--primary-600);
-    border: 1px solid var(--primary-200);
-}
-
-.btn-outline-success:hover {
-    background: var(--primary-50);
-    border-color: var(--primary-300);
-    color: var(--primary-700);
-}
-
-.btn-outline-info {
-    background: white;
-    color: var(--blue-600);
-    border: 1px solid var(--blue-200);
-}
-
-.btn-outline-info:hover {
-    background: var(--blue-50);
-    border-color: var(--blue-300);
-    color: var(--blue-700);
-}
-
-/* Badges */
-.badge {
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.688rem;
-    font-weight: 600;
-}
-
-.badge-primary {
-    background: var(--primary-100);
-    color: var(--primary-700);
-}
-
-/* Alert */
+/* ══════════════════════════════════════════════
+   ALERT
+══════════════════════════════════════════════ */
 .alert {
     padding: 16px 20px;
-    border-radius: 12px;
+    border-radius: var(--rl);
     margin-bottom: 20px;
-    border: 1px solid transparent;
+    border: 1.5px solid;
     display: flex;
     align-items: center;
     gap: 12px;
 }
-
-.alert-success {
-    background: var(--primary-50);
-    border-color: var(--primary-100);
-    color: var(--primary-800);
-}
-
-.alert-dismissible .btn-close {
-    margin-left: auto;
-    background: none;
-    border: none;
-    color: currentColor;
-    opacity: 0.5;
-    cursor: pointer;
-}
-
-.alert-dismissible .btn-close:hover {
-    opacity: 1;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .search-page {
-        padding: 16px;
-    }
-    
-    .reservation-item .row {
-        gap: 16px;
-    }
-    
-    .customer-avatar {
-        margin-bottom: 8px;
-    }
-    
-    .btn-group-custom {
-        justify-content: flex-start;
-    }
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.animate-item {
-    animation: fadeIn 0.3s ease-out forwards;
+.alert-green {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
 }
 </style>
 
 <div class="search-page">
-    <!-- Breadcrumb -->
-    <nav class="breadcrumb-custom">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
-        <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('checkin.index') }}">Check-in</a>
-        <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Recherche</span>
-    </nav>
 
-    <!-- En-tête -->
-    <div class="page-header">
+    {{-- Breadcrumb --}}
+    <div class="breadcrumb anim-1">
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <a href="{{ route('checkin.index') }}">Check-in</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <span class="active">Recherche</span>
+    </div>
+
+    {{-- En-tête --}}
+    <div class="page-header anim-2">
         <div>
             <div class="header-title">
-                <span class="header-icon">
-                    <i class="fas fa-search"></i>
-                </span>
-                <h1>Recherche de réservations</h1>
+                <span class="header-icon"><i class="fas fa-search"></i></span>
+                <h1>Recherche de <em>réservations</em></h1>
             </div>
             <p class="header-subtitle">Trouvez rapidement une réservation pour le check-in</p>
         </div>
-        <a href="{{ route('checkin.index') }}" class="btn btn-outline">
-            <i class="fas fa-arrow-left me-2"></i>Retour au check-in
+        <a href="{{ route('checkin.index') }}" class="btn btn-gray">
+            <i class="fas fa-arrow-left"></i> Retour
         </a>
     </div>
 
-    <!-- Barre de recherche -->
-    <div class="search-container">
-        <h4>
-            <i class="fas fa-search me-2"></i>Rechercher une réservation
-        </h4>
+    {{-- Barre de recherche --}}
+    <div class="search-container anim-3">
+        <h4><i class="fas fa-search"></i>Rechercher une réservation</h4>
         <form method="GET" action="{{ route('checkin.search') }}" id="search-form">
             <div class="row g-3">
                 <div class="col-md-8">
-                    <div class="input-group">
-                        <span class="input-group-text">
-                            <i class="fas fa-search"></i>
-                        </span>
+                    <div class="search-input-group">
+                        <span><i class="fas fa-search"></i></span>
                         <input type="text" 
-                               class="form-control" 
                                name="search" 
                                id="search-input"
-                               placeholder="Nom du client, téléphone, email, numéro de chambre..."
+                               placeholder="Nom, téléphone, email, chambre..."
                                value="{{ $search ?? '' }}"
                                autocomplete="off"
                                autofocus>
+                        <button type="submit">Rechercher</button>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <button type="submit" class="btn btn-light w-100">
-                        <i class="fas fa-search me-2"></i>Rechercher
+                    <button type="submit" class="btn btn-green w-100">
+                        <i class="fas fa-search"></i> Rechercher
                     </button>
                 </div>
             </div>
             
-            <!-- Filtres rapides -->
+            {{-- Filtres rapides --}}
             <div class="quick-filters">
-                <div class="d-flex flex-wrap gap-2">
-                    <span class="quick-filter-badge" onclick="setFilter('arrivals-today')">
-                        <i class="fas fa-calendar-day"></i>Arrivées aujourd'hui
-                    </span>
-                    <span class="quick-filter-badge" onclick="setFilter('departures-today')">
-                        <i class="fas fa-sign-out-alt"></i>Départs aujourd'hui
-                    </span>
-                    <span class="quick-filter-badge" onclick="setFilter('reservation')">
-                        <i class="fas fa-calendar-check"></i>Réservations
-                    </span>
-                    <span class="quick-filter-badge" onclick="setFilter('active')">
-                        <i class="fas fa-bed"></i>Dans l'hôtel
-                    </span>
-                </div>
+                <span class="filter-badge" onclick="setFilter('arrivals-today')">
+                    <i class="fas fa-calendar-day"></i>Arrivées aujourd'hui
+                </span>
+                <span class="filter-badge" onclick="setFilter('departures-today')">
+                    <i class="fas fa-sign-out-alt"></i>Départs aujourd'hui
+                </span>
+                <span class="filter-badge" onclick="setFilter('reservation')">
+                    <i class="fas fa-calendar-check"></i>Réservations
+                </span>
+                <span class="filter-badge" onclick="setFilter('active')">
+                    <i class="fas fa-bed"></i>Dans l'hôtel
+                </span>
             </div>
         </form>
     </div>
 
-    <!-- Indicateur de chargement -->
+    {{-- Indicateur de chargement --}}
     <div class="search-loading" id="loading-indicator">
         <div class="loading-spinner">
             <div class="spinner"></div>
@@ -686,97 +583,93 @@
         </div>
     </div>
 
-    <!-- Résultats -->
-    <div class="card">
+    {{-- Résultats --}}
+    <div class="card anim-4">
         <div class="card-header">
-            <h5>
-                <i class="fas fa-list-ul" style="color: var(--primary-500);"></i>
-                Résultats de recherche
-            </h5>
+            <h5><i class="fas fa-list-ul"></i> Résultats de recherche</h5>
             @if(isset($search) && $search)
                 <div>
-                    <span class="badge badge-primary">{{ $reservations->count() }} résultat(s)</span>
-                    <a href="{{ route('checkin.search') }}" class="btn btn-outline btn-sm ms-2">
-                        <i class="fas fa-times me-1"></i>Effacer
+                    <span class="badge badge-green">{{ $reservations->count() }} résultat(s)</span>
+                    <a href="{{ route('checkin.search') }}" class="btn btn-sm btn-gray ms-2">
+                        <i class="fas fa-times"></i> Effacer
                     </a>
                 </div>
             @endif
         </div>
         <div class="card-body">
+
             @if(!isset($search) || !$search)
-                <!-- État initial -->
+                {{-- État initial --}}
                 <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
+                    <div class="empty-icon"><i class="fas fa-search"></i></div>
                     <h4>Recherchez une réservation</h4>
-                    <p>Utilisez la barre de recherche ci-dessus pour trouver des réservations par nom, téléphone, email ou numéro de chambre.</p>
+                    <p>Utilisez la barre de recherche ci-dessus</p>
                     
                     <div class="row g-4 mt-2">
                         <div class="col-md-3">
                             <div class="guide-card">
-                                <i class="fas fa-user text-primary"></i>
+                                <i class="fas fa-user"></i>
                                 <h6>Par nom</h6>
                                 <p>Ex: "Dupont"</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="guide-card">
-                                <i class="fas fa-phone text-success"></i>
+                                <i class="fas fa-phone"></i>
                                 <h6>Par téléphone</h6>
                                 <p>Ex: "0123456789"</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="guide-card">
-                                <i class="fas fa-envelope text-warning"></i>
+                                <i class="fas fa-envelope"></i>
                                 <h6>Par email</h6>
                                 <p>Ex: "client@email.com"</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="guide-card">
-                                <i class="fas fa-door-closed text-info"></i>
+                                <i class="fas fa-door-closed"></i>
                                 <h6>Par chambre</h6>
                                 <p>Ex: "101"</p>
                             </div>
                         </div>
                     </div>
                 </div>
+
             @elseif($reservations->isEmpty())
-                <!-- Aucun résultat -->
+                {{-- Aucun résultat --}}
                 <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <i class="fas fa-search-minus"></i>
-                    </div>
+                    <div class="empty-icon"><i class="fas fa-search-minus"></i></div>
                     <h4>Aucun résultat trouvé</h4>
-                    <p>Aucune réservation ne correspond à votre recherche "{{ $search }}"</p>
-                    <div class="d-flex justify-content-center gap-2">
-                        <a href="{{ route('checkin.search') }}" class="btn btn-outline">
-                            <i class="fas fa-search me-2"></i>Nouvelle recherche
-                        </a>
-                        <a href="{{ route('checkin.direct') }}" class="btn btn-primary">
-                            <i class="fas fa-user-plus me-2"></i>Check-in direct
-                        </a>
+                    <p>Aucune réservation ne correspond à "{{ $search }}"</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a href="{{ route('checkin.search') }}" class="btn btn-gray">Nouvelle recherche</a>
+                        <a href="{{ route('checkin.direct') }}" class="btn btn-green">Check-in direct</a>
                     </div>
                 </div>
+
             @else
-                <!-- Liste des résultats -->
+                {{-- Liste des résultats --}}
                 <div class="search-results">
                     @foreach($reservations as $transaction)
-                        <div class="reservation-item animate-item">
+                        @php
+                            $totalPaid = $transaction->getTotalPayment();
+                            $totalPrice = $transaction->getTotalPrice();
+                            $remaining = $totalPrice - $totalPaid;
+                        @endphp
+                        <div class="reservation-item">
                             <div class="reservation-header">
                                 <div>
                                     <span class="reservation-id">
-                                        <i class="fas fa-hashtag fa-xs"></i>
-                                        Réservation #{{ $transaction->id }}
+                                        <i class="fas fa-hashtag"></i> #{{ $transaction->id }}
                                     </span>
-                                    <span class="reservation-status status-{{ $transaction->status }} ms-2">
+                                    <span class="reservation-status status-{{ $transaction->status }}">
                                         {{ $transaction->status_label }}
                                     </span>
                                 </div>
                                 <small class="text-muted">
-                                    <i class="far fa-calendar-alt me-1"></i>
+                                    <i class="far fa-calendar-alt"></i>
                                     {{ $transaction->created_at->format('d/m/Y') }}
                                 </small>
                             </div>
@@ -788,15 +681,15 @@
                                     </div>
                                 </div>
                                 <div class="col-md-4">
-                                    <h6 class="mb-2 fw-semibold">{{ $transaction->customer->name }}</h6>
+                                    <h6 class="fw-semibold mb-2">{{ $transaction->customer->name }}</h6>
                                     <div class="text-muted small">
                                         <div class="mb-1">
-                                            <i class="fas fa-phone fa-xs me-2" style="color: var(--gray-400);"></i>
+                                            <i class="fas fa-phone fa-xs me-2" style="color:var(--gray-400);"></i>
                                             {{ $transaction->customer->phone }}
                                         </div>
                                         @if($transaction->customer->email)
                                             <div>
-                                                <i class="fas fa-envelope fa-xs me-2" style="color: var(--gray-400);"></i>
+                                                <i class="fas fa-envelope fa-xs me-2" style="color:var(--gray-400);"></i>
                                                 {{ $transaction->customer->email }}
                                             </div>
                                         @endif
@@ -808,8 +701,8 @@
                                         Chambre {{ $transaction->room->number }}
                                     </span>
                                     <div class="text-muted small">
-                                        <i class="fas fa-bed me-1"></i>
-                                        {{ $transaction->room->type->name ?? 'Type non spécifié' }}
+                                        <i class="fas fa-bed"></i>
+                                        {{ $transaction->room->type->name ?? 'Standard' }}
                                     </div>
                                 </div>
                                 <div class="col-md-3">
@@ -819,29 +712,25 @@
                                             <strong>{{ $transaction->check_in->format('d/m/Y H:i') }}</strong>
                                         </div>
                                         
-                                        <div class="btn-group-custom">
+                                        <div class="d-flex gap-1 justify-content-md-end">
                                             @if($transaction->status == 'reservation')
                                                 <a href="{{ route('checkin.show', $transaction) }}" 
-                                                   class="btn btn-success btn-sm">
-                                                    <i class="fas fa-door-open me-1"></i> Check-in
+                                                   class="btn btn-green btn-sm">
+                                                    <i class="fas fa-door-open"></i> Check-in
                                                 </a>
                                                 <button onclick="quickCheckIn({{ $transaction->id }})" 
-                                                        class="btn btn-outline-success btn-sm">
+                                                        class="btn btn-gray btn-sm">
                                                     <i class="fas fa-bolt"></i>
                                                 </button>
                                             @elseif($transaction->status == 'active')
                                                 <a href="{{ route('transaction.show', $transaction) }}" 
-                                                   class="btn btn-outline-info btn-sm">
-                                                    <i class="fas fa-eye me-1"></i> Voir
+                                                   class="btn btn-gray btn-sm">
+                                                    <i class="fas fa-eye"></i> Voir
                                                 </a>
-                                                <button onclick="checkoutGuest({{ $transaction->id }})" 
-                                                        class="btn btn-outline-success btn-sm">
-                                                    <i class="fas fa-sign-out-alt me-1"></i> Check-out
-                                                </button>
                                             @else
                                                 <a href="{{ route('transaction.show', $transaction) }}" 
-                                                   class="btn btn-outline-secondary btn-sm">
-                                                    <i class="fas fa-eye me-1"></i> Détails
+                                                   class="btn btn-gray btn-sm">
+                                                    <i class="fas fa-eye"></i> Détails
                                                 </a>
                                             @endif
                                         </div>
@@ -849,27 +738,27 @@
                                 </div>
                             </div>
                             
-                            <!-- Informations supplémentaires -->
-                            <div class="row mt-3 pt-3" style="border-top: 1px solid var(--gray-100);">
+                            {{-- Informations supplémentaires --}}
+                            <div class="row mt-3 pt-3" style="border-top:1px solid var(--gray-200);">
                                 <div class="col-md-4">
                                     <small class="text-muted">
-                                        <i class="fas fa-calendar-alt me-1" style="color: var(--primary-400);"></i>
+                                        <i class="fas fa-calendar-alt me-1" style="color:var(--green-600);"></i>
                                         <strong>Durée:</strong> {{ $transaction->nights }} nuit(s)
                                     </small>
                                 </div>
                                 <div class="col-md-4">
                                     <small class="text-muted">
-                                        <i class="fas fa-money-bill-wave me-1" style="color: var(--primary-400);"></i>
-                                        <strong>Total:</strong> {{ Helper::formatCFA($transaction->getTotalPrice()) }}
+                                        <i class="fas fa-money-bill-wave me-1" style="color:var(--green-600);"></i>
+                                        <strong>Total:</strong> {{ number_format($totalPrice, 0, ',', ' ') }} FCFA
                                     </small>
                                 </div>
                                 <div class="col-md-4">
                                     <small class="text-muted">
-                                        <i class="fas fa-credit-card me-1" style="color: var(--primary-400);"></i>
-                                        <strong>Payé:</strong> {{ Helper::formatCFA($transaction->getTotalPayment()) }}
-                                        @if($transaction->getRemainingPayment() > 0)
-                                            <span class="text-warning ms-1">
-                                                (Solde: {{ Helper::formatCFA($transaction->getRemainingPayment()) }})
+                                        <i class="fas fa-credit-card me-1" style="color:var(--green-600);"></i>
+                                        <strong>Payé:</strong> {{ number_format($totalPaid, 0, ',', ' ') }} FCFA
+                                        @if($remaining > 0)
+                                            <span class="text-danger ms-1">
+                                                (Solde: {{ number_format($remaining, 0, ',', ' ') }})
                                             </span>
                                         @endif
                                     </small>
@@ -879,7 +768,7 @@
                     @endforeach
                 </div>
                 
-                <!-- Pagination -->
+                {{-- Pagination --}}
                 @if($reservations->hasPages())
                     <div class="d-flex justify-content-center mt-4">
                         {{ $reservations->appends(['search' => $search])->links() }}
@@ -889,21 +778,18 @@
         </div>
     </div>
 
-    <!-- Aide et actions rapides -->
-    <div class="row mt-4">
+    {{-- Aide et actions --}}
+    <div class="row g-4 mt-2">
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5>
-                        <i class="fas fa-lightbulb" style="color: var(--amber-400);"></i>
-                        Conseils de recherche
-                    </h5>
+                    <h5><i class="fas fa-lightbulb" style="color:var(--green-600);"></i> Conseils</h5>
                 </div>
                 <div class="card-body">
-                    <ul class="mb-0" style="color: var(--gray-600);">
+                    <ul class="mb-0" style="color:var(--gray-600); font-size:.8rem;">
                         <li class="mb-2">Utilisez les initiales pour une recherche plus large</li>
-                        <li class="mb-2">Les numéros de téléphone peuvent être saisis avec ou sans indicatif</li>
-                        <li class="mb-2">Recherchez par numéro de chambre pour voir tous les clients d'une chambre</li>
+                        <li class="mb-2">Les numéros de téléphone peuvent être saisis sans indicatif</li>
+                        <li class="mb-2">Recherchez par numéro de chambre</li>
                         <li>Utilisez les filtres rapides pour les besoins courants</li>
                     </ul>
                 </div>
@@ -912,155 +798,89 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5>
-                        <i class="fas fa-clock" style="color: var(--blue-400);"></i>
-                        Actions rapides
-                    </h5>
+                    <h5><i class="fas fa-clock" style="color:var(--green-600);"></i> Actions</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ route('checkin.index') }}" class="btn btn-outline">
-                            <i class="fas fa-home me-2"></i>Retour au dashboard check-in
+                        <a href="{{ route('checkin.index') }}" class="btn btn-gray">
+                            <i class="fas fa-home"></i> Dashboard check-in
                         </a>
-                        <a href="{{ route('checkin.direct') }}" class="btn btn-primary">
-                            <i class="fas fa-user-plus me-2"></i>Check-in direct (sans réservation)
+                        <a href="{{ route('checkin.direct') }}" class="btn btn-green">
+                            <i class="fas fa-user-plus"></i> Check-in direct
                         </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 
-@endsection
-
-@section('footer')
 <script>
-function setFilter(filterType) {
-    const searchInput = document.getElementById('search-input');
+function setFilter(type) {
+    const input = document.getElementById('search-input');
+    const today = new Date().toISOString().split('T')[0];
     
-    switch(filterType) {
+    switch(type) {
         case 'arrivals-today':
-            searchInput.value = 'arrivée:' + new Date().toLocaleDateString('fr-CA');
+            input.value = 'arrivée:' + today;
             break;
         case 'departures-today':
-            searchInput.value = 'départ:' + new Date().toLocaleDateString('fr-CA');
+            input.value = 'départ:' + today;
             break;
         case 'reservation':
-            searchInput.value = 'statut:reservation';
+            input.value = 'statut:reservation';
             break;
         case 'active':
-            searchInput.value = 'statut:active';
+            input.value = 'statut:active';
             break;
     }
-    
     document.getElementById('search-form').submit();
 }
 
-function quickCheckIn(transactionId) {
-    if (confirm('Effectuer un check-in rapide sans formulaire détaillé ?')) {
-        const loadingIndicator = document.getElementById('loading-indicator');
-        loadingIndicator.classList.add('active');
-        
-        fetch(`/checkin/${transactionId}/quick`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({})
-        })
-        .then(response => response.json())
-        .then(data => {
-            loadingIndicator.classList.remove('active');
-            
-            if (data.success) {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                alertDiv.innerHTML = `
-                    <i class="fas fa-check-circle me-2"></i>
-                    ${data.message || 'Check-in rapide effectué avec succès!'}
-                    <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-                `;
-                document.querySelector('.search-page').prepend(alertDiv);
-                
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
-            } else {
-                alert('Erreur: ' + (data.error || 'Échec du check-in rapide'));
-            }
-        })
-        .catch(error => {
-            loadingIndicator.classList.remove('active');
-            console.error('Error:', error);
-            alert('Une erreur est survenue lors du check-in rapide');
-        });
-    }
-}
-
-function checkoutGuest(transactionId) {
-    if (confirm('Effectuer le check-out de ce client ?')) {
-        const loadingIndicator = document.getElementById('loading-indicator');
-        loadingIndicator.classList.add('active');
-        
-        fetch(`/transaction/${transactionId}/check-out`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            loadingIndicator.classList.remove('active');
-            
-            if (data.success) {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = 'alert alert-success alert-dismissible fade show';
-                alertDiv.innerHTML = `
-                    <i class="fas fa-check-circle me-2"></i>
-                    ${data.message || 'Check-out effectué avec succès!'}
-                    <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-                `;
-                document.querySelector('.search-page').prepend(alertDiv);
-                
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
-            } else {
-                alert('Erreur: ' + (data.message || 'Échec du check-out'));
-            }
-        })
-        .catch(error => {
-            loadingIndicator.classList.remove('active');
-            console.error('Error:', error);
-            alert('Une erreur est survenue lors du check-out');
-        });
-    }
-}
-
-// Recherche automatique après délai
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('search-input');
-    const searchForm = document.getElementById('search-form');
-    const loadingIndicator = document.getElementById('loading-indicator');
+function quickCheckIn(id) {
+    if (!confirm('Effectuer un check-in rapide ?')) return;
     
-    if (searchInput && !searchInput.value) {
-        searchInput.focus();
-    }
+    const loader = document.getElementById('loading-indicator');
+    loader.classList.add('active');
     
-    let searchTimeout;
-    searchInput.addEventListener('input', function() {
-        clearTimeout(searchTimeout);
-        if (this.value.length >= 2) {
-            searchTimeout = setTimeout(() => {
-                loadingIndicator.classList.add('active');
-                searchForm.submit();
-            }, 1000);
+    fetch(`/checkin/${id}/quick`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json'
         }
+    })
+    .then(r => r.json())
+    .then(data => {
+        loader.classList.remove('active');
+        if (data.success) {
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-green';
+            alert.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message || 'Check-in effectué'}`;
+            document.querySelector('.search-page').prepend(alert);
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            alert('Erreur: ' + (data.error || 'Échec'));
+        }
+    })
+    .catch(() => {
+        loader.classList.remove('active');
+        alert('Erreur réseau');
     });
+}
+
+// Recherche automatique
+let timeout;
+document.getElementById('search-input')?.addEventListener('input', function() {
+    clearTimeout(timeout);
+    if (this.value.length >= 2) {
+        timeout = setTimeout(() => {
+            document.getElementById('loading-indicator').classList.add('active');
+            document.getElementById('search-form').submit();
+        }, 800);
+    }
 });
 </script>
+
 @endsection
