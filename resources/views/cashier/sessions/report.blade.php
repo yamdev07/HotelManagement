@@ -7,44 +7,53 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    /* Palette 3 couleurs professionnelle */
-    --primary: #0f3b4c;
-    --primary-dark: #0a2a36;
-    --success: #1e5a2a;
-    --success-dark: #15451e;
-    --success-light: #e8f3ea;
-    --gray-900: #1e293b;
-    --gray-800: #2d3a4f;
-    --gray-700: #334155;
-    --gray-600: #475569;
-    --gray-500: #64748b;
-    --gray-400: #94a3b8;
-    --gray-300: #cbd5e1;
-    --gray-200: #e2e8f0;
-    --gray-100: #f1f5f9;
-    --gray-50: #f8fafc;
-    --white: #ffffff;
-    --border: #e9edf2;
-    
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.02);
-    --shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-    --radius-sm: 6px;
-    --radius: 10px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-xl: 20px;
+    /* ── 4 COULEURS (vert, rouge, gris, blanc) ── */
+    --green-50:  #f0faf0;
+    --green-100: #d4edda;
+    --green-500: #2e8540;
+    --green-600: #1e6b2e;
+    --green-700: #155221;
+
+    --red-50:    #fee2e2;
+    --red-100:   #fecaca;
+    --red-500:   #b91c1c;
+    --red-600:   #991b1b;
+
+    --gray-50:   #f8f9f8;
+    --gray-100:  #eff0ef;
+    --gray-200:  #dde0dd;
+    --gray-300:  #c2c7c2;
+    --gray-400:  #9ba09b;
+    --gray-500:  #737873;
+    --gray-600:  #545954;
+    --gray-700:  #3a3e3a;
+    --gray-800:  #252825;
+    --gray-900:  #131513;
+
+    --white:     #ffffff;
+    --surface:   #f7f9f7;
+
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s ease;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--gray-50);
+    background: var(--surface);
+    font-family: var(--font);
+    color: var(--gray-800);
     padding: 1.5rem 0;
 }
 
@@ -59,32 +68,37 @@ body {
 /* ========================================= */
 .report-card {
     background: var(--white);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow);
+    border-radius: var(--rxl);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--gray-200);
 }
 
 /* ========================================= */
-/* EN-TÊTE COMPACT */
+/* EN-TÊTE */
 /* ========================================= */
 .report-header {
     padding: 1.25rem 2rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1.5px solid var(--gray-200);
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
-    background: white;
+    background: var(--white);
 }
 
 .header-title h1 {
     font-size: 1.5rem;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--gray-900);
     margin-bottom: 0.25rem;
     letter-spacing: -0.02em;
+}
+
+.header-title h1 em {
+    font-style: normal;
+    color: var(--green-600);
 }
 
 .header-title p {
@@ -96,7 +110,7 @@ body {
 }
 
 .header-title p i {
-    color: var(--primary);
+    color: var(--green-600);
     font-size: 0.4rem;
 }
 
@@ -104,24 +118,23 @@ body {
     padding: 0.35rem 1.25rem;
     background: var(--gray-100);
     border-radius: 100px;
-    font-weight: 500;
+    font-weight: 600;
     font-size: 0.75rem;
     color: var(--gray-700);
-    border: 1px solid var(--border);
+    border: 1.5px solid var(--gray-200);
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
 }
 
 .header-badge.active {
-    background: var(--success-light);
-    color: var(--success);
-    border-color: var(--success);
-    font-weight: 600;
+    background: var(--green-50);
+    color: var(--green-700);
+    border-color: var(--green-200);
 }
 
 /* ========================================= */
-/* GRILLE D'INFORMATIONS COMPACTE */
+/* GRILLE D'INFORMATIONS */
 /* ========================================= */
 .info-grid {
     padding: 1.25rem 2rem;
@@ -129,14 +142,14 @@ body {
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
     background: var(--gray-50);
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1.5px solid var(--gray-200);
 }
 
 .info-item {
     background: var(--white);
     padding: 0.75rem 1rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
+    border-radius: var(--rl);
+    border: 1.5px solid var(--gray-200);
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -145,12 +158,12 @@ body {
 .info-icon {
     width: 36px;
     height: 36px;
-    background: var(--gray-50);
-    border-radius: var(--radius-sm);
+    background: var(--green-50);
+    border-radius: var(--r);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--primary);
+    color: var(--green-600);
     font-size: 1rem;
 }
 
@@ -170,28 +183,23 @@ body {
     line-height: 1.2;
 }
 
-.info-sub {
-    font-size: 0.65rem;
-    color: var(--gray-500);
-}
-
 /* ========================================= */
-/* KPI CARDS COMPACTES */
+/* KPI CARDS */
 /* ========================================= */
 .kpi-grid {
     padding: 1.25rem 2rem;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
-    border-bottom: 1px solid var(--border);
-    background: white;
+    border-bottom: 1.5px solid var(--gray-200);
+    background: var(--white);
 }
 
 .kpi-card {
     padding: 1rem 1.25rem;
     background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
 }
 
 .kpi-header {
@@ -212,21 +220,21 @@ body {
 .kpi-icon {
     width: 28px;
     height: 28px;
-    background: var(--gray-50);
-    border-radius: var(--radius-sm);
+    background: var(--green-50);
+    border-radius: var(--r);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--primary);
+    color: var(--green-600);
     font-size: 0.75rem;
 }
 
 .kpi-value {
     font-size: 1.5rem;
     font-weight: 700;
+    font-family: var(--mono);
     color: var(--gray-900);
     margin-bottom: 0.25rem;
-    letter-spacing: -0.02em;
 }
 
 .kpi-footer {
@@ -244,15 +252,17 @@ body {
     color: var(--gray-700);
     font-weight: 500;
     font-size: 0.6rem;
+    border: 1.5px solid var(--gray-200);
 }
 
-.kpi-badge.success {
-    background: var(--success-light);
-    color: var(--success);
+.kpi-badge.green {
+    background: var(--green-50);
+    color: var(--green-700);
+    border-color: var(--green-200);
 }
 
 /* ========================================= */
-/* SECTION TITRE COMPACT */
+/* SECTION TITRE */
 /* ========================================= */
 .section-header {
     padding: 1rem 2rem 0 2rem;
@@ -272,12 +282,12 @@ body {
 .section-title i {
     width: 30px;
     height: 30px;
-    background: var(--gray-100);
-    border-radius: var(--radius);
+    background: var(--green-50);
+    border-radius: var(--r);
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--primary);
+    color: var(--green-600);
     font-size: 0.875rem;
 }
 
@@ -295,10 +305,11 @@ body {
     font-size: 0.7rem;
     font-weight: 500;
     color: var(--gray-700);
+    border: 1.5px solid var(--gray-200);
 }
 
 /* ========================================= */
-/* MÉTHODES DE PAIEMENT COMPACTES */
+/* MÉTHODES DE PAIEMENT */
 /* ========================================= */
 .methods-grid {
     padding: 1rem 2rem;
@@ -310,8 +321,8 @@ body {
 .method-card {
     padding: 1rem;
     background: var(--white);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
 }
 
 .method-name {
@@ -331,6 +342,7 @@ body {
 .method-amount {
     font-size: 1rem;
     font-weight: 700;
+    font-family: var(--mono);
     color: var(--gray-900);
 }
 
@@ -341,7 +353,7 @@ body {
 }
 
 .method-progress {
-    height: 3px;
+    height: 4px;
     background: var(--gray-100);
     border-radius: 100px;
     overflow: hidden;
@@ -349,23 +361,19 @@ body {
 
 .method-progress-bar {
     height: 100%;
-    background: var(--primary);
+    background: var(--green-600);
     border-radius: 100px;
 }
 
-.method-progress-bar.success {
-    background: var(--success);
-}
-
 /* ========================================= */
-/* TABLEAU COMPACT POUR 1 PAGE */
+/* TABLEAU */
 /* ========================================= */
 .table-container {
     margin: 1rem 2rem;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
     overflow: hidden;
-    background: white;
+    background: var(--white);
     max-height: 350px;
     overflow-y: auto;
 }
@@ -385,21 +393,20 @@ th {
     padding: 0.6rem 1rem;
     background: var(--gray-50);
     font-size: 0.6rem;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--gray-500);
     text-transform: uppercase;
     letter-spacing: 0.4px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1.5px solid var(--gray-200);
     white-space: nowrap;
     position: sticky;
     top: 0;
-    background: var(--gray-50);
     z-index: 10;
 }
 
 td {
     padding: 0.6rem 1rem;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--gray-200);
     color: var(--gray-700);
     vertical-align: middle;
 }
@@ -408,7 +415,7 @@ tr:last-child td {
     border-bottom: none;
 }
 
-/* Badges compacts */
+/* Badges */
 .badge {
     display: inline-flex;
     align-items: center;
@@ -416,15 +423,17 @@ tr:last-child td {
     padding: 0.2rem 0.6rem;
     border-radius: 100px;
     font-size: 0.6rem;
-    font-weight: 500;
+    font-weight: 600;
     background: var(--gray-100);
     color: var(--gray-700);
     white-space: nowrap;
+    border: 1.5px solid var(--gray-200);
 }
 
-.badge.success {
-    background: var(--success-light);
-    color: var(--success);
+.badge.green {
+    background: var(--green-50);
+    color: var(--green-700);
+    border-color: var(--green-200);
 }
 
 .method-badge {
@@ -434,40 +443,37 @@ tr:last-child td {
     padding: 0.2rem 0.6rem;
     border-radius: 100px;
     font-size: 0.6rem;
-    font-weight: 500;
+    font-weight: 600;
     background: var(--gray-100);
     color: var(--gray-700);
+    border: 1.5px solid var(--gray-200);
 }
 
 .method-badge i {
     font-size: 0.6rem;
+    color: var(--green-600);
 }
 
-.method-badge.cash {
-    background: var(--success-light);
-    color: var(--success);
-}
-
-.method-badge.card {
-    background: #e3f0f5;
-    color: var(--primary);
-}
-
-/* Montants compacts */
+/* Montants */
 .amount {
     font-weight: 600;
     font-size: 0.7rem;
+    font-family: var(--mono);
 }
 
 .amount.positive {
-    color: var(--success);
+    color: var(--green-600);
 }
 
-/* Pied du tableau compact */
+.amount.negative {
+    color: var(--red-500);
+}
+
+/* Pied du tableau */
 .table-footer {
     padding: 0.6rem 1rem;
     background: var(--gray-50);
-    border-top: 1px solid var(--border);
+    border-top: 1.5px solid var(--gray-200);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -490,11 +496,20 @@ tr:last-child td {
 .total-value {
     font-size: 0.9rem;
     font-weight: 700;
+    font-family: var(--mono);
     color: var(--gray-900);
 }
 
+.total-value.green {
+    color: var(--green-600);
+}
+
+.total-value.red {
+    color: var(--red-500);
+}
+
 /* ========================================= */
-/* RÉSUMÉ FINANCIER COMPACT */
+/* RÉSUMÉ FINANCIER */
 /* ========================================= */
 .summary-grid {
     padding: 1rem 2rem;
@@ -502,16 +517,16 @@ tr:last-child td {
     grid-template-columns: repeat(3, 1fr);
     gap: 1rem;
     background: var(--gray-50);
-    border-top: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
+    border-top: 1.5px solid var(--gray-200);
+    border-bottom: 1.5px solid var(--gray-200);
 }
 
 .summary-item {
     text-align: center;
     padding: 0.75rem;
-    background: white;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
+    background: var(--white);
+    border-radius: var(--rl);
+    border: 1.5px solid var(--gray-200);
 }
 
 .summary-label {
@@ -526,22 +541,21 @@ tr:last-child td {
 .summary-value {
     font-size: 1.25rem;
     font-weight: 700;
+    font-family: var(--mono);
     color: var(--gray-900);
     margin-bottom: 0.1rem;
-    letter-spacing: -0.02em;
 }
 
-.summary-value.success {
-    color: var(--success);
+.summary-value.green {
+    color: var(--green-600);
 }
 
-.summary-sub {
-    font-size: 0.6rem;
-    color: var(--gray-500);
+.summary-value.red {
+    color: var(--red-500);
 }
 
 /* ========================================= */
-/* PIED DE PAGE COMPACT */
+/* PIED DE PAGE */
 /* ========================================= */
 .report-footer {
     padding: 1rem 2rem;
@@ -550,7 +564,7 @@ tr:last-child td {
     align-items: center;
     flex-wrap: wrap;
     gap: 1rem;
-    background: white;
+    background: var(--white);
 }
 
 .signatures {
@@ -574,12 +588,12 @@ tr:last-child td {
 .signature-line {
     width: 120px;
     height: 1px;
-    background: var(--border);
+    background: var(--gray-200);
     margin: 0.35rem 0;
 }
 
 .signature-name {
-    color: var(--gray-600);
+    color: var(--gray-700);
     font-size: 0.7rem;
     font-weight: 500;
 }
@@ -597,36 +611,42 @@ tr:last-child td {
 
 .btn {
     padding: 0.5rem 1.25rem;
-    border-radius: var(--radius);
-    font-weight: 500;
+    border-radius: var(--r);
+    font-weight: 600;
     font-size: 0.75rem;
     cursor: pointer;
-    border: 1px solid transparent;
+    border: none;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: var(--transition);
 }
 
-.btn-primary {
-    background: var(--primary);
+.btn-green {
+    background: var(--green-600);
     color: white;
 }
 
-.btn-secondary {
-    background: white;
-    color: var(--gray-700);
-    border-color: var(--border);
+.btn-green:hover {
+    background: var(--green-700);
+    transform: translateY(-1px);
 }
 
-.btn-success {
-    background: var(--success);
-    color: white;
+.btn-gray {
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+}
+
+.btn-gray:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
 }
 
 /* ========================================= */
-/* PRINT STYLES OPTIMISÉS 1 PAGE */
+/* PRINT STYLES */
 /* ========================================= */
 @media print {
     @page {
@@ -634,108 +654,61 @@ tr:last-child td {
         margin: 0.5cm;
     }
     
-    body { 
-        background: white; 
-        padding: 0;
-        font-size: 10pt;
-    }
+    body { background: white; padding: 0; }
+    .footer-actions { display: none !important; }
+    .btn { display: none !important; }
     
-    .report-wrapper {
-        padding: 0;
-        max-width: 100%;
-    }
-    
-    .report-card {
-        box-shadow: none;
-        border: 1px solid #ddd;
-        border-radius: 0;
-    }
-    
-    .footer-actions, 
-    .btn,
-    .table-filters {
-        display: none !important;
-    }
-    
-    .kpi-grid {
-        break-inside: avoid;
-    }
-    
-    .methods-grid {
-        break-inside: avoid;
-    }
-    
-    .table-container {
-        max-height: none;
-        overflow: visible;
-        break-inside: avoid;
-    }
-    
-    th {
-        background: #f0f0f0 !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-    
-    .badge, .method-badge {
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
-    
-    /* Réduire encore pour l'impression */
-    .info-grid { padding: 0.5rem 1rem; }
-    .kpi-grid { padding: 0.5rem 1rem; }
-    .section-header { padding: 0.5rem 1rem 0; }
-    .methods-grid { padding: 0.5rem 1rem; }
-    .table-container { margin: 0.5rem 1rem; }
-    .summary-grid { padding: 0.5rem 1rem; }
-    .report-footer { padding: 0.5rem 1rem; }
-    
-    td, th { padding: 0.3rem 0.5rem; }
-    
-    .info-value { font-size: 0.9rem; }
-    .kpi-value { font-size: 1.25rem; }
+    .report-card { box-shadow: none; border: 1.5px solid var(--gray-200); }
+    .badge, .method-badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
 /* ========================================= */
 /* RESPONSIVE */
 /* ========================================= */
 @media (max-width: 1200px) {
-    .info-grid, 
-    .kpi-grid, 
-    .methods-grid {
+    .info-grid, .kpi-grid, .methods-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 768px) {
-    .report-wrapper { padding: 0 0.75rem; }
-    
-    .info-grid, 
-    .kpi-grid, 
-    .methods-grid,
-    .summary-grid {
+    .info-grid, .kpi-grid, .methods-grid, .summary-grid {
         grid-template-columns: 1fr;
     }
-    
-    .signatures {
-        flex-direction: column;
-        gap: 1rem;
-    }
-    
+    .signatures { flex-direction: column; gap: 1rem; }
     .signature-line { width: 100%; }
 }
 </style>
 @endpush
 
 @section('content')
+@php
+    // Calcul des totaux
+    $totalCompleted = $payments->where('status', 'completed')->where('amount', '>', 0)->sum('amount');
+    $totalRefunded = abs($payments->where('status', 'completed')->where('amount', '<', 0)->sum('amount'));
+    $paymentCount = $payments->where('status', 'completed')->count();
+    $netTotal = $totalCompleted - $totalRefunded;
+    
+    // Répartition par méthode
+    $byMethod = $payments->where('status', 'completed')
+        ->groupBy('payment_method')
+        ->map(function($group) {
+            return [
+                'method' => $group->first()->payment_method_label ?? $group->first()->payment_method,
+                'count' => $group->count(),
+                'total' => $group->sum('amount'),
+                'type' => $group->first()->payment_method
+            ];
+        });
+@endphp
+
 <div class="report-wrapper">
     <div class="report-card">
         
         <!-- EN-TÊTE -->
         <div class="report-header">
             <div class="header-title">
-                <h1>Rapport de Session #{{ $session->id }}</h1>
+                <h1>Rapport de Session <em>#{{ $session->id }}</em></h1>
                 <p>
                     <i class="fas fa-circle"></i>
                     {{ now()->format('d/m/Y H:i') }} • {{ auth()->user()->name }}
@@ -793,7 +766,7 @@ tr:last-child td {
                 <div class="kpi-value">{{ number_format($totalCompleted, 0, ',', ' ') }}</div>
                 <div class="kpi-footer">
                     <span>FCFA</span>
-                    <span class="kpi-badge success">{{ $paymentCount }} paiements</span>
+                    <span class="kpi-badge green">{{ $paymentCount }} paiements</span>
                 </div>
             </div>
 
@@ -802,7 +775,7 @@ tr:last-child td {
                     <span class="kpi-title">Remboursé</span>
                     <span class="kpi-icon"><i class="fas fa-arrow-down"></i></span>
                 </div>
-                <div class="kpi-value">{{ number_format($totalRefunded, 0, ',', ' ') }}</div>
+                <div class="kpi-value" style="color: var(--red-500);">{{ number_format($totalRefunded, 0, ',', ' ') }}</div>
                 <div class="kpi-footer">
                     <span>FCFA</span>
                 </div>
@@ -810,10 +783,10 @@ tr:last-child td {
 
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-title">Solde actuel</span>
+                    <span class="kpi-title">Net</span>
                     <span class="kpi-icon"><i class="fas fa-wallet"></i></span>
                 </div>
-                <div class="kpi-value">{{ number_format($session->final_balance ?? $session->current_balance, 0, ',', ' ') }}</div>
+                <div class="kpi-value {{ $netTotal >= 0 ? 'green' : 'red' }}">{{ number_format($netTotal, 0, ',', ' ') }}</div>
                 <div class="kpi-footer">
                     @if($session->balance_difference != 0)
                     <span>Écart: {{ number_format(abs($session->balance_difference), 0, ',', ' ') }}</span>
@@ -834,7 +807,7 @@ tr:last-child td {
         </div>
 
         <!-- RÉPARTITION DES PAIEMENTS -->
-        @if(isset($byMethod) && $byMethod->count() > 0)
+        @if($byMethod->count() > 0)
         <div class="section-header">
             <div class="section-title">
                 <i class="fas fa-chart-pie"></i>
@@ -846,25 +819,27 @@ tr:last-child td {
         <div class="methods-grid">
             @foreach($byMethod as $method)
             @php
-                $methodName = strtolower($method['method'] ?? '');
-                $isCash = str_contains($methodName, 'cash') || str_contains($methodName, 'espèces') || $method['method'] == 'Espèces';
+                $methodTotal = $method['total'] > 0 ? $method['total'] : abs($method['total']);
                 $percentage = $paymentCount > 0 ? round(($method['count'] / $paymentCount) * 100) : 0;
+                $isPositive = $method['total'] > 0;
             @endphp
             <div class="method-card">
                 <div class="method-name">{{ $method['method'] }}</div>
                 <div class="method-stats">
-                    <span class="method-amount">{{ number_format($method['total'], 0, ',', ' ') }}</span>
+                    <span class="method-amount {{ !$isPositive ? 'red' : '' }}">
+                        {{ $isPositive ? number_format($method['total'], 0, ',', ' ') : '-' . number_format(abs($method['total']), 0, ',', ' ') }}
+                    </span>
                     <span class="method-count">{{ $method['count'] }} tx</span>
                 </div>
                 <div class="method-progress">
-                    <div class="method-progress-bar {{ $isCash ? 'success' : '' }}" style="width: {{ $percentage }}%"></div>
+                    <div class="method-progress-bar" style="width: {{ $percentage }}%"></div>
                 </div>
             </div>
             @endforeach
         </div>
         @endif
 
-        <!-- TABLEAU DES PAIEMENTS (VERSION COMPACTE) -->
+        <!-- TABLEAU DES PAIEMENTS -->
         @if($payments->count() > 0)
         <div class="section-header">
             <div class="section-title">
@@ -887,10 +862,10 @@ tr:last-child td {
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($payments->take(15) as $payment) {{-- Limiter à 15 lignes max --}}
+                        @foreach($payments->take(15) as $payment)
                         @php
                             $isCompleted = $payment->status == 'completed';
-                            $isCash = $payment->payment_method == 'cash';
+                            $isPositive = $payment->amount > 0;
                             
                             $methodClass = 'cash';
                             $methodIcon = 'fa-money-bill-wave';
@@ -903,8 +878,8 @@ tr:last-child td {
                                 $methodIcon = 'fa-mobile-alt';
                             }
                         @endphp
-                        <tr data-status="{{ $payment->status }}" data-method="{{ $payment->payment_method }}">
-                            <td><span style="font-family: monospace;">{{ substr($payment->reference, -8) }}</span></td>
+                        <tr>
+                            <td><span style="font-family: var(--mono);">{{ substr($payment->reference, -8) }}</span></td>
                             <td>{{ $payment->created_at->format('d/m H:i') }}</td>
                             <td>
                                 @if($payment->transaction && $payment->transaction->customer)
@@ -914,17 +889,17 @@ tr:last-child td {
                                 @endif
                             </td>
                             <td>
-                                <span class="method-badge {{ $methodClass }}">
+                                <span class="method-badge">
                                     <i class="fas {{ $methodIcon }}"></i>
                                 </span>
                             </td>
                             <td>
-                                <span class="amount {{ $payment->amount > 0 ? 'positive' : '' }}">
-                                    {{ number_format($payment->amount, 0, ',', ' ') }}
+                                <span class="amount {{ $isPositive ? 'positive' : 'negative' }}">
+                                    {{ $isPositive ? '+' : '-' }} {{ number_format(abs($payment->amount), 0, ',', ' ') }}
                                 </span>
                             </td>
                             <td>
-                                <span class="badge {{ $isCompleted ? 'success' : '' }}">
+                                <span class="badge {{ $isCompleted ? 'green' : '' }}">
                                     {{ $isCompleted ? '✓' : '⏱' }}
                                 </span>
                             </td>
@@ -936,11 +911,25 @@ tr:last-child td {
             
             <div class="table-footer">
                 <div class="table-totals">
-                    <div><span class="total-label">Total</span> <span class="total-value">{{ $paymentCount }}</span></div>
-                    <div><span class="total-label">Montant</span> <span class="total-value success">{{ number_format($totalCompleted, 0, ',', ' ') }}</span></div>
+                    <div>
+                        <span class="total-label">Total</span>
+                        <span class="total-value">{{ $paymentCount }}</span>
+                    </div>
+                    <div>
+                        <span class="total-label">Encaissé</span>
+                        <span class="total-value green">{{ number_format($totalCompleted, 0, ',', ' ') }}</span>
+                    </div>
+                    <div>
+                        <span class="total-label">Remboursé</span>
+                        <span class="total-value red">{{ number_format($totalRefunded, 0, ',', ' ') }}</span>
+                    </div>
+                    <div>
+                        <span class="total-label">Net</span>
+                        <span class="total-value {{ $netTotal >= 0 ? 'green' : 'red' }}">{{ number_format($netTotal, 0, ',', ' ') }}</span>
+                    </div>
                 </div>
                 <div>
-                    <span class="badge success">✓ {{ $payments->where('status', 'completed')->count() }}</span>
+                    <span class="badge green">✓ {{ $payments->where('status', 'completed')->count() }}</span>
                     <span class="badge">⏱ {{ $payments->where('status', 'pending')->count() }}</span>
                 </div>
             </div>
@@ -956,12 +945,17 @@ tr:last-child td {
             
             <div class="summary-item">
                 <div class="summary-label">Total encaissé</div>
-                <div class="summary-value success">{{ number_format($totalCompleted, 0, ',', ' ') }}</div>
+                <div class="summary-value green">{{ number_format($totalCompleted, 0, ',', ' ') }}</div>
+            </div>
+            
+            <div class="summary-item">
+                <div class="summary-label">Total remboursé</div>
+                <div class="summary-value red">{{ number_format($totalRefunded, 0, ',', ' ') }}</div>
             </div>
             
             <div class="summary-item">
                 <div class="summary-label">Solde final</div>
-                <div class="summary-value">{{ number_format($session->final_balance ?? $session->current_balance, 0, ',', ' ') }}</div>
+                <div class="summary-value {{ $netTotal >= 0 ? 'green' : 'red' }}">{{ number_format($netTotal + $session->initial_balance, 0, ',', ' ') }}</div>
             </div>
         </div>
 
@@ -986,10 +980,10 @@ tr:last-child td {
             </div>
             
             <div class="footer-actions">
-                <a href="{{ route('cashier.sessions.show', $session) }}" class="btn btn-secondary">
+                <a href="{{ route('cashier.sessions.show', $session) }}" class="btn btn-gray">
                     <i class="fas fa-arrow-left"></i> Retour
                 </a>
-                <button onclick="window.print()" class="btn btn-primary">
+                <button onclick="window.print()" class="btn btn-green">
                     <i class="fas fa-print"></i> Imprimer
                 </button>
             </div>
@@ -998,18 +992,11 @@ tr:last-child td {
 </div>
 
 <script>
-function exportToPDF() {
-    window.print();
-}
-
-// Animation simple
+function exportToPDF() { window.print(); }
 document.addEventListener('DOMContentLoaded', function() {
-    // Réduire le tableau si trop de lignes
-    const rows = document.querySelectorAll('#payments-table tbody tr');
+    const rows = document.querySelectorAll('tbody tr');
     if (rows.length > 18) {
-        for (let i = 18; i < rows.length; i++) {
-            rows[i].style.display = 'none';
-        }
+        for (let i = 18; i < rows.length; i++) rows[i].style.display = 'none';
     }
 });
 </script>

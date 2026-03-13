@@ -3,356 +3,177 @@
 @section('title', 'Dashboard Caissier')
 
 @push('styles')
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    --primary: #3b82f6;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --info: #06b6d4;
-    --dark: #1e293b;
-    --light: #f8fafc;
-    --border: #e2e8f0;
-    --shadow: rgba(0,0,0,0.05);
+    /* ── 4 COULEURS (vert, rouge, gris, blanc) ── */
+    --green-50:  #f0faf0;
+    --green-100: #d4edda;
+    --green-500: #2e8540;
+    --green-600: #1e6b2e;
+    --green-700: #155221;
+
+    --red-50:    #fee2e2;
+    --red-100:   #fecaca;
+    --red-500:   #b91c1c;
+    --red-600:   #991b1b;
+
+    --gray-50:   #f8f9f8;
+    --gray-100:  #eff0ef;
+    --gray-200:  #dde0dd;
+    --gray-300:  #c2c7c2;
+    --gray-400:  #9ba09b;
+    --gray-500:  #737873;
+    --gray-600:  #545954;
+    --gray-700:  #3a3e3a;
+    --gray-800:  #252825;
+    --gray-900:  #131513;
+
+    --white:     #ffffff;
+    --surface:   #f7f9f7;
+
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s ease;
+    --font: 'DM Sans', system-ui, sans-serif;
 }
 
-body {
-    font-family: 'Inter', sans-serif;
-    background: var(--light);
+* { box-sizing: border-box; }
+
+.dash-page {
+    background: var(--surface);
+    min-height: 100vh;
+    padding: 24px 32px;
+    font-family: var(--font);
+    color: var(--gray-800);
 }
 
-/* Header */
-.cashier-header {
-    background: white;
-    border-bottom: 1px solid var(--border);
-    padding: 1.5rem 0;
-    margin-bottom: 1.5rem;
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+.anim-3 { animation: fadeSlide .4s .16s ease both; }
 
-.cashier-title {
-    font-size: 1.75rem;
-    font-weight: 800;
-    color: var(--dark);
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+.dash-header {
+    background: var(--white);
+    border-bottom: 1.5px solid var(--gray-200);
+    padding: 20px 0;
+    margin-bottom: 24px;
+}
+.header-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gray-900);
     margin: 0;
 }
-
-.user-info-badge {
+.header-title i {
+    color: var(--green-600);
+    margin-right: 10px;
+}
+.user-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-    color: #64748b;
+    gap: 8px;
+    font-size: .85rem;
+    color: var(--gray-500);
 }
-
 .role-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    padding: 0.25rem 0.75rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: .7rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
+.role-admin { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+.role-cashier { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+.role-receptionist { background: var(--gray-100); color: var(--gray-700); border: 1.5px solid var(--gray-200); }
 
-.role-admin {
-    background: rgba(16,185,129,0.1);
-    color: #059669;
-}
-
-.role-receptionist {
-    background: rgba(59,130,246,0.1);
-    color: #2563eb;
-}
-
-.role-cashier {
-    background: rgba(245,158,11,0.1);
-    color: #d97706;
-}
-
-/* Permission alerts */
-.permission-alert {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border: 1px solid #fbbf24;
-    border-radius: 12px;
-    padding: 1rem 1.25rem;
-    margin-bottom: 1.5rem;
-}
-
-.permission-alert-icon {
-    width: 40px;
-    height: 40px;
-    background: white;
-    border-radius: 10px;
+/* ══════════════════════════════════════════════
+   BREADCRUMB
+══════════════════════════════════════════════ */
+.breadcrumb {
     display: flex;
     align-items: center;
-    justify-content: center;
-    color: #f59e0b;
-    font-size: 1.25rem;
-    flex-shrink: 0;
+    gap: 8px;
+    font-size: .8rem;
+    color: var(--gray-400);
 }
-
-.permission-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-top: 0.75rem;
+.breadcrumb a {
+    color: var(--gray-400);
+    text-decoration: none;
+    transition: var(--transition);
 }
-
-.permission-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.375rem;
-    padding: 0.375rem 0.75rem;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.75rem;
+.breadcrumb a:hover {
+    color: var(--green-600);
+}
+.breadcrumb .active {
+    color: var(--gray-600);
     font-weight: 500;
 }
 
-.permission-badge i {
-    font-size: 0.75rem;
-}
-
-/* Active session card */
-.active-session {
-    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-    border: 2px solid #10b981;
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.active-session::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    transform: translate(50%, -50%);
-}
-
-.session-icon {
-    width: 50px;
-    height: 50px;
-    background: white;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    color: var(--success);
-    flex-shrink: 0;
-    box-shadow: 0 4px 6px rgba(16,185,129,0.1);
-}
-
-.session-badge {
+/* ══════════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════════ */
+.btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.5rem 1rem;
-    background: white;
-    border-radius: 8px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.pulse {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-    0%, 100% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0.7;
-    }
-}
-
-/* No session card */
-.no-session {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border: 2px dashed #f59e0b;
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-/* Stats cards */
-.stat-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.25rem;
-    transition: all 0.3s ease;
-    height: 100%;
-}
-
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 24px var(--shadow);
-}
-
-.stat-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    flex-shrink: 0;
-}
-
-.stat-label {
-    font-size: 0.8125rem;
-    font-weight: 600;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 0.5rem;
-}
-
-.stat-value {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--dark);
-    line-height: 1;
-    margin-bottom: 0.25rem;
-}
-
-.stat-subtitle {
-    font-size: 0.75rem;
-    color: #94a3b8;
-}
-
-/* Tabs */
-.nav-tabs {
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--r);
+    font-size: .8rem;
+    font-weight: 500;
     border: none;
-    background: white;
-    border-radius: 12px;
-    padding: 0.5rem;
-    box-shadow: 0 1px 3px var(--shadow);
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
 }
-
-.nav-tabs .nav-link {
-    border: none;
-    border-radius: 8px;
-    color: #64748b;
-    font-weight: 600;
-    font-size: 0.875rem;
-    padding: 0.75rem 1.25rem;
-    transition: all 0.2s;
-}
-
-.nav-tabs .nav-link:hover {
-    background: var(--light);
-    color: var(--dark);
-}
-
-.nav-tabs .nav-link.active {
-    background: var(--primary);
+.btn-green {
+    background: var(--green-600);
     color: white;
 }
-
-.nav-tabs .badge {
-    margin-left: 0.5rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
+.btn-green:hover {
+    background: var(--green-700);
+    transform: translateY(-1px);
+    color: white;
 }
-
-.nav-tabs .nav-link.active .badge {
-    background: rgba(255,255,255,0.2);
+.btn-gray {
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
 }
-
-/* Table */
-.table-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
+.btn-gray:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+    transform: translateY(-1px);
 }
-
-.table {
-    margin: 0;
+.btn-red {
+    background: var(--red-500);
+    color: white;
 }
-
-.table thead {
-    background: var(--light);
+.btn-red:hover {
+    background: var(--red-600);
+    transform: translateY(-1px);
+    color: white;
 }
-
-.table thead th {
-    border: none;
-    padding: 1rem 1.25rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #64748b;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+.btn-warning {
+    background: var(--red-500);
+    color: white;
 }
-
-.table tbody td {
-    border-color: var(--border);
-    padding: 1rem 1.25rem;
-    vertical-align: middle;
-}
-
-.table tbody tr:hover {
-    background: var(--light);
-}
-
-/* Badges */
-.badge {
-    padding: 0.375rem 0.75rem;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 0.75rem;
-}
-
-.badge-success-soft {
-    background: rgba(16,185,129,0.1);
-    color: #059669;
-}
-
-.badge-warning-soft {
-    background: rgba(245,158,11,0.1);
-    color: #d97706;
-}
-
-.badge-danger-soft {
-    background: rgba(239,68,68,0.1);
-    color: #dc2626;
-}
-
-.badge-info-soft {
-    background: rgba(6,182,212,0.1);
-    color: #0891b2;
-}
-
-.badge-dark-soft {
-    background: rgba(30,41,59,0.1);
-    color: #1e293b;
-}
-
-/* Buttons */
-.btn {
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    padding: 0.5rem 1rem;
-    transition: all 0.2s;
-}
-
 .btn-icon {
     width: 36px;
     height: 36px;
@@ -360,163 +181,378 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    border-radius: var(--r);
+    border: 1.5px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-500);
+}
+.btn-icon:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
 }
 
-.btn-primary {
-    background: var(--primary);
-    border-color: var(--primary);
+/* ══════════════════════════════════════════════
+   ALERTE PERMISSION
+══════════════════════════════════════════════ */
+.permission-alert {
+    background: var(--gray-100);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
 }
-
-.btn-primary:hover {
-    background: #2563eb;
-    border-color: #2563eb;
-    transform: translateY(-2px);
+.permission-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--white);
+    border-radius: var(--r);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--green-600);
+    font-size: 1.2rem;
 }
-
-/* Payment method badges */
-.payment-method-badge {
+.permission-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+.permission-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.375rem;
-    padding: 0.375rem 0.75rem;
-    border-radius: 6px;
-    font-size: 0.75rem;
+    gap: 4px;
+    padding: 4px 10px;
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: 100px;
+    font-size: .7rem;
+}
+.permission-badge i {
+    color: var(--green-600);
+}
+.permission-badge i.fa-times {
+    color: var(--red-500);
+}
+
+/* ══════════════════════════════════════════════
+   SESSION CARDS
+══════════════════════════════════════════════ */
+.session-card {
+    border-radius: var(--rxl);
+    padding: 24px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+.session-card.active {
+    background: var(--green-50);
+    border: 2px solid var(--green-600);
+}
+.session-card.inactive {
+    background: var(--gray-100);
+    border: 2px dashed var(--gray-400);
+}
+.session-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--white);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: var(--green-600);
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+}
+.session-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    background: var(--white);
+    border-radius: var(--r);
+    font-size: .85rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-xs);
+}
+.pulse {
+    animation: pulse 2s infinite;
+}
+@keyframes pulse {
+    0%,100% { opacity:1; }
+    50% { opacity:.6; }
+}
+
+/* ══════════════════════════════════════════════
+   STATS CARDS
+══════════════════════════════════════════════ */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.stat-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
+    padding: 20px;
+    transition: var(--transition);
+}
+.stat-card:hover {
+    border-color: var(--green-300);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+.stat-label {
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    line-height: 1;
+}
+.stat-subtitle {
+    font-size: .7rem;
+    color: var(--gray-400);
+    margin-top: 4px;
+}
+
+/* ══════════════════════════════════════════════
+   TABS
+══════════════════════════════════════════════ */
+.nav-tabs {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
+    padding: 6px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 4px;
+}
+.nav-tab {
+    padding: 8px 16px;
+    border-radius: var(--r);
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.nav-tab:hover {
+    background: var(--green-50);
+    color: var(--green-700);
+}
+.nav-tab.active {
+    background: var(--green-600);
+    color: white;
+}
+.nav-tab .badge {
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: .65rem;
+    background: rgba(255,255,255,.2);
+    color: white;
+}
+
+/* ══════════════════════════════════════════════
+   BADGES
+══════════════════════════════════════════════ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: .68rem;
+    font-weight: 600;
+}
+.badge-green { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+.badge-red { background: var(--red-50); color: var(--red-500); border: 1.5px solid var(--red-100); }
+.badge-gray { background: var(--gray-100); color: var(--gray-700); border: 1.5px solid var(--gray-200); }
+
+/* ── Payment badges ── */
+.payment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: .68rem;
+    font-weight: 600;
+}
+.payment-cash { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+.payment-card { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+.payment-mobile { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+
+/* ══════════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════════ */
+.table-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rxl);
+    overflow: hidden;
+}
+.table-responsive {
+    overflow-x: auto;
+}
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table thead th {
+    background: var(--gray-50);
+    padding: 14px 18px;
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    border-bottom: 1.5px solid var(--gray-200);
+    text-align: left;
+}
+.table tbody td {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--gray-200);
+    color: var(--gray-700);
+    font-size: .8rem;
+}
+.table tbody tr:hover td {
+    background: var(--green-50);
+}
+.table tfoot {
+    background: var(--gray-50);
     font-weight: 600;
 }
 
-.method-cash {
-    background: rgba(16,185,129,0.1);
-    color: #059669;
+/* ══════════════════════════════════════════════
+   AVATAR
+══════════════════════════════════════════════ */
+.user-avatar-sm {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    background: var(--gray-100);
+    color: var(--gray-500);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .7rem;
 }
 
-.method-card {
-    background: rgba(59,130,246,0.1);
-    color: #2563eb;
-}
-
-.method-mobile {
-    background: rgba(245,158,11,0.1);
-    color: #d97706;
-}
-
-/* Empty states */
+/* ══════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════ */
 .empty-state {
     text-align: center;
-    padding: 3rem 2rem;
+    padding: 48px 24px;
 }
-
 .empty-icon {
-    width: 80px;
-    height: 80px;
-    background: var(--light);
+    width: 72px;
+    height: 72px;
+    background: var(--gray-100);
     border-radius: 50%;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 2rem;
-    color: #cbd5e1;
-    margin-bottom: 1.5rem;
+    color: var(--gray-300);
+    margin-bottom: 16px;
 }
 
-/* User avatar */
-.user-avatar {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-/* Filters */
-.filters-row {
-    background: white;
-    border-radius: 12px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    border: 1px solid var(--border);
-}
-
-/* Modal */
+/* ══════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════ */
 .modal-content {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    border-radius: var(--rxl);
+    border: 1.5px solid var(--gray-200);
 }
-
 .modal-header {
-    border-bottom: 1px solid var(--border);
-    padding: 1.5rem;
+    border-bottom: 1.5px solid var(--gray-200);
+    padding: 18px 24px;
 }
-
 .modal-body {
-    padding: 1.5rem;
+    padding: 24px;
 }
-
 .modal-footer {
-    border-top: 1px solid var(--border);
-    padding: 1.5rem;
+    border-top: 1.5px solid var(--gray-200);
+    padding: 16px 24px;
 }
-
-/* Summary card */
+.alert-warning {
+    background: var(--red-50);
+    border: 1.5px solid var(--red-100);
+    color: var(--red-500);
+    padding: 14px 18px;
+    border-radius: var(--rl);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
 .summary-card {
-    background: var(--light);
-    border-radius: 10px;
-    padding: 1rem;
-    margin-bottom: 1.5rem;
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
+    padding: 16px;
+    margin-bottom: 20px;
 }
-
 .summary-item {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px dashed var(--border);
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--gray-200);
 }
-
 .summary-item:last-child {
     border-bottom: none;
 }
-
-.summary-label {
-    color: #64748b;
-    font-size: 0.875rem;
+.form-label {
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    margin-bottom: 6px;
 }
-
-.summary-value {
-    font-weight: 700;
-    color: var(--dark);
+.form-control {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--r);
+    font-size: .85rem;
 }
-
-/* Responsive */
-@media (max-width: 768px) {
-    .stat-value {
-        font-size: 1.5rem;
-    }
-    
-    .cashier-title {
-        font-size: 1.5rem;
-    }
-    
-    .stat-card {
-        margin-bottom: 1rem;
-    }
+.form-control:focus {
+    outline: none;
+    border-color: var(--green-400);
+    box-shadow: 0 0 0 3px rgba(46,133,64,.1);
 }
 </style>
 @endpush
 
 @section('content')
-<div class="container-fluid">
-    
-    <!-- Header -->
-    <div class="cashier-header">
+<div class="dash-page">
+
+    {{-- Header --}}
+    <div class="dash-header anim-1">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h1 class="cashier-title">
-                    <i class="fas fa-cash-register me-2" style="color:var(--primary)"></i>
+                <h1 class="header-title">
+                    <i class="fas fa-cash-register"></i>
                     Dashboard Caissier
                 </h1>
-                <div class="user-info-badge mt-2">
+                <div class="user-badge mt-2">
                     Bonjour, <strong class="mx-1">{{ auth()->user()->name }}</strong>
-                    <span class="role-badge {{ $isAdmin ? 'role-admin' : ($isCashier ? 'role-cashier' : 'role-receptionist') }}">
+                    <span class="role-badge role-{{ $isAdmin ? 'admin' : ($isCashier ? 'cashier' : 'receptionist') }}">
                         <i class="fas {{ $isAdmin ? 'fa-crown' : ($isCashier ? 'fa-cash-register' : 'fa-user') }}"></i>
                         {{ auth()->user()->role }}
                     </span>
@@ -525,72 +561,53 @@ body {
             
             @if($isAdmin && $canStartSession && !$activeSession)
             <div>
-                <a href="{{ route('cashier.sessions.create') }}" class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i>Nouvelle session
+                <a href="{{ route('cashier.sessions.create') }}" class="btn btn-green">
+                    <i class="fas fa-plus"></i> Nouvelle session
                 </a>
             </div>
             @endif
         </div>
         
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item">
-                    <a href="{{ route('dashboard.index') }}">
-                        <i class="fas fa-home"></i> Accueil
-                    </a>
-                </li>
-                <li class="breadcrumb-item active">Caissier</li>
-            </ol>
-        </nav>
+        <div class="breadcrumb">
+            <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Accueil</a>
+            <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+            <span class="active">Caissier</span>
+        </div>
     </div>
 
-    <!-- Receptionist/Cashier permission notice -->
+    {{-- Permission alert --}}
     @if(!$isAdmin)
-    <div class="permission-alert">
-        <div class="d-flex align-items-start gap-3">
-            <div class="permission-alert-icon">
-                <i class="fas fa-info-circle"></i>
-            </div>
-            <div class="flex-grow-1">
-                <h6 class="fw-bold mb-1">
-                    @if($isCashier)
-                    Mode Caissier
-                    @else
-                    Mode Lecture Seule
-                    @endif
-                </h6>
-                <p class="mb-2 small">
-                    @if($isCashier)
-                    Vous pouvez gérer votre session et les paiements.
-                    @else
-                    Vous pouvez consulter les données mais seuls les administrateurs peuvent effectuer des modifications.
-                    @endif
-                </p>
-                <div class="permission-badges">
-                    <span class="permission-badge">
-                        <i class="fas fa-check text-success"></i> Visualisation
-                    </span>
-                    @if($isCashier)
-                    <span class="permission-badge">
-                        <i class="fas fa-check text-success"></i> Paiements
-                    </span>
-                    <span class="permission-badge">
-                        <i class="fas fa-times text-danger"></i> Administration
-                    </span>
-                    @else
-                    <span class="permission-badge">
-                        <i class="fas fa-times text-danger"></i> Modification
-                    </span>
-                    @endif
-                </div>
+    <div class="permission-alert anim-2">
+        <div class="permission-icon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div>
+            <h6 class="fw-bold mb-1">
+                @if($isCashier) Mode Caissier @else Mode Lecture Seule @endif
+            </h6>
+            <p class="small mb-2">
+                @if($isCashier)
+                Vous pouvez gérer votre session et les paiements.
+                @else
+                Vous pouvez consulter les données mais seuls les administrateurs peuvent effectuer des modifications.
+                @endif
+            </p>
+            <div class="permission-badges">
+                <span class="permission-badge"><i class="fas fa-check" style="color:var(--green-600);"></i> Visualisation</span>
+                @if($isCashier)
+                <span class="permission-badge"><i class="fas fa-check" style="color:var(--green-600);"></i> Paiements</span>
+                <span class="permission-badge"><i class="fas fa-times" style="color:var(--red-500);"></i> Administration</span>
+                @else
+                <span class="permission-badge"><i class="fas fa-times" style="color:var(--red-500);"></i> Modification</span>
+                @endif
             </div>
         </div>
     </div>
     @endif
 
-    <!-- Active session -->
+    {{-- Session card --}}
     @if($activeSession)
-    <div class="active-session">
+    <div class="session-card active anim-3">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
                 <div class="session-icon pulse">
@@ -600,654 +617,389 @@ body {
                     <h5 class="fw-bold mb-2">
                         Session Active #{{ $activeSession->id }}
                         @if($activeSession->user_id != auth()->id())
-                        <span class="badge badge-dark-soft">{{ $activeSession->user->name }}</span>
+                        <span class="badge badge-gray">{{ $activeSession->user->name }}</span>
                         @endif
                     </h5>
-                    <div class="d-flex flex-wrap gap-3">
-                        <div class="session-badge">
-                            <i class="fas fa-user"></i>
-                            <span>{{ $activeSession->user->name }}</span>
-                        </div>
-                        <div class="session-badge">
-                            <i class="fas fa-clock"></i>
-                            <span>{{ $activeSession->start_time->format('d/m/Y H:i') }}</span>
-                        </div>
-                        <div class="session-badge">
-                            <i class="fas fa-hourglass-half"></i>
-                            <span>{{ $activeSession->start_time->diffForHumans(now(), true) }}</span>
-                        </div>
-                        <div class="session-badge">
-                            <i class="fas fa-wallet" style="color:var(--success)"></i>
-                            <strong style="color:var(--success)">{{ number_format($activeSession->current_balance, 0, ',', ' ') }} FCFA</strong>
-                        </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="session-badge"><i class="fas fa-user"></i> {{ $activeSession->user->name }}</div>
+                        <div class="session-badge"><i class="fas fa-clock"></i> {{ $activeSession->start_time->format('d/m/Y H:i') }}</div>
+                        <div class="session-badge"><i class="fas fa-hourglass-half"></i> {{ $activeSession->start_time->diffForHumans(now(), true) }}</div>
+                        <div class="session-badge"><strong style="color:var(--green-600);">{{ number_format($activeSession->current_balance, 0, ',', ' ') }} FCFA</strong></div>
                     </div>
                 </div>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('cashier.sessions.show', $activeSession) }}" class="btn btn-outline-success">
-                    <i class="fas fa-eye"></i> Détails
-                </a>
+                <a href="{{ route('cashier.sessions.show', $activeSession) }}" class="btn btn-gray"><i class="fas fa-eye"></i> Détails</a>
                 @if(($isAdmin && $activeSession->user_id == auth()->id()) || $isCashier || $isReceptionist)
-                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#closeModal">
-                    <i class="fas fa-lock"></i> Clôturer
-                </button>
+                <button class="btn btn-red" data-bs-toggle="modal" data-bs-target="#closeModal"><i class="fas fa-lock"></i> Clôturer</button>
                 @endif
             </div>
         </div>
     </div>
     @else
-    <div class="no-session">
+    <div class="session-card inactive anim-2">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <div class="d-flex align-items-center gap-3">
-                <div class="session-icon" style="background:white;color:var(--warning)">
+                <div class="session-icon" style="color:var(--red-500);">
                     <i class="fas fa-pause-circle"></i>
                 </div>
                 <div>
                     <h5 class="fw-bold mb-1">Aucune session active</h5>
-                    <p class="mb-0 small text-muted">
-                        @if($isAdmin || $isCashier)
-                        Démarrez une nouvelle session pour commencer
-                        @else
-                        Contactez un administrateur pour démarrer une session
-                        @endif
+                    <p class="mb-0 text-muted">
+                        @if($isAdmin || $isCashier) Démarrez une nouvelle session pour commencer
+                        @else Contactez un administrateur pour démarrer une session @endif
                     </p>
                 </div>
             </div>
             @if(($isAdmin || $isCashier) && $canStartSession)
-            <a href="{{ route('cashier.sessions.create') }}" class="btn btn-warning">
-                <i class="fas fa-play"></i> Démarrer une session
-            </a>
+            <a href="{{ route('cashier.sessions.create') }}" class="btn btn-green"><i class="fas fa-play"></i> Démarrer</a>
             @endif
         </div>
     </div>
     @endif
 
-    <!-- Stats -->
-    <div class="row g-3 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="stat-label">Réservations</div>
-                        <div class="stat-value">{{ $todayStats['totalBookings'] }}</div>
-                        <div class="stat-subtitle">Aujourd'hui</div>
-                    </div>
-                    <div class="stat-icon" style="background:rgba(59,130,246,0.1);color:var(--primary)">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                </div>
-            </div>
+    {{-- Stats --}}
+    <div class="stats-grid anim-3">
+        <div class="stat-card">
+            <div class="stat-label">Réservations</div>
+            <div class="stat-value">{{ $todayStats['totalBookings'] }}</div>
+            <div class="stat-subtitle">Aujourd'hui</div>
         </div>
-        
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="stat-label">Chiffre d'affaires</div>
-                        <div class="stat-value">{{ number_format($todayStats['revenue'], 0, ',', ' ') }}</div>
-                        <div class="stat-subtitle">FCFA aujourd'hui</div>
-                    </div>
-                    <div class="stat-icon" style="background:rgba(16,185,129,0.1);color:var(--success)">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                </div>
-            </div>
+        <div class="stat-card">
+            <div class="stat-label">Chiffre d'affaires</div>
+            <div class="stat-value">{{ number_format($todayStats['revenue'], 0, ',', ' ') }}</div>
+            <div class="stat-subtitle">FCFA</div>
         </div>
-        
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="stat-label">Check-ins</div>
-                        <div class="stat-value">{{ $todayStats['checkins'] }}</div>
-                        <div class="stat-subtitle">Aujourd'hui</div>
-                    </div>
-                    <div class="stat-icon" style="background:rgba(6,182,212,0.1);color:var(--info)">
-                        <i class="fas fa-door-open"></i>
-                    </div>
-                </div>
-            </div>
+        <div class="stat-card">
+            <div class="stat-label">Check-ins</div>
+            <div class="stat-value">{{ $todayStats['checkins'] }}</div>
+            <div class="stat-subtitle">Aujourd'hui</div>
         </div>
-        
-        <div class="col-xl-3 col-md-6">
-            <div class="stat-card">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <div class="stat-label">En attente</div>
-                        <div class="stat-value">{{ $todayStats['pendingPayments'] }}</div>
-                        <div class="stat-subtitle">Paiements</div>
-                    </div>
-                    <div class="stat-icon" style="background:rgba(245,158,11,0.1);color:var(--warning)">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                </div>
-            </div>
+        <div class="stat-card">
+            <div class="stat-label">En attente</div>
+            <div class="stat-value">{{ $todayStats['pendingPayments'] }}</div>
+            <div class="stat-subtitle">Paiements</div>
         </div>
     </div>
 
-    <!-- Tabs -->
-    <ul class="nav nav-tabs mb-4" role="tablist">
-        <li class="nav-item">
-            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pending">
-                <i class="fas fa-clock me-1"></i> Paiements
-                <span class="badge bg-warning">{{ $pendingPayments->count() }}</span>
-            </button>
-        </li>
-        <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#sessions">
-                <i class="fas fa-history me-1"></i> Mes sessions
-                <span class="badge bg-info">{{ $recentSessions->count() }}</span>
-            </button>
-        </li>
+    {{-- Tabs --}}
+    <div class="nav-tabs">
+        <button class="nav-tab active" onclick="switchTab('pending')"><i class="fas fa-clock me-1"></i> Paiements <span class="badge">{{ $pendingPayments->count() }}</span></button>
+        <button class="nav-tab" onclick="switchTab('sessions')"><i class="fas fa-history me-1"></i> Mes sessions <span class="badge">{{ $recentSessions->count() }}</span></button>
         @if($isAdmin)
-        <li class="nav-item">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#all-sessions">
-                <i class="fas fa-users me-1"></i> Toutes les sessions
-                <span class="badge bg-dark">{{ $allSessionsCount ?? 0 }}</span>
-            </button>
-        </li>
+        <button class="nav-tab" onclick="switchTab('all-sessions')"><i class="fas fa-users me-1"></i> Toutes les sessions <span class="badge">{{ $allSessionsCount ?? 0 }}</span></button>
         @endif
-    </ul>
+    </div>
 
-    <!-- Tab content -->
-    <div class="tab-content">
-        
-        <!-- Pending payments -->
-        <div class="tab-pane fade show active" id="pending">
-            <div class="table-card">
-                @if($activeSession && $activeSession->payments && $activeSession->payments->count() > 0)
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Référence</th>
-                                <th>Montant</th>
-                                <th>Client</th>
-                                <th>Méthode</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($activeSession->payments as $payment)
-                            <tr>
-                                <td><strong>#{{ $payment->reference }}</strong></td>
-                                <td>
-                                    <span class="badge badge-success-soft">
-                                        {{ number_format($payment->amount, 0, ',', ' ') }} FCFA
+    {{-- Tab contents --}}
+    <div id="pending" class="tab-content active">
+        <div class="table-card">
+            @if($activeSession && $activeSession->payments && $activeSession->payments->count() > 0)
+                @php
+                    $totalEncaissements = $activeSession->payments->where('amount', '>', 0)->sum('amount');
+                    $totalRemboursements = abs($activeSession->payments->where('amount', '<', 0)->sum('amount'));
+                    $netTotal = $totalEncaissements - $totalRemboursements;
+                @endphp
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Référence</th>
+                            <th>Montant</th>
+                            <th>Client</th>
+                            <th>Méthode</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($activeSession->payments as $payment)
+                        <tr>
+                            <td><strong>#{{ $payment->reference }}</strong></td>
+                            <td>
+                                @if($payment->amount < 0)
+                                    <span class="badge badge-red">
+                                        - {{ number_format(abs($payment->amount), 0, ',', ' ') }} FCFA
                                     </span>
-                                </td>
-                                <td>
-                                    @if($payment->transaction && $payment->transaction->customer)
-                                        {{ $payment->transaction->customer->name }}
-                                    @else
-                                        <span class="text-muted">N/A</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @php
-                                        $methodIcon = 'fa-money-bill-wave';
-                                        $methodClass = 'method-cash';
-                                        if($payment->payment_method == 'card') {
-                                            $methodIcon = 'fa-credit-card';
-                                            $methodClass = 'method-card';
-                                        } elseif($payment->payment_method == 'mobile_money') {
-                                            $methodIcon = 'fa-mobile-alt';
-                                            $methodClass = 'method-mobile';
-                                        }
-                                    @endphp
-                                    <span class="payment-method-badge {{ $methodClass }}">
-                                        <i class="fas {{ $methodIcon }} me-1"></i>
-                                        {{ $payment->payment_method_label }}
+                                @else
+                                    <span class="badge badge-green">
+                                        + {{ number_format($payment->amount, 0, ',', ' ') }} FCFA
                                     </span>
-                                </td>
-                                <td>
-                                    <small>{{ $payment->created_at->format('d/m H:i') }}</small>
-                                </td>
-                                <td>
-                                    <a href="#" 
-                                       class="btn btn-sm btn-info btn-icon" 
-                                       title="Voir détail"
-                                       data-bs-toggle="modal" 
-                                       data-bs-target="#paymentModal{{ $payment->id }}">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                        <tfoot class="bg-light">
-                            <tr>
-                                <td colspan="6" class="text-end">
-                                    <strong>Total encaissé : 
-                                        {{ number_format($activeSession->current_balance, 0, ',', ' ') }} FCFA
+                                @endif
+                            </td>
+                            <td>{{ $payment->transaction->customer->name ?? 'N/A' }}</td>
+                            <td>
+                                <span class="payment-badge payment-cash">
+                                    <i class="fas {{ $payment->payment_method == 'cash' ? 'fa-money-bill-wave' : ($payment->payment_method == 'card' ? 'fa-credit-card' : 'fa-mobile-alt') }}"></i>
+                                    {{ $payment->payment_method_label }}
+                                </span>
+                            </td>
+                            <td><small>{{ $payment->created_at->format('d/m H:i') }}</small></td>
+                            <td>
+                                <button class="btn-icon" onclick="showPayment({{ $payment->id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="6" class="text-end">
+                                <div class="d-flex justify-content-end align-items-center gap-3">
+                                    <small class="text-muted">Encaissements:</small>
+                                    <span class="badge badge-green">{{ number_format($totalEncaissements, 0, ',', ' ') }} FCFA</span>
+                                    
+                                    <small class="text-muted">Remboursements:</small>
+                                    <span class="badge badge-red">{{ number_format($totalRemboursements, 0, ',', ' ') }} FCFA</span>
+                                    
+                                    <small class="text-muted">Net:</small>
+                                    <strong class="badge {{ $netTotal >= 0 ? 'badge-green' : 'badge-red' }}" style="font-size:.9rem; padding:6px 16px;">
+                                        {{ number_format($netTotal, 0, ',', ' ') }} FCFA
                                     </strong>
-                                </td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-                @else
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-money-bill-wave"></i>
-                    </div>
-                    <h5 class="fw-bold mb-2">Aucun paiement</h5>
-                    <p class="text-muted">
-                        @if($activeSession)
-                            Aucun paiement n'a été effectué pendant cette session.
-                        @else
-                            Démarrez une session pour commencer à enregistrer des paiements.
-                        @endif
-                    </p>
-                    @if(!$activeSession && ($isAdmin || $isCashier))
-                    <a href="{{ route('cashier.sessions.create') }}" class="btn btn-primary mt-3">
-                        <i class="fas fa-play me-2"></i>Démarrer une session
-                    </a>
-                    @endif
-                </div>
-                @endif
+                                </div>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
+            @else
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <h5 class="fw-bold mb-2">Aucun paiement</h5>
+                <p class="text-muted">
+                    @if($activeSession) Aucun paiement pendant cette session 
+                    @else Démarrez une session @endif
+                </p>
+            </div>
+            @endif
         </div>
-
-        <!-- My sessions -->
-        <div class="tab-pane fade" id="sessions">
-            <div class="table-card">
-                @if($recentSessions->count() > 0)
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Session</th>
-                                <th>Début</th>
-                                <th>Fin</th>
-                                <th>Durée</th>
-                                <th>Initial</th>
-                                <th>Final</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($recentSessions as $session)
-                            <tr>
-                                <td><strong>#{{ $session->id }}</strong></td>
-                                <td>{{ $session->start_time->format('d/m H:i') }}</td>
-                                <td>
-                                    @if($session->end_time)
-                                    {{ $session->end_time->format('d/m H:i') }}
-                                    @else
-                                    <span class="badge badge-warning-soft">En cours</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($session->end_time)
-                                    <span class="badge badge-dark-soft">
-                                        @php
-                                            $minutes = $session->start_time->diffInMinutes($session->end_time);
-                                            $hours = floor($minutes / 60);
-                                            $remainingMinutes = $minutes % 60;
-                                        @endphp
-                                        @if($hours > 0)
-                                            {{ $hours }}h {{ $remainingMinutes }}min
-                                        @else
-                                            {{ $remainingMinutes }} min
-                                        @endif
-                                    </span>
-                                    @else
-                                    <span class="badge badge-info-soft">
-                                        {{ $session->start_time->diffForHumans(now(), true) }}
-                                    </span>
-                                    @endif
-                                </td>
-                                <td>{{ number_format($session->initial_balance, 0, ',', ' ') }} FCFA</td>
-                                <td>{{ number_format($session->final_balance, 0, ',', ' ') }} FCFA</td>
-                                <td>
-                                    @if($session->status == 'active')
-                                    <span class="badge badge-success-soft">Active</span>
-                                    @else
-                                    <span class="badge badge-dark-soft">Terminée</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <a href="{{ route('cashier.sessions.show', $session) }}" 
-                                       class="btn btn-sm btn-info btn-icon" title="Voir">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                @else
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-history"></i>
-                    </div>
-                    <h5 class="fw-bold mb-2">Aucune session</h5>
-                    <p class="text-muted">Vous n'avez pas encore de sessions</p>
-                </div>
-                @endif
-            </div>
-        </div>
-
-        <!-- All sessions (admin) -->
-        @if($isAdmin)
-        <div class="tab-pane fade" id="all-sessions">
-            <div class="filters-row">
-                <div class="row g-2">
-                    <div class="col-md-4">
-                        <select class="form-select" id="userFilter">
-                            <option value="">Tous les utilisateurs</option>
-                            @foreach($allReceptionists as $receptionist)
-                            <option value="{{ $receptionist->id }}">{{ $receptionist->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <select class="form-select" id="statusFilter">
-                            <option value="">Tous les statuts</option>
-                            <option value="active">Actives</option>
-                            <option value="closed">Terminées</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <input type="date" class="form-control" id="dateFilter" value="{{ now()->format('Y-m-d') }}">
-                    </div>
-                </div>
-            </div>
-            
-            <div class="table-card">
-                @if(isset($allSessions) && $allSessions->count() > 0)
-                <div class="table-responsive">
-                    <table class="table" id="sessionsTable">
-                        <thead>
-                            <tr>
-                                <th>Utilisateur</th>
-                                <th>Session</th>
-                                <th>Début</th>
-                                <th>Fin</th>
-                                <th>Durée</th>
-                                <th>Initial</th>
-                                <th>Final</th>
-                                <th>Différence</th>
-                                <th>Statut</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($allSessions as $session)
-                            <tr data-user="{{ $session->user_id }}" 
-                                data-status="{{ $session->status }}"
-                                data-date="{{ $session->start_time->format('Y-m-d') }}">
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        @if($session->user && $session->user->avatar)
-                                        <img src="{{ $session->user->avatar }}" class="user-avatar" alt="">
-                                        @else
-                                        <div class="user-avatar bg-light d-flex align-items-center justify-content-center">
-                                            <i class="fas fa-user text-muted"></i>
-                                        </div>
-                                        @endif
-                                        <div>
-                                            <div class="fw-medium">{{ $session->user->name ?? 'N/A' }}</div>
-                                            <small class="text-muted">{{ $session->user->role ?? 'N/A' }}</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td><strong>#{{ $session->id }}</strong></td>
-                                <td>{{ $session->start_time->format('d/m H:i') }}</td>
-                                <td>
-                                    @if($session->end_time)
-                                    {{ $session->end_time->format('d/m H:i') }}
-                                    @else
-                                    <span class="badge badge-warning-soft">En cours</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($session->end_time)
-                                    <span class="badge badge-dark-soft">
-                                        @php
-                                            $minutes = $session->start_time->diffInMinutes($session->end_time);
-                                            $hours = floor($minutes / 60);
-                                            $remainingMinutes = $minutes % 60;
-                                        @endphp
-                                        @if($hours > 0)
-                                            {{ $hours }}h {{ $remainingMinutes }}min
-                                        @else
-                                            {{ $remainingMinutes }} min
-                                        @endif
-                                    </span>
-                                    @else
-                                    <span class="badge badge-info-soft">
-                                        {{ $session->start_time->diffForHumans(now(), true) }}
-                                    </span>
-                                    @endif
-                                </td>
-                                <td>{{ number_format($session->initial_balance, 0, ',', ' ') }}</td>
-                                <td>{{ number_format($session->final_balance, 0, ',', ' ') }}</td>
-                                <td>
-                                    @php
-                                        $diff = $session->final_balance - $session->initial_balance;
-                                    @endphp
-                                    <span class="badge {{ $diff >= 0 ? 'badge-success-soft' : 'badge-danger-soft' }}">
-                                        {{ $diff >= 0 ? '+' : '' }}{{ number_format($diff, 0, ',', ' ') }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge {{ $session->status == 'active' ? 'badge-success-soft' : 'badge-dark-soft' }}">
-                                        {{ $session->status == 'active' ? 'Active' : 'Terminée' }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <a href="{{ route('cashier.sessions.show', $session) }}" 
-                                       class="btn btn-sm btn-info btn-icon" title="Voir détails">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Pagination -->
-                <div class="p-3 border-top">
-                    {{ $allSessions->links() }}
-                </div>
-                @else
-                <div class="empty-state">
-                    <div class="empty-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <h5 class="fw-bold mb-2">Aucune session</h5>
-                    <p class="text-muted">Aucune session n'a été créée</p>
-                </div>
-                @endif
-            </div>
-        </div>
-        @endif
-        
     </div>
+
+    <div id="sessions" class="tab-content">
+        <div class="table-card">
+            @if($recentSessions->count() > 0)
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Session</th>
+                            <th>Début</th>
+                            <th>Fin</th>
+                            <th>Durée</th>
+                            <th>Initial</th>
+                            <th>Final</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($recentSessions as $session)
+                        <tr>
+                            <td><strong>#{{ $session->id }}</strong></td>
+                            <td>{{ $session->start_time->format('d/m H:i') }}</td>
+                            <td>
+                                @if($session->end_time)
+                                    {{ $session->end_time->format('d/m H:i') }}
+                                @else
+                                    <span class="badge badge-green">En cours</span>
+                                @endif
+                            </td>
+                            <td>
+                                @php
+                                    $minutes = $session->start_time->diffInMinutes($session->end_time ?? now());
+                                    $hours = floor($minutes / 60);
+                                    $mins = $minutes % 60;
+                                @endphp
+                                <span class="badge badge-gray">{{ $hours }}h {{ $mins }}min</span>
+                            </td>
+                            <td>{{ number_format($session->initial_balance, 0, ',', ' ') }}</td>
+                            <td>{{ number_format($session->final_balance ?? 0, 0, ',', ' ') }}</td>
+                            <td>
+                                <span class="badge {{ $session->status == 'active' ? 'badge-green' : 'badge-gray' }}">
+                                    {{ $session->status == 'active' ? 'Active' : 'Terminée' }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ route('cashier.sessions.show', $session) }}" class="btn-icon">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-history"></i></div>
+                <h5 class="fw-bold mb-2">Aucune session</h5>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    @if($isAdmin)
+    <div id="all-sessions" class="tab-content">
+        <div class="table-card">
+            @if(isset($allSessions) && $allSessions->count() > 0)
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Session</th>
+                            <th>Début</th>
+                            <th>Fin</th>
+                            <th>Durée</th>
+                            <th>Initial</th>
+                            <th>Final</th>
+                            <th>Diff</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($allSessions as $session)
+                        @php $diff = ($session->final_balance ?? 0) - $session->initial_balance; @endphp
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="user-avatar-sm"><i class="fas fa-user"></i></div>
+                                    {{ $session->user->name ?? 'N/A' }}
+                                </div>
+                            </td>
+                            <td><strong>#{{ $session->id }}</strong></td>
+                            <td>{{ $session->start_time->format('d/m H:i') }}</td>
+                            <td>
+                                @if($session->end_time)
+                                    {{ $session->end_time->format('d/m H:i') }}
+                                @else
+                                    <span class="badge badge-green">En cours</span>
+                                @endif
+                            </td>
+                            <td>
+                                @php
+                                    $minutes = $session->start_time->diffInMinutes($session->end_time ?? now());
+                                    $hours = floor($minutes / 60);
+                                    $mins = $minutes % 60;
+                                @endphp
+                                <span class="badge badge-gray">{{ $hours }}h {{ $mins }}min</span>
+                            </td>
+                            <td>{{ number_format($session->initial_balance, 0, ',', ' ') }}</td>
+                            <td>{{ number_format($session->final_balance ?? 0, 0, ',', ' ') }}</td>
+                            <td>
+                                <span class="badge {{ $diff >= 0 ? 'badge-green' : 'badge-red' }}">
+                                    {{ $diff >= 0 ? '+' : '' }}{{ number_format($diff, 0, ',', ' ') }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge {{ $session->status == 'active' ? 'badge-green' : 'badge-gray' }}">
+                                    {{ $session->status == 'active' ? 'Active' : 'Terminée' }}
+                                </span>
+                            </td>
+                            <td>
+                                <a href="{{ route('cashier.sessions.show', $session) }}" class="btn-icon">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            @else
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-users"></i></div>
+                <h5 class="fw-bold mb-2">Aucune session</h5>
+            </div>
+            @endif
+        </div>
+    </div>
+    @endif
+
 </div>
 
-<!-- Close modal -->
+{{-- Modal clôture --}}
 @if($activeSession && ($isAdmin || $isCashier || $isReceptionist) && $activeSession->user_id == auth()->id())
 <div class="modal fade" id="closeModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-lock text-danger me-2"></i>
-                    Clôturer la session #{{ $activeSession->id }}
+                    <i class="fas fa-lock text-danger me-2"></i> Clôturer #{{ $activeSession->id }}
                 </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('cashier.sessions.destroy', $activeSession) }}" method="POST">
-                @csrf
-                @method('DELETE')
+                @csrf @method('DELETE')
                 <div class="modal-body">
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Cette action est irréversible. Vérifiez le solde avant de clôturer.
+                    <div class="alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Action irréversible. Vérifiez le solde.
                     </div>
-                    
-                    <!-- Résumé de la session -->
                     <div class="summary-card">
-                        <h6 class="fw-bold mb-3">Récapitulatif de la session</h6>
+                        <h6 class="fw-bold mb-2">Récapitulatif</h6>
                         <div class="summary-item">
-                            <span class="summary-label">Début de session</span>
-                            <span class="summary-value">{{ $activeSession->start_time->format('d/m/Y H:i') }}</span>
+                            <span>Début</span>
+                            <span>{{ $activeSession->start_time->format('d/m/Y H:i') }}</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">Durée</span>
-                            <span class="summary-value">{{ $activeSession->start_time->diffForHumans(now(), true) }}</span>
+                            <span>Durée</span>
+                            <span>{{ $activeSession->start_time->diffForHumans(now(), true) }}</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">Solde théorique</span>
-                            <span class="summary-value text-success">{{ number_format($activeSession->current_balance, 0, ',', ' ') }} FCFA</span>
+                            <span>Solde théorique</span>
+                            <span class="text-success">{{ number_format($activeSession->current_balance, 0, ',', ' ') }} FCFA</span>
                         </div>
                         <div class="summary-item">
-                            <span class="summary-label">Nombre de paiements</span>
-                            <span class="summary-value">{{ $activeSession->payments->count() }}</span>
+                            <span>Paiements</span>
+                            <span>{{ $activeSession->payments->count() }}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Encaissements</span>
+                            <span class="badge badge-green">{{ number_format($activeSession->payments->where('amount', '>', 0)->sum('amount'), 0, ',', ' ') }} FCFA</span>
+                        </div>
+                        <div class="summary-item">
+                            <span>Remboursements</span>
+                            <span class="badge badge-red">{{ number_format(abs($activeSession->payments->where('amount', '<', 0)->sum('amount')), 0, ',', ' ') }} FCFA</span>
                         </div>
                     </div>
-                    
                     <div class="mb-4">
-                        <label class="form-label fw-medium">
-                            <i class="fas fa-calculator me-1 text-primary"></i>
-                            Solde final réel <span class="text-danger">*</span>
-                        </label>
-                        <div class="input-group">
-                            <input type="number" 
-                                   name="final_balance" 
-                                   id="finalBalance"
-                                   class="form-control form-control-lg" 
-                                   step="0.01" 
-                                   min="0"
-                                   value="{{ $activeSession->current_balance }}" 
-                                   required>
-                            <span class="input-group-text">FCFA</span>
-                        </div>
-                        <div class="form-text" id="balanceHelp">
-                            Montant physique présent dans la caisse
-                            @if($activeSession->current_balance > 0)
-                            <br>Solde attendu : <strong>{{ number_format($activeSession->current_balance, 0, ',', ' ') }} FCFA</strong>
-                            @endif
-                        </div>
-                        
-                        <!-- Différence indicator -->
-                        <div class="mt-2" id="differenceAlert" style="display: none;">
-                            <div class="alert alert-info py-2">
-                                <i class="fas fa-info-circle me-2"></i>
-                                Différence : <span id="differenceAmount">0</span> FCFA
-                            </div>
-                        </div>
+                        <label class="form-label">Solde final réel</label>
+                        <input type="number" name="final_balance" class="form-control" value="{{ $activeSession->current_balance }}" required>
                     </div>
-                    
                     <div class="mb-3">
-                        <label class="form-label fw-medium">
-                            <i class="fas fa-sticky-note me-1 text-primary"></i>
-                            Notes de clôture
-                        </label>
-                        <textarea name="closing_notes" 
-                                  class="form-control" 
-                                  rows="3" 
-                                  placeholder="Observations, anomalies, remarques..."></textarea>
-                    </div>
-                    
-                    <div class="alert alert-info small">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Une différence sera automatiquement enregistrée comme ajustement.
+                        <label class="form-label">Notes</label>
+                        <textarea name="closing_notes" class="form-control" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-times me-2"></i>Annuler
-                    </button>
-                    <button type="submit" class="btn btn-danger" id="closeConfirmBtn">
-                        <i class="fas fa-lock me-2"></i>Confirmer la clôture
-                    </button>
+                    <button class="btn btn-gray" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-red">Confirmer</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Calcul de la différence en temps réel
-    const finalBalanceInput = document.getElementById('finalBalance');
-    const theoreticalBalance = {{ $activeSession->current_balance }};
-    const differenceAlert = document.getElementById('differenceAlert');
-    const differenceAmount = document.getElementById('differenceAmount');
-    
-    if (finalBalanceInput) {
-        finalBalanceInput.addEventListener('input', function() {
-            const finalBalance = parseFloat(this.value) || 0;
-            const difference = finalBalance - theoreticalBalance;
-            
-            if (Math.abs(difference) > 0.01) { // Tolérance de 0.01
-                differenceAlert.style.display = 'block';
-                differenceAmount.textContent = difference.toLocaleString('fr-FR', {
-                    minimumFractionDigits: 0,
-                    maximumFractionDigits: 0
-                });
-                
-                if (difference > 0) {
-                    differenceAlert.className = 'mt-2 alert alert-success py-2';
-                    differenceAmount.style.color = '#10b981';
-                } else {
-                    differenceAlert.className = 'mt-2 alert alert-danger py-2';
-                    differenceAmount.style.color = '#ef4444';
-                }
-            } else {
-                differenceAlert.style.display = 'none';
-            }
-        });
-    }
-    
-    // Filtres pour le tableau des sessions
-    const userFilter = document.getElementById('userFilter');
-    const statusFilter = document.getElementById('statusFilter');
-    const dateFilter = document.getElementById('dateFilter');
-    const table = document.getElementById('sessionsTable');
-    
-    if (userFilter && statusFilter && dateFilter && table) {
-        const filterRows = function() {
-            const selectedUser = userFilter.value;
-            const selectedStatus = statusFilter.value;
-            const selectedDate = dateFilter.value;
-            const rows = table.querySelectorAll('tbody tr');
-            
-            rows.forEach(row => {
-                let show = true;
-                
-                if (selectedUser && row.dataset.user !== selectedUser) {
-                    show = false;
-                }
-                
-                if (selectedStatus && row.dataset.status !== selectedStatus) {
-                    show = false;
-                }
-                
-                if (selectedDate && row.dataset.date !== selectedDate) {
-                    show = false;
-                }
-                
-                row.style.display = show ? '' : 'none';
-            });
-        };
-        
-        userFilter.addEventListener('change', filterRows);
-        statusFilter.addEventListener('change', filterRows);
-        dateFilter.addEventListener('change', filterRows);
-    }
-});
-</script>
-@endpush
 @endif
+
+<script>
+function switchTab(tabId) {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    event.target.closest('.nav-tab').classList.add('active');
+    document.getElementById(tabId).classList.add('active');
+}
+
+function showPayment(id) {
+    alert('Détails paiement #' + id);
+    // À implémenter: modal avec détails du paiement
+}
+</script>
+
+<style>
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+</style>
 
 @endsection
