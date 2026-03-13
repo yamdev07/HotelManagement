@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Calendrier des disponibilités')
 
-@push('styles')
+<?php $__env->startSection('title', 'Calendrier des disponibilités'); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -784,15 +784,13 @@
     background: var(--g50);
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <div class="cal-page">
 
-    {{-- ══════════════════════════════════════════════
-         TOPBAR
-    ═══════════════════════════════════════════════ --}}
+    
     <div class="cal-topbar anim-1">
         <div class="cal-topbar__inner">
             <div class="cal-topbar__title">
@@ -807,19 +805,20 @@
             </div>
             <div class="cal-topbar__actions">
                 <div class="cal-nav">
-                    <a href="{{ route('availability.calendar', ['month' => $prevMonth->format('m'), 'year' => $prevMonth->format('Y')]) }}" 
+                    <a href="<?php echo e(route('availability.calendar', ['month' => $prevMonth->format('m'), 'year' => $prevMonth->format('Y')])); ?>" 
                        class="cal-nav__btn">
                         <i class="fas fa-chevron-left"></i>
                     </a>
                     <button class="cal-nav__btn active">
-                        {{ $startDate->translatedFormat('F Y') }}
+                        <?php echo e($startDate->translatedFormat('F Y')); ?>
+
                     </button>
-                    <a href="{{ route('availability.calendar', ['month' => $nextMonth->format('m'), 'year' => $nextMonth->format('Y')]) }}" 
+                    <a href="<?php echo e(route('availability.calendar', ['month' => $nextMonth->format('m'), 'year' => $nextMonth->format('Y')])); ?>" 
                        class="cal-nav__btn">
                         <i class="fas fa-chevron-right"></i>
                     </a>
                 </div>
-                <a href="{{ route('availability.search') }}" class="btn-db btn-db-primary">
+                <a href="<?php echo e(route('availability.search')); ?>" class="btn-db btn-db-primary">
                     <i class="fas fa-search"></i>
                     Rechercher
                 </a>
@@ -827,9 +826,7 @@
         </div>
     </div>
 
-    {{-- ══════════════════════════════════════════════
-         KPIS (rendus cliquables)
-    ═══════════════════════════════════════════════ --}}
+    
     <div class="cal-kpis anim-2">
         <div class="kpi-card" onclick="filterByStatus('all')" title="Voir toutes les chambres">
             <div class="kpi-icon" style="background:var(--g50);color:var(--g600)">
@@ -837,7 +834,7 @@
             </div>
             <div>
                 <div class="kpi-label">Chambres totales</div>
-                <div class="kpi-value">{{ $stats['total_rooms'] }}</div>
+                <div class="kpi-value"><?php echo e($stats['total_rooms']); ?></div>
             </div>
         </div>
         <div class="kpi-card" onclick="filterByStatus('available')" title="Voir les chambres disponibles">
@@ -846,7 +843,7 @@
             </div>
             <div>
                 <div class="kpi-label">Disponibles</div>
-                <div class="kpi-value" style="color:var(--g600)">{{ $stats['available_today'] }}</div>
+                <div class="kpi-value" style="color:var(--g600)"><?php echo e($stats['available_today']); ?></div>
             </div>
         </div>
         <div class="kpi-card" onclick="filterByStatus('reserved')" title="Voir les chambres réservées">
@@ -855,7 +852,7 @@
             </div>
             <div>
                 <div class="kpi-label">Réservées</div>
-                <div class="kpi-value" style="color:#b91c1c">{{ $stats['occupied_today'] }}</div>
+                <div class="kpi-value" style="color:#b91c1c"><?php echo e($stats['occupied_today']); ?></div>
             </div>
         </div>
         <div class="kpi-card" onclick="filterByStatus('unavailable')" title="Voir les chambres indisponibles">
@@ -864,14 +861,12 @@
             </div>
             <div>
                 <div class="kpi-label">Indisponibles</div>
-                <div class="kpi-value" style="color:var(--s500)">{{ $stats['unavailable_today'] }}</div>
+                <div class="kpi-value" style="color:var(--s500)"><?php echo e($stats['unavailable_today']); ?></div>
             </div>
         </div>
     </div>
 
-    {{-- ══════════════════════════════════════════════
-         FILTERS
-    ═══════════════════════════════════════════════ --}}
+    
     <div class="cal-filters anim-3">
         <div class="filter-card">
             <form method="GET" id="calendarFilterForm">
@@ -880,24 +875,25 @@
                         <label>Type de chambre</label>
                         <select name="room_type" class="form-select" onchange="this.form.submit()">
                             <option value="">Tous les types</option>
-                            @foreach($roomTypes as $type)
-                                <option value="{{ $type->id }}" {{ request('room_type') == $type->id ? 'selected' : '' }}>
-                                    {{ $type->name }}
+                            <?php $__currentLoopData = $roomTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($type->id); ?>" <?php echo e(request('room_type') == $type->id ? 'selected' : ''); ?>>
+                                    <?php echo e($type->name); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Numéro de chambre</label>
                         <input type="text" name="room_number" class="form-control" 
-                               value="{{ request('room_number') }}"
+                               value="<?php echo e(request('room_number')); ?>"
                                placeholder="Ex: 101, 102..."
                                onkeyup="filterByRoomNumber(this.value)">
                     </div>
                     <div class="form-group">
                         <label>Mois</label>
                         <input type="month" name="month_year" class="form-control" 
-                               value="{{ $year }}-{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}"
+                               value="<?php echo e($year); ?>-<?php echo e(str_pad($month, 2, '0', STR_PAD_LEFT)); ?>"
                                onchange="this.form.submit()">
                     </div>
                     <div class="filter-actions">
@@ -905,7 +901,7 @@
                             <i class="fas fa-filter"></i>
                             Filtrer
                         </button>
-                        <a href="{{ route('availability.calendar') }}" class="btn-db btn-db-ghost">
+                        <a href="<?php echo e(route('availability.calendar')); ?>" class="btn-db btn-db-ghost">
                             <i class="fas fa-times"></i>
                             Réinitialiser
                         </a>
@@ -915,9 +911,7 @@
         </div>
     </div>
 
-    {{-- ══════════════════════════════════════════════
-         LEGEND (rendue cliquable)
-    ═══════════════════════════════════════════════ --}}
+    
     <div class="cal-legend anim-4">
         <div class="legend-item" onclick="filterByStatus('available')">
             <div class="legend-sq available"></div>
@@ -945,9 +939,7 @@
         </div>
     </div>
 
-    {{-- ══════════════════════════════════════════════
-         CALENDAR
-    ═══════════════════════════════════════════════ --}}
+    
     <div class="cal-wrap anim-5">
         <div class="cal-container">
             <div class="cal-scroll">
@@ -962,21 +954,21 @@
                                     </button>
                                 </div>
                             </th>
-                            @foreach($dates as $dateString => $dateInfo)
-                                <th class="date-col {{ $dateInfo['is_today'] ? 'th-today' : '' }} {{ $dateInfo['is_weekend'] ? 'th-weekend' : '' }}"
-                                    data-date="{{ $dateString }}"
-                                    onclick="window.scrollToDate('{{ $dateString }}')"
+                            <?php $__currentLoopData = $dates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dateString => $dateInfo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <th class="date-col <?php echo e($dateInfo['is_today'] ? 'th-today' : ''); ?> <?php echo e($dateInfo['is_weekend'] ? 'th-weekend' : ''); ?>"
+                                    data-date="<?php echo e($dateString); ?>"
+                                    onclick="window.scrollToDate('<?php echo e($dateString); ?>')"
                                     title="Cliquez pour centrer">
-                                    <div class="date-day">{{ $dateInfo['date']->format('d') }}</div>
-                                    <div class="date-name">{{ $dateInfo['day_name'] }}</div>
+                                    <div class="date-day"><?php echo e($dateInfo['date']->format('d')); ?></div>
+                                    <div class="date-name"><?php echo e($dateInfo['day_name']); ?></div>
                                 </th>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tr>
                     </thead>
                     <tbody>
-                        @if($rooms->isEmpty())
+                        <?php if($rooms->isEmpty()): ?>
                             <tr>
-                                <td colspan="{{ count($dates) + 1 }}">
+                                <td colspan="<?php echo e(count($dates) + 1); ?>">
                                     <div class="empty-state">
                                         <i class="fas fa-bed"></i>
                                         <h5>Aucune chambre trouvée</h5>
@@ -984,26 +976,27 @@
                                     </div>
                                 </td>
                             </tr>
-                        @else
-                            @foreach($calendar as $roomData)
-                                <tr class="room-row" data-room-number="{{ $roomData['room']->number }}" data-room-status="{{ $roomData['room']->room_status_id }}">
+                        <?php else: ?>
+                            <?php $__currentLoopData = $calendar; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $roomData): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <tr class="room-row" data-room-number="<?php echo e($roomData['room']->number); ?>" data-room-status="<?php echo e($roomData['room']->room_status_id); ?>">
                                     <td class="room-cell">
                                         <div class="room-cell__inner">
-                                            <div class="room-badge">{{ $roomData['room']->number }}</div>
+                                            <div class="room-badge"><?php echo e($roomData['room']->number); ?></div>
                                             <div class="room-info">
-                                                <div class="room-type">{{ $roomData['room']->type->name ?? 'Type inconnu' }}</div>
+                                                <div class="room-type"><?php echo e($roomData['room']->type->name ?? 'Type inconnu'); ?></div>
                                                 <div class="room-meta">
-                                                    <span><i class="fas fa-users"></i> {{ $roomData['room']->capacity }} pers.</span>
+                                                    <span><i class="fas fa-users"></i> <?php echo e($roomData['room']->capacity); ?> pers.</span>
                                                 </div>
-                                                <div class="room-price">{{ number_format($roomData['room']->price, 0, ',', ' ') }} FCFA/nuit</div>
-                                                @if($roomData['room']->room_status_id != 1)
+                                                <div class="room-price"><?php echo e(number_format($roomData['room']->price, 0, ',', ' ')); ?> FCFA/nuit</div>
+                                                <?php if($roomData['room']->room_status_id != 1): ?>
                                                     <span class="room-status-badge">
-                                                        {{ $roomData['room']->roomStatus->name ?? 'Indisponible' }}
+                                                        <?php echo e($roomData['room']->roomStatus->name ?? 'Indisponible'); ?>
+
                                                     </span>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
                                             <div class="room-actions">
-                                                <a href="{{ route('availability.room.detail', $roomData['room']->id) }}" 
+                                                <a href="<?php echo e(route('availability.room.detail', $roomData['room']->id)); ?>" 
                                                    class="btn-icon"
                                                    title="Voir détails">
                                                     <i class="fas fa-eye"></i>
@@ -1011,8 +1004,8 @@
                                             </div>
                                         </div>
                                     </td>
-                                    @foreach($dates as $dateString => $dateInfo)
-                                        @php
+                                    <?php $__currentLoopData = $dates; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dateString => $dateInfo): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php
                                             $availability = $roomData['availability'][$dateString] ?? [
                                                 'occupied' => false,
                                                 'available' => true,
@@ -1029,45 +1022,44 @@
                                             }
                                             $reservationCount = $availability['reservation_count'] ?? 0;
                                             $isOccupied = $availability['occupied'] ?? false;
-                                        @endphp
-                                        <td class="avail-cell {{ $cssClass }} {{ $dateInfo['is_today'] ? 'today' : '' }} {{ $dateInfo['is_weekend'] ? 'weekend' : '' }}"
-                                            data-room-id="{{ $roomData['room']->id }}"
-                                            data-room-number="{{ $roomData['room']->number }}"
-                                            data-room-type="{{ $roomData['room']->type->name ?? '' }}"
-                                            data-room-price="{{ $roomData['room']->price }}"
-                                            data-date="{{ $dateString }}"
-                                            data-formatted-date="{{ $dateInfo['date']->format('d/m/Y') }}"
-                                            data-is-occupied="{{ $isOccupied ? 'true' : 'false' }}"
-                                            data-reservation-count="{{ $reservationCount }}"
-                                            data-can-reserve="{{ $canReserve ? 'true' : 'false' }}"
-                                            title="{{ $dateInfo['date']->format('d/m/Y') }} - Chambre {{ $roomData['room']->number }} - {{ $isOccupied ? 'Réservée' : 'Disponible' }}">
-                                            @if($isOccupied)
+                                        ?>
+                                        <td class="avail-cell <?php echo e($cssClass); ?> <?php echo e($dateInfo['is_today'] ? 'today' : ''); ?> <?php echo e($dateInfo['is_weekend'] ? 'weekend' : ''); ?>"
+                                            data-room-id="<?php echo e($roomData['room']->id); ?>"
+                                            data-room-number="<?php echo e($roomData['room']->number); ?>"
+                                            data-room-type="<?php echo e($roomData['room']->type->name ?? ''); ?>"
+                                            data-room-price="<?php echo e($roomData['room']->price); ?>"
+                                            data-date="<?php echo e($dateString); ?>"
+                                            data-formatted-date="<?php echo e($dateInfo['date']->format('d/m/Y')); ?>"
+                                            data-is-occupied="<?php echo e($isOccupied ? 'true' : 'false'); ?>"
+                                            data-reservation-count="<?php echo e($reservationCount); ?>"
+                                            data-can-reserve="<?php echo e($canReserve ? 'true' : 'false'); ?>"
+                                            title="<?php echo e($dateInfo['date']->format('d/m/Y')); ?> - Chambre <?php echo e($roomData['room']->number); ?> - <?php echo e($isOccupied ? 'Réservée' : 'Disponible'); ?>">
+                                            <?php if($isOccupied): ?>
                                                 <i class="fas fa-calendar-check" style="color:#b91c1c;"></i>
-                                                @if($reservationCount > 1)
+                                                <?php if($reservationCount > 1): ?>
                                                     <div class="conflict-badge">
-                                                        {{ $reservationCount }}
-                                                        @if($reservationCount > 2)
+                                                        <?php echo e($reservationCount); ?>
+
+                                                        <?php if($reservationCount > 2): ?>
                                                             <i class="fas fa-exclamation"></i>
-                                                        @endif
+                                                        <?php endif; ?>
                                                     </div>
-                                                @endif
-                                            @else
+                                                <?php endif; ?>
+                                            <?php else: ?>
                                                 <i class="fas fa-check" style="color:var(--g600);"></i>
-                                            @endif
+                                            <?php endif; ?>
                                         </td>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tr>
-                            @endforeach
-                        @endif
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    {{-- ══════════════════════════════════════════════
-         ACTIONS
-    ═══════════════════════════════════════════════ --}}
+    
     <div class="cal-actions anim-6">
         <div class="btn-group">
             <button type="button" class="btn-db btn-db-ghost" onclick="window.selectDateRange()">
@@ -1084,12 +1076,12 @@
                 <i class="fas fa-print"></i>
                 Imprimer
             </button>
-            <a href="{{ route('availability.export', [
+            <a href="<?php echo e(route('availability.export', [
                 'type' => 'excel',
                 'export_type' => 'calendar',
                 'month' => $month,
                 'year' => $year
-            ]) }}" class="btn-db btn-db-ghost" style="color:var(--g600);border-color:var(--g200);">
+            ])); ?>" class="btn-db btn-db-ghost" style="color:var(--g600);border-color:var(--g200);">
                 <i class="fas fa-file-excel"></i>
                 Exporter Excel
             </a>
@@ -1098,7 +1090,7 @@
 
 </div>
 
-{{-- Modal pour les détails --}}
+
 <div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -1116,9 +1108,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 // ============ FONCTIONS GLOBALES ============
 
@@ -1658,4 +1650,5 @@ window.addEventListener('error', function(e) {
     console.error('❌ Erreur capturée:', e.error?.message || e.message);
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/availability/calendar.blade.php ENDPATH**/ ?>

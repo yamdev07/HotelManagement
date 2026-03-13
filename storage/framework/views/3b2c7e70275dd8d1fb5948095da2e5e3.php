@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Inventaire des chambres')
-@section('content')
+
+<?php $__env->startSection('title', 'Inventaire des chambres'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -508,14 +508,14 @@
 
 <div class="inventory-page">
 
-    {{-- ─── BREADCRUMB ─────────────────────────── --}}
+    
     <div class="breadcrumb-custom anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Inventaire</span>
     </div>
 
-    {{-- ─── HEADER ─────────────────────────────── --}}
+    
     <div class="inventory-header anim-2">
         <div class="inventory-brand">
             <div class="inventory-brand-icon"><i class="fas fa-clipboard-list"></i></div>
@@ -527,10 +527,10 @@
             </div>
         </div>
         <div class="inventory-header-actions">
-            <a href="{{ route('availability.calendar') }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('availability.calendar')); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-calendar-alt"></i> Calendrier
             </a>
-            <a href="{{ route('availability.dashboard') }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('availability.dashboard')); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
             <button class="btn-db btn-db-primary" onclick="window.print()">
@@ -539,14 +539,14 @@
         </div>
     </div>
 
-    {{-- ─── STATISTIQUES ───────────────────────── --}}
+    
     <div class="stats-grid anim-3">
         <div class="stat-card">
             <div class="stat-icon primary">
                 <i class="fas fa-bed"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-number">{{ $stats['total_rooms'] }}</div>
+                <div class="stat-number"><?php echo e($stats['total_rooms']); ?></div>
                 <div class="stat-label">Chambres totales</div>
             </div>
         </div>
@@ -556,7 +556,7 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-number">{{ $stats['available_rooms'] }}</div>
+                <div class="stat-number"><?php echo e($stats['available_rooms']); ?></div>
                 <div class="stat-label">Chambres disponibles</div>
             </div>
         </div>
@@ -566,7 +566,7 @@
                 <i class="fas fa-users"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-number">{{ $stats['occupied_rooms'] }}</div>
+                <div class="stat-number"><?php echo e($stats['occupied_rooms']); ?></div>
                 <div class="stat-label">Chambres occupées</div>
             </div>
         </div>
@@ -576,13 +576,13 @@
                 <i class="fas fa-chart-line"></i>
             </div>
             <div class="stat-content">
-                <div class="stat-number">{{ number_format($stats['occupancy_rate'], 1) }}%</div>
+                <div class="stat-number"><?php echo e(number_format($stats['occupancy_rate'], 1)); ?>%</div>
                 <div class="stat-label">Taux d'occupation</div>
             </div>
         </div>
     </div>
 
-    {{-- ─── INVENTAIRE PAR TYPE DE CHAMBRE ─────── --}}
+    
     <div class="table-container anim-4">
         <div class="table-header">
             <h5>
@@ -591,7 +591,8 @@
             </h5>
             <div class="update-badge">
                 <i class="fas fa-clock fa-xs"></i>
-                Mis à jour: {{ now()->format('H:i') }}
+                Mis à jour: <?php echo e(now()->format('H:i')); ?>
+
             </div>
         </div>
         
@@ -610,8 +611,8 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($roomTypes as $type)
-                    @php
+                    <?php $__currentLoopData = $roomTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php
                         $totalRooms = $type->rooms->count();
                         $occupiedRooms = $occupancyByType[$type->name]['occupied'] ?? 0;
                         $percentage = $occupancyByType[$type->name]['percentage'] ?? 0;
@@ -626,7 +627,7 @@
                         $avgPrice = $type->rooms->avg('price');
                         $minPrice = $type->rooms->min('price');
                         $maxPrice = $type->rooms->max('price');
-                    @endphp
+                    ?>
                     <tr>
                         <td>
                             <div class="room-type-info">
@@ -634,47 +635,47 @@
                                     <i class="fas fa-bed"></i>
                                 </div>
                                 <div>
-                                    <div class="room-type-name">{{ $type->name }}</div>
+                                    <div class="room-type-name"><?php echo e($type->name); ?></div>
                                     <div class="room-type-price">
-                                        @if($avgPrice)
-                                            @if($minPrice && $maxPrice && $minPrice != $maxPrice)
-                                                {{ number_format($minPrice, 0, ',', ' ') }} - {{ number_format($maxPrice, 0, ',', ' ') }} FCFA
-                                            @else
-                                                {{ number_format($avgPrice, 0, ',', ' ') }} FCFA
-                                            @endif
+                                        <?php if($avgPrice): ?>
+                                            <?php if($minPrice && $maxPrice && $minPrice != $maxPrice): ?>
+                                                <?php echo e(number_format($minPrice, 0, ',', ' ')); ?> - <?php echo e(number_format($maxPrice, 0, ',', ' ')); ?> FCFA
+                                            <?php else: ?>
+                                                <?php echo e(number_format($avgPrice, 0, ',', ' ')); ?> FCFA
+                                            <?php endif; ?>
                                             <span class="text-muted">/nuit</span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="text-muted">Prix non défini</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
                         </td>
                         <td class="text-center">
-                            <span class="badge-modern badge-dark">{{ $totalRooms }}</span>
+                            <span class="badge-modern badge-dark"><?php echo e($totalRooms); ?></span>
                         </td>
                         <td class="text-center">
-                            <span class="badge-modern badge-success">{{ $available }}</span>
+                            <span class="badge-modern badge-success"><?php echo e($available); ?></span>
                         </td>
                         <td class="text-center">
-                            <span class="badge-modern badge-warning">{{ $occupiedRooms }}</span>
+                            <span class="badge-modern badge-warning"><?php echo e($occupiedRooms); ?></span>
                         </td>
                         <td class="text-center">
-                            <span class="badge-modern badge-info">{{ $cleaning }}</span>
+                            <span class="badge-modern badge-info"><?php echo e($cleaning); ?></span>
                         </td>
                         <td class="text-center">
-                            <span class="badge-modern badge-danger">{{ $maintenance }}</span>
+                            <span class="badge-modern badge-danger"><?php echo e($maintenance); ?></span>
                         </td>
                         <td>
                             <div class="progress-container">
                                 <div class="progress-modern">
-                                    <div class="progress-bar-modern {{ $progressClass }}" style="width: {{ $percentage }}%"></div>
+                                    <div class="progress-bar-modern <?php echo e($progressClass); ?>" style="width: <?php echo e($percentage); ?>%"></div>
                                 </div>
-                                <span style="font-size: .7rem; font-weight: 600; color: var(--s700); min-width: 45px;">{{ number_format($percentage, 1) }}%</span>
+                                <span style="font-size: .7rem; font-weight: 600; color: var(--s700); min-width: 45px;"><?php echo e(number_format($percentage, 1)); ?>%</span>
                             </div>
                         </td>
                         <td class="text-center">
-                            <a href="{{ route('availability.search', ['room_type_id' => $type->id]) }}" 
+                            <a href="<?php echo e(route('availability.search', ['room_type_id' => $type->id])); ?>" 
                                class="btn-db-icon"
                                data-bs-toggle="tooltip" 
                                title="Voir les chambres">
@@ -682,13 +683,13 @@
                             </a>
                         </td>
                     </tr>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </tbody>
             </table>
         </div>
     </div>
 
-    {{-- ─── CHAMBRES PAR STATUT ─────────────────--}}
+    
     <div class="table-container anim-5">
         <div class="table-header" style="background: linear-gradient(135deg, var(--blue), var(--g600)); color: white;">
             <h5 style="color: white;">
@@ -699,8 +700,8 @@
         
         <div class="card-body-modern" style="padding: 20px;">
             <div class="status-grid">
-                @foreach($roomsByStatus as $statusId => $rooms)
-                @php
+                <?php $__currentLoopData = $roomsByStatus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $statusId => $rooms): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php
                     $status = $rooms->first()->roomStatus ?? null;
                     if (!$status) continue;
                     
@@ -727,57 +728,59 @@
                         4 => 'warning',
                         default => 'secondary'
                     };
-                @endphp
+                ?>
                 
                 <div class="status-card">
-                    <div class="status-card-header {{ $headerClass }}">
+                    <div class="status-card-header <?php echo e($headerClass); ?>">
                         <div>
-                            <i class="fas {{ $icon }} me-2"></i>
-                            <strong>{{ $status->name }}</strong>
+                            <i class="fas <?php echo e($icon); ?> me-2"></i>
+                            <strong><?php echo e($status->name); ?></strong>
                         </div>
-                        <span class="badge bg-light text-dark">{{ $rooms->count() }}</span>
+                        <span class="badge bg-light text-dark"><?php echo e($rooms->count()); ?></span>
                     </div>
                     <div class="status-card-body">
-                        @foreach($rooms->take(12) as $room)
-                        <a href="{{ route('availability.room.detail', $room->id) }}" 
+                        <?php $__currentLoopData = $rooms->take(12); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <a href="<?php echo e(route('availability.room.detail', $room->id)); ?>" 
                            class="room-chip"
                            data-bs-toggle="tooltip" 
-                           title="{{ $room->type->name ?? 'Chambre' }} · {{ number_format($room->price, 0, ',', ' ') }} FCFA">
+                           title="<?php echo e($room->type->name ?? 'Chambre'); ?> · <?php echo e(number_format($room->price, 0, ',', ' ')); ?> FCFA">
                             <i class="fas fa-bed"></i>
-                            {{ $room->number }}
-                            @if($statusId == 2)
+                            <?php echo e($room->number); ?>
+
+                            <?php if($statusId == 2): ?>
                                 <i class="fas fa-tools ms-1" style="font-size:.6rem;"></i>
-                            @elseif($statusId == 3)
+                            <?php elseif($statusId == 3): ?>
                                 <i class="fas fa-broom ms-1" style="font-size:.6rem;"></i>
-                            @endif
+                            <?php endif; ?>
                         </a>
-                        @endforeach
-                        @if($rooms->count() > 12)
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php if($rooms->count() > 12): ?>
                             <span class="room-chip" style="background: var(--s100); border-color: var(--s200);">
                                 <i class="fas fa-plus-circle"></i>
-                                {{ $rooms->count() - 12 }} autres
+                                <?php echo e($rooms->count() - 12); ?> autres
                             </span>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
-                @endforeach
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>
         </div>
     </div>
 
-    {{-- ─── TIMESTAMP ───────────────────────────--}}
+    
     <div class="text-end mt-3 anim-6">
         <span class="update-badge">
             <i class="fas fa-sync-alt fa-xs"></i>
-            Dernière mise à jour: {{ now()->format('d/m/Y H:i:s') }}
+            Dernière mise à jour: <?php echo e(now()->format('d/m/Y H:i:s')); ?>
+
         </span>
     </div>
 
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialisation des tooltips
@@ -811,7 +814,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 300);
     });
     
-    console.log('Inventaire mis à jour: {{ now()->format("H:i:s") }}');
+    console.log('Inventaire mis à jour: <?php echo e(now()->format("H:i:s")); ?>');
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/availability/inventory.blade.php ENDPATH**/ ?>

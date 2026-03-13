@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Chambre ' . $room->number)
 
-@push('styles')
+<?php $__env->startSection('title', 'Chambre ' . $room->number); ?>
+
+<?php $__env->startPush('styles'); ?>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -737,10 +737,10 @@
     padding: 16px 24px;
 }
 </style>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@section('content')
-@php
+<?php $__env->startSection('content'); ?>
+<?php
     $roomStats = array_merge([
         'total_transactions' => 0,
         'total_revenue' => 0,
@@ -757,44 +757,44 @@
     
     $user = auth()->user();
     $canCheckOut = in_array($user->role ?? '', ['Super', 'Admin', 'Receptionist']);
-@endphp
+?>
 
-{{-- ══════════════════════════════════════════════
-     TOPBAR
-══════════════════════════════════════════════ --}}
+
 <div class="room-topbar anim-1">
     <div class="room-topbar__inner">
         <div class="room-topbar__title">
-            <h1>Chambre <em>{{ $room->number }}</em></h1>
+            <h1>Chambre <em><?php echo e($room->number); ?></em></h1>
             <div class="room-topbar__meta">
-                <span class="badge badge-{{ $room->room_status_id == 1 ? 'success' : ($room->room_status_id == 2 ? 'danger' : 'warning') }}">
-                    <i class="fas fa-{{ $room->room_status_id == 1 ? 'check' : ($room->room_status_id == 2 ? 'tools' : 'broom') }}"></i>
-                    {{ $room->roomStatus->name ?? 'Statut inconnu' }}
+                <span class="badge badge-<?php echo e($room->room_status_id == 1 ? 'success' : ($room->room_status_id == 2 ? 'danger' : 'warning')); ?>">
+                    <i class="fas fa-<?php echo e($room->room_status_id == 1 ? 'check' : ($room->room_status_id == 2 ? 'tools' : 'broom')); ?>"></i>
+                    <?php echo e($room->roomStatus->name ?? 'Statut inconnu'); ?>
+
                 </span>
                 <span>
                     <i class="fas fa-bed" style="color:var(--g500);"></i>
-                    {{ $room->type->name ?? 'Type inconnu' }}
+                    <?php echo e($room->type->name ?? 'Type inconnu'); ?>
+
                 </span>
                 <span>
                     <i class="fas fa-users" style="color:var(--g500);"></i>
-                    {{ $room->capacity }} personnes
+                    <?php echo e($room->capacity); ?> personnes
                 </span>
                 <span>
                     <i class="fas fa-tag" style="color:var(--g500);"></i>
-                    {{ number_format($room->price, 0, ',', ' ') }} FCFA/nuit
+                    <?php echo e(number_format($room->price, 0, ',', ' ')); ?> FCFA/nuit
                 </span>
             </div>
         </div>
         <div class="room-topbar__actions">
-            <a href="{{ route('availability.calendar') }}?room_number={{ $room->number }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('availability.calendar')); ?>?room_number=<?php echo e($room->number); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-calendar-alt"></i>
                 Calendrier
             </a>
-            <a href="{{ route('availability.inventory') }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('availability.inventory')); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-clipboard-list"></i>
                 Inventaire
             </a>
-            <a href="{{ route('room.edit', $room->id) }}" class="btn-db btn-db-primary">
+            <a href="<?php echo e(route('room.edit', $room->id)); ?>" class="btn-db btn-db-primary">
                 <i class="fas fa-edit"></i>
                 Modifier
             </a>
@@ -802,15 +802,13 @@
     </div>
 </div>
 
-{{-- ══════════════════════════════════════════════
-     MAIN CONTAINER
-══════════════════════════════════════════════ --}}
+
 <div class="room-container">
     <div class="room-grid">
 
-        {{-- ═══ SIDEBAR (colonnen de gauche) ═══ --}}
+        
         <div class="anim-2">
-            {{-- Info générale --}}
+            
             <div class="card">
                 <div class="card-header card-header-primary">
                     <i class="fas fa-info-circle"></i>
@@ -819,16 +817,16 @@
                 <div class="card-body">
                     <div class="info-row">
                         <div class="info-label">Numéro de chambre</div>
-                        <div class="info-value info-value-lg">{{ $room->number }}</div>
+                        <div class="info-value info-value-lg"><?php echo e($room->number); ?></div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Type</div>
-                        <div class="info-value">{{ $room->type->name ?? 'Type inconnu' }}</div>
+                        <div class="info-value"><?php echo e($room->type->name ?? 'Type inconnu'); ?></div>
                     </div>
                     <div class="info-row">
                         <div class="info-label">Prix par nuit</div>
                         <div class="info-value info-value-lg info-value-price">
-                            {{ number_format($room->price, 0, ',', ' ') }} FCFA
+                            <?php echo e(number_format($room->price, 0, ',', ' ')); ?> FCFA
                         </div>
                     </div>
                     
@@ -837,20 +835,21 @@
                             <div class="info-label">Capacité</div>
                             <div class="info-value">
                                 <i class="fas fa-users" style="color:var(--g500); margin-right:4px;"></i>
-                                {{ $room->capacity }}
+                                <?php echo e($room->capacity); ?>
+
                             </div>
                         </div>
                         <div class="info-row">
                             <div class="info-label">Étage</div>
-                            <div class="info-value">{{ $room->floor ?? 'N/A' }}</div>
+                            <div class="info-value"><?php echo e($room->floor ?? 'N/A'); ?></div>
                         </div>
                         <div class="info-row">
                             <div class="info-label">Surface</div>
-                            <div class="info-value">{{ $room->size ?? 'N/A' }} m²</div>
+                            <div class="info-value"><?php echo e($room->size ?? 'N/A'); ?> m²</div>
                         </div>
                         <div class="info-row">
                             <div class="info-label">Vue</div>
-                            <div class="info-value">{{ $room->view ?? 'N/A' }}</div>
+                            <div class="info-value"><?php echo e($room->view ?? 'N/A'); ?></div>
                         </div>
                     </div>
                     
@@ -858,14 +857,15 @@
                         <div class="info-label">Dernière mise à jour</div>
                         <div class="info-value info-value-sm">
                             <i class="fas fa-clock" style="color:var(--g500); margin-right:4px;"></i>
-                            {{ $room->updated_at ? $room->updated_at->format('d/m/Y H:i') : 'N/A' }}
+                            <?php echo e($room->updated_at ? $room->updated_at->format('d/m/Y H:i') : 'N/A'); ?>
+
                         </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Équipements --}}
-            @if($room->facilities && $room->facilities->count() > 0)
+            
+            <?php if($room->facilities && $room->facilities->count() > 0): ?>
             <div class="card">
                 <div class="card-header card-header-success">
                     <i class="fas fa-wifi"></i>
@@ -873,18 +873,19 @@
                 </div>
                 <div class="card-body">
                     <div class="facilities">
-                        @foreach($room->facilities as $facility)
+                        <?php $__currentLoopData = $room->facilities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $facility): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <span class="facility-badge">
-                            <i class="fas fa-{{ $facility->icon ?? 'check' }}"></i>
-                            {{ $facility->name }}
+                            <i class="fas fa-<?php echo e($facility->icon ?? 'check'); ?>"></i>
+                            <?php echo e($facility->name); ?>
+
                         </span>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- Statistiques --}}
+            
             <div class="card">
                 <div class="card-header card-header-info">
                     <i class="fas fa-chart-bar"></i>
@@ -893,110 +894,113 @@
                 <div class="card-body">
                     <div class="stats-grid">
                         <div class="stat-item">
-                            <div class="stat-value">{{ $roomStats['total_transactions'] }}</div>
+                            <div class="stat-value"><?php echo e($roomStats['total_transactions']); ?></div>
                             <div class="stat-label">Réservations</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value">{{ number_format($roomStats['occupancy_rate_30d'], 1) }}%</div>
+                            <div class="stat-value"><?php echo e(number_format($roomStats['occupancy_rate_30d'], 1)); ?>%</div>
                             <div class="stat-label">Taux d'occ.</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value">{{ number_format($roomStats['avg_stay_duration'], 1) }}</div>
+                            <div class="stat-value"><?php echo e(number_format($roomStats['avg_stay_duration'], 1)); ?></div>
                             <div class="stat-label">Nuits moy.</div>
                         </div>
                         <div class="stat-item">
-                            <div class="stat-value">{{ number_format($roomStats['avg_daily_rate'], 0) }}</div>
+                            <div class="stat-value"><?php echo e(number_format($roomStats['avg_daily_rate'], 0)); ?></div>
                             <div class="stat-label">Prix moy.</div>
                         </div>
                     </div>
                     
                     <div class="stat-item" style="margin-top:8px;background:var(--g50);border-color:var(--g200);">
                         <div class="stat-value" style="color:var(--g600);">
-                            {{ number_format($roomStats['total_revenue_30d'], 0, ',', ' ') }} FCFA
+                            <?php echo e(number_format($roomStats['total_revenue_30d'], 0, ',', ' ')); ?> FCFA
                         </div>
                         <div class="stat-label">Revenu total (30j)</div>
                     </div>
                     
-                    @if($roomStats['next_available'] && $roomStats['next_available'] instanceof \Carbon\Carbon)
+                    <?php if($roomStats['next_available'] && $roomStats['next_available'] instanceof \Carbon\Carbon): ?>
                     <div style="margin-top:16px;padding:12px;background:var(--amber-light);border:1.5px solid var(--amber);border-radius:var(--rl);text-align:center;">
                         <div style="font-size:.65rem;color:var(--s500);margin-bottom:4px;text-transform:uppercase;">Prochaine disponibilité</div>
-                        <div style="font-weight:700;color:var(--amber);">{{ $roomStats['next_available']->format('d/m/Y') }}</div>
+                        <div style="font-weight:700;color:var(--amber);"><?php echo e($roomStats['next_available']->format('d/m/Y')); ?></div>
                     </div>
-                    @elseif(isset($roomStats['formatted_next_available']) && $roomStats['formatted_next_available'] != 'Immédiate')
+                    <?php elseif(isset($roomStats['formatted_next_available']) && $roomStats['formatted_next_available'] != 'Immédiate'): ?>
                     <div style="margin-top:16px;padding:12px;background:var(--g50);border:1.5px solid var(--g200);border-radius:var(--rl);text-align:center;">
                         <div style="font-size:.65rem;color:var(--s500);margin-bottom:4px;text-transform:uppercase;">Disponible</div>
                         <div style="font-weight:700;color:var(--g600);">Immédiatement</div>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
 
-        {{-- ═══ MAIN CONTENT (colonne de droite) ═══ --}}
+        
         <div class="anim-3">
-            {{-- Client actuel / Disponible --}}
-            @if($currentTransaction)
+            
+            <?php if($currentTransaction): ?>
             <div class="card" style="border-color:var(--amber);">
                 <div class="card-header card-header-warning">
                     <i class="fas fa-user-check"></i>
                     Client actuel
                     <span class="card-badge">
                         <span class="badge badge-light">
-                            {{ $currentTransaction->check_in->format('d/m/Y') }} - {{ $currentTransaction->check_out->format('d/m/Y') }}
+                            <?php echo e($currentTransaction->check_in->format('d/m/Y')); ?> - <?php echo e($currentTransaction->check_out->format('d/m/Y')); ?>
+
                         </span>
                     </span>
                 </div>
                 <div class="card-body">
                     <div class="guest-card">
                         <div class="guest-avatar">
-                            {{ strtoupper(substr($currentTransaction->customer->name ?? 'C', 0, 1)) }}
+                            <?php echo e(strtoupper(substr($currentTransaction->customer->name ?? 'C', 0, 1))); ?>
+
                         </div>
                         <div class="guest-info">
-                            <div class="guest-name">{{ $currentTransaction->customer->name ?? 'Client inconnu' }}</div>
+                            <div class="guest-name"><?php echo e($currentTransaction->customer->name ?? 'Client inconnu'); ?></div>
                             <div class="guest-meta">
-                                @if($currentTransaction->customer->email ?? false)
-                                <span><i class="fas fa-envelope" style="color:var(--g500);"></i> {{ $currentTransaction->customer->email }}</span>
-                                @endif
-                                @if($currentTransaction->customer->phone ?? false)
-                                <span><i class="fas fa-phone" style="color:var(--g500);"></i> {{ $currentTransaction->customer->phone }}</span>
-                                @endif
+                                <?php if($currentTransaction->customer->email ?? false): ?>
+                                <span><i class="fas fa-envelope" style="color:var(--g500);"></i> <?php echo e($currentTransaction->customer->email); ?></span>
+                                <?php endif; ?>
+                                <?php if($currentTransaction->customer->phone ?? false): ?>
+                                <span><i class="fas fa-phone" style="color:var(--g500);"></i> <?php echo e($currentTransaction->customer->phone); ?></span>
+                                <?php endif; ?>
                             </div>
                             <div class="guest-badges">
-                                <span class="badge badge-info">{{ $currentTransaction->nights ?? 1 }} nuit(s)</span>
-                                <span class="badge badge-success">{{ number_format($currentTransaction->total_price ?? 0, 0, ',', ' ') }} FCFA</span>
-                                <span class="badge badge-{{ ($currentTransaction->status ?? '') == 'active' ? 'warning' : 'info' }}">
-                                    {{ $currentTransaction->status_label ?? 'Réservation' }}
+                                <span class="badge badge-info"><?php echo e($currentTransaction->nights ?? 1); ?> nuit(s)</span>
+                                <span class="badge badge-success"><?php echo e(number_format($currentTransaction->total_price ?? 0, 0, ',', ' ')); ?> FCFA</span>
+                                <span class="badge badge-<?php echo e(($currentTransaction->status ?? '') == 'active' ? 'warning' : 'info'); ?>">
+                                    <?php echo e($currentTransaction->status_label ?? 'Réservation'); ?>
+
                                 </span>
                             </div>
                         </div>
                         <div class="guest-actions">
-                            <a href="{{ route('transaction.show', ['transaction' => $currentTransaction->id]) }}" class="btn-db btn-db-ghost">
+                            <a href="<?php echo e(route('transaction.show', ['transaction' => $currentTransaction->id])); ?>" class="btn-db btn-db-ghost">
                                 <i class="fas fa-eye"></i> Détails
                             </a>
-                            @if(($currentTransaction->status ?? '') == 'active')
-                                @if($canCheckOut)
-                                <a href="{{ route('transaction.mark-departed', ['transaction' => $currentTransaction->id]) }}" 
+                            <?php if(($currentTransaction->status ?? '') == 'active'): ?>
+                                <?php if($canCheckOut): ?>
+                                <a href="<?php echo e(route('transaction.mark-departed', ['transaction' => $currentTransaction->id])); ?>" 
                                    class="btn-db btn-db-warning"
                                    onclick="return confirm('Êtes-vous sûr de vouloir faire le check-out ?');">
                                     <i class="fas fa-sign-out-alt"></i> Check-out
                                 </a>
-                                @else
+                                <?php else: ?>
                                 <button class="btn-db btn-db-ghost" disabled title="Seul le personnel de réception peut faire le check-out">
                                     <i class="fas fa-sign-out-alt"></i> Check-out
                                 </button>
-                                @endif
-                            @endif
+                                <?php endif; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
             </div>
-            @else
+            <?php else: ?>
             <div class="card" style="border-color:var(--g600);">
                 <div class="card-header card-header-success">
                     <i class="fas fa-door-open"></i>
                     Chambre disponible
                     <span class="card-badge">
-                        <span class="badge badge-light">{{ now()->format('d/m/Y H:i') }}</span>
+                        <span class="badge badge-light"><?php echo e(now()->format('d/m/Y H:i')); ?></span>
                     </span>
                 </div>
                 <div class="card-body">
@@ -1004,24 +1008,24 @@
                         <i class="fas fa-check-circle"></i>
                         <h5>Chambre libre</h5>
                         <p>Cette chambre est actuellement disponible pour une nouvelle réservation.</p>
-                        @if($room->room_status_id == 1)
-                        <a href="{{ route('transaction.reservation.createIdentity') }}?room_id={{ $room->id }}" class="btn-db btn-db-success">
+                        <?php if($room->room_status_id == 1): ?>
+                        <a href="<?php echo e(route('transaction.reservation.createIdentity')); ?>?room_id=<?php echo e($room->id); ?>" class="btn-db btn-db-success">
                             <i class="fas fa-plus-circle"></i>
                             Créer une réservation
                         </a>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- Calendrier de disponibilité --}}
+            
             <div class="card">
                 <div class="card-header card-header-dark">
                     <i class="fas fa-calendar-alt"></i>
                     Disponibilité (30 prochains jours)
                     <span class="card-badge">
-                        <small style="color:rgba(255,255,255,.7);">{{ now()->format('d/m') }} → {{ now()->addDays(30)->format('d/m') }}</small>
+                        <small style="color:rgba(255,255,255,.7);"><?php echo e(now()->format('d/m')); ?> → <?php echo e(now()->addDays(30)->format('d/m')); ?></small>
                     </span>
                 </div>
                 <div class="card-body">
@@ -1048,20 +1052,20 @@
                         <table class="cal-table">
                             <thead>
                                 <tr>
-                                    @for($i = 0; $i < 7; $i++)
-                                        @php $day = now()->addDays($i); @endphp
+                                    <?php for($i = 0; $i < 7; $i++): ?>
+                                        <?php $day = now()->addDays($i); ?>
                                         <th>
-                                            <div style="font-weight:700;">{{ $day->isoFormat('dd') }}</div>
-                                            <div style="font-size:.6rem;color:var(--s400);">{{ $day->format('d') }}</div>
+                                            <div style="font-weight:700;"><?php echo e($day->isoFormat('dd')); ?></div>
+                                            <div style="font-size:.6rem;color:var(--s400);"><?php echo e($day->format('d')); ?></div>
                                         </th>
-                                    @endfor
+                                    <?php endfor; ?>
                                 </tr>
                             </thead>
                             <tbody>
-                                @for($week = 0; $week < 5; $week++)
+                                <?php for($week = 0; $week < 5; $week++): ?>
                                     <tr>
-                                        @for($day = 0; $day < 7; $day++)
-                                            @php
+                                        <?php for($day = 0; $day < 7; $day++): ?>
+                                            <?php
                                                 $dateIndex = $week * 7 + $day;
                                                 if ($dateIndex >= 30) break;
                                                 
@@ -1101,30 +1105,31 @@
                                                     $cssClass .= ' cal-day--today';
                                                     $tooltipText .= ' - Aujourd\'hui';
                                                 }
-                                            @endphp
+                                            ?>
                                             <td>
-                                                <div class="cal-day {{ $cssClass }}"
-                                                    data-date="{{ $dateKey }}"
-                                                    data-is-occupied="{{ $isOccupied ? 'true' : 'false' }}"
-                                                    data-room-id="{{ $room->id }}"
-                                                    data-room-number="{{ $room->number }}"
+                                                <div class="cal-day <?php echo e($cssClass); ?>"
+                                                    data-date="<?php echo e($dateKey); ?>"
+                                                    data-is-occupied="<?php echo e($isOccupied ? 'true' : 'false'); ?>"
+                                                    data-room-id="<?php echo e($room->id); ?>"
+                                                    data-room-number="<?php echo e($room->number); ?>"
                                                     onclick="handleCalendarDayClick(this)"
-                                                    title="{{ $tooltipText }}">
-                                                    <div class="cal-day__num">{{ $date->format('d') }}</div>
-                                                    <div class="cal-day__month">{{ $date->isoFormat('MMM') }}</div>
+                                                    title="<?php echo e($tooltipText); ?>">
+                                                    <div class="cal-day__num"><?php echo e($date->format('d')); ?></div>
+                                                    <div class="cal-day__month"><?php echo e($date->isoFormat('MMM')); ?></div>
                                                     <div class="cal-day__icon">
-                                                        <i class="{{ $icon }}"></i>
+                                                        <i class="<?php echo e($icon); ?>"></i>
                                                     </div>
-                                                    @if($isOccupied && isset($availability['reservation_count']) && $availability['reservation_count'] > 1)
+                                                    <?php if($isOccupied && isset($availability['reservation_count']) && $availability['reservation_count'] > 1): ?>
                                                     <div class="conflict-badge">
-                                                        {{ $availability['reservation_count'] }}
+                                                        <?php echo e($availability['reservation_count']); ?>
+
                                                     </div>
-                                                    @endif
+                                                    <?php endif; ?>
                                                 </div>
                                             </td>
-                                        @endfor
+                                        <?php endfor; ?>
                                     </tr>
-                                @endfor
+                                <?php endfor; ?>
                             </tbody>
                         </table>
                     </div>
@@ -1138,7 +1143,7 @@
                             <button class="btn-db btn-db-ghost" style="font-size:.7rem;padding:6px 12px;" onclick="scrollToTodayInCalendar()">
                                 <i class="fas fa-calendar-day"></i> Aujourd'hui
                             </button>
-                            <a href="{{ route('availability.calendar') }}?room_number={{ $room->number }}" 
+                            <a href="<?php echo e(route('availability.calendar')); ?>?room_number=<?php echo e($room->number); ?>" 
                                class="btn-db btn-db-ghost" style="font-size:.7rem;padding:6px 12px;">
                                 <i class="fas fa-expand-alt"></i> Calendrier complet
                             </a>
@@ -1147,38 +1152,39 @@
                 </div>
             </div>
 
-            {{-- Prochaine réservation --}}
-            @if($nextReservation)
+            
+            <?php if($nextReservation): ?>
             <div class="card">
                 <div class="card-header card-header-info">
                     <i class="fas fa-calendar-plus"></i>
                     Prochaine réservation
                     <span class="card-badge">
-                        <span class="badge badge-light">{{ $nextReservation->check_in->format('d/m/Y') }}</span>
+                        <span class="badge badge-light"><?php echo e($nextReservation->check_in->format('d/m/Y')); ?></span>
                     </span>
                 </div>
                 <div class="card-body">
                     <div class="next-res">
                         <div class="next-res__info">
-                            <h6>{{ $nextReservation->customer->name ?? 'Client inconnu' }}</h6>
+                            <h6><?php echo e($nextReservation->customer->name ?? 'Client inconnu'); ?></h6>
                             <div class="next-res__meta">
                                 <i class="fas fa-calendar" style="color:var(--g500);"></i>
-                                {{ $nextReservation->check_in->format('d/m/Y') }} → {{ $nextReservation->check_out->format('d/m/Y') }}
+                                <?php echo e($nextReservation->check_in->format('d/m/Y')); ?> → <?php echo e($nextReservation->check_out->format('d/m/Y')); ?>
+
                                 &nbsp;•&nbsp;
                                 <i class="fas fa-moon" style="color:var(--g500);"></i>
-                                {{ $nextReservation->nights }} nuit(s)
+                                <?php echo e($nextReservation->nights); ?> nuit(s)
                                 &nbsp;•&nbsp;
                                 <i class="fas fa-users" style="color:var(--g500);"></i>
-                                {{ $nextReservation->person_count ?? 1 }} pers.
+                                <?php echo e($nextReservation->person_count ?? 1); ?> pers.
                             </div>
                         </div>
                         <span class="badge badge-warning">Confirmée</span>
                     </div>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
-            {{-- Actions rapides --}}
+            
             <div class="card">
                 <div class="card-header card-header-primary">
                     <i class="fas fa-bolt"></i>
@@ -1186,62 +1192,62 @@
                 </div>
                 <div class="card-body">
                     <div class="actions-grid">
-                        <a href="{{ route('availability.search', ['room_type_id' => $room->type_id, 'check_in' => now()->format('Y-m-d'), 'check_out' => now()->addDays(1)->format('Y-m-d')]) }}" 
+                        <a href="<?php echo e(route('availability.search', ['room_type_id' => $room->type_id, 'check_in' => now()->format('Y-m-d'), 'check_out' => now()->addDays(1)->format('Y-m-d')])); ?>" 
                            class="action-btn action-btn--primary">
                             <div class="action-btn__icon"><i class="fas fa-search"></i></div>
                             <div class="action-btn__title">Rechercher</div>
                             <div class="action-btn__desc">Voir disponibilités</div>
                         </a>
                         
-                        @if($room->room_status_id == 1)
-                        <a href="{{ route('transaction.reservation.createIdentity', ['room_id' => $room->id]) }}" 
+                        <?php if($room->room_status_id == 1): ?>
+                        <a href="<?php echo e(route('transaction.reservation.createIdentity', ['room_id' => $room->id])); ?>" 
                            class="action-btn action-btn--success">
                             <div class="action-btn__icon"><i class="fas fa-book"></i></div>
                             <div class="action-btn__title">Réserver</div>
                             <div class="action-btn__desc">Nouvelle réservation</div>
                         </a>
-                        @else
+                        <?php else: ?>
                         <button class="action-btn" disabled>
                             <div class="action-btn__icon" style="color:var(--s400);"><i class="fas fa-ban"></i></div>
                             <div class="action-btn__title">Indisponible</div>
-                            <div class="action-btn__desc">{{ $room->roomStatus->name ?? 'Non disponible' }}</div>
+                            <div class="action-btn__desc"><?php echo e($room->roomStatus->name ?? 'Non disponible'); ?></div>
                         </button>
-                        @endif
+                        <?php endif; ?>
                         
-                        @php
+                        <?php
                             $canMaintenance = in_array($user->role ?? '', ['Super', 'Admin', 'Receptionist', 'Housekeeping']);
-                        @endphp
-                        @if($canMaintenance && $room->room_status_id == 1)
-                        <a href="{{ route('housekeeping.mark-maintenance', $room->id) }}" class="action-btn action-btn--warning">
+                        ?>
+                        <?php if($canMaintenance && $room->room_status_id == 1): ?>
+                        <a href="<?php echo e(route('housekeeping.mark-maintenance', $room->id)); ?>" class="action-btn action-btn--warning">
                             <div class="action-btn__icon"><i class="fas fa-tools"></i></div>
                             <div class="action-btn__title">Maintenance</div>
                             <div class="action-btn__desc">Marquer en maintenance</div>
                         </a>
-                        @else
-                        <button class="action-btn" disabled title="{{ !$canMaintenance ? 'Non autorisé' : 'Chambre déjà en maintenance' }}">
+                        <?php else: ?>
+                        <button class="action-btn" disabled title="<?php echo e(!$canMaintenance ? 'Non autorisé' : 'Chambre déjà en maintenance'); ?>">
                             <div class="action-btn__icon" style="color:var(--s400);"><i class="fas fa-tools"></i></div>
                             <div class="action-btn__title">Maintenance</div>
-                            <div class="action-btn__desc">{{ !$canMaintenance ? 'Non autorisé' : 'Indisponible' }}</div>
+                            <div class="action-btn__desc"><?php echo e(!$canMaintenance ? 'Non autorisé' : 'Indisponible'); ?></div>
                         </button>
-                        @endif
+                        <?php endif; ?>
                         
-                        @php
+                        <?php
                             $canClean = in_array($user->role ?? '', ['Super', 'Admin', 'Housekeeping']);
                             $isDirty = $room->room_status_id == 3;
-                        @endphp
-                        @if($canClean && $isDirty)
-                        <a href="{{ route('housekeeping.mark-cleaned', $room->id) }}" class="action-btn action-btn--info">
+                        ?>
+                        <?php if($canClean && $isDirty): ?>
+                        <a href="<?php echo e(route('housekeeping.mark-cleaned', $room->id)); ?>" class="action-btn action-btn--info">
                             <div class="action-btn__icon"><i class="fas fa-broom"></i></div>
                             <div class="action-btn__title">Nettoyée</div>
                             <div class="action-btn__desc">Marquer comme nettoyée</div>
                         </a>
-                        @else
-                        <button class="action-btn" disabled title="{{ !$canClean ? 'Non autorisé' : 'Chambre déjà nettoyée' }}">
+                        <?php else: ?>
+                        <button class="action-btn" disabled title="<?php echo e(!$canClean ? 'Non autorisé' : 'Chambre déjà nettoyée'); ?>">
                             <div class="action-btn__icon" style="color:var(--s400);"><i class="fas fa-broom"></i></div>
                             <div class="action-btn__title">Nettoyée</div>
-                            <div class="action-btn__desc">{{ !$canClean ? 'Non autorisé' : 'Indisponible' }}</div>
+                            <div class="action-btn__desc"><?php echo e(!$canClean ? 'Non autorisé' : 'Indisponible'); ?></div>
                         </button>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -1250,7 +1256,7 @@
     </div>
 </div>
 
-{{-- Modal pour les détails --}}
+
 <div class="modal fade" id="roomModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -1259,9 +1265,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialisation des tooltips
@@ -1358,7 +1364,7 @@ function showReservationModal(roomId, roomNumber, date) {
         </div>
         <div class="modal-footer">
             <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">Annuler</button>
-            <a href="{{ route('transaction.reservation.createIdentity') }}?room_id=${roomId}&check_in=${checkInStr}&check_out=${checkOutStr}" 
+            <a href="<?php echo e(route('transaction.reservation.createIdentity')); ?>?room_id=${roomId}&check_in=${checkInStr}&check_out=${checkOutStr}" 
                class="btn-db btn-db-success"><i class="fas fa-book me-2"></i>Continuer</a>
         </div>
     `;
@@ -1383,4 +1389,5 @@ function scrollToTodayInCalendar() {
     }
 }
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/availability/room-detail.blade.php ENDPATH**/ ?>

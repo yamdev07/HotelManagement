@@ -2034,7 +2034,7 @@ class TransactionController extends Controller
 
     /**
      * =====================================================
-     * ✅ EARLY CHECKOUT - Départ anticipé (CORRIGÉ)
+     * ✅ EARLY CHECKOUT - Départ anticipé (VERSION CORRIGÉE AVEC SESSION)
      * =====================================================
      */
     public function earlyCheckout(Request $request, Transaction $transaction)
@@ -2069,6 +2069,18 @@ class TransactionController extends Controller
 
         try {
             DB::beginTransaction();
+
+            // =====================================================
+            // 0. RÉCUPÉRER LA SESSION ACTIVE
+            // =====================================================
+            $activeSession = \App\Models\CashierSession::where('user_id', auth()->id())
+                ->where('status', 'active')
+                ->first();
+
+            if (!$activeSession) {
+                return redirect()->back()->with('error', 
+                    '❌ Vous devez avoir une session de caisse active pour effectuer un early checkout.');
+            }
 
             // =====================================================
             // 1. SAUVEGARDER L'ÉTAT AVANT
@@ -2124,7 +2136,7 @@ class TransactionController extends Controller
             }
 
             // =====================================================
-            // 4. CRÉER LE REMBOURSEMENT SI NÉCESSAIRE (CORRIGÉ)
+            // 4. CRÉER LE REMBOURSEMENT SI NÉCESSAIRE (AVEC SESSION)
             // =====================================================
             if ($refundAmount > 0) {
                 $description = 'Remboursement early checkout - ' . 
@@ -2139,18 +2151,30 @@ class TransactionController extends Controller
                     'customer_id' => $transaction->customer_id,
                     'user_id' => auth()->id(),
                     'created_by' => auth()->id(),
+                    'cashier_session_id' => $activeSession->id, // ✅ LIEN CRUCIAL VERS LA SESSION
                     'amount' => -$refundAmount,
                     'payment_method' => $request->payment_method,
                     'status' => Payment::STATUS_COMPLETED,
                     'reference' => 'REFUND-EARLY-' . $transaction->id . '-' . time(),
                     'description' => $description,
-                    // ✅ PAS DE CHAMP 'notes' !
                 ]);
 
-                Log::info("💰 Remboursement early checkout créé", [
+                // ✅ METTRE À JOUR LES TOTAUX DE LA SESSION
+                $activeSession->refunds_total = ($activeSession->refunds_total ?? 0) + $refundAmount;
+                $activeSession->current_balance -= $refundAmount;
+                
+                // ✅ METTRE À JOUR cash_out SI C'EST UN REMBOURSEMENT EN ESPÈCES
+                if ($request->payment_method == 'cash') {
+                    $activeSession->cash_out = ($activeSession->cash_out ?? 0) + $refundAmount;
+                }
+                
+                $activeSession->save();
+
+                Log::info("💰 Remboursement early checkout créé et lié à la session", [
                     'transaction_id' => $transaction->id,
                     'amount' => $refundAmount,
                     'payment_id' => $refundPayment->id,
+                    'session_id' => $activeSession->id,
                 ]);
             }
 
@@ -2173,6 +2197,7 @@ class TransactionController extends Controller
                 'early_checkout_reason' => $request->early_checkout_reason,
                 'early_checkout_refund' => $refundAmount,
                 'notes' => $notes . $newNote . ($request->notes ? ' - ' . $request->notes : ''),
+                'cashier_session_id' => $activeSession->id, // ✅ LIEN VERS LA SESSION
             ]);
 
             // =====================================================
@@ -2206,6 +2231,7 @@ class TransactionController extends Controller
                     'refund_amount' => $refundAmount,
                     'refund_policy' => $refundPolicy,
                     'room_status' => self::STATUS_DIRTY,
+                    'cashier_session_id' => $activeSession->id,
                 ]),
                 'notes' => $request->notes,
             ]);
@@ -2228,6 +2254,7 @@ class TransactionController extends Controller
                         'old_total_price' => $oldTotalPrice,
                         'new_total_price' => $newTotalPrice,
                         'price_difference' => $priceDifference,
+                        'cashier_session_id' => $activeSession->id,
                     ],
                     beforeState: $beforeState,
                     afterState: [
@@ -2237,6 +2264,7 @@ class TransactionController extends Controller
                         'early_checkout' => true,
                         'early_checkout_reason' => $request->early_checkout_reason,
                         'refund_amount' => $refundAmount,
+                        'cashier_session_id' => $activeSession->id,
                     ],
                     notes: 'Early checkout - Départ anticipé'
                 );
@@ -2290,7 +2318,6 @@ class TransactionController extends Controller
                 ->with('error', 'Erreur lors du early checkout: ' . $e->getMessage());
         }
     }
-
     /**
      * Vérifier si un early checkout est possible
      */
