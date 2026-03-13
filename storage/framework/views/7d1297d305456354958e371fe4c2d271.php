@@ -4,326 +4,510 @@
 
 <?php $__env->startPush('styles'); ?>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    --primary: #3b82f6;
-    --success: #10b981;
-    --warning: #f59e0b;
-    --danger: #ef4444;
-    --dark: #1e293b;
-    --light: #f8fafc;
-    --border: #e2e8f0;
+    /* ── 4 COULEURS (vert, rouge, gris, blanc) ── */
+    --green-50:  #f0faf0;
+    --green-100: #d4edda;
+    --green-500: #2e8540;
+    --green-600: #1e6b2e;
+    --green-700: #155221;
+
+    --red-50:    #fee2e2;
+    --red-100:   #fecaca;
+    --red-500:   #b91c1c;
+    --red-600:   #991b1b;
+
+    --gray-50:   #f8f9f8;
+    --gray-100:  #eff0ef;
+    --gray-200:  #dde0dd;
+    --gray-300:  #c2c7c2;
+    --gray-400:  #9ba09b;
+    --gray-500:  #737873;
+    --gray-600:  #545954;
+    --gray-700:  #3a3e3a;
+    --gray-800:  #252825;
+    --gray-900:  #131513;
+
+    --white:     #ffffff;
+    --surface:   #f7f9f7;
+
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s ease;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
 }
 
-.create-session-container {
+* { box-sizing: border-box; }
+
+.create-page {
+    background: var(--surface);
+    min-height: 100vh;
+    padding: 24px 32px;
+    font-family: var(--font);
+    color: var(--gray-800);
+}
+
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+.anim-3 { animation: fadeSlide .4s .16s ease both; }
+
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+.create-header {
+    background: var(--white);
+    border-bottom: 1.5px solid var(--gray-200);
+    padding: 20px 0;
+    margin-bottom: 24px;
+}
+.header-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+}
+.header-title i {
+    color: var(--green-600);
+    margin-right: 10px;
+}
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .8rem;
+    color: var(--gray-400);
+}
+.breadcrumb a {
+    color: var(--gray-400);
+    text-decoration: none;
+    transition: var(--transition);
+}
+.breadcrumb a:hover {
+    color: var(--green-600);
+}
+.breadcrumb .active {
+    color: var(--gray-600);
+    font-weight: 500;
+}
+
+/* ══════════════════════════════════════════════
+   CONTAINER
+══════════════════════════════════════════════ */
+.create-container {
     max-width: 600px;
-    margin: 2rem auto;
+    margin: 0 auto;
 }
 
-.session-card {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 2rem;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+/* ══════════════════════════════════════════════
+   ALERTES
+══════════════════════════════════════════════ */
+.alert {
+    border-radius: var(--rl);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    border: 1.5px solid;
+    animation: fadeSlide .3s ease;
+}
+.alert-green {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+}
+.alert-red {
+    background: var(--red-50);
+    border-color: var(--red-100);
+    color: var(--red-500);
+}
+.alert-yellow {
+    background: var(--red-50);
+    border-color: var(--red-100);
+    color: var(--red-500);
+}
+.alert-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.alert-content {
+    flex: 1;
+}
+.alert-content ul {
+    margin-top: 8px;
+    padding-left: 20px;
+}
+.alert-close {
+    background: transparent;
+    border: none;
+    color: currentColor;
+    opacity: .6;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 4px;
+}
+.alert-close:hover {
+    opacity: 1;
 }
 
-.session-header {
-    text-align: center;
-    margin-bottom: 2rem;
+/* ══════════════════════════════════════════════
+   RULES CARD
+══════════════════════════════════════════════ */
+.rules-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rxl);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow-xs);
+}
+.rules-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: .9rem;
+    color: var(--gray-800);
+    margin-bottom: 12px;
+}
+.rules-title i {
+    color: var(--green-600);
+}
+.rules-list {
+    padding-left: 28px;
+    color: var(--gray-600);
+    font-size: .8rem;
+    line-height: 1.6;
+}
+.rules-list li {
+    margin-bottom: 6px;
 }
 
-.session-header .icon {
+/* ══════════════════════════════════════════════
+   FORM CARD
+══════════════════════════════════════════════ */
+.form-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rxl);
+    padding: 28px;
+    box-shadow: var(--shadow-sm);
+}
+.form-icon {
     width: 80px;
     height: 80px;
-    background: rgba(16,185,129,0.1);
+    background: var(--green-50);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1rem;
+    margin: 0 auto 16px;
     font-size: 2rem;
-    color: var(--success);
+    color: var(--green-600);
 }
-
-.session-header h2 {
-    font-size: 1.5rem;
+.form-title {
+    text-align: center;
+    font-size: 1.3rem;
     font-weight: 700;
-    color: var(--dark);
-    margin-bottom: 0.5rem;
+    color: var(--gray-900);
+    margin-bottom: 6px;
+}
+.form-subtitle {
+    text-align: center;
+    color: var(--gray-500);
+    font-size: .8rem;
+    margin-bottom: 24px;
 }
 
-.session-header p {
-    color: #64748b;
-    font-size: 0.875rem;
-}
-
-.form-label {
-    font-weight: 600;
-    font-size: 0.875rem;
-    color: var(--dark);
-    margin-bottom: 0.5rem;
-}
-
-.form-control {
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-    transition: all 0.2s;
-}
-
-.form-control:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
-    outline: none;
-}
-
-.form-control.is-invalid {
-    border-color: var(--danger);
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ef4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ef4444' stroke='none'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right 0.75rem center;
-    background-size: 1rem;
-}
-
-.btn-start {
-    background: var(--success);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0.875rem;
-    font-weight: 600;
-    font-size: 0.875rem;
-    width: 100%;
-    transition: all 0.2s;
-    cursor: pointer;
-}
-
-.btn-start:hover:not(:disabled) {
-    background: #059669;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16,185,129,0.2);
-}
-
-.btn-start:disabled {
-    background: #cbd5e1;
-    transform: none;
-    box-shadow: none;
-    cursor: not-allowed;
-}
-
-.btn-start i {
-    margin-right: 0.5rem;
-}
-
+/* ══════════════════════════════════════════════
+   INFO BOX
+══════════════════════════════════════════════ */
 .info-box {
-    background: var(--light);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 1rem;
-    margin: 1.5rem 0;
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
+    padding: 18px;
+    margin-bottom: 24px;
 }
-
+.info-box-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: .85rem;
+    color: var(--gray-800);
+    margin-bottom: 16px;
+}
+.info-box-title i {
+    color: var(--green-600);
+}
 .info-item {
     display: flex;
     align-items: center;
-    padding: 0.5rem 0;
-    border-bottom: 1px dashed var(--border);
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--gray-200);
 }
-
 .info-item:last-child {
     border-bottom: none;
 }
-
 .info-item i {
-    width: 24px;
-    color: var(--primary);
-    font-size: 1rem;
+    width: 20px;
+    color: var(--green-600);
+    font-size: .9rem;
+}
+.info-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-right: 4px;
+}
+.info-value {
+    color: var(--gray-600);
+}
+.info-badge {
+    display: inline-block;
+    background: var(--green-50);
+    color: var(--green-700);
+    border: 1.5px solid var(--green-200);
+    border-radius: 100px;
+    padding: 2px 8px;
+    font-size: .65rem;
+    font-weight: 600;
+    margin-left: 8px;
 }
 
-.info-item strong {
-    margin-right: 0.5rem;
-    color: var(--dark);
+/* ══════════════════════════════════════════════
+   FORM ELEMENTS
+══════════════════════════════════════════════ */
+.form-group {
+    margin-bottom: 24px;
 }
-
-.session-rules {
-    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-    border: 1px solid #fbbf24;
-    border-radius: 12px;
-    padding: 1.25rem;
-    margin-bottom: 1.5rem;
-}
-
-.session-rules h6 {
-    color: #92400e;
-    font-weight: 700;
-    margin-bottom: 1rem;
+.form-label {
     display: flex;
     align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: .8rem;
+    color: var(--gray-700);
+    margin-bottom: 8px;
 }
-
-.session-rules h6 i {
-    margin-right: 0.5rem;
-    font-size: 1rem;
+.form-label i {
+    color: var(--green-600);
 }
-
-.session-rules ul {
-    margin: 0;
-    padding-left: 1.5rem;
-    color: #92400e;
-    font-size: 0.875rem;
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--r);
+    font-size: .85rem;
+    color: var(--gray-700);
+    background: var(--white);
+    transition: var(--transition);
+    font-family: var(--font);
 }
-
-.session-rules li {
-    margin-bottom: 0.5rem;
+.form-control:focus {
+    outline: none;
+    border-color: var(--green-400);
+    box-shadow: 0 0 0 3px rgba(46,133,64,.1);
 }
-
-.session-rules li:last-child {
-    margin-bottom: 0;
+.form-control.is-invalid {
+    border-color: var(--red-500);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='%23b91c1c'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
 }
-
-.alert {
-    border-radius: 10px;
-    padding: 1rem 1.25rem;
-    margin-bottom: 1.5rem;
-    border: none;
+.invalid-feedback {
+    color: var(--red-500);
+    font-size: .7rem;
+    margin-top: 4px;
+}
+.text-muted {
+    color: var(--gray-400) !important;
+    font-size: .7rem;
     display: flex;
     align-items: center;
+    gap: 4px;
+    margin-top: 4px;
 }
 
-.alert-warning {
-    background: #fef3c7;
-    color: #92400e;
-}
-
-.alert-danger {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.alert-success {
-    background: #d1fae5;
-    color: #065f46;
-}
-
-.alert i {
-    margin-right: 0.75rem;
-    font-size: 1.25rem;
-}
-
-.btn-close {
-    margin-left: auto;
-    background: transparent;
+/* ══════════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════════ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: var(--r);
+    font-size: .85rem;
+    font-weight: 600;
     border: none;
-    font-size: 1.25rem;
     cursor: pointer;
-    opacity: 0.5;
-    transition: opacity 0.2s;
+    transition: var(--transition);
+    text-decoration: none;
+    white-space: nowrap;
+}
+.btn-green {
+    background: var(--green-600);
+    color: white;
+    flex: 1;
+}
+.btn-green:hover:not(:disabled) {
+    background: var(--green-700);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(46,133,64,.2);
+}
+.btn-green:disabled {
+    background: var(--gray-300);
+    cursor: not-allowed;
+}
+.btn-gray {
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+    flex: 1;
+}
+.btn-gray:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+    transform: translateY(-1px);
+}
+.btn-icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--r);
+    border: 1.5px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-500);
+}
+.btn-icon:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
 }
 
-.btn-close:hover {
-    opacity: 1;
-}
-
+/* ══════════════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════════════ */
 @keyframes spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
-
 .fa-spinner {
     animation: spin 1s linear infinite;
 }
 
-.badge-info {
-    background: rgba(59,130,246,0.1);
-    color: var(--primary);
-    padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    margin-left: 0.5rem;
+/* ══════════════════════════════════════════════
+   SECURITY NOTE
+══════════════════════════════════════════════ */
+.security-note {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--gray-400);
+    font-size: .7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+.security-note i {
+    color: var(--green-500);
 }
 </style>
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>
-<div class="container-fluid">
+<div class="create-page">
+
     
-    <!-- Header -->
-    <div class="cashier-header">
+    <div class="create-header anim-1">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div>
-                <h1 class="cashier-title">
-                    <i class="fas fa-cash-register me-2" style="color:var(--primary)"></i>
+                <h1 class="header-title">
+                    <i class="fas fa-cash-register"></i>
                     Nouvelle Session
                 </h1>
             </div>
         </div>
         
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item">
-                    <a href="<?php echo e(route('dashboard.index')); ?>">
-                        <i class="fas fa-home"></i> Accueil
-                    </a>
-                </li>
-                <li class="breadcrumb-item">
-                    <a href="<?php echo e(route('cashier.dashboard')); ?>">Caissier</a>
-                </li>
-                <li class="breadcrumb-item active">Nouvelle session</li>
-            </ol>
-        </nav>
+        <div class="breadcrumb">
+            <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home"></i> Accueil</a>
+            <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+            <a href="<?php echo e(route('cashier.dashboard')); ?>">Caissier</a>
+            <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+            <span class="active">Nouvelle session</span>
+        </div>
     </div>
 
-    <div class="create-session-container">
-        <!-- Messages de notification -->
-        <?php if(session('warning')): ?>
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-triangle"></i>
-            <?php echo e(session('warning')); ?>
+    <div class="create-container">
 
-            <button type="button" class="btn-close" data-bs-dismiss="alert">&times;</button>
+        
+        <?php if(session('warning')): ?>
+        <div class="alert alert-yellow">
+            <div class="alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <div class="alert-content"><?php echo e(session('warning')); ?></div>
+            <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
         </div>
         <?php endif; ?>
 
         <?php if(session('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-times-circle"></i>
-            <?php echo e(session('error')); ?>
-
-            <button type="button" class="btn-close" data-bs-dismiss="alert">&times;</button>
+        <div class="alert alert-red">
+            <div class="alert-icon"><i class="fas fa-times-circle"></i></div>
+            <div class="alert-content"><?php echo e(session('error')); ?></div>
+            <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
         </div>
         <?php endif; ?>
 
         <?php if(session('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="fas fa-check-circle"></i>
-            <?php echo e(session('success')); ?>
-
-            <button type="button" class="btn-close" data-bs-dismiss="alert">&times;</button>
+        <div class="alert alert-green">
+            <div class="alert-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="alert-content"><?php echo e(session('success')); ?></div>
+            <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
         </div>
         <?php endif; ?>
 
         <?php if($errors->any()): ?>
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="fas fa-exclamation-circle"></i>
-            Veuillez corriger les erreurs ci-dessous
-            <ul class="mb-0 mt-2">
-                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <li><?php echo e($error); ?></li>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </ul>
-            <button type="button" class="btn-close" data-bs-dismiss="alert">&times;</button>
+        <div class="alert alert-red">
+            <div class="alert-icon"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="alert-content">
+                <strong>Veuillez corriger les erreurs :</strong>
+                <ul class="mb-0 mt-2">
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <li><?php echo e($error); ?></li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </ul>
+            </div>
+            <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
         </div>
         <?php endif; ?>
 
-        <!-- Règles de la session -->
-        <div class="session-rules">
-            <h6>
+        
+        <div class="rules-card anim-2">
+            <div class="rules-title">
                 <i class="fas fa-info-circle"></i>
                 Règles importantes
-            </h6>
-            <ul>
+            </div>
+            <ul class="rules-list">
                 <li>Une seule session active à la fois par utilisateur</li>
                 <li>Cette session enregistrera tous vos paiements</li>
                 <li>Vous pourrez la clôturer à tout moment avec un rapport détaillé</li>
@@ -331,71 +515,70 @@
             </ul>
         </div>
 
-        <!-- Formulaire de création -->
-        <div class="session-card">
-            <div class="session-header">
-                <div class="icon">
-                    <i class="fas fa-play"></i>
-                </div>
-                <h2>Démarrer une nouvelle session</h2>
-                <p>Ouvrez votre shift pour commencer à enregistrer les paiements</p>
+        
+        <div class="form-card anim-3">
+            <div class="form-icon">
+                <i class="fas fa-play"></i>
             </div>
+            <div class="form-title">Démarrer une nouvelle session</div>
+            <div class="form-subtitle">Ouvrez votre shift pour commencer à enregistrer les paiements</div>
 
             <form action="<?php echo e(route('cashier.sessions.store')); ?>" method="POST" id="startSessionForm">
                 <?php echo csrf_field(); ?>
                 
-                <!-- Informations de la session (lecture seule) -->
+                
                 <div class="info-box">
-                    <h6 class="mb-3" style="color: var(--dark); font-weight: 600;">
-                        <i class="fas fa-file-invoice me-2"></i>Informations de la session
-                    </h6>
+                    <div class="info-box-title">
+                        <i class="fas fa-file-invoice"></i>
+                        Informations de la session
+                    </div>
                     
                     <div class="info-item">
                         <i class="fas fa-user"></i>
                         <div>
-                            <strong>Réceptionniste:</strong>
-                            <span><?php echo e(auth()->user()->name); ?></span>
-                            <span class="badge-info"><?php echo e(auth()->user()->role); ?></span>
+                            <span class="info-label">Réceptionniste:</span>
+                            <span class="info-value"><?php echo e(auth()->user()->name); ?></span>
+                            <span class="info-badge"><?php echo e(auth()->user()->role); ?></span>
                         </div>
                     </div>
                     
                     <div class="info-item">
                         <i class="fas fa-calendar"></i>
                         <div>
-                            <strong>Date d'ouverture:</strong>
-                            <span><?php echo e(now()->format('d/m/Y')); ?></span>
+                            <span class="info-label">Date:</span>
+                            <span class="info-value"><?php echo e(now()->format('d/m/Y')); ?></span>
                         </div>
                     </div>
                     
                     <div class="info-item">
                         <i class="fas fa-clock"></i>
                         <div>
-                            <strong>Heure:</strong>
-                            <span><?php echo e(now()->format('H:i:s')); ?></span>
+                            <span class="info-label">Heure:</span>
+                            <span class="info-value"><?php echo e(now()->format('H:i:s')); ?></span>
                         </div>
                     </div>
                     
                     <div class="info-item">
                         <i class="fas fa-wallet"></i>
                         <div>
-                            <strong>Solde de départ:</strong>
-                            <span>0 FCFA</span>
+                            <span class="info-label">Solde de départ:</span>
+                            <span class="info-value">0 FCFA</span>
                         </div>
                     </div>
                     
                     <div class="info-item">
                         <i class="fas fa-hashtag"></i>
                         <div>
-                            <strong>Session #:</strong>
-                            <span>Généré automatiquement</span>
+                            <span class="info-label">Session #:</span>
+                            <span class="info-value">Généré automatiquement</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Notes (optionnel) -->
-                <div class="mb-4">
+                
+                <div class="form-group">
                     <label for="notes" class="form-label">
-                        <i class="fas fa-sticky-note me-1" style="color:var(--primary)"></i>
+                        <i class="fas fa-sticky-note"></i>
                         Notes (optionnel)
                     </label>
                     <textarea name="notes" 
@@ -415,39 +598,38 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-                    <div class="invalid-feedback d-block"><?php echo e($message); ?></div>
+                    <div class="invalid-feedback"><?php echo e($message); ?></div>
                     <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-                    <small class="text-muted">
-                        <i class="fas fa-info-circle me-1"></i>
+                    <div class="text-muted">
+                        <i class="fas fa-info-circle"></i>
                         Maximum 500 caractères
-                    </small>
+                    </div>
                 </div>
 
-                <!-- Boutons d'action -->
-                <div class="d-flex gap-2 mt-4">
-                    <a href="<?php echo e(route('cashier.dashboard')); ?>" class="btn btn-secondary flex-grow-1" style="padding: 0.875rem;">
-                        <i class="fas fa-times me-2"></i>Annuler
+                
+                <div class="d-flex gap-2">
+                    <a href="<?php echo e(route('cashier.dashboard')); ?>" class="btn btn-gray">
+                        <i class="fas fa-times"></i> Annuler
                     </a>
-                    <button type="submit" class="btn-start flex-grow-1" id="submitBtn">
-                        <i class="fas fa-play me-2"></i>Démarrer la session
+                    <button type="submit" class="btn btn-green" id="submitBtn">
+                        <i class="fas fa-play"></i> Démarrer
                     </button>
                 </div>
 
-                <!-- Note de sécurité -->
-                <p class="text-center text-muted mt-3 mb-0" style="font-size: 0.75rem;">
-                    <i class="fas fa-shield-alt me-1"></i>
+                
+                <div class="security-note">
+                    <i class="fas fa-shield-alt"></i>
                     Toutes les actions seront enregistrées avec votre nom
-                </p>
+                </div>
             </form>
         </div>
     </div>
-</div>
-<?php $__env->stopSection(); ?>
 
-<?php $__env->startPush('scripts'); ?>
+</div>
+
 <script>
 (function() {
     'use strict';
@@ -457,7 +639,6 @@ unset($__errorArgs, $__bag); ?>
     
     if (!form || !submitBtn) return;
     
-    // Confirmation avant soumission
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
@@ -465,15 +646,14 @@ unset($__errorArgs, $__bag); ?>
             return;
         }
         
-        // Désactiver le bouton
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Démarrage en cours...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Démarrage...';
         
-        // Soumettre le formulaire
         form.submit();
     });
     
 })();
 </script>
-<?php $__env->stopPush(); ?>
+
+<?php $__env->stopSection(); ?>
 <?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/cashier/sessions/create.blade.php ENDPATH**/ ?>
