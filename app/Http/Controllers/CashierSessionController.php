@@ -1461,132 +1461,184 @@ class CashierSessionController extends Controller
         }
     }
 
-    /**
-     * Récupérer les statistiques en temps réel (AJAX)
-     */
-    public function liveStats(Request $request)
-    {
-        try {
-            $user = auth()->user();
+   /**
+ * Récupérer les statistiques en temps réel (AJAX) - CORRIGÉ
+ */
+public function liveStats(Request $request)
+{
+    try {
+        $user = auth()->user();
 
-            $currentSession = CashierSession::where('user_id', $user->id)
-                ->where('status', 'active')
-                ->first();
+        $currentSession = CashierSession::where('user_id', $user->id)
+            ->where('status', 'active')
+            ->first();
 
-            if (! $currentSession) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Aucune session ouverte',
-                    'has_session' => false,
-                ]);
-            }
-
-            $totalCash = $currentSession->total_cash ?? 0;
-            $totalCard = $currentSession->total_card ?? 0;
-            $totalMobile = $currentSession->total_mobile ?? 0;
-            $totalCheque = $currentSession->total_cheque ?? 0;
-            $totalOther = $currentSession->total_other ?? 0;
-
-            $totalTransactions = $currentSession->total_transactions ?? 0;
-            $totalAmount = $totalCash + $totalCard + $totalMobile + $totalCheque + $totalOther;
-
-            $transactions = Transaction::where('cashier_session_id', $currentSession->id)
-                ->whereDate('created_at', now()->toDateString())
-                ->get();
-
-            $transactionsCount = $transactions->count();
-            $transactionsAmount = $transactions->sum(function ($transaction) {
-                return $transaction->getTotalPayment();
-            });
-
-            return response()->json([
-                'success' => true,
-                'has_session' => true,
-                'session_id' => $currentSession->id,
-                'session_start' => $currentSession->start_time->format('H:i'),
-                'stats' => [
-                    'total_amount' => number_format($totalAmount, 0, ',', ' ').' CFA',
-                    'total_cash' => number_format($totalCash, 0, ',', ' ').' CFA',
-                    'total_card' => number_format($totalCard, 0, ',', ' ').' CFA',
-                    'total_mobile' => number_format($totalMobile, 0, ',', ' ').' CFA',
-                    'total_cheque' => number_format($totalCheque, 0, ',', ' ').' CFA',
-                    'total_other' => number_format($totalOther, 0, ',', ' ').' CFA',
-                    'total_transactions' => $totalTransactions,
-                    'session_duration' => $currentSession->start_time->diffForHumans(now(), true),
-                    'today_transactions' => $transactionsCount,
-                    'today_amount' => number_format($transactionsAmount, 0, ',', ' ').' CFA',
-                ],
-                'updated_at' => now()->format('H:i:s'),
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Erreur live stats caisse:', ['error' => $e->getMessage()]);
-
+        if (! $currentSession) {
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur serveur',
-                'error' => config('app.debug') ? $e->getMessage() : null,
-            ], 500);
+                'message' => 'Aucune session ouverte',
+                'has_session' => false,
+            ]);
         }
-    }
 
+        // ✅ UTILISER LES COLONNES EXISTANTES
+        $totalCash = $currentSession->cash_in ?? 0;
+        $totalCard = $currentSession->card_total ?? 0;
+        $totalMobile = $currentSession->mobile_total ?? 0;
+        $totalOther = $currentSession->other_total ?? 0;
+        $totalRefunds = $currentSession->refunds_total ?? 0;
+        
+        // ✅ Total général (sans compter les remboursements deux fois)
+        $totalAmount = $totalCash + $totalCard + $totalMobile + $totalOther;
+        
+        // ✅ Calculer le nombre de transactions (à partir des paiements)
+        $paymentsCount = Payment::where('cashier_session_id', $currentSession->id)
+            ->where('status', Payment::STATUS_COMPLETED)
+            ->count();
+
+        // ✅ Transactions du jour associées à la session
+        $transactions = Transaction::where('cashier_session_id', $currentSession->id)
+            ->whereDate('created_at', now()->toDateString())
+            ->get();
+
+        $transactionsCount = $transactions->count();
+        $transactionsAmount = $transactions->sum(function ($transaction) {
+            return $transaction->getTotalPayment();
+        });
+
+        return response()->json([
+            'success' => true,
+            'has_session' => true,
+            'session_id' => $currentSession->id,
+            'session_start' => $currentSession->start_time->format('H:i'),
+            'stats' => [
+                // ✅ Totaux par méthode
+                'total_amount' => number_format($totalAmount, 0, ',', ' ').' CFA',
+                'total_cash' => number_format($totalCash, 0, ',', ' ').' CFA',
+                'total_card' => number_format($totalCard, 0, ',', ' ').' CFA',
+                'total_mobile' => number_format($totalMobile, 0, ',', ' ').' CFA',
+                'total_other' => number_format($totalOther, 0, ',', ' ').' CFA',
+                'total_refunds' => number_format($totalRefunds, 0, ',', ' ').' CFA',
+                
+                // ✅ Informations session
+                'total_transactions' => $paymentsCount,
+                'session_duration' => $currentSession->start_time->diffForHumans(now(), true),
+                'current_balance' => number_format($currentSession->current_balance, 0, ',', ' ').' CFA',
+                'initial_balance' => number_format($currentSession->initial_balance, 0, ',', ' ').' CFA',
+                
+                // ✅ Transactions du jour
+                'today_transactions' => $transactionsCount,
+                'today_amount' => number_format($transactionsAmount, 0, ',', ' ').' CFA',
+            ],
+            'updated_at' => now()->format('H:i:s'),
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Erreur live stats caisse:', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Erreur serveur',
+            'error' => config('app.debug') ? $e->getMessage() : null,
+        ], 500);
+    }
+}
     /**
-     * Rapport détaillé d'une session
-     */
-    public function report(CashierSession $cashierSession)
-    {
-        $user = Auth::user();
+ * Rapport détaillé d'une session - CORRIGÉ
+ */
+public function report(CashierSession $cashierSession)
+{
+    $user = Auth::user();
 
-        if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
-            return redirect()->route('cashier.dashboard')
-                ->with('error', 'Vous n\'avez pas accès à ce rapport.');
-        }
-
-        try {
-            $payments = Payment::where('cashier_session_id', $cashierSession->id)
-                ->with(['transaction.customer', 'user'])
-                ->orderBy('created_at', 'desc')
-                ->get();
-
-            $totalCompleted = $payments->where('status', Payment::STATUS_COMPLETED)->sum('amount');
-            $totalRefunded = $payments->where('status', Payment::STATUS_REFUNDED)->sum('amount');
-            $paymentCount = $payments->where('status', Payment::STATUS_COMPLETED)->count();
-            
-            $byMethod = $payments->where('status', Payment::STATUS_COMPLETED)
-                ->groupBy('payment_method')
-                ->map(function($group) {
-                    return [
-                        'count' => $group->count(),
-                        'total' => $group->sum('amount'),
-                        'method' => $group->first()->payment_method_label ?? 'Autre',
-                        'icon' => $group->first()->payment_method_icon ?? 'fa-money-bill-wave',
-                    ];
-                });
-
-            $startTime = $cashierSession->start_time;
-            $endTime = $cashierSession->end_time ?? now();
-            $duration = $startTime->diff($endTime);
-            $durationFormatted = $duration->format('%h heures %i minutes');
-
-            return view('cashier.sessions.report', [
-                'session' => $cashierSession,
-                'payments' => $payments,
-                'totalCompleted' => $totalCompleted,
-                'totalRefunded' => $totalRefunded,
-                'paymentCount' => $paymentCount,
-                'byMethod' => $byMethod,
-                'durationFormatted' => $durationFormatted,
-                'user' => $user,
-            ]);
-
-        } catch (\Exception $e) {
-            \Log::error('Erreur génération rapport', [
-                'session_id' => $cashierSession->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return redirect()->route('cashier.sessions.show', $cashierSession)
-                ->with('error', 'Erreur lors de la génération du rapport: ' . $e->getMessage());
-        }
+    if ($user->role !== 'Admin' && $user->role !== 'Super' && $cashierSession->user_id !== $user->id) {
+        return redirect()->route('cashier.dashboard')
+            ->with('error', 'Vous n\'avez pas accès à ce rapport.');
     }
+
+    try {
+        $payments = Payment::where('cashier_session_id', $cashierSession->id)
+            ->with(['transaction.customer', 'user'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $totalCompleted = $payments->where('status', Payment::STATUS_COMPLETED)->sum('amount');
+        $totalRefunded = $payments->where('status', Payment::STATUS_REFUNDED)->sum('amount');
+        $paymentCount = $payments->where('status', Payment::STATUS_COMPLETED)->count();
+        
+        // ✅ Utiliser les colonnes de la session
+        $byMethod = [
+            'cash' => [
+                'count' => $payments->where('status', Payment::STATUS_COMPLETED)->where('payment_method', 'cash')->count(),
+                'total' => $payments->where('status', Payment::STATUS_COMPLETED)->where('payment_method', 'cash')->sum('amount'),
+                'method' => 'Espèces',
+                'icon' => 'fa-money-bill-wave',
+                'session_total' => $cashierSession->cash_in ?? 0,
+            ],
+            'card' => [
+                'count' => $payments->where('status', Payment::STATUS_COMPLETED)->whereIn('payment_method', ['card', 'fedapay'])->count(),
+                'total' => $payments->where('status', Payment::STATUS_COMPLETED)->whereIn('payment_method', ['card', 'fedapay'])->sum('amount'),
+                'method' => 'Carte bancaire',
+                'icon' => 'fa-credit-card',
+                'session_total' => $cashierSession->card_total ?? 0,
+            ],
+            'mobile_money' => [
+                'count' => $payments->where('status', Payment::STATUS_COMPLETED)->where('payment_method', 'mobile_money')->count(),
+                'total' => $payments->where('status', Payment::STATUS_COMPLETED)->where('payment_method', 'mobile_money')->sum('amount'),
+                'method' => 'Mobile Money',
+                'icon' => 'fa-mobile-alt',
+                'session_total' => $cashierSession->mobile_total ?? 0,
+            ],
+            'other' => [
+                'count' => $payments->where('status', Payment::STATUS_COMPLETED)->whereNotIn('payment_method', ['cash', 'card', 'fedapay', 'mobile_money'])->count(),
+                'total' => $payments->where('status', Payment::STATUS_COMPLETED)->whereNotIn('payment_method', ['cash', 'card', 'fedapay', 'mobile_money'])->sum('amount'),
+                'method' => 'Autres',
+                'icon' => 'fa-circle',
+                'session_total' => $cashierSession->other_total ?? 0,
+            ],
+        ];
+
+        $startTime = $cashierSession->start_time;
+        $endTime = $cashierSession->end_time ?? now();
+        $duration = $startTime->diff($endTime);
+        $durationFormatted = $duration->format('%h heures %i minutes');
+
+        // ✅ Calculer le total des encaissements (sans remboursements)
+        $totalIncome = $cashierSession->cash_in + $cashierSession->card_total + 
+                      $cashierSession->mobile_total + $cashierSession->other_total;
+
+        return view('cashier.sessions.report', [
+            'session' => $cashierSession,
+            'payments' => $payments,
+            'totalCompleted' => $totalCompleted,
+            'totalRefunded' => $totalRefunded,
+            'paymentCount' => $paymentCount,
+            'byMethod' => $byMethod,
+            'durationFormatted' => $durationFormatted,
+            'user' => $user,
+            'totalIncome' => $totalIncome,
+            'summary' => [
+                'initial_balance' => $cashierSession->initial_balance,
+                'current_balance' => $cashierSession->current_balance,
+                'final_balance' => $cashierSession->final_balance,
+                'theoretical_balance' => $cashierSession->theoretical_balance,
+                'balance_difference' => $cashierSession->balance_difference,
+                'total_refunds' => $cashierSession->refunds_total,
+                'total_income' => $totalIncome,
+                'shift_type' => $cashierSession->shift_type,
+            ]
+        ]);
+
+    } catch (\Exception $e) {
+        \Log::error('Erreur génération rapport', [
+            'session_id' => $cashierSession->id,
+            'error' => $e->getMessage()
+        ]);
+
+        return redirect()->route('cashier.sessions.show', $cashierSession)
+            ->with('error', 'Erreur lors de la génération du rapport: ' . $e->getMessage());
+    }
+}
 }
