@@ -3,183 +3,175 @@
 <?php $__env->startSection('content'); ?>
 
 <style>
-/* ══════════════════════════════════════════════
-   VARIABLES & BASE
-══════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    --green-950: #052e16;
-    --green-900: #064e3b;
-    --green-800: #065f46;
-    --green-600: #059669;
-    --green-500: #10b981;
-    --green-400: #34d399;
-    --green-100: #d1fae5;
-    --green-50:  #ecfdf5;
+    /* ── Palette : 3 couleurs uniquement ── */
+    /* VERT */
+    --g50:  #f0faf0;
+    --g100: #d4edda;
+    --g200: #a8d5b5;
+    --g300: #72bb82;
+    --g400: #4a9e5c;
+    --g500: #2e8540;
+    --g600: #1e6b2e;
+    --g700: #155221;
+    --g800: #0d3a16;
+    --g900: #072210;
+    /* BLANC / SURFACE */
+    --white:    #ffffff;
+    --surface:  #f7f9f7;
+    --surface2: #eef3ee;
+    /* GRIS */
+    --s50:  #f8f9f8;
+    --s100: #eff0ef;
+    --s200: #dde0dd;
+    --s300: #c2c7c2;
+    --s400: #9ba09b;
+    --s500: #737873;
+    --s600: #545954;
+    --s700: #3a3e3a;
+    --s800: #252825;
+    --s900: #131513;
 
-    --amber-500: #f59e0b;
-    --amber-100: #fef3c7;
-    --amber-50:  #fffbeb;
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.05);
 
-    --blue-600:  #2563eb;
-    --blue-100:  #dbeafe;
-    --blue-50:   #eff6ff;
-
-    --slate-900: #0f172a;
-    --slate-700: #334155;
-    --slate-500: #64748b;
-    --slate-400: #94a3b8;
-    --slate-200: #e2e8f0;
-    --slate-100: #f1f5f9;
-    --slate-50:  #f8fafc;
-
-    --red-500:   #ef4444;
-    --red-100:   #fee2e2;
-
-    --shadow-sm:  0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.05);
-    --shadow-md:  0 4px 12px rgba(0,0,0,.08), 0 2px 6px rgba(0,0,0,.05);
-    --shadow-lg:  0 10px 30px rgba(0,0,0,.1),  0 4px 12px rgba(0,0,0,.06);
-    --radius-sm:  8px;
-    --radius-md:  12px;
-    --radius-lg:  16px;
-
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
     --transition: all .2s cubic-bezier(.4,0,.2,1);
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
 }
 
-/* ── Page wrapper ───────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 .ci-page {
-    padding: 28px 28px 48px;
-    background: var(--slate-50);
+    padding: 28px 32px 64px;
+    background: var(--surface);
     min-height: 100vh;
-    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-family: var(--font);
+    color: var(--s800);
 }
 
-/* ── Fade-in animation ──────────────────────── */
-@keyframes fadeUp {
-    from { opacity: 0; transform: translateY(14px); }
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
     to   { opacity: 1; transform: translateY(0); }
 }
-.anim-1 { animation: fadeUp .35s ease both; }
-.anim-2 { animation: fadeUp .35s .08s ease both; }
-.anim-3 { animation: fadeUp .35s .16s ease both; }
-.anim-4 { animation: fadeUp .35s .22s ease both; }
-.anim-5 { animation: fadeUp .35s .28s ease both; }
-.anim-6 { animation: fadeUp .35s .34s ease both; }
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(.96); }
+    to   { opacity: 1; transform: scale(1); }
+}
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+.anim-3 { animation: fadeSlide .4s .16s ease both; }
+.anim-4 { animation: fadeSlide .4s .24s ease both; }
+.anim-5 { animation: fadeSlide .4s .32s ease both; }
+.anim-6 { animation: fadeSlide .4s .40s ease both; }
 
-/* ── Breadcrumb ─────────────────────────────── */
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+.ci-header {
+    display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap;
+    gap: 16px; margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1.5px solid var(--s100);
+}
+.ci-brand { display: flex; align-items: center; gap: 14px; }
+.ci-brand-icon {
+    width: 48px; height: 48px;
+    background: var(--g600); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.1rem; flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+}
+.ci-header-title {
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--s900); line-height: 1.2; letter-spacing: -.3px;
+}
+.ci-header-title em { font-style: normal; color: var(--g600); }
+.ci-header-sub {
+    font-size: .8rem; color: var(--s400); margin-top: 3px;
+    display: flex; align-items: center; gap: 8px;
+}
+.ci-header-actions { display: flex; align-items: center; gap: 10px; }
+
+.time-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: var(--white);
+    border: 1.5px solid var(--s200);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-size: .75rem;
+    color: var(--s600);
+}
+.time-badge i {
+    color: var(--g600);
+}
+
+/* ══════════════════════════════════════════════
+   BREADCRUMB
+══════════════════════════════════════════════ */
 .ci-breadcrumb {
     display: flex; align-items: center; gap: 6px;
-    font-size: .78rem;
-    color: var(--slate-400);
-    margin-bottom: 18px;
-    flex-wrap: wrap;
+    font-size: .8rem;
+    color: var(--s400);
+    margin-bottom: 20px;
 }
-.ci-breadcrumb a { color: var(--slate-400); text-decoration: none; transition: var(--transition); }
-.ci-breadcrumb a:hover { color: var(--green-600); }
-.ci-breadcrumb .sep { color: var(--slate-300); }
-.ci-breadcrumb .current { color: var(--slate-600); font-weight: 500; }
-
-/* ── Page header ────────────────────────────── */
-.ci-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-bottom: 28px;
-}
-.ci-header-left {}
-.ci-header-title {
-    display: flex; align-items: center; gap: 12px;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--slate-900);
-    line-height: 1.2;
-    margin: 0;
-}
-.ci-header-icon {
-    width: 44px; height: 44px;
-    background: linear-gradient(135deg, var(--green-800), var(--green-600));
-    border-radius: var(--radius-sm);
-    display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 1.1rem;
-    box-shadow: 0 4px 12px rgba(5,150,105,.3);
-    flex-shrink: 0;
-}
-.ci-header-subtitle {
-    color: var(--slate-500);
-    font-size: .875rem;
-    margin: 6px 0 0 56px;
-}
-.ci-header-actions {
-    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
-}
-
-/* ── Buttons ────────────────────────────────── */
-.btn-ci {
-    display: inline-flex; align-items: center; gap: 7px;
-    padding: 9px 18px;
-    border-radius: var(--radius-sm);
-    font-size: .85rem;
-    font-weight: 500;
-    border: none; cursor: pointer;
+.ci-breadcrumb a {
+    color: var(--s400);
+    text-decoration: none;
     transition: var(--transition);
-    text-decoration: none;
-    white-space: nowrap;
-    line-height: 1;
 }
-.btn-ci-primary {
-    background: linear-gradient(135deg, var(--green-800), var(--green-600));
-    color: white;
-    box-shadow: 0 4px 12px rgba(5,150,105,.3);
+.ci-breadcrumb a:hover {
+    color: var(--g600);
 }
-.btn-ci-primary:hover {
-    background: linear-gradient(135deg, var(--green-900), var(--green-800));
-    box-shadow: 0 6px 16px rgba(5,150,105,.4);
-    transform: translateY(-1px);
-    color: white;
-    text-decoration: none;
-}
-.btn-ci-outline {
-    background: white;
-    color: var(--slate-700);
-    border: 1.5px solid var(--slate-200);
-    box-shadow: var(--shadow-sm);
-}
-.btn-ci-outline:hover {
-    background: var(--slate-50);
-    border-color: var(--slate-300);
-    color: var(--slate-900);
-    transform: translateY(-1px);
-    text-decoration: none;
+.ci-breadcrumb .sep {
+    color: var(--s300);
 }
 
-/* ── Alerts ─────────────────────────────────── */
+/* ══════════════════════════════════════════════
+   ALERTS
+══════════════════════════════════════════════ */
 .ci-alert {
-    display: flex; align-items: flex-start; gap: 12px;
-    padding: 14px 18px;
-    border-radius: var(--radius-md);
-    margin-bottom: 16px;
-    border: 1px solid transparent;
-    font-size: .875rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: var(--rl);
+    margin-bottom: 24px;
+    border: 1.5px solid transparent;
+    animation: fadeSlide .3s ease;
 }
 .ci-alert-success {
-    background: var(--green-50);
-    border-color: var(--green-100);
-    color: #065f46;
+    background: var(--g50);
+    border-color: var(--g200);
+    color: var(--g700);
 }
 .ci-alert-error {
-    background: var(--red-100);
+    background: #fee2e2;
     border-color: #fecaca;
-    color: #991b1b;
+    color: #b91c1c;
 }
-.ci-alert-icon { font-size: 1rem; margin-top: 1px; flex-shrink: 0; }
 .ci-alert-close {
-    margin-left: auto; background: none; border: none;
-    cursor: pointer; color: inherit; opacity: .5;
-    padding: 0 4px; font-size: 1rem; line-height: 1;
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: currentColor;
+    opacity: .6;
+    cursor: pointer;
+    font-size: 1rem;
     transition: var(--transition);
 }
-.ci-alert-close:hover { opacity: 1; }
+.ci-alert-close:hover {
+    opacity: 1;
+}
 
 /* ══════════════════════════════════════════════
    STAT CARDS
@@ -194,78 +186,85 @@
 @media (max-width: 600px)  { .stats-grid { grid-template-columns: 1fr; } }
 
 .stat-card {
-    background: white;
-    border-radius: var(--radius-md);
+    background: var(--white);
+    border-radius: var(--rl);
     padding: 20px 22px;
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--slate-200);
+    border: 1.5px solid var(--s100);
+    box-shadow: var(--shadow-xs);
     transition: var(--transition);
     position: relative;
     overflow: hidden;
 }
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--card-accent, var(--green-500));
-    border-radius: 4px 4px 0 0;
-}
 .stat-card:hover {
     transform: translateY(-3px);
+    border-color: var(--g200);
     box-shadow: var(--shadow-md);
 }
-.stat-card--arrivals   { --card-accent: var(--blue-600); }
-.stat-card--staying    { --card-accent: var(--green-500); }
-.stat-card--departures { --card-accent: var(--amber-500); }
-.stat-card--available  { --card-accent: #8b5cf6; }
+.stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent, var(--g400));
+    border-radius: 0 0 var(--rl) var(--rl);
+}
+.stat-card--arrivals   { --accent: var(--g400); }
+.stat-card--staying    { --accent: var(--g600); }
+.stat-card--departures { --accent: var(--g300); }
+.stat-card--available  { --accent: var(--s400); }
 
 .stat-card-top {
-    display: flex; justify-content: space-between; align-items: flex-start;
-    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
 }
 .stat-card-label {
-    font-size: .72rem;
-    font-weight: 700;
+    font-size: .7rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: .6px;
-    color: var(--slate-500);
-    margin-bottom: 6px;
+    letter-spacing: .5px;
+    color: var(--s400);
 }
 .stat-card-value {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--slate-900);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--s900);
     line-height: 1;
+    font-family: var(--mono);
+    letter-spacing: -1px;
 }
 .stat-card-icon {
-    width: 46px; height: 46px;
+    width: 44px; height: 44px;
     border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
     flex-shrink: 0;
-    opacity: .85;
 }
-.stat-card--arrivals .stat-card-icon   { background: var(--blue-50);  color: var(--blue-600); }
-.stat-card--staying .stat-card-icon    { background: var(--green-50); color: var(--green-600); }
-.stat-card--departures .stat-card-icon { background: var(--amber-50); color: var(--amber-500); }
-.stat-card--available .stat-card-icon  { background: #f5f3ff;         color: #7c3aed; }
+.stat-card--arrivals .stat-card-icon   { background: var(--g50); color: var(--g600); }
+.stat-card--staying .stat-card-icon    { background: var(--g100); color: var(--g700); }
+.stat-card--departures .stat-card-icon { background: var(--g50); color: var(--g500); }
+.stat-card--available .stat-card-icon  { background: var(--s100); color: var(--s500); }
 
 .stat-card-meta {
-    font-size: .78rem;
-    color: var(--slate-400);
-    display: flex; align-items: center; gap: 5px;
-    border-top: 1px solid var(--slate-100);
-    padding-top: 10px;
-    margin-top: 10px;
+    font-size: .75rem;
+    color: var(--s400);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-top: 1px solid var(--s100);
+    padding-top: 12px;
+    margin-top: 12px;
 }
 
 /* ══════════════════════════════════════════════
-   MAIN LAYOUT
+   MAIN GRID
 ══════════════════════════════════════════════ */
 .ci-main-grid {
     display: grid;
-    grid-template-columns: 1fr 360px;
+    grid-template-columns: 1fr 340px;
     gap: 20px;
     align-items: start;
 }
@@ -277,79 +276,92 @@
    CARDS
 ══════════════════════════════════════════════ */
 .ci-card {
-    background: white;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
-    border: 1px solid var(--slate-200);
+    background: var(--white);
+    border-radius: var(--rxl);
+    border: 1.5px solid var(--s100);
     overflow: hidden;
     margin-bottom: 20px;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+.ci-card:hover {
+    border-color: var(--g200);
+    box-shadow: var(--shadow-md);
 }
 .ci-card:last-child { margin-bottom: 0; }
 
 .ci-card-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 22px;
-    border-bottom: 1px solid var(--slate-100);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1.5px solid var(--s100);
+    background: var(--white);
+    flex-wrap: wrap;
     gap: 12px;
 }
 .ci-card-title {
-    display: flex; align-items: center; gap: 9px;
-    font-size: .9rem;
-    font-weight: 700;
-    color: var(--slate-800);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--s800);
     margin: 0;
 }
-.ci-card-title-dot {
-    width: 9px; height: 9px;
-    border-radius: 50%;
-    flex-shrink: 0;
+.ci-card-title i {
+    color: var(--g600);
 }
 .ci-card-badge {
-    font-size: .72rem;
-    font-weight: 700;
-    padding: 3px 9px;
-    border-radius: 20px;
-    white-space: nowrap;
+    background: var(--g100);
+    color: var(--g700);
+    font-size: .7rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 100px;
 }
 
-/* ── Badge colors ───────────────────────────── */
-.badge-green  { background: var(--green-100); color: #065f46; }
-.badge-amber  { background: var(--amber-100); color: #92400e; }
-.badge-blue   { background: var(--blue-100);  color: #1e40af; }
-.badge-purple { background: #f5f3ff;          color: #5b21b6; }
-.badge-slate  { background: var(--slate-100); color: var(--slate-700); }
-
 /* ══════════════════════════════════════════════
-   DATE GROUP (upcoming reservations)
+   DATE GROUPS (arrivées)
 ══════════════════════════════════════════════ */
 .date-group {
     padding: 18px 22px;
-    border-bottom: 1px solid var(--slate-100);
+    border-bottom: 1.5px solid var(--s100);
 }
 .date-group:last-child { border-bottom: none; }
 
 .date-group-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 14px;
-    flex-wrap: wrap; gap: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 .date-group-label {
-    display: flex; align-items: center; gap: 9px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: .8rem;
-    font-weight: 700;
+    font-weight: 600;
+    color: var(--s600);
     text-transform: uppercase;
     letter-spacing: .5px;
-    color: var(--slate-600);
+}
+.date-group-label i {
+    color: var(--g500);
 }
 .date-group-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    background: var(--blue-50);
-    color: var(--blue-600);
+    background: var(--g50);
+    color: var(--g700);
+    border: 1.5px solid var(--g200);
+    padding: 4px 12px;
+    border-radius: 100px;
     font-size: .7rem;
-    font-weight: 700;
-    padding: 2px 10px;
-    border-radius: 20px;
-    border: 1px solid var(--blue-100);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 /* ── Reservation row ────────────────────────── */
@@ -358,355 +370,515 @@
     grid-template-columns: 1fr auto auto auto auto;
     align-items: center;
     gap: 12px;
-    padding: 12px 14px;
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--slate-100);
+    padding: 14px 16px;
+    border-radius: var(--rl);
+    border: 1.5px solid var(--s100);
     margin-bottom: 8px;
     transition: var(--transition);
-    background: var(--slate-50);
+    background: var(--surface);
 }
 .res-row:last-child { margin-bottom: 0; }
 .res-row:hover {
-    background: white;
-    border-color: var(--green-100);
-    box-shadow: var(--shadow-sm);
+    background: var(--white);
+    border-color: var(--g200);
     transform: translateX(2px);
+    box-shadow: var(--shadow-sm);
 }
 
-.res-guest { min-width: 0; }
+.res-guest {}
 .res-guest-name {
     font-size: .88rem;
     font-weight: 600;
-    color: var(--slate-900);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    color: var(--s900);
 }
 .res-guest-phone {
-    font-size: .75rem;
-    color: var(--slate-400);
-    margin-top: 2px;
+    font-size: .72rem;
+    color: var(--s400);
+    margin-top: 3px;
 }
 
 .res-room-badge {
-    background: var(--slate-100);
-    color: var(--slate-700);
-    font-size: .78rem;
+    background: var(--s100);
+    color: var(--s700);
     font-weight: 600;
-    padding: 4px 10px;
-    border-radius: 6px;
-    white-space: nowrap;
+    padding: 5px 12px;
+    border-radius: var(--r);
+    font-size: .8rem;
+    display: inline-block;
+    border: 1.5px solid var(--s200);
+    font-family: var(--mono);
+}
+.res-room-type {
+    font-size: .68rem;
+    color: var(--s400);
+    text-align: center;
+    margin-top: 3px;
 }
 
 .res-time {
     text-align: center;
-    min-width: 56px;
+    min-width: 70px;
 }
 .res-time-val {
-    font-size: .9rem; font-weight: 700; color: var(--slate-800);
+    font-size: .9rem;
+    font-weight: 700;
+    color: var(--s800);
     display: block;
 }
 .res-time-label {
-    font-size: .68rem; color: var(--slate-400); margin-top: 1px;
+    font-size: .68rem;
+    color: var(--s400);
 }
 
 .res-nights {
-    text-align: center; min-width: 52px;
+    text-align: center;
+    min-width: 70px;
 }
 .res-nights-val {
-    font-size: .88rem; font-weight: 600; color: var(--slate-700);
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--s700);
     display: block;
 }
-.res-nights-label { font-size: .68rem; color: var(--slate-400); margin-top: 1px; }
+.res-nights-label {
+    font-size: .68rem;
+    color: var(--s400);
+}
 
-.res-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.date-indicator {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: .62rem;
+    font-weight: 600;
+    margin-top: 3px;
+}
+.di-upcoming { background: var(--g100); color: var(--g700); }
+.di-waiting  { background: var(--g50); color: var(--g600); }
 
 /* ── Action buttons ─────────────────────────── */
 .btn-res {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 6px 11px;
-    border-radius: 6px;
-    font-size: .78rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: var(--r);
+    font-size: .75rem;
     font-weight: 500;
-    border: 1px solid transparent;
+    border: 1.5px solid transparent;
     cursor: pointer;
-    text-decoration: none;
     transition: var(--transition);
+    text-decoration: none;
     white-space: nowrap;
-    line-height: 1;
 }
-.btn-res:hover { transform: translateY(-1px); text-decoration: none; }
 .btn-res-checkin {
-    background: linear-gradient(135deg, var(--green-800), var(--green-600));
-    color: white; border-color: var(--green-700);
-    box-shadow: 0 2px 6px rgba(5,150,105,.25);
+    background: var(--g600);
+    color: white;
+    border-color: var(--g700);
 }
 .btn-res-checkin:hover {
-    box-shadow: 0 4px 10px rgba(5,150,105,.35);
-    color: white;
+    background: var(--g700);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(46,133,64,.25);
 }
 .btn-res-quick {
-    background: white; color: var(--green-700);
-    border-color: var(--green-200);
+    background: var(--white);
+    color: var(--g600);
+    border-color: var(--g200);
 }
-.btn-res-quick:hover { background: var(--green-50); color: var(--green-800); border-color: var(--green-300); }
+.btn-res-quick:hover {
+    background: var(--g50);
+    color: var(--g700);
+    border-color: var(--g300);
+    transform: translateY(-1px);
+}
 .btn-res-view {
-    background: white; color: var(--slate-600);
-    border-color: var(--slate-200);
+    background: var(--white);
+    color: var(--s500);
+    border-color: var(--s200);
 }
-.btn-res-view:hover { background: var(--slate-50); color: var(--slate-900); border-color: var(--slate-300); }
-
-/* ── Empty state ────────────────────────────── */
-.ci-empty {
-    display: flex; flex-direction: column; align-items: center;
-    padding: 48px 24px; text-align: center;
+.btn-res-view:hover {
+    background: var(--s50);
+    color: var(--s700);
+    border-color: var(--s300);
+    transform: translateY(-1px);
 }
-.ci-empty-icon {
-    width: 72px; height: 72px;
-    background: var(--slate-100);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.8rem; color: var(--slate-300);
-    margin-bottom: 16px;
-}
-.ci-empty-title { font-size: .95rem; font-weight: 600; color: var(--slate-700); margin-bottom: 6px; }
-.ci-empty-text  { font-size: .82rem; color: var(--slate-400); max-width: 260px; }
 
 /* ══════════════════════════════════════════════
    RIGHT COLUMN — Guest cards
 ══════════════════════════════════════════════ */
 .guest-card {
-    display: flex; flex-direction: column;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--slate-100);
+    padding: 16px 18px;
+    border-bottom: 1.5px solid var(--s100);
     transition: var(--transition);
-    gap: 10px;
 }
 .guest-card:last-child { border-bottom: none; }
-.guest-card:hover { background: var(--slate-50); }
+.guest-card:hover {
+    background: var(--g50);
+}
 
-.guest-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.guest-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 10px;
+}
 .guest-card-name {
-    font-size: .875rem;
+    font-size: .88rem;
     font-weight: 600;
-    color: var(--slate-900);
-    line-height: 1.2;
+    color: var(--s900);
 }
 .guest-card-meta {
-    font-size: .75rem; color: var(--slate-400);
-    display: flex; align-items: center; gap: 5px; margin-top: 3px;
+    font-size: .72rem;
+    color: var(--s400);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
     flex-wrap: wrap;
 }
-.guest-card-meta span { display: flex; align-items: center; gap: 4px; }
-.guest-card-room {
-    font-size: .78rem; font-weight: 700;
-    background: var(--slate-100); color: var(--slate-600);
-    padding: 2px 8px; border-radius: 5px; flex-shrink: 0;
+.guest-card-room-badge {
+    background: var(--s100);
+    color: var(--s600);
+    padding: 3px 8px;
+    border-radius: 5px;
+    font-weight: 600;
+    font-size: .7rem;
 }
+.unpaid-alert {
+    background: #fee2e2;
+    border-left: 3px solid #b91c1c;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: .7rem;
+    margin-top: 6px;
+    color: #b91c1c;
+}
+
 .guest-card-footer {
-    display: flex; justify-content: space-between; align-items: center; gap: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
 }
 .guest-card-departure {
-    font-size: .75rem; color: var(--slate-500);
-    display: flex; align-items: center; gap: 5px;
+    font-size: .72rem;
+    color: var(--s500);
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
-.guest-card-actions { display: flex; gap: 6px; }
+.guest-card-actions {
+    display: flex;
+    gap: 5px;
+}
 
 .btn-ghost-sm {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 30px; height: 30px;
+    width: 30px;
+    height: 30px;
     border-radius: 6px;
-    border: 1px solid var(--slate-200);
-    background: white;
-    color: var(--slate-500);
-    font-size: .8rem;
-    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1.5px solid var(--s200);
+    background: var(--white);
+    color: var(--s500);
+    font-size: .75rem;
     transition: var(--transition);
     text-decoration: none;
+    cursor: pointer;
 }
-.btn-ghost-sm:hover { border-color: var(--slate-300); color: var(--slate-900); background: var(--slate-50); transform: translateY(-1px); }
-.btn-ghost-sm-green:hover { border-color: var(--green-200); color: var(--green-700); background: var(--green-50); }
+.btn-ghost-sm:hover {
+    background: var(--g50);
+    border-color: var(--g300);
+    color: var(--g700);
+    transform: translateY(-1px);
+}
 
-/* Departure "urgent" tag */
-.tag-urgent {
-    display: inline-flex; align-items: center; gap: 5px;
-    background: var(--amber-50); color: #92400e;
-    font-size: .68rem; font-weight: 700;
-    padding: 2px 7px; border-radius: 5px;
-    border: 1px solid var(--amber-100);
-}
 .tag-largesse {
-    background: var(--green-50); color: var(--green-700);
-    border-color: var(--green-200);
+    background: var(--g100);
+    color: var(--g700);
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: .6rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+.tag-urgent {
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: .6rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
 }
 
-/* ── Departure row ──────────────────────────── */
+/* ══════════════════════════════════════════════
+   DEPARTURE ROWS
+══════════════════════════════════════════════ */
 .dep-row {
-    display: flex; justify-content: space-between; align-items: center;
-    padding: 13px 16px;
-    border-bottom: 1px solid var(--slate-100);
-    gap: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1.5px solid var(--s100);
+    gap: 12px;
     transition: var(--transition);
 }
 .dep-row:last-child { border-bottom: none; }
-.dep-row:hover { background: var(--amber-50); }
-
+.dep-row:hover {
+    background: var(--g50);
+}
 .dep-row-info {}
-.dep-row-name { font-size: .875rem; font-weight: 600; color: var(--slate-900); }
-.dep-row-room { font-size: .75rem; color: var(--slate-400); margin-top: 2px; display: flex; align-items: center; gap: 4px; }
-.dep-row-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.dep-row-name {
+    font-size: .88rem;
+    font-weight: 600;
+    color: var(--s900);
+}
+.dep-row-room {
+    font-size: .72rem;
+    color: var(--s400);
+    margin-top: 3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.dep-row-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
 .dep-time-badge {
-    font-size: .8rem; font-weight: 700;
-    background: var(--amber-100); color: #92400e;
-    padding: 4px 9px; border-radius: 6px;
-    border: 1px solid #fde68a;
+    background: var(--s100);
+    color: var(--s700);
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: var(--r);
+    font-size: .78rem;
+    border: 1.5px solid var(--s200);
 }
 .dep-time-badge-largesse {
-    background: var(--green-100); color: var(--green-800);
-    border-color: var(--green-200);
+    background: var(--g100);
+    color: var(--g700);
+    border-color: var(--g200);
 }
-.dep-actions { display: flex; gap: 6px; }
+.dep-actions {
+    display: flex;
+    gap: 5px;
+}
 
 .btn-dep-invoice {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 10px; border-radius: 6px; font-size: .75rem; font-weight: 500;
-    border: 1px solid var(--slate-200); background: white; color: var(--slate-600);
-    cursor: pointer; text-decoration: none; transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: var(--r);
+    font-size: .72rem;
+    font-weight: 500;
+    border: 1.5px solid var(--s200);
+    background: var(--white);
+    color: var(--s500);
+    text-decoration: none;
+    transition: var(--transition);
 }
-.btn-dep-invoice:hover { background: var(--slate-50); border-color: var(--slate-300); color: var(--slate-900); text-decoration: none; }
+.btn-dep-invoice:hover {
+    background: var(--s50);
+    border-color: var(--s300);
+    color: var(--s700);
+    transform: translateY(-1px);
+}
 .btn-dep-checkout {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 10px; border-radius: 6px; font-size: .75rem; font-weight: 600;
-    border: 1px solid var(--green-200); background: var(--green-50); color: var(--green-700);
-    cursor: pointer; text-decoration: none; transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 12px;
+    border-radius: var(--r);
+    font-size: .72rem;
+    font-weight: 600;
+    border: 1.5px solid var(--g200);
+    background: var(--g50);
+    color: var(--g700);
+    text-decoration: none;
+    transition: var(--transition);
 }
 .btn-dep-checkout:hover {
-    background: linear-gradient(135deg, var(--green-800), var(--green-600));
-    color: white; border-color: transparent;
-    box-shadow: 0 3px 8px rgba(5,150,105,.3);
+    background: var(--g600);
+    border-color: var(--g600);
+    color: white;
     transform: translateY(-1px);
 }
 .btn-dep-checkout-late {
-    background: var(--amber-50); color: #92400e;
-    border-color: var(--amber-200);
+    background: #fff7ed;
+    border-color: #fed7aa;
+    color: #c2410c;
 }
 .btn-dep-checkout-late:hover {
-    background: linear-gradient(135deg, #b45309, #d97706);
+    background: #c2410c;
+    border-color: #c2410c;
     color: white;
 }
 
-/* ── Card footer ────────────────────────────── */
+/* ══════════════════════════════════════════════
+   CARD FOOTER
+══════════════════════════════════════════════ */
 .ci-card-footer {
-    padding: 12px 18px;
-    border-top: 1px solid var(--slate-100);
-    background: var(--slate-50);
+    padding: 14px 22px;
+    border-top: 1.5px solid var(--s100);
+    background: var(--surface);
     text-align: center;
 }
 .btn-ci-footer {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 16px; border-radius: var(--radius-sm);
-    font-size: .78rem; font-weight: 500;
-    color: var(--green-700); background: transparent;
-    border: 1px solid var(--green-200);
-    text-decoration: none; cursor: pointer; transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    border-radius: var(--r);
+    font-size: .78rem;
+    font-weight: 500;
+    color: var(--g700);
+    background: var(--white);
+    border: 1.5px solid var(--g200);
+    text-decoration: none;
+    transition: var(--transition);
 }
 .btn-ci-footer:hover {
-    background: var(--green-50);
-    border-color: var(--green-300);
-    color: var(--green-800);
-    text-decoration: none;
+    background: var(--g50);
+    border-color: var(--g300);
+    color: var(--g800);
+    transform: translateY(-1px);
 }
 
-/* ── Toast / feedback overlay ───────────────── */
+/* ══════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════ */
+.ci-empty {
+    text-align: center;
+    padding: 48px 24px;
+}
+.ci-empty-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--g50);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--g300);
+    margin: 0 auto 16px;
+    border: 2px solid var(--g100);
+}
+.ci-empty-title {
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--s700);
+    margin-bottom: 6px;
+}
+.ci-empty-text {
+    font-size: .8rem;
+    color: var(--s400);
+    margin-bottom: 18px;
+}
+
+/* ══════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════ */
 .ci-toast-wrap {
-    position: fixed; top: 24px; right: 24px; z-index: 9999;
-    display: flex; flex-direction: column; gap: 8px;
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     pointer-events: none;
 }
 .ci-toast {
-    display: flex; align-items: center; gap: 10px;
-    padding: 13px 18px;
-    background: white;
-    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    background: var(--white);
+    border-radius: var(--rl);
     box-shadow: var(--shadow-lg);
-    border-left: 4px solid var(--green-500);
-    font-size: .875rem; font-weight: 500;
-    color: var(--slate-800);
+    border-left: 4px solid var(--g600);
+    font-size: .8rem;
+    font-weight: 500;
+    color: var(--s800);
     pointer-events: auto;
     animation: slideIn .25s ease;
-    min-width: 280px; max-width: 380px;
+    min-width: 280px;
+    max-width: 380px;
 }
-.ci-toast-error { border-left-color: var(--red-500); }
+.ci-toast-error {
+    border-left-color: #b91c1c;
+}
 @keyframes slideIn {
     from { opacity: 0; transform: translateX(20px); }
     to   { opacity: 1; transform: translateX(0); }
 }
-
-/* ── Time badge ─────────────────────────────── */
-.time-badge {
-    background: var(--slate-100);
-    color: var(--slate-600);
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: .7rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    margin-left: 10px;
-}
 </style>
 
 <div class="ci-page">
-    <!-- Toast container -->
+
+    
     <div class="ci-toast-wrap" id="toast-container"></div>
 
-    <!-- Breadcrumb -->
-    <nav class="ci-breadcrumb anim-1">
+    
+    <div class="ci-breadcrumb anim-1">
         <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Check-in</span>
-    </nav>
+    </div>
 
-    <!-- Header -->
+    
     <div class="ci-header anim-2">
-        <div class="ci-header-left">
-            <h1 class="ci-header-title">
-                <span class="ci-header-icon"><i class="fas fa-door-open"></i></span>
-                Gestion des Check-in
-            </h1>
-            <p class="ci-header-subtitle">
-                Arrivées, séjours en cours et départs du <?php echo e($today->format('d/m/Y')); ?>
-
-                <span class="time-badge">
-                    <i class="fas fa-clock"></i> Check-in 12h | Check-out 12h (largesse 14h)
-                </span>
-            </p>
+        <div class="ci-brand">
+            <div class="ci-brand-icon"><i class="fas fa-door-open"></i></div>
+            <div>
+                <h1 class="ci-header-title">Gestion des <em>Check-in</em></h1>
+                <div class="ci-header-sub">
+                    <span>Arrivées, séjours et départs</span>
+                    <span class="time-badge">
+                        <i class="fas fa-clock"></i> Check-in 12h | Check-out 12h (largesse 14h)
+                    </span>
+                </div>
+            </div>
         </div>
         <div class="ci-header-actions">
-            <a href="<?php echo e(route('checkin.search')); ?>" class="btn-ci btn-ci-outline">
-                <i class="fas fa-search"></i> Rechercher
+            <a href="<?php echo e(route('checkin.search')); ?>" class="btn-db btn-db-ghost">
+                <i class="fas fa-search fa-xs"></i> Rechercher
             </a>
-            <a href="<?php echo e(route('checkin.direct')); ?>" class="btn-ci btn-ci-primary">
-                <i class="fas fa-user-plus"></i> Check-in Direct
+            <a href="<?php echo e(route('checkin.direct')); ?>" class="btn-db btn-db-primary">
+                <i class="fas fa-user-plus fa-xs"></i> Check-in Direct
             </a>
         </div>
     </div>
 
-    <!-- Alerts session -->
+    
     <?php if(session('success')): ?>
     <div class="ci-alert ci-alert-success anim-2">
-        <span class="ci-alert-icon"><i class="fas fa-check-circle"></i></span>
+        <i class="fas fa-check-circle"></i>
         <span><?php echo session('success'); ?></span>
         <button class="ci-alert-close" onclick="this.parentElement.remove()">✕</button>
     </div>
     <?php endif; ?>
     <?php if(session('error')): ?>
     <div class="ci-alert ci-alert-error anim-2">
-        <span class="ci-alert-icon"><i class="fas fa-exclamation-circle"></i></span>
+        <i class="fas fa-exclamation-circle"></i>
         <span><?php echo e(session('error')); ?></span>
         <button class="ci-alert-close" onclick="this.parentElement.remove()">✕</button>
     </div>
     <?php endif; ?>
 
-    <!-- ─── Stat Cards ──────────────────────── -->
+    
     <div class="stats-grid anim-3">
         <div class="stat-card stat-card--arrivals">
             <div class="stat-card-top">
@@ -717,7 +889,7 @@
                 <div class="stat-card-icon"><i class="fas fa-calendar-day"></i></div>
             </div>
             <div class="stat-card-meta">
-                <i class="fas fa-clock"></i>
+                <i class="fas fa-clock fa-xs"></i>
                 Prévues pour <?php echo e($today->format('d/m/Y')); ?>
 
             </div>
@@ -732,7 +904,7 @@
                 <div class="stat-card-icon"><i class="fas fa-bed"></i></div>
             </div>
             <div class="stat-card-meta">
-                <i class="fas fa-hotel"></i>
+                <i class="fas fa-hotel fa-xs"></i>
                 Clients dans l'hôtel
             </div>
         </div>
@@ -746,7 +918,7 @@
                 <div class="stat-card-icon"><i class="fas fa-sign-out-alt"></i></div>
             </div>
             <div class="stat-card-meta">
-                <i class="fas fa-door-open"></i>
+                <i class="fas fa-door-open fa-xs"></i>
                 Chambres à libérer
             </div>
         </div>
@@ -760,25 +932,24 @@
                 <div class="stat-card-icon"><i class="fas fa-door-closed"></i></div>
             </div>
             <div class="stat-card-meta">
-                <i class="fas fa-check-circle"></i>
+                <i class="fas fa-check-circle fa-xs"></i>
                 Prêtes à l'accueil
             </div>
         </div>
     </div>
 
-    <!-- ─── Main Grid ──────────────────────── -->
+    
     <div class="ci-main-grid">
 
-        <!-- LEFT — Upcoming reservations -->
+        
         <div class="anim-4">
             <div class="ci-card">
                 <div class="ci-card-header">
-                    <h2 class="ci-card-title">
-                        <span class="ci-card-title-dot" style="background:var(--blue-600)"></span>
+                    <h3 class="ci-card-title">
+                        <i class="fas fa-calendar-check"></i>
                         Réservations à venir
-                        <span style="font-size:.75rem;font-weight:400;color:var(--slate-400)">Aujourd'hui & Demain</span>
-                    </h2>
-                    <span class="ci-card-badge badge-blue"><?php echo e($upcomingReservations->count()); ?> groupe(s)</span>
+                    </h3>
+                    <span class="ci-card-badge"><?php echo e($upcomingReservations->count()); ?> groupe(s)</span>
                 </div>
 
                 <?php if($upcomingReservations->isEmpty()): ?>
@@ -786,8 +957,8 @@
                     <div class="ci-empty-icon"><i class="fas fa-calendar-times"></i></div>
                     <p class="ci-empty-title">Aucune arrivée prévue</p>
                     <p class="ci-empty-text">Pas de réservations pour aujourd'hui ni demain</p>
-                    <a href="<?php echo e(route('checkin.search')); ?>" class="btn-ci btn-ci-primary" style="margin-top:16px;font-size:.82rem;">
-                        <i class="fas fa-search"></i> Chercher des réservations
+                    <a href="<?php echo e(route('checkin.search')); ?>" class="btn-db btn-db-primary" style="margin-top:8px;">
+                        <i class="fas fa-search fa-xs"></i> Chercher des réservations
                     </a>
                 </div>
                 <?php else: ?>
@@ -795,12 +966,12 @@
                     <div class="date-group">
                         <div class="date-group-header">
                             <span class="date-group-label">
-                                <i class="fas fa-calendar-day" style="color:var(--blue-600)"></i>
+                                <i class="fas fa-calendar-day"></i>
                                 <?php echo e(\Carbon\Carbon::parse($date)->translatedFormat('l d F Y')); ?>
 
                             </span>
                             <span class="date-group-pill">
-                                <i class="fas fa-ticket-alt"></i>
+                                <i class="fas fa-ticket-alt fa-xs"></i>
                                 <?php echo e($reservations->count()); ?> réservation<?php echo e($reservations->count() > 1 ? 's' : ''); ?>
 
                             </span>
@@ -809,7 +980,6 @@
                         <?php $__currentLoopData = $reservations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $transaction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <?php
                             $now = \Carbon\Carbon::now();
-                            $today = \Carbon\Carbon::today();
                             $checkIn = \Carbon\Carbon::parse($transaction->check_in);
                             $checkInDate = $checkIn->copy()->startOfDay();
                             $checkInTime = $checkIn->copy()->setTime(12, 0, 0);
@@ -824,40 +994,35 @@
                                            !$now->isSameDay($checkInDate);
                         ?>
                         <div class="res-row">
-                            <!-- Guest -->
                             <div class="res-guest">
                                 <div class="res-guest-name"><?php echo e($transaction->customer->name); ?></div>
                                 <div class="res-guest-phone">
-                                    <i class="fas fa-phone fa-xs" style="color:var(--slate-300)"></i>
+                                    <i class="fas fa-phone fa-xs" style="color:var(--s300);"></i>
                                     <?php echo e($transaction->customer->phone); ?>
 
                                 </div>
                             </div>
 
-                            <!-- Room -->
                             <div style="text-align:center;">
-                                <span class="res-room-badge">N° <?php echo e($transaction->room->number); ?></span>
-                                <div style="font-size:.68rem;color:var(--slate-400);margin-top:3px;"><?php echo e($transaction->room->type->name ?? 'N/A'); ?></div>
+                                <span class="res-room-badge"><?php echo e($transaction->room->number); ?></span>
+                                <div class="res-room-type"><?php echo e($transaction->room->type->name ?? 'N/A'); ?></div>
                             </div>
 
-                            <!-- Time -->
                             <div class="res-time">
                                 <span class="res-time-val">12:00</span>
                                 <span class="res-time-label">Arrivée</span>
                                 <?php if($now->lt($checkInDate)): ?>
-                                    <div class="date-indicator upcoming" style="font-size:.6rem;background:var(--amber-100);color:#92400e;padding:2px 4px;border-radius:4px;margin-top:2px;">J-<?php echo e($now->diffInDays($checkInDate)); ?></div>
+                                    <div class="date-indicator di-upcoming">J-<?php echo e($now->diffInDays($checkInDate)); ?></div>
                                 <?php elseif($checkinTooEarly): ?>
-                                    <div class="date-indicator upcoming" style="font-size:.6rem;background:var(--blue-50);color:var(--blue-700);padding:2px 4px;border-radius:4px;margin-top:2px;">Attente 12h</div>
+                                    <div class="date-indicator di-waiting">Attente 12h</div>
                                 <?php endif; ?>
                             </div>
 
-                            <!-- Nights -->
                             <div class="res-nights">
                                 <span class="res-nights-val"><?php echo e($transaction->nights); ?>n</span>
                                 <span class="res-nights-label">→ <?php echo e($transaction->check_out->format('d/m')); ?></span>
                             </div>
 
-                            <!-- Actions -->
                             <div class="res-actions">
                                 <?php if($canCheckin): ?>
                                 <form action="<?php echo e(route('transaction.mark-arrived', $transaction)); ?>" method="POST" class="d-inline">
@@ -867,8 +1032,8 @@
                                     </button>
                                 </form>
                                 <?php elseif($checkinTooEarly): ?>
-                                <span class="btn-res btn-res-checkin" style="opacity:0.5;cursor:not-allowed;" title="Check-in possible à partir de 12h aujourd'hui">
-                                    <i class="fas fa-clock"></i> Check-in (12h)
+                                <span class="btn-res btn-res-checkin" style="opacity:0.5;cursor:not-allowed;" title="Check-in possible à partir de 12h">
+                                    <i class="fas fa-clock"></i> Check-in
                                 </span>
                                 <?php elseif($checkinFuture): ?>
                                 <span class="btn-res btn-res-checkin" style="opacity:0.5;cursor:not-allowed;" title="Arrivée prévue le <?php echo e($checkInDate->format('d/m/Y')); ?>">
@@ -888,34 +1053,32 @@
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                <?php endif; ?>
 
-                <?php if($upcomingReservations->isNotEmpty()): ?>
-                <div class="ci-card-footer">
-                    <a href="<?php echo e(route('transaction.index')); ?>?status=reservation" class="btn-ci-footer">
-                        <i class="fas fa-list"></i> Voir toutes les réservations
-                    </a>
-                </div>
+                    <div class="ci-card-footer">
+                        <a href="<?php echo e(route('transaction.index')); ?>?status=reservation" class="btn-ci-footer">
+                            <i class="fas fa-list fa-xs"></i> Voir toutes les réservations
+                        </a>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>
 
-        <!-- RIGHT column -->
+        
         <div class="anim-5">
 
-            <!-- Clients dans l'hôtel -->
+            
             <div class="ci-card">
                 <div class="ci-card-header">
-                    <h2 class="ci-card-title">
-                        <span class="ci-card-title-dot" style="background:var(--green-500)"></span>
+                    <h3 class="ci-card-title">
+                        <i class="fas fa-users"></i>
                         Dans l'hôtel
-                    </h2>
-                    <span class="ci-card-badge badge-green"><?php echo e($activeGuests->count()); ?> client<?php echo e($activeGuests->count() > 1 ? 's' : ''); ?></span>
+                    </h3>
+                    <span class="ci-card-badge"><?php echo e($activeGuests->count()); ?> client<?php echo e($activeGuests->count() > 1 ? 's' : ''); ?></span>
                 </div>
 
                 <?php if($activeGuests->isEmpty()): ?>
                 <div class="ci-empty" style="padding: 32px 20px;">
-                    <div class="ci-empty-icon" style="width:52px;height:52px;font-size:1.3rem;"><i class="fas fa-users-slash"></i></div>
+                    <div class="ci-empty-icon" style="width:56px;height:56px;font-size:1.4rem;"><i class="fas fa-users-slash"></i></div>
                     <p class="ci-empty-title" style="font-size:.85rem;">Aucun client en ce moment</p>
                 </div>
                 <?php else: ?>
@@ -939,27 +1102,25 @@
                                 <div class="guest-card-name"><?php echo e($transaction->customer->name); ?></div>
                                 <div class="guest-card-meta">
                                     <span><i class="fas fa-door-closed"></i> Ch. <?php echo e($transaction->room->number); ?></span>
-                                    <span style="color:var(--slate-300)">·</span>
-                                    <span><i class="fas fa-clock"></i> <?php echo e($transaction->check_in->diffForHumans()); ?></span>
+                                    <span class="guest-card-room-badge"><?php echo e($transaction->room->type->name ?? 'N/A'); ?></span>
                                 </div>
                                 <?php if(!$isFullyPaid): ?>
-                                <div class="unpaid-alert" style="background:var(--red-100);padding:2px 8px;border-radius:4px;margin-top:4px;font-size:.7rem;">
-                                    <i class="fas fa-exclamation-triangle text-danger me-1"></i>
-                                    <span class="text-danger">Solde: <?php echo e(number_format($remaining, 0, ',', ' ')); ?> CFA</span>
+                                <div class="unpaid-alert">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Solde: <?php echo e(number_format($remaining, 0, ',', ' ')); ?> FCFA
                                 </div>
                                 <?php endif; ?>
                             </div>
-                            <span class="guest-card-room"><?php echo e($transaction->room->type->name ?? 'N/A'); ?></span>
                         </div>
                         <div class="guest-card-footer">
                             <div class="guest-card-departure">
-                                <i class="fas fa-calendar-minus" style="color:var(--amber-500)"></i>
+                                <i class="fas fa-calendar-minus" style="color:var(--g400);"></i>
                                 Départ <?php echo e($transaction->check_out->format('d/m')); ?> à 12h00
                                 <?php if($isInLargess): ?>
-                                    <span class="tag-urgent tag-largesse" style="margin-left:5px;">largesse</span>
+                                    <span class="tag-largesse"><i class="fas fa-gift fa-xs"></i> largesse</span>
                                 <?php endif; ?>
                                 <?php if($isLate): ?>
-                                    <span class="tag-urgent" style="margin-left:5px;">Dépassé</span>
+                                    <span class="tag-urgent"><i class="fas fa-exclamation-triangle fa-xs"></i> Dépassé</span>
                                 <?php endif; ?>
                             </div>
                             <div class="guest-card-actions">
@@ -967,19 +1128,19 @@
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 <?php if(!$isFullyPaid): ?>
-                                <a href="<?php echo e(route('transaction.payment.create', $transaction)); ?>" class="btn-ghost-sm" style="color:var(--success);" title="Paiement">
+                                <a href="<?php echo e(route('transaction.payment.create', $transaction)); ?>" class="btn-ghost-sm" title="Paiement">
                                     <i class="fas fa-money-bill-wave-alt"></i>
                                 </a>
                                 <?php endif; ?>
                                 <?php if($canCheckout): ?>
                                 <form action="<?php echo e(route('transaction.mark-departed', $transaction)); ?>" method="POST" class="d-inline">
                                     <?php echo csrf_field(); ?>
-                                    <button type="submit" class="btn-ghost-sm btn-ghost-sm-green" title="Check-out (largesse)" onclick="return confirm('Confirmer le départ de <?php echo e($transaction->customer->name); ?> ?')">
+                                    <button type="submit" class="btn-ghost-sm" title="Check-out (largesse)" onclick="return confirm('Confirmer le départ de <?php echo e($transaction->customer->name); ?> ?')">
                                         <i class="fas fa-sign-out-alt"></i>
                                     </button>
                                 </form>
                                 <?php elseif($isLate): ?>
-                                <span class="btn-ghost-sm" style="opacity:0.5;cursor:not-allowed;background:var(--amber-50);" title="Départ après 14h - Prolongation nécessaire">
+                                <span class="btn-ghost-sm" style="opacity:0.5;cursor:not-allowed;background:var(--g50);" title="Départ après 14h - Prolongation nécessaire">
                                     <i class="fas fa-hourglass-end"></i>
                                 </span>
                                 <?php else: ?>
@@ -996,25 +1157,27 @@
                 <?php if($activeGuests->isNotEmpty()): ?>
                 <div class="ci-card-footer">
                     <a href="<?php echo e(route('transaction.index')); ?>?status=active" class="btn-ci-footer">
-                        <i class="fas fa-list"></i> Voir tous les séjours
+                        <i class="fas fa-list fa-xs"></i> Voir tous les séjours
                     </a>
                 </div>
                 <?php endif; ?>
             </div>
 
-            <!-- Départs du jour -->
+            
             <div class="ci-card anim-6">
                 <div class="ci-card-header">
-                    <h2 class="ci-card-title">
-                        <span class="ci-card-title-dot" style="background:var(--amber-500)"></span>
+                    <h3 class="ci-card-title">
+                        <i class="fas fa-sign-out-alt"></i>
                         Départs aujourd'hui
-                    </h2>
-                    <span class="ci-card-badge badge-amber"><?php echo e($todayDepartures->count()); ?></span>
+                    </h3>
+                    <span class="ci-card-badge"><?php echo e($todayDepartures->count()); ?></span>
                 </div>
 
                 <?php if($todayDepartures->isEmpty()): ?>
-                <div class="ci-empty" style="padding: 28px 20px;">
-                    <div class="ci-empty-icon" style="width:52px;height:52px;font-size:1.3rem;color:var(--green-400);background:var(--green-50);"><i class="fas fa-check-circle"></i></div>
+                <div class="ci-empty" style="padding: 32px 20px;">
+                    <div class="ci-empty-icon" style="width:56px;height:56px;font-size:1.4rem;background:var(--g50);color:var(--g400);">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
                     <p class="ci-empty-title" style="font-size:.85rem;">Aucun départ prévu</p>
                 </div>
                 <?php else: ?>
@@ -1040,7 +1203,7 @@
                                 Chambre <?php echo e($transaction->room->number); ?>
 
                                 <?php if(!$isFullyPaid): ?>
-                                <span class="badge bg-danger ms-2" style="font-size:.6rem;">Impayé</span>
+                                <span class="badge badge-danger" style="background:#fee2e2;color:#b91c1c;padding:2px 6px;border-radius:4px;font-size:.6rem;margin-left:5px;">Impayé</span>
                                 <?php endif; ?>
                             </div>
                         </div>
@@ -1066,7 +1229,7 @@
                                     </button>
                                 </form>
                                 <?php elseif(!$isFullyPaid): ?>
-                                <a href="<?php echo e(route('transaction.payment.create', $transaction)); ?>" class="btn-dep-checkout" style="background:var(--red-50);color:var(--red-700);border-color:var(--red-200);">
+                                <a href="<?php echo e(route('transaction.payment.create', $transaction)); ?>" class="btn-dep-checkout" style="background:#fee2e2;color:#b91c1c;border-color:#fecaca;">
                                     <i class="fas fa-money-bill-wave-alt"></i> Payer
                                 </a>
                                 <?php else: ?>
@@ -1078,20 +1241,19 @@
                         </div>
                     </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                <?php endif; ?>
 
-                <?php if($todayDepartures->isNotEmpty()): ?>
-                <div class="ci-card-footer">
-                    <a href="<?php echo e(route('transaction.index')); ?>?check_out=<?php echo e($today->format('Y-m-d')); ?>" class="btn-ci-footer">
-                        <i class="fas fa-door-open"></i> Gérer tous les départs
-                    </a>
-                </div>
+                    <div class="ci-card-footer">
+                        <a href="<?php echo e(route('transaction.index')); ?>?check_out=<?php echo e($today->format('Y-m-d')); ?>" class="btn-ci-footer">
+                            <i class="fas fa-door-open fa-xs"></i> Gérer tous les départs
+                        </a>
+                    </div>
                 <?php endif; ?>
             </div>
 
-        </div><!-- /right col -->
-    </div><!-- /main grid -->
-</div><!-- /ci-page -->
+        </div>
+    </div>
+
+</div>
 
 <?php $__env->stopSection(); ?>
 
@@ -1103,8 +1265,7 @@ function showToast(msg, type = 'success') {
     const t = document.createElement('div');
     t.className = 'ci-toast' + (type === 'error' ? ' ci-toast-error' : '');
     const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
-    const color = type === 'success' ? 'var(--green-500)' : 'var(--red-500)';
-    t.innerHTML = `<i class="${icon}" style="color:${color};font-size:1rem;flex-shrink:0"></i><span>${msg}</span>`;
+    t.innerHTML = `<i class="${icon}" style="font-size:1rem;flex-shrink:0"></i><span>${msg}</span>`;
     wrap.appendChild(t);
     setTimeout(() => t.style.opacity = '0', 2800);
     setTimeout(() => t.remove(), 3100);
@@ -1112,7 +1273,7 @@ function showToast(msg, type = 'success') {
 
 /* ── Quick check-in (rapide) ───────────────────── */
 function quickCheckIn(id, btn) {
-    if (!confirm('Effectuer un check-in rapide sans formulaire détaillé ?\nLe client sera enregistré avec les informations de base.')) return;
+    if (!confirm('Effectuer un check-in rapide ?')) return;
 
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -1124,10 +1285,9 @@ function quickCheckIn(id, btn) {
             'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
             'Accept': 'application/json',
             'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
+        }
     })
-    .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+    .then(r => r.json())
     .then(data => {
         if (data.success) {
             showToast(data.message || 'Check-in effectué avec succès !');

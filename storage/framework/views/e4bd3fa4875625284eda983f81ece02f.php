@@ -4,292 +4,225 @@
 
 <?php $__env->startPush('styles'); ?>
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   STYLES DASHBOARD DISPONIBILITÉ - Version claire
-═══════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    --primary: #2563eb;
-    --primary-light: #3b82f6;
-    --primary-soft: rgba(37, 99, 235, 0.08);
-    --success: #10b981;
-    --success-light: rgba(16, 185, 129, 0.08);
-    --warning: #f59e0b;
-    --warning-light: rgba(245, 158, 11, 0.08);
-    --danger: #ef4444;
-    --danger-light: rgba(239, 68, 68, 0.08);
-    --info: #3b82f6;
-    --info-light: rgba(59, 130, 246, 0.08);
-    --dark: #1e293b;
-    --gray-50: #f8fafc;
-    --gray-100: #f1f5f9;
-    --gray-200: #e2e8f0;
-    --gray-300: #cbd5e1;
-    --gray-400: #94a3b8;
-    --gray-500: #64748b;
-    --gray-600: #475569;
-    --gray-700: #334155;
-    --gray-800: #1e293b;
-    --white: #ffffff;
-    --radius: 12px;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.05);
-    --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    /* ── PALETTE 3 COULEURS : VERT / BLANC / GRIS ── */
+    --g50:  #f0faf0;
+    --g100: #d4edda;
+    --g200: #a8d5b5;
+    --g300: #72bb82;
+    --g400: #4a9e5c;
+    --g500: #2e8540;
+    --g600: #1e6b2e;
+    --g700: #155221;
+    --g800: #0d3a16;
+
+    --white:   #ffffff;
+    --surface: #f7f9f7;
+
+    --s50:  #f8f9f8;
+    --s100: #eff0ef;
+    --s200: #dde0dd;
+    --s300: #c2c7c2;
+    --s400: #9ba09b;
+    --s500: #737873;
+    --s600: #545954;
+    --s700: #3a3e3a;
+    --s800: #252825;
+    --s900: #131513;
+
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.05);
+
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
+    --transition: all .2s cubic-bezier(.4,0,.2,1);
 }
 
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
 body {
-    background: var(--gray-50);
-    color: var(--gray-700);
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--surface);
+    color: var(--s800);
+    font-family: var(--font);
     font-size: 14px;
     line-height: 1.5;
     min-height: 100vh;
 }
 
-/* ════════════════════════════════════════
+/* ══════════════════════════════════════
    ① TOPBAR — sticky
-════════════════════════════════════════ */
+══════════════════════════════════════ */
 .db-topbar {
-    position: sticky;
-    top: 0;
-    z-index: 200;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 0 22px;
-    background: rgba(255,255,255,0.92);
+    position: sticky; top: 0; z-index: 200;
+    height: 54px;
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 24px;
+    background: rgba(255,255,255,.95);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--gray-200);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    border-bottom: 1.5px solid var(--s200);
+    box-shadow: var(--shadow-xs);
+}
+.db-topbar__brand {
+    display: flex; align-items: center; gap: 10px;
+}
+.db-topbar__icon {
+    width: 32px; height: 32px;
+    background: var(--g600); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: .85rem;
+    box-shadow: 0 2px 8px rgba(46,133,64,.3);
 }
 .db-topbar__title {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: -0.3px;
-    white-space: nowrap;
-    color: var(--gray-800);
+    font-size: .9rem; font-weight: 700;
+    color: var(--s900); letter-spacing: -.2px;
 }
-.db-topbar__sub { color: var(--gray-500); font-weight: 400; }
+.db-topbar__sub { color: var(--s400); font-weight: 400; }
 .db-topbar__clock {
     margin-left: auto;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--gray-500);
+    font-family: var(--mono);
+    font-size: .78rem;
+    color: var(--s400);
     white-space: nowrap;
+    padding: 5px 12px;
+    background: var(--s50);
+    border: 1.5px solid var(--s200);
+    border-radius: 100px;
 }
 .pulse {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--success);
-    flex-shrink: 0;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--g500); flex-shrink: 0;
     animation: blink 2.2s ease-in-out infinite;
 }
 @keyframes blink {
-    0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(16,185,129,.5); }
-    50%      { opacity:.4; box-shadow:0 0 0 5px rgba(16,185,129,0); }
+    0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(46,133,64,.5); }
+    50%      { opacity:.4; box-shadow:0 0 0 5px rgba(46,133,64,0); }
 }
 
-/* ════════════════════════════════════════
+/* ══════════════════════════════════════
    ② KPI STRIP — sticky
-════════════════════════════════════════ */
+══════════════════════════════════════ */
 .db-kpibar {
-    position: sticky;
-    top: 52px;
-    z-index: 190;
-    height: 84px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    position: sticky; top: 54px; z-index: 190;
+    height: 88px;
+    display: grid; grid-template-columns: repeat(4, 1fr);
     background: var(--white);
-    border-bottom: 1px solid var(--gray-200);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.02);
+    border-bottom: 1.5px solid var(--s200);
+    box-shadow: var(--shadow-xs);
 }
 .kpi {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    padding: 0 18px;
-    border-right: 1px solid var(--gray-200);
+    display: flex; align-items: center; gap: 12px;
+    padding: 0 20px;
+    border-right: 1.5px solid var(--s100);
     transition: var(--transition);
-    cursor: default;
 }
 .kpi:last-child { border-right: none; }
-.kpi:hover { background: var(--gray-50); }
+.kpi:hover { background: var(--g50); }
+
 .kpi__icon {
-    width: 34px; height: 34px;
-    border-radius: 9px;
+    width: 36px; height: 36px; border-radius: 9px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px;
-    flex-shrink: 0;
+    font-size: .9rem; flex-shrink: 0;
 }
 .kpi__label {
-    font-size: 10.5px;
-    color: var(--gray-500);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .45px;
-    white-space: nowrap;
+    font-size: .62rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .5px;
+    color: var(--s400); white-space: nowrap;
 }
 .kpi__value {
-    font-size: 23px;
-    font-weight: 700;
-    letter-spacing: -.6px;
-    line-height: 1;
-    margin-top: 1px;
-    color: var(--gray-800);
+    font-size: 1.5rem; font-weight: 700;
+    letter-spacing: -.5px; line-height: 1;
+    margin-top: 2px; color: var(--s900);
+    font-family: var(--mono);
 }
 .kpi__bar {
-    height: 2px;
-    border-radius: 99px;
-    background: var(--gray-200);
-    margin-top: 6px;
-    overflow: hidden;
+    height: 2px; border-radius: 99px;
+    background: var(--s100); margin-top: 7px; overflow: hidden;
 }
 .kpi__bar-fill { height: 100%; border-radius: 99px; }
 
-/* ════════════════════════════════════════
+/* ══════════════════════════════════════
    ③ QUICK ACTIONS BAR — sticky
-════════════════════════════════════════ */
+══════════════════════════════════════ */
 .db-qabar {
-    position: sticky;
-    top: 136px;
-    z-index: 180;
-    height: 56px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0 22px;
-    background: rgba(255,255,255,0.96);
+    position: sticky; top: 142px; z-index: 180;
+    height: 52px;
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 24px;
+    background: rgba(255,255,255,.97);
     backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--gray-200);
-    overflow-x: auto;
-    scrollbar-width: none;
+    border-bottom: 1.5px solid var(--s200);
+    overflow-x: auto; scrollbar-width: none;
 }
 .db-qabar::-webkit-scrollbar { display: none; }
 .db-qabar__label {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--gray-500);
-    text-transform: uppercase;
-    letter-spacing: .6px;
-    white-space: nowrap;
-    margin-right: 4px;
-    flex-shrink: 0;
+    font-size: .62rem; font-weight: 700;
+    color: var(--s400); text-transform: uppercase;
+    letter-spacing: .6px; white-space: nowrap;
+    margin-right: 4px; flex-shrink: 0;
 }
-.qa-sep { width: 1px; height: 22px; background: var(--gray-300); flex-shrink: 0; margin: 0 4px; }
+.qa-sep { width: 1px; height: 20px; background: var(--s200); flex-shrink: 0; margin: 0 4px; }
 
 .qa {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 13px;
-    border-radius: 7px;
-    font-size: 12px;
-    font-weight: 600;
-    white-space: nowrap;
-    text-decoration: none;
-    border: 1px solid var(--gray-200);
-    background: var(--white);
-    color: var(--gray-700);
-    transition: var(--transition);
-    flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 13px; border-radius: var(--r);
+    font-size: .75rem; font-weight: 600; white-space: nowrap;
+    text-decoration: none; border: 1.5px solid var(--s200);
+    background: var(--white); color: var(--s600);
+    transition: var(--transition); flex-shrink: 0;
+    font-family: var(--font);
 }
-.qa i { font-size: 11px; }
-.qa:hover { 
-    border-color: var(--gray-300); 
-    background: var(--gray-50); 
-    color: var(--gray-800); 
-    transform: translateY(-1px); 
-    box-shadow: var(--shadow);
+.qa i { font-size: .7rem; }
+.qa:hover {
+    border-color: var(--g300); background: var(--g50);
+    color: var(--g700); transform: translateY(-1px);
+    box-shadow: var(--shadow-xs); text-decoration: none;
 }
-.qa--yellow { 
-    border-color: rgba(245, 158, 11, 0.3); 
-    color: #b45309;  
-    background: var(--warning-light); 
+.qa--primary {
+    border-color: var(--g200); color: var(--g700);
+    background: var(--g50);
 }
-.qa--yellow:hover { 
-    background: rgba(245, 158, 11, 0.15); 
-    border-color: var(--warning); 
-    color: #b45309; 
-}
-.qa--red { 
-    border-color: rgba(239, 68, 68, 0.3); 
-    color: var(--danger);    
-    background: var(--danger-light); 
-}
-.qa--red:hover { 
-    background: rgba(239, 68, 68, 0.15); 
-    border-color: var(--danger);    
-    color: var(--danger); 
-}
-.qa--blue { 
-    border-color: rgba(37, 99, 235, 0.3);  
-    color: var(--primary);  
-    background: var(--primary-soft); 
-}
-.qa--blue:hover { 
-    background: rgba(37, 99, 235, 0.15);  
-    border-color: var(--primary);  
-    color: var(--primary); 
-}
-.qa--green { 
-    border-color: rgba(16, 185, 129, 0.3);  
-    color: var(--success);   
-    background: var(--success-light); 
-}
-.qa--green:hover { 
-    background: rgba(16, 185, 129, 0.15);  
-    border-color: var(--success);   
-    color: var(--success); 
-}
+.qa--primary:hover { background: var(--g100); border-color: var(--g400); color: var(--g800); }
 
-/* ════════════════════════════════════════
+.qa--dark {
+    border-color: var(--s300); color: var(--s700);
+    background: var(--s50);
+}
+.qa--dark:hover { background: var(--s100); border-color: var(--s500); color: var(--s900); }
+
+/* ══════════════════════════════════════
    ④ BODY
-════════════════════════════════════════ */
+══════════════════════════════════════ */
 .db-body {
-    padding: 16px 22px 60px;
+    padding: 18px 24px 64px;
     max-width: 1700px;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+    display: flex; flex-direction: column; gap: 16px;
 }
 
-/* Grille principale - MODIFIÉE pour 2 colonnes */
-.grid-main {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    align-items: start;
-}
+.grid-main { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+.grid-sec  { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
 
-/* Grille secondaire */
-.grid-sec {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    align-items: start;
-}
-
-/* ════════════════════════════════════════
+/* ══════════════════════════════════════
    CARDS
-════════════════════════════════════════ */
+══════════════════════════════════════ */
 .card {
     background: var(--white);
-    border: 1px solid var(--gray-200);
-    border-radius: var(--radius);
+    border: 1.5px solid var(--s100);
+    border-radius: var(--rxl);
     overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     transition: var(--transition);
+    box-shadow: var(--shadow-sm);
     animation: fadeUp .28s ease both;
-    box-shadow: var(--shadow);
 }
-.card:hover { 
-    border-color: var(--gray-300);
-    box-shadow: var(--shadow-hover);
-}
+.card:hover { border-color: var(--s200); box-shadow: var(--shadow-md); }
 
 @keyframes fadeUp {
     from { opacity:0; transform:translateY(8px); }
@@ -297,350 +230,296 @@ body {
 }
 
 .card__head {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 11px 15px;
-    border-bottom: 1px solid var(--gray-200);
-    flex-shrink: 0;
-    background: var(--gray-50);
+    display: flex; align-items: center; gap: 9px;
+    padding: 13px 18px;
+    border-bottom: 1.5px solid var(--s100);
+    background: var(--s50); flex-shrink: 0;
 }
 .card__icon {
-    width: 26px; height: 26px;
-    border-radius: 7px;
+    width: 28px; height: 28px; border-radius: 7px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 11px;
-    flex-shrink: 0;
+    font-size: .75rem; flex-shrink: 0;
 }
-.card__title { 
-    font-size: 12px; 
-    font-weight: 700; 
-    color: var(--gray-800);
+.card__title {
+    font-size: .8rem; font-weight: 700; color: var(--s800);
 }
 .card__badge { margin-left: auto; flex-shrink: 0; }
-
 .card__body {
-    padding: 14px 15px;
-    overflow-y: auto;
-    flex: 1;
-    max-height: 310px;
+    padding: 16px 18px; overflow-y: auto; flex: 1; max-height: 320px;
 }
 .card__body--nogrow { max-height: none; }
 .card__body::-webkit-scrollbar { width: 3px; }
-.card__body::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 99px; }
-
+.card__body::-webkit-scrollbar-thumb { background: var(--s200); border-radius: 99px; }
 .card__foot {
-    padding: 9px 15px;
-    border-top: 1px solid var(--gray-200);
-    display: flex;
-    justify-content: center;
-    flex-shrink: 0;
-    background: var(--gray-50);
+    padding: 10px 18px; border-top: 1.5px solid var(--s100);
+    display: flex; justify-content: center; flex-shrink: 0;
+    background: var(--s50);
 }
 
-/* ════════════════════════════════════════
+/* ══════════════════════════════════════
    BADGES
-════════════════════════════════════════ */
+══════════════════════════════════════ */
 .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 2px 8px;
-    border-radius: 5px;
-    font-size: 11px;
-    font-weight: 600;
-    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 9px; border-radius: 100px;
+    font-size: .68rem; font-weight: 600; white-space: nowrap;
 }
-.badge--green  { background: var(--success-light);  color: #047857; }
-.badge--blue   { background: var(--primary-soft); color: var(--primary); }
-.badge--yellow { background: var(--warning-light); color: #b45309; }
-.badge--red    { background: var(--danger-light);    color: #b91c1c; }
-.badge--cyan   { background: var(--info-light);   color: #1e40af; }
-.badge--muted  { background: var(--gray-100);   color: var(--gray-600); }
+.badge--green  { background: var(--g100);  color: var(--g700); }
+.badge--dark   { background: var(--s100);  color: var(--s700); }
+.badge--muted  { background: var(--s100);  color: var(--s500); }
+.badge--soft   { background: var(--g50);   color: var(--g600); }
+.badge--outline { background: transparent; color: var(--s600); border: 1.5px solid var(--s200); }
 
-/* ════════════════════════════════════════
+/* ══════════════════════════════════════
    MINI BUTTONS
-════════════════════════════════════════ */
+══════════════════════════════════════ */
 .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11.5px;
-    font-weight: 600;
-    text-decoration: none;
-    border: 1px solid;
-    transition: var(--transition);
-    white-space: nowrap;
-    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 11px; border-radius: var(--r);
+    font-size: .72rem; font-weight: 600;
+    text-decoration: none; border: 1.5px solid;
+    transition: var(--transition); white-space: nowrap;
+    cursor: pointer; font-family: var(--font);
 }
-.btn--green  { 
-    color: #047857;  
-    border-color: rgba(16, 185, 129, 0.3);  
-    background: var(--success-light); 
+.btn--green {
+    color: var(--g600); border-color: var(--g200); background: var(--g50);
 }
-.btn--green:hover  { 
-    background: rgba(16, 185, 129, 0.15); 
-    border-color: var(--success);  
-    color: #047857; 
+.btn--green:hover { background: var(--g600); color: white; border-color: var(--g600); text-decoration: none; }
+.btn--dark {
+    color: var(--s600); border-color: var(--s200); background: var(--s50);
 }
-.btn--blue   { 
-    color: var(--primary); 
-    border-color: rgba(37, 99, 235, 0.3);  
-    background: var(--primary-soft); 
+.btn--dark:hover { background: var(--s200); color: var(--s900); text-decoration: none; }
+.btn--outline {
+    color: var(--s500); border-color: var(--s200); background: var(--white);
 }
-.btn--blue:hover   { 
-    background: rgba(37, 99, 235, 0.15); 
-    border-color: var(--primary); 
-    color: var(--primary); 
-}
-.btn--yellow { 
-    color: #b45309; 
-    border-color: rgba(245, 158, 11, 0.3);  
-    background: var(--warning-light); 
-}
-.btn--yellow:hover { 
-    background: rgba(245, 158, 11, 0.15); 
-    border-color: var(--warning); 
-    color: #b45309; 
-}
-.btn--red { 
-    color: #b91c1c; 
-    border-color: rgba(239, 68, 68, 0.3);  
-    background: var(--danger-light); 
-}
-.btn--red:hover { 
-    background: rgba(239, 68, 68, 0.15); 
-    border-color: var(--danger); 
-    color: #b91c1c; 
-}
-.btn--icon { padding: 4px 8px; }
-.btn-sm { padding: 2px 8px; font-size: 10px; }
+.btn--outline:hover { background: var(--s50); color: var(--s800); text-decoration: none; }
+.btn--sm { padding: 2px 8px; font-size: .65rem; }
+.btn--icon { padding: 4px 9px; }
 
-/* ════════════════════════════════════════
+/* ══════════════════════════════════════
    TABLE
-════════════════════════════════════════ */
+══════════════════════════════════════ */
 .tbl { width: 100%; border-collapse: collapse; }
 .tbl th {
-    padding: 5px 8px;
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--gray-500);
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    text-align: left;
-    border-bottom: 1px solid var(--gray-200);
-    white-space: nowrap;
+    padding: 6px 10px; font-size: .62rem; font-weight: 600;
+    color: var(--s400); text-transform: uppercase; letter-spacing: .5px;
+    text-align: left; border-bottom: 1.5px solid var(--s100); white-space: nowrap;
+    background: var(--s50);
 }
 .tbl td {
-    padding: 9px 8px;
-    font-size: 12.5px;
-    border-bottom: 1px solid var(--gray-200);
-    vertical-align: middle;
-    color: var(--gray-700);
+    padding: 10px 10px; font-size: .8rem;
+    border-bottom: 1px solid var(--s100);
+    vertical-align: middle; color: var(--s700);
 }
 .tbl tr:last-child td { border-bottom: none; }
-.tbl tr:hover td { background: var(--gray-50); }
+.tbl tr:hover td { background: var(--g50); }
 
-/* ════════════════════════════════════════
-   OCCUPATION
-════════════════════════════════════════ */
+/* ══════════════════════════════════════
+   SECTION SALE (3 colonnes)
+══════════════════════════════════════ */
+.dirty-card {
+    border-left: 3px solid var(--g400);
+}
+.dirty-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+    margin-bottom: 16px;
+}
+.dirty-col {
+    background: var(--s50); border-radius: var(--rl);
+    border: 1.5px solid var(--s100); padding: 14px;
+}
+.dirty-col-head {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+}
+.dirty-col-icon {
+    width: 30px; height: 30px; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .78rem; color: white; flex-shrink: 0;
+}
+.dirty-col-title { font-size: .8rem; font-weight: 700; color: var(--s800); }
+.dirty-col-sub   { font-size: .68rem; color: var(--s400); margin-top: 1px; }
+.dirty-inner {
+    background: var(--white); border-radius: var(--r);
+    border: 1.5px solid var(--s100); padding: 8px;
+}
+.dirty-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 0; border-bottom: 1px solid var(--s100); font-size: .78rem;
+}
+.dirty-row:last-child { border-bottom: none; }
+.dirty-row-name { font-weight: 600; color: var(--s900); }
+.dirty-row-type { font-size: .65rem; color: var(--s400); margin-left: 5px; }
+.dirty-empty {
+    padding: 18px; text-align: center;
+    font-size: .75rem; color: var(--s400);
+}
+.dirty-empty i { display: block; font-size: 1.3rem; color: var(--g300); margin-bottom: 6px; }
+.dirty-foot {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-top: 12px; border-top: 1.5px solid var(--s100);
+    font-size: .78rem; color: var(--s500); flex-wrap: wrap; gap: 10px;
+}
+.dirty-foot-stats { display: flex; gap: 18px; flex-wrap: wrap; }
+.dirty-foot-stat  { display: flex; align-items: center; gap: 5px; }
+.dirty-foot-stat strong { color: var(--s900); }
+
+/* ══════════════════════════════════════
+   OCCUPATION PAR TYPE
+══════════════════════════════════════ */
 .occ-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 10px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px;
 }
 .occ-item {
-    background: var(--white);
-    border: 1px solid var(--gray-200);
-    border-radius: 9px;
-    padding: 13px;
-    transition: var(--transition);
+    background: var(--s50); border: 1.5px solid var(--s100);
+    border-radius: var(--rl); padding: 14px; transition: var(--transition);
 }
-.occ-item:hover { 
-    border-color: var(--primary);
-    box-shadow: var(--shadow);
-}
-.occ-name { 
-    font-size: 12px; 
-    font-weight: 700; 
-    margin-bottom: 8px;
-    color: var(--gray-800);
-}
-.occ-bar-wrap { 
-    height: 4px; 
-    border-radius: 99px; 
-    background: var(--gray-200); 
-    overflow: hidden; 
-    margin-bottom: 9px; 
-}
+.occ-item:hover { border-color: var(--g300); background: var(--g50); }
+.occ-name { font-size: .78rem; font-weight: 700; margin-bottom: 10px; color: var(--s800); }
+.occ-bar-wrap { height: 4px; border-radius: 99px; background: var(--s200); overflow: hidden; margin-bottom: 10px; }
 .occ-bar-fill { height: 100%; border-radius: 99px; }
 .occ-nums { display: flex; justify-content: space-between; align-items: flex-end; }
-.occ-num { text-align: center; }
-.occ-num span { 
-    display: block; 
-    font-size: 17px; 
-    font-weight: 700; 
-    line-height: 1; 
-    color: var(--gray-800);
-}
-.occ-num small { 
-    font-size: 10px; 
-    color: var(--gray-500); 
-    text-transform: uppercase; 
-}
+.occ-num  { text-align: center; }
+.occ-num span  { display: block; font-size: 1.1rem; font-weight: 700; line-height: 1; color: var(--s900); font-family: var(--mono); }
+.occ-num small { font-size: .6rem; color: var(--s400); text-transform: uppercase; letter-spacing: .3px; }
 
-/* ════════════════════════════════════════
+/* ══════════════════════════════════════
    EMPTY STATE
-════════════════════════════════════════ */
+══════════════════════════════════════ */
 .empty {
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
     gap: 8px; padding: 36px 20px;
-    color: var(--gray-500); text-align: center;
+    color: var(--s400); text-align: center;
 }
-.empty i { 
-    font-size: 28px; 
-    color: var(--gray-300);
-}
-.empty p { font-size: 12px; line-height: 1.6; }
+.empty i  { font-size: 1.6rem; color: var(--s300); }
+.empty p  { font-size: .78rem; line-height: 1.6; }
 
-/* ════════════════════════════════════════
+/* ══════════════════════════════════════
    TOAST
-════════════════════════════════════════ */
+══════════════════════════════════════ */
 .toast-box {
     position: fixed; bottom: 20px; right: 20px; z-index: 9999;
-    background: var(--white);
-    color: var(--success);
-    border: 1px solid rgba(16, 185, 129, 0.25);
-    border-radius: 8px;
-    padding: 9px 15px;
-    font-size: 12px; font-weight: 600;
+    background: var(--white); color: var(--g600);
+    border: 1.5px solid var(--g200); border-radius: var(--r);
+    padding: 9px 16px; font-size: .75rem; font-weight: 600;
     display: flex; align-items: center; gap: 7px;
-    box-shadow: var(--shadow-hover);
-    animation: fadeUp .25s ease;
+    box-shadow: var(--shadow-lg); animation: fadeUp .25s ease;
+    font-family: var(--font);
 }
 
-/* ════════════════════════════════════════
+/* ══════════════════════════════════════
    RESPONSIVE
-════════════════════════════════════════ */
-@media (max-width: 1100px) {
-    .grid-main,
-    .grid-sec {
-        grid-template-columns: 1fr;
-    }
+══════════════════════════════════════ */
+@media(max-width:1100px) {
+    .grid-main, .grid-sec { grid-template-columns: 1fr; }
+    .dirty-grid { grid-template-columns: 1fr; }
 }
-
-@media (max-width: 680px) {
+@media(max-width:680px) {
     .db-topbar__sub { display: none; }
-    .db-body { padding: 12px 12px 60px; gap: 12px; }
-
-    .db-kpibar {
-        grid-template-columns: repeat(2, 1fr);
-        height: calc(84px * 2);
-    }
-    .kpi { border-right: none; border-bottom: 1px solid var(--gray-200); }
-    .kpi:nth-child(odd)  { border-right: 1px solid var(--gray-200); }
-    .kpi:nth-child(3),
-    .kpi:nth-child(4)    { border-bottom: none; }
-    .kpi__value { font-size: 19px; }
-    .kpi__icon  { width: 30px; height: 30px; font-size: 12px; }
-
-    .db-qabar { padding: 0 12px; gap: 5px; }
+    .db-body { padding: 12px 14px 60px; gap: 12px; }
+    .db-kpibar { grid-template-columns: repeat(2, 1fr); height: calc(88px * 2); }
+    .kpi { border-right: none; border-bottom: 1.5px solid var(--s100); }
+    .kpi:nth-child(odd) { border-right: 1.5px solid var(--s100); }
+    .kpi:nth-child(3), .kpi:nth-child(4) { border-bottom: none; }
+    .db-qabar { padding: 0 14px; }
     .db-qabar__label { display: none; }
     .qa-sep { display: none; }
-
-    .card__body { max-height: 260px; }
+    .dirty-grid { grid-template-columns: 1fr; }
 }
 </style>
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>
 
+
 <div class="db-topbar">
+    <div class="db-topbar__brand">
+        <div class="db-topbar__icon"><i class="fas fa-hotel"></i></div>
+        <span class="db-topbar__title">
+            Dashboard
+            <span class="db-topbar__sub"> · Disponibilité</span>
+        </span>
+    </div>
     <div class="pulse"></div>
-    <span class="db-topbar__title">
-        Dashboard
-        <span class="db-topbar__sub"> · disponibilité</span>
-    </span>
     <span class="db-topbar__clock" id="live-clock"><?php echo e(now()->format('d/m/Y H:i:s')); ?></span>
 </div>
 
 
 <div class="db-kpibar">
+
     <div class="kpi">
-        <div class="kpi__icon" style="background:var(--primary-soft);color:var(--primary)">
+        <div class="kpi__icon" style="background:var(--s100);color:var(--s600)">
             <i class="fas fa-bed"></i>
         </div>
         <div>
-            <div class="kpi__label">Total</div>
+            <div class="kpi__label">Total chambres</div>
             <div class="kpi__value"><?php echo e($stats['total_rooms']); ?></div>
             <div class="kpi__bar">
-                <div class="kpi__bar-fill" style="width:100%;background:var(--primary)"></div>
+                <div class="kpi__bar-fill" style="width:100%;background:var(--s400)"></div>
             </div>
         </div>
     </div>
 
     <div class="kpi">
         <?php $pA = $stats['total_rooms'] > 0 ? ($stats['available_rooms'] / $stats['total_rooms']) * 100 : 0; ?>
-        <div class="kpi__icon" style="background:var(--success-light);color:var(--success)">
+        <div class="kpi__icon" style="background:var(--g100);color:var(--g600)">
             <i class="fas fa-check-circle"></i>
         </div>
         <div>
             <div class="kpi__label">Disponibles</div>
-            <div class="kpi__value" style="color:var(--success)"><?php echo e($stats['available_rooms']); ?></div>
+            <div class="kpi__value" style="color:var(--g600)"><?php echo e($stats['available_rooms']); ?></div>
             <div class="kpi__bar">
-                <div class="kpi__bar-fill" style="width:<?php echo e($pA); ?>%;background:var(--success)"></div>
+                <div class="kpi__bar-fill" style="width:<?php echo e($pA); ?>%;background:var(--g500)"></div>
             </div>
         </div>
     </div>
 
     <div class="kpi">
         <?php $pO = $stats['total_rooms'] > 0 ? ($stats['occupied_rooms'] / $stats['total_rooms']) * 100 : 0; ?>
-        <div class="kpi__icon" style="background:var(--warning-light);color:var(--warning)">
+        <div class="kpi__icon" style="background:var(--s100);color:var(--s600)">
             <i class="fas fa-users"></i>
         </div>
         <div>
             <div class="kpi__label">Occupées</div>
-            <div class="kpi__value" style="color:var(--warning)"><?php echo e($stats['occupied_rooms']); ?></div>
+            <div class="kpi__value"><?php echo e($stats['occupied_rooms']); ?></div>
             <div class="kpi__bar">
-                <div class="kpi__bar-fill" style="width:<?php echo e($pO); ?>%;background:var(--warning)"></div>
+                <div class="kpi__bar-fill" style="width:<?php echo e($pO); ?>%;background:var(--s400)"></div>
             </div>
         </div>
     </div>
 
     <div class="kpi">
-        <div class="kpi__icon" style="background:var(--info-light);color:var(--info)">
+        <div class="kpi__icon" style="background:var(--g50);color:var(--g500)">
             <i class="fas fa-chart-line"></i>
         </div>
         <div>
-            <div class="kpi__label">Taux d'occupation</div>
-            <div class="kpi__value" style="color:var(--info)"><?php echo e(number_format($stats['occupancy_rate'], 1)); ?>%</div>
+            <div class="kpi__label">Taux occupation</div>
+            <div class="kpi__value" style="color:var(--g600)"><?php echo e(number_format($stats['occupancy_rate'], 1)); ?>%</div>
             <div class="kpi__bar">
-                <div class="kpi__bar-fill" style="width:<?php echo e($stats['occupancy_rate']); ?>%;background:var(--info)"></div>
+                <div class="kpi__bar-fill" style="width:<?php echo e($stats['occupancy_rate']); ?>%;background:var(--g400)"></div>
             </div>
         </div>
     </div>
+
 </div>
 
 
 <div class="db-qabar">
     <span class="db-qabar__label">Actions</span>
 
-    <a href="<?php echo e(route('transaction.reservation.createIdentity')); ?>" class="qa qa--yellow">
+    <a href="<?php echo e(route('transaction.reservation.createIdentity')); ?>" class="qa qa--primary">
         <i class="fas fa-plus-circle"></i> Réservation
     </a>
-    <a href="<?php echo e(route('checkin.index')); ?>" class="qa qa--red">
+    <a href="<?php echo e(route('checkin.index')); ?>" class="qa qa--dark">
         <i class="fas fa-door-open"></i> Check-in / Check-out
     </a>
 
     <div class="qa-sep"></div>
 
-    <a href="<?php echo e(route('availability.calendar')); ?>" class="qa qa--blue">
+    <a href="<?php echo e(route('availability.calendar')); ?>" class="qa">
         <i class="fas fa-calendar-alt"></i> Calendrier
     </a>
-    <a href="<?php echo e(route('availability.search')); ?>" class="qa qa--green">
+    <a href="<?php echo e(route('availability.search')); ?>" class="qa qa--primary">
         <i class="fas fa-search"></i> Rechercher
     </a>
     <a href="<?php echo e(route('availability.inventory')); ?>" class="qa">
@@ -656,12 +535,14 @@ body {
 
 
 <div class="db-body">
+
     
     <div class="grid-main">
+
         
         <div class="card">
             <div class="card__head">
-                <div class="card__icon" style="background:var(--success-light);color:var(--success)">
+                <div class="card__icon" style="background:var(--g100);color:var(--g600)">
                     <i class="fas fa-bed"></i>
                 </div>
                 <span class="card__title">Chambres disponibles maintenant</span>
@@ -678,25 +559,21 @@ body {
                 <table class="tbl">
                     <thead>
                         <tr>
-                            <th>N°</th>
-                            <th>Type</th>
-                            <th>Prix / nuit</th>
-                            <th>Cap.</th>
-                            <th></th>
+                            <th>N°</th><th>Type</th><th>Prix / nuit</th><th>Cap.</th><th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php $__currentLoopData = $availableNow; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
                             <td><span class="badge badge--green"><?php echo e($room->number); ?></span></td>
-                            <td style="color:var(--gray-600)"><?php echo e($room->type->name ?? 'Standard'); ?></td>
+                            <td style="color:var(--s500)"><?php echo e($room->type->name ?? 'Standard'); ?></td>
                             <td>
-                                <span style="color:var(--success);font-weight:700;font-family:'DM Mono',monospace;font-size:12px">
+                                <span style="color:var(--g600);font-weight:700;font-family:var(--mono);font-size:.78rem">
                                     <?php echo e(number_format($room->price, 0, ',', ' ')); ?> FCFA
                                 </span>
                             </td>
-                            <td style="color:var(--gray-500)">
-                                <i class="fas fa-user" style="font-size:10px;margin-right:2px"></i><?php echo e($room->capacity); ?>
+                            <td style="color:var(--s400)">
+                                <i class="fas fa-user" style="font-size:.65rem;margin-right:2px"></i><?php echo e($room->capacity); ?>
 
                             </td>
                             <td>
@@ -728,12 +605,12 @@ body {
         
         <div class="card">
             <div class="card__head">
-                <div class="card__icon" style="background:var(--warning-light);color:var(--warning)">
+                <div class="card__icon" style="background:var(--s100);color:var(--s600)">
                     <i class="fas fa-tools"></i>
                 </div>
                 <span class="card__title">Maintenance / Nettoyage</span>
                 <span class="card__badge">
-                    <span class="badge badge--yellow"><?php echo e($unavailableRooms->count()); ?></span>
+                    <span class="badge badge--dark"><?php echo e($unavailableRooms->count()); ?></span>
                 </span>
             </div>
 
@@ -742,31 +619,27 @@ body {
                 <table class="tbl">
                     <thead>
                         <tr>
-                            <th>N°</th>
-                            <th>Type</th>
-                            <th>Statut</th>
-                            <th>Depuis</th>
-                            <th></th>
+                            <th>N°</th><th>Type</th><th>Statut</th><th>Depuis</th><th></th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php $__currentLoopData = $unavailableRooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
                             <td>
-                                <span class="badge <?php echo e($room->room_status_id == 2 ? 'badge--red' : 'badge--cyan'); ?>">
+                                <span class="badge <?php echo e($room->room_status_id == 2 ? 'badge--dark' : 'badge--muted'); ?>">
                                     <?php echo e($room->number); ?>
 
                                 </span>
                             </td>
-                            <td style="color:var(--gray-600)"><?php echo e($room->type->name ?? 'Standard'); ?></td>
+                            <td style="color:var(--s500)"><?php echo e($room->type->name ?? 'Standard'); ?></td>
                             <td>
-                                <span class="badge <?php echo e($room->room_status_id == 2 ? 'badge--red' : 'badge--cyan'); ?>">
+                                <span class="badge <?php echo e($room->room_status_id == 2 ? 'badge--dark' : 'badge--muted'); ?>">
                                     <i class="fas fa-<?php echo e($room->room_status_id == 2 ? 'tools' : 'broom'); ?>"></i>
                                     <?php echo e($room->roomStatus->name ?? 'Indisponible'); ?>
 
                                 </span>
                             </td>
-                            <td style="color:var(--gray-500);font-size:11px">
+                            <td style="color:var(--s400);font-size:.72rem">
                                 <?php echo e($room->updated_at ? $room->updated_at->diffForHumans() : 'N/A'); ?>
 
                             </td>
@@ -776,7 +649,7 @@ body {
                                         <i class="fas fa-check"></i> OK
                                     </a>
                                 <?php else: ?>
-                                    <span style="font-size:11px;color:var(--gray-500)">En cours…</span>
+                                    <span style="font-size:.7rem;color:var(--s400)">En cours…</span>
                                 <?php endif; ?>
                             </td>
                         </tr>
@@ -785,7 +658,7 @@ body {
                 </table>
                 <?php else: ?>
                 <div class="empty">
-                    <i class="fas fa-check-circle" style="color:var(--success);opacity:.55"></i>
+                    <i class="fas fa-check-circle" style="color:var(--g400)"></i>
                     <p>Aucune chambre en maintenance<br>Tout est opérationnel</p>
                 </div>
                 <?php endif; ?>
@@ -793,188 +666,209 @@ body {
 
             <?php if($unavailableRooms->count() > 0): ?>
             <div class="card__foot">
-                <a href="<?php echo e(route('housekeeping.index')); ?>" class="btn btn--yellow">
+                <a href="<?php echo e(route('housekeeping.index')); ?>" class="btn btn--dark">
                     <i class="fas fa-broom"></i> Gestion nettoyage
                 </a>
             </div>
             <?php endif; ?>
         </div>
+
     </div>
 
-   
-<div class="card" style="margin:10px 0 20px; border-left:4px solid #f59e0b;">
-    <div class="card__head" style="background:var(--warning-light); border-bottom-color:rgba(245, 158, 11, 0.2);">
-        <div class="card__icon" style="background:rgba(245, 158, 11, 0.2); color:#b45309;">
-            <i class="fas fa-broom"></i>
+    
+    <div class="card dirty-card">
+        <div class="card__head">
+            <div class="card__icon" style="background:var(--s100);color:var(--s600)">
+                <i class="fas fa-broom"></i>
+            </div>
+            <span class="card__title">Chambres sales · Disponibilité après nettoyage</span>
+            <span class="card__badge">
+                <span class="badge badge--dark"><?php echo e($stats['dirty_rooms'] ?? 0); ?> sale(s)</span>
+            </span>
         </div>
-        <span class="card__title" style="color:#b45309;">Chambres sales - Disponibilité après nettoyage</span>
-        <span class="card__badge">
-            <span class="badge badge--yellow"><?php echo e($stats['dirty_rooms'] ?? 0); ?> sale(s)</span>
-        </span>
-    </div>
 
-    <div class="card__body card__body--nogrow" style="padding:18px 15px;">
-        <?php
-            // ✅ UTILISER LES COLLECTIONS DU CONTROLEUR
-            $dirtyOccupied = $dirtyOccupied ?? collect();
-            $dirtyUnoccupied = $dirtyUnoccupied ?? collect();
-            $departingToday = $todayDepartures ?? collect();
-            $roomsToBeFreed = $roomsToBeFreed ?? collect();
-            
-            // Debug silencieux (visible dans les logs)
-            if($dirtyOccupied->count() == 0 && $dirtyUnoccupied->count() > 0) {
-                \Log::info('VUE: dirtyOccupied vide mais dirtyUnoccupied contient:', $dirtyUnoccupied->pluck('number')->toArray());
-            }
-        ?>
+        <div class="card__body card__body--nogrow">
+            <?php
+                $dirtyOccupied   = $dirtyOccupied   ?? collect();
+                $dirtyUnoccupied = $dirtyUnoccupied  ?? collect();
+                $roomsToBeFreed  = $roomsToBeFreed   ?? collect();
+            ?>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:15px;">
-            
-            <div style="background:var(--danger-light); border-radius:12px; padding:14px;">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                    <span style="background:var(--danger); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
-                        <i class="fas fa-user"></i>
-                    </span>
-                    <div>
-                        <h4 style="font-size:13px; font-weight:700; color:#b91c1c; margin:0;">Occupées (sales)</h4>
-                        <p style="font-size:11px; color:var(--gray-600); margin:2px 0 0;">Client présent - À nettoyer après départ</p>
+            <div class="dirty-grid">
+
+                
+                <div class="dirty-col">
+                    <div class="dirty-col-head">
+                        <div class="dirty-col-icon" style="background:var(--s600)">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <div class="dirty-col-title">Occupées (sales)</div>
+                            <div class="dirty-col-sub">Client présent · À nettoyer après départ</div>
+                        </div>
                     </div>
-                </div>
 
-                <?php if($dirtyOccupied->count() > 0): ?>
-                    <div style="background:white; border-radius:8px; padding:8px;">
+                    <?php if($dirtyOccupied->count() > 0): ?>
+                    <div class="dirty-inner">
                         <?php $__currentLoopData = $dirtyOccupied->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--gray-200);">
+                        <div class="dirty-row">
                             <div>
-                                <span style="font-weight:600;">Ch. <?php echo e($room->number); ?></span>
-                                <span style="font-size:10px; color:var(--gray-500); margin-left:5px;"><?php echo e($room->type->name ?? 'Std'); ?></span>
+                                <span class="dirty-row-name">Ch. <?php echo e($room->number); ?></span>
+                                <span class="dirty-row-type"><?php echo e($room->type->name ?? 'Std'); ?></span>
                             </div>
-                            <span class="badge badge--red"><?php echo e($room->capacity); ?>p</span>
+                            <span class="badge badge--muted"><?php echo e($room->capacity); ?>p</span>
                         </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         <?php if($dirtyOccupied->count() > 3): ?>
-                        <div style="text-align:center; margin-top:8px;">
-                            <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="btn btn--red btn-sm">+<?php echo e($dirtyOccupied->count()-3); ?> autres</a>
+                        <div style="text-align:center;margin-top:8px">
+                            <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="btn btn--dark btn--sm">
+                                +<?php echo e($dirtyOccupied->count()-3); ?> autres
+                            </a>
                         </div>
                         <?php endif; ?>
                     </div>
-                    <div style="margin-top:10px; font-size:11px; color:var(--gray-600);">
-                        <i class="fas fa-clock"></i> Seront nettoyées après check-out
+                    <div style="margin-top:8px;font-size:.7rem;color:var(--s400)">
+                        <i class="fas fa-clock"></i> Nettoyage après check-out
                     </div>
-                <?php else: ?>
-                    <div style="background:white; border-radius:8px; padding:20px; text-align:center;">
-                        <i class="fas fa-check-circle" style="color:var(--success); font-size:20px;"></i>
-                        <p style="margin:5px 0 0; font-size:12px;">Aucune chambre avec client présent</p>
+                    <?php else: ?>
+                    <div class="dirty-inner">
+                        <div class="dirty-empty">
+                            <i class="fas fa-check-circle" style="color:var(--g400)"></i>
+                            Aucune chambre avec client présent
+                        </div>
                     </div>
-                <?php endif; ?>
-            </div>
-
-            
-            <div style="background:var(--warning-light); border-radius:12px; padding:14px;">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                    <span style="background:var(--warning); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
-                        <i class="fas fa-door-open"></i>
-                    </span>
-                    <div>
-                        <h4 style="font-size:13px; font-weight:700; color:#b45309; margin:0;">Non occupées (sales)</h4>
-                        <p style="font-size:11px; color:var(--gray-600); margin:2px 0 0;">Client parti - À nettoyer maintenant</p>
-                    </div>
+                    <?php endif; ?>
                 </div>
 
-                <?php if($dirtyUnoccupied->count() > 0): ?>
-                    <div style="background:white; border-radius:8px; padding:8px;">
+                
+                <div class="dirty-col" style="border-color:var(--g200);background:var(--g50)">
+                    <div class="dirty-col-head">
+                        <div class="dirty-col-icon" style="background:var(--g500)">
+                            <i class="fas fa-door-open"></i>
+                        </div>
+                        <div>
+                            <div class="dirty-col-title" style="color:var(--g700)">Non occupées (sales)</div>
+                            <div class="dirty-col-sub">Client parti · À nettoyer maintenant</div>
+                        </div>
+                    </div>
+
+                    <?php if($dirtyUnoccupied->count() > 0): ?>
+                    <div class="dirty-inner">
                         <?php $__currentLoopData = $dirtyUnoccupied->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--gray-200);">
+                        <div class="dirty-row">
                             <div>
-                                <span style="font-weight:600;">Ch. <?php echo e($room->number); ?></span>
-                                <span style="font-size:10px; color:var(--gray-500); margin-left:5px;"><?php echo e($room->type->name ?? 'Std'); ?></span>
+                                <span class="dirty-row-name">Ch. <?php echo e($room->number); ?></span>
+                                <span class="dirty-row-type"><?php echo e($room->type->name ?? 'Std'); ?></span>
                             </div>
-                            <a href="<?php echo e(route('housekeeping.start-cleaning', $room->id)); ?>" class="btn btn--green btn-sm">
+                            <a href="<?php echo e(route('housekeeping.start-cleaning', $room->id)); ?>" class="btn btn--green btn--sm">
                                 <i class="fas fa-broom"></i> Nettoyer
                             </a>
                         </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         <?php if($dirtyUnoccupied->count() > 3): ?>
-                        <div style="text-align:center; margin-top:8px;">
-                            <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="btn btn--yellow btn-sm">+<?php echo e($dirtyUnoccupied->count()-3); ?> autres</a>
+                        <div style="text-align:center;margin-top:8px">
+                            <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="btn btn--green btn--sm">
+                                +<?php echo e($dirtyUnoccupied->count()-3); ?> autres
+                            </a>
                         </div>
                         <?php endif; ?>
                     </div>
-                <?php else: ?>
-                    <div style="background:white; border-radius:8px; padding:20px; text-align:center;">
-                        <i class="fas fa-check-circle" style="color:var(--success); font-size:20px;"></i>
-                        <p style="margin:5px 0 0; font-size:12px;">Aucune chambre à nettoyer</p>
+                    <?php else: ?>
+                    <div class="dirty-inner">
+                        <div class="dirty-empty">
+                            <i class="fas fa-check-circle" style="color:var(--g400)"></i>
+                            Aucune chambre à nettoyer
+                        </div>
                     </div>
-                <?php endif; ?>
-            </div>
-
-            
-            <div style="background:var(--info-light); border-radius:12px; padding:14px;">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-                    <span style="background:var(--info); color:white; width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;">
-                        <i class="fas fa-sign-out-alt"></i>
-                    </span>
-                    <div>
-                        <h4 style="font-size:13px; font-weight:700; color:var(--info); margin:0;">Départs aujourd'hui</h4>
-                        <p style="font-size:11px; color:var(--gray-600); margin:2px 0 0;">Seront libres après 12h</p>
-                    </div>
+                    <?php endif; ?>
                 </div>
 
-                <?php if($roomsToBeFreed->count() > 0): ?>
-                    <div style="background:white; border-radius:8px; padding:8px;">
+                
+                <div class="dirty-col">
+                    <div class="dirty-col-head">
+                        <div class="dirty-col-icon" style="background:var(--s400)">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </div>
+                        <div>
+                            <div class="dirty-col-title">Départs aujourd'hui</div>
+                            <div class="dirty-col-sub">Seront libres après 12h</div>
+                        </div>
+                    </div>
+
+                    <?php if($roomsToBeFreed->count() > 0): ?>
+                    <div class="dirty-inner">
                         <?php $__currentLoopData = $roomsToBeFreed->take(3); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid var(--gray-200);">
+                        <div class="dirty-row">
                             <div>
-                                <span style="font-weight:600;">Ch. <?php echo e($room->number); ?></span>
-                                <span style="font-size:10px; color:var(--gray-500); margin-left:5px;"><?php echo e($room->type->name ?? 'Std'); ?></span>
+                                <span class="dirty-row-name">Ch. <?php echo e($room->number); ?></span>
+                                <span class="dirty-row-type"><?php echo e($room->type->name ?? 'Std'); ?></span>
                             </div>
-                            <span class="badge badge--cyan">12h</span>
+                            <span class="badge badge--muted">12h</span>
                         </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         <?php if($roomsToBeFreed->count() > 3): ?>
-                        <div style="text-align:center; margin-top:8px;">
-                            <a href="<?php echo e(route('checkin.index')); ?>" class="btn btn--blue btn-sm">+<?php echo e($roomsToBeFreed->count()-3); ?> autres</a>
+                        <div style="text-align:center;margin-top:8px">
+                            <a href="<?php echo e(route('checkin.index')); ?>" class="btn btn--outline btn--sm">
+                                +<?php echo e($roomsToBeFreed->count()-3); ?> autres
+                            </a>
                         </div>
                         <?php endif; ?>
                     </div>
-                    <div style="margin-top:10px; font-size:11px; color:var(--gray-600);">
+                    <div style="margin-top:8px;font-size:.7rem;color:var(--s400)">
                         <i class="fas fa-clock"></i> Largesse jusqu'à 14h
                     </div>
-                <?php else: ?>
-                    <div style="background:white; border-radius:8px; padding:20px; text-align:center;">
-                        <i class="fas fa-calendar-check" style="color:var(--gray-400); font-size:20px;"></i>
-                        <p style="margin:5px 0 0; font-size:12px;">Aucun départ prévu aujourd'hui</p>
+                    <?php else: ?>
+                    <div class="dirty-inner">
+                        <div class="dirty-empty">
+                            <i class="fas fa-calendar-check" style="color:var(--s300)"></i>
+                            Aucun départ prévu aujourd'hui
+                        </div>
                     </div>
-                <?php endif; ?>
-            </div>
-        </div>
+                    <?php endif; ?>
+                </div>
 
-        
-        <div style="display:flex; justify-content:space-between; align-items:center; padding-top:12px; border-top:1px solid var(--gray-200);">
-            <div style="display:flex; gap:20px;">
-                <span><i class="fas fa-bed" style="color:var(--gray-500);"></i> Total sales: <strong><?php echo e($stats['dirty_rooms'] ?? 0); ?></strong></span>
-                <span><i class="fas fa-user" style="color:#b91c1c;"></i> Clients présents: <strong><?php echo e($dirtyOccupied->count()); ?></strong></span>
-                <span><i class="fas fa-door-open" style="color:#b45309;"></i> À nettoyer maintenant: <strong><?php echo e($dirtyUnoccupied->count()); ?></strong></span>
-                <span><i class="fas fa-sign-out-alt" style="color:var(--info);"></i> Départs: <strong><?php echo e($roomsToBeFreed->count()); ?></strong></span>
             </div>
-            <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="btn btn--yellow">
-                <i class="fas fa-broom"></i> Gérer le nettoyage
-            </a>
+
+            
+            <div class="dirty-foot">
+                <div class="dirty-foot-stats">
+                    <span class="dirty-foot-stat">
+                        <i class="fas fa-bed" style="color:var(--s400)"></i>
+                        Total sales : <strong><?php echo e($stats['dirty_rooms'] ?? 0); ?></strong>
+                    </span>
+                    <span class="dirty-foot-stat">
+                        <i class="fas fa-user" style="color:var(--s600)"></i>
+                        Clients présents : <strong><?php echo e($dirtyOccupied->count()); ?></strong>
+                    </span>
+                    <span class="dirty-foot-stat">
+                        <i class="fas fa-door-open" style="color:var(--g500)"></i>
+                        À nettoyer maintenant : <strong><?php echo e($dirtyUnoccupied->count()); ?></strong>
+                    </span>
+                    <span class="dirty-foot-stat">
+                        <i class="fas fa-sign-out-alt" style="color:var(--s400)"></i>
+                        Départs : <strong><?php echo e($roomsToBeFreed->count()); ?></strong>
+                    </span>
+                </div>
+                <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="btn btn--dark">
+                    <i class="fas fa-broom"></i> Gérer le nettoyage
+                </a>
+            </div>
         </div>
     </div>
-</div>
 
     
     <div class="grid-sec">
+
         
         <div class="card">
             <div class="card__head">
-                <div class="card__icon" style="background:var(--info-light);color:var(--info)">
+                <div class="card__icon" style="background:var(--g100);color:var(--g600)">
                     <i class="fas fa-chart-pie"></i>
                 </div>
                 <span class="card__title">Occupation par type de chambre</span>
                 <span class="card__badge">
                     <?php $avgOcc = collect($occupancyByType)->avg('percentage') ?? 0; ?>
-                    <span class="badge badge--cyan">Moy. <?php echo e(number_format($avgOcc, 1)); ?>%</span>
+                    <span class="badge badge--soft">Moy. <?php echo e(number_format($avgOcc, 1)); ?>%</span>
                 </span>
             </div>
 
@@ -985,8 +879,8 @@ body {
                     <?php if(is_array($type) && isset($type['type'])): ?>
                     <?php
                         $pct = $type['percentage'] ?? 0;
-                        $col = $pct > 80 ? 'var(--success)' : ($pct > 50 ? 'var(--warning)' : 'var(--info)');
-                        $bdg = $pct > 80 ? 'badge--green' : ($pct > 50 ? 'badge--yellow' : 'badge--cyan');
+                        $col = $pct > 80 ? 'var(--g500)' : ($pct > 50 ? 'var(--g300)' : 'var(--s300)');
+                        $bdg = $pct > 80 ? 'badge--green' : ($pct > 50 ? 'badge--soft' : 'badge--muted');
                     ?>
                     <div class="occ-item">
                         <div class="occ-name"><?php echo e($type['type']); ?></div>
@@ -1020,27 +914,29 @@ body {
         
         <div class="card">
             <div class="card__head">
-                <div class="card__icon" style="background:var(--primary-soft);color:var(--primary)">
+                <div class="card__icon" style="background:var(--s100);color:var(--s500)">
                     <i class="fas fa-info-circle"></i>
                 </div>
                 <span class="card__title">Informations</span>
             </div>
             <div class="card__body">
                 <div class="empty">
-                    <i class="fas fa-clock" style="color:var(--primary);opacity:.55"></i>
+                    <i class="fas fa-clock" style="color:var(--g400)"></i>
                     <p>Les arrivées et départs<br>sont gérés dans les sections dédiées</p>
-                    <div class="d-flex gap-2 mt-2" style="display:flex; gap:10px; margin-top:15px;">
-                        <a href="<?php echo e(route('checkin.index')); ?>" class="btn btn--blue btn-sm">
-                            <i class="fas fa-door-open"></i> Check-in/out
+                    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center">
+                        <a href="<?php echo e(route('checkin.index')); ?>" class="btn btn--dark">
+                            <i class="fas fa-door-open"></i> Check-in / Check-out
                         </a>
-                        <a href="<?php echo e(route('availability.calendar')); ?>" class="btn btn--green btn-sm">
+                        <a href="<?php echo e(route('availability.calendar')); ?>" class="btn btn--green">
                             <i class="fas fa-calendar-alt"></i> Calendrier
                         </a>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
+
 </div>
 <?php $__env->stopSection(); ?>
 
@@ -1049,7 +945,7 @@ body {
 document.addEventListener('DOMContentLoaded', function () {
     /* Horloge temps réel */
     const clockEl = document.getElementById('live-clock');
-    function tick () {
+    function tick() {
         const n = new Date();
         const p = v => String(v).padStart(2, '0');
         clockEl.textContent =
@@ -1058,14 +954,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     setInterval(tick, 1000);
 
-    /* Refresh silencieux toutes les 30 s */
+    /* Refresh silencieux toutes les 30s */
     setInterval(function () {
         fetch('<?php echo e(route("availability.dashboard")); ?>')
             .then(r => { if (r.ok) toast(); })
             .catch(() => {});
     }, 30000);
 
-    function toast () {
+    function toast() {
         const el = document.createElement('div');
         el.className = 'toast-box';
         el.innerHTML = '<i class="fas fa-sync-alt"></i> Données actualisées';
