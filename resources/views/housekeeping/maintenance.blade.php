@@ -2,571 +2,630 @@
 
 @section('title', 'Chambres en Maintenance')
 
-@push('styles')
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+@section('content')
 <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    /* Palette principale - Vert */
-    --primary-50: #E8F5F0;
-    --primary-100: #C1E4D6;
-    --primary-200: #96D3BA;
-    --primary-300: #6BC29E;
-    --primary-400: #4BB589;
-    --primary-500: #2AA874;
-    --primary-600: #25A06C;
-    --primary-700: #1F9661;
-    --primary-800: #198C57;
-    --primary-900: #0F7C44;
+    /* ── 4 COULEURS (vert, rouge, gris, blanc) ── */
+    --green-50:  #f0faf0;
+    --green-100: #d4edda;
+    --green-500: #2e8540;
+    --green-600: #1e6b2e;
+    --green-700: #155221;
 
-    /* Couleurs utilitaires */
-    --success-500: #22C55E;
-    --danger-500: #EF4444;
-    --warning-500: #F59E0B;
-    --warning-600: #D97706;
-    --info-500: #3B82F6;
+    --red-50:    #fee2e2;
+    --red-100:   #fecaca;
+    --red-500:   #b91c1c;
+    --red-600:   #991b1b;
 
-    /* Neutres */
-    --gray-50: #F9FAFB;
-    --gray-100: #F3F4F6;
-    --gray-200: #E5E7EB;
-    --gray-300: #D1D5DB;
-    --gray-400: #9CA3AF;
-    --gray-500: #6B7280;
-    --gray-600: #4B5563;
-    --gray-700: #374151;
-    --gray-800: #1F2937;
-    --gray-900: #111827;
+    --gray-50:   #f8f9f8;
+    --gray-100:  #eff0ef;
+    --gray-200:  #dde0dd;
+    --gray-300:  #c2c7c2;
+    --gray-400:  #9ba09b;
+    --gray-500:  #737873;
+    --gray-600:  #545954;
+    --gray-700:  #3a3e3a;
+    --gray-800:  #252825;
+    --gray-900:  #131513;
 
-    /* Ombres */
-    --shadow-sm: 0 1px 2px 0 rgba(42, 168, 116, 0.08);
-    --shadow-md: 0 4px 6px -1px rgba(42, 168, 116, 0.12);
-    --shadow-lg: 0 10px 15px -3px rgba(42, 168, 116, 0.15);
-    
-    /* Transitions */
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --white:     #ffffff;
+    --surface:   #f7f9f7;
+
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s ease;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
 }
 
-body {
-    background: var(--gray-50);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-/* Page Header */
-.page-header {
-    background: white;
-    border-radius: 20px;
-    padding: 24px 28px;
-    margin-bottom: 28px;
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow-sm);
-}
-
-.page-header h1 {
-    font-size: 28px;
-    font-weight: 800;
+.maintenance-page {
+    background: var(--surface);
+    min-height: 100vh;
+    padding: 24px 32px;
+    font-family: var(--font);
     color: var(--gray-800);
-    margin-bottom: 8px;
 }
 
-.page-header p {
-    color: var(--gray-500);
-    font-size: 14px;
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+.anim-3 { animation: fadeSlide .4s .16s ease both; }
+
+/* ══════════════════════════════════════════════
+   BREADCRUMB
+══════════════════════════════════════════════ */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .8rem;
+    color: var(--gray-400);
+    margin-bottom: 20px;
+}
+.breadcrumb a {
+    color: var(--gray-400);
+    text-decoration: none;
+    transition: var(--transition);
+}
+.breadcrumb a:hover {
+    color: var(--green-600);
+}
+.breadcrumb .sep {
+    color: var(--gray-300);
+}
+.breadcrumb .current {
+    color: var(--gray-600);
+    font-weight: 500;
+}
+
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+.page-header {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rxl);
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.header-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--green-600);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 10px rgba(46,133,64,.3);
+}
+.header-title h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gray-900);
     margin: 0;
 }
+.header-title em {
+    font-style: normal;
+    color: var(--green-600);
+}
+.header-subtitle {
+    color: var(--gray-500);
+    font-size: .8rem;
+    margin: 6px 0 0 60px;
+}
 
-/* Buttons */
+/* ══════════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════════ */
 .btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    border: 1px solid transparent;
-    transition: var(--transition);
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--r);
+    font-size: .8rem;
+    font-weight: 500;
+    border: none;
     cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
 }
-
-.btn-primary {
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
-    color: white;
-    box-shadow: 0 4px 6px -1px rgba(42, 168, 116, 0.3);
-}
-
-.btn-primary:hover {
-    background: linear-gradient(135deg, var(--primary-800), var(--primary-600));
-    transform: translateY(-2px);
-    box-shadow: 0 6px 10px -2px rgba(42, 168, 116, 0.4);
+.btn-green {
+    background: var(--green-600);
     color: white;
 }
-
+.btn-green:hover {
+    background: var(--green-700);
+    transform: translateY(-1px);
+    color: white;
+}
+.btn-red {
+    background: var(--red-500);
+    color: white;
+}
+.btn-red:hover {
+    background: var(--red-600);
+    transform: translateY(-1px);
+    color: white;
+}
+.btn-gray {
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+}
+.btn-gray:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+}
 .btn-outline {
-    border: 2px solid var(--gray-200);
-    background: white;
-    color: var(--gray-700);
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
 }
-
 .btn-outline:hover {
-    border-color: var(--primary-500);
-    color: var(--primary-500);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+}
+.btn-sm {
+    padding: 6px 12px;
+    font-size: .7rem;
 }
 
-.btn-warning {
-    background: linear-gradient(135deg, #F59E0B, #D97706);
-    color: white;
-}
-
-.btn-warning:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(245,158,11,0.3);
-}
-
-/* Stats Cards */
+/* ══════════════════════════════════════════════
+   STATS CARDS
+══════════════════════════════════════════════ */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-bottom: 28px;
+    gap: 16px;
+    margin-bottom: 24px;
 }
-
 .stat-card {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow-sm);
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
+    padding: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     transition: var(--transition);
-    position: relative;
-    overflow: hidden;
 }
-
 .stat-card:hover {
+    border-color: var(--green-300);
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
 }
-
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--primary-500);
+.stat-left {
+    flex: 1;
 }
-
-.stat-number {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--gray-800);
+.stat-label {
+    font-size: .65rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
     margin-bottom: 4px;
 }
-
-.stat-label {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--gray-500);
-    letter-spacing: 0.5px;
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: var(--mono);
+    color: var(--gray-900);
+    line-height: 1;
+    margin-bottom: 2px;
 }
-
 .stat-icon {
-    color: var(--primary-200);
-    opacity: 0.8;
+    font-size: 1.8rem;
+    color: var(--green-600);
+    opacity: .5;
 }
 
-/* Main Card */
-.main-card {
-    background: white;
-    border-radius: 20px;
-    border: 1px solid var(--gray-200);
+/* ══════════════════════════════════════════════
+   CARD
+══════════════════════════════════════════════ */
+.card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rxl);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
 }
-
 .card-header {
-    padding: 18px 24px;
-    border-bottom: 1px solid var(--gray-200);
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
+    padding: 16px 20px;
+    border-bottom: 1.5px solid var(--gray-200);
+    background: var(--green-600);
+    color: white;
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-
-.card-header h5 {
-    margin: 0;
-    font-weight: 700;
+.card-header i {
     color: white;
 }
-
-.card-header i {
-    color: rgba(255,255,255,0.9);
+.card-header .badge {
+    background: rgba(255,255,255,.2);
+    color: white;
+    border: 1.5px solid rgba(255,255,255,.2);
+}
+.card-body {
+    padding: 0;
 }
 
-/* Table */
+/* ══════════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════════ */
+.table-responsive {
+    overflow-x: auto;
+}
 .table {
-    margin: 0;
+    width: 100%;
+    border-collapse: collapse;
 }
-
 .table thead th {
     background: var(--gray-50);
-    padding: 16px 20px;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    padding: 14px 18px;
+    font-size: .7rem;
+    font-weight: 600;
     color: var(--gray-500);
-    border-bottom: 1px solid var(--gray-200);
+    text-transform: uppercase;
+    border-bottom: 1.5px solid var(--gray-200);
+    text-align: left;
 }
-
 .table tbody td {
-    padding: 16px 20px;
-    font-size: 14px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--gray-200);
     color: var(--gray-700);
-    border-bottom: 1px solid var(--gray-100);
+    font-size: .8rem;
     vertical-align: middle;
 }
-
-.table tbody tr:hover {
-    background: var(--gray-50);
+.table tbody tr:hover td {
+    background: var(--green-50);
+}
+.table tbody tr.warning {
+    background: var(--red-50);
 }
 
-.table tbody tr.table-warning {
-    background: rgba(245,158,11,0.05);
-}
-
-/* Room Badge */
+/* ══════════════════════════════════════════════
+   ROOM BADGE
+══════════════════════════════════════════════ */
 .room-badge {
     width: 48px;
     height: 48px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
+    border-radius: var(--r);
+    background: var(--green-600);
     color: white;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 16px;
-    box-shadow: 0 4px 8px rgba(42, 168, 116, 0.2);
+    font-size: .9rem;
+    font-family: var(--mono);
+    flex-shrink: 0;
 }
-
-/* Badges */
-.badge {
-    padding: 6px 12px;
-    border-radius: 30px;
-    font-size: 11px;
+.room-info {
+    margin-left: 12px;
+}
+.room-number {
     font-weight: 600;
-    letter-spacing: 0.3px;
+    font-size: .9rem;
+    color: var(--gray-800);
+}
+.room-type {
+    font-size: .65rem;
+    color: var(--gray-500);
 }
 
-.badge.bg-info {
-    background: rgba(42, 168, 116, 0.1) !important;
-    color: var(--primary-700);
-    border: 1px solid rgba(42, 168, 116, 0.2);
+/* ══════════════════════════════════════════════
+   BADGES
+══════════════════════════════════════════════ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: .65rem;
+    font-weight: 600;
 }
+.badge-green { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+.badge-red { background: var(--red-50); color: var(--red-500); border: 1.5px solid var(--red-100); }
+.badge-gray { background: var(--gray-100); color: var(--gray-600); border: 1.5px solid var(--gray-200); }
 
-.badge.bg-warning {
-    background: rgba(245,158,11,0.1) !important;
-    color: var(--warning-600);
-    border: 1px solid rgba(245,158,11,0.2);
-}
-
-/* Avatars */
+/* ══════════════════════════════════════════════
+   AVATAR
+══════════════════════════════════════════════ */
 .avatar-sm {
-    width: 32px;
-    height: 32px;
-}
-
-.avatar-lg {
-    width: 50px;
-    height: 50px;
-}
-
-.avatar-title {
-    width: 100%;
-    height: 100%;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--green-50);
+    color: var(--green-600);
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: .7rem;
     font-weight: 600;
-    border-radius: 50%;
+}
+.avatar-lg {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: var(--green-50);
+    color: var(--green-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 600;
 }
 
-.avatar-title.bg-light {
-    background: var(--primary-100) !important;
-    color: var(--primary-700);
+/* ══════════════════════════════════════════════
+   ACTION BUTTONS
+══════════════════════════════════════════════ */
+.action-group {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
 }
-
-.avatar-title.bg-success {
-    background: var(--success-500) !important;
-    color: white;
-}
-
-/* Action Buttons */
-.btn-group .btn {
-    width: 36px;
-    height: 36px;
-    padding: 0;
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--r);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px !important;
-    border: 2px solid var(--gray-200);
-    background: white;
-    color: var(--gray-600);
-    transition: var(--transition);
-    margin: 0 2px;
-}
-
-.btn-group .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-group .btn-outline-primary {
-    border-color: rgba(42, 168, 116, 0.3);
-    color: var(--primary-600);
-}
-
-.btn-group .btn-outline-primary:hover {
-    background: var(--primary-600);
-    border-color: var(--primary-600);
-    color: white;
-}
-
-.btn-group .btn-outline-warning {
-    border-color: rgba(245,158,11,0.3);
-    color: var(--warning-600);
-}
-
-.btn-group .btn-outline-warning:hover {
-    background: var(--warning-600);
-    border-color: var(--warning-600);
-    color: white;
-}
-
-.btn-group .btn-success {
-    background: var(--success-500);
-    border-color: var(--success-500);
-    color: white;
-}
-
-.btn-group .btn-success:hover {
-    background: #16a34a;
-    border-color: #16a34a;
-}
-
-/* Empty State */
-.empty-state {
-    padding: 60px 20px;
-    text-align: center;
-}
-
-.empty-state i {
-    font-size: 64px;
-    color: var(--primary-200);
-    margin-bottom: 20px;
-}
-
-.empty-state h4 {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--gray-700);
-    margin-bottom: 8px;
-}
-
-.empty-state p {
+    border: 1.5px solid var(--gray-200);
+    background: var(--white);
     color: var(--gray-500);
-    margin-bottom: 24px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.btn-icon:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
 }
 
-/* Secondary Cards */
+/* ══════════════════════════════════════════════
+   SECONDARY CARD
+══════════════════════════════════════════════ */
 .secondary-card {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--gray-200);
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
     height: 100%;
 }
-
-.secondary-card .card-header {
-    padding: 16px 20px;
+.secondary-header {
+    padding: 16px 18px;
+    border-bottom: 1.5px solid var(--gray-200);
     background: var(--gray-50);
-    border-bottom: 1px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
-
-.secondary-card .card-header i {
-    color: var(--primary-500);
+.secondary-header i {
+    color: var(--green-600);
 }
-
-.secondary-card .card-header strong {
+.secondary-header strong {
+    font-size: .85rem;
     color: var(--gray-700);
-    font-size: 14px;
 }
-
-/* Progress Bar */
-.progress {
-    height: 8px;
-    border-radius: 10px;
-    background: var(--gray-100);
+.list-group {
+    list-style: none;
+    padding: 0;
 }
-
-.progress-bar {
-    background: var(--primary-500);
-    border-radius: 10px;
+.list-item {
+    padding: 14px 18px;
+    border-bottom: 1.5px solid var(--gray-200);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-
-/* List Group */
-.list-group-item {
-    border: none;
-    border-bottom: 1px solid var(--gray-100);
-    padding: 16px 20px;
-    transition: var(--transition);
-}
-
-.list-group-item:last-child {
+.list-item:last-child {
     border-bottom: none;
 }
 
-.list-group-item:hover {
-    background: var(--gray-50);
+/* ══════════════════════════════════════════════
+   PROGRESS BAR
+══════════════════════════════════════════════ */
+.progress {
+    height: 6px;
+    background: var(--gray-100);
+    border-radius: 100px;
+    overflow: hidden;
+}
+.progress-bar {
+    height: 100%;
+    background: var(--green-600);
+    border-radius: 100px;
 }
 
-/* Responsive */
-@media (max-width: 1200px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+/* ══════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════ */
+.empty-state {
+    padding: 48px 24px;
+    text-align: center;
+}
+.empty-state i {
+    font-size: 3rem;
+    color: var(--green-500);
+    margin-bottom: 16px;
+}
+.empty-state h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 8px;
+}
+.empty-state p {
+    color: var(--gray-400);
+    margin-bottom: 20px;
 }
 
-@media (max-width: 768px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .page-header {
-        padding: 20px;
-    }
-    
-    .table-responsive {
-        border-radius: 12px;
-    }
+/* ══════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════ */
+.modal-content {
+    border-radius: var(--rxl);
+    border: 1.5px solid var(--gray-200);
+}
+.modal-header {
+    border-bottom: 1.5px solid var(--gray-200);
+    padding: 18px 22px;
+}
+.modal-title i {
+    color: var(--green-600);
+}
+.modal-body {
+    padding: 22px;
+}
+.modal-footer {
+    border-top: 1.5px solid var(--gray-200);
+    padding: 16px 22px;
+}
+.form-label {
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+.form-control, .form-select {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--r);
+    font-size: .8rem;
+}
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--green-400);
+    box-shadow: 0 0 0 3px rgba(46,133,64,.1);
+}
+.alert {
+    padding: 14px 18px;
+    border-radius: var(--rl);
+    border: 1.5px solid;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+.alert-green {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
 }
 </style>
-@endpush
 
-@section('content')
+<div class="maintenance-page">
 
-<div class="container-fluid px-4">
-    <!-- En-tête -->
-    <div class="page-header d-flex justify-content-between align-items-center">
-        <div>
-            <h1 class="h2 fw-bold">
-                <i class="fas fa-tools me-3" style="color: var(--primary-500);"></i>
-                Chambres en Maintenance
-            </h1>
-            <p class="text-muted mb-0">Gestion des chambres en réparation et maintenance</p>
+    {{-- Breadcrumb --}}
+    <div class="breadcrumb anim-1">
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <a href="{{ route('housekeeping.index') }}">Housekeeping</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <span class="current">Maintenance</span>
+    </div>
+
+    {{-- En-tête --}}
+    <div class="page-header anim-2">
+        <div class="header-title">
+            <span class="header-icon"><i class="fas fa-tools"></i></span>
+            <div>
+                <h1>Chambres en <em>maintenance</em></h1>
+                <p class="header-subtitle">Gestion des chambres en réparation</p>
+            </div>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('housekeeping.index') }}" class="btn btn-outline">
-                <i class="fas fa-arrow-left me-2"></i>
-                Retour
+            <a href="{{ route('housekeeping.index') }}" class="btn btn-gray">
+                <i class="fas fa-arrow-left"></i> Retour
             </a>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
-                <i class="fas fa-plus-circle me-2"></i>
-                Nouvelle Maintenance
+            <button class="btn btn-green" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
+                <i class="fas fa-plus-circle"></i> Nouvelle maintenance
             </button>
         </div>
     </div>
 
-    <!-- Statistiques -->
-    <div class="stats-grid">
+    {{-- Statistiques --}}
+    <div class="stats-grid anim-3">
         <div class="stat-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="stat-label">Total Maintenance</div>
-                    <div class="stat-number">{{ $stats['total_maintenance'] ?? 0 }}</div>
-                </div>
-                <div class="stat-icon">
-                    <i class="fas fa-tools fa-2x"></i>
-                </div>
+            <div class="stat-left">
+                <div class="stat-label">Total maintenance</div>
+                <div class="stat-number">{{ $stats['total_maintenance'] ?? 0 }}</div>
             </div>
-            <div class="mt-2">
-                <small class="text-muted">Chambres en maintenance actuellement</small>
-            </div>
+            <div class="stat-icon"><i class="fas fa-tools"></i></div>
         </div>
-
         <div class="stat-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="stat-label">Plus ancienne</div>
-                    <div class="stat-number" style="font-size: 20px;">
-                        @if(isset($stats['longest_maintenance']) && $stats['longest_maintenance'])
-                            {{ \Carbon\Carbon::parse($stats['longest_maintenance'])->diffForHumans(['parts' => 1]) }}
-                        @else
-                            N/A
-                        @endif
-                    </div>
-                </div>
-                <div class="stat-icon">
-                    <i class="fas fa-clock fa-2x"></i>
-                </div>
+            <div class="stat-left">
+                <div class="stat-label">En cours</div>
+                <div class="stat-number">{{ $stats['in_progress'] ?? 0 }}</div>
             </div>
-            <div class="mt-2">
-                <small class="text-muted">Durée de la plus ancienne maintenance</small>
-            </div>
+            <div class="stat-icon"><i class="fas fa-spinner"></i></div>
         </div>
-
         <div class="stat-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="stat-label">En cours</div>
-                    <div class="stat-number">{{ $stats['in_progress'] ?? 0 }}</div>
-                </div>
-                <div class="stat-icon">
-                    <i class="fas fa-spinner fa-2x"></i>
-                </div>
+            <div class="stat-left">
+                <div class="stat-label">Planifiées</div>
+                <div class="stat-number">{{ $stats['scheduled'] ?? 0 }}</div>
             </div>
-            <div class="mt-2">
-                <small class="text-muted">Maintenances en cours</small>
-            </div>
+            <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
         </div>
-
         <div class="stat-card">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <div class="stat-label">Planifiées</div>
-                    <div class="stat-number">{{ $stats['scheduled'] ?? 0 }}</div>
-                </div>
-                <div class="stat-icon">
-                    <i class="fas fa-calendar-alt fa-2x"></i>
+            <div class="stat-left">
+                <div class="stat-label">Plus ancienne</div>
+                <div class="stat-number" style="font-size:1rem;">
+                    @if(isset($stats['longest_maintenance']) && $stats['longest_maintenance'])
+                        {{ \Carbon\Carbon::parse($stats['longest_maintenance'])->diffForHumans(['parts' => 1]) }}
+                    @else
+                        N/A
+                    @endif
                 </div>
             </div>
-            <div class="mt-2">
-                <small class="text-muted">Maintenances planifiées</small>
-            </div>
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
         </div>
     </div>
 
-    <!-- Statistiques par raison -->
+    {{-- Répartition par raison --}}
     @if(isset($stats['maintenance_by_reason']) && count($stats['maintenance_by_reason']) > 0)
     <div class="row mb-4">
         <div class="col-12">
             <div class="secondary-card">
-                <div class="card-header">
-                    <i class="fas fa-chart-pie me-2"></i>
-                    <strong>Répartition par raison de maintenance</strong>
+                <div class="secondary-header">
+                    <i class="fas fa-chart-pie"></i>
+                    <strong>Répartition par raison</strong>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-3">
                     <div class="d-flex flex-wrap gap-2">
                         @foreach($stats['maintenance_by_reason'] as $reason => $count)
-                        <span class="badge" style="background: var(--primary-100); color: var(--primary-700); padding: 8px 16px;">
-                            <i class="fas fa-tag me-1"></i>
-                            {{ $reason }}: <strong>{{ $count }}</strong>
+                        <span class="badge badge-green">
+                            <i class="fas fa-tag"></i> {{ $reason }}: <strong>{{ $count }}</strong>
                         </span>
                         @endforeach
                     </div>
@@ -576,456 +635,262 @@ body {
     </div>
     @endif
 
-    <!-- Liste des chambres en maintenance -->
-    <div class="row">
-        <div class="col-12">
-            <div class="main-card">
-                <div class="card-header">
-                    <div>
-                        <i class="fas fa-tools me-2"></i>
-                        <strong>Chambres en maintenance ({{ $maintenanceRooms->count() }})</strong>
-                    </div>
-                    <div class="text-white-50">
-                        <small>Mis à jour: {{ now()->format('H:i') }}</small>
-                    </div>
-                </div>
-
-                @if($maintenanceRooms->count() > 0)
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Chambre</th>
-                                    <th>Type</th>
-                                    <th>Raison</th>
-                                    <th>Début</th>
-                                    <th>Durée</th>
-                                    <th>Demandé par</th>
-                                    <th style="text-align: center;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($maintenanceRooms as $room)
-                                @php
-                                    $startDate = \Carbon\Carbon::parse($room->maintenance_started_at);
-                                    $duration = $startDate->diffForHumans(now(), true);
-                                    $isLongTerm = $startDate->diffInDays(now()) > 3;
-                                @endphp
-                                <tr class="{{ $isLongTerm ? 'table-warning' : '' }}">
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="room-badge me-3">
-                                                {{ $room->number }}
-                                            </div>
-                                            <div>
-                                                <div class="fw-bold">{{ $room->type->name ?? 'Standard' }}</div>
-                                                <small class="text-muted">Étage: {{ $room->floor ?? 'N/A' }}</small>
-                                            </div>
+    {{-- Liste des chambres --}}
+    <div class="card">
+        <div class="card-header">
+            <div><i class="fas fa-tools"></i> Chambres en maintenance ({{ $maintenanceRooms->count() }})</div>
+            <span class="badge badge-green">{{ now()->format('H:i') }}</span>
+        </div>
+        <div class="card-body p-0">
+            @if($maintenanceRooms->count() > 0)
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Chambre</th>
+                                <th>Type</th>
+                                <th>Raison</th>
+                                <th>Début</th>
+                                <th>Durée</th>
+                                <th>Demandé par</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($maintenanceRooms as $room)
+                            @php
+                                $start = \Carbon\Carbon::parse($room->maintenance_started_at);
+                                $isLong = $start->diffInDays(now()) > 3;
+                            @endphp
+                            <tr class="{{ $isLong ? 'warning' : '' }}">
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="room-badge">{{ $room->number }}</div>
+                                        <div class="room-info">
+                                            <div class="room-number">{{ $room->type->name ?? 'Standard' }}</div>
+                                            <div class="room-type">Étage {{ $room->floor ?? '?' }}</div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <span class="badge" style="background: var(--primary-100); color: var(--primary-700);">
-                                            {{ $room->type->name ?? 'Standard' }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="text-truncate" style="max-width: 200px;" 
-                                             data-bs-toggle="tooltip" 
-                                             title="{{ $room->maintenance_reason }}">
-                                            {{ $room->maintenance_reason }}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="fw-bold">{{ $startDate->format('d/m/Y') }}</div>
-                                        <small class="text-muted">{{ $startDate->format('H:i') }}</small>
-                                    </td>
-                                    <td>
-                                        <span class="badge bg-{{ $isLongTerm ? 'warning' : 'info' }}">
-                                            <i class="fas fa-clock me-1"></i>
-                                            {{ $duration }}
-                                        </span>
-                                        @if($room->estimated_maintenance_duration)
-                                            <small class="d-block text-muted mt-1">
-                                                Estimé: {{ $room->estimated_maintenance_duration }}h
-                                            </small>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        @php
-                                            $requestedBy = \App\Models\User::find($room->maintenance_requested_by);
-                                        @endphp
-                                        @if($requestedBy)
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar-sm me-2">
-                                                    <div class="avatar-title bg-light">
-                                                        {{ substr($requestedBy->name, 0, 1) }}
-                                                    </div>
-                                                </div>
-                                                <div>
-                                                    <div class="fw-bold small">{{ $requestedBy->name }}</div>
-                                                    <small class="text-muted">{{ $requestedBy->role }}</small>
-                                                </div>
-                                            </div>
-                                        @else
-                                            <span class="text-muted">Inconnu</span>
-                                        @endif
-                                    </td>
-                                    <td style="text-align: center;">
-                                        <div class="btn-group" role="group">
-                                            <button class="btn btn-outline-primary"
-                                                    data-bs-toggle="modal" 
-                                                    data-bs-target="#detailsModal{{ $room->id }}"
-                                                    title="Voir détails">
-                                                <i class="fas fa-eye"></i>
+                                    </div>
+                                </td>
+                                <td><span class="badge badge-gray">{{ $room->type->name ?? 'Standard' }}</span></td>
+                                <td>{{ Str::limit($room->maintenance_reason, 30) }}</td>
+                                <td>
+                                    <div>{{ $start->format('d/m/Y') }}</div>
+                                    <small class="text-muted">{{ $start->format('H:i') }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge {{ $isLong ? 'badge-red' : 'badge-green' }}">
+                                        <i class="fas fa-clock"></i> {{ $start->diffForHumans(now(), true) }}
+                                    </span>
+                                </td>
+                                <td>
+                                    @php $req = \App\Models\User::find($room->maintenance_requested_by); @endphp
+                                    @if($req)
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar-sm">{{ substr($req->name, 0, 1) }}</div>
+                                        <span>{{ $req->name }}</span>
+                                    </div>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="action-group">
+                                        <button class="btn-icon" data-bs-toggle="modal" data-bs-target="#detailsModal{{ $room->id }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <a href="{{ route('housekeeping.maintenance-form', $room->id) }}" class="btn-icon">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form action="{{ route('housekeeping.end-maintenance', $room->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button class="btn-icon" style="color:var(--green-600);" onclick="return confirm('Terminer la maintenance ?')">
+                                                <i class="fas fa-check"></i>
                                             </button>
-                                            <a href="{{ route('housekeeping.maintenance-form', $room->id) }}"
-                                               class="btn btn-outline-warning"
-                                               title="Modifier">
-                                                <i class="fas fa-edit"></i>
-                                            </a>
-                                            <form action="{{ route('housekeeping.end-maintenance', $room->id) }}" 
-                                                  method="POST" class="d-inline">
-                                                @csrf
-                                                <button type="submit" 
-                                                        class="btn btn-success"
-                                                        title="Terminer"
-                                                        onclick="return confirm('Terminer la maintenance de la chambre {{ $room->number }} ?')">
-                                                    <i class="fas fa-check"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @else
-                    <div class="empty-state">
-                        <i class="fas fa-check-circle"></i>
-                        <h4>Aucune chambre en maintenance</h4>
-                        <p>Toutes les chambres sont opérationnelles</p>
-                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
-                            <i class="fas fa-plus-circle me-2"></i>
-                            Ajouter une maintenance
-                        </button>
-                    </div>
-                @endif
-            </div>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="empty-state">
+                    <i class="fas fa-check-circle" style="color:var(--green-600);"></i>
+                    <h4>Aucune chambre en maintenance</h4>
+                    <p>Toutes les chambres sont opérationnelles</p>
+                    <button class="btn btn-green" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
+                        <i class="fas fa-plus-circle"></i> Ajouter
+                    </button>
+                </div>
+            @endif
         </div>
     </div>
 
-    <!-- Résumé et analyses -->
+    {{-- Analyses supplémentaires --}}
     @if($maintenanceRooms->count() > 0)
-    <div class="row mt-4">
+    <div class="row g-4 mt-3">
         <div class="col-md-6">
             <div class="secondary-card">
-                <div class="card-header">
-                    <i class="fas fa-exclamation-triangle me-2" style="color: var(--warning-500);"></i>
-                    <strong>Maintenance longue durée (> 3 jours)</strong>
+                <div class="secondary-header">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Maintenance longue durée (>3 jours)</strong>
                 </div>
-                <div class="card-body p-0">
-                    @php
-                        $longTerm = $maintenanceRooms->filter(function($room) {
-                            return \Carbon\Carbon::parse($room->maintenance_started_at)->diffInDays(now()) > 3;
-                        });
-                    @endphp
-                    @if($longTerm->count() > 0)
-                        <div class="list-group list-group-flush">
-                            @foreach($longTerm as $room)
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h6 class="mb-1 fw-bold">
-                                            <span class="room-badge me-2" style="width: 32px; height: 32px; font-size: 14px;">
-                                                {{ $room->number }}
-                                            </span>
-                                            {{ $room->type->name ?? 'Standard' }}
-                                        </h6>
-                                        <small class="text-muted">{{ $room->maintenance_reason }}</small>
-                                    </div>
-                                    <div class="text-end">
-                                        <span class="badge" style="background: rgba(239,68,68,0.1); color: var(--danger-500);">
-                                            <i class="fas fa-clock me-1"></i>
-                                            {{ \Carbon\Carbon::parse($room->maintenance_started_at)->diffForHumans(now(), true) }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            @endforeach
+                <div class="list-group">
+                    @php $long = $maintenanceRooms->filter(fn($r) => \Carbon\Carbon::parse($r->maintenance_started_at)->diffInDays(now()) > 3); @endphp
+                    @forelse($long as $room)
+                        <div class="list-item">
+                            <span class="fw-semibold">Chambre {{ $room->number }}</span>
+                            <span class="badge badge-red">{{ \Carbon\Carbon::parse($room->maintenance_started_at)->diffForHumans(now(), true) }}</span>
                         </div>
-                    @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-check-circle fa-3x" style="color: var(--primary-200); margin-bottom: 12px;"></i>
-                            <p class="text-muted mb-0">Aucune maintenance longue durée</p>
-                        </div>
-                    @endif
+                    @empty
+                        <div class="p-4 text-center text-muted">Aucune</div>
+                    @endforelse
                 </div>
             </div>
         </div>
-
         <div class="col-md-6">
             <div class="secondary-card">
-                <div class="card-header">
-                    <i class="fas fa-chart-pie me-2"></i>
-                    <strong>Répartition par type de chambre</strong>
+                <div class="secondary-header">
+                    <i class="fas fa-chart-pie"></i>
+                    <strong>Répartition par type</strong>
                 </div>
-                <div class="card-body">
-                    @php
-                        $byType = $maintenanceRooms->groupBy(function($room) {
-                            return $room->type->name ?? 'Inconnu';
-                        })->map->count();
-                    @endphp
-                    @if($byType->count() > 0)
-                        @foreach($byType as $type => $count)
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold" style="color: var(--gray-700);">{{ $type }}</span>
-                                <span class="badge" style="background: var(--primary-100); color: var(--primary-700);">
-                                    {{ $count }} chambre(s)
-                                </span>
+                <div class="card-body p-3">
+                    @php $byType = $maintenanceRooms->groupBy(fn($r) => $r->type->name ?? 'Inconnu')->map->count(); @endphp
+                    @foreach($byType as $type => $count)
+                        @php $pct = ($count / $maintenanceRooms->count()) * 100; @endphp
+                        <div class="mb-2">
+                            <div class="d-flex justify-content-between small">
+                                <span>{{ $type }}</span>
+                                <span class="fw-bold">{{ $count }}</span>
                             </div>
-                            <div class="progress">
-                                @php
-                                    $percentage = ($count / $maintenanceRooms->count()) * 100;
-                                @endphp
-                                <div class="progress-bar" style="width: {{ $percentage }}%;"></div>
-                            </div>
+                            <div class="progress"><div class="progress-bar" style="width:{{ $pct }}%"></div></div>
                         </div>
-                        @endforeach
-                    @else
-                        <div class="text-center py-4">
-                            <i class="fas fa-chart-pie fa-3x" style="color: var(--primary-200); margin-bottom: 12px;"></i>
-                            <p class="text-muted mb-0">Aucune donnée disponible</p>
-                        </div>
-                    @endif
+                    @endforeach
                 </div>
             </div>
         </div>
     </div>
     @endif
+
 </div>
 
-<!-- Modal Ajouter Maintenance -->
-<div class="modal fade" id="addMaintenanceModal" tabindex="-1" aria-hidden="true">
+{{-- Modal ajout maintenance --}}
+<div class="modal fade" id="addMaintenanceModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 20px;">
-            <div class="modal-header" style="border-bottom: 1px solid var(--gray-200);">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-plus-circle me-2" style="color: var(--primary-500);"></i>
-                    Ajouter une maintenance
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus-circle" style="color:var(--green-600);"></i> Nouvelle maintenance</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="" method="POST" id="addMaintenanceForm">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="room_select" class="form-label fw-semibold">Chambre *</label>
-                        <select class="form-select" id="room_select" name="room_id" required>
-                            <option value="">Sélectionner une chambre</option>
-                            @php
-                                $availableRooms = \App\Models\Room::where('room_status_id', '!=', \App\Models\Room::STATUS_MAINTENANCE)
-                                    ->orderBy('number')
-                                    ->get();
-                            @endphp
-                            @foreach($availableRooms as $room)
-                                <option value="{{ $room->id }}">
-                                    Chambre {{ $room->number }} - {{ $room->type->name ?? 'Standard' }}
-                                </option>
+                        <label class="form-label">Chambre</label>
+                        <select class="form-select" name="room_id" required>
+                            <option value="">-- Sélectionner --</option>
+                            @php $rooms = \App\Models\Room::where('room_status_id', '!=', 2)->orderBy('number')->get(); @endphp
+                            @foreach($rooms as $r)
+                                <option value="{{ $r->id }}">Chambre {{ $r->number }} - {{ $r->type->name ?? 'Standard' }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="maintenance_reason" class="form-label fw-semibold">Raison de la maintenance *</label>
-                        <select class="form-select" id="maintenance_reason" name="maintenance_reason" required>
-                            <option value="">Sélectionner une raison</option>
-                            <option value="Électricité">Problème électrique</option>
-                            <option value="Plomberie">Fuite d'eau / Plomberie</option>
-                            <option value="Climatisation">Climatisation défectueuse</option>
-                            <option value="Meuble">Meuble cassé / Réparation</option>
-                            <option value="Sécurité">Problème de sécurité (serrure, fenêtre)</option>
-                            <option value="Peinture">Peinture / Rénovation</option>
-                            <option value="Sol">Sol / Tapis à remplacer</option>
-                            <option value="Salle de bain">Salle de bain (sanitaires)</option>
-                            <option value="Nettoyage profond">Nettoyage profond nécessaire</option>
-                            <option value="Autre">Autre raison</option>
+                        <label class="form-label">Raison</label>
+                        <select class="form-select" name="maintenance_reason" required>
+                            <option value="">-- Sélectionner --</option>
+                            <option value="Électricité">Électricité</option>
+                            <option value="Plomberie">Plomberie</option>
+                            <option value="Climatisation">Climatisation</option>
+                            <option value="Meuble">Meuble</option>
+                            <option value="Sécurité">Sécurité</option>
+                            <option value="Peinture">Peinture</option>
+                            <option value="Sol">Sol</option>
+                            <option value="Salle de bain">Salle de bain</option>
+                            <option value="Autre">Autre</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="estimated_duration" class="form-label fw-semibold">Durée estimée (heures) *</label>
-                        <input type="number" class="form-control" id="estimated_duration" 
-                               name="estimated_duration" min="1" max="168" value="4" required>
-                        <small class="text-muted">Entre 1 et 168 heures (1 semaine)</small>
+                        <label class="form-label">Durée estimée (heures)</label>
+                        <input type="number" class="form-control" name="estimated_duration" min="1" max="168" value="4">
                     </div>
                     <div class="mb-3">
-                        <label for="additional_notes" class="form-label fw-semibold">Notes supplémentaires</label>
-                        <textarea class="form-control" id="additional_notes" name="additional_notes" 
-                                  rows="3" placeholder="Détails supplémentaires..."></textarea>
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="additional_notes" rows="2"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer" style="border-top: 1px solid var(--gray-200);">
-                    <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-tools me-2"></i>
-                        Ajouter la maintenance
-                    </button>
+                <div class="modal-footer">
+                    <button class="btn btn-gray" data-bs-dismiss="modal">Annuler</button>
+                    <button class="btn btn-green" type="submit">Ajouter</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- Modals pour détails -->
+{{-- Modals détails --}}
 @foreach($maintenanceRooms as $room)
-<div class="modal fade" id="detailsModal{{ $room->id }}" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="detailsModal{{ $room->id }}" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content" style="border-radius: 20px;">
-            <div class="modal-header" style="border-bottom: 1px solid var(--gray-200);">
-                <h5 class="modal-title fw-bold">
-                    <i class="fas fa-info-circle me-2" style="color: var(--primary-500);"></i>
-                    Détails maintenance - Chambre {{ $room->number }}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-info-circle" style="color:var(--green-600);"></i> Détails - Chambre {{ $room->number }}</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="row">
+                <div class="row mb-4">
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="text-muted small mb-1">Chambre</label>
-                            <div class="d-flex align-items-center">
-                                <div class="room-badge me-3" style="width: 48px; height: 48px;">
-                                    {{ $room->number }}
-                                </div>
-                                <div>
-                                    <div class="fw-bold fs-5">{{ $room->type->name ?? 'Standard' }}</div>
-                                    <small class="text-muted">Étage: {{ $room->floor ?? 'N/A' }}</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="text-muted small mb-1">Capacité</label>
-                            <div class="fw-bold">
-                                <i class="fas fa-users me-2" style="color: var(--primary-500);"></i>
-                                {{ $room->capacity }} personnes
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="room-badge">{{ $room->number }}</div>
+                            <div>
+                                <h6>{{ $room->type->name ?? 'Standard' }}</h6>
+                                <small class="text-muted">Étage {{ $room->floor ?? '?' }}</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="mb-3">
-                            <label class="text-muted small mb-1">Statut</label>
-                            <div>
-                                <span class="badge" style="background: var(--primary-100); color: var(--primary-700); padding: 8px 16px;">
-                                    <i class="fas fa-tools me-1"></i>
-                                    EN MAINTENANCE
-                                </span>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="text-muted small mb-1">Début maintenance</label>
-                            <div class="fw-bold">
-                                <i class="fas fa-calendar me-2" style="color: var(--primary-500);"></i>
-                                {{ \Carbon\Carbon::parse($room->maintenance_started_at)->format('d/m/Y H:i') }}
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="text-muted small mb-1">Durée</label>
-                            <div class="fw-bold">
-                                <i class="fas fa-clock me-2" style="color: var(--primary-500);"></i>
-                                {{ \Carbon\Carbon::parse($room->maintenance_started_at)->diffForHumans(now(), true) }}
-                                @if($room->estimated_maintenance_duration)
-                                    <small class="d-block text-muted mt-1">
-                                        Estimé: {{ $room->estimated_maintenance_duration }} heures
-                                    </small>
-                                @endif
-                            </div>
-                        </div>
+                        <span class="badge badge-red"><i class="fas fa-tools"></i> EN MAINTENANCE</span>
                     </div>
                 </div>
-                
-                <div class="mb-3">
-                    <label class="text-muted small mb-1">Raison de la maintenance</label>
-                    <div class="alert" style="background: var(--primary-50); border: 1px solid var(--primary-100); color: var(--primary-700);">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        {{ $room->maintenance_reason }}
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <small class="text-muted">Début</small>
+                        <div class="fw-bold">{{ \Carbon\Carbon::parse($room->maintenance_started_at)->format('d/m/Y H:i') }}</div>
                     </div>
-                </div>
-                
-                @if($room->additional_notes)
-                <div class="mb-3">
-                    <label class="text-muted small mb-1">Notes supplémentaires</label>
-                    <div class="card bg-light" style="border: none;">
-                        <div class="card-body">
-                            {{ $room->additional_notes }}
-                        </div>
+                    <div class="col-sm-6">
+                        <small class="text-muted">Durée</small>
+                        <div class="fw-bold">{{ \Carbon\Carbon::parse($room->maintenance_started_at)->diffForHumans(now(), true) }}</div>
                     </div>
-                </div>
-                @endif
-                
-                <div class="row">
-                    <div class="col-md-6">
-                        <label class="text-muted small mb-1">Demandé par</label>
-                        @php
-                            $requestedBy = \App\Models\User::find($room->maintenance_requested_by);
-                        @endphp
-                        @if($requestedBy)
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-lg me-3">
-                                <div class="avatar-title bg-light">
-                                    {{ substr($requestedBy->name, 0, 1) }}
-                                </div>
-                            </div>
-                            <div>
-                                <div class="fw-bold">{{ $requestedBy->name }}</div>
-                                <div class="text-muted small">{{ $requestedBy->email }}</div>
-                                <span class="badge" style="background: var(--primary-100); color: var(--primary-700);">
-                                    {{ $requestedBy->role }}
-                                </span>
-                            </div>
-                        </div>
-                        @else
-                        <span class="text-muted">Inconnu</span>
-                        @endif
+                    <div class="col-12">
+                        <small class="text-muted">Raison</small>
+                        <div class="alert alert-green mt-1">{{ $room->maintenance_reason }}</div>
                     </div>
-                    @if($room->maintenance_resolved_by)
-                    <div class="col-md-6">
-                        <label class="text-muted small mb-1">Résolu par</label>
-                        @php
-                            $resolvedBy = \App\Models\User::find($room->maintenance_resolved_by);
-                        @endphp
-                        @if($resolvedBy)
-                        <div class="d-flex align-items-center">
-                            <div class="avatar-lg me-3">
-                                <div class="avatar-title" style="background: var(--success-500); color: white;">
-                                    {{ substr($resolvedBy->name, 0, 1) }}
-                                </div>
-                            </div>
-                            <div>
-                                <div class="fw-bold">{{ $resolvedBy->name }}</div>
-                                <div class="text-muted small">{{ $resolvedBy->email }}</div>
-                                <span class="badge" style="background: var(--success-500); color: white;">
-                                    {{ $resolvedBy->role }}
-                                </span>
-                            </div>
-                        </div>
-                        @endif
+                    @if($room->additional_notes)
+                    <div class="col-12">
+                        <small class="text-muted">Notes</small>
+                        <div class="bg-light p-3 rounded">{{ $room->additional_notes }}</div>
                     </div>
                     @endif
+                    <div class="col-sm-6">
+                        <small class="text-muted">Demandé par</small>
+                        @php $req = \App\Models\User::find($room->maintenance_requested_by); @endphp
+                        @if($req)
+                        <div class="d-flex align-items-center gap-2 mt-1">
+                            <div class="avatar-lg">{{ substr($req->name, 0, 1) }}</div>
+                            <div>{{ $req->name }}</div>
+                        </div>
+                        @endif
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer" style="border-top: 1px solid var(--gray-200);">
-                <button type="button" class="btn btn-outline" data-bs-dismiss="modal">Fermer</button>
-                <a href="{{ route('housekeeping.maintenance-form', $room->id) }}" class="btn btn-warning">
-                    <i class="fas fa-edit me-2"></i>
-                    Modifier
-                </a>
+            <div class="modal-footer">
+                <button class="btn btn-gray" data-bs-dismiss="modal">Fermer</button>
+                <a href="{{ route('housekeeping.maintenance-form', $room->id) }}" class="btn btn-green">Modifier</a>
                 <form action="{{ route('housekeeping.end-maintenance', $room->id) }}" method="POST" class="d-inline">
                     @csrf
-                    <button type="submit" class="btn btn-success"
-                            onclick="return confirm('Terminer la maintenance de la chambre {{ $room->number }} ?')">
-                        <i class="fas fa-check me-2"></i>
-                        Terminer
-                    </button>
+                    <button class="btn btn-red" onclick="return confirm('Terminer la maintenance ?')">Terminer</button>
                 </form>
             </div>
         </div>
@@ -1033,65 +898,20 @@ body {
 </div>
 @endforeach
 
-@endsection
-
-@push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialiser les tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-    
-    // Gestion du formulaire d'ajout de maintenance
-    const addMaintenanceForm = document.getElementById('addMaintenanceForm');
-    if (addMaintenanceForm) {
-        addMaintenanceForm.addEventListener('submit', function(e) {
-            const roomId = document.getElementById('room_select').value;
-            const reason = document.getElementById('maintenance_reason').value;
-            const duration = document.getElementById('estimated_duration').value;
-            
-            if (!roomId || !reason || !duration) {
-                e.preventDefault();
-                alert('Veuillez remplir tous les champs obligatoires');
-                return false;
-            }
-            
-            if (duration < 1 || duration > 168) {
-                e.preventDefault();
-                alert('La durée estimée doit être entre 1 et 168 heures');
-                return false;
-            }
-            
-            // Construire l'URL correcte
-            const action = "{{ route('housekeeping.mark-maintenance', ':roomId') }}".replace(':roomId', roomId);
-            addMaintenanceForm.setAttribute('action', action);
-            
-            // Confirmation
-            if (!confirm('Êtes-vous sûr de vouloir mettre cette chambre en maintenance ?')) {
-                e.preventDefault();
-                return false;
-            }
-        });
+document.getElementById('addMaintenanceForm')?.addEventListener('submit', function(e) {
+    const room = this.querySelector('[name="room_id"]').value;
+    const reason = this.querySelector('[name="maintenance_reason"]').value;
+    if (!room || !reason) {
+        e.preventDefault();
+        alert('Veuillez remplir tous les champs');
+    } else {
+        const action = "{{ route('housekeeping.mark-maintenance', ':roomId') }}".replace(':roomId', room);
+        this.setAttribute('action', action);
     }
-    
-    // Auto-select "Autre" si on entre du texte
-    const maintenanceReasonSelect = document.getElementById('maintenance_reason');
-    const additionalNotes = document.getElementById('additional_notes');
-    
-    if (maintenanceReasonSelect && additionalNotes) {
-        additionalNotes.addEventListener('input', function() {
-            if (this.value.trim() !== '' && maintenanceReasonSelect.value === '') {
-                maintenanceReasonSelect.value = 'Autre';
-            }
-        });
-    }
-    
-    // Rafraîchissement automatique toutes les 2 minutes
-    setTimeout(function() {
-        window.location.reload();
-    }, 120000);
 });
+
+setTimeout(() => window.location.reload(), 120000);
 </script>
-@endpush
+
+@endsection
