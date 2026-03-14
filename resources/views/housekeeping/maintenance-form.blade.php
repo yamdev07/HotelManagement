@@ -3,73 +3,499 @@
 @section('title', 'Signalement Maintenance - Chambre ' . $room->number)
 
 @section('content')
-<div class="container-fluid">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+    /* ── 4 COULEURS (vert, rouge, gris, blanc) ── */
+    --green-50:  #f0faf0;
+    --green-100: #d4edda;
+    --green-500: #2e8540;
+    --green-600: #1e6b2e;
+    --green-700: #155221;
+
+    --red-50:    #fee2e2;
+    --red-100:   #fecaca;
+    --red-500:   #b91c1c;
+    --red-600:   #991b1b;
+
+    --gray-50:   #f8f9f8;
+    --gray-100:  #eff0ef;
+    --gray-200:  #dde0dd;
+    --gray-300:  #c2c7c2;
+    --gray-400:  #9ba09b;
+    --gray-500:  #737873;
+    --gray-600:  #545954;
+    --gray-700:  #3a3e3a;
+    --gray-800:  #252825;
+    --gray-900:  #131513;
+
+    --white:     #ffffff;
+    --surface:   #f7f9f7;
+
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s ease;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.maintenance-page {
+    background: var(--surface);
+    min-height: 100vh;
+    padding: 24px 32px;
+    font-family: var(--font);
+    color: var(--gray-800);
+}
+
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+
+/* ══════════════════════════════════════════════
+   BREADCRUMB
+══════════════════════════════════════════════ */
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .8rem;
+    color: var(--gray-400);
+    margin-bottom: 20px;
+}
+.breadcrumb a {
+    color: var(--gray-400);
+    text-decoration: none;
+    transition: var(--transition);
+}
+.breadcrumb a:hover {
+    color: var(--green-600);
+}
+.breadcrumb .sep {
+    color: var(--gray-300);
+}
+.breadcrumb .current {
+    color: var(--gray-600);
+    font-weight: 500;
+}
+
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.header-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--green-600);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 10px rgba(46,133,64,.3);
+}
+.header-title h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+}
+.header-title em {
+    font-style: normal;
+    color: var(--green-600);
+}
+.header-subtitle {
+    color: var(--gray-500);
+    font-size: .8rem;
+    margin: 6px 0 0 60px;
+}
+
+/* ══════════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════════ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--r);
+    font-size: .8rem;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: var(--transition);
+    text-decoration: none;
+}
+.btn-green {
+    background: var(--green-600);
+    color: white;
+}
+.btn-green:hover {
+    background: var(--green-700);
+    transform: translateY(-1px);
+    color: white;
+}
+.btn-red {
+    background: var(--red-500);
+    color: white;
+}
+.btn-red:hover {
+    background: var(--red-600);
+    transform: translateY(-1px);
+    color: white;
+}
+.btn-gray {
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+}
+.btn-gray:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+}
+.btn-outline {
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+}
+.btn-outline:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+}
+.btn-sm {
+    padding: 6px 12px;
+    font-size: .7rem;
+}
+.btn-lg {
+    padding: 12px 24px;
+    font-size: .9rem;
+}
+
+/* ══════════════════════════════════════════════
+   CARD
+══════════════════════════════════════════════ */
+.card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rxl);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+.card-header {
+    padding: 16px 20px;
+    border-bottom: 1.5px solid var(--gray-200);
+    background: var(--red-500);
+    color: white;
+}
+.card-header i {
+    color: white;
+}
+.card-body {
+    padding: 24px;
+}
+.card-footer {
+    padding: 16px 20px;
+    border-top: 1.5px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+/* ══════════════════════════════════════════════
+   ALERT
+══════════════════════════════════════════════ */
+.alert {
+    padding: 16px 20px;
+    border-radius: var(--rl);
+    border: 1.5px solid;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+.alert-info {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+}
+.alert-warning {
+    background: var(--red-50);
+    border-color: var(--red-100);
+    color: var(--red-500);
+}
+.alert-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+.alert-content {
+    flex: 1;
+}
+.alert-content h6 {
+    font-size: .85rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.room-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: .65rem;
+    font-weight: 600;
+}
+.room-badge.warning { background: var(--red-50); color: var(--red-500); border: 1.5px solid var(--red-100); }
+.room-badge.info { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+
+/* ══════════════════════════════════════════════
+   FORM
+══════════════════════════════════════════════ */
+.form-group {
+    margin-bottom: 24px;
+}
+.form-label {
+    display: block;
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 8px;
+}
+.form-label i {
+    color: var(--green-600);
+    width: 20px;
+}
+.form-control, .form-select {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--r);
+    font-size: .85rem;
+    transition: var(--transition);
+    background: var(--white);
+}
+.form-control:focus, .form-select:focus {
+    outline: none;
+    border-color: var(--green-400);
+    box-shadow: 0 0 0 3px rgba(46,133,64,.1);
+}
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+.input-group {
+    display: flex;
+    align-items: center;
+}
+.input-group .form-control {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+.input-group-text {
+    background: var(--gray-50);
+    border: 1.5px solid var(--gray-200);
+    border-left: none;
+    padding: 12px 16px;
+    border-radius: var(--r);
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    color: var(--gray-600);
+}
+
+/* ══════════════════════════════════════════════
+   URGENCY CARDS
+══════════════════════════════════════════════ */
+.urgency-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.urgency-card {
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--white);
+}
+.urgency-card:hover {
+    border-color: var(--green-300);
+    transform: translateY(-2px);
+}
+.urgency-card.selected {
+    border-color: var(--green-600);
+    background: var(--green-50);
+}
+.urgency-icon {
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+.urgency-icon.low { color: var(--green-600); }
+.urgency-icon.medium { color: var(--red-500); }
+.urgency-icon.high { color: var(--red-500); }
+.urgency-title {
+    font-size: .8rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 2px;
+}
+.urgency-desc {
+    font-size: .65rem;
+    color: var(--gray-500);
+}
+.radio-input {
+    display: none;
+}
+
+/* ══════════════════════════════════════════════
+   PHOTO UPLOAD
+══════════════════════════════════════════════ */
+.upload-area {
+    border: 1.5px dashed var(--gray-300);
+    border-radius: var(--rl);
+    padding: 32px;
+    text-align: center;
+    background: var(--gray-50);
+    cursor: pointer;
+    transition: var(--transition);
+}
+.upload-area:hover {
+    border-color: var(--green-400);
+    background: var(--green-50);
+}
+.upload-icon {
+    font-size: 2.5rem;
+    color: var(--green-600);
+    margin-bottom: 12px;
+}
+.photo-preview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+}
+.photo-item {
+    position: relative;
+    border-radius: var(--r);
+    overflow: hidden;
+}
+.photo-item img {
+    width: 100%;
+    height: 80px;
+    object-fit: cover;
+}
+.photo-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 24px;
+    height: 24px;
+    background: var(--red-500);
+    color: white;
+    border: none;
+    border-radius: var(--r);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .maintenance-page { padding: 16px; }
+    .urgency-grid { grid-template-columns: 1fr; }
+    .photo-preview { grid-template-columns: repeat(2, 1fr); }
+}
+</style>
+
+<div class="maintenance-page">
+
+    {{-- Breadcrumb --}}
+    <div class="breadcrumb anim-1">
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <a href="{{ route('housekeeping.index') }}">Housekeeping</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <a href="{{ route('availability.room.detail', $room->id) }}">Chambre {{ $room->number }}</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <span class="current">Maintenance</span>
+    </div>
+
+    {{-- En-tête --}}
+    <div class="page-header anim-2">
+        <div>
+            <div class="header-title">
+                <span class="header-icon"><i class="fas fa-tools"></i></span>
+                <h1>Signalement <em>maintenance</em></h1>
+            </div>
+            <p class="header-subtitle">Chambre {{ $room->number }}</p>
+        </div>
+        <a href="{{ url()->previous() }}" class="btn btn-gray">
+            <i class="fas fa-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    {{-- Formulaire --}}
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-            <!-- En-tête -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <h1 class="h2 fw-bold text-dark">
-                                <i class="fas fa-tools me-2 text-warning"></i>
-                                Signalement de maintenance
-                            </h1>
-                            <p class="text-muted mb-0">Chambre {{ $room->number }}</p>
+        <div class="col-lg-8">
+
+            {{-- Infos chambre --}}
+            <div class="alert alert-info mb-4">
+                <div class="alert-icon"><i class="fas fa-door-closed"></i></div>
+                <div class="alert-content">
+                    <h6>Chambre {{ $room->number }}</h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <small><i class="fas fa-layer-group" style="color:var(--green-600);"></i> Type: {{ $room->type->name ?? 'Standard' }}</small>
                         </div>
-                        <a href="{{ url()->previous() }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-2"></i>
-                            Retour
-                        </a>
+                        <div class="col-md-6">
+                            <small><i class="fas fa-bed" style="color:var(--green-600);"></i> Statut: 
+                                <span class="room-badge {{ $room->room_status_id == 2 ? 'warning' : 'info' }}">
+                                    {{ $room->roomStatus->name ?? 'Inconnu' }}
+                                </span>
+                            </small>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Formulaire -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <strong>Détails de la maintenance</strong>
+            {{-- Carte formulaire --}}
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-exclamation-triangle"></i> Détails de la maintenance
                 </div>
                 <div class="card-body">
-                    <!-- Infos chambre -->
-                    <div class="alert alert-info mb-4">
-                        <div class="d-flex">
-                            <i class="fas fa-door-closed fa-2x me-3 mt-1"></i>
-                            <div>
-                                <h6 class="alert-heading">Chambre {{ $room->number }}</h6>
-                                <div class="row mt-2">
-                                    <div class="col-md-6">
-                                        <small class="d-block">
-                                            <i class="fas fa-layer-group me-2"></i>
-                                            Type: {{ $room->type->name ?? 'Standard' }}
-                                        </small>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <small class="d-block">
-                                            <i class="fas fa-bed me-2"></i>
-                                            Statut: 
-                                            <span class="badge bg-{{ $room->room_status_id == \App\Models\Room::STATUS_MAINTENANCE ? 'warning' : 'info' }}">
-                                                {{ $room->roomStatus->name ?? 'Inconnu' }}
-                                            </span>
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <form action="{{ route('housekeeping.mark-maintenance', $room->id) }}" method="POST" id="maintenanceForm">
+                    <form action="{{ route('housekeeping.mark-maintenance', $room->id) }}" method="POST" id="maintenanceForm" enctype="multipart/form-data">
                         @csrf
-                        
-                        <!-- Raison -->
-                        <div class="mb-4">
-                            <label for="maintenance_reason" class="form-label fw-bold">
-                                <i class="fas fa-clipboard-list me-2 text-primary"></i>
-                                Type de problème
-                            </label>
-                            <select class="form-select form-select-lg" id="maintenance_reason" name="maintenance_reason" required>
-                                <option value="">Sélectionner le type de problème...</option>
+
+                        {{-- Raison --}}
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-clipboard-list"></i> Type de problème</label>
+                            <select class="form-select" name="maintenance_reason" required>
+                                <option value="">Sélectionner...</option>
                                 <optgroup label="Problèmes techniques">
                                     <option value="Électricité">Problème électrique</option>
                                     <option value="Plomberie">Fuite d'eau / Plomberie</option>
@@ -85,242 +511,164 @@
                                     <option value="Fenêtre">Fenêtre / Store</option>
                                     <option value="Serrure">Problème de serrure</option>
                                 </optgroup>
-                                <optgroup label="Nettoyage">
-                                    <option value="Nettoyage profond">Nettoyage profond nécessaire</option>
-                                    <option value="Désinfection">Désinfection requise</option>
-                                    <option value="Odeur">Problème d'odeur</option>
-                                </optgroup>
                                 <option value="Autre">Autre problème</option>
                             </select>
                         </div>
 
-                        <!-- Description détaillée -->
-                        <div class="mb-4">
-                            <label for="detailed_description" class="form-label fw-bold">
-                                <i class="fas fa-align-left me-2 text-primary"></i>
-                                Description détaillée
-                            </label>
-                            <textarea class="form-control" id="detailed_description" 
-                                      name="detailed_description" 
-                                      rows="4" 
-                                      placeholder="Décrivez le problème en détail..."></textarea>
-                            <small class="text-muted">
-                                Inclure toutes les informations utiles pour l'équipe de maintenance
-                            </small>
+                        {{-- Description --}}
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-align-left"></i> Description détaillée</label>
+                            <textarea class="form-control" name="detailed_description" rows="4" placeholder="Décrivez le problème..."></textarea>
                         </div>
 
-                        <!-- Urgence -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-exclamation me-2 text-primary"></i>
-                                Niveau d'urgence
-                            </label>
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="form-check card border h-100">
-                                        <input class="form-check-input" type="radio" name="urgency" id="urgency_low" value="low" checked>
-                                        <label class="form-check-label card-body" for="urgency_low">
-                                            <div class="d-flex align-items-center">
-                                                <i class="fas fa-flag text-success fa-2x me-3"></i>
-                                                <div>
-                                                    <h6 class="mb-1">Basse</h6>
-                                                    <small class="text-muted">Problème mineur</small>
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-check card border h-100">
-                                        <input class="form-check-input" type="radio" name="urgency" id="urgency_medium" value="medium">
-                                        <label class="form-check-label card-body" for="urgency_medium">
-                                            <div class="d-flex align-items-center">
-                                                <i class="fas fa-flag text-warning fa-2x me-3"></i>
-                                                <div>
-                                                    <h6 class="mb-1">Moyenne</h6>
-                                                    <small class="text-muted">À traiter rapidement</small>
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-check card border h-100">
-                                        <input class="form-check-input" type="radio" name="urgency" id="urgency_high" value="high">
-                                        <label class="form-check-label card-body" for="urgency_high">
-                                            <div class="d-flex align-items-center">
-                                                <i class="fas fa-flag text-danger fa-2x me-3"></i>
-                                                <div>
-                                                    <h6 class="mb-1">Haute</h6>
-                                                    <small class="text-muted">Problème critique</small>
-                                                </div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
+                        {{-- Urgence --}}
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-exclamation"></i> Niveau d'urgence</label>
+                            <div class="urgency-grid">
+                                <label class="urgency-card" data-value="low">
+                                    <input type="radio" name="urgency" value="low" class="radio-input" checked>
+                                    <div class="urgency-icon low"><i class="fas fa-flag"></i></div>
+                                    <div class="urgency-title">Basse</div>
+                                    <div class="urgency-desc">Problème mineur</div>
+                                </label>
+                                <label class="urgency-card" data-value="medium">
+                                    <input type="radio" name="urgency" value="medium" class="radio-input">
+                                    <div class="urgency-icon medium"><i class="fas fa-flag"></i></div>
+                                    <div class="urgency-title">Moyenne</div>
+                                    <div class="urgency-desc">À traiter rapidement</div>
+                                </label>
+                                <label class="urgency-card" data-value="high">
+                                    <input type="radio" name="urgency" value="high" class="radio-input">
+                                    <div class="urgency-icon high"><i class="fas fa-flag"></i></div>
+                                    <div class="urgency-title">Haute</div>
+                                    <div class="urgency-desc">Problème critique</div>
+                                </label>
                             </div>
                         </div>
 
-                        <!-- Durée estimée -->
-                        <div class="mb-4">
-                            <label for="estimated_duration" class="form-label fw-bold">
-                                <i class="fas fa-clock me-2 text-primary"></i>
-                                Durée estimée de réparation
-                            </label>
+                        {{-- Durée --}}
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-clock"></i> Durée estimée</label>
                             <div class="input-group">
-                                <input type="number" class="form-control form-control-lg" 
-                                       id="estimated_duration" name="estimated_duration" 
-                                       min="1" max="168" value="2" required>
+                                <input type="number" class="form-control" name="estimated_duration" min="1" max="168" value="2" required>
                                 <span class="input-group-text">heures</span>
                             </div>
-                            <small class="text-muted">
-                                Estimation du temps nécessaire pour réparer le problème
-                            </small>
                         </div>
 
-                        <!-- Photos -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="fas fa-camera me-2 text-primary"></i>
-                                Photos du problème (optionnel)
-                            </label>
-                            <div class="border rounded p-4 text-center">
-                                <i class="fas fa-images fa-3x text-muted mb-3"></i>
-                                <p class="text-muted mb-3">
-                                    Vous pouvez ajouter des photos pour illustrer le problème
-                                </p>
-                                <button type="button" class="btn btn-outline-primary" id="addPhotoBtn">
-                                    <i class="fas fa-plus me-2"></i>
-                                    Ajouter une photo
-                                </button>
-                                <input type="file" id="photoInput" multiple accept="image/*" class="d-none">
+                        {{-- Photos --}}
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-camera"></i> Photos (optionnel)</label>
+                            <div class="upload-area" id="uploadArea">
+                                <input type="file" id="photoInput" multiple accept="image/*" class="d-none" name="photos[]">
+                                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                                <p>Cliquez ou glissez pour ajouter des photos</p>
+                                <small class="text-muted">JPG, PNG (max 5 Mo)</small>
                             </div>
-                            <div id="photoPreview" class="row mt-3 d-none">
-                                <!-- Les aperçus de photos apparaîtront ici -->
-                            </div>
+                            <div class="photo-preview" id="photoPreview"></div>
                         </div>
                     </form>
                 </div>
-                <div class="card-footer bg-light">
+                <div class="card-footer">
                     <div class="d-flex justify-content-between">
-                        <button type="button" class="btn btn-secondary" onclick="history.back()">
-                            <i class="fas fa-times me-2"></i>
-                            Annuler
-                        </button>
-                        <button type="submit" form="maintenanceForm" class="btn btn-warning">
-                            <i class="fas fa-paper-plane me-2"></i>
-                            Signaler la maintenance
-                        </button>
+                        <button class="btn btn-gray" onclick="history.back()"><i class="fas fa-times"></i> Annuler</button>
+                        <button class="btn btn-red" form="maintenanceForm"><i class="fas fa-paper-plane"></i> Signaler</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Avertissement -->
+            {{-- Avertissement --}}
             <div class="alert alert-warning mt-4">
-                <div class="d-flex">
-                    <i class="fas fa-info-circle fa-2x me-3 mt-1"></i>
-                    <div>
-                        <h6 class="alert-heading">Important</h6>
-                        <p class="mb-0">
-                            Une fois signalée, la chambre sera marquée comme "En maintenance" et ne sera plus disponible 
-                            pour la vente jusqu'à résolution du problème. L'équipe de maintenance sera automatiquement notifiée.
-                        </p>
-                    </div>
+                <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
+                <div class="alert-content">
+                    <h6>Important</h6>
+                    <p class="mb-0">La chambre sera marquée "En maintenance" et ne sera plus disponible à la vente.</p>
                 </div>
             </div>
+
         </div>
     </div>
-</div>
-@endsection
 
-@push('scripts')
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Gestion des photos
-    const addPhotoBtn = document.getElementById('addPhotoBtn');
+    // Urgence cards
+    document.querySelectorAll('.urgency-card').forEach(card => {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.urgency-card').forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            this.querySelector('.radio-input').checked = true;
+        });
+    });
+
+    // Upload area
+    const uploadArea = document.getElementById('uploadArea');
     const photoInput = document.getElementById('photoInput');
     const photoPreview = document.getElementById('photoPreview');
-    
-    if (addPhotoBtn) {
-        addPhotoBtn.addEventListener('click', function() {
-            photoInput.click();
-        });
+    let filesArray = [];
+
+    uploadArea.addEventListener('click', () => photoInput.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.background = 'var(--green-50)';
+        uploadArea.style.borderColor = 'var(--green-400)';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.background = '';
+        uploadArea.style.borderColor = '';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.background = '';
+        uploadArea.style.borderColor = '';
+        const files = Array.from(e.dataTransfer.files);
+        handleFiles(files);
+    });
+
+    photoInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files);
+        handleFiles(files);
+    });
+
+    function handleFiles(newFiles) {
+        filesArray = [...filesArray, ...newFiles];
+        displayPreviews();
     }
-    
-    if (photoInput) {
-        photoInput.addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            if (files.length > 0) {
-                photoPreview.classList.remove('d-none');
-                photoPreview.innerHTML = '';
-                
-                files.forEach((file, index) => {
-                    if (file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            const col = document.createElement('div');
-                            col.className = 'col-md-3 mb-3';
-                            
-                            col.innerHTML = `
-                                <div class="card">
-                                    <img src="${e.target.result}" class="card-img-top" style="height: 100px; object-fit: cover;">
-                                    <div class="card-body p-2">
-                                        <small class="text-muted d-block text-truncate">${file.name}</small>
-                                        <button type="button" class="btn btn-sm btn-outline-danger mt-1 w-100 remove-photo" data-index="${index}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            `;
-                            
-                            photoPreview.appendChild(col);
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
+
+    function displayPreviews() {
+        photoPreview.innerHTML = '';
+        filesArray.forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'photo-item';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="">
+                        <button class="photo-remove" data-index="${index}"><i class="fas fa-times"></i></button>
+                    `;
+                    photoPreview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
             }
         });
     }
-    
-    // Supprimer une photo
-    photoPreview.addEventListener('click', function(e) {
-        if (e.target.closest('.remove-photo')) {
-            const button = e.target.closest('.remove-photo');
-            const index = button.getAttribute('data-index');
+
+    photoPreview.addEventListener('click', (e) => {
+        if (e.target.closest('.photo-remove')) {
+            const index = e.target.closest('.photo-remove').dataset.index;
+            filesArray.splice(index, 1);
+            displayPreviews();
             
-            // Supprimer le fichier du input
             const dt = new DataTransfer();
-            const files = Array.from(photoInput.files);
-            files.splice(index, 1);
-            
-            files.forEach(file => dt.items.add(file));
+            filesArray.forEach(f => dt.items.add(f));
             photoInput.files = dt.files;
-            
-            // Supprimer l'aperçu
-            button.closest('.col-md-3').remove();
-            
-            // Masquer la prévisualisation si vide
-            if (photoPreview.children.length === 0) {
-                photoPreview.classList.add('d-none');
-            }
         }
     });
-    
-    // Validation du formulaire
-    const form = document.getElementById('maintenanceForm');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const reason = document.getElementById('maintenance_reason').value;
-            if (!reason) {
-                e.preventDefault();
-                alert('Veuillez sélectionner un type de problème');
-                return false;
-            }
-            
-            // Vous pouvez ajouter plus de validations ici
-            return true;
-        });
-    }
 });
 </script>
-@endpush
+
+@endsection

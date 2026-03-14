@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Ajouter un équipement')
-@section('content')
+
+<?php $__env->startSection('title', 'Ajouter un équipement'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -326,16 +326,16 @@ textarea.form-control {
 
 <div class="create-page">
 
-    {{-- Breadcrumb --}}
+    
     <div class="breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('facility.index') }}">Équipements</a>
+        <a href="<?php echo e(route('facility.index')); ?>">Équipements</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Ajouter</span>
     </div>
 
-    {{-- En-tête --}}
+    
     <div class="page-header anim-2">
         <div>
             <div class="header-title">
@@ -346,22 +346,22 @@ textarea.form-control {
         </div>
     </div>
 
-    {{-- Erreurs --}}
-    @if($errors->any())
+    
+    <?php if($errors->any()): ?>
         <div class="alert alert-red">
             <div class="alert-icon"><i class="fas fa-exclamation"></i></div>
             <div class="alert-content">
                 <strong>Erreur de validation</strong>
                 <ul class="mb-0">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <li><?php echo e($error); ?></li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </ul>
             </div>
         </div>
-    @endif
+    <?php endif; ?>
 
-    {{-- Formulaire --}}
+    
     <div class="row justify-content-md-center">
         <div class="col-lg-8">
             <div class="card">
@@ -369,28 +369,28 @@ textarea.form-control {
                     <h2><i class="fas fa-plus-circle"></i> Nouvel équipement</h2>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('facility.store') }}" method="POST">
-                        @csrf
+                    <form action="<?php echo e(route('facility.store')); ?>" method="POST">
+                        <?php echo csrf_field(); ?>
 
-                        {{-- Nom --}}
+                        
                         <div class="form-group">
                             <label class="form-label"><i class="fas fa-tag"></i> Nom de l'équipement</label>
                             <input type="text" name="name" class="form-control" 
-                                   value="{{ old('name') }}" placeholder="Ex: WiFi, Piscine, Parking..." required>
+                                   value="<?php echo e(old('name')); ?>" placeholder="Ex: WiFi, Piscine, Parking..." required>
                         </div>
 
-                        {{-- Détail --}}
+                        
                         <div class="form-group">
                             <label class="form-label"><i class="fas fa-align-left"></i> Description</label>
                             <textarea name="detail" class="form-control" 
-                                      placeholder="Description détaillée de l'équipement..." required>{{ old('detail') }}</textarea>
+                                      placeholder="Description détaillée de l'équipement..." required><?php echo e(old('detail')); ?></textarea>
                         </div>
 
-                        {{-- Icône --}}
+                        
                         <div class="form-group">
                             <label class="form-label"><i class="fas fa-icons"></i> Icône</label>
                             
-                            @php
+                            <?php
                                 $icons = [
                                     'fas fa-wifi' => 'WiFi',
                                     'fas fa-swimming-pool' => 'Piscine',
@@ -414,18 +414,19 @@ textarea.form-control {
                                     'fas fa-iron' => 'Fer à repasser',
                                     'fas fa-baby' => 'Équipement bébé',
                                 ];
-                            @endphp
+                            ?>
 
                             <select name="icon" class="form-select" id="iconSelect">
                                 <option value="">-- Aucune icône --</option>
-                                @foreach($icons as $class => $label)
-                                    <option value="{{ $class }}" {{ old('icon') == $class ? 'selected' : '' }}>
-                                        {{ $label }}
+                                <?php $__currentLoopData = $icons; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $class => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($class); ?>" <?php echo e(old('icon') == $class ? 'selected' : ''); ?>>
+                                        <?php echo e($label); ?>
+
                                     </option>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </select>
 
-                            {{-- Aperçu de l'icône sélectionnée --}}
+                            
                             <div class="mt-2 d-flex align-items-center">
                                 <small class="text-muted me-2">Aperçu :</small>
                                 <span id="iconPreview" class="icon-preview">
@@ -433,26 +434,27 @@ textarea.form-control {
                                 </span>
                             </div>
 
-                            {{-- Grille alternative --}}
+                            
                             <details class="mt-2">
                                 <summary class="text-muted small">Choisir dans la grille</summary>
                                 <div class="icon-grid">
-                                    @foreach($icons as $class => $label)
+                                    <?php $__currentLoopData = $icons; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $class => $label): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <label class="icon-option">
-                                            <input type="radio" name="icon_radio" value="{{ $class }}" 
-                                                   {{ old('icon') == $class ? 'checked' : '' }}
+                                            <input type="radio" name="icon_radio" value="<?php echo e($class); ?>" 
+                                                   <?php echo e(old('icon') == $class ? 'checked' : ''); ?>
+
                                                    onchange="document.getElementById('iconSelect').value = this.value; updatePreview(this.value);">
-                                            <i class="{{ $class }}"></i>
-                                            <span>{{ $label }}</span>
+                                            <i class="<?php echo e($class); ?>"></i>
+                                            <span><?php echo e($label); ?></span>
                                         </label>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
                             </details>
                         </div>
 
-                        {{-- Actions --}}
+                        
                         <div class="form-actions">
-                            <a href="{{ route('facility.index') }}" class="btn btn-gray">
+                            <a href="<?php echo e(route('facility.index')); ?>" class="btn btn-gray">
                                 <i class="fas fa-times"></i> Annuler
                             </a>
                             <button type="submit" class="btn btn-green">
@@ -497,4 +499,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/facility/create.blade.php ENDPATH**/ ?>

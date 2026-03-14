@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Équipements')
-@section('content')
+
+<?php $__env->startSection('title', 'Équipements'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -258,14 +258,14 @@
 
 <div class="facility-page">
 
-    {{-- Breadcrumb --}}
+    
     <div class="breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Équipements</span>
     </div>
 
-    {{-- En-tête --}}
+    
     <div class="page-header anim-2">
         <div>
             <div class="header-title">
@@ -274,12 +274,12 @@
             </div>
             <p class="header-subtitle">Liste des équipements disponibles dans les chambres</p>
         </div>
-        <a href="{{ route('facility.create') }}" class="btn btn-green">
+        <a href="<?php echo e(route('facility.create')); ?>" class="btn btn-green">
             <i class="fas fa-plus-circle"></i> Ajouter
         </a>
     </div>
 
-    {{-- Tableau --}}
+    
     <div class="card">
         <div class="table-responsive">
             <table class="table">
@@ -292,61 +292,61 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($facilities as $facility)
+                    <?php $__empty_1 = true; $__currentLoopData = $facilities; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $facility): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                         <tr>
-                            <td><span class="badge badge-gray">{{ $loop->iteration }}</span></td>
+                            <td><span class="badge badge-gray"><?php echo e($loop->iteration); ?></span></td>
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    @if($facility->icon)
-                                        <i class="fas {{ $facility->icon }}" style="color:var(--green-600);"></i>
-                                    @else
+                                    <?php if($facility->icon): ?>
+                                        <i class="fas <?php echo e($facility->icon); ?>" style="color:var(--green-600);"></i>
+                                    <?php else: ?>
                                         <i class="fas fa-cog" style="color:var(--green-600);"></i>
-                                    @endif
-                                    <span class="fw-semibold">{{ $facility->name }}</span>
+                                    <?php endif; ?>
+                                    <span class="fw-semibold"><?php echo e($facility->name); ?></span>
                                 </div>
                             </td>
                             <td>
-                                @if($facility->status)
+                                <?php if($facility->status): ?>
                                     <span class="badge badge-green"><i class="fas fa-check-circle"></i> Actif</span>
-                                @else
+                                <?php else: ?>
                                     <span class="badge badge-red"><i class="fas fa-times-circle"></i> Inactif</span>
-                                @endif
+                                <?php endif; ?>
                             </td>
                             <td>
                                 <div class="d-flex gap-1 justify-content-center">
-                                    <a href="{{ route('facility.edit', $facility->id) }}" 
+                                    <a href="<?php echo e(route('facility.edit', $facility->id)); ?>" 
                                        class="btn btn-gray btn-sm"
                                        title="Modifier">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <button class="btn btn-red btn-sm delete" 
-                                            data-id="{{ $facility->id }}" 
-                                            data-name="{{ $facility->name }}"
+                                            data-id="<?php echo e($facility->id); ?>" 
+                                            data-name="<?php echo e($facility->name); ?>"
                                             title="Supprimer">
                                         <i class="fas fa-trash"></i>
                                     </button>
-                                    <form id="delete-form-{{ $facility->id }}" 
-                                          action="{{ route('facility.destroy', $facility->id) }}" 
+                                    <form id="delete-form-<?php echo e($facility->id); ?>" 
+                                          action="<?php echo e(route('facility.destroy', $facility->id)); ?>" 
                                           method="POST" class="d-none">
-                                        @csrf @method('DELETE')
+                                        <?php echo csrf_field(); ?> <?php echo method_field('DELETE'); ?>
                                     </form>
                                 </div>
                             </td>
                         </tr>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
                             <td colspan="4">
                                 <div class="empty-state">
                                     <div class="empty-icon"><i class="fas fa-cogs"></i></div>
                                     <h4>Aucun équipement</h4>
                                     <p>Commencez par ajouter un équipement.</p>
-                                    <a href="{{ route('facility.create') }}" class="btn btn-green mt-3">
+                                    <a href="<?php echo e(route('facility.create')); ?>" class="btn btn-green mt-3">
                                         <i class="fas fa-plus-circle"></i> Ajouter
                                     </a>
                                 </div>
                             </td>
                         </tr>
-                    @endforelse
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -381,4 +381,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/facility/index.blade.php ENDPATH**/ ?>

@@ -3,82 +3,77 @@
 <?php $__env->startSection('title', 'Housekeeping - Nettoyage des Chambres'); ?>
 
 <?php $__env->startPush('styles'); ?>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    /* Palette principale - Vert */
-    --primary-50: #E8F5F0;
-    --primary-100: #C1E4D6;
-    --primary-200: #96D3BA;
-    --primary-300: #6BC29E;
-    --primary-400: #4BB589;
-    --primary-500: #2AA874;
-    --primary-600: #25A06C;
-    --primary-700: #1F9661;
-    --primary-800: #198C57;
-    --primary-900: #0F7C44;
+    /* ── 4 COULEURS (vert, rouge, gris, blanc) ── */
+    --green-50:  #f0faf0;
+    --green-100: #d4edda;
+    --green-500: #2e8540;
+    --green-600: #1e6b2e;
+    --green-700: #155221;
 
-    /* Couleurs d'état */
-    --dirty: #EF4444;
-    --dirty-dim: rgba(239, 68, 68, 0.1);
-    --cleaning: #F59E0B;
-    --cleaning-dim: rgba(245, 158, 11, 0.1);
-    --clean: #10B981;
-    --clean-dim: rgba(16, 185, 129, 0.1);
-    --occupied: #3B82F6;
-    --occupied-dim: rgba(59, 130, 246, 0.1);
-    --maintenance: #8B5CF6;
-    --maintenance-dim: rgba(139, 92, 246, 0.1);
+    --red-50:    #fee2e2;
+    --red-100:   #fecaca;
+    --red-500:   #b91c1c;
+    --red-600:   #991b1b;
 
-    /* Neutres */
-    --gray-50: #F9FAFB;
-    --gray-100: #F3F4F6;
-    --gray-200: #E5E7EB;
-    --gray-300: #D1D5DB;
-    --gray-400: #9CA3AF;
-    --gray-500: #6B7280;
-    --gray-600: #4B5563;
-    --gray-700: #374151;
-    --gray-800: #1F2937;
-    --gray-900: #111827;
+    --gray-50:   #f8f9f8;
+    --gray-100:  #eff0ef;
+    --gray-200:  #dde0dd;
+    --gray-300:  #c2c7c2;
+    --gray-400:  #9ba09b;
+    --gray-500:  #737873;
+    --gray-600:  #545954;
+    --gray-700:  #3a3e3a;
+    --gray-800:  #252825;
+    --gray-900:  #131513;
 
-    /* Ombres */
-    --shadow-sm: 0 1px 2px 0 rgba(42, 168, 116, 0.08);
-    --shadow-md: 0 4px 6px -1px rgba(42, 168, 116, 0.12);
-    --shadow-lg: 0 10px 15px -3px rgba(42, 168, 116, 0.15);
-    
-    /* Transitions */
-    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* Border radius */
-    --r: 14px;
+    --white:     #ffffff;
+    --surface:   #f7f9f7;
+
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s ease;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
 }
 
-* { 
-    box-sizing: border-box; 
-    margin:0; 
-    padding:0;
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.hk-page {
+    background: var(--surface);
+    min-height: 100vh;
+    font-family: var(--font);
+    color: var(--gray-800);
 }
 
-body {
-    background: var(--gray-50);
-    color: var(--gray-900);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    line-height: 1.5;
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+.anim-3 { animation: fadeSlide .4s .16s ease both; }
+.anim-4 { animation: fadeSlide .4s .24s ease both; }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    HEADER
-══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .hk-header {
-    background: white;
-    border-bottom: 1px solid var(--gray-200);
-    padding: 24px 32px;
+    background: var(--white);
+    border-bottom: 1.5px solid var(--gray-200);
+    padding: 20px 32px;
     margin-bottom: 24px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-xs);
 }
-
 .hk-header__inner {
     max-width: 1600px;
     margin: 0 auto;
@@ -87,169 +82,116 @@ body {
     justify-content: space-between;
     gap: 20px;
 }
-
 .hk-header__title {
     display: flex;
     align-items: center;
     gap: 16px;
 }
-
 .hk-header__icon {
     width: 52px;
     height: 52px;
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
-    border-radius: 14px;
+    background: var(--green-600);
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 1.5rem;
-    box-shadow: 0 4px 12px rgba(42, 168, 116, 0.3);
+    font-size: 1.4rem;
+    box-shadow: 0 4px 10px rgba(46,133,64,.3);
 }
-
 .hk-header__title h1 {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--gray-800);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gray-900);
     margin-bottom: 4px;
-    letter-spacing: -0.5px;
 }
-
+.hk-header__title em {
+    font-style: normal;
+    color: var(--green-600);
+}
 .hk-header__title p {
-    font-size: 14px;
+    font-size: .8rem;
     color: var(--gray-500);
 }
-
 .hk-header__actions {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    BUTTONS
-══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .btn {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    border: 1px solid transparent;
-    transition: var(--transition);
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--r);
+    font-size: .8rem;
+    font-weight: 500;
+    border: none;
     cursor: pointer;
+    transition: var(--transition);
     text-decoration: none;
-    white-space: nowrap;
 }
-
-.btn--primary {
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
-    color: white;
-    box-shadow: 0 4px 8px rgba(42, 168, 116, 0.25);
-}
-
-.btn--primary:hover {
-    background: linear-gradient(135deg, var(--primary-800), var(--primary-600));
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(42, 168, 116, 0.35);
+.btn-green {
+    background: var(--green-600);
     color: white;
 }
-
-.btn--outline {
-    background: white;
-    border: 2px solid var(--gray-200);
-    color: var(--gray-700);
+.btn-green:hover {
+    background: var(--green-700);
+    transform: translateY(-1px);
 }
-
-.btn--outline:hover {
-    border-color: var(--primary-500);
-    color: var(--primary-600);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
+.btn-gray {
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
 }
-
-.btn--success {
-    background: var(--clean);
+.btn-gray:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+}
+.btn-red {
+    background: var(--red-500);
     color: white;
 }
-
-.btn--success:hover {
-    background: #059669;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+.btn-red:hover {
+    background: var(--red-600);
+    transform: translateY(-1px);
 }
-
-.btn--danger {
-    background: var(--dirty);
-    color: white;
-}
-
-.btn--danger:hover {
-    background: #DC2626;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-.btn--warning {
-    background: var(--cleaning);
-    color: white;
-}
-
-.btn--warning:hover {
-    background: #D97706;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-}
-
 .btn-sm {
     padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 8px;
+    font-size: .7rem;
 }
-
 .btn-lg {
-    padding: 14px 28px;
-    font-size: 16px;
+    padding: 12px 24px;
+    font-size: .9rem;
 }
 
-/* ══════════════════════════════════════
-   MAIN CONTAINER
-══════════════════════════════════════ */
-.hk-container {
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 0 32px 48px;
-}
-
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    STATS GRID
-══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
     gap: 16px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
 }
-
 .stat-card {
-    background: white;
-    border-radius: 14px;
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
     padding: 16px;
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow-sm);
     transition: var(--transition);
     position: relative;
     overflow: hidden;
 }
-
 .stat-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    border-color: var(--green-300);
 }
-
 .stat-card::before {
     content: '';
     position: absolute;
@@ -257,824 +199,590 @@ body {
     left: 0;
     width: 4px;
     height: 100%;
-    background: var(--primary-500);
+    background: var(--green-600);
 }
-
-.stat-card.dirty::before { background: var(--dirty); }
-.stat-card.cleaning::before { background: var(--cleaning); }
-.stat-card.clean::before { background: var(--clean); }
-.stat-card.occupied::before { background: var(--occupied); }
-.stat-card.maintenance::before { background: var(--maintenance); }
-
+.stat-card.red::before { background: var(--red-500); }
 .stat-value {
-    font-size: 32px;
-    font-weight: 800;
-    color: var(--gray-800);
+    font-size: 1.8rem;
+    font-weight: 700;
+    font-family: var(--mono);
+    color: var(--gray-900);
     line-height: 1;
     margin-bottom: 4px;
-    font-family: 'IBM Plex Mono', monospace;
 }
-
 .stat-label {
-    font-size: 12px;
+    font-size: .65rem;
     font-weight: 600;
     color: var(--gray-500);
     text-transform: uppercase;
-    letter-spacing: 0.3px;
     margin-bottom: 8px;
 }
-
 .stat-footer {
-    font-size: 11px;
+    font-size: .65rem;
     color: var(--gray-400);
     display: flex;
     align-items: center;
     gap: 4px;
 }
 
-.stat-footer i {
-    font-size: 10px;
-}
-
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    ACTION BANNER
-══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .action-banner {
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
-    border-radius: 16px;
+    background: var(--green-600);
+    border-radius: var(--rxl);
     padding: 20px 24px;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     color: white;
 }
-
 .action-banner h3 {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 600;
     margin-bottom: 4px;
 }
-
 .action-banner p {
-    font-size: 14px;
-    opacity: 0.9;
+    font-size: .8rem;
+    opacity: .9;
 }
-
 .action-banner .btn {
-    background: white;
-    color: var(--primary-700);
-    border: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: var(--white);
+    color: var(--green-700);
 }
-
 .action-banner .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    background: var(--green-50);
 }
 
-/* ══════════════════════════════════════
-   ROOMS GRID - SECTION PRINCIPALE
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   SECTION TITLE
+══════════════════════════════════════════════ */
 .section-title {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 1rem;
+    font-weight: 600;
     color: var(--gray-700);
     margin-bottom: 16px;
     display: flex;
     align-items: center;
     gap: 8px;
 }
-
 .section-title i {
-    color: var(--primary-500);
+    color: var(--green-600);
+}
+.section-badge {
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: .7rem;
+    font-weight: 600;
 }
 
+/* ══════════════════════════════════════════════
+   ROOMS GRID
+══════════════════════════════════════════════ */
 .rooms-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 16px;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
 }
-
 .room-card {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--gray-200);
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
     overflow: hidden;
     transition: var(--transition);
-    position: relative;
 }
-
 .room-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--primary-300);
+    border-color: var(--green-300);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
 }
-
-.room-card__header {
+.room-header {
     padding: 16px;
-    border-bottom: 1px solid var(--gray-100);
+    border-bottom: 1.5px solid var(--gray-200);
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-
-.room-card__number {
-    font-size: 24px;
-    font-weight: 800;
+.room-number {
+    font-size: 1.2rem;
+    font-weight: 700;
+    font-family: var(--mono);
     color: var(--gray-800);
-    font-family: 'IBM Plex Mono', monospace;
 }
-
-.room-card__badge {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
+.room-badge {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--r);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 1rem;
 }
-
-.room-card__badge.dirty {
-    background: var(--dirty-dim);
-    color: var(--dirty);
-}
-
-.room-card__badge.cleaning {
-    background: var(--cleaning-dim);
-    color: var(--cleaning);
-}
-
-.room-card__badge.clean {
-    background: var(--clean-dim);
-    color: var(--clean);
-}
-
-.room-card__body {
+.room-badge.red { background: var(--red-50); color: var(--red-500); }
+.room-badge.green { background: var(--green-50); color: var(--green-600); }
+.room-body {
     padding: 16px;
 }
-
-.room-card__type {
-    font-size: 14px;
+.room-type {
+    font-size: .8rem;
     font-weight: 600;
     color: var(--gray-700);
     margin-bottom: 4px;
 }
-
-.room-card__meta {
-    font-size: 12px;
+.room-meta {
+    font-size: .7rem;
     color: var(--gray-500);
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     margin-bottom: 12px;
 }
-
-.room-card__status {
+.room-status {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
-    border-radius: 30px;
-    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: .7rem;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
+.room-status.red { background: var(--red-50); color: var(--red-500); border: 1.5px solid var(--red-100); }
+.room-status.green { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
 
-.room-card__status.dirty {
-    background: var(--dirty-dim);
-    color: var(--dirty);
-    border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.room-card__status.cleaning {
-    background: var(--cleaning-dim);
-    color: var(--cleaning);
-    border: 1px solid rgba(245, 158, 11, 0.2);
-}
-
-.room-card__status.clean {
-    background: var(--clean-dim);
-    color: var(--clean);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-/* Bouton de nettoyage en un clic */
+/* ── Clean button ── */
 .clean-btn {
     width: 100%;
-    padding: 12px;
-    border-radius: 10px;
+    padding: 10px;
+    border-radius: var(--r);
     border: none;
     font-weight: 600;
-    font-size: 14px;
+    font-size: .75rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     cursor: pointer;
     transition: var(--transition);
     margin-top: 8px;
 }
-
-.clean-btn.dirty {
-    background: var(--dirty);
+.clean-btn.red {
+    background: var(--red-500);
     color: white;
 }
-
-.clean-btn.dirty:hover {
-    background: #DC2626;
-    transform: scale(1.02);
+.clean-btn.red:hover {
+    background: var(--red-600);
 }
-
-.clean-btn.clean {
-    background: var(--clean-dim);
-    color: var(--clean);
-    border: 1px solid rgba(16, 185, 129, 0.3);
+.clean-btn.green {
+    background: var(--green-50);
+    color: var(--green-700);
+    border: 1.5px solid var(--green-200);
 }
-
-.clean-btn.clean:hover {
-    background: var(--clean);
+.clean-btn.green:hover {
+    background: var(--green-600);
     color: white;
-    border-color: var(--clean);
+    border-color: var(--green-600);
 }
 
-/* ══════════════════════════════════════
-   DEPARTURES & ARRIVALS
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   SIDE CARDS
+══════════════════════════════════════════════ */
 .side-card {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--gray-200);
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rxl);
     overflow: hidden;
-    margin-bottom: 24px;
+    margin-bottom: 20px;
 }
-
-.side-card__header {
+.side-header {
     padding: 16px 20px;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1.5px solid var(--gray-200);
     background: var(--gray-50);
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
-
-.side-card__header h3 {
-    font-size: 15px;
-    font-weight: 700;
+.side-header h3 {
+    font-size: .85rem;
+    font-weight: 600;
     color: var(--gray-700);
     margin: 0;
     display: flex;
     align-items: center;
     gap: 8px;
 }
-
-.side-card__header i {
-    color: var(--primary-500);
+.side-header i {
+    color: var(--green-600);
 }
-
-.side-card__body {
+.side-badge {
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: .6rem;
+    font-weight: 600;
+}
+.side-body {
     padding: 0;
 }
-
 .side-item {
     padding: 16px 20px;
-    border-bottom: 1px solid var(--gray-100);
+    border-bottom: 1.5px solid var(--gray-200);
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    gap: 12px;
 }
-
 .side-item:last-child {
     border-bottom: none;
 }
-
-.side-item__room {
-    font-size: 16px;
+.side-item-room {
+    font-size: .9rem;
     font-weight: 700;
+    font-family: var(--mono);
     color: var(--gray-800);
-    font-family: 'IBM Plex Mono', monospace;
-    margin-right: 12px;
+    min-width: 50px;
 }
-
-.side-item__info {
+.side-item-info {
     flex: 1;
 }
-
-.side-item__name {
+.side-item-name {
+    font-size: .8rem;
     font-weight: 600;
     color: var(--gray-700);
     margin-bottom: 2px;
 }
-
-.side-item__meta {
-    font-size: 11px;
+.side-item-meta {
+    font-size: .65rem;
     color: var(--gray-500);
 }
-
-.side-item__status {
-    font-size: 11px;
+.side-item-status {
+    font-size: .6rem;
     font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 20px;
+    padding: 2px 8px;
+    border-radius: 100px;
 }
+.side-item-status.red { background: var(--red-50); color: var(--red-500); border: 1.5px solid var(--red-100); }
+.side-item-status.green { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
 
-.side-item__status.departed {
-    background: var(--dirty-dim);
-    color: var(--dirty);
-}
-
-.side-item__status.arriving {
-    background: var(--clean-dim);
-    color: var(--clean);
-}
-
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    QUICK ACTIONS
-══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .quick-actions {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-    margin-top: 24px;
+    margin-top: 20px;
 }
-
-.quick-action-btn {
-    background: white;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    padding: 16px 12px;
+.quick-btn {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
+    padding: 16px;
     text-align: center;
     text-decoration: none;
     transition: var(--transition);
 }
-
-.quick-action-btn:hover {
-    transform: translateY(-3px);
-    border-color: var(--primary-500);
-    box-shadow: var(--shadow-md);
+.quick-btn:hover {
+    border-color: var(--green-300);
+    transform: translateY(-2px);
 }
-
-.quick-action-btn i {
-    font-size: 24px;
-    color: var(--primary-500);
-    margin-bottom: 8px;
+.quick-btn i {
+    font-size: 1.4rem;
+    color: var(--green-600);
+    margin-bottom: 6px;
 }
-
-.quick-action-btn span {
+.quick-btn span {
     display: block;
-    font-size: 13px;
+    font-size: .75rem;
     font-weight: 600;
     color: var(--gray-700);
 }
-
-.quick-action-btn small {
-    font-size: 11px;
+.quick-btn small {
+    font-size: .6rem;
     color: var(--gray-500);
 }
 
-/* ══════════════════════════════════════
-   EMPTY STATE
-══════════════════════════════════════ */
-.empty-state {
-    padding: 60px 20px;
-    text-align: center;
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--gray-200);
-}
-
-.empty-state i {
-    font-size: 56px;
-    color: var(--primary-200);
-    margin-bottom: 16px;
-}
-
-.empty-state h4 {
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--gray-700);
-    margin-bottom: 8px;
-}
-
-.empty-state p {
-    color: var(--gray-500);
-    margin-bottom: 24px;
-}
-
-/* ══════════════════════════════════════
-   ALERTS
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   ALERT
+══════════════════════════════════════════════ */
 .alert {
-    padding: 16px 20px;
-    border-radius: 12px;
+    padding: 14px 18px;
+    border-radius: var(--rl);
     margin-bottom: 20px;
+    border: 1.5px solid;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+}
+.alert-green {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
 }
 
-.alert-success {
-    background: var(--clean-dim);
-    border: 1px solid rgba(16, 185, 129, 0.3);
-    color: var(--clean);
+/* ══════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════ */
+.empty-state {
+    padding: 48px 20px;
+    text-align: center;
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rxl);
 }
-
-.alert-success i {
-    font-size: 20px;
+.empty-state i {
+    font-size: 3rem;
+    color: var(--gray-300);
+    margin-bottom: 16px;
 }
-
-/* ══════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════ */
-@media (max-width: 1400px) {
-    .stats-grid {
-        grid-template-columns: repeat(3, 1fr);
-    }
+.empty-state h4 {
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 4px;
 }
-
-@media (max-width: 1024px) {
-    .hk-header__inner {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .rooms-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .quick-actions {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .hk-header { padding: 20px; }
-    .hk-container { padding: 0 20px 40px; }
-    
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .rooms-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .action-banner {
-        flex-direction: column;
-        text-align: center;
-        gap: 16px;
-    }
-}
-
-@media (max-width: 480px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .quick-actions {
-        grid-template-columns: 1fr;
-    }
+.empty-state p {
+    color: var(--gray-400);
+    font-size: .8rem;
 }
 </style>
 <?php $__env->stopPush(); ?>
 
 <?php $__env->startSection('content'); ?>
+<div class="hk-page">
 
-
-<div class="hk-header">
-    <div class="hk-header__inner">
-        <div class="hk-header__title">
-            <div class="hk-header__icon">
-                <i class="fas fa-broom"></i>
+    
+    <div class="hk-header anim-1">
+        <div class="hk-header__inner">
+            <div class="hk-header__title">
+                <div class="hk-header__icon"><i class="fas fa-broom"></i></div>
+                <div>
+                    <h1>Housekeeping • <em>Nettoyage</em></h1>
+                    <p>Gestion du nettoyage des chambres en un clic</p>
+                </div>
             </div>
+            <div class="hk-header__actions">
+                <a href="<?php echo e(route('housekeeping.scan')); ?>" class="btn btn-gray"><i class="fas fa-qrcode"></i> Scanner</a>
+                <a href="<?php echo e(route('housekeeping.reports')); ?>" class="btn btn-green"><i class="fas fa-chart-bar"></i> Rapports</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="hk-container" style="max-width:1600px; margin:0 auto; padding:0 32px 48px;">
+
+        
+        <?php if(session('success')): ?>
+        <div class="alert alert-green anim-2">
+            <i class="fas fa-check-circle"></i>
+            <span><?php echo e(session('success')); ?></span>
+        </div>
+        <?php endif; ?>
+
+        
+        <div class="stats-grid anim-3">
+            <div class="stat-card red">
+                <div class="stat-value"><?php echo e($stats['dirty_rooms'] ?? 0); ?></div>
+                <div class="stat-label">À nettoyer</div>
+                <div class="stat-footer"><i class="fas fa-broom"></i> Sales</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo e($stats['clean_rooms'] ?? 0); ?></div>
+                <div class="stat-label">Nettoyées</div>
+                <div class="stat-footer"><i class="fas fa-check-circle"></i> Prêtes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo e($stats['occupied_rooms'] ?? 0); ?></div>
+                <div class="stat-label">Occupées</div>
+                <div class="stat-footer"><i class="fas fa-user"></i> Clients</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo e($stats['total_rooms'] ?? 0); ?></div>
+                <div class="stat-label">Total</div>
+                <div class="stat-footer"><i class="fas fa-building"></i> Chambres</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo e($stats['cleaned_today'] ?? 0); ?></div>
+                <div class="stat-label">Aujourd'hui</div>
+                <div class="stat-footer"><i class="fas fa-calendar-day"></i> Nettoyées</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value"><?php echo e($stats['maintenance_rooms'] ?? 0); ?></div>
+                <div class="stat-label">Maintenance</div>
+                <div class="stat-footer"><i class="fas fa-tools"></i> En réparation</div>
+            </div>
+        </div>
+
+        
+        <?php if(($stats['dirty_rooms'] ?? 0) > 0): ?>
+        <div class="action-banner anim-4">
             <div>
-                <h1>Housekeeping • Nettoyage</h1>
-                <p>Gestion du nettoyage des chambres en un clic</p>
+                <h3><i class="fas fa-broom"></i> <?php echo e($stats['dirty_rooms'] ?? 0); ?> chambre(s) à nettoyer</h3>
+                <p>Cliquez sur le bouton vert pour marquer comme nettoyée</p>
+            </div>
+            <a href="#dirty" class="btn"><i class="fas fa-arrow-down"></i> Voir</a>
+        </div>
+        <?php endif; ?>
+
+        
+        <div class="row g-4">
+            
+            <div class="col-lg-8">
+
+                
+                <div class="section-title" id="dirty">
+                    <i class="fas fa-broom"></i> À nettoyer
+                    <span class="section-badge"><?php echo e($roomsByStatus['dirty']->count()); ?></span>
+                </div>
+
+                <?php if($roomsByStatus['dirty']->count() > 0): ?>
+                <div class="rooms-grid">
+                    <?php $__currentLoopData = $roomsByStatus['dirty']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="room-card">
+                        <div class="room-header">
+                            <div class="room-number">#<?php echo e($room->number); ?></div>
+                            <div class="room-badge red"><i class="fas fa-broom"></i></div>
+                        </div>
+                        <div class="room-body">
+                            <div class="room-type"><?php echo e($room->type->name ?? 'Standard'); ?></div>
+                            <div class="room-meta"><i class="fas fa-user"></i> <?php echo e($room->capacity); ?> pers.</div>
+                            <div class="room-status red"><i class="fas fa-exclamation-circle"></i> À nettoyer</div>
+                            <form action="<?php echo e(route('housekeeping.clean-room', $room->id)); ?>" method="POST">
+                                <?php echo csrf_field(); ?>
+                                <button class="clean-btn red"><i class="fas fa-check-circle"></i> Marquer nettoyée</button>
+                            </form>
+                        </div>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+                <?php else: ?>
+                <div class="empty-state mb-4">
+                    <i class="fas fa-check-circle" style="color:var(--green-500);"></i>
+                    <h4>Aucune chambre à nettoyer</h4>
+                    <p>Toutes les chambres sont propres</p>
+                </div>
+                <?php endif; ?>
+
+                
+                <div class="section-title mt-4">
+                    <i class="fas fa-check-circle" style="color:var(--green-600);"></i> Nettoyées aujourd'hui
+                    <span class="section-badge"><?php echo e($stats['cleaned_today'] ?? 0); ?></span>
+                </div>
+
+                <?php if(isset($roomsCleanedToday) && $roomsCleanedToday->count() > 0): ?>
+                <div class="rooms-grid">
+                    <?php $__currentLoopData = $roomsCleanedToday->take(4); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <div class="room-card">
+                        <div class="room-header">
+                            <div class="room-number">#<?php echo e($room->number); ?></div>
+                            <div class="room-badge green"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="room-body">
+                            <div class="room-type"><?php echo e($room->type->name ?? 'Standard'); ?></div>
+                            <div class="room-meta"><i class="fas fa-clock"></i> <?php echo e($room->last_cleaned_at ? \Carbon\Carbon::parse($room->last_cleaned_at)->format('H:i') : 'N/A'); ?></div>
+                            <div class="room-status green"><i class="fas fa-check-circle"></i> Nettoyée</div>
+                        </div>
+                    </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+                <?php endif; ?>
+            </div>
+
+            
+            <div class="col-lg-4">
+
+                
+                <div class="side-card">
+                    <div class="side-header">
+                        <h3><i class="fas fa-sign-out-alt"></i> Départs aujourd'hui</h3>
+                        <span class="side-badge"><?php echo e($todayDepartures->count()); ?></span>
+                    </div>
+                    <div class="side-body">
+                        <?php if($todayDepartures->count() > 0): ?>
+                            <?php $__currentLoopData = $todayDepartures->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $d): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="side-item">
+                                <div class="side-item-room">#<?php echo e($d->room->number); ?></div>
+                                <div class="side-item-info">
+                                    <div class="side-item-name"><?php echo e($d->customer->name ?? 'Client'); ?></div>
+                                    <div class="side-item-meta"><i class="fas fa-clock"></i> 12h00</div>
+                                </div>
+                                <div class="side-item-status red">À nettoyer</div>
+                            </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php else: ?>
+                        <div class="p-4 text-center text-muted">Aucun départ</div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                
+                <div class="side-card">
+                    <div class="side-header">
+                        <h3><i class="fas fa-sign-in-alt"></i> Arrivées aujourd'hui</h3>
+                        <span class="side-badge"><?php echo e($todayArrivals->count()); ?></span>
+                    </div>
+                    <div class="side-body">
+                        <?php if($todayArrivals->count() > 0): ?>
+                            <?php $__currentLoopData = $todayArrivals->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $a): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <div class="side-item">
+                                <div class="side-item-room">#<?php echo e($a->room->number); ?></div>
+                                <div class="side-item-info">
+                                    <div class="side-item-name"><?php echo e($a->customer->name ?? 'Client'); ?></div>
+                                    <div class="side-item-meta"><i class="fas fa-clock"></i> 14h00</div>
+                                </div>
+                                <div class="side-item-status green">À préparer</div>
+                            </div>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php else: ?>
+                        <div class="p-4 text-center text-muted">Aucune arrivée</div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                
+                <div class="quick-actions">
+                    <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="quick-btn">
+                        <i class="fas fa-broom"></i>
+                        <span>À nettoyer</span>
+                        <small><?php echo e($stats['dirty_rooms'] ?? 0); ?></small>
+                    </a>
+                    <a href="<?php echo e(route('housekeeping.maintenance')); ?>" class="quick-btn">
+                        <i class="fas fa-tools"></i>
+                        <span>Maintenance</span>
+                        <small><?php echo e($stats['maintenance_rooms'] ?? 0); ?></small>
+                    </a>
+                    <a href="<?php echo e(route('housekeeping.mobile')); ?>" class="quick-btn">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Mobile</span>
+                        <small>Scanner</small>
+                    </a>
+                    <a href="<?php echo e(route('housekeeping.daily-report')); ?>" class="quick-btn">
+                        <i class="fas fa-file-alt"></i>
+                        <span>Rapport</span>
+                        <small>Quotidien</small>
+                    </a>
+                </div>
             </div>
         </div>
-        <div class="hk-header__actions">
-            <a href="<?php echo e(route('housekeeping.scan')); ?>" class="btn btn--outline">
-                <i class="fas fa-qrcode"></i>
-                Scanner QR
-            </a>
-            <a href="<?php echo e(route('housekeeping.reports')); ?>" class="btn btn--primary">
-                <i class="fas fa-chart-bar"></i>
-                Rapports
-            </a>
-        </div>
     </div>
+
 </div>
 
-
-<div class="hk-container">
-
-    
-    <?php if(session('success')): ?>
-    <div class="alert alert-success">
-        <i class="fas fa-check-circle"></i>
-        <span><?php echo e(session('success')); ?></span>
-    </div>
-    <?php endif; ?>
-
-    
-    <div class="stats-grid">
-        <div class="stat-card dirty">
-            <div class="stat-value"><?php echo e($stats['dirty_rooms'] ?? 0); ?></div>
-            <div class="stat-label">À nettoyer</div>
-            <div class="stat-footer">
-                <i class="fas fa-broom"></i>
-                Chambres sales
-            </div>
-        </div>
-        
-        <div class="stat-card clean">
-            <div class="stat-value"><?php echo e($stats['clean_rooms'] ?? 0); ?></div>
-            <div class="stat-label">Nettoyées</div>
-            <div class="stat-footer">
-                <i class="fas fa-check-circle"></i>
-                Prêtes
-            </div>
-        </div>
-        
-        <div class="stat-card occupied">
-            <div class="stat-value"><?php echo e($stats['occupied_rooms'] ?? 0); ?></div>
-            <div class="stat-label">Occupées</div>
-            <div class="stat-footer">
-                <i class="fas fa-user"></i>
-                Clients présents
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-value"><?php echo e($stats['total_rooms'] ?? 0); ?></div>
-            <div class="stat-label">Total</div>
-            <div class="stat-footer">
-                <i class="fas fa-building"></i>
-                Chambres
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-value"><?php echo e($stats['cleaned_today'] ?? 0); ?></div>
-            <div class="stat-label">Aujourd'hui</div>
-            <div class="stat-footer">
-                <i class="fas fa-calendar-day"></i>
-                Nettoyées
-            </div>
-        </div>
-        
-        <div class="stat-card maintenance">
-            <div class="stat-value"><?php echo e($stats['maintenance_rooms'] ?? 0); ?></div>
-            <div class="stat-label">Maintenance</div>
-            <div class="stat-footer">
-                <i class="fas fa-tools"></i>
-                En réparation
-            </div>
-        </div>
-    </div>
-
-    
-    <?php if(($stats['dirty_rooms'] ?? 0) > 0): ?>
-    <div class="action-banner">
-        <div>
-            <h3><i class="fas fa-broom me-2"></i> <?php echo e($stats['dirty_rooms'] ?? 0); ?> chambre(s) à nettoyer</h3>
-            <p>Cliquez simplement sur le bouton vert d'une chambre pour la marquer comme nettoyée</p>
-        </div>
-        <div>
-            <a href="#dirty-section" class="btn">
-                <i class="fas fa-arrow-down"></i>
-                Voir les chambres
-            </a>
-        </div>
-    </div>
-    <?php endif; ?>
-
-    
-    <div class="row">
-        
-        <div class="col-lg-8">
-            
-            <div class="section-title" id="dirty-section">
-                <i class="fas fa-broom"></i>
-                Chambres à nettoyer
-                <span class="badge" style="background: var(--dirty-dim); color: var(--dirty); padding: 4px 12px;">
-                    <?php echo e($roomsByStatus['dirty']->count()); ?>
-
-                </span>
-            </div>
-
-            <?php if($roomsByStatus['dirty']->count() > 0): ?>
-            <div class="rooms-grid">
-                <?php $__currentLoopData = $roomsByStatus['dirty']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <div class="room-card">
-                    <div class="room-card__header">
-                        <div class="room-card__number">#<?php echo e($room->number); ?></div>
-                        <div class="room-card__badge dirty">
-                            <i class="fas fa-broom"></i>
-                        </div>
-                    </div>
-                    <div class="room-card__body">
-                        <div class="room-card__type"><?php echo e($room->type->name ?? 'Chambre Standard'); ?></div>
-                        <div class="room-card__meta">
-                            <i class="fas fa-user"></i> <?php echo e($room->capacity); ?> pers.
-                            <?php if($room->floor): ?>
-                            <i class="fas fa-layer-group ms-2"></i> Étage <?php echo e($room->floor); ?>
-
-                            <?php endif; ?>
-                        </div>
-                        <div class="room-card__status dirty">
-                            <i class="fas fa-exclamation-circle"></i>
-                            À nettoyer
-                        </div>
-                        
-                        
-                        <form action="<?php echo e(route('housekeeping.clean-room', $room->id)); ?>" method="POST">
-                            <?php echo csrf_field(); ?>
-                            <button type="submit" class="clean-btn dirty">
-                                <i class="fas fa-check-circle"></i>
-                                Marquer comme nettoyée
-                            </button>
-                        </form>
-                    </div>
-                </div>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </div>
-            <?php else: ?>
-            <div class="empty-state mb-4">
-                <i class="fas fa-check-circle" style="color: var(--clean);"></i>
-                <h4>Aucune chambre à nettoyer</h4>
-                <p>Toutes les chambres sont propres et prêtes</p>
-            </div>
-            <?php endif; ?>
-
-            
-            <div class="section-title mt-4">
-                <i class="fas fa-check-circle" style="color: var(--clean);"></i>
-                Nettoyées aujourd'hui
-                <span class="badge" style="background: var(--clean-dim); color: var(--clean); padding: 4px 12px;">
-                    <?php echo e($stats['cleaned_today'] ?? 0); ?>
-
-                </span>
-            </div>
-
-            <?php if(isset($roomsCleanedToday) && $roomsCleanedToday->count() > 0): ?>
-            <div class="rooms-grid">
-                <?php $__currentLoopData = $roomsCleanedToday->take(4); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <div class="room-card" style="opacity: 0.9;">
-                    <div class="room-card__header">
-                        <div class="room-card__number">#<?php echo e($room->number); ?></div>
-                        <div class="room-card__badge clean">
-                            <i class="fas fa-check"></i>
-                        </div>
-                    </div>
-                    <div class="room-card__body">
-                        <div class="room-card__type"><?php echo e($room->type->name ?? 'Chambre Standard'); ?></div>
-                        <div class="room-card__meta">
-                            <i class="fas fa-clock"></i> 
-                            <?php echo e($room->last_cleaned_at ? \Carbon\Carbon::parse($room->last_cleaned_at)->format('H:i') : 'N/A'); ?>
-
-                        </div>
-                        <div class="room-card__status clean">
-                            <i class="fas fa-check-circle"></i>
-                            Nettoyée
-                        </div>
-                    </div>
-                </div>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </div>
-            <?php endif; ?>
-        </div>
-
-        
-        <div class="col-lg-4">
-            
-            <div class="side-card">
-                <div class="side-card__header">
-                    <h3>
-                        <i class="fas fa-sign-out-alt"></i>
-                        Départs aujourd'hui
-                    </h3>
-                    <span class="badge" style="background: var(--dirty-dim); color: var(--dirty);">
-                        <?php echo e($todayDepartures->count()); ?>
-
-                    </span>
-                </div>
-                <div class="side-card__body">
-                    <?php if($todayDepartures->count() > 0): ?>
-                        <?php $__currentLoopData = $todayDepartures->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $departure): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="side-item">
-                            <div class="side-item__room"><?php echo e($departure->room->number); ?></div>
-                            <div class="side-item__info">
-                                <div class="side-item__name"><?php echo e($departure->customer->name ?? 'Client'); ?></div>
-                                <div class="side-item__meta">
-                                    <i class="fas fa-clock"></i> Départ: 12h00
-                                </div>
-                            </div>
-                            <div class="side-item__status departed">
-                                À nettoyer
-                            </div>
-                        </div>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    <?php else: ?>
-                        <div class="text-center py-4 text-muted">
-                            <i class="fas fa-calendar-check mb-2"></i>
-                            <p class="mb-0">Aucun départ aujourd'hui</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            
-            <div class="side-card">
-                <div class="side-card__header">
-                    <h3>
-                        <i class="fas fa-sign-in-alt"></i>
-                        Arrivées aujourd'hui
-                    </h3>
-                    <span class="badge" style="background: var(--clean-dim); color: var(--clean);">
-                        <?php echo e($todayArrivals->count()); ?>
-
-                    </span>
-                </div>
-                <div class="side-card__body">
-                    <?php if($todayArrivals->count() > 0): ?>
-                        <?php $__currentLoopData = $todayArrivals->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $arrival): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="side-item">
-                            <div class="side-item__room"><?php echo e($arrival->room->number); ?></div>
-                            <div class="side-item__info">
-                                <div class="side-item__name"><?php echo e($arrival->customer->name ?? 'Client'); ?></div>
-                                <div class="side-item__meta">
-                                    <i class="fas fa-clock"></i> Arrivée: 14h00
-                                </div>
-                            </div>
-                            <div class="side-item__status arriving">
-                                À préparer
-                            </div>
-                        </div>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    <?php else: ?>
-                        <div class="text-center py-4 text-muted">
-                            <i class="fas fa-calendar-times mb-2"></i>
-                            <p class="mb-0">Aucune arrivée aujourd'hui</p>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            </div>
-
-            
-            <div class="quick-actions">
-                <a href="<?php echo e(route('housekeeping.to-clean')); ?>" class="quick-action-btn">
-                    <i class="fas fa-broom"></i>
-                    <span>À nettoyer</span>
-                    <small><?php echo e($stats['dirty_rooms'] ?? 0); ?></small>
-                </a>
-                <a href="<?php echo e(route('housekeeping.maintenance')); ?>" class="quick-action-btn">
-                    <i class="fas fa-tools"></i>
-                    <span>Maintenance</span>
-                    <small><?php echo e($stats['maintenance_rooms'] ?? 0); ?></small>
-                </a>
-                <a href="<?php echo e(route('housekeeping.mobile')); ?>" class="quick-action-btn">
-                    <i class="fas fa-mobile-alt"></i>
-                    <span>Vue mobile</span>
-                    <small>Scanner</small>
-                </a>
-                <a href="<?php echo e(route('housekeeping.daily-report')); ?>" class="quick-action-btn">
-                    <i class="fas fa-file-alt"></i>
-                    <span>Rapport</span>
-                    <small>Quotidien</small>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<?php $__env->stopSection(); ?>
-
-<?php $__env->startPush('scripts'); ?>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Auto-hide alerts after 3 seconds
-    setTimeout(() => {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
-            alert.style.transition = 'opacity 0.5s';
-            alert.style.opacity = '0';
-            setTimeout(() => alert.remove(), 500);
-        });
-    }, 3000);
-    
-    // Confirmation rapide pour les boutons de nettoyage
-    const cleanButtons = document.querySelectorAll('.clean-btn.dirty');
-    cleanButtons.forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            if (!confirm('Marquer cette chambre comme nettoyée ?')) {
-                e.preventDefault();
-            }
-        });
+document.querySelectorAll('.clean-btn.red').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        if (!confirm('Marquer cette chambre comme nettoyée ?')) e.preventDefault();
     });
 });
+setTimeout(() => {
+    document.querySelectorAll('.alert').forEach(a => a.remove());
+}, 3000);
 </script>
-<?php $__env->stopPush(); ?>
+
+<?php $__env->stopSection(); ?>
 <?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/housekeeping/index.blade.php ENDPATH**/ ?>

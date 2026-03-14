@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Profil Client - ' . $customer->name)
-@section('content')
+
+<?php $__env->startSection('title', 'Profil Client - ' . $customer->name); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -566,40 +566,40 @@
 
 <div class="profile-page">
 
-    {{-- Breadcrumb --}}
+    
     <div class="breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('customer.index') }}">Clients</a>
+        <a href="<?php echo e(route('customer.index')); ?>">Clients</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">{{ $customer->name }}</span>
+        <span class="current"><?php echo e($customer->name); ?></span>
     </div>
 
-    {{-- En-tête --}}
+    
     <div class="page-header anim-2">
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-user"></i></span>
-                <h1>{{ $customer->name }}</h1>
+                <h1><?php echo e($customer->name); ?></h1>
             </div>
             <p class="header-subtitle">Fiche client détaillée</p>
         </div>
-        <a href="{{ route('customer.edit', $customer->id) }}" class="btn btn-gray">
+        <a href="<?php echo e(route('customer.edit', $customer->id)); ?>" class="btn btn-gray">
             <i class="fas fa-edit"></i> Modifier
         </a>
     </div>
 
-    {{-- Messages --}}
-    @if(session('success'))
+    
+    <?php if(session('success')): ?>
     <div class="alert alert-green">
         <div class="alert-icon"><i class="fas fa-check"></i></div>
-        <span>{!! session('success') !!}</span>
+        <span><?php echo session('success'); ?></span>
         <button class="alert-close" onclick="this.parentElement.remove()">✕</button>
     </div>
-    @endif
+    <?php endif; ?>
 
-    {{-- Statistiques --}}
-    @php
+    
+    <?php
         $totalReservations = $customer->transactions->count();
         $activeReservations = $customer->transactions->where('check_out', '>=', now())->count();
         $completedReservations = $customer->transactions->where('check_out', '<', now())->count();
@@ -608,130 +608,130 @@
         foreach($customer->transactions as $t) {
             $totalNights += \Carbon\Carbon::parse($t->check_in)->diffInDays($t->check_out);
         }
-    @endphp
+    ?>
     
     <div class="stats-grid anim-3">
         <div class="stat-card">
-            <div class="stat-number">{{ $totalReservations }}</div>
+            <div class="stat-number"><?php echo e($totalReservations); ?></div>
             <div class="stat-label">Réservations</div>
             <div class="stat-footer"><i class="fas fa-calendar-check"></i> totales</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">{{ $totalNights }}</div>
+            <div class="stat-number"><?php echo e($totalNights); ?></div>
             <div class="stat-label">Nuits passées</div>
             <div class="stat-footer"><i class="fas fa-moon"></i> au total</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">{{ $activeReservations }}</div>
+            <div class="stat-number"><?php echo e($activeReservations); ?></div>
             <div class="stat-label">En cours</div>
             <div class="stat-footer"><i class="fas fa-clock"></i> actuellement</div>
         </div>
     </div>
 
     <div class="row g-4">
-        {{-- Colonne gauche - Profil --}}
+        
         <div class="col-lg-4">
             <div class="profile-card anim-4">
                 <div class="profile-header">
-                    @php
+                    <?php
                         $avatarUrl = $customer->user ? $customer->user->getAvatar() : null;
-                    @endphp
-                    <img src="{{ $avatarUrl ?? 'https://ui-avatars.com/api/?name='.urlencode($customer->name).'&background=1e6b2e&color=fff&size=120' }}" 
-                         alt="{{ $customer->name }}" 
+                    ?>
+                    <img src="<?php echo e($avatarUrl ?? 'https://ui-avatars.com/api/?name='.urlencode($customer->name).'&background=1e6b2e&color=fff&size=120'); ?>" 
+                         alt="<?php echo e($customer->name); ?>" 
                          class="profile-avatar">
-                    <h2 class="profile-name">{{ $customer->name }}</h2>
-                    @if($customer->job)<div class="profile-job">{{ $customer->job }}</div>@endif
-                    <span class="profile-badge"><i class="fas fa-id-card"></i> Client #{{ $customer->id }}</span>
+                    <h2 class="profile-name"><?php echo e($customer->name); ?></h2>
+                    <?php if($customer->job): ?><div class="profile-job"><?php echo e($customer->job); ?></div><?php endif; ?>
+                    <span class="profile-badge"><i class="fas fa-id-card"></i> Client #<?php echo e($customer->id); ?></span>
                 </div>
                 
                 <div class="profile-body">
                     
-                    {{-- Contact --}}
+                    
                     <div class="profile-section">
                         <div class="section-title">
                             <i class="fas fa-address-card"></i> Contact
                         </div>
                         
-                        @if($customer->user && $customer->user->email)
+                        <?php if($customer->user && $customer->user->email): ?>
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-envelope"></i></div>
-                            <div><span class="info-label">Email</span><div class="info-value"><a href="mailto:{{ $customer->user->email }}">{{ $customer->user->email }}</a></div></div>
+                            <div><span class="info-label">Email</span><div class="info-value"><a href="mailto:<?php echo e($customer->user->email); ?>"><?php echo e($customer->user->email); ?></a></div></div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if($customer->phone)
+                        <?php if($customer->phone): ?>
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-phone"></i></div>
-                            <div><span class="info-label">Téléphone</span><div class="info-value">{{ $customer->phone }}</div></div>
+                            <div><span class="info-label">Téléphone</span><div class="info-value"><?php echo e($customer->phone); ?></div></div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if($customer->address)
+                        <?php if($customer->address): ?>
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
-                            <div><span class="info-label">Adresse</span><div class="info-value">{{ $customer->address }}</div></div>
+                            <div><span class="info-label">Adresse</span><div class="info-value"><?php echo e($customer->address); ?></div></div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                     
-                    {{-- Informations personnelles --}}
+                    
                     <div class="profile-section">
                         <div class="section-title">
                             <i class="fas fa-user-circle"></i> Personnel
                         </div>
                         
-                        @if($customer->gender)
+                        <?php if($customer->gender): ?>
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-venus-mars"></i></div>
-                            <div><span class="info-label">Genre</span><div class="info-value">{{ $customer->gender }}</div></div>
+                            <div><span class="info-label">Genre</span><div class="info-value"><?php echo e($customer->gender); ?></div></div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                         
-                        @if($customer->birthdate)
+                        <?php if($customer->birthdate): ?>
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-cake-candles"></i></div>
                             <div>
                                 <span class="info-label">Date de naissance</span>
-                                <div class="info-value">{{ \Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y') }} ({{ \Carbon\Carbon::parse($customer->birthdate)->age }} ans)</div>
+                                <div class="info-value"><?php echo e(\Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y')); ?> (<?php echo e(\Carbon\Carbon::parse($customer->birthdate)->age); ?> ans)</div>
                             </div>
                         </div>
-                        @endif
+                        <?php endif; ?>
                         
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
                             <div>
                                 <span class="info-label">Client depuis</span>
-                                <div class="info-value">{{ $customer->created_at->format('d/m/Y') }}</div>
+                                <div class="info-value"><?php echo e($customer->created_at->format('d/m/Y')); ?></div>
                             </div>
                         </div>
                     </div>
                     
-                    {{-- Actions rapides --}}
+                    
                     <div class="profile-section">
                         <div class="section-title">
                             <i class="fas fa-bolt"></i> Actions rapides
                         </div>
                         
                         <div class="actions-grid">
-                            <a href="{{ route('customer.edit', $customer->id) }}" class="action-card">
+                            <a href="<?php echo e(route('customer.edit', $customer->id)); ?>" class="action-card">
                                 <div class="action-icon"><i class="fas fa-edit"></i></div>
                                 <div class="action-title">Modifier</div>
                                 <div class="action-subtitle">Mettre à jour</div>
                             </a>
                             
-                            <a href="{{ route('transaction.reservation.createIdentity') }}?customer_id={{ $customer->id }}" class="action-card">
+                            <a href="<?php echo e(route('transaction.reservation.createIdentity')); ?>?customer_id=<?php echo e($customer->id); ?>" class="action-card">
                                 <div class="action-icon"><i class="fas fa-calendar-plus"></i></div>
                                 <div class="action-title">Réserver</div>
                                 <div class="action-subtitle">Nouveau séjour</div>
                             </a>
                             
-                            <a href="{{ route('transaction.reservation.customerReservations', $customer->id) }}" class="action-card">
+                            <a href="<?php echo e(route('transaction.reservation.customerReservations', $customer->id)); ?>" class="action-card">
                                 <div class="action-icon"><i class="fas fa-history"></i></div>
                                 <div class="action-title">Historique</div>
                                 <div class="action-subtitle">Toutes les réservations</div>
                             </a>
                             
-                            <a href="{{ route('customer.index') }}" class="action-card">
+                            <a href="<?php echo e(route('customer.index')); ?>" class="action-card">
                                 <div class="action-icon"><i class="fas fa-arrow-left"></i></div>
                                 <div class="action-title">Retour</div>
                                 <div class="action-subtitle">Liste des clients</div>
@@ -742,43 +742,44 @@
             </div>
         </div>
         
-        {{-- Colonne droite - Réservations --}}
+        
         <div class="col-lg-8">
-            {{-- Réservations en cours --}}
+            
             <div class="profile-card anim-4">
                 <div class="profile-header" style="background: linear-gradient(135deg, var(--gray-700), var(--gray-800));">
                     <h2 class="profile-name" style="font-size:1.2rem;"><i class="fas fa-calendar-check me-2"></i> Réservations en cours</h2>
-                    <span class="profile-badge">{{ $activeReservations }} active(s)</span>
+                    <span class="profile-badge"><?php echo e($activeReservations); ?> active(s)</span>
                 </div>
                 
                 <div class="profile-body">
-                    @php
+                    <?php
                         $activeStays = $customer->transactions()->where('check_out', '>=', now())->orderBy('check_in', 'desc')->with('room')->get();
-                    @endphp
+                    ?>
                     
-                    @if($activeStays->count() > 0)
+                    <?php if($activeStays->count() > 0): ?>
                         <div class="reservations-grid">
-                            @foreach($activeStays as $t)
-                                @php
+                            <?php $__currentLoopData = $activeStays; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $isActive = $t->check_in <= now() && $t->check_out >= now();
                                     $checkIn = \Carbon\Carbon::parse($t->check_in);
                                     $checkOut = \Carbon\Carbon::parse($t->check_out);
                                     $nights = $checkIn->diffInDays($checkOut);
                                     $balance = $t->getTotalPrice() - $t->getTotalPayment();
-                                @endphp
+                                ?>
                                 
                                 <div class="res-card">
                                     <div class="res-header">
                                         <div class="res-room">
                                             <div class="res-room-icon"><i class="fas fa-bed"></i></div>
                                             <div class="res-room-info">
-                                                <h6>Chambre {{ $t->room->number ?? 'N/A' }}</h6>
-                                                <small>{{ $t->room->type->name ?? 'Standard' }}</small>
+                                                <h6>Chambre <?php echo e($t->room->number ?? 'N/A'); ?></h6>
+                                                <small><?php echo e($t->room->type->name ?? 'Standard'); ?></small>
                                             </div>
                                         </div>
-                                        <span class="res-status status-{{ $isActive ? 'active' : 'upcoming' }}">
-                                            <i class="fas fa-{{ $isActive ? 'user-check' : 'clock' }}"></i>
-                                            {{ $isActive ? 'En cours' : 'À venir' }}
+                                        <span class="res-status status-<?php echo e($isActive ? 'active' : 'upcoming'); ?>">
+                                            <i class="fas fa-<?php echo e($isActive ? 'user-check' : 'clock'); ?>"></i>
+                                            <?php echo e($isActive ? 'En cours' : 'À venir'); ?>
+
                                         </span>
                                     </div>
                                     
@@ -788,8 +789,8 @@
                                                 <div class="res-date-icon"><i class="fas fa-sign-in-alt"></i></div>
                                                 <div class="res-date-info">
                                                     <span class="label">Arrivée</span>
-                                                    <div class="value">{{ $checkIn->format('d/m/Y') }}</div>
-                                                    <div class="time">{{ $checkIn->format('H:i') }}</div>
+                                                    <div class="value"><?php echo e($checkIn->format('d/m/Y')); ?></div>
+                                                    <div class="time"><?php echo e($checkIn->format('H:i')); ?></div>
                                                 </div>
                                             </div>
                                             <div class="res-sep"><i class="fas fa-arrow-right"></i></div>
@@ -797,8 +798,8 @@
                                                 <div class="res-date-icon"><i class="fas fa-sign-out-alt"></i></div>
                                                 <div class="res-date-info">
                                                     <span class="label">Départ</span>
-                                                    <div class="value">{{ $checkOut->format('d/m/Y') }}</div>
-                                                    <div class="time">{{ $checkOut->format('H:i') }}</div>
+                                                    <div class="value"><?php echo e($checkOut->format('d/m/Y')); ?></div>
+                                                    <div class="time"><?php echo e($checkOut->format('H:i')); ?></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -806,68 +807,68 @@
                                         <div class="res-details">
                                             <div class="res-detail-item">
                                                 <span class="res-detail-label">Nuits</span>
-                                                <span class="res-detail-value">{{ $nights }}</span>
+                                                <span class="res-detail-value"><?php echo e($nights); ?></span>
                                             </div>
                                             <div class="res-detail-item">
                                                 <span class="res-detail-label">Total</span>
-                                                <span class="res-detail-value">{{ number_format($t->total_price, 0, ',', ' ') }} <small>FCFA</small></span>
+                                                <span class="res-detail-value"><?php echo e(number_format($t->total_price, 0, ',', ' ')); ?> <small>FCFA</small></span>
                                             </div>
-                                            @if($balance > 0)
+                                            <?php if($balance > 0): ?>
                                             <div class="res-detail-item">
                                                 <span class="res-detail-label">Solde</span>
-                                                <span class="res-detail-value" style="color:var(--red-500);">{{ number_format($balance, 0, ',', ' ') }}</span>
+                                                <span class="res-detail-value" style="color:var(--red-500);"><?php echo e(number_format($balance, 0, ',', ' ')); ?></span>
                                             </div>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                         
                                         <div class="res-footer">
-                                            <a href="{{ route('transaction.show', $t->id) }}" class="btn btn-outline btn-sm">Détails</a>
-                                            @if($balance > 0)
-                                            <a href="{{ route('transaction.payment.create', $t->id) }}" class="btn btn-green btn-sm">Payer</a>
-                                            @endif
+                                            <a href="<?php echo e(route('transaction.show', $t->id)); ?>" class="btn btn-outline btn-sm">Détails</a>
+                                            <?php if($balance > 0): ?>
+                                            <a href="<?php echo e(route('transaction.payment.create', $t->id)); ?>" class="btn btn-green btn-sm">Payer</a>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
-                    @else
+                    <?php else: ?>
                         <div class="text-center py-5">
                             <i class="fas fa-calendar-times fa-3x" style="color:var(--gray-300); margin-bottom:12px;"></i>
                             <h6>Aucune réservation en cours</h6>
                             <p class="text-muted small">Ce client n'a pas de réservation active.</p>
                         </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
             
-            {{-- Historique --}}
-            @php
-                $pastStays = $customer->transactions()->where('check_out', '<', now())->orderBy('check_out', 'desc')->take(3)->with('room')->get();
-            @endphp
             
-            @if($pastStays->count() > 0)
+            <?php
+                $pastStays = $customer->transactions()->where('check_out', '<', now())->orderBy('check_out', 'desc')->take(3)->with('room')->get();
+            ?>
+            
+            <?php if($pastStays->count() > 0): ?>
             <div class="profile-card mt-4 anim-4">
                 <div class="profile-header" style="background: linear-gradient(135deg, var(--gray-600), var(--gray-700));">
                     <h2 class="profile-name" style="font-size:1.2rem;"><i class="fas fa-history me-2"></i> Historique</h2>
-                    <span class="profile-badge">{{ $completedReservations }} terminée(s)</span>
+                    <span class="profile-badge"><?php echo e($completedReservations); ?> terminée(s)</span>
                 </div>
                 
                 <div class="profile-body">
                     <div class="reservations-grid">
-                        @foreach($pastStays as $t)
-                            @php
+                        <?php $__currentLoopData = $pastStays; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
                                 $checkIn = \Carbon\Carbon::parse($t->check_in);
                                 $checkOut = \Carbon\Carbon::parse($t->check_out);
                                 $nights = $checkIn->diffInDays($checkOut);
-                            @endphp
+                            ?>
                             
                             <div class="res-card">
                                 <div class="res-header">
                                     <div class="res-room">
                                         <div class="res-room-icon"><i class="fas fa-bed"></i></div>
                                         <div class="res-room-info">
-                                            <h6>Chambre {{ $t->room->number ?? 'N/A' }}</h6>
-                                            <small>{{ $t->room->type->name ?? 'Standard' }}</small>
+                                            <h6>Chambre <?php echo e($t->room->number ?? 'N/A'); ?></h6>
+                                            <small><?php echo e($t->room->type->name ?? 'Standard'); ?></small>
                                         </div>
                                     </div>
                                     <span class="res-status status-completed"><i class="fas fa-check-circle"></i> Terminé</span>
@@ -877,42 +878,42 @@
                                     <div class="res-dates mb-3">
                                         <div class="d-flex align-items-center gap-2">
                                             <small class="text-muted">Du</small>
-                                            <span class="fw-semibold">{{ $checkIn->format('d/m/Y') }}</span>
+                                            <span class="fw-semibold"><?php echo e($checkIn->format('d/m/Y')); ?></span>
                                             <i class="fas fa-arrow-right text-muted fa-xs"></i>
                                             <small class="text-muted">au</small>
-                                            <span class="fw-semibold">{{ $checkOut->format('d/m/Y') }}</span>
+                                            <span class="fw-semibold"><?php echo e($checkOut->format('d/m/Y')); ?></span>
                                         </div>
                                     </div>
                                     
                                     <div class="res-details mb-3">
                                         <div class="res-detail-item">
                                             <span class="res-detail-label">Nuits</span>
-                                            <span class="res-detail-value">{{ $nights }}</span>
+                                            <span class="res-detail-value"><?php echo e($nights); ?></span>
                                         </div>
                                         <div class="res-detail-item">
                                             <span class="res-detail-label">Total</span>
-                                            <span class="res-detail-value">{{ number_format($t->total_price, 0, ',', ' ') }} <small>FCFA</small></span>
+                                            <span class="res-detail-value"><?php echo e(number_format($t->total_price, 0, ',', ' ')); ?> <small>FCFA</small></span>
                                         </div>
                                     </div>
                                     
                                     <div class="res-footer">
-                                        <a href="{{ route('transaction.show', $t->id) }}" class="btn btn-outline btn-sm">Voir</a>
+                                        <a href="<?php echo e(route('transaction.show', $t->id)); ?>" class="btn btn-outline btn-sm">Voir</a>
                                     </div>
                                 </div>
                             </div>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                     
-                    @if($completedReservations > 3)
+                    <?php if($completedReservations > 3): ?>
                     <div class="text-center mt-3">
-                        <a href="{{ route('transaction.reservation.customerReservations', $customer->id) }}" class="btn btn-outline btn-sm">
+                        <a href="<?php echo e(route('transaction.reservation.customerReservations', $customer->id)); ?>" class="btn btn-outline btn-sm">
                             Voir tout l'historique
                         </a>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
@@ -929,4 +930,5 @@ document.querySelectorAll('.alert').forEach(alert => {
 });
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/customer/show.blade.php ENDPATH**/ ?>

@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Scanner QR Code')
 
-@section('content')
+<?php $__env->startSection('title', 'Scanner QR Code'); ?>
+
+<?php $__env->startSection('content'); ?>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -370,16 +370,16 @@ code {
 
 <div class="scan-page">
 
-    {{-- Breadcrumb --}}
+    
     <div class="breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('housekeeping.index') }}">Housekeeping</a>
+        <a href="<?php echo e(route('housekeeping.index')); ?>">Housekeeping</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Scanner</span>
     </div>
 
-    {{-- En-tête --}}
+    
     <div class="page-header anim-2">
         <div>
             <div class="header-title">
@@ -388,12 +388,12 @@ code {
             </div>
             <p class="header-subtitle">Scannez le QR code d'une chambre</p>
         </div>
-        <a href="{{ route('housekeeping.index') }}" class="btn btn-gray">
+        <a href="<?php echo e(route('housekeeping.index')); ?>" class="btn btn-gray">
             <i class="fas fa-arrow-left"></i> Retour
         </a>
     </div>
 
-    {{-- Scanner --}}
+    
     <div class="row justify-content-center">
         <div class="col-lg-8 col-xl-6">
             <div class="card">
@@ -413,10 +413,10 @@ code {
 
                     <hr>
 
-                    {{-- Saisie manuelle --}}
+                    
                     <h6 class="fw-semibold mb-3"><i class="fas fa-keyboard me-2" style="color:var(--green-600);"></i> Saisie manuelle</h6>
-                    <form id="manualForm" action="{{ route('housekeeping.scan.process') }}" method="POST">
-                        @csrf
+                    <form id="manualForm" action="<?php echo e(route('housekeeping.scan.process')); ?>" method="POST">
+                        <?php echo csrf_field(); ?>
                         <div class="row g-2">
                             <div class="col-md-8">
                                 <input type="text" class="form-control form-control-lg" name="room_number" placeholder="Numéro de chambre" required>
@@ -439,7 +439,7 @@ code {
                 </div>
             </div>
 
-            {{-- Dernières actions --}}
+            
             <div class="card mt-4">
                 <div class="card-header light">
                     <i class="fas fa-history"></i> Dernières actions
@@ -509,8 +509,8 @@ function showActionModal(room, qr) {
                             <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
                             <div><code>${qr}</code></div>
                         </div>
-                        <form id="scanForm" method="POST" action="{{ route('housekeeping.scan.process') }}">
-                            @csrf
+                        <form id="scanForm" method="POST" action="<?php echo e(route('housekeeping.scan.process')); ?>">
+                            <?php echo csrf_field(); ?>
                             <input type="hidden" name="room_number" value="${room}">
                             <div class="mb-3">
                                 <select class="form-select" name="action" required>
@@ -574,4 +574,5 @@ function showCameraError() {
 window.addEventListener('beforeunload', () => html5QrCode?.stop());
 </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/housekeeping/scan.blade.php ENDPATH**/ ?>
