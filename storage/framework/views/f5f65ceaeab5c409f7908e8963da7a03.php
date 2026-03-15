@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Modifier le Type de Chambre')
-@section('content')
+
+<?php $__env->startSection('title', 'Nouveau Type de Chambre'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -49,7 +49,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-.edit-type-page {
+.create-type-page {
     padding: 28px 32px 64px;
     background: var(--surface);
     min-height: 100vh;
@@ -76,48 +76,48 @@
 /* ══════════════════════════════════════════════
    BREADCRUMB
 ══════════════════════════════════════════════ */
-.edit-type-breadcrumb {
+.create-type-breadcrumb {
     display: flex; align-items: center; gap: 6px;
     font-size: .8rem; color: var(--s400);
     margin-bottom: 20px;
 }
-.edit-type-breadcrumb a {
+.create-type-breadcrumb a {
     color: var(--s400); text-decoration: none;
     transition: var(--transition);
 }
-.edit-type-breadcrumb a:hover { color: var(--g600); }
-.edit-type-breadcrumb .sep { color: var(--s300); }
-.edit-type-breadcrumb .current { color: var(--s600); font-weight: 500; }
+.create-type-breadcrumb a:hover { color: var(--g600); }
+.create-type-breadcrumb .sep { color: var(--s300); }
+.create-type-breadcrumb .current { color: var(--s600); font-weight: 500; }
 
 /* ══════════════════════════════════════════════
    HEADER
 ══════════════════════════════════════════════ */
-.edit-type-header {
+.create-type-header {
     display: flex; align-items: center;
     justify-content: space-between; flex-wrap: wrap;
     gap: 16px; margin-bottom: 32px;
     padding-bottom: 24px;
     border-bottom: 1.5px solid var(--s100);
 }
-.edit-type-brand { display: flex; align-items: center; gap: 14px; }
-.edit-type-brand-icon {
+.create-type-brand { display: flex; align-items: center; gap: 14px; }
+.create-type-brand-icon {
     width: 48px; height: 48px;
     background: var(--g600); border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 1.1rem; flex-shrink: 0;
     box-shadow: 0 4px 14px rgba(46,133,64,.35);
 }
-.edit-type-header-title {
+.create-type-header-title {
     font-size: 1.4rem; font-weight: 700;
     color: var(--s900); line-height: 1.2; letter-spacing: -.3px;
 }
-.edit-type-header-title em { font-style: normal; color: var(--g600); }
-.edit-type-header-sub {
+.create-type-header-title em { font-style: normal; color: var(--g600); }
+.create-type-header-sub {
     font-size: .8rem; color: var(--s400); margin-top: 3px;
     display: flex; align-items: center; gap: 8px;
 }
-.edit-type-header-sub i { color: var(--g500); }
-.edit-type-header-actions { display: flex; align-items: center; gap: 10px; }
+.create-type-header-sub i { color: var(--g500); }
+.create-type-header-actions { display: flex; align-items: center; gap: 10px; }
 
 /* ══════════════════════════════════════════════
    BOUTONS
@@ -148,34 +148,26 @@
     background: var(--s50); border-color: var(--s300);
     color: var(--s900); text-decoration: none;
 }
-.btn-db-warning {
-    background: #fff3cd; color: #856404;
-    border: 1.5px solid #ffeeba;
-}
-.btn-db-warning:hover {
-    background: #ffe69c; color: #856404;
-    transform: translateY(-1px);
-}
 
 /* ══════════════════════════════════════════════
    CARTE PRINCIPALE
 ══════════════════════════════════════════════ */
-.edit-type-card {
+.create-type-card {
     background: var(--white); border-radius: var(--rxl);
     border: 1.5px solid var(--s100); overflow: hidden;
     margin-bottom: 20px; box-shadow: var(--shadow-sm);
 }
-.edit-type-card-header {
+.create-type-card-header {
     padding: 18px 24px;
     border-bottom: 1.5px solid var(--s100);
     background: var(--white);
 }
-.edit-type-card-title {
+.create-type-card-title {
     display: flex; align-items: center; gap: 10px;
     font-size: .95rem; font-weight: 600; color: var(--s800); margin: 0;
 }
-.edit-type-card-title i { color: var(--g500); }
-.edit-type-card-body { padding: 28px; }
+.create-type-card-title i { color: var(--g500); }
+.create-type-card-body { padding: 28px; }
 
 /* ══════════════════════════════════════════════
    FORMULAIRE
@@ -252,54 +244,53 @@
    RESPONSIVE
 ══════════════════════════════════════════════ */
 @media(max-width:768px){
-    .edit-type-page{ padding: 20px; }
-    .edit-type-header{ flex-direction: column; align-items: flex-start; }
-    .edit-type-card-body{ padding: 20px; }
+    .create-type-page{ padding: 20px; }
+    .create-type-header{ flex-direction: column; align-items: flex-start; }
+    .create-type-card-body{ padding: 20px; }
     .actions-bar{ flex-direction: column; align-items: stretch; }
     .actions-bar .btn-db{ width: 100%; justify-content: center; }
 }
 </style>
 
-<div class="edit-type-page">
+<div class="create-type-page">
     <!-- Breadcrumb -->
-    <div class="edit-type-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+    <div class="create-type-breadcrumb anim-1">
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('type.index') }}">Types de chambres</a>
+        <a href="<?php echo e(route('type.index')); ?>">Types de chambres</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Modifier: {{ $type->name }}</span>
+        <span class="current">Nouveau type</span>
     </div>
 
     <!-- Header -->
-    <div class="edit-type-header anim-2">
-        <div class="edit-type-brand">
-            <div class="edit-type-brand-icon"><i class="fas fa-edit"></i></div>
+    <div class="create-type-header anim-2">
+        <div class="create-type-brand">
+            <div class="create-type-brand-icon"><i class="fas fa-plus"></i></div>
             <div>
-                <h1 class="edit-type-header-title">Modifier le <em>type</em></h1>
-                <p class="edit-type-header-sub">
-                    <i class="fas fa-tag me-1"></i> {{ $type->name }} · Mise à jour des informations
+                <h1 class="create-type-header-title">Nouveau <em>type</em></h1>
+                <p class="create-type-header-sub">
+                    <i class="fas fa-tag me-1"></i> Ajouter un nouveau type de chambre
                 </p>
             </div>
         </div>
-        <div class="edit-type-header-actions">
-            <a href="{{ route('type.index') }}" class="btn-db btn-db-ghost">
+        <div class="create-type-header-actions">
+            <a href="<?php echo e(route('type.index')); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-arrow-left me-2"></i> Retour
             </a>
         </div>
     </div>
 
     <!-- Formulaire -->
-    <div class="edit-type-card anim-3">
-        <div class="edit-type-card-header">
-            <h5 class="edit-type-card-title">
+    <div class="create-type-card anim-3">
+        <div class="create-type-card-header">
+            <h5 class="create-type-card-title">
                 <i class="fas fa-info-circle"></i>
                 Informations du type
             </h5>
         </div>
-        <div class="edit-type-card-body">
-            <form id="edit-type-form" method="POST" action="{{ route('type.update', $type->id) }}">
-                @csrf
-                @method('PUT')
+        <div class="create-type-card-body">
+            <form id="create-type-form" method="POST" action="<?php echo e(route('type.store')); ?>">
+                <?php echo csrf_field(); ?>
                 
                 <div class="form-grid">
                     <!-- Nom -->
@@ -308,8 +299,7 @@
                             <i class="fas fa-tag"></i>
                             Nom du type <span class="required">*</span>
                         </label>
-                        <input type="text" name="name" class="form-control" 
-                               value="{{ $type->name }}" required
+                        <input type="text" name="name" class="form-control" required 
                                placeholder="Ex: Standard, Deluxe, Suite">
                     </div>
                     
@@ -321,8 +311,7 @@
                         </label>
                         <div class="input-group">
                             <input type="number" name="base_price" class="form-control"
-                                   value="{{ $type->base_price }}" min="0"
-                                   placeholder="50000">
+                                   placeholder="50000" min="0">
                             <span class="input-group-text">FCFA</span>
                         </div>
                         <div class="form-hint">Prix par nuit recommandé</div>
@@ -336,11 +325,9 @@
                         </label>
                         <select name="capacity" class="form-select">
                             <option value="">-- Sélectionner --</option>
-                            @for($i = 1; $i <= 10; $i++)
-                                <option value="{{ $i }}" {{ $type->capacity == $i ? 'selected' : '' }}>
-                                    {{ $i }} personne(s)
-                                </option>
-                            @endfor
+                            <?php for($i = 1; $i <= 10; $i++): ?>
+                                <option value="<?php echo e($i); ?>"><?php echo e($i); ?> personne(s)</option>
+                            <?php endfor; ?>
                         </select>
                     </div>
                 </div>
@@ -352,13 +339,13 @@
                         Description
                     </label>
                     <textarea name="information" class="form-control" rows="4" 
-                              placeholder="Description du type de chambre...">{{ $type->information }}</textarea>
+                              placeholder="Description du type de chambre..."></textarea>
                 </div>
                 
                 <!-- Statut actif -->
                 <div class="form-check" style="margin-top:16px;">
                     <input class="form-check-input" type="checkbox" value="1" 
-                           id="is_active" name="is_active" {{ $type->is_active ? 'checked' : '' }}>
+                           id="is_active" name="is_active" checked>
                     <label class="form-check-label" for="is_active">
                         Actif (disponible pour sélection)
                     </label>
@@ -366,10 +353,10 @@
                 
                 <!-- Actions -->
                 <div class="actions-bar">
-                    <button type="submit" class="btn-db btn-db-warning">
-                        <i class="fas fa-save me-2"></i> Mettre à jour
+                    <button type="submit" class="btn-db btn-db-primary">
+                        <i class="fas fa-save me-2"></i> Créer le type
                     </button>
-                    <a href="{{ route('type.index') }}" class="btn-db btn-db-ghost">
+                    <a href="<?php echo e(route('type.index')); ?>" class="btn-db btn-db-ghost">
                         <i class="fas fa-times me-2"></i> Annuler
                     </a>
                 </div>
@@ -377,13 +364,13 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 // Gestion AJAX de la soumission
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('edit-type-form');
+    const form = document.getElementById('create-type-form');
     if (form) {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -398,17 +385,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 body: new FormData(this),
                 headers: {
-                    'Accept': 'application/json',
-                    'X-HTTP-Method-Override': 'PUT'
+                    'Accept': 'application/json'
                 }
             })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     alert(data.message);
-                    window.location.href = '{{ route("type.index") }}';
+                    window.location.href = '<?php echo e(route("type.index")); ?>';
                 } else {
-                    alert(data.message || 'Erreur lors de la modification');
+                    alert(data.message || 'Erreur lors de la création');
                     button.disabled = false;
                     button.innerHTML = originalText;
                 }
@@ -423,4 +409,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/type/create.blade.php ENDPATH**/ ?>
