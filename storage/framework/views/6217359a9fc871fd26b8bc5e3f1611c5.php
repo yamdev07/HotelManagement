@@ -1,7 +1,6 @@
-@extends('template.master')
-@section('title', 'Ajouter un Utilisateur')
+<?php $__env->startSection('title', 'Ajouter un Utilisateur'); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -341,9 +340,9 @@
 <div class="add-user-page">
     <!-- Breadcrumb -->
     <div class="add-user-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('user.index') }}">Utilisateurs</a>
+        <a href="<?php echo e(route('user.index')); ?>">Utilisateurs</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Ajouter</span>
     </div>
@@ -360,7 +359,7 @@
             </div>
         </div>
         <div class="add-user-header-actions">
-            <a href="{{ route('user.index') }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('user.index')); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-arrow-left me-2"></i> Retour
             </a>
         </div>
@@ -381,8 +380,8 @@
                 </div>
 
                 <div class="add-user-card-body">
-                    <form method="POST" action="{{ route('user.store') }}" class="modern-form" id="userForm">
-                        @csrf
+                    <form method="POST" action="<?php echo e(route('user.store')); ?>" class="modern-form" id="userForm">
+                        <?php echo csrf_field(); ?>
                         
                         <!-- Section Informations personnelles -->
                         <div class="form-section">
@@ -399,17 +398,32 @@
                                     <i class="fas fa-user input-icon"></i>
                                     <input 
                                         type="text" 
-                                        class="form-control-modern @error('name') is-invalid @enderror" 
+                                        class="form-control-modern <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                         id="name"
                                         name="name" 
-                                        value="{{ old('name') }}"
+                                        value="<?php echo e(old('name')); ?>"
                                         placeholder="Ex: Jean Dupont">
                                 </div>
-                                @error('name')
+                                <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                     <div class="error-message">
-                                        <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                        <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                                     </div>
-                                @enderror
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             </div>
                         </div>
 
@@ -430,17 +444,32 @@
                                             <i class="fas fa-envelope input-icon"></i>
                                             <input 
                                                 type="email" 
-                                                class="form-control-modern @error('email') is-invalid @enderror" 
+                                                class="form-control-modern <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                 id="email"
                                                 name="email" 
-                                                value="{{ old('email') }}"
+                                                value="<?php echo e(old('email')); ?>"
                                                 placeholder="exemple@hotel.com">
                                         </div>
-                                        @error('email')
+                                        <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                             <div class="error-message">
-                                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                                             </div>
-                                        @enderror
+                                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                     </div>
                                 </div>
 
@@ -453,7 +482,14 @@
                                             <i class="fas fa-key input-icon"></i>
                                             <input 
                                                 type="password" 
-                                                class="form-control-modern @error('password') is-invalid @enderror" 
+                                                class="form-control-modern <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                                 id="password"
                                                 name="password" 
                                                 placeholder="Minimum 8 caractères">
@@ -461,15 +497,23 @@
                                                 <i class="fas fa-eye" id="toggleIcon"></i>
                                             </button>
                                         </div>
-                                        @error('password')
+                                        <?php $__errorArgs = ['password'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                             <div class="error-message">
-                                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                                             </div>
-                                        @else
+                                        <?php else: ?>
                                             <div class="form-hint">
                                                 <i class="fas fa-info-circle"></i> Minimum 8 caractères
                                             </div>
-                                        @enderror
+                                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                     </div>
                                 </div>
                             </div>
@@ -491,27 +535,42 @@
                                     <select 
                                         id="role" 
                                         name="role" 
-                                        class="form-select-modern @error('role') is-invalid @enderror">
+                                        class="form-select-modern <?php $__errorArgs = ['role'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                                         <option value="" selected disabled>-- Sélectionner un rôle --</option>
-                                        <option value="Admin" @if(old('role') == 'Admin') selected @endif>
+                                        <option value="Admin" <?php if(old('role') == 'Admin'): ?> selected <?php endif; ?>>
                                             👑 Administrateur
                                         </option>
-                                        <option value="Receptionist" @if(old('role') == 'Receptionist') selected @endif>
+                                        <option value="Receptionist" <?php if(old('role') == 'Receptionist'): ?> selected <?php endif; ?>>
                                             🎯 Réceptionniste
                                         </option>
-                                        <option value="Housekeeping" @if(old('role') == 'Housekeeping') selected @endif>
+                                        <option value="Housekeeping" <?php if(old('role') == 'Housekeeping'): ?> selected <?php endif; ?>>
                                             🧹 Femme de ménage
                                         </option>
-                                        <option value="Customer" @if(old('role') == 'Customer') selected @endif>
+                                        <option value="Customer" <?php if(old('role') == 'Customer'): ?> selected <?php endif; ?>>
                                             👤 Client
                                         </option>
                                     </select>
                                 </div>
-                                @error('role')
+                                <?php $__errorArgs = ['role'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                     <div class="error-message">
-                                        <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                        <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                                     </div>
-                                @enderror
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 
                                 <!-- Description du rôle -->
                                 <div class="role-description" id="roleDescription" style="display: none;">
@@ -554,9 +613,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Descriptions des rôles
@@ -622,4 +681,5 @@ document.getElementById('userForm')?.addEventListener('submit', function(e) {
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Création...';
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/user/create.blade.php ENDPATH**/ ?>

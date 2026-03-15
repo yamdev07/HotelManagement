@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Profil Utilisateur - ' . $user->name)
 
-@section('content')
+<?php $__env->startSection('title', 'Profil Utilisateur - ' . $user->name); ?>
+
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -334,53 +334,56 @@
 <div class="profile-page">
     <!-- Breadcrumb -->
     <div class="profile-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('user.index') }}">Utilisateurs</a>
+        <a href="<?php echo e(route('user.index')); ?>">Utilisateurs</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">{{ $user->name }}</span>
+        <span class="current"><?php echo e($user->name); ?></span>
     </div>
 
     <!-- Carte Profil -->
     <div class="profile-card anim-2">
         <div class="profile-header">
-            <img src="{{ $user->getAvatar() }}" 
+            <img src="<?php echo e($user->getAvatar()); ?>" 
                  class="profile-avatar" 
-                 alt="{{ $user->name }}"
-                 onerror="this.src='https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=1e6b2e&color=fff&size=150'">
+                 alt="<?php echo e($user->name); ?>"
+                 onerror="this.src='https://ui-avatars.com/api/?name=<?php echo e(urlencode($user->name)); ?>&background=1e6b2e&color=fff&size=150'">
             
-            <h2 class="mb-2" style="color:white;">{{ $user->name }}</h2>
+            <h2 class="mb-2" style="color:white;"><?php echo e($user->name); ?></h2>
             
-            @switch($user->role)
-                @case('Super')
+            <?php switch($user->role):
+                case ('Super'): ?>
                     <span class="role-badge badge-super">
                         <i class="fas fa-crown me-1"></i>Super Admin
                     </span>
-                    @break
-                @case('Admin')
+                    <?php break; ?>
+                <?php case ('Admin'): ?>
                     <span class="role-badge badge-admin">
                         <i class="fas fa-user-shield me-1"></i>Administrateur
                     </span>
-                    @break
-                @case('Receptionist')
+                    <?php break; ?>
+                <?php case ('Receptionist'): ?>
                     <span class="role-badge badge-receptionist">
                         <i class="fas fa-concierge-bell me-1"></i>Réceptionniste
                     </span>
-                    @break
-                @case('Housekeeping')
+                    <?php break; ?>
+                <?php case ('Housekeeping'): ?>
                     <span class="role-badge badge-housekeeping">
                         <i class="fas fa-broom me-1"></i>Housekeeping
                     </span>
-                    @break
-                @default
+                    <?php break; ?>
+                <?php default: ?>
                     <span class="role-badge badge-customer">
-                        <i class="fas fa-user me-1"></i>{{ $user->role }}
+                        <i class="fas fa-user me-1"></i><?php echo e($user->role); ?>
+
                     </span>
-            @endswitch
+            <?php endswitch; ?>
             
             <p class="mt-3 mb-0" style="color:rgba(255,255,255,0.8);">
-                <i class="fas fa-user-circle me-1"></i> ID: #{{ $user->id }}
-                • Membre depuis {{ $user->created_at->format('d/m/Y') }}
+                <i class="fas fa-user-circle me-1"></i> ID: #<?php echo e($user->id); ?>
+
+                • Membre depuis <?php echo e($user->created_at->format('d/m/Y')); ?>
+
             </p>
         </div>
         
@@ -404,12 +407,12 @@
                                         </div>
                                         <div>
                                             <small class="text-muted d-block" style="color:var(--s400);">Email</small>
-                                            <strong style="color:var(--s800);">{{ $user->email }}</strong>
-                                            @if($user->email_verified_at)
+                                            <strong style="color:var(--s800);"><?php echo e($user->email); ?></strong>
+                                            <?php if($user->email_verified_at): ?>
                                             <span class="badge-db badge-db-success ms-2">
                                                 <i class="fas fa-check-circle"></i> Vérifié
                                             </span>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -421,12 +424,12 @@
                                         </div>
                                         <div>
                                             <small class="text-muted d-block" style="color:var(--s400);">Téléphone</small>
-                                            <strong style="color:var(--s800);">{{ $user->phone ?? 'Non renseigné' }}</strong>
+                                            <strong style="color:var(--s800);"><?php echo e($user->phone ?? 'Non renseigné'); ?></strong>
                                         </div>
                                     </div>
                                 </div>
                                 
-                                @if($user->address)
+                                <?php if($user->address): ?>
                                 <div class="col-12 mb-3">
                                     <div class="d-flex align-items-start">
                                         <div class="info-icon">
@@ -434,38 +437,38 @@
                                         </div>
                                         <div>
                                             <small class="text-muted d-block" style="color:var(--s400);">Adresse</small>
-                                            <strong style="color:var(--s800);">{{ $user->address }}</strong>
+                                            <strong style="color:var(--s800);"><?php echo e($user->address); ?></strong>
                                         </div>
                                     </div>
                                 </div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                             
                             <!-- Actions -->
                             <div class="mt-4 pt-3" style="border-top:1px solid var(--s100);">
                                 <div class="d-flex gap-2 flex-wrap">
-                                    <a href="mailto:{{ $user->email }}" class="btn-db btn-db-outline-primary">
+                                    <a href="mailto:<?php echo e($user->email); ?>" class="btn-db btn-db-outline-primary">
                                         <i class="fas fa-envelope me-2"></i>Envoyer un email
                                     </a>
                                     
-                                    @if(auth()->user()->role === 'Super' && auth()->user()->id !== $user->id)
-                                    <a href="{{ route('user.edit', $user) }}" class="btn-db btn-db-outline-warning">
+                                    <?php if(auth()->user()->role === 'Super' && auth()->user()->id !== $user->id): ?>
+                                    <a href="<?php echo e(route('user.edit', $user)); ?>" class="btn-db btn-db-outline-warning">
                                         <i class="fas fa-edit me-2"></i>Modifier
                                     </a>
-                                    @endif
+                                    <?php endif; ?>
                                     
-                                    @if(auth()->user()->id === $user->id)
-                                    <a href="{{ route('profile.edit') }}" class="btn-db btn-db-outline-info">
+                                    <?php if(auth()->user()->id === $user->id): ?>
+                                    <a href="<?php echo e(route('profile.edit')); ?>" class="btn-db btn-db-outline-info">
                                         <i class="fas fa-user-edit me-2"></i>Mon profil
                                     </a>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <!-- Statistiques client -->
-                    @if($user->role === 'Customer' && isset($user->customer))
+                    <?php if($user->role === 'Customer' && isset($user->customer)): ?>
                     <div class="info-card">
                         <div class="info-card-body">
                             <h5 class="card-title mb-4" style="color:var(--s800); font-size:.95rem;">
@@ -477,7 +480,8 @@
                                 <div class="col-md-3 col-sm-6">
                                     <div class="stat-item">
                                         <div class="stat-number" style="color:var(--g600);">
-                                            {{ $user->customer->transactions->count() ?? 0 }}
+                                            <?php echo e($user->customer->transactions->count() ?? 0); ?>
+
                                         </div>
                                         <div class="stat-label">Réservations</div>
                                     </div>
@@ -486,7 +490,8 @@
                                 <div class="col-md-3 col-sm-6">
                                     <div class="stat-item">
                                         <div class="stat-number" style="color:var(--g600);">
-                                            {{ number_format($user->customer->transactions->sum('total_price') ?? 0, 0) }}
+                                            <?php echo e(number_format($user->customer->transactions->sum('total_price') ?? 0, 0)); ?>
+
                                         </div>
                                         <div class="stat-label">FCFA dépensés</div>
                                     </div>
@@ -495,7 +500,8 @@
                                 <div class="col-md-3 col-sm-6">
                                     <div class="stat-item">
                                         <div class="stat-number" style="color:var(--g500);">
-                                            {{ $user->customer->transactions->where('status', 'active')->count() ?? 0 }}
+                                            <?php echo e($user->customer->transactions->where('status', 'active')->count() ?? 0); ?>
+
                                         </div>
                                         <div class="stat-label">Séjours actifs</div>
                                     </div>
@@ -504,7 +510,8 @@
                                 <div class="col-md-3 col-sm-6">
                                     <div class="stat-item">
                                         <div class="stat-number" style="color:var(--g400);">
-                                            {{ $user->customer->transactions->where('status', 'completed')->count() ?? 0 }}
+                                            <?php echo e($user->customer->transactions->where('status', 'completed')->count() ?? 0); ?>
+
                                         </div>
                                         <div class="stat-label">Séjours terminés</div>
                                     </div>
@@ -512,10 +519,10 @@
                             </div>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
                     
                     <!-- Dernières activités -->
-                    @if($user->activities && $user->activities->count() > 0)
+                    <?php if($user->activities && $user->activities->count() > 0): ?>
                     <div class="info-card">
                         <div class="info-card-body">
                             <h5 class="card-title mb-4" style="color:var(--s800); font-size:.95rem;">
@@ -524,27 +531,28 @@
                             </h5>
                             
                             <div class="activity-list">
-                                @foreach($user->activities->take(5) as $activity)
+                                <?php $__currentLoopData = $user->activities->take(5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $activity): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="activity-item mb-2">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
                                             <i class="fas fa-circle text-success me-2" style="font-size:0.5rem; color:var(--g500);"></i>
-                                            <span class="fw-medium" style="color:var(--s800);">{{ $activity->description }}</span>
+                                            <span class="fw-medium" style="color:var(--s800);"><?php echo e($activity->description); ?></span>
                                         </div>
-                                        <small class="text-muted" style="color:var(--s400);">{{ $activity->created_at->diffForHumans() }}</small>
+                                        <small class="text-muted" style="color:var(--s400);"><?php echo e($activity->created_at->diffForHumans()); ?></small>
                                     </div>
-                                    @if($activity->properties && !empty($activity->properties))
+                                    <?php if($activity->properties && !empty($activity->properties)): ?>
                                     <small class="text-muted ms-3 d-block mt-1" style="color:var(--s400);">
                                         <i class="fas fa-info-circle me-1"></i>
-                                        {{ json_encode($activity->properties) }}
+                                        <?php echo e(json_encode($activity->properties)); ?>
+
                                     </small>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
                 
                 <!-- Colonne droite -->
@@ -561,43 +569,43 @@
                                 <div class="d-flex justify-content-between">
                                     <span style="color:var(--s600);">Statut:</span>
                                     <span>
-                                        @if($user->is_active)
+                                        <?php if($user->is_active): ?>
                                         <span class="badge-db badge-db-success">
                                             <i class="fas fa-check-circle me-1"></i>Actif
                                         </span>
-                                        @else
+                                        <?php else: ?>
                                         <span class="badge-db badge-db-danger">
                                             <i class="fas fa-times-circle me-1"></i>Inactif
                                         </span>
-                                        @endif
+                                        <?php endif; ?>
                                     </span>
                                 </div>
                                 
                                 <div class="d-flex justify-content-between">
                                     <span style="color:var(--s600);">Email vérifié:</span>
                                     <span>
-                                        @if($user->email_verified_at)
+                                        <?php if($user->email_verified_at): ?>
                                         <span class="badge-db badge-db-success">Oui</span>
-                                        @else
+                                        <?php else: ?>
                                         <span class="badge-db badge-db-warning">Non</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </span>
                                 </div>
                                 
                                 <div class="d-flex justify-content-between">
                                     <span style="color:var(--s600);">Dernière connexion:</span>
                                     <span style="color:var(--s800);">
-                                        @if($user->last_login_at)
-                                        <small>{{ $user->last_login_at->diffForHumans() }}</small>
-                                        @else
+                                        <?php if($user->last_login_at): ?>
+                                        <small><?php echo e($user->last_login_at->diffForHumans()); ?></small>
+                                        <?php else: ?>
                                         <small class="text-muted">Jamais</small>
-                                        @endif
+                                        <?php endif; ?>
                                     </span>
                                 </div>
                                 
                                 <div class="d-flex justify-content-between">
                                     <span style="color:var(--s600);">Créé le:</span>
-                                    <small style="color:var(--s800);">{{ $user->created_at->format('d/m/Y H:i') }}</small>
+                                    <small style="color:var(--s800);"><?php echo e($user->created_at->format('d/m/Y H:i')); ?></small>
                                 </div>
                             </div>
                         </div>
@@ -611,8 +619,8 @@
                                 Permissions
                             </h5>
                             
-                            @switch($user->role)
-                                @case('Super')
+                            <?php switch($user->role):
+                                case ('Super'): ?>
                                     <div class="alert-db alert-db-danger">
                                         <i class="fas fa-crown"></i>
                                         <div>
@@ -620,8 +628,8 @@
                                             <p class="mb-0 small mt-1">Accès complet à toutes les fonctionnalités</p>
                                         </div>
                                     </div>
-                                    @break
-                                @case('Admin')
+                                    <?php break; ?>
+                                <?php case ('Admin'): ?>
                                     <div class="alert-db alert-db-primary">
                                         <i class="fas fa-user-shield"></i>
                                         <div>
@@ -629,8 +637,8 @@
                                             <p class="mb-0 small mt-1">Gestion complète avec restrictions mineures</p>
                                         </div>
                                     </div>
-                                    @break
-                                @case('Receptionist')
+                                    <?php break; ?>
+                                <?php case ('Receptionist'): ?>
                                     <div class="alert-db alert-db-info">
                                         <i class="fas fa-concierge-bell"></i>
                                         <div>
@@ -638,8 +646,8 @@
                                             <p class="mb-0 small mt-1">Accès limité aux opérations de réception</p>
                                         </div>
                                     </div>
-                                    @break
-                                @case('Housekeeping')
+                                    <?php break; ?>
+                                <?php case ('Housekeeping'): ?>
                                     <div class="alert-db alert-db-warning">
                                         <i class="fas fa-broom"></i>
                                         <div>
@@ -647,8 +655,8 @@
                                             <p class="mb-0 small mt-1">Accès aux fonctions de nettoyage uniquement</p>
                                         </div>
                                     </div>
-                                    @break
-                                @default
+                                    <?php break; ?>
+                                <?php default: ?>
                                     <div class="alert-db alert-db-success">
                                         <i class="fas fa-user"></i>
                                         <div>
@@ -656,12 +664,12 @@
                                             <p class="mb-0 small mt-1">Accès à ses propres réservations seulement</p>
                                         </div>
                                     </div>
-                            @endswitch
+                            <?php endswitch; ?>
                         </div>
                     </div>
                     
                     <!-- Actions rapides (Super seulement) -->
-                    @if(auth()->user()->role === 'Super' && auth()->user()->id !== $user->id)
+                    <?php if(auth()->user()->role === 'Super' && auth()->user()->id !== $user->id): ?>
                     <div class="info-card">
                         <div class="info-card-body">
                             <h5 class="card-title mb-3" style="color:var(--s800); font-size:.9rem;">
@@ -679,16 +687,16 @@
                                 <button class="btn-db btn-db-outline-warning w-100" 
                                         data-bs-toggle="modal" 
                                         data-bs-target="#toggleStatusModal">
-                                    @if($user->is_active)
+                                    <?php if($user->is_active): ?>
                                     <i class="fas fa-user-slash me-2"></i>Désactiver le compte
-                                    @else
+                                    <?php else: ?>
                                     <i class="fas fa-user-check me-2"></i>Activer le compte
-                                    @endif
+                                    <?php endif; ?>
                                 </button>
                             </div>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -696,7 +704,7 @@
 </div>
 
 <!-- Modal de réinitialisation de mot de passe -->
-@if(auth()->user()->role === 'Super' && auth()->user()->id !== $user->id)
+<?php if(auth()->user()->role === 'Super' && auth()->user()->id !== $user->id): ?>
 <div class="modal fade modal-db" id="resetPasswordModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -707,16 +715,16 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir réinitialiser le mot de passe de <strong>{{ $user->name }}</strong> ?</p>
+                <p>Êtes-vous sûr de vouloir réinitialiser le mot de passe de <strong><?php echo e($user->name); ?></strong> ?</p>
                 <div class="alert-db alert-db-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    Un email sera envoyé à {{ $user->email }} avec les instructions de réinitialisation.
+                    Un email sera envoyé à <?php echo e($user->email); ?> avec les instructions de réinitialisation.
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">Annuler</button>
-                <form action="{{ route('user.password.reset', $user) }}" method="POST">
-                    @csrf
+                <form action="<?php echo e(route('user.password.reset', $user)); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
                     <button type="submit" class="btn-db btn-db-outline-danger">
                         <i class="fas fa-key me-1"></i>Réinitialiser
                     </button>
@@ -732,51 +740,51 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    @if($user->is_active)
+                    <?php if($user->is_active): ?>
                     <i class="fas fa-user-slash me-2"></i>Désactiver le compte
-                    @else
+                    <?php else: ?>
                     <i class="fas fa-user-check me-2"></i>Activer le compte
-                    @endif
+                    <?php endif; ?>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                @if($user->is_active)
-                <p>Êtes-vous sûr de vouloir désactiver le compte de <strong>{{ $user->name }}</strong> ?</p>
+                <?php if($user->is_active): ?>
+                <p>Êtes-vous sûr de vouloir désactiver le compte de <strong><?php echo e($user->name); ?></strong> ?</p>
                 <div class="alert-db alert-db-warning">
                     <i class="fas fa-exclamation-triangle me-2"></i>
                     L'utilisateur ne pourra plus se connecter jusqu'à réactivation.
                 </div>
-                @else
-                <p>Êtes-vous sûr de vouloir activer le compte de <strong>{{ $user->name }}</strong> ?</p>
+                <?php else: ?>
+                <p>Êtes-vous sûr de vouloir activer le compte de <strong><?php echo e($user->name); ?></strong> ?</p>
                 <div class="alert-db alert-db-success">
                     <i class="fas fa-check-circle me-2"></i>
                     L'utilisateur pourra à nouveau se connecter.
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">Annuler</button>
-                <form action="{{ route('user.toggle.status', $user) }}" method="POST">
-                    @csrf
-                    @method('PATCH')
+                <form action="<?php echo e(route('user.toggle.status', $user)); ?>" method="POST">
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PATCH'); ?>
                     <button type="submit" class="btn-db btn-db-outline-warning">
-                        @if($user->is_active)
+                        <?php if($user->is_active): ?>
                         <i class="fas fa-user-slash me-1"></i>Désactiver
-                        @else
+                        <?php else: ?>
                         <i class="fas fa-user-check me-1"></i>Activer
-                        @endif
+                        <?php endif; ?>
                     </button>
                 </form>
             </div>
         </div>
     </div>
 </div>
-@endif
+<?php endif; ?>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Tooltips
@@ -796,4 +804,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/user/show.blade.php ENDPATH**/ ?>
