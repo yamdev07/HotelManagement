@@ -152,14 +152,60 @@
     border-color: #fecaca;
 }
 
+/* ✅ STYLE POUR BOUTON SALE */
+.btn-db-icon-warning {
+    background: #fff3cd;
+    color: #856404;
+    border-color: #ffeeba;
+}
+.btn-db-icon-warning:hover {
+    background: #ffe69c;
+    color: #856404;
+    border-color: #ffc107;
+    transform: translateY(-1px);
+}
+
+/* ✅ STYLE POUR BOUTON PROPRE */
+.btn-db-icon-success {
+    background: var(--g50);
+    color: var(--g600);
+    border-color: var(--g200);
+}
+.btn-db-icon-success:hover {
+    background: var(--g100);
+    color: var(--g700);
+    border-color: var(--g300);
+    transform: translateY(-1px);
+}
+
+/* ✅ STYLE POUR BOUTONS DÉSACTIVÉS */
+.btn-db-icon:disabled,
+.btn-db-icon.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+    background: var(--s100);
+    border-color: var(--s200);
+    color: var(--s400);
+}
+
+.btn-db-icon:disabled:hover,
+.btn-db-icon.disabled:hover {
+    transform: none;
+    box-shadow: none;
+    background: var(--s100);
+    color: var(--s400);
+}
+
 /* ══════════════════════════════════════════════
    STAT CARDS
 ══════════════════════════════════════════════ */
 .stats-grid {
-    display: grid; grid-template-columns: repeat(4,1fr);
+    display: grid; grid-template-columns: repeat(5,1fr);
     gap: 14px; margin-bottom: 24px;
 }
-@media(max-width:1100px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:1200px){ .stats-grid{ grid-template-columns:repeat(3,1fr); } }
+@media(max-width:768px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
 @media(max-width:560px) { .stats-grid{ grid-template-columns:1fr; } }
 
 .stat-card {
@@ -185,6 +231,7 @@
 .stat-card--available { --bar-c: var(--g600); }
 .stat-card--occupied { --bar-c: var(--g300); }
 .stat-card--maintenance { --bar-c: var(--s400); }
+.stat-card--dirty { --bar-c: #ffc107; }
 
 .stat-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
 .stat-card-icon {
@@ -196,6 +243,7 @@
 .stat-card--available .stat-card-icon { background: var(--g50); color: var(--g600); }
 .stat-card--occupied .stat-card-icon { background: var(--g50); color: var(--g500); }
 .stat-card--maintenance .stat-card-icon { background: var(--s100); color: var(--s500); }
+.stat-card--dirty .stat-card-icon { background: #fff3cd; color: #856404; }
 
 .stat-card-value {
     font-size: 2.6rem; font-weight: 700; color: var(--s900);
@@ -210,6 +258,7 @@
 }
 .stat-card--total .stat-card-footer { color: var(--g600); }
 .stat-card--available .stat-card-footer { color: var(--g600); }
+.stat-card--dirty .stat-card-footer { color: #856404; }
 
 /* ══════════════════════════════════════════════
    ALERTES
@@ -470,19 +519,22 @@
    RESPONSIVE
 ══════════════════════════════════════════════ */
 @media(max-width:1200px){
-    .stats-grid{ grid-template-columns:repeat(2,1fr); }
+    .stats-grid{ grid-template-columns:repeat(3,1fr); }
 }
 @media(max-width:768px){
     .rooms-page{ padding: 20px; }
     .rooms-header{ flex-direction: column; align-items: flex-start; }
     .rooms-header__inner{ width: 100%; }
-    .stats-grid{ grid-template-columns:1fr; }
+    .stats-grid{ grid-template-columns:repeat(2,1fr); }
     .action-bar{ flex-direction: column; align-items: stretch; }
     .action-right{ max-width: 100%; }
     .rooms-card-header{ flex-direction: column; align-items: flex-start; gap: 10px; }
     .rooms-table{ display: block; overflow-x: auto; }
     .rooms-table td{ padding: 12px; }
     .pagination-wrap{ flex-direction: column; gap: 12px; align-items: flex-start; }
+}
+@media(max-width:560px){
+    .stats-grid{ grid-template-columns:1fr; }
 }
 </style>
 
@@ -515,6 +567,7 @@
         $availableRooms = $rooms->where('roomStatus.name', 'Available')->count();
         $occupiedRooms = $rooms->where('roomStatus.name', 'Occupied')->count();
         $maintenanceRooms = $rooms->where('roomStatus.name', 'Maintenance')->count();
+        $dirtyRooms = $rooms->where('roomStatus.name', 'Dirty')->count();
     ?>
 
     <div class="stats-grid anim-2">
@@ -551,6 +604,18 @@
             <div class="stat-card-footer">
                 <i class="fas fa-clock"></i>
                 En cours
+            </div>
+        </div>
+
+        <div class="stat-card stat-card--dirty">
+            <div class="stat-card-head">
+                <div class="stat-card-icon"><i class="fas fa-broom"></i></div>
+            </div>
+            <div class="stat-card-value"><?php echo e($dirtyRooms); ?></div>
+            <div class="stat-card-label">À nettoyer</div>
+            <div class="stat-card-footer">
+                <i class="fas fa-exclamation-triangle"></i>
+                Check-in bloqué
             </div>
         </div>
 
@@ -634,6 +699,17 @@
                     </thead>
                     <tbody>
                         <?php $__empty_1 = true; $__currentLoopData = $rooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php
+                            // Définir les conditions pour les boutons
+                            $isDirty = $room->roomStatus->name == 'Dirty' || $room->room_status_id == 6;
+                            $isOccupied = $room->roomStatus->name == 'Occupied' || $room->room_status_id == 2;
+                            $isMaintenance = $room->roomStatus->name == 'Maintenance' || $room->room_status_id == 3;
+                            $isAvailable = $room->roomStatus->name == 'Available' || $room->room_status_id == 1;
+                            
+                            $canMarkDirty = !$isDirty && !$isOccupied && !$isMaintenance;
+                            $canMarkClean = $isDirty;
+                            $canDelete = !$isOccupied && (auth()->user()->role === 'Super' || auth()->user()->role === 'Admin');
+                        ?>
                         <tr>
                             <td>
                                 <span class="room-num"><?php echo e($room->number); ?></span>
@@ -710,32 +786,84 @@
                                 </span>
                             </td>
                             <td style="text-align: center;">
-                                <div style="display: flex; gap: 6px; justify-content: center;">
+                                <div style="display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;">
+                                    <!-- Bouton Voir (toujours actif) -->
                                     <a href="<?php echo e(route('room.show', $room->id)); ?>" 
                                        class="btn-db-icon" 
                                        title="Voir détails">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     
+                                    <!-- Bouton Modifier (toujours actif) -->
                                     <a href="<?php echo e(route('room.edit', $room->id)); ?>" 
                                        class="btn-db-icon" 
                                        title="Modifier">
                                         <i class="fas fa-edit"></i>
                                     </a>
+
+                                    <?php if(in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping'])): ?>
+                                        <!-- ✅ BOUTON MARQUER COMME SALE -->
+                                        <?php if($canMarkDirty): ?>
+                                            <form method="POST" 
+                                                  action="<?php echo e(route('room.mark-dirty', $room->id)); ?>"
+                                                  style="display:inline">
+                                                <?php echo csrf_field(); ?>
+                                                <button type="submit" 
+                                                        class="btn-db-icon btn-db-icon-warning"
+                                                        title="Marquer comme sale"
+                                                        onclick="return confirm('Marquer la chambre <?php echo e($room->number); ?> comme sale ?')">
+                                                    <i class="fas fa-broom"></i>
+                                                </button>
+                                            </form>
+                                        <?php else: ?>
+                                            <button class="btn-db-icon" disabled
+                                                    title="<?php echo e($isDirty ? 'Déjà sale' : ($isOccupied ? 'Chambre occupée' : 'Action non disponible')); ?>">
+                                                <i class="fas fa-broom"></i>
+                                            </button>
+                                        <?php endif; ?>
+
+                                        <!-- ✅ BOUTON MARQUER COMME PROPRE -->
+                                        <?php if($canMarkClean): ?>
+                                            <form method="POST" 
+                                                  action="<?php echo e(route('room.mark-clean', $room->id)); ?>"
+                                                  style="display:inline">
+                                                <?php echo csrf_field(); ?>
+                                                <button type="submit" 
+                                                        class="btn-db-icon btn-db-icon-success"
+                                                        title="Marquer comme propre"
+                                                        onclick="return confirm('Marquer la chambre <?php echo e($room->number); ?> comme propre ?')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                            </form>
+                                        <?php else: ?>
+                                            <button class="btn-db-icon" disabled
+                                                    title="<?php echo e(!$isDirty ? 'Pas besoin de nettoyage' : 'Action non disponible'); ?>">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
                                     
+                                    <!-- Bouton Supprimer (Super/Admin uniquement) -->
                                     <?php if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin'): ?>
-                                    <form method="POST" 
-                                          action="<?php echo e(route('room.destroy', $room->id)); ?>"
-                                          style="display:inline"
-                                          onsubmit="return confirm('Supprimer la chambre <?php echo e($room->number); ?> ? Cette action est irréversible.')">
-                                        <?php echo csrf_field(); ?>
-                                        <?php echo method_field('DELETE'); ?>
-                                        <button type="submit" 
-                                                class="btn-db-icon btn-db-icon-danger"
-                                                title="Supprimer">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                        <?php if($canDelete): ?>
+                                            <form method="POST" 
+                                                  action="<?php echo e(route('room.destroy', $room->id)); ?>"
+                                                  style="display:inline"
+                                                  onsubmit="return confirm('Supprimer la chambre <?php echo e($room->number); ?> ? Cette action est irréversible.')">
+                                                <?php echo csrf_field(); ?>
+                                                <?php echo method_field('DELETE'); ?>
+                                                <button type="submit" 
+                                                        class="btn-db-icon btn-db-icon-danger"
+                                                        title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        <?php else: ?>
+                                            <button class="btn-db-icon btn-db-icon-danger" disabled
+                                                    title="Impossible de supprimer une chambre occupée">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </div>
                             </td>

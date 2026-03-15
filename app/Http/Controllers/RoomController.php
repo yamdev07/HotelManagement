@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log; 
 
 class RoomController extends Controller
 {
@@ -447,5 +448,218 @@ class RoomController extends Controller
                 '_system_update' => true,
             ]);
         }
+    }
+
+    /**
+     * ✅ Marquer une chambre comme sale manuellement
+     * 
+     * @param Room $room
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function markAsDirty(Room $room)
+    {
+        Log::info("🔴 Tentative de marquer la chambre #{$room->id} comme sale", [
+            'user' => auth()->user()->name,
+            'room' => $room->number,
+            'old_status' => $room->room_status_id
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // Vérifier si la chambre est occupée
+            if ($room->isOccupied()) {
+                Log::warning("❌ Tentative de marquer une chambre occupée comme sale", [
+                    'room_id' => $room->id,
+                    'current_status' => $room->room_status_id
+                ]);
+
+                return redirect()->back()
+                    ->with('error', 'Impossible de marquer une chambre occupée comme sale. Le client est toujours présent.');
+            }
+
+            // Vérifier si la chambre est déjà sale
+            if ($room->room_status_id == Room::STATUS_DIRTY) {
+                return redirect()->back()
+                    ->with('info', "La chambre {$room->number} est déjà marquée comme sale.");
+            }
+
+            // Vérifier si la chambre est en maintenance
+            if ($room->room_status_id == Room::STATUS_MAINTENANCE) {
+                return redirect()->back()
+                    ->with('error', "Impossible de marquer une chambre en maintenance comme sale. Terminez d'abord la maintenance.");
+            }
+
+            // Marquer comme sale
+            $room->update([
+                'room_status_id' => Room::STATUS_DIRTY, // 6
+                'last_cleaned_at' => null, // Réinitialiser la date de dernier nettoyage
+            ]);
+
+            // Journaliser l'action
+            activity()
+                ->performedOn($room)
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'old_status' => $room->getOriginal('room_status_id'),
+                    'new_status' => Room::STATUS_DIRTY,
+                    'room_number' => $room->number,
+                    'action' => 'mark_dirty'
+                ])
+                ->log('a marqué la chambre comme sale');
+
+            DB::commit();
+
+            Log::info("✅ Chambre #{$room->id} marquée comme sale avec succès");
+
+            return redirect()->back()
+                ->with('success', "✅ Chambre {$room->number} marquée comme sale avec succès.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('❌ Erreur lors du marquage de la chambre comme sale:', [
+                'room_id' => $room->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Erreur lors du marquage de la chambre: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * ✅ Marquer une chambre comme propre (après nettoyage)
+     * 
+     * @param Room $room
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function markAsClean(Room $room)
+    {
+        Log::info("🟢 Tentative de marquer la chambre #{$room->id} comme propre", [
+            'user' => auth()->user()->name,
+            'room' => $room->number,
+            'old_status' => $room->room_status_id
+        ]);
+
+        DB::beginTransaction();
+
+        try {
+            // Vérifier si la chambre est occupée
+            if ($room->isOccupied()) {
+                return redirect()->back()
+                    ->with('error', 'Impossible de marquer une chambre occupée comme propre. Le client est toujours présent.');
+            }
+
+            // Vérifier si la chambre est déjà propre
+            if ($room->room_status_id == Room::STATUS_AVAILABLE) {
+                return redirect()->back()
+                    ->with('info', "La chambre {$room->number} est déjà marquée comme propre.");
+            }
+
+            // Vérifier si la chambre est en maintenance
+            if ($room->room_status_id == Room::STATUS_MAINTENANCE) {
+                return redirect()->back()
+                    ->with('error', "Impossible de marquer une chambre en maintenance comme propre. Terminez d'abord la maintenance.");
+            }
+
+            // Déterminer le nouveau statut
+            $newStatus = Room::STATUS_AVAILABLE; // Par défaut, disponible
+
+            $room->update([
+                'room_status_id' => $newStatus,
+                'last_cleaned_at' => now(),
+            ]);
+
+            // Journaliser l'action
+            activity()
+                ->performedOn($room)
+                ->causedBy(auth()->user())
+                ->withProperties([
+                    'old_status' => $room->getOriginal('room_status_id'),
+                    'new_status' => $newStatus,
+                    'cleaned_at' => now(),
+                    'room_number' => $room->number,
+                    'action' => 'mark_clean'
+                ])
+                ->log('a marqué la chambre comme propre');
+
+            DB::commit();
+
+            Log::info("✅ Chambre #{$room->id} marquée comme propre avec succès");
+
+            return redirect()->back()
+                ->with('success', "✅ Chambre {$room->number} marquée comme propre.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            Log::error('❌ Erreur lors du marquage de la chambre comme propre:', [
+                'room_id' => $room->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Erreur: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * ✅ Vérifier si une chambre peut être marquée comme sale
+     * (Méthode utilitaire pour la vue)
+     * 
+     * @param Room $room
+     * @return bool
+     */
+    public function canMarkAsDirty(Room $room): bool
+    {
+        // Ne peut pas être marquée comme sale si :
+        // - Elle est occupée
+        // - Elle est déjà sale
+        // - Elle est en maintenance
+        // - L'utilisateur n'a pas les droits
+        
+        if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping'])) {
+            return false;
+        }
+        
+        if ($room->isOccupied()) {
+            return false;
+        }
+        
+        if ($room->room_status_id == Room::STATUS_DIRTY) {
+            return false;
+        }
+        
+        if ($room->room_status_id == Room::STATUS_MAINTENANCE) {
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
+     * ✅ Vérifier si une chambre peut être marquée comme propre
+     * (Méthode utilitaire pour la vue)
+     * 
+     * @param Room $room
+     * @return bool
+     */
+    public function canMarkAsClean(Room $room): bool
+    {
+        // Ne peut être marquée comme propre que si :
+        // - Elle est sale
+        // - L'utilisateur a les droits
+        
+        if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping'])) {
+            return false;
+        }
+        
+        if ($room->room_status_id != Room::STATUS_DIRTY) {
+            return false;
+        }
+        
+        return true;
     }
 }

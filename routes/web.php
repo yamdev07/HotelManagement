@@ -214,7 +214,15 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
 
         // Routes de lecture pour tous (admins et réceptionnistes)
         Route::get('/', [RoomController::class, 'index'])->name('index');
-
+        
+         Route::post('/{room}/mark-dirty', [RoomController::class, 'markAsDirty'])
+        ->name('mark-dirty')
+        ->middleware('checkrole:Super,Admin,Housekeeping');
+        
+        Route::post('/{room}/mark-clean', [RoomController::class, 'markAsClean'])
+        ->name('mark-clean')
+        ->middleware('checkrole:Super,Admin,Housekeeping');
+        
         // IMPORTANT: La route show DOIT être définie EN DERNIER
         Route::get('/{room}', [RoomController::class, 'show'])->name('show');
     });
