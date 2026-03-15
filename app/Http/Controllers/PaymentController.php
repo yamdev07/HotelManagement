@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Models\CashierSession; 
+use App\Notifications\PaymentNotification;
+
 
 class PaymentController extends Controller
 {
@@ -118,8 +120,8 @@ class PaymentController extends Controller
         ]);
     }
 
-    /**
-     * Enregistrer un nouveau paiement - AVEC DÉTAILS SPÉCIFIQUES
+        /**
+     * Enregistrer un nouveau paiement - AVEC DÉTAILS SPÉCIFIQUES ET NOTIFICATIONS
      */
     public function store(Transaction $transaction, Request $request)
     {
@@ -356,6 +358,11 @@ class PaymentController extends Controller
 
             DB::commit();
 
+            // =====================================================
+            // ✅ 9. ENVOYER LES NOTIFICATIONS
+            // =====================================================
+            $this->sendPaymentNotifications($payment, $transaction);
+
             Log::info('=== PAIEMENT TERMINÉ AVEC SUCCÈS ===', [
                 'payment_id' => $payment->id,
                 'transaction_id' => $transaction->id,
@@ -382,6 +389,50 @@ class PaymentController extends Controller
         }
     }
 
+    /**
+     * ✅ NOUVELLE MÉTHODE : Envoyer les notifications après un paiement
+     */
+    private function sendPaymentNotifications(Payment $payment, Transaction $transaction)
+    {
+        try {
+            // Récupérer tous les utilisateurs à notifier (réceptionnistes, admins, super)
+            $users = \App\Models\User::whereIn('role', ['Receptionist', 'Admin', 'Super'])->get();
+            
+            $notificationCount = 0;
+            foreach ($users as $user) {
+                try {
+                    $user->notify(new PaymentNotification($payment, $transaction));
+                    $notificationCount++;
+                } catch (\Exception $e) {
+                    Log::warning('Erreur envoi notification à ' . $user->email, [
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            // Notifier le client s'il a un compte
+            if ($transaction->customer && $transaction->customer->user) {
+                try {
+                    $transaction->customer->user->notify(new PaymentNotification($payment, $transaction));
+                    $notificationCount++;
+                } catch (\Exception $e) {
+                    Log::warning('Erreur envoi notification client', [
+                        'customer_id' => $transaction->customer->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            Log::info("✅ {$notificationCount} notifications envoyées pour le paiement #{$payment->id}");
+
+        } catch (\Exception $e) {
+            Log::error('❌ Erreur lors de l\'envoi des notifications', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage()
+            ]);
+            // Ne pas bloquer le processus principal
+        }
+    }
     /**
      * Méthode intelligente pour obtenir un user_id valide - OPTION 2
      */

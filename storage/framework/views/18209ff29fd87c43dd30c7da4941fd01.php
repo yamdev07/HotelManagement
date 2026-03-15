@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Confirmation de Réservation')
 
-@section('content')
+<?php $__env->startSection('title', 'Confirmation de Réservation'); ?>
+
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -538,13 +538,13 @@
 <div class="confirm-page">
     <!-- Breadcrumb -->
     <div class="confirm-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.createIdentity') }}">Création client</a>
+        <a href="<?php echo e(route('transaction.reservation.createIdentity')); ?>">Création client</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.viewCountPerson', $customer->id) }}">Dates</a>
+        <a href="<?php echo e(route('transaction.reservation.viewCountPerson', $customer->id)); ?>">Dates</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.chooseRoom', $customer->id) }}?check_in={{ $stayFrom }}&check_out={{ $stayUntil }}">Choix chambre</a>
+        <a href="<?php echo e(route('transaction.reservation.chooseRoom', $customer->id)); ?>?check_in=<?php echo e($stayFrom); ?>&check_out=<?php echo e($stayUntil); ?>">Choix chambre</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Confirmation</span>
     </div>
@@ -561,7 +561,7 @@
             </div>
         </div>
         <div class="confirm-header-actions">
-            <a href="{{ route('transaction.reservation.chooseRoom', $customer->id) }}?check_in={{ $stayFrom }}&check_out={{ $stayUntil }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('transaction.reservation.chooseRoom', $customer->id)); ?>?check_in=<?php echo e($stayFrom); ?>&check_out=<?php echo e($stayUntil); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-arrow-left me-2"></i> Retour
             </a>
         </div>
@@ -590,7 +590,7 @@
     </div>
 
     <!-- Agent Card -->
-    @auth
+    <?php if(auth()->guard()->check()): ?>
     <div class="agent-card anim-4">
         <div class="d-flex align-items-center gap-3">
             <div class="agent-avatar d-flex align-items-center justify-content-center" style="background:rgba(255,255,255,0.2);">
@@ -599,49 +599,49 @@
             <div class="flex-grow-1">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="agent-name">{{ auth()->user()->name }}</div>
-                        <div class="agent-email">{{ auth()->user()->email }}</div>
+                        <div class="agent-name"><?php echo e(auth()->user()->name); ?></div>
+                        <div class="agent-email"><?php echo e(auth()->user()->email); ?></div>
                     </div>
                     <div>
-                        <span class="agent-badge">{{ auth()->user()->role }}</span>
+                        <span class="agent-badge"><?php echo e(auth()->user()->role); ?></span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    @endauth
+    <?php endif; ?>
 
     <div class="row g-4">
         <!-- Colonne principale -->
         <div class="col-lg-8">
             <!-- Alertes -->
-            @if(session('success'))
+            <?php if(session('success')): ?>
                 <div class="alert-db alert-db-success anim-4">
                     <i class="fas fa-check-circle"></i>
-                    <span>{!! session('success') !!}</span>
+                    <span><?php echo session('success'); ?></span>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            @if(session('error'))
+            <?php if(session('error')): ?>
                 <div class="alert-db alert-db-warning anim-4">
                     <i class="fas fa-exclamation-circle"></i>
-                    <span>{{ session('error') }}</span>
+                    <span><?php echo e(session('error')); ?></span>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            @if($existingReservationsCount > 0)
+            <?php if($existingReservationsCount > 0): ?>
             <div class="alert-db alert-db-info anim-4">
                 <i class="fas fa-info-circle"></i>
                 <div>
                     <strong>Client régulier</strong><br>
-                    <span>Ce client a déjà {{ $existingReservationsCount }} réservation(s) dans notre établissement.</span>
-                    <a href="{{ route('transaction.reservation.customerReservations', $customer) }}" 
+                    <span>Ce client a déjà <?php echo e($existingReservationsCount); ?> réservation(s) dans notre établissement.</span>
+                    <a href="<?php echo e(route('transaction.reservation.customerReservations', $customer)); ?>" 
                        class="btn-db btn-db-ghost mt-2" style="padding:5px 12px; font-size:.7rem;">
                         <i class="fas fa-history me-1"></i> Voir l'historique
                     </a>
                 </div>
             </div>
-            @endif
+            <?php endif; ?>
 
             <!-- Formulaire de réservation -->
             <div class="confirm-card anim-5">
@@ -666,16 +666,16 @@
                                         <i class="fas fa-door-open"></i>
                                     </div>
                                     <div class="room-details">
-                                        <h6>Chambre {{ $room->number }}</h6>
-                                        <p>{{ $room->type->name ?? 'Standard' }}</p>
+                                        <h6>Chambre <?php echo e($room->number); ?></h6>
+                                        <p><?php echo e($room->type->name ?? 'Standard'); ?></p>
                                         <span class="badge-db badge-db-info">
-                                            <i class="fas fa-user me-1"></i> {{ $room->capacity }} personnes
+                                            <i class="fas fa-user me-1"></i> <?php echo e($room->capacity); ?> personnes
                                         </span>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between mt-3 pt-3 border-top" style="border-color:var(--s100);">
                                     <span class="text-muted">Prix par nuit</span>
-                                    <span class="fw-bold" style="color:var(--s800); font-family:var(--mono);">{{ number_format($room->price, 0, ',', ' ') }} FCFA</span>
+                                    <span class="fw-bold" style="color:var(--s800); font-family:var(--mono);"><?php echo e(number_format($room->price, 0, ',', ' ')); ?> FCFA</span>
                                 </div>
                             </div>
                         </div>
@@ -692,20 +692,20 @@
                                         <div class="timeline-marker"></div>
                                         <div class="timeline-content">
                                             <h6>Arrivée</h6>
-                                            <p>{{ \Carbon\Carbon::parse($stayFrom)->format('d/m/Y') }} • <span style="color:var(--g600);">14:00</span></p>
+                                            <p><?php echo e(\Carbon\Carbon::parse($stayFrom)->format('d/m/Y')); ?> • <span style="color:var(--g600);">14:00</span></p>
                                         </div>
                                     </div>
                                     <div class="timeline-item">
                                         <div class="timeline-marker"></div>
                                         <div class="timeline-content">
                                             <h6>Départ</h6>
-                                            <p>{{ \Carbon\Carbon::parse($stayUntil)->format('d/m/Y') }} • <span style="color:var(--g600);">12:00</span></p>
+                                            <p><?php echo e(\Carbon\Carbon::parse($stayUntil)->format('d/m/Y')); ?> • <span style="color:var(--g600);">12:00</span></p>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between mt-3 pt-3 border-top" style="border-color:var(--s100);">
                                     <span class="text-muted">Nombre de nuits</span>
-                                    <span class="fw-bold">{{ $dayDifference }}</span>
+                                    <span class="fw-bold"><?php echo e($dayDifference); ?></span>
                                 </div>
                             </div>
                         </div>
@@ -721,12 +721,12 @@
                                 </div>
                                 <table class="table-db">
                                     <tr>
-                                        <td>{{ number_format($room->price, 0, ',', ' ') }} FCFA × {{ $dayDifference }} nuit(s)</td>
-                                        <td>{{ number_format($room->price * $dayDifference, 0, ',', ' ') }} FCFA</td>
+                                        <td><?php echo e(number_format($room->price, 0, ',', ' ')); ?> FCFA × <?php echo e($dayDifference); ?> nuit(s)</td>
+                                        <td><?php echo e(number_format($room->price * $dayDifference, 0, ',', ' ')); ?> FCFA</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Total séjour</strong></td>
-                                        <td><strong style="color:var(--g600);">{{ number_format($room->price * $dayDifference, 0, ',', ' ') }} FCFA</strong></td>
+                                        <td><strong style="color:var(--g600);"><?php echo e(number_format($room->price * $dayDifference, 0, ',', ' ')); ?> FCFA</strong></td>
                                     </tr>
                                 </table>
                             </div>
@@ -734,7 +734,7 @@
                         <div class="col-md-4">
                             <div class="price-highlight h-100">
                                 <div class="price-label">TOTAL</div>
-                                <div class="price-value">{{ number_format($room->price * $dayDifference, 0, ',', ' ') }}</div>
+                                <div class="price-value"><?php echo e(number_format($room->price * $dayDifference, 0, ',', ' ')); ?></div>
                                 <div class="price-currency">FCFA</div>
                             </div>
                         </div>
@@ -750,12 +750,12 @@
                         </div>
                         <div class="confirm-card-body">
                             <form method="POST" 
-                                  action="{{ route('transaction.reservation.payDownPayment', ['customer' => $customer->id, 'room' => $room->id]) }}"
+                                  action="<?php echo e(route('transaction.reservation.payDownPayment', ['customer' => $customer->id, 'room' => $room->id])); ?>"
                                   id="reservationForm">
-                                @csrf
+                                <?php echo csrf_field(); ?>
 
-                                <input type="hidden" name="check_in" value="{{ $stayFrom }}">
-                                <input type="hidden" name="check_out" value="{{ $stayUntil }}">
+                                <input type="hidden" name="check_in" value="<?php echo e($stayFrom); ?>">
+                                <input type="hidden" name="check_out" value="<?php echo e($stayUntil); ?>">
                                 <input type="hidden" name="person_count" value="1">
                                 <input type="hidden" name="downPayment" id="downPaymentHidden" value="0">
 
@@ -803,15 +803,15 @@
                                                 <div class="input-group">
                                                     <span class="input-group-text">FCFA</span>
                                                     <input type="number" class="form-control" id="deposit_amount" 
-                                                           value="{{ $downPayment }}" min="0" max="{{ $room->price * $dayDifference }}" step="500">
+                                                           value="<?php echo e($downPayment); ?>" min="0" max="<?php echo e($room->price * $dayDifference); ?>" step="500">
                                                 </div>
                                                 <input type="range" class="form-range" id="deposit_slider"
-                                                       min="0" max="{{ $room->price * $dayDifference }}" step="500"
-                                                       value="{{ $downPayment }}">
+                                                       min="0" max="<?php echo e($room->price * $dayDifference); ?>" step="500"
+                                                       value="<?php echo e($downPayment); ?>">
                                                 <div class="d-flex justify-content-between mt-2">
                                                     <small class="text-muted">Min: 0 FCFA</small>
-                                                    <small class="text-muted">Recommandé: {{ number_format($downPayment, 0, ',', ' ') }} FCFA</small>
-                                                    <small class="text-muted">Max: {{ number_format($room->price * $dayDifference, 0, ',', ' ') }} FCFA</small>
+                                                    <small class="text-muted">Recommandé: <?php echo e(number_format($downPayment, 0, ',', ' ')); ?> FCFA</small>
+                                                    <small class="text-muted">Max: <?php echo e(number_format($room->price * $dayDifference, 0, ',', ' ')); ?> FCFA</small>
                                                 </div>
                                             </div>
                                             <div class="form-group">
@@ -846,7 +846,7 @@
                                                 <i class="fas fa-check-circle"></i>
                                                 <div>
                                                     <strong>Paiement complet</strong><br>
-                                                    <span class="fw-bold">{{ number_format($room->price * $dayDifference, 0, ',', ' ') }} FCFA</span>
+                                                    <span class="fw-bold"><?php echo e(number_format($room->price * $dayDifference, 0, ',', ' ')); ?> FCFA</span>
                                                 </div>
                                             </div>
                                             <div class="form-group">
@@ -878,7 +878,7 @@
                                                     </div>
                                                     <div class="d-flex justify-content-between">
                                                         <span class="text-muted">Solde :</span>
-                                                        <strong id="balanceAmount" class="fw-bold">{{ number_format($room->price * $dayDifference, 0, ',', ' ') }} FCFA</strong>
+                                                        <strong id="balanceAmount" class="fw-bold"><?php echo e(number_format($room->price * $dayDifference, 0, ',', ' ')); ?> FCFA</strong>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -909,13 +909,13 @@
 
                                 <!-- Boutons -->
                                 <div class="d-flex justify-content-between gap-3 mt-4">
-                                    <a href="{{ route('transaction.reservation.chooseRoom', $customer->id) }}?check_in={{ $stayFrom }}&check_out={{ $stayUntil }}" 
+                                    <a href="<?php echo e(route('transaction.reservation.chooseRoom', $customer->id)); ?>?check_in=<?php echo e($stayFrom); ?>&check_out=<?php echo e($stayUntil); ?>" 
                                        class="btn-db btn-db-ghost flex-grow-1">
                                         <i class="fas fa-arrow-left me-2"></i> Retour
                                     </a>
                                     <button type="submit" class="btn-db btn-db-success flex-grow-1" id="submitBtn">
                                         <span id="submitText">Confirmer la réservation</span>
-                                        <small class="d-block fw-normal opacity-75">Agent: {{ auth()->user()->name ?? 'Système' }}</small>
+                                        <small class="d-block fw-normal opacity-75">Agent: <?php echo e(auth()->user()->name ?? 'Système'); ?></small>
                                     </button>
                                 </div>
                             </form>
@@ -929,55 +929,56 @@
         <div class="col-lg-4">
             <div class="profile-card anim-6">
                 <div class="profile-header">
-                    @if($customer->avatar)
-                        <img src="{{ Storage::url($customer->avatar) }}" alt="{{ $customer->name }}" class="profile-avatar">
-                    @else
+                    <?php if($customer->avatar): ?>
+                        <img src="<?php echo e(Storage::url($customer->avatar)); ?>" alt="<?php echo e($customer->name); ?>" class="profile-avatar">
+                    <?php else: ?>
                         <div class="profile-avatar d-flex align-items-center justify-content-center" style="background:rgba(255,255,255,0.2);">
                             <i class="fas fa-user-circle fa-4x text-white"></i>
                         </div>
-                    @endif
-                    <div class="profile-name">{{ $customer->name }}</div>
-                    <span class="profile-badge">ID #{{ $customer->id }}</span>
+                    <?php endif; ?>
+                    <div class="profile-name"><?php echo e($customer->name); ?></div>
+                    <span class="profile-badge">ID #<?php echo e($customer->id); ?></span>
                 </div>
                 <div class="profile-body">
                     <div class="profile-info-row">
-                        <div class="profile-info-icon"><i class="fas fa-{{ $customer->gender == 'Male' ? 'mars' : 'venus' }}"></i></div>
+                        <div class="profile-info-icon"><i class="fas fa-<?php echo e($customer->gender == 'Male' ? 'mars' : 'venus'); ?>"></i></div>
                         <div class="profile-info-label">Genre</div>
-                        <div class="profile-info-value">{{ $customer->gender == 'Male' ? 'Homme' : 'Femme' }}</div>
+                        <div class="profile-info-value"><?php echo e($customer->gender == 'Male' ? 'Homme' : 'Femme'); ?></div>
                     </div>
-                    @if($customer->phone)
+                    <?php if($customer->phone): ?>
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-phone"></i></div>
                         <div class="profile-info-label">Téléphone</div>
-                        <div class="profile-info-value">{{ $customer->phone }}</div>
+                        <div class="profile-info-value"><?php echo e($customer->phone); ?></div>
                     </div>
-                    @endif
-                    @if($customer->email)
+                    <?php endif; ?>
+                    <?php if($customer->email): ?>
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-envelope"></i></div>
                         <div class="profile-info-label">Email</div>
-                        <div class="profile-info-value"><small>{{ $customer->email }}</small></div>
+                        <div class="profile-info-value"><small><?php echo e($customer->email); ?></small></div>
                     </div>
-                    @endif
-                    @if($customer->job)
+                    <?php endif; ?>
+                    <?php if($customer->job): ?>
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-briefcase"></i></div>
                         <div class="profile-info-label">Profession</div>
-                        <div class="profile-info-value">{{ $customer->job }}</div>
+                        <div class="profile-info-value"><?php echo e($customer->job); ?></div>
                     </div>
-                    @endif
-                    @if($existingReservationsCount > 0)
+                    <?php endif; ?>
+                    <?php if($existingReservationsCount > 0): ?>
                     <div class="profile-info-row" style="background:var(--g50);">
                         <div class="profile-info-icon"><i class="fas fa-bed"></i></div>
                         <div class="profile-info-label">Historique</div>
-                        <div class="profile-info-value">{{ $existingReservationsCount }} réservation(s)</div>
+                        <div class="profile-info-value"><?php echo e($existingReservationsCount); ?> réservation(s)</div>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
                 <div class="confirm-card-footer">
                     <small class="text-muted d-block text-center">
                         <i class="fas fa-clock me-1"></i>
-                        Création le {{ now()->format('d/m/Y H:i') }}
+                        Création le <?php echo e(now()->format('d/m/Y H:i')); ?>
+
                     </small>
                 </div>
             </div>
@@ -985,9 +986,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const downPaymentHidden = document.getElementById('downPaymentHidden');
@@ -1003,9 +1004,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const submitText = document.getElementById('submitText');
     const termsCheckbox = document.getElementById('terms');
 
-    const totalPrice = {{ $room->price * $dayDifference }};
-    const recommendedDeposit = {{ $downPayment }};
-    const agentName = "{{ auth()->user()->name ?? 'Système' }}";
+    const totalPrice = <?php echo e($room->price * $dayDifference); ?>;
+    const recommendedDeposit = <?php echo e($downPayment); ?>;
+    const agentName = "<?php echo e(auth()->user()->name ?? 'Système'); ?>";
 
     function formatCurrency(amount) {
         return new Intl.NumberFormat('fr-FR').format(amount) + ' FCFA';
@@ -1095,4 +1096,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/transaction/reservation/confirmation.blade.php ENDPATH**/ ?>

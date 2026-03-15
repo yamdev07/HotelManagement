@@ -1,12 +1,11 @@
 <?php
+// app/Notifications/NewRoomReservationDownPayment.php
 
 namespace App\Notifications;
 
-use App\Helpers\Helper;
 use App\Models\Payment;
 use App\Models\Transaction;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -14,76 +13,53 @@ class NewRoomReservationDownPayment extends Notification
 {
     use Queueable;
 
-    /**
-     * @var \App\Models\Transaction
-     */
     public $transaction;
-
-    /**
-     * @var \App\Models\Payment
-     */
     public $payment;
 
-    /**
-     * Create a new notification instance.
-     *
-     * @return void
-     */
-    public function __construct(Transaction $transaction, Payment $payment)
+    public function __construct(Transaction $transaction, Payment $payment = null)
     {
         $this->transaction = $transaction;
         $this->payment = $payment;
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @param  mixed  $notifiable
-     * @return array
-     */
     public function via($notifiable)
     {
-        return [
-            // 'mail',
-            'database',
-            'broadcast',
-        ];
+        return ['database']; // Uniquement base de données pour les notifications
     }
 
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
-     */
-    public function toMail($notifiable)
+    public function toDatabase($notifiable)
     {
-        return (new MailMessage)
-            ->line('Room '.$this->transaction->room->number.' has been reservated by '.$this->transaction->customer->name)
-            ->line('Payment: '.Helper::convertToRupiah($this->payment->price))
-            ->line('Status: '.$this->payment->status.' Success')
-            ->action('See invoice', route('payment.invoice', ['payment' => $this->payment->id]));
+        $data = [
+            'message' => 'Nouvelle réservation pour ' . $this->transaction->customer->name,
+            'url' => route('transaction.show', $this->transaction->id),
+            'type' => 'reservation',
+            'transaction_id' => $this->transaction->id,
+            'customer_name' => $this->transaction->customer->name,
+            'room_number' => $this->transaction->room->number,
+            'check_in' => $this->transaction->check_in->format('d/m/Y'),
+            'check_out' => $this->transaction->check_out->format('d/m/Y'),
+            'nights' => $this->transaction->nights,
+            'total_price' => $this->transaction->total_price,
+            'total_price_formatted' => number_format($this->transaction->total_price, 0, ',', ' ') . ' CFA',
+            'created_at' => now()->format('d/m/Y H:i'),
+        ];
+
+        // Ajouter les infos de paiement si disponibles
+        if ($this->payment) {
+            $data['payment'] = [
+                'id' => $this->payment->id,
+                'amount' => $this->payment->amount,
+                'amount_formatted' => number_format($this->payment->amount, 0, ',', ' ') . ' CFA',
+                'method' => $this->payment->payment_method,
+                'method_label' => $this->payment->payment_method_label ?? $this->payment->payment_method,
+            ];
+        }
+
+        return $data;
     }
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return array
-     */
     public function toArray($notifiable)
     {
-        return [
-            'message' => 'Room '.$this->transaction->room->number.' reservated by '.$this->transaction->customer->name.'. Payment: '.Helper::convertToRupiah($this->payment->price),
-            'url' => route('payment.invoice', ['payment' => $this->payment->id]),
-        ];
-    }
-
-    public function toBroadcast($notifiable)
-    {
-        return new BroadcastMessage([
-            'message' => 'Room '.$this->transaction->room->number.' reservated by '.$this->transaction->customer->name,
-            'url' => route('payment.invoice', ['payment' => $this->payment->id]),
-        ]);
+        return $this->toDatabase($notifiable);
     }
 }

@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Création Client')
-@section('content')
+
+<?php $__env->startSection('title', 'Création Client'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -401,7 +401,7 @@
 <div class="create-identity-page">
     <!-- Breadcrumb -->
     <div class="identity-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Création client</span>
     </div>
@@ -418,7 +418,7 @@
             </div>
         </div>
         <div class="identity-header-actions">
-            <a href="{{ route('dashboard.index') }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('dashboard.index')); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-times me-2"></i> Annuler
             </a>
         </div>
@@ -483,30 +483,30 @@
                 </div>
             </div>
 
-            @if(session('info'))
+            <?php if(session('info')): ?>
                 <div class="alert-db alert-db-info">
                     <i class="fas fa-info-circle"></i>
-                    <span>{{ session('info') }}</span>
+                    <span><?php echo e(session('info')); ?></span>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            @if($errors->any())
+            <?php if($errors->any()): ?>
                 <div class="alert-db alert-db-danger">
                     <i class="fas fa-exclamation-circle"></i>
                     <div style="flex:1">
                         <strong>Veuillez corriger les erreurs :</strong>
                         <ul>
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
+                            <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <li><?php echo e($error); ?></li>
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </ul>
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
 
-            <form method="POST" action="{{ route('transaction.reservation.storeCustomer') }}"
+            <form method="POST" action="<?php echo e(route('transaction.reservation.storeCustomer')); ?>"
                   enctype="multipart/form-data" id="customerForm">
-                @csrf
+                <?php echo csrf_field(); ?>
 
                 <div class="form-grid">
                     <!-- Email (full width) -->
@@ -515,15 +515,30 @@
                             <i class="fas fa-envelope"></i>
                             Adresse email <span class="required">*</span>
                         </label>
-                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                               id="email" name="email" value="{{ old('email') }}" 
+                        <input type="email" class="form-control <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                               id="email" name="email" value="<?php echo e(old('email')); ?>" 
                                placeholder="exemple@domaine.com" required
                                onblur="checkExistingCustomer()">
-                        @error('email')
+                        <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                             </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         <div class="form-text">
                             <i class="fas fa-lightbulb"></i>
                             Saisissez l'email du client. Le système vérifiera s'il existe déjà.
@@ -536,14 +551,29 @@
                             <i class="fas fa-user"></i>
                             Nom complet <span class="required">*</span>
                         </label>
-                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                               id="name" name="name" value="{{ old('name') }}" 
+                        <input type="text" class="form-control <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                               id="name" name="name" value="<?php echo e(old('name')); ?>" 
                                placeholder="Jean Dupont" required>
-                        @error('name')
+                        <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                             </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <!-- Date de naissance -->
@@ -552,13 +582,28 @@
                             <i class="fas fa-birthday-cake"></i>
                             Date de naissance
                         </label>
-                        <input type="date" class="form-control @error('birthdate') is-invalid @enderror"
-                               id="birthdate" name="birthdate" value="{{ old('birthdate') }}">
-                        @error('birthdate')
+                        <input type="date" class="form-control <?php $__errorArgs = ['birthdate'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                               id="birthdate" name="birthdate" value="<?php echo e(old('birthdate')); ?>">
+                        <?php $__errorArgs = ['birthdate'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                             </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <!-- Genre -->
@@ -567,18 +612,33 @@
                             <i class="fas fa-venus-mars"></i>
                             Genre <span class="required">*</span>
                         </label>
-                        <select class="form-select @error('gender') is-invalid @enderror" 
+                        <select class="form-select <?php $__errorArgs = ['gender'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                 id="gender" name="gender" required>
                             <option value="">-- Sélectionner --</option>
-                            <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>Masculin</option>
-                            <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>Féminin</option>
-                            <option value="Other" {{ old('gender') == 'Other' ? 'selected' : '' }}>Autre</option>
+                            <option value="Male" <?php echo e(old('gender') == 'Male' ? 'selected' : ''); ?>>Masculin</option>
+                            <option value="Female" <?php echo e(old('gender') == 'Female' ? 'selected' : ''); ?>>Féminin</option>
+                            <option value="Other" <?php echo e(old('gender') == 'Other' ? 'selected' : ''); ?>>Autre</option>
                         </select>
-                        @error('gender')
+                        <?php $__errorArgs = ['gender'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                             </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <!-- Téléphone -->
@@ -587,14 +647,29 @@
                             <i class="fas fa-phone"></i>
                             Téléphone <span class="required">*</span>
                         </label>
-                        <input type="text" class="form-control @error('phone') is-invalid @enderror" 
-                               id="phone" name="phone" value="{{ old('phone') }}" 
+                        <input type="text" class="form-control <?php $__errorArgs = ['phone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                               id="phone" name="phone" value="<?php echo e(old('phone')); ?>" 
                                placeholder="+229 XX XX XX XX" required>
-                        @error('phone')
+                        <?php $__errorArgs = ['phone'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                             </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <!-- Profession -->
@@ -603,14 +678,29 @@
                             <i class="fas fa-briefcase"></i>
                             Profession
                         </label>
-                        <input type="text" class="form-control @error('job') is-invalid @enderror" 
-                               id="job" name="job" value="{{ old('job') }}" 
+                        <input type="text" class="form-control <?php $__errorArgs = ['job'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                               id="job" name="job" value="<?php echo e(old('job')); ?>" 
                                placeholder="Développeur, Médecin, Étudiant...">
-                        @error('job')
+                        <?php $__errorArgs = ['job'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                             </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <!-- Adresse (full width) -->
@@ -619,14 +709,29 @@
                             <i class="fas fa-map-marker-alt"></i>
                             Adresse
                         </label>
-                        <textarea class="form-control @error('address') is-invalid @enderror" 
+                        <textarea class="form-control <?php $__errorArgs = ['address'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                   id="address" name="address" rows="3" 
-                                  placeholder="Rue, Ville, Pays">{{ old('address') }}</textarea>
-                        @error('address')
+                                  placeholder="Rue, Ville, Pays"><?php echo e(old('address')); ?></textarea>
+                        <?php $__errorArgs = ['address'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                             </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
 
                     <!-- Photo de profil (full width) -->
@@ -636,7 +741,14 @@
                             Photo de profil
                         </label>
                         <div class="input-group">
-                            <input class="form-control @error('avatar') is-invalid @enderror" 
+                            <input class="form-control <?php $__errorArgs = ['avatar'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    type="file" name="avatar" id="avatar" accept="image/*">
                             <button class="btn-outline" type="button" onclick="clearAvatar()">
                                 <i class="fas fa-times"></i> Effacer
@@ -646,11 +758,19 @@
                             <i class="fas fa-image"></i>
                             Formats acceptés : JPEG, PNG, GIF (max 2MB)
                         </div>
-                        @error('avatar')
+                        <?php $__errorArgs = ['avatar'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                             </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
                         <!-- Avatar preview -->
                         <div id="avatarPreview" class="avatar-preview">
@@ -661,7 +781,7 @@
 
                 <!-- Actions -->
                 <div style="display: flex; justify-content: space-between; margin-top: 28px;">
-                    <a href="{{ route('dashboard.index') }}" class="btn-db btn-db-ghost">
+                    <a href="<?php echo e(route('dashboard.index')); ?>" class="btn-db btn-db-ghost">
                         <i class="fas fa-times me-2"></i> Annuler
                     </a>
                     <button type="submit" class="btn-db btn-db-primary">
@@ -685,9 +805,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 // Fonction pour vérifier si le client existe déjà
 function checkExistingCustomer() {
@@ -706,11 +826,11 @@ function checkExistingCustomer() {
     submitButton.disabled = true;
     
     // Effectuer la requête AJAX
-    fetch('{{ route("transaction.reservation.searchByEmail") }}', {
+    fetch('<?php echo e(route("transaction.reservation.searchByEmail")); ?>', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
         },
         body: JSON.stringify({ email: email })
     })
@@ -835,4 +955,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/transaction/reservation/createIdentity.blade.php ENDPATH**/ ?>

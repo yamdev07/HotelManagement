@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Nombre de personnes')
-@section('content')
+
+<?php $__env->startSection('title', 'Nombre de personnes'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -279,9 +279,9 @@
 <div class="count-person-page">
     <!-- Breadcrumb -->
     <div class="count-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.createIdentity') }}">Création client</a>
+        <a href="<?php echo e(route('transaction.reservation.createIdentity')); ?>">Création client</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Dates et personnes</span>
     </div>
@@ -298,7 +298,7 @@
             </div>
         </div>
         <div class="count-header-actions">
-            <a href="{{ route('transaction.reservation.createIdentity') }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('transaction.reservation.createIdentity')); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-arrow-left me-2"></i> Retour
             </a>
         </div>
@@ -331,7 +331,7 @@
         <div class="col-md-8">
             <div class="count-card anim-4">
                 <div class="count-card-body">
-                    <form method="GET" action="{{ route('transaction.reservation.chooseRoom', ['customer' => $customer->id]) }}">
+                    <form method="GET" action="<?php echo e(route('transaction.reservation.chooseRoom', ['customer' => $customer->id])); ?>">
                         
                         <!-- Nombre de personnes -->
                         <div class="form-group">
@@ -340,19 +340,34 @@
                                 Nombre de personnes
                             </label>
                             <input type="number" 
-                                   class="form-control @error('count_person') is-invalid @enderror"
+                                   class="form-control <?php $__errorArgs = ['count_person'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                                    id="count_person" 
                                    name="count_person" 
-                                   value="{{ old('count_person', 1) }}"
+                                   value="<?php echo e(old('count_person', 1)); ?>"
                                    min="1"
                                    max="10"
                                    placeholder="Ex: 2"
                                    required>
-                            @error('count_person')
+                            <?php $__errorArgs = ['count_person'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                 <div class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                    <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                                 </div>
-                            @enderror
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                             <div class="form-text" style="font-size:.7rem; color:var(--s400); margin-top:4px;">
                                 <i class="fas fa-info-circle"></i> Maximum 10 personnes
                             </div>
@@ -365,17 +380,32 @@
                                 Date d'arrivée
                             </label>
                             <input type="date" 
-                                   class="form-control @error('check_in') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['check_in'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="check_in" 
                                    name="check_in" 
-                                   value="{{ old('check_in', now()->format('Y-m-d')) }}"
-                                   min="{{ now()->format('Y-m-d') }}"
+                                   value="<?php echo e(old('check_in', now()->format('Y-m-d'))); ?>"
+                                   min="<?php echo e(now()->format('Y-m-d')); ?>"
                                    required>
-                            @error('check_in')
+                            <?php $__errorArgs = ['check_in'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                 <div class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                    <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                                 </div>
-                            @enderror
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <!-- Date de départ -->
@@ -385,17 +415,32 @@
                                 Date de départ
                             </label>
                             <input type="date" 
-                                   class="form-control @error('check_out') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['check_out'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="check_out" 
                                    name="check_out" 
-                                   value="{{ old('check_out', now()->addDays(1)->format('Y-m-d')) }}"
-                                   min="{{ now()->addDays(1)->format('Y-m-d') }}"
+                                   value="<?php echo e(old('check_out', now()->addDays(1)->format('Y-m-d'))); ?>"
+                                   min="<?php echo e(now()->addDays(1)->format('Y-m-d')); ?>"
                                    required>
-                            @error('check_out')
+                            <?php $__errorArgs = ['check_out'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                                 <div class="error-message">
-                                    <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                    <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                                 </div>
-                            @enderror
+                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         </div>
 
                         <!-- Bouton suivant -->
@@ -413,54 +458,56 @@
         <!-- Profil client -->
         <div class="col-md-4">
             <div class="profile-card anim-5">
-                <img src="{{ $customer->user->getAvatar() }}" class="profile-image" alt="{{ $customer->name }}">
+                <img src="<?php echo e($customer->user->getAvatar()); ?>" class="profile-image" alt="<?php echo e($customer->name); ?>">
                 <div class="profile-info">
                     <h5 style="font-size:1rem; font-weight:600; color:var(--s800); margin-bottom:12px;">
                         <i class="fas fa-user-circle me-2" style="color:var(--g500);"></i>
-                        {{ $customer->name }}
+                        <?php echo e($customer->name); ?>
+
                     </h5>
                     
                     <table class="profile-table">
                         <tr>
-                            <td class="profile-icon"><i class="fas {{ $customer->gender == 'Male' ? 'fa-male' : 'fa-female' }}"></i></td>
-                            <td>{{ $customer->gender == 'Male' ? 'Masculin' : ($customer->gender == 'Female' ? 'Féminin' : 'Autre') }}</td>
+                            <td class="profile-icon"><i class="fas <?php echo e($customer->gender == 'Male' ? 'fa-male' : 'fa-female'); ?>"></i></td>
+                            <td><?php echo e($customer->gender == 'Male' ? 'Masculin' : ($customer->gender == 'Female' ? 'Féminin' : 'Autre')); ?></td>
                         </tr>
-                        @if($customer->job)
+                        <?php if($customer->job): ?>
                         <tr>
                             <td class="profile-icon"><i class="fas fa-briefcase"></i></td>
-                            <td>{{ $customer->job }}</td>
+                            <td><?php echo e($customer->job); ?></td>
                         </tr>
-                        @endif
-                        @if($customer->birthdate)
+                        <?php endif; ?>
+                        <?php if($customer->birthdate): ?>
                         <tr>
                             <td class="profile-icon"><i class="fas fa-birthday-cake"></i></td>
-                            <td>{{ \Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y') }}</td>
+                            <td><?php echo e(\Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y')); ?></td>
                         </tr>
-                        @endif
-                        @if($customer->phone)
+                        <?php endif; ?>
+                        <?php if($customer->phone): ?>
                         <tr>
                             <td class="profile-icon"><i class="fas fa-phone"></i></td>
-                            <td>{{ $customer->phone }}</td>
+                            <td><?php echo e($customer->phone); ?></td>
                         </tr>
-                        @endif
-                        @if($customer->email)
+                        <?php endif; ?>
+                        <?php if($customer->email): ?>
                         <tr>
                             <td class="profile-icon"><i class="fas fa-envelope"></i></td>
-                            <td>{{ $customer->email }}</td>
+                            <td><?php echo e($customer->email); ?></td>
                         </tr>
-                        @endif
-                        @if($customer->address)
+                        <?php endif; ?>
+                        <?php if($customer->address): ?>
                         <tr>
                             <td class="profile-icon"><i class="fas fa-map-marker-alt"></i></td>
-                            <td>{{ $customer->address }}</td>
+                            <td><?php echo e($customer->address); ?></td>
                         </tr>
-                        @endif
+                        <?php endif; ?>
                     </table>
 
                     <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--s100);">
                         <small class="text-muted" style="color:var(--s400);">
                             <i class="fas fa-clock me-1"></i>
-                            Créé le {{ $customer->created_at->format('d/m/Y') }}
+                            Créé le <?php echo e($customer->created_at->format('d/m/Y')); ?>
+
                         </small>
                     </div>
                 </div>
@@ -469,9 +516,9 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const checkIn = document.getElementById('check_in');
@@ -492,4 +539,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/transaction/reservation/viewCountPerson.blade.php ENDPATH**/ ?>

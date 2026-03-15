@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Choix de la chambre')
-@section('content')
+
+<?php $__env->startSection('title', 'Choix de la chambre'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -375,11 +375,11 @@
 <div class="choose-room-page">
     <!-- Breadcrumb -->
     <div class="choose-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.createIdentity') }}">Création client</a>
+        <a href="<?php echo e(route('transaction.reservation.createIdentity')); ?>">Création client</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.viewCountPerson', $customer->id) }}">Dates</a>
+        <a href="<?php echo e(route('transaction.reservation.viewCountPerson', $customer->id)); ?>">Dates</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Choix chambre</span>
     </div>
@@ -396,7 +396,7 @@
             </div>
         </div>
         <div class="choose-header-actions">
-            <a href="{{ route('transaction.reservation.viewCountPerson', $customer->id) }}?check_in={{ request()->input('check_in') }}&check_out={{ request()->input('check_out') }}&count_person={{ request()->input('count_person') }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('transaction.reservation.viewCountPerson', $customer->id)); ?>?check_in=<?php echo e(request()->input('check_in')); ?>&check_out=<?php echo e(request()->input('check_out')); ?>&count_person=<?php echo e(request()->input('count_person')); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-arrow-left me-2"></i> Retour
             </a>
         </div>
@@ -431,36 +431,36 @@
             <div class="summary-box anim-4">
                 <div class="summary-title">
                     <i class="fas fa-door-open me-2"></i>
-                    {{ $roomsCount }} chambre(s) disponible(s)
+                    <?php echo e($roomsCount); ?> chambre(s) disponible(s)
                 </div>
                 <div class="summary-details">
-                    <span><i class="fas fa-users me-1"></i>{{ request()->input('count_person') }} personne(s)</span>
-                    <span><i class="fas fa-calendar-alt me-1"></i>Du {{ Helper::dateFormat(request()->input('check_in')) }}</span>
-                    <span><i class="fas fa-calendar-alt me-1"></i>Au {{ Helper::dateFormat(request()->input('check_out')) }}</span>
+                    <span><i class="fas fa-users me-1"></i><?php echo e(request()->input('count_person')); ?> personne(s)</span>
+                    <span><i class="fas fa-calendar-alt me-1"></i>Du <?php echo e(Helper::dateFormat(request()->input('check_in'))); ?></span>
+                    <span><i class="fas fa-calendar-alt me-1"></i>Au <?php echo e(Helper::dateFormat(request()->input('check_out'))); ?></span>
                 </div>
             </div>
 
             <!-- Filtres -->
             <div class="filters-container anim-5">
-                <form method="GET" action="{{ route('transaction.reservation.chooseRoom', ['customer' => $customer->id]) }}">
-                    <input type="hidden" name="count_person" value="{{ request()->input('count_person') }}">
-                    <input type="hidden" name="check_in" value="{{ request()->input('check_in') }}">
-                    <input type="hidden" name="check_out" value="{{ request()->input('check_out') }}">
+                <form method="GET" action="<?php echo e(route('transaction.reservation.chooseRoom', ['customer' => $customer->id])); ?>">
+                    <input type="hidden" name="count_person" value="<?php echo e(request()->input('count_person')); ?>">
+                    <input type="hidden" name="check_in" value="<?php echo e(request()->input('check_in')); ?>">
+                    <input type="hidden" name="check_out" value="<?php echo e(request()->input('check_out')); ?>">
 
                     <div class="row g-3">
                         <div class="col-md-5">
                             <div class="filter-label">Trier par</div>
                             <select class="filter-select" name="sort_name">
-                                <option value="Price" @if(request()->input('sort_name') == 'Price') selected @endif>Prix</option>
-                                <option value="Number" @if(request()->input('sort_name') == 'Number') selected @endif>Numéro</option>
-                                <option value="Capacity" @if(request()->input('sort_name') == 'Capacity') selected @endif>Capacité</option>
+                                <option value="Price" <?php if(request()->input('sort_name') == 'Price'): ?> selected <?php endif; ?>>Prix</option>
+                                <option value="Number" <?php if(request()->input('sort_name') == 'Number'): ?> selected <?php endif; ?>>Numéro</option>
+                                <option value="Capacity" <?php if(request()->input('sort_name') == 'Capacity'): ?> selected <?php endif; ?>>Capacité</option>
                             </select>
                         </div>
                         <div class="col-md-5">
                             <div class="filter-label">Ordre</div>
                             <select class="filter-select" name="sort_type">
-                                <option value="ASC" @if(request()->input('sort_type') == 'ASC') selected @endif>Croissant</option>
-                                <option value="DESC" @if(request()->input('sort_type') == 'DESC') selected @endif>Décroissant</option>
+                                <option value="ASC" <?php if(request()->input('sort_type') == 'ASC'): ?> selected <?php endif; ?>>Croissant</option>
+                                <option value="DESC" <?php if(request()->input('sort_type') == 'DESC'): ?> selected <?php endif; ?>>Décroissant</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -473,40 +473,42 @@
             </div>
 
             <!-- Liste des chambres -->
-            @forelse ($rooms as $room)
+            <?php $__empty_1 = true; $__currentLoopData = $rooms; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <div class="room-card anim-6">
                     <div class="row g-0">
                         <div class="col-md-4">
-                            <img src="{{ $room->firstImage() }}" 
-                                 alt="Chambre {{ $room->number }}" 
+                            <img src="<?php echo e($room->firstImage()); ?>" 
+                                 alt="Chambre <?php echo e($room->number); ?>" 
                                  class="room-image">
                         </div>
                         <div class="col-md-8">
                             <div class="room-info">
                                 <div class="room-header">
                                     <div>
-                                        <div class="room-number">Chambre {{ $room->number }}</div>
-                                        <div class="room-type">{{ $room->type->name ?? 'Standard' }}</div>
+                                        <div class="room-number">Chambre <?php echo e($room->number); ?></div>
+                                        <div class="room-type"><?php echo e($room->type->name ?? 'Standard'); ?></div>
                                     </div>
                                     <span class="room-capacity">
-                                        <i class="fas fa-user"></i> {{ $room->capacity }}
+                                        <i class="fas fa-user"></i> <?php echo e($room->capacity); ?>
+
                                     </span>
                                 </div>
 
                                 <div class="room-price">
-                                    {{ Helper::formatCFA($room->price) }} <small>/nuit</small>
+                                    <?php echo e(Helper::formatCFA($room->price)); ?> <small>/nuit</small>
                                 </div>
 
                                 <div class="room-description">
-                                    {{ $room->view ?? 'Description non disponible' }}
+                                    <?php echo e($room->view ?? 'Description non disponible'); ?>
+
                                 </div>
 
-                                <a href="{{ route('transaction.reservation.confirmation', [
+                                <a href="<?php echo e(route('transaction.reservation.confirmation', [
                                     'customer' => $customer->id, 
                                     'room' => $room->id, 
                                     'from' => request()->input('check_in'), 
                                     'to' => request()->input('check_out')
-                                ]) }}" class="choose-btn">
+                                ])); ?>" class="choose-btn">
                                     <i class="fas fa-check-circle"></i>
                                     Choisir cette chambre
                                 </a>
@@ -514,95 +516,97 @@
                         </div>
                     </div>
                 </div>
-            @empty
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                 <div class="no-rooms anim-4">
                     <h3><i class="fas fa-bed me-2"></i>Aucune chambre disponible</h3>
                     <p class="text-muted">
                         Aucune chambre ne correspond à votre recherche pour 
-                        {{ request()->input('count_person') }} personne(s)
+                        <?php echo e(request()->input('count_person')); ?> personne(s)
                     </p>
                 </div>
-            @endforelse
+            <?php endif; ?>
 
             <!-- Pagination -->
-            @if($rooms->hasPages())
+            <?php if($rooms->hasPages()): ?>
                 <div class="pagination-container">
                     <div class="pagination-custom">
-                        {{ $rooms->onEachSide(1)->appends([
+                        <?php echo e($rooms->onEachSide(1)->appends([
                             'count_person' => request()->input('count_person'),
                             'check_in' => request()->input('check_in'),
                             'check_out' => request()->input('check_out'),
                             'sort_name' => request()->input('sort_name'),
                             'sort_type' => request()->input('sort_type'),
-                        ])->links('pagination::bootstrap-4') }}
+                        ])->links('pagination::bootstrap-4')); ?>
+
                     </div>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
 
         <!-- Profil client -->
         <div class="col-lg-4">
             <div class="profile-card anim-5">
                 <div class="profile-header">
-                    <img src="{{ $customer->user->getAvatar() }}" 
-                         alt="{{ $customer->name }}" 
+                    <img src="<?php echo e($customer->user->getAvatar()); ?>" 
+                         alt="<?php echo e($customer->name); ?>" 
                          class="profile-avatar">
-                    <div class="profile-name">{{ $customer->name }}</div>
-                    <div class="profile-id">ID: #{{ $customer->id }}</div>
+                    <div class="profile-name"><?php echo e($customer->name); ?></div>
+                    <div class="profile-id">ID: #<?php echo e($customer->id); ?></div>
                 </div>
 
                 <div class="profile-body">
                     <div class="profile-info-row">
-                        <div class="profile-info-icon"><i class="fas {{ $customer->gender == 'Male' ? 'fa-mars' : 'fa-venus' }}"></i></div>
+                        <div class="profile-info-icon"><i class="fas <?php echo e($customer->gender == 'Male' ? 'fa-mars' : 'fa-venus'); ?>"></i></div>
                         <div class="profile-info-content">
                             <div class="profile-info-label">Genre</div>
-                            <div class="profile-info-value">{{ $customer->gender == 'Male' ? 'Homme' : ($customer->gender == 'Female' ? 'Femme' : 'Autre') }}</div>
+                            <div class="profile-info-value"><?php echo e($customer->gender == 'Male' ? 'Homme' : ($customer->gender == 'Female' ? 'Femme' : 'Autre')); ?></div>
                         </div>
                     </div>
 
-                    @if($customer->job)
+                    <?php if($customer->job): ?>
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-briefcase"></i></div>
                         <div class="profile-info-content">
                             <div class="profile-info-label">Profession</div>
-                            <div class="profile-info-value">{{ $customer->job }}</div>
+                            <div class="profile-info-value"><?php echo e($customer->job); ?></div>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
 
-                    @if($customer->birthdate)
+                    <?php if($customer->birthdate): ?>
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-birthday-cake"></i></div>
                         <div class="profile-info-content">
                             <div class="profile-info-label">Naissance</div>
-                            <div class="profile-info-value">{{ \Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y') }}</div>
+                            <div class="profile-info-value"><?php echo e(\Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y')); ?></div>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
 
-                    @if($customer->phone)
+                    <?php if($customer->phone): ?>
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-phone"></i></div>
                         <div class="profile-info-content">
                             <div class="profile-info-label">Téléphone</div>
-                            <div class="profile-info-value">{{ $customer->phone }}</div>
+                            <div class="profile-info-value"><?php echo e($customer->phone); ?></div>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
 
-                    @if($customer->address)
+                    <?php if($customer->address): ?>
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-map-marker-alt"></i></div>
                         <div class="profile-info-content">
                             <div class="profile-info-label">Adresse</div>
-                            <div class="profile-info-value">{{ Str::limit($customer->address, 30) }}</div>
+                            <div class="profile-info-value"><?php echo e(Str::limit($customer->address, 30)); ?></div>
                         </div>
                     </div>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/transaction/reservation/chooseRoom.blade.php ENDPATH**/ ?>
