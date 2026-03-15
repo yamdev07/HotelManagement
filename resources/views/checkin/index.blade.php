@@ -66,6 +66,11 @@
     from { opacity: 0; transform: scale(.96); }
     to   { opacity: 1; transform: scale(1); }
 }
+@keyframes urgentPulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; background-color: #ffc107; color: #856404; }
+    100% { opacity: 1; }
+}
 .anim-1 { animation: fadeSlide .4s ease both; }
 .anim-2 { animation: fadeSlide .4s .08s ease both; }
 .anim-3 { animation: fadeSlide .4s .16s ease both; }
@@ -159,6 +164,16 @@
     border-color: #fecaca;
     color: #b91c1c;
 }
+.ci-alert-warning {
+    background: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+}
+.ci-alert-info {
+    background: #d1ecf1;
+    border-color: #bee5eb;
+    color: #0c5460;
+}
 .ci-alert-close {
     margin-left: auto;
     background: none;
@@ -178,10 +193,11 @@
 ══════════════════════════════════════════════ */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(6, 1fr);
     gap: 16px;
     margin-bottom: 28px;
 }
+@media (max-width: 1400px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 600px)  { .stats-grid { grid-template-columns: 1fr; } }
 
@@ -212,6 +228,8 @@
 .stat-card--staying    { --accent: var(--g600); }
 .stat-card--departures { --accent: var(--g300); }
 .stat-card--available  { --accent: var(--s400); }
+.stat-card--dirty      { --accent: #ffc107; }
+.stat-card--urgent     { --accent: #dc3545; }
 
 .stat-card-top {
     display: flex;
@@ -247,6 +265,8 @@
 .stat-card--staying .stat-card-icon    { background: var(--g100); color: var(--g700); }
 .stat-card--departures .stat-card-icon { background: var(--g50); color: var(--g500); }
 .stat-card--available .stat-card-icon  { background: var(--s100); color: var(--s500); }
+.stat-card--dirty .stat-card-icon      { background: #fff3cd; color: #856404; }
+.stat-card--urgent .stat-card-icon     { background: #fee2e2; color: #b91c1c; }
 
 .stat-card-meta {
     font-size: .75rem;
@@ -257,6 +277,13 @@
     border-top: 1px solid var(--s100);
     padding-top: 12px;
     margin-top: 12px;
+}
+.stat-card-meta a {
+    color: var(--g600);
+    text-decoration: none;
+}
+.stat-card-meta a:hover {
+    text-decoration: underline;
 }
 
 /* ══════════════════════════════════════════════
@@ -299,6 +326,10 @@
     background: var(--white);
     flex-wrap: wrap;
     gap: 12px;
+}
+.ci-card-header.warning {
+    background: #fff3cd;
+    border-bottom-color: #ffc107;
 }
 .ci-card-title {
     display: flex;
@@ -376,6 +407,7 @@
     margin-bottom: 8px;
     transition: var(--transition);
     background: var(--surface);
+    position: relative;
 }
 .res-row:last-child { margin-bottom: 0; }
 .res-row:hover {
@@ -384,12 +416,32 @@
     transform: translateX(2px);
     box-shadow: var(--shadow-sm);
 }
+.res-row.dirty-room {
+    border-left: 6px solid #ffc107;
+    background-color: #fff9e6;
+}
+.res-row.dirty-room:hover {
+    background-color: #fff3cd;
+    border-color: #ffc107;
+}
+.res-row.cleaning-room {
+    border-left: 6px solid #17a2b8;
+    background-color: #e3f2fd;
+}
+.res-row.cleaning-room:hover {
+    background-color: #d1ecf1;
+    border-color: #17a2b8;
+}
 
 .res-guest {}
 .res-guest-name {
     font-size: .88rem;
     font-weight: 600;
     color: var(--s900);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
 }
 .res-guest-phone {
     font-size: .72rem;
@@ -455,6 +507,41 @@
 }
 .di-upcoming { background: var(--g100); color: var(--g700); }
 .di-waiting  { background: var(--g50); color: var(--g600); }
+.di-urgent {
+    background: #ffc107;
+    color: #856404;
+    animation: urgentPulse 2s infinite;
+}
+
+/* ── Badges de statut de chambre ────────────── */
+.room-status-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 0.6rem;
+    font-weight: 600;
+    margin-left: 5px;
+}
+.room-status-badge.dirty {
+    background: #ffc107;
+    color: #856404;
+}
+.room-status-badge.clean {
+    background: #28a745;
+    color: white;
+}
+.room-status-badge.occupied {
+    background: #dc3545;
+    color: white;
+}
+.room-status-badge.cleaning {
+    background: #17a2b8;
+    color: white;
+}
+.room-status-badge.maintenance {
+    background: #6c757d;
+    color: white;
+}
 
 /* ── Action buttons ─────────────────────────── */
 .btn-res {
@@ -503,6 +590,26 @@
     border-color: var(--s300);
     transform: translateY(-1px);
 }
+.btn-res-notify {
+    background: #ffc107;
+    color: #856404;
+    border-color: #ffc107;
+}
+.btn-res-notify:hover {
+    background: #ffca2c;
+    transform: translateY(-1px);
+}
+.btn-res-notified {
+    background: #28a745;
+    color: white;
+    border-color: #28a745;
+    cursor: default;
+}
+.btn-res-disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+}
 
 /* ══════════════════════════════════════════════
    RIGHT COLUMN — Guest cards
@@ -528,6 +635,10 @@
     font-size: .88rem;
     font-weight: 600;
     color: var(--s900);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
 }
 .guest-card-meta {
     font-size: .72rem;
@@ -635,11 +746,21 @@
 .dep-row:hover {
     background: var(--g50);
 }
+.dep-row.urgent-cleaning {
+    background: #fff3cd;
+}
+.dep-row.urgent-cleaning:hover {
+    background: #ffe69c;
+}
 .dep-row-info {}
 .dep-row-name {
     font-size: .88rem;
     font-weight: 600;
     color: var(--s900);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 .dep-row-room {
     font-size: .72rem;
@@ -820,6 +941,9 @@
 .ci-toast-error {
     border-left-color: #b91c1c;
 }
+.ci-toast-warning {
+    border-left-color: #ffc107;
+}
 @keyframes slideIn {
     from { opacity: 0; transform: translateX(20px); }
     to   { opacity: 1; transform: translateX(0); }
@@ -878,7 +1002,21 @@
     </div>
     @endif
 
-    {{-- ─── STAT CARDS ─────────────────────────── --}}
+    {{-- ALERTE URGENCE HOUSEKEEPING --}}
+    @if(isset($stats['urgent_cleaning']) && $stats['urgent_cleaning'] > 0)
+    <div class="ci-alert ci-alert-warning anim-2">
+        <i class="fas fa-broom fa-lg"></i>
+        <span>
+            <strong>{{ $stats['urgent_cleaning'] }} chambre(s) sale(s) avec arrivée aujourd'hui !</strong>
+            <br><small>Ces chambres doivent être nettoyées en priorité avant l'arrivée des clients.</small>
+        </span>
+        <a href="{{ route('housekeeping.index') }}" class="btn-db btn-db-ghost" style="margin-left:auto;background:#ffc107;color:#856404;border-color:#ffc107;padding:5px 12px;border-radius:20px;text-decoration:none;">
+            <i class="fas fa-bell me-1"></i> Voir housekeeping
+        </a>
+    </div>
+    @endif
+
+    {{-- STAT CARDS --}}
     <div class="stats-grid anim-3">
         <div class="stat-card stat-card--arrivals">
             <div class="stat-card-top">
@@ -935,9 +1073,37 @@
                 Prêtes à l'accueil
             </div>
         </div>
+
+        <div class="stat-card stat-card--dirty">
+            <div class="stat-card-top">
+                <div>
+                    <div class="stat-card-label">Chambres sales</div>
+                    <div class="stat-card-value">{{ $stats['dirty_rooms'] ?? 0 }}</div>
+                </div>
+                <div class="stat-card-icon"><i class="fas fa-broom"></i></div>
+            </div>
+            <div class="stat-card-meta">
+                <i class="fas fa-exclamation-triangle fa-xs"></i>
+                <span>Dont <strong>{{ $stats['urgent_cleaning'] ?? 0 }}</strong> avec arrivée</span>
+            </div>
+        </div>
+
+        <div class="stat-card stat-card--urgent">
+            <div class="stat-card-top">
+                <div>
+                    <div class="stat-card-label">Urgences nettoyage</div>
+                    <div class="stat-card-value">{{ $stats['urgent_cleaning'] ?? 0 }}</div>
+                </div>
+                <div class="stat-card-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            </div>
+            <div class="stat-card-meta">
+                <i class="fas fa-clock fa-xs"></i>
+                <a href="{{ route('housekeeping.index') }}">Voir housekeeping <i class="fas fa-arrow-right fa-xs"></i></a>
+            </div>
+        </div>
     </div>
 
-    {{-- ─── MAIN GRID ──────────────────────────── --}}
+    {{-- MAIN GRID --}}
     <div class="ci-main-grid">
 
         {{-- LEFT — Réservations à venir --}}
@@ -979,20 +1145,48 @@
                             $now = \Carbon\Carbon::now();
                             $checkIn = \Carbon\Carbon::parse($transaction->check_in);
                             $checkInDate = $checkIn->copy()->startOfDay();
-                            $checkInTime = $checkIn->copy()->setTime(12, 0, 0);
                             
-                            $canCheckin = $transaction->status == 'reservation' && 
-                                          $now->isSameDay($checkInDate) && 
-                                          $now->gte($checkInTime);
-                            $checkinTooEarly = $transaction->status == 'reservation' && 
-                                              $now->isSameDay($checkInDate) && 
-                                              $now->lt($checkInTime);
-                            $checkinFuture = $transaction->status == 'reservation' && 
-                                           !$now->isSameDay($checkInDate);
+                            // Statut de la chambre
+                            $room = $transaction->room;
+                            $roomStatusId = $room->room_status_id;
+                            $isDirty = $roomStatusId == 6; // STATUS_DIRTY
+                            $isCleaning = $roomStatusId == 5; // STATUS_CLEANING
+                            $isAvailable = $roomStatusId == 1; // STATUS_AVAILABLE
+                            
+                            // Vérifications pour le check-in
+                            $isToday = $now->isSameDay($checkInDate);
+                            $isCheckinTime = $now->gte($checkIn->copy()->setTime(12, 0, 0));
+                            $canCheckin = $transaction->status == 'reservation' && $isToday && $isCheckinTime && !$isDirty && !$isCleaning;
+                            $checkinTooEarly = $transaction->status == 'reservation' && $isToday && !$isCheckinTime;
+                            $checkinFuture = $transaction->status == 'reservation' && !$isToday;
+                            
+                            // Urgence
+                            $isUrgent = $isToday && $isDirty;
+                            
+                            // Classes CSS
+                            $rowClass = '';
+                            if ($isDirty) $rowClass = 'dirty-room';
+                            elseif ($isCleaning) $rowClass = 'cleaning-room';
                         @endphp
-                        <div class="res-row">
+                        
+                        <div class="res-row {{ $rowClass }}" id="reservation-{{ $transaction->id }}">
                             <div class="res-guest">
-                                <div class="res-guest-name">{{ $transaction->customer->name }}</div>
+                                <div class="res-guest-name">
+                                    {{ $transaction->customer->name }}
+                                    @if($isDirty)
+                                        <span class="room-status-badge dirty">
+                                            <i class="fas fa-broom"></i> Sale
+                                        </span>
+                                    @elseif($isCleaning)
+                                        <span class="room-status-badge cleaning">
+                                            <i class="fas fa-spinner fa-spin"></i> Nettoyage
+                                        </span>
+                                    @elseif($isAvailable)
+                                        <span class="room-status-badge clean">
+                                            <i class="fas fa-check-circle"></i> Prête
+                                        </span>
+                                    @endif
+                                </div>
                                 <div class="res-guest-phone">
                                     <i class="fas fa-phone fa-xs" style="color:var(--s300);"></i>
                                     {{ $transaction->customer->phone }}
@@ -1000,17 +1194,19 @@
                             </div>
 
                             <div style="text-align:center;">
-                                <span class="res-room-badge">{{ $transaction->room->number }}</span>
-                                <div class="res-room-type">{{ $transaction->room->type->name ?? 'N/A' }}</div>
+                                <span class="res-room-badge">{{ $room->number }}</span>
+                                <div class="res-room-type">{{ $room->type->name ?? 'N/A' }}</div>
                             </div>
 
                             <div class="res-time">
                                 <span class="res-time-val">12:00</span>
                                 <span class="res-time-label">Arrivée</span>
-                                @if($now->lt($checkInDate))
+                                @if($checkinFuture)
                                     <div class="date-indicator di-upcoming">J-{{ $now->diffInDays($checkInDate) }}</div>
                                 @elseif($checkinTooEarly)
                                     <div class="date-indicator di-waiting">Attente 12h</div>
+                                @elseif($isUrgent)
+                                    <div class="date-indicator di-urgent">⚠️ Urgent</div>
                                 @endif
                             </div>
 
@@ -1021,29 +1217,45 @@
 
                             <div class="res-actions">
                                 @if($canCheckin)
-                                <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button type="submit" class="btn-res btn-res-checkin" onclick="return confirm('Confirmer l\'arrivée de {{ $transaction->customer->name }} ?')">
-                                        <i class="fas fa-door-open"></i> Check-in
+                                    <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        <button type="submit" class="btn-res btn-res-checkin" onclick="return confirm('Confirmer l\'arrivée de {{ $transaction->customer->name }} ?')">
+                                            <i class="fas fa-door-open"></i> Check-in
+                                        </button>
+                                    </form>
+                                @elseif($isUrgent)
+                                    <button onclick="notifyHousekeeping({{ $room->id }}, this)" class="btn-res btn-res-notify">
+                                        <i class="fas fa-bell"></i> Notifier
                                     </button>
-                                </form>
+                                    <a href="{{ route('checkin.show', $transaction) }}" class="btn-res btn-res-view" title="Voir détails">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                @elseif($isCleaning && $isToday)
+                                    <span class="btn-res btn-res-disabled" style="background:#17a2b8;color:white;">
+                                        <i class="fas fa-spinner fa-spin"></i> Nettoyage
+                                    </span>
+                                    <a href="{{ route('checkin.show', $transaction) }}" class="btn-res btn-res-view">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
                                 @elseif($checkinTooEarly)
-                                <span class="btn-res btn-res-checkin" style="opacity:0.5;cursor:not-allowed;" title="Check-in possible à partir de 12h">
-                                    <i class="fas fa-clock"></i> Check-in
-                                </span>
+                                    <span class="btn-res btn-res-checkin btn-res-disabled" title="Check-in possible à partir de 12h">
+                                        <i class="fas fa-clock"></i> Check-in
+                                    </span>
                                 @elseif($checkinFuture)
-                                <span class="btn-res btn-res-checkin" style="opacity:0.5;cursor:not-allowed;" title="Arrivée prévue le {{ $checkInDate->format('d/m/Y') }}">
-                                    <i class="fas fa-calendar"></i> Check-in
-                                </span>
+                                    <span class="btn-res btn-res-checkin btn-res-disabled" title="Arrivée prévue le {{ $checkInDate->format('d/m/Y') }}">
+                                        <i class="fas fa-calendar"></i> Check-in
+                                    </span>
+                                @else
+                                    <a href="{{ route('checkin.show', $transaction) }}" class="btn-res btn-res-view">
+                                        <i class="fas fa-eye"></i> Voir
+                                    </a>
                                 @endif
                                 
-                                <button onclick="quickCheckIn({{ $transaction->id }}, this)" class="btn-res btn-res-quick">
-                                    <i class="fas fa-bolt"></i>
-                                </button>
-                                
-                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-res btn-res-view">
-                                    <i class="fas fa-eye"></i>
-                                </a>
+                                @if(!$isDirty && !$isCleaning && $isToday)
+                                    <button onclick="quickCheckIn({{ $transaction->id }}, this)" class="btn-res btn-res-quick">
+                                        <i class="fas fa-bolt"></i>
+                                    </button>
+                                @endif
                             </div>
                         </div>
                         @endforeach
@@ -1091,11 +1303,19 @@
                         $canCheckout = $isFullyPaid && $now->gte($checkOutTime) && $now->lte($checkOutLargess);
                         $isLate = $now->gt($checkOutLargess);
                         $isInLargess = $now->gte($checkOutTime) && $now->lte($checkOutLargess);
+                        
+                        $roomStatus = $transaction->room->status_label ?? 'N/A';
+                        $roomStatusColor = $transaction->room->status_color ?? 'secondary';
                     @endphp
                     <div class="guest-card">
                         <div class="guest-card-top">
                             <div>
-                                <div class="guest-card-name">{{ $transaction->customer->name }}</div>
+                                <div class="guest-card-name">
+                                    {{ $transaction->customer->name }}
+                                    <span class="badge bg-{{ $roomStatusColor }} ms-2" style="font-size:0.6rem;">
+                                        {{ $roomStatus }}
+                                    </span>
+                                </div>
                                 <div class="guest-card-meta">
                                     <span><i class="fas fa-door-closed"></i> Ch. {{ $transaction->room->number }}</span>
                                     <span class="guest-card-room-badge">{{ $transaction->room->type->name ?? 'N/A' }}</span>
@@ -1158,6 +1378,50 @@
                 </div>
                 @endif
             </div>
+
+            {{-- URGENCES HOUSEKEEPING --}}
+            @if(isset($urgentCleanings) && $urgentCleanings->count() > 0)
+            <div class="ci-card">
+                <div class="ci-card-header warning">
+                    <h3 class="ci-card-title">
+                        <i class="fas fa-broom" style="color:#856404;"></i>
+                        Urgences nettoyage
+                    </h3>
+                    <span class="ci-card-badge" style="background:#ffc107;color:#856404;">{{ $urgentCleanings->count() }}</span>
+                </div>
+
+                @foreach($urgentCleanings as $urgent)
+                <div class="dep-row urgent-cleaning">
+                    <div class="dep-row-info">
+                        <div class="dep-row-name">
+                            {{ $urgent['customer_name'] }}
+                            <span class="badge bg-warning ms-2">Arrivée {{ $urgent['arrival_time_formatted'] }}</span>
+                        </div>
+                        <div class="dep-row-room">
+                            <i class="fas fa-door-closed"></i>
+                            Chambre {{ $urgent['room_number'] }}
+                        </div>
+                    </div>
+                    <div class="dep-row-right">
+                        <div class="dep-actions">
+                            <button onclick="notifyHousekeeping({{ $urgent['room_id'] }}, this)" class="btn-dep-checkout" style="background:#ffc107;color:#856404;border-color:#ffc107;">
+                                <i class="fas fa-bell"></i> Notifier
+                            </button>
+                            <a href="{{ route('checkin.show', $urgent['reservation_id']) }}" class="btn-dep-invoice">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+
+                <div class="ci-card-footer">
+                    <a href="{{ route('housekeeping.index') }}" class="btn-ci-footer">
+                        <i class="fas fa-broom fa-xs"></i> Voir housekeeping
+                    </a>
+                </div>
+            </div>
+            @endif
 
             {{-- Départs aujourd'hui --}}
             <div class="ci-card anim-6">
@@ -1258,8 +1522,14 @@
 function showToast(msg, type = 'success') {
     const wrap = document.getElementById('toast-container');
     const t = document.createElement('div');
-    t.className = 'ci-toast' + (type === 'error' ? ' ci-toast-error' : '');
-    const icon = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+    t.className = 'ci-toast';
+    if (type === 'error') t.classList.add('ci-toast-error');
+    if (type === 'warning') t.classList.add('ci-toast-warning');
+    
+    const icon = type === 'success' ? 'fas fa-check-circle' : 
+                 type === 'error' ? 'fas fa-exclamation-circle' : 
+                 'fas fa-exclamation-triangle';
+    
     t.innerHTML = `<i class="${icon}" style="font-size:1rem;flex-shrink:0"></i><span>${msg}</span>`;
     wrap.appendChild(t);
     setTimeout(() => t.style.opacity = '0', 2800);
@@ -1299,5 +1569,82 @@ function quickCheckIn(id, btn) {
         btn.disabled = false;
     });
 }
+
+/* ── Notifier housekeeping ─────────────────────── */
+function notifyHousekeeping(roomId, btn) {
+    if (!confirm('Notifier l\'équipe housekeeping pour nettoyage urgent ?')) return;
+
+    const orig = btn.innerHTML;
+    const origClass = btn.className;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+    btn.disabled = true;
+
+    fetch(`/checkin/notify-housekeeping/${roomId}`, {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('✅ ' + data.message, 'success');
+            btn.innerHTML = '<i class="fas fa-check"></i> Notifié';
+            btn.classList.remove('btn-res-notify');
+            btn.classList.add('btn-res-notified');
+            
+            // Réinitialiser après 3 secondes
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-bell"></i> Notifier';
+                btn.classList.remove('btn-res-notified');
+                btn.classList.add('btn-res-notify');
+                btn.disabled = false;
+            }, 3000);
+        } else {
+            showToast('❌ ' + data.message, 'error');
+            btn.innerHTML = orig;
+            btn.disabled = false;
+        }
+    })
+    .catch(() => {
+        showToast('❌ Erreur lors de la notification', 'error');
+        btn.innerHTML = orig;
+        btn.disabled = false;
+    });
+}
+
+/* ── Auto-refresh des données toutes les 60 secondes ── */
+setInterval(() => {
+    // Recharger les données sans recharger la page
+    fetch(window.location.href, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.text())
+    .then(html => {
+        // Mettre à jour uniquement les sections nécessaires
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        
+        // Mettre à jour les stats
+        const newStats = doc.querySelector('.stats-grid');
+        const currentStats = document.querySelector('.stats-grid');
+        if (newStats && currentStats) {
+            currentStats.innerHTML = newStats.innerHTML;
+        }
+        
+        // Mettre à jour les réservations
+        const newReservations = doc.querySelector('.ci-main-grid > div:first-child .ci-card');
+        const currentReservations = document.querySelector('.ci-main-grid > div:first-child .ci-card');
+        if (newReservations && currentReservations) {
+            currentReservations.innerHTML = newReservations.innerHTML;
+        }
+    })
+    .catch(error => console.error('Auto-refresh error:', error));
+}, 60000); // Toutes les 60 secondes
 </script>
 @endsection

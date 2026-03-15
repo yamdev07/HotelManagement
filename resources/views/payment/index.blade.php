@@ -3,1238 +3,821 @@
 @section('content')
 
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   DESIGN SYSTEM - MÊME STYLE QUE CHECK-IN
-═══════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    --primary-50: #ecfdf5;
-    --primary-100: #d1fae5;
-    --primary-400: #34d399;
-    --primary-500: #10b981;
-    --primary-600: #059669;
-    --primary-700: #047857;
-    --primary-800: #065f46;
+    /* ── 4 COULEURS (vert, rouge, gris, blanc) ── */
+    --green-50:  #f0faf0;
+    --green-100: #d4edda;
+    --green-500: #2e8540;
+    --green-600: #1e6b2e;
+    --green-700: #155221;
 
-    --amber-50: #fffbeb;
-    --amber-100: #fef3c7;
-    --amber-400: #fbbf24;
-    --amber-500: #f59e0b;
-    --amber-600: #d97706;
+    --red-50:    #fee2e2;
+    --red-100:   #fecaca;
+    --red-500:   #b91c1c;
+    --red-600:   #991b1b;
 
-    --blue-50: #eff6ff;
-    --blue-100: #dbeafe;
-    --blue-500: #3b82f6;
-    --blue-600: #2563eb;
+    --gray-50:   #f8f9f8;
+    --gray-100:  #eff0ef;
+    --gray-200:  #dde0dd;
+    --gray-300:  #c2c7c2;
+    --gray-400:  #9ba09b;
+    --gray-500:  #737873;
+    --gray-600:  #545954;
+    --gray-700:  #3a3e3a;
+    --gray-800:  #252825;
+    --gray-900:  #131513;
 
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-400: #9ca3af;
-    --gray-500: #6b7280;
-    --gray-600: #4b5563;
-    --gray-700: #374151;
-    --gray-800: #1f2937;
-    --gray-900: #111827;
+    --white:     #ffffff;
+    --surface:   #f7f9f7;
 
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s ease;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 .payments-page {
-    background: var(--gray-50);
+    background: var(--surface);
     min-height: 100vh;
     padding: 24px 32px;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font);
+    color: var(--gray-800);
 }
 
-/* Breadcrumb */
-.breadcrumb-custom {
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+.anim-3 { animation: fadeSlide .4s .16s ease both; }
+
+/* ══════════════════════════════════════════════
+   BREADCRUMB
+══════════════════════════════════════════════ */
+.breadcrumb {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.813rem;
+    font-size: .8rem;
     color: var(--gray-400);
-    margin-bottom: 24px;
-    flex-wrap: wrap;
+    margin-bottom: 20px;
 }
-
-.breadcrumb-custom a {
+.breadcrumb a {
     color: var(--gray-400);
     text-decoration: none;
-    transition: color 0.2s;
+    transition: var(--transition);
 }
-
-.breadcrumb-custom a:hover {
-    color: var(--primary-600);
+.breadcrumb a:hover {
+    color: var(--green-600);
 }
-
-.breadcrumb-custom .separator {
+.breadcrumb .sep {
     color: var(--gray-300);
-    font-size: 0.688rem;
 }
-
-.breadcrumb-custom .current {
+.breadcrumb .current {
     color: var(--gray-600);
     font-weight: 500;
 }
 
-/* En-tête */
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
 .page-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 28px;
+    margin-bottom: 24px;
     flex-wrap: wrap;
     gap: 16px;
 }
-
 .header-title {
     display: flex;
     align-items: center;
     gap: 12px;
 }
-
-.header-title h1 {
-    font-size: 1.875rem;
-    font-weight: 600;
-    color: var(--gray-800);
-    margin: 0;
-}
-
 .header-icon {
     width: 48px;
     height: 48px;
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
+    background: var(--green-600);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 1.25rem;
-    box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
+    box-shadow: 0 4px 10px rgba(46,133,64,.3);
 }
-
+.header-title h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin: 0;
+}
+.header-title em {
+    font-style: normal;
+    color: var(--green-600);
+}
 .header-subtitle {
     color: var(--gray-500);
-    font-size: 0.875rem;
+    font-size: .8rem;
     margin: 6px 0 0 60px;
 }
 
-/* Boutons */
-.btn-modern {
+/* ══════════════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════════════ */
+.btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 10px;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--r);
+    font-size: .8rem;
     font-weight: 500;
-    font-size: 0.875rem;
     border: none;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: var(--transition);
     text-decoration: none;
 }
-
-.btn-primary-modern {
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
-    color: white;
-    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.3);
-}
-
-.btn-primary-modern:hover {
-    background: linear-gradient(135deg, var(--primary-800), var(--primary-600));
-    transform: translateY(-1px);
-    box-shadow: 0 6px 8px -1px rgba(5, 150, 105, 0.4);
-    color: white;
-    text-decoration: none;
-}
-
-.btn-outline-modern {
-    background: white;
-    color: var(--gray-700);
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow-sm);
-}
-
-.btn-outline-modern:hover {
-    background: var(--gray-50);
-    border-color: var(--gray-300);
-    color: var(--gray-900);
-    transform: translateY(-1px);
-    text-decoration: none;
-}
-
-.btn-success-modern {
-    background: var(--primary-600);
+.btn-green {
+    background: var(--green-600);
     color: white;
 }
-
-.btn-success-modern:hover {
-    background: var(--primary-700);
+.btn-green:hover {
+    background: var(--green-700);
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
+    color: white;
 }
-
-.btn-sm-modern {
-    padding: 6px 14px;
-    font-size: 0.813rem;
-    border-radius: 8px;
+.btn-gray {
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
 }
-
-/* Dropdown */
-.dropdown-modern .dropdown-menu {
-    border-radius: 12px;
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow-lg);
-    padding: 8px;
+.btn-gray:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
 }
-
-.dropdown-modern .dropdown-item {
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 0.875rem;
-    color: var(--gray-700);
-    transition: all 0.2s;
+.btn-outline {
+    background: var(--white);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
 }
-
-.dropdown-modern .dropdown-item:hover {
-    background: var(--gray-50);
-    color: var(--gray-900);
+.btn-outline:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
 }
-
-.dropdown-modern .dropdown-item i {
-    color: var(--primary-500);
-    width: 20px;
+.btn-sm {
+    padding: 6px 12px;
+    font-size: .7rem;
 }
-
-.dropdown-modern .dropdown-divider {
-    margin: 8px 0;
-    border-top: 1px solid var(--gray-200);
-}
-
-/* Cartes */
-.card-modern {
-    background: white;
-    border-radius: 20px;
-    border: 1px solid var(--gray-200);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 20px;
-    transition: all 0.2s;
-}
-
-.card-modern:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--gray-300);
-}
-
-.card-header-modern {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--gray-100);
-    background: white;
-}
-
-.card-header-modern h5 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--gray-700);
-    margin: 0;
-    display: flex;
+.btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
+    border: 1.5px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-500);
+    transition: var(--transition);
+}
+.btn-icon:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
 }
 
-.card-header-modern h5 i {
-    color: var(--primary-500);
+/* ══════════════════════════════════════════════
+   DROPDOWN
+══════════════════════════════════════════════ */
+.dropdown-menu {
+    border-radius: var(--rl);
+    border: 1.5px solid var(--gray-200);
+    padding: 6px;
+    box-shadow: var(--shadow-sm);
+}
+.dropdown-item {
+    border-radius: var(--r);
+    padding: 6px 12px;
+    font-size: .75rem;
+    transition: var(--transition);
+}
+.dropdown-item:hover {
+    background: var(--green-50);
+    color: var(--green-700);
+}
+.dropdown-item i {
+    width: 18px;
+    color: var(--green-600);
+}
+.dropdown-divider {
+    border-top: 1.5px solid var(--gray-200);
 }
 
-.card-body-modern {
-    padding: 24px;
-}
-
-/* Stats cards */
+/* ══════════════════════════════════════════════
+   STATS CARDS
+══════════════════════════════════════════════ */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
-    margin-bottom: 28px;
-}
-
-.stat-card-modern {
-    background: white;
-    border-radius: 20px;
-    padding: 24px;
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.2s;
-}
-
-.stat-card-modern:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.stat-icon-wrapper {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 16px;
-}
-
-.stat-icon-wrapper.primary { background: var(--primary-100); color: var(--primary-600); }
-.stat-icon-wrapper.success { background: var(--primary-100); color: var(--primary-600); }
-.stat-icon-wrapper.info { background: var(--blue-100); color: var(--blue-600); }
-.stat-icon-wrapper.warning { background: var(--amber-100); color: var(--amber-600); }
-
-.stat-number {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--gray-800);
-    line-height: 1.2;
-    margin-bottom: 4px;
-}
-
-.stat-label {
-    font-size: 0.875rem;
-    color: var(--gray-500);
-}
-
-.stat-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 30px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    background: var(--primary-100);
-    color: var(--primary-700);
-    margin-top: 8px;
-}
-
-/* Table */
-.table-container {
-    overflow-x: auto;
-    border-radius: 16px;
-}
-
-.table-modern {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.table-modern thead th {
-    background: var(--gray-50);
-    padding: 16px 20px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--gray-500);
-    border-bottom: 1px solid var(--gray-200);
-    text-align: left;
-}
-
-.table-modern tbody td {
-    padding: 20px;
-    border-bottom: 1px solid var(--gray-100);
-    color: var(--gray-700);
-    font-size: 0.875rem;
-}
-
-.table-modern tbody tr:hover {
-    background: var(--gray-50);
-}
-
-.table-modern tbody tr:last-child td {
-    border-bottom: none;
-}
-
-/* Badges statut */
-.badge-modern {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    border-radius: 30px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    line-height: 1;
-}
-
-.badge-completed {
-    background: var(--primary-100);
-    color: var(--primary-700);
-    border: 1px solid var(--primary-200);
-}
-
-.badge-pending {
-    background: var(--amber-100);
-    color: var(--amber-700);
-    border: 1px solid var(--amber-200);
-}
-
-.badge-failed {
-    background: #fee2e2;
-    color: #b91c1c;
-    border: 1px solid #fecaca;
-}
-
-.badge-refunded {
-    background: var(--blue-100);
-    color: var(--blue-700);
-    border: 1px solid var(--blue-200);
-}
-
-.badge-cancelled {
-    background: var(--gray-100);
-    color: var(--gray-600);
-    border: 1px solid var(--gray-200);
-}
-
-/* Référence */
-.reference-badge {
-    background: var(--gray-100);
-    color: var(--gray-700);
-    font-family: 'Courier New', monospace;
-    font-size: 0.75rem;
-    padding: 4px 10px;
-    border-radius: 6px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    border: 1px solid var(--gray-200);
-}
-
-/* Avatar */
-.avatar-modern {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: var(--primary-100);
-    color: var(--primary-600);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-}
-
-/* Actions */
-.actions-group {
-    display: flex;
-    gap: 4px;
-    justify-content: flex-end;
-}
-
-.btn-icon-modern {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--gray-200);
-    background: white;
-    color: var(--gray-600);
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-}
-
-.btn-icon-modern:hover {
-    background: var(--gray-50);
-    border-color: var(--gray-300);
-    color: var(--gray-800);
-    transform: translateY(-1px);
-}
-
-/* Pagination */
-.pagination-modern {
-    display: flex;
-    gap: 4px;
-    justify-content: flex-end;
-}
-
-.page-item-modern {
-    list-style: none;
-}
-
-.page-link-modern {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    border: 1px solid var(--gray-200);
-    color: var(--gray-600);
-    text-decoration: none;
-    transition: all 0.2s;
-}
-
-.page-link-modern:hover {
-    background: var(--gray-50);
-    border-color: var(--gray-300);
-    color: var(--gray-800);
-}
-
-.page-item-modern.active .page-link-modern {
-    background: var(--primary-600);
-    border-color: var(--primary-600);
-    color: white;
-}
-
-.page-item-modern.disabled .page-link-modern {
-    opacity: 0.5;
-    pointer-events: none;
-    background: var(--gray-100);
-}
-
-/* Empty state */
-.empty-state-modern {
-    text-align: center;
-    padding: 60px 20px;
-}
-
-.empty-state-modern i {
-    font-size: 4rem;
-    color: var(--gray-300);
-    margin-bottom: 20px;
-}
-
-.empty-state-modern h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--gray-600);
-    margin-bottom: 8px;
-}
-
-.empty-state-modern p {
-    color: var(--gray-400);
+    gap: 16px;
     margin-bottom: 24px;
 }
+.stat-card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
+    padding: 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    transition: var(--transition);
+}
+.stat-card:hover {
+    border-color: var(--green-300);
+    transform: translateY(-2px);
+}
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--r);
+    background: var(--green-50);
+    color: var(--green-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.stat-content {
+    flex: 1;
+}
+.stat-number {
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-family: var(--mono);
+    color: var(--gray-900);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+.stat-label {
+    font-size: .65rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+.stat-badge {
+    display: inline-block;
+    background: var(--gray-100);
+    color: var(--gray-600);
+    border: 1.5px solid var(--gray-200);
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: .6rem;
+    font-weight: 600;
+}
 
-/* Search input */
+/* ══════════════════════════════════════════════
+   CARD
+══════════════════════════════════════════════ */
+.card {
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rxl);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+.card-header {
+    padding: 16px 20px;
+    border-bottom: 1.5px solid var(--gray-200);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--white);
+}
+.card-header h5 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin: 0;
+}
+.card-header h5 i {
+    color: var(--green-600);
+}
+.card-body {
+    padding: 0;
+}
+
+/* ══════════════════════════════════════════════
+   SEARCH
+══════════════════════════════════════════════ */
 .search-wrapper {
     position: relative;
     width: 280px;
 }
-
 .search-wrapper i {
     position: absolute;
     left: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: var(--gray-400);
-    font-size: 0.875rem;
 }
-
 .search-wrapper input {
     width: 100%;
-    padding: 10px 16px 10px 40px;
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    font-size: 0.875rem;
-    transition: all 0.2s;
+    padding: 8px 12px 8px 36px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--r);
+    font-size: .8rem;
+    transition: var(--transition);
 }
-
 .search-wrapper input:focus {
     outline: none;
-    border-color: var(--primary-500);
-    box-shadow: 0 0 0 3px var(--primary-100);
+    border-color: var(--green-400);
+    box-shadow: 0 0 0 3px rgba(46,133,64,.1);
 }
 
-/* Modal */
-.modal-modern .modal-content {
-    border-radius: 20px;
-    border: none;
-    overflow: hidden;
+/* ══════════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════════ */
+.table-responsive {
+    overflow-x: auto;
 }
-
-.modal-modern .modal-header {
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.table thead th {
     background: var(--gray-50);
+    padding: 14px 18px;
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    border-bottom: 1.5px solid var(--gray-200);
+    text-align: left;
+}
+.table tbody td {
+    padding: 16px 18px;
     border-bottom: 1px solid var(--gray-200);
-    padding: 20px 24px;
+    color: var(--gray-700);
+    font-size: .8rem;
+    vertical-align: middle;
+}
+.table tbody tr:hover td {
+    background: var(--green-50);
+}
+.table tbody tr.today {
+    background: var(--green-50);
 }
 
-.modal-modern .modal-body {
-    padding: 24px;
+/* ══════════════════════════════════════════════
+   BADGES
+══════════════════════════════════════════════ */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    font-size: .65rem;
+    font-weight: 600;
+}
+.badge-green { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+.badge-red { background: var(--red-50); color: var(--red-500); border: 1.5px solid var(--red-100); }
+.badge-gray { background: var(--gray-100); color: var(--gray-600); border: 1.5px solid var(--gray-200); }
+.badge-blue { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+.badge-orange { background: var(--red-50); color: var(--red-500); border: 1.5px solid var(--red-100); }
+
+/* ── Reference badge ── */
+.ref-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--gray-100);
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--r);
+    font-size: .65rem;
+    font-family: var(--mono);
+    color: var(--gray-600);
 }
 
-.modal-modern .modal-footer {
+/* ══════════════════════════════════════════════
+   AVATAR
+══════════════════════════════════════════════ */
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--green-50);
+    color: var(--green-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .8rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+.avatar-sm {
+    width: 30px;
+    height: 30px;
+    font-size: .7rem;
+}
+
+/* ══════════════════════════════════════════════
+   ACTIONS
+══════════════════════════════════════════════ */
+.actions-group {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+}
+
+/* ══════════════════════════════════════════════
+   PAGINATION
+══════════════════════════════════════════════ */
+.pagination-modern {
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+}
+.pagination-modern .page-item {
+    list-style: none;
+}
+.pagination-modern .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: var(--r);
+    border: 1.5px solid var(--gray-200);
+    background: var(--white);
+    color: var(--gray-600);
+    font-size: .7rem;
+    text-decoration: none;
+    transition: var(--transition);
+}
+.pagination-modern .page-link:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+}
+.pagination-modern .active .page-link {
+    background: var(--green-600);
+    border-color: var(--green-600);
+    color: white;
+}
+.pagination-modern .disabled .page-link {
+    opacity: .5;
+    pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════
+   EMPTY STATE
+══════════════════════════════════════════════ */
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+}
+.empty-icon {
+    font-size: 3rem;
+    color: var(--gray-300);
+    margin-bottom: 16px;
+}
+.empty-state h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--gray-600);
+    margin-bottom: 4px;
+}
+.empty-state p {
+    color: var(--gray-400);
+    margin-bottom: 20px;
+}
+
+/* ══════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════ */
+.modal-content {
+    border-radius: var(--rxl);
+    border: 1.5px solid var(--gray-200);
+}
+.modal-header {
+    border-bottom: 1.5px solid var(--gray-200);
+    padding: 18px 22px;
+}
+.modal-title i {
+    color: var(--green-600);
+}
+.modal-body {
+    padding: 22px;
+}
+.modal-footer {
+    border-top: 1.5px solid var(--gray-200);
+    padding: 16px 22px;
+}
+.modal-card {
     background: var(--gray-50);
-    border-top: 1px solid var(--gray-200);
-    padding: 16px 24px;
+    border: 1.5px solid var(--gray-200);
+    border-radius: var(--rl);
+    padding: 16px;
+    margin-bottom: 16px;
 }
-
-.modal-modern .modal-title i {
-    color: var(--primary-500);
-    margin-right: 8px;
-}
-
-/* Responsive */
-@media (max-width: 1024px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-
-@media (max-width: 768px) {
-    .payments-page {
-        padding: 16px;
-    }
-    
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    .search-wrapper {
-        width: 100%;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .table-modern thead th {
-        padding: 12px;
-    }
-    
-    .table-modern tbody td {
-        padding: 12px;
-    }
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
+.modal-card-title {
+    font-size: .7rem;
+    font-weight: 600;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    margin-bottom: 8px;
 }
 </style>
 
 <div class="payments-page">
-    <!-- Breadcrumb -->
-    <div class="breadcrumb-custom">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
-        <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
+
+    {{-- Breadcrumb --}}
+    <div class="breadcrumb anim-1">
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Paiements</span>
     </div>
 
-    <!-- En-tête -->
-    <div class="page-header">
+    {{-- En-tête --}}
+    <div class="page-header anim-2">
         <div>
             <div class="header-title">
-                <span class="header-icon">
-                    <i class="fas fa-money-bill-wave"></i>
-                </span>
-                <h1>Gestion des Paiements</h1>
+                <span class="header-icon"><i class="fas fa-money-bill-wave"></i></span>
+                <h1>Gestion des <em>paiements</em></h1>
             </div>
-            <p class="header-subtitle">
-                {{ $payments->total() }} paiement(s) enregistré(s)
-            </p>
+            <p class="header-subtitle">{{ $payments->total() }} paiement(s) enregistré(s)</p>
         </div>
-        
-        <div class="d-flex gap-2 flex-wrap">
-            <!-- Filtre dropdown -->
-            <div class="dropdown dropdown-modern">
-                <button class="btn-modern btn-outline-modern dropdown-toggle" type="button" 
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="fas fa-filter me-2"></i>Filtrer
+        <div class="d-flex gap-2">
+            <div class="dropdown">
+                <button class="btn btn-outline dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-filter"></i> Filtrer
                 </button>
-                <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="?status=all"><i class="fas fa-list me-2"></i>Tous les paiements</a></li>
-                    <li><a class="dropdown-item" href="?status=completed"><i class="fas fa-check-circle me-2 text-success"></i>Complétés</a></li>
-                    <li><a class="dropdown-item" href="?status=pending"><i class="fas fa-clock me-2 text-warning"></i>En attente</a></li>
-                    <li><a class="dropdown-item" href="?status=failed"><i class="fas fa-times-circle me-2 text-danger"></i>Échoués</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="?period=today"><i class="fas fa-calendar-day me-2"></i>Aujourd'hui</a></li>
-                    <li><a class="dropdown-item" href="?period=this_week"><i class="fas fa-calendar-week me-2"></i>Cette semaine</a></li>
-                    <li><a class="dropdown-item" href="?period=this_month"><i class="fas fa-calendar-alt me-2"></i>Ce mois</a></li>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="?status=all"><i class="fas fa-list"></i> Tous</a></li>
+                    <li><a class="dropdown-item" href="?status=completed"><i class="fas fa-check-circle" style="color:var(--green-600);"></i> Complétés</a></li>
+                    <li><a class="dropdown-item" href="?status=pending"><i class="fas fa-clock" style="color:var(--red-500);"></i> En attente</a></li>
+                    <li><a class="dropdown-item" href="?period=today"><i class="fas fa-calendar-day"></i> Aujourd'hui</a></li>
                 </ul>
             </div>
-            
-            <!-- Export button -->
-            <button class="btn-modern btn-outline-modern" onclick="exportPayments()">
-                <i class="fas fa-file-export me-2"></i>Exporter
-            </button>
-            
-            <!-- Refresh button -->
-            <button class="btn-modern btn-outline-modern" onclick="window.location.reload()">
-                <i class="fas fa-sync-alt"></i>
-            </button>
+            <button class="btn btn-outline" onclick="exportPayments()"><i class="fas fa-file-export"></i> Exporter</button>
+            <button class="btn btn-outline" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
         </div>
     </div>
 
-    <!-- Stats cards -->
-    <div class="stats-grid">
-        @php
-            $totalAmount = $payments->sum('amount');
-            $todayAmount = $payments->where('created_at', '>=', now()->startOfDay())->sum('amount');
-        @endphp
-        
-        <div class="stat-card-modern">
-            <div class="stat-icon-wrapper primary">
-                <i class="fas fa-coins fa-lg"></i>
+    {{-- Stats --}}
+    @php
+        $total = $payments->sum('amount');
+        $today = $payments->where('created_at', '>=', now()->startOfDay())->sum('amount');
+    @endphp
+    <div class="stats-grid anim-3">
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-coins"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ number_format($total, 0, ',', ' ') }}</div>
+                <div class="stat-label">Total</div>
+                <span class="stat-badge">Global</span>
             </div>
-            <div class="stat-number">{{ Helper::formatCFA($totalAmount) }}</div>
-            <div class="stat-label">Total des paiements</div>
-            <div class="stat-badge">Global</div>
         </div>
-        
-        <div class="stat-card-modern">
-            <div class="stat-icon-wrapper success">
-                <i class="fas fa-calendar-day fa-lg"></i>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ number_format($today, 0, ',', ' ') }}</div>
+                <div class="stat-label">Aujourd'hui</div>
+                <span class="stat-badge">{{ now()->format('d/m') }}</span>
             </div>
-            <div class="stat-number">{{ Helper::formatCFA($todayAmount) }}</div>
-            <div class="stat-label">Reçu aujourd'hui</div>
-            <div class="stat-badge">{{ now()->format('d/m/Y') }}</div>
         </div>
-        
-        <div class="stat-card-modern">
-            <div class="stat-icon-wrapper info">
-                <i class="fas fa-users fa-lg"></i>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ $payments->unique('transaction.customer_id')->count() }}</div>
+                <div class="stat-label">Clients</div>
+                <span class="stat-badge">Uniques</span>
             </div>
-            <div class="stat-number">{{ $payments->unique('transaction.customer_id')->count() }}</div>
-            <div class="stat-label">Clients uniques</div>
-            <div class="stat-badge">Paiements</div>
         </div>
-        
-        <div class="stat-card-modern">
-            <div class="stat-icon-wrapper warning">
-                <i class="fas fa-bed fa-lg"></i>
+        <div class="stat-card">
+            <div class="stat-icon"><i class="fas fa-bed"></i></div>
+            <div class="stat-content">
+                <div class="stat-number">{{ $payments->unique('transaction.room_id')->count() }}</div>
+                <div class="stat-label">Chambres</div>
+                <span class="stat-badge">Réservations</span>
             </div>
-            <div class="stat-number">{{ $payments->unique('transaction.room_id')->count() }}</div>
-            <div class="stat-label">Chambres payées</div>
-            <div class="stat-badge">Réservations</div>
         </div>
     </div>
 
-    <!-- Tableau principal -->
-    <div class="card-modern">
-        <div class="card-header-modern d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <h5>
-                <i class="fas fa-credit-card"></i>
-                Historique des Paiements
-            </h5>
-            
+    {{-- Tableau --}}
+    <div class="card">
+        <div class="card-header">
+            <h5><i class="fas fa-credit-card"></i> Historique des paiements</h5>
             <div class="search-wrapper">
                 <i class="fas fa-search"></i>
-                <input type="text" placeholder="Rechercher un paiement..." id="searchInput" onkeyup="filterPayments()">
+                <input type="text" id="searchInput" placeholder="Rechercher..." onkeyup="filterPayments()">
             </div>
         </div>
-        
-        <div class="card-body-modern p-0">
+        <div class="card-body">
             @if($payments->count() > 0)
-                <div class="table-container">
-                    <table class="table-modern" id="paymentsTable">
+                <div class="table-responsive">
+                    <table class="table" id="paymentsTable">
                         <thead>
                             <tr>
                                 <th>ID</th>
                                 <th>Client & Chambre</th>
-                                <th>Détails du paiement</th>
-                                <th>Date & Heure</th>
+                                <th>Détails</th>
+                                <th>Date</th>
                                 <th>Statut</th>
-                                <th>Traité par</th>
-                                <th class="text-end">Actions</th>
+                                <th>Par</th>
+                                <th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($payments as $payment)
-                                @php
-                                    $statusClass = [
-                                        'completed' => 'badge-completed',
-                                        'pending' => 'badge-pending',
-                                        'failed' => 'badge-failed',
-                                        'refunded' => 'badge-refunded',
-                                        'cancelled' => 'badge-cancelled'
-                                    ][$payment->status] ?? 'badge-cancelled';
-                                    
-                                    $statusTranslations = [
-                                        'completed' => 'Complété',
-                                        'pending' => 'En attente',
-                                        'failed' => 'Échoué',
-                                        'refunded' => 'Remboursé',
-                                        'cancelled' => 'Annulé'
-                                    ];
-                                    
-                                    $isToday = $payment->created_at->isToday();
-                                @endphp
-                                
-                                <tr style="{{ $isToday ? 'background: var(--primary-50);' : '' }}">
-                                    <!-- ID -->
-                                    <td>
-                                        <span class="badge-modern" style="background: var(--gray-800); color: white; border: none;">
-                                            #{{ $payment->id }}
-                                        </span>
-                                    </td>
-                                    
-                                    <!-- Client & Chambre -->
-                                    <td>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <div class="avatar-modern">
-                                                <i class="fas fa-user"></i>
-                                            </div>
-                                            <div>
-                                                <div style="font-weight: 600; color: var(--gray-800);">
-                                                    {{ $payment->transaction->customer->name ?? 'N/A' }}
-                                                </div>
-                                                <div style="font-size: 0.75rem; color: var(--gray-500);">
-                                                    <i class="fas fa-bed me-1"></i>
-                                                    Chambre {{ $payment->transaction->room->number ?? 'N/A' }}
-                                                </div>
-                                            </div>
+                            @php
+                                $badge = match($payment->status) {
+                                    'completed' => 'badge-green',
+                                    'pending' => 'badge-orange',
+                                    'failed' => 'badge-red',
+                                    'refunded' => 'badge-blue',
+                                    default => 'badge-gray'
+                                };
+                                $text = match($payment->status) {
+                                    'completed' => 'Complété',
+                                    'pending' => 'En attente',
+                                    'failed' => 'Échoué',
+                                    'refunded' => 'Remboursé',
+                                    default => $payment->status
+                                };
+                                $isToday = $payment->created_at->isToday();
+                            @endphp
+                            <tr class="{{ $isToday ? 'today' : '' }}">
+                                <td><span class="badge badge-gray">#{{ $payment->id }}</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar"><i class="fas fa-user"></i></div>
+                                        <div>
+                                            <div class="fw-semibold">{{ $payment->transaction->customer->name ?? 'N/A' }}</div>
+                                            <small class="text-muted"><i class="fas fa-bed"></i> Ch. {{ $payment->transaction->room->number ?? 'N/A' }}</small>
                                         </div>
-                                    </td>
-                                    
-                                    <!-- Détails du paiement -->
-                                    <td>
-                                        <div style="font-weight: 700; color: var(--gray-800); font-size: 1rem; margin-bottom: 4px;">
-                                            {{ Helper::formatCFA($payment->amount) }}
-                                        </div>
-                                        
-                                        <!-- Référence -->
-                                        @if($payment->reference)
-                                            <div class="reference-badge mb-2">
-                                                <i class="fas fa-fingerprint" style="font-size: 0.7rem;"></i>
-                                                {{ $payment->reference }}
-                                            </div>
-                                        @else
-                                            <div class="reference-badge mb-2" style="color: var(--gray-400);">
-                                                <i class="far fa-question-circle"></i>
-                                                Référence non disponible
-                                            </div>
-                                        @endif
-                                        
-                                        <!-- Méthode -->
-                                        @if($payment->payment_method)
-                                            <div style="font-size: 0.75rem; color: var(--gray-500);">
-                                                <i class="fas fa-credit-card me-1"></i>
-                                                {{ ucfirst($payment->payment_method) }}
-                                            </div>
-                                        @endif
-                                        
-                                        <!-- Notes -->
-                                        @if($payment->notes)
-                                            <div style="font-size: 0.75rem; color: var(--gray-400); margin-top: 4px;">
-                                                <i class="fas fa-sticky-note me-1"></i>
-                                                {{ Str::limit($payment->notes, 20) }}
-                                            </div>
-                                        @endif
-                                    </td>
-                                    
-                                    <!-- Date & Heure -->
-                                    <td>
-                                        <div style="font-weight: 500; color: var(--gray-800);">
-                                            {{ Helper::dateFormat($payment->created_at) }}
-                                        </div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-500);">
-                                            <i class="fas fa-clock me-1"></i>
-                                            {{ $payment->created_at->format('H:i') }}
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- Statut -->
-                                    <td>
-                                        <span class="badge-modern {{ $statusClass }}">
-                                            @if($payment->status == 'completed') 
-                                                <i class="fas fa-check-circle"></i>
-                                            @elseif($payment->status == 'pending')
-                                                <i class="fas fa-clock"></i>
-                                            @elseif($payment->status == 'failed')
-                                                <i class="fas fa-times-circle"></i>
-                                            @elseif($payment->status == 'refunded')
-                                                <i class="fas fa-undo"></i>
-                                            @else
-                                                <i class="fas fa-ban"></i>
-                                            @endif
-                                            {{ $statusTranslations[$payment->status] ?? ucfirst($payment->status) }}
-                                        </span>
-                                        
-                                        @if($payment->verified_at)
-                                            <div style="font-size: 0.688rem; color: var(--primary-600); margin-top: 4px;">
-                                                <i class="fas fa-check-circle me-1"></i>Vérifié
-                                            </div>
-                                        @endif
-                                    </td>
-                                    
-                                    <!-- Traité par -->
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="avatar-modern" style="width: 32px; height: 32px; font-size: 0.8rem;">
-                                                <i class="fas fa-user-tie"></i>
-                                            </div>
-                                            <div>
-                                                <div style="font-weight: 500; color: var(--gray-700);">
-                                                    {{ $payment->user->name ?? 'Système' }}
-                                                </div>
-                                                <div style="font-size: 0.688rem; color: var(--gray-400);">Personnel</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    
-                                    <!-- Actions -->
-                                    <td class="text-end">
-                                        <div class="actions-group">
-                                            <!-- Facture -->
-                                            <a href="{{ route('payment.invoice', $payment->id) }}" 
-                                               class="btn-icon-modern"
-                                               data-bs-toggle="tooltip" 
-                                               title="Voir la facture">
-                                                <i class="fas fa-file-invoice"></i>
-                                            </a>
-                                            
-                                            <!-- Transaction -->
-                                            <a href="{{ route('transaction.show', $payment->transaction_id) }}" 
-                                               class="btn-icon-modern"
-                                               data-bs-toggle="tooltip" 
-                                               title="Voir la transaction">
-                                                <i class="fas fa-external-link-alt"></i>
-                                            </a>
-                                            
-                                            <!-- Détails -->
-                                            <button class="btn-icon-modern"
-                                                    onclick="showPaymentDetails({{ $payment->id }})"
-                                                    data-bs-toggle="tooltip" 
-                                                    title="Détails du paiement">
-                                                <i class="fas fa-info-circle"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold" style="color:var(--green-600);">{{ number_format($payment->amount, 0, ',', ' ') }} FCFA</div>
+                                    <div class="ref-badge mt-1"><i class="fas fa-fingerprint"></i> {{ $payment->reference ?? 'N/A' }}</div>
+                                    @if($payment->payment_method)
+                                    <small class="text-muted d-block mt-1"><i class="fas fa-credit-card"></i> {{ $payment->payment_method }}</small>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div>{{ $payment->created_at->format('d/m/Y') }}</div>
+                                    <small class="text-muted">{{ $payment->created_at->format('H:i') }}</small>
+                                </td>
+                                <td><span class="badge {{ $badge }}"><i class="fas fa-{{ $payment->status == 'completed' ? 'check-circle' : ($payment->status == 'pending' ? 'clock' : 'times') }}"></i> {{ $text }}</span></td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="avatar avatar-sm"><i class="fas fa-user-tie"></i></div>
+                                        <span>{{ $payment->user->name ?? 'Système' }}</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="actions-group">
+                                        <a href="{{ route('payment.invoice', $payment->id) }}" class="btn-icon" title="Facture"><i class="fas fa-file-invoice"></i></a>
+                                        <a href="{{ route('transaction.show', $payment->transaction_id) }}" class="btn-icon" title="Transaction"><i class="fas fa-external-link-alt"></i></a>
+                                        <button class="btn-icon" onclick="showPaymentDetails({{ $payment->id }})"><i class="fas fa-info-circle"></i></button>
+                                    </div>
+                                </td>
+                            </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
-                
-                <!-- Pagination -->
+
+                {{-- Pagination --}}
                 @if($payments->hasPages())
-                    <div style="padding: 16px 24px; border-top: 1px solid var(--gray-100);">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                            <div style="font-size: 0.813rem; color: var(--gray-500);">
-                                Affichage de {{ $payments->firstItem() }} à {{ $payments->lastItem() }} 
-                                sur {{ $payments->total() }} paiements
-                            </div>
-                            
-                            <nav>
-                                <ul class="pagination-modern">
-                                    @if($payments->onFirstPage())
-                                        <li class="page-item-modern disabled">
-                                            <span class="page-link-modern">‹</span>
-                                        </li>
-                                    @else
-                                        <li class="page-item-modern">
-                                            <a class="page-link-modern" href="{{ $payments->previousPageUrl() }}">‹</a>
-                                        </li>
-                                    @endif
-                                    
-                                    @foreach(range(1, $payments->lastPage()) as $i)
-                                        <li class="page-item-modern {{ $i == $payments->currentPage() ? 'active' : '' }}">
-                                            <a class="page-link-modern" href="{{ $payments->url($i) }}">{{ $i }}</a>
-                                        </li>
-                                    @endforeach
-                                    
-                                    @if($payments->hasMorePages())
-                                        <li class="page-item-modern">
-                                            <a class="page-link-modern" href="{{ $payments->nextPageUrl() }}">›</a>
-                                        </li>
-                                    @else
-                                        <li class="page-item-modern disabled">
-                                            <span class="page-link-modern">›</span>
-                                        </li>
-                                    @endif
-                                </ul>
-                            </nav>
-                        </div>
+                <div class="p-3 border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">{{ $payments->firstItem() }}-{{ $payments->lastItem() }} sur {{ $payments->total() }}</small>
+                        <ul class="pagination-modern">
+                            @if($payments->onFirstPage())
+                                <li class="page-item disabled"><span class="page-link">‹</span></li>
+                            @else
+                                <li class="page-item"><a class="page-link" href="{{ $payments->previousPageUrl() }}">‹</a></li>
+                            @endif
+                            @for($i=1; $i<=$payments->lastPage(); $i++)
+                                <li class="page-item {{ $i == $payments->currentPage() ? 'active' : '' }}">
+                                    <a class="page-link" href="{{ $payments->url($i) }}">{{ $i }}</a>
+                                </li>
+                            @endfor
+                            @if($payments->hasMorePages())
+                                <li class="page-item"><a class="page-link" href="{{ $payments->nextPageUrl() }}">›</a></li>
+                            @else
+                                <li class="page-item disabled"><span class="page-link">›</span></li>
+                            @endif
+                        </ul>
                     </div>
+                </div>
                 @endif
             @else
-                <!-- Empty state -->
-                <div class="empty-state-modern">
-                    <i class="fas fa-money-bill-wave"></i>
-                    <h3>Aucun paiement trouvé</h3>
-                    <p>Aucun enregistrement de paiement trouvé dans la base de données.</p>
-                    <a href="{{ route('dashboard.index') }}" class="btn-modern btn-primary-modern">
-                        <i class="fas fa-tachometer-alt me-2"></i>
-                        Tableau de bord
-                    </a>
+                <div class="empty-state">
+                    <div class="empty-icon"><i class="fas fa-money-bill-wave"></i></div>
+                    <h3>Aucun paiement</h3>
+                    <p>Aucun paiement trouvé dans la base</p>
+                    <a href="{{ route('dashboard.index') }}" class="btn btn-gray">Retour</a>
                 </div>
             @endif
         </div>
     </div>
+
 </div>
 
-<!-- Modal pour les détails -->
-<div class="modal fade modal-modern" id="paymentDetailsModal" tabindex="-1" aria-hidden="true">
+{{-- Modal détails --}}
+<div class="modal fade" id="paymentModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-info-circle"></i>
-                    Détails du paiement
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title"><i class="fas fa-info-circle" style="color:var(--green-600);"></i> Détails du paiement</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="paymentDetailsBody">
-                <!-- Contenu dynamique -->
-            </div>
+            <div class="modal-body" id="modalBody"></div>
             <div class="modal-footer">
-                <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">Fermer</button>
+                <button class="btn btn-gray" data-bs-dismiss="modal">Fermer</button>
             </div>
         </div>
     </div>
 </div>
 
-@endsection
-
-@section('footer')
 <script>
-// Initialisation des tooltips
-document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.map(function(tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-    });
-});
-
-// Filtre de recherche
 function filterPayments() {
-    const input = document.getElementById('searchInput');
-    const filter = input.value.toLowerCase();
-    const table = document.getElementById('paymentsTable');
-    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
-    
-    for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        const text = row.textContent.toLowerCase();
-        row.style.display = text.includes(filter) ? '' : 'none';
-    }
+    const term = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('#paymentsTable tbody tr').forEach(r => {
+        r.style.display = r.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
 }
 
-// Export des paiements
 function exportPayments() {
-    if (confirm('Exporter tous les paiements en CSV ?')) {
-        window.location.href = '{{ route("transaction.export", "payments") }}';
-    }
+    if (confirm('Exporter en CSV ?')) window.location.href = '{{ route("transaction.export", "payments") }}';
 }
 
-// Marquer comme complété
-function markAsCompleted(paymentId) {
-    if (confirm('Marquer ce paiement comme complété ?')) {
-        fetch(`/payments/${paymentId}/complete`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                window.location.reload();
-            } else {
-                alert(data.message || 'Erreur lors du marquage du paiement');
-            }
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert('Erreur réseau');
-        });
-    }
-}
-
-// Afficher les détails du paiement
-function showPaymentDetails(paymentId) {
-    fetch(`/payments/${paymentId}/details`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const modalBody = document.getElementById('paymentDetailsBody');
-                
-                modalBody.innerHTML = `
+function showPaymentDetails(id) {
+    fetch(`/payments/${id}/details`)
+        .then(r => r.json())
+        .then(d => {
+            if (!d.success) return alert('Erreur');
+            const p = d.payment;
+            document.getElementById('modalBody').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="modal-card">
+                            <div class="modal-card-title">Paiement</div>
+                            <div class="fs-3 fw-bold" style="color:var(--green-600);">${p.amount_formatted}</div>
+                            <div class="ref-badge mt-2"><i class="fas fa-fingerprint"></i> ${p.reference}</div>
+                            <div class="mt-2"><span class="badge ${p.status_color == 'success' ? 'badge-green' : 'badge-orange'}">${p.status}</span></div>
+                            <div class="mt-2"><small class="text-muted">Méthode: ${p.method}</small></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="modal-card">
+                            <div class="modal-card-title">Client & Chambre</div>
+                            <div class="fw-semibold">${p.guest_name}</div>
+                            <div class="mt-2"><span class="badge badge-green">Chambre ${p.room_number}</span></div>
+                            <div class="mt-2"><small class="text-muted">Transaction #${p.transaction_id}</small></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-card">
+                    <div class="modal-card-title">Traitement</div>
                     <div class="row">
-                        <div class="col-md-6">
-                            <div class="card-modern" style="margin-bottom: 0;">
-                                <div class="card-header-modern" style="background: transparent; border-bottom: 1px solid var(--gray-200);">
-                                    <h5 style="margin: 0;">Informations de paiement</h5>
-                                </div>
-                                <div style="padding: 20px;">
-                                    <div style="margin-bottom: 16px;">
-                                        <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px;">Montant</div>
-                                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-600);">
-                                            ${data.payment.amount_formatted}
-                                        </div>
-                                    </div>
-                                    
-                                    <div style="margin-bottom: 12px;">
-                                        <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px;">Référence</div>
-                                        <div class="reference-badge" style="font-size: 0.875rem;">
-                                            <i class="fas fa-fingerprint me-2"></i>
-                                            ${data.payment.reference || 'Non disponible'}
-                                        </div>
-                                    </div>
-                                    
-                                    <div style="margin-bottom: 12px;">
-                                        <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px;">Statut</div>
-                                        <span class="badge-modern ${data.payment.status === 'completed' ? 'badge-completed' : 
-                                            (data.payment.status === 'pending' ? 'badge-pending' : 
-                                            (data.payment.status === 'failed' ? 'badge-failed' : 
-                                            (data.payment.status === 'refunded' ? 'badge-refunded' : 'badge-cancelled')))}">
-                                            ${data.payment.status === 'completed' ? 'Complété' : 
-                                              (data.payment.status === 'pending' ? 'En attente' : 
-                                              (data.payment.status === 'failed' ? 'Échoué' : 
-                                              (data.payment.status === 'refunded' ? 'Remboursé' : 'Annulé')))}
-                                        </span>
-                                    </div>
-                                    
-                                    <div style="margin-bottom: 12px;">
-                                        <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px;">Méthode</div>
-                                        <div style="color: var(--gray-700);">${data.payment.method || 'Non spécifiée'}</div>
-                                    </div>
-                                    
-                                    <div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px;">ID Transaction</div>
-                                        <span class="badge-modern" style="background: var(--gray-800); color: white;">
-                                            #${data.payment.transaction_id || 'N/A'}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="card-modern" style="margin-bottom: 0;">
-                                <div class="card-header-modern" style="background: transparent; border-bottom: 1px solid var(--gray-200);">
-                                    <h5 style="margin: 0;">Détails de la transaction</h5>
-                                </div>
-                                <div style="padding: 20px;">
-                                    <div style="margin-bottom: 16px;">
-                                        <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px;">Client</div>
-                                        <div style="font-weight: 600; color: var(--gray-800);">${data.payment.guest_name}</div>
-                                    </div>
-                                    
-                                    <div style="margin-bottom: 12px;">
-                                        <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px;">Chambre</div>
-                                        <span class="badge-modern" style="background: var(--primary-100); color: var(--primary-700);">
-                                            ${data.payment.room_number}
-                                        </span>
-                                    </div>
-                                    
-                                    <div style="margin-bottom: 12px;">
-                                        <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px;">Date de paiement</div>
-                                        <div style="color: var(--gray-700);">${data.payment.date_formatted}</div>
-                                    </div>
-                                    
-                                    <div style="margin-bottom: 12px;">
-                                        <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px;">Traité par</div>
-                                        <div style="color: var(--gray-700);">${data.payment.processed_by}</div>
-                                    </div>
-                                    
-                                    <div>
-                                        <div style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 4px;">Créé le</div>
-                                        <div style="color: var(--gray-700);">${data.payment.created_at || 'N/A'}</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="col-sm-6"><small class="text-muted">Date: </small>${p.date_formatted}</div>
+                        <div class="col-sm-6"><small class="text-muted">Par: </small>${p.processed_by}</div>
+                        <div class="col-sm-6 mt-2"><small class="text-muted">Créé: </small>${p.created_at}</div>
                     </div>
-                    
-                    ${data.payment.notes ? `
-                    <div class="mt-4">
-                        <div class="card-modern" style="margin-bottom: 0;">
-                            <div class="card-header-modern" style="background: transparent; border-bottom: 1px solid var(--gray-200);">
-                                <h5 style="margin: 0;">Notes</h5>
-                            </div>
-                            <div style="padding: 20px;">
-                                <div style="background: var(--gray-50); padding: 12px; border-radius: 8px; color: var(--gray-700);">
-                                    ${data.payment.notes}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    ` : ''}
-                `;
-                
-                const modal = new bootstrap.Modal(document.getElementById('paymentDetailsModal'));
-                modal.show();
-            }
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert('Erreur lors du chargement des détails');
+                </div>
+                ${p.notes ? `<div class="modal-card"><div class="modal-card-title">Notes</div>${p.notes}</div>` : ''}
+            `;
+            new bootstrap.Modal(document.getElementById('paymentModal')).show();
         });
-}
-
-// Annuler le paiement
-function cancelPayment(paymentId) {
-    if (confirm('Êtes-vous sûr de vouloir annuler ce paiement ?')) {
-        fetch(`/payments/${paymentId}/cancel`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                window.location.reload();
-            } else {
-                alert(data.message || 'Erreur lors de l\'annulation');
-            }
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert('Erreur réseau');
-        });
-    }
-}
-
-// Initier un remboursement
-function initiateRefund(paymentId) {
-    const amount = prompt('Entrez le montant du remboursement (FCFA):', '');
-    if (amount && !isNaN(amount) && amount > 0) {
-        fetch(`/payments/${paymentId}/refund`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ amount: amount })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(data.message);
-                window.location.reload();
-            } else {
-                alert(data.message || 'Erreur lors du remboursement');
-            }
-        })
-        .catch(error => {
-            console.error('Erreur:', error);
-            alert('Erreur réseau');
-        });
-    }
 }
 </script>
+
 @endsection
