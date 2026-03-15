@@ -1,60 +1,84 @@
-<form id="form-save-roomstatus" method="POST" action="{{ route('roomstatus.store') }}">
-    @csrf
+<form id="form-save-roomstatus" method="POST" action="<?php echo e(route('roomstatus.update', ['roomstatus' => $roomstatus->id])); ?>">
+    <?php echo method_field('PUT'); ?>
+    <?php echo csrf_field(); ?>
     
     <div style="display: flex; flex-direction: column; gap: 20px;">
         <!-- Nom -->
         <div style="display: flex; flex-direction: column;">
             <label for="name" style="font-size: .75rem; font-weight: 600; color: var(--s600); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: .5px;">
                 <i class="fas fa-tag" style="font-size: .7rem; color: var(--g500);"></i>
-                Nom du statut <span style="color: #b91c1c; margin-left: 4px;">*</span>
+                Nom du statut
             </label>
             <input type="text" 
-                   class="form-control-db @error('name') is-invalid @enderror" 
+                   class="form-control-db <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                    id="name"
                    name="name" 
-                   value="{{ old('name') }}"
-                   placeholder="Ex: Disponible, Occupée, Maintenance"
+                   value="<?php echo e($roomstatus->name); ?>"
                    style="padding: 10px 14px; border-radius: var(--r); border: 1.5px solid var(--s200); font-size: .875rem; font-family: var(--font); transition: var(--transition); background: var(--white); width: 100%;"
                    onfocus="this.style.outline='none'; this.style.borderColor='var(--g400)'; this.style.boxShadow='0 0 0 3px var(--g100)'"
-                   onblur="this.style.borderColor='var(--s200)'; this.style.boxShadow='none'"
-                   required>
-            @error('name')
+                   onblur="this.style.borderColor='var(--s200)'; this.style.boxShadow='none'">
+            <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                 <div style="display: flex; align-items: center; gap: 4px; font-size: .7rem; color: #b91c1c; margin-top: 4px;">
                     <i class="fas fa-exclamation-circle"></i>
-                    {{ $message }}
+                    <?php echo e($message); ?>
+
                 </div>
-            @enderror
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             <div id="error_name" style="display: flex; align-items: center; gap: 4px; font-size: .7rem; color: #b91c1c; margin-top: 4px;"></div>
-            <div style="font-size: .65rem; color: var(--s400); margin-top: 4px;">
-                <i class="fas fa-info-circle"></i> Nom descriptif du statut
-            </div>
         </div>
 
         <!-- Code -->
         <div style="display: flex; flex-direction: column;">
             <label for="code" style="font-size: .75rem; font-weight: 600; color: var(--s600); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: .5px;">
                 <i class="fas fa-code" style="font-size: .7rem; color: var(--g500);"></i>
-                Code <span style="color: #b91c1c; margin-left: 4px;">*</span>
+                Code
             </label>
             <input type="text" 
-                   class="form-control-db @error('code') is-invalid @enderror"
+                   class="form-control-db <?php $__errorArgs = ['code'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
                    id="code" 
                    name="code" 
-                   value="{{ old('code') }}"
-                   placeholder="Ex: AVBL, OCC, MNT"
-                   style="padding: 10px 14px; border-radius: var(--r); border: 1.5px solid var(--s200); font-size: .875rem; font-family: var(--mono); transition: var(--transition); background: var(--white); width: 100%; text-transform: uppercase;"
+                   value="<?php echo e($roomstatus->code); ?>"
+                   style="padding: 10px 14px; border-radius: var(--r); border: 1.5px solid var(--s200); font-size: .875rem; font-family: var(--mono); transition: var(--transition); background: var(--white); width: 100%;"
                    onfocus="this.style.outline='none'; this.style.borderColor='var(--g400)'; this.style.boxShadow='0 0 0 3px var(--g100)'"
-                   onblur="this.style.borderColor='var(--s200)'; this.style.boxShadow='none'"
-                   required>
-            @error('code')
+                   onblur="this.style.borderColor='var(--s200)'; this.style.boxShadow='none'">
+            <?php $__errorArgs = ['code'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                 <div style="display: flex; align-items: center; gap: 4px; font-size: .7rem; color: #b91c1c; margin-top: 4px;">
                     <i class="fas fa-exclamation-circle"></i>
-                    {{ $message }}
+                    <?php echo e($message); ?>
+
                 </div>
-            @enderror
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             <div id="error_code" style="display: flex; align-items: center; gap: 4px; font-size: .7rem; color: #b91c1c; margin-top: 4px;"></div>
             <div style="font-size: .65rem; color: var(--s400); margin-top: 4px;">
-                <i class="fas fa-info-circle"></i> Code unique (2-10 caractères majuscules)
+                <i class="fas fa-info-circle"></i> Code unique (ex: AVBL, OCC, MNT)
             </div>
         </div>
 
@@ -69,19 +93,26 @@
                 id="information" 
                 name="information" 
                 rows="3"
-                placeholder="Description détaillée du statut..."
                 style="padding: 10px 14px; border-radius: var(--r); border: 1.5px solid var(--s200); font-size: .875rem; font-family: var(--font); transition: var(--transition); background: var(--white); width: 100%; resize: vertical;"
                 onfocus="this.style.outline='none'; this.style.borderColor='var(--g400)'; this.style.boxShadow='0 0 0 3px var(--g100)'"
-                onblur="this.style.borderColor='var(--s200)'; this.style.boxShadow='none'">{{ old('information') }}</textarea>
-            @error('information')
+                onblur="this.style.borderColor='var(--s200)'; this.style.boxShadow='none'"><?php echo e($roomstatus->information); ?></textarea>
+            <?php $__errorArgs = ['information'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                 <div style="display: flex; align-items: center; gap: 4px; font-size: .7rem; color: #b91c1c; margin-top: 4px;">
                     <i class="fas fa-exclamation-circle"></i>
-                    {{ $message }}
+                    <?php echo e($message); ?>
+
                 </div>
-            @enderror
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
             <div id="error_information" style="display: flex; align-items: center; gap: 4px; font-size: .7rem; color: #b91c1c; margin-top: 4px;"></div>
             <div style="font-size: .65rem; color: var(--s400); margin-top: 4px;">
-                <i class="fas fa-info-circle"></i> Description optionnelle du statut
+                <i class="fas fa-info-circle"></i> Description du statut
             </div>
         </div>
     </div>
@@ -89,17 +120,6 @@
 
 <style>
 /* Styles additionnels pour le formulaire */
-.form-control-db {
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: var(--r);
-    border: 1.5px solid var(--s200);
-    font-size: .875rem;
-    font-family: var(--font);
-    transition: var(--transition);
-    background: var(--white);
-}
-
 .form-control-db:focus {
     outline: none;
     border-color: var(--g400);
@@ -126,17 +146,10 @@
 .text-danger {
     animation: shake 0.3s ease-in-out;
 }
-
-/* Placeholder style */
-.form-control-db::placeholder {
-    color: var(--s300);
-    font-size: .8rem;
-    font-style: italic;
-}
 </style>
 
 <script>
-// Validation en temps réel
+// Validation en temps réel (optionnel)
 document.addEventListener('DOMContentLoaded', function() {
     const nameInput = document.getElementById('name');
     const codeInput = document.getElementById('code');
@@ -145,11 +158,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const errorName = document.getElementById('error_name');
     const errorCode = document.getElementById('error_code');
     const errorInfo = document.getElementById('error_information');
-    
-    // Auto-capitalize pour le code
-    codeInput.addEventListener('input', function() {
-        this.value = this.value.toUpperCase();
-    });
     
     // Validation du nom
     nameInput.addEventListener('input', function() {
@@ -184,39 +192,5 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.remove('is-invalid');
         }
     });
-    
-    // Validation à la soumission
-    document.getElementById('form-save-roomstatus').addEventListener('submit', function(e) {
-        let isValid = true;
-        
-        if (nameInput.value.trim().length < 2) {
-            errorName.innerHTML = '<i class="fas fa-exclamation-circle"></i> Le nom est requis (minimum 2 caractères)';
-            nameInput.classList.add('is-invalid');
-            isValid = false;
-        }
-        
-        const codeRegex = /^[A-Z0-9]{2,10}$/;
-        if (!codeRegex.test(codeInput.value.trim())) {
-            errorCode.innerHTML = '<i class="fas fa-exclamation-circle"></i> Le code est requis (2-10 caractères majuscules ou chiffres)';
-            codeInput.classList.add('is-invalid');
-            isValid = false;
-        }
-        
-        if (infoInput.value.trim().length > 0 && infoInput.value.trim().length < 5) {
-            errorInfo.innerHTML = '<i class="fas fa-exclamation-circle"></i> L\'information est trop courte';
-            infoInput.classList.add('is-invalid');
-            isValid = false;
-        }
-        
-        if (!isValid) {
-            e.preventDefault();
-            
-            // Scroll to first error
-            const firstError = document.querySelector('.is-invalid');
-            if (firstError) {
-                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-    });
 });
-</script>
+</script><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/roomstatus/edit.blade.php ENDPATH**/ ?>
