@@ -1,8 +1,8 @@
-@extends('template.master')
 
-@section('title', 'Nouvelle Chambre')
 
-@section('content')
+<?php $__env->startSection('title', 'Nouvelle Chambre'); ?>
+
+<?php $__env->startSection('content'); ?>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 
@@ -294,9 +294,9 @@
 <div class="create-page">
     <!-- Breadcrumb -->
     <div class="create-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('room.index') }}">Chambres</a>
+        <a href="<?php echo e(route('room.index')); ?>">Chambres</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Nouvelle chambre</span>
     </div>
@@ -313,35 +313,35 @@
             </div>
         </div>
         <div class="create-header-actions">
-            <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('room.index')); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-arrow-left me-2"></i> Retour
             </a>
         </div>
     </div>
 
     <!-- Alertes -->
-    @if($errors->any())
+    <?php if($errors->any()): ?>
     <div class="alert-modern alert-danger anim-2">
         <div class="alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
         <div style="flex:1">
             <strong>Veuillez corriger les erreurs suivantes :</strong>
             <ul>
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
+                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <li><?php echo e($error); ?></li>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </ul>
         </div>
         <button class="alert-close" onclick="this.parentElement.remove()">×</button>
     </div>
-    @endif
+    <?php endif; ?>
 
-    @if(session('success'))
+    <?php if(session('success')): ?>
     <div class="alert-modern alert-success anim-2">
         <div class="alert-icon"><i class="fas fa-check-circle"></i></div>
-        <span>{{ session('success') }}</span>
+        <span><?php echo e(session('success')); ?></span>
         <button class="alert-close" onclick="this.parentElement.remove()">×</button>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Formulaire -->
     <div class="create-card anim-3">
@@ -352,8 +352,8 @@
             </h5>
         </div>
         <div class="create-card-body">
-            <form class="form" method="POST" action="{{ route('room.store') }}">
-                @csrf
+            <form class="form" method="POST" action="<?php echo e(route('room.store')); ?>">
+                <?php echo csrf_field(); ?>
                 
                 <div class="form-grid">
                     
@@ -364,18 +364,33 @@
                             Numéro de chambre *
                         </label>
                         <input type="text" 
-                               class="form-control @error('number') is-invalid @enderror" 
+                               class="form-control <?php $__errorArgs = ['number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                id="number" 
                                name="number" 
-                               value="{{ old('number') }}" 
+                               value="<?php echo e(old('number')); ?>" 
                                placeholder="Ex: 101, 201, 301" 
                                required>
-                        @error('number')
+                        <?php $__errorArgs = ['number'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         <div class="form-hint">Identifiant unique de la chambre</div>
                     </div>
                     
@@ -387,17 +402,32 @@
                             <span class="optional">(Optionnel)</span>
                         </label>
                         <input type="text" 
-                               class="form-control @error('name') is-invalid @enderror" 
+                               class="form-control <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                id="name" 
                                name="name" 
-                               value="{{ old('name') }}" 
+                               value="<?php echo e(old('name')); ?>" 
                                placeholder="Ex: Suite Présidentielle, Vue Mer">
-                        @error('name')
+                        <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         <div class="form-hint">Nom descriptif de la chambre</div>
                     </div>
                     
@@ -409,24 +439,39 @@
                         </label>
                         <select id="type_id" 
                                 name="type_id" 
-                                class="form-select @error('type_id') is-invalid @enderror" 
+                                class="form-select <?php $__errorArgs = ['type_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                 required>
                             <option value="" disabled selected>-- Sélectionner un type --</option>
-                            @foreach ($types as $type)
-                                <option value="{{ $type->id }}" {{ old('type_id') == $type->id ? 'selected' : '' }}>
-                                    {{ $type->name }} 
-                                    @if($type->base_price)
-                                        - {{ number_format($type->base_price, 0, ',', ' ') }} FCFA
-                                    @endif
+                            <?php $__currentLoopData = $types; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <option value="<?php echo e($type->id); ?>" <?php echo e(old('type_id') == $type->id ? 'selected' : ''); ?>>
+                                    <?php echo e($type->name); ?> 
+                                    <?php if($type->base_price): ?>
+                                        - <?php echo e(number_format($type->base_price, 0, ',', ' ')); ?> FCFA
+                                    <?php endif; ?>
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
-                        @error('type_id')
+                        <?php $__errorArgs = ['type_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                     
                     <!-- Statut de la chambre -->
@@ -437,29 +482,45 @@
                         </label>
                         <select id="room_status_id" 
                                 name="room_status_id" 
-                                class="form-select @error('room_status_id') is-invalid @enderror" 
+                                class="form-select <?php $__errorArgs = ['room_status_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                 required>
                             <option value="" disabled selected>-- Sélectionner un statut --</option>
-                            @foreach ($roomstatuses as $roomstatus)
-                                @php
+                            <?php $__currentLoopData = $roomstatuses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $roomstatus): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $badgeClass = match($roomstatus->code ?? '') {
                                         'available' => 'success',
                                         'occupied' => 'danger',
                                         'reserved' => 'warning',
                                         default => 'gray'
                                     };
-                                @endphp
-                                <option value="{{ $roomstatus->id }}" {{ old('room_status_id') == $roomstatus->id ? 'selected' : '' }}>
-                                    {{ $roomstatus->name }}
+                                ?>
+                                <option value="<?php echo e($roomstatus->id); ?>" <?php echo e(old('room_status_id') == $roomstatus->id ? 'selected' : ''); ?>>
+                                    <?php echo e($roomstatus->name); ?>
+
                                 </option>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </select>
-                        @error('room_status_id')
+                        <?php $__errorArgs = ['room_status_id'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         <div class="form-hint">Statut initial de la chambre (peut être modifié plus tard)</div>
                     </div>
                     
@@ -470,20 +531,35 @@
                             Capacité *
                         </label>
                         <input type="number" 
-                               class="form-control @error('capacity') is-invalid @enderror" 
+                               class="form-control <?php $__errorArgs = ['capacity'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                id="capacity" 
                                name="capacity" 
-                               value="{{ old('capacity', 2) }}" 
+                               value="<?php echo e(old('capacity', 2)); ?>" 
                                placeholder="Ex: 2, 4, 6" 
                                min="1" 
                                max="10" 
                                required>
-                        @error('capacity')
+                        <?php $__errorArgs = ['capacity'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         <div class="form-hint">Nombre de personnes (1-10)</div>
                     </div>
                     
@@ -496,20 +572,35 @@
                         <div class="input-group">
                             <span class="input-group-text">FCFA</span>
                             <input type="number" 
-                                   class="form-control @error('price') is-invalid @enderror" 
+                                   class="form-control <?php $__errorArgs = ['price'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                    id="price" 
                                    name="price" 
-                                   value="{{ old('price') }}" 
+                                   value="<?php echo e(old('price')); ?>" 
                                    placeholder="Ex: 50000" 
                                    min="0" 
                                    required>
                         </div>
-                        @error('price')
+                        <?php $__errorArgs = ['price'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                     
                     <!-- Description de la vue -->
@@ -518,17 +609,32 @@
                             <i class="fas fa-binoculars"></i>
                             Description de la vue
                         </label>
-                        <textarea class="form-control @error('view') is-invalid @enderror" 
+                        <textarea class="form-control <?php $__errorArgs = ['view'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
                                   id="view" 
                                   name="view" 
                                   rows="1" 
-                                  placeholder="Ex: Vue sur mer, Vue sur montagne, Vue sur ville">{{ old('view') }}</textarea>
-                        @error('view')
+                                  placeholder="Ex: Vue sur mer, Vue sur montagne, Vue sur ville"><?php echo e(old('view')); ?></textarea>
+                        <?php $__errorArgs = ['view'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
+                            <?php echo e($message); ?>
+
                         </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         <div class="form-hint">Optionnel - décrit la vue depuis la chambre</div>
                     </div>
                     
@@ -536,7 +642,7 @@
                 
                 <!-- Actions -->
                 <div class="actions-bar">
-                    <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost">
+                    <a href="<?php echo e(route('room.index')); ?>" class="btn-db btn-db-ghost">
                         <i class="fas fa-times me-2"></i>
                         Annuler
                     </a>
@@ -555,4 +661,5 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/room/create.blade.php ENDPATH**/ ?>

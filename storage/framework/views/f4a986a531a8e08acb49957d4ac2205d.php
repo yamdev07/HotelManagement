@@ -1,525 +1,454 @@
 
 
-<?php $__env->startSection('title', 'Edit Room'); ?>
+<?php $__env->startSection('title', 'Modifier la Chambre'); ?>
 
-<?php $__env->startPush('styles'); ?>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<?php $__env->startSection('content'); ?>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    --bg:       #f5f8fa;
-    --surf:     #ffffff;
-    --surf2:    #f1f5f9;
-    --brd:      #e2e8f0;
-    --brd2:     #cbd5e1;
-    --txt:      #0f172a;
-    --txt2:     #475569;
-    --txt3:     #94a3b8;
-    
-    --blue:     #3b82f6;
-    --blue-dim: rgba(59,130,246,.15);
-    --grn:      #10b981;
-    --grn-dim:  rgba(16,185,129,.15);
-    --yel:      #eab308;
-    --yel-dim:  rgba(234,179,8,.15);
-    --red:      #ef4444;
-    --red-dim:  rgba(239,68,68,.15);
-    --cyan:     #06b6d4;
-    --cyan-dim: rgba(6,182,212,.15);
-    
-    --r: 12px;
+    /* ── Palette : 3 couleurs uniquement ── */
+    /* VERT */
+    --g50:  #f0faf0;
+    --g100: #d4edda;
+    --g200: #a8d5b5;
+    --g300: #72bb82;
+    --g400: #4a9e5c;
+    --g500: #2e8540;
+    --g600: #1e6b2e;
+    --g700: #155221;
+    --g800: #0d3a16;
+    --g900: #072210;
+    /* BLANC / SURFACE */
+    --white:    #ffffff;
+    --surface:  #f7f9f7;
+    --surface2: #eef3ee;
+    /* GRIS */
+    --s50:  #f8f9f8;
+    --s100: #eff0ef;
+    --s200: #dde0dd;
+    --s300: #c2c7c2;
+    --s400: #9ba09b;
+    --s500: #737873;
+    --s600: #545954;
+    --s700: #3a3e3a;
+    --s800: #252825;
+    --s900: #131513;
+
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.05);
+
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s cubic-bezier(.4,0,.2,1);
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
 }
 
-*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
-body {
-    background: var(--bg);
-    color: var(--txt);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.edit-page {
+    padding: 28px 32px 64px;
+    background: var(--surface);
+    min-height: 100vh;
+    font-family: var(--font);
+    color: var(--s800);
 }
 
-/* ══════════════════════════════════════
-   HEADER
-══════════════════════════════════════ */
-.re-header {
-    background: var(--surf);
-    border-bottom: 1px solid var(--brd);
-    padding: 20px 28px;
-    margin-bottom: 24px;
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-.re-header__inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(.96); }
+    to   { opacity: 1; transform: scale(1); }
 }
-.re-header__title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: -.5px;
-    margin-bottom: 8px;
-}
-.re-header__title i {
-    font-size: 22px;
-    color: var(--blue);
-}
-.breadcrumb {
-    margin: 0;
-    padding: 0;
-    background: none;
-    font-size: 13px;
-}
-.breadcrumb-item + .breadcrumb-item::before {
-    content: "/";
-    color: var(--txt3);
-}
-.breadcrumb-item a {
-    color: var(--txt3);
-    text-decoration: none;
-}
-.breadcrumb-item a:hover {
-    color: var(--blue);
-}
-.breadcrumb-item.active {
-    color: var(--txt2);
-}
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+.anim-3 { animation: fadeSlide .4s .16s ease both; }
+.anim-4 { animation: fadeSlide .4s .24s ease both; }
+.anim-5 { animation: fadeSlide .4s .32s ease both; }
+.anim-6 { animation: fadeSlide .4s .40s ease both; }
 
-/* ══════════════════════════════════════
-   MAIN CONTAINER
-══════════════════════════════════════ */
-.re-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 28px 48px;
-}
-
-/* ══════════════════════════════════════
-   ALERTS
-══════════════════════════════════════ */
-.alert {
-    padding: 14px 18px;
-    border-radius: 10px;
-    border: 1px solid;
+/* ══════════════════════════════════════════════
+   BREADCRUMB
+══════════════════════════════════════════════ */
+.edit-breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .8rem; color: var(--s400);
     margin-bottom: 20px;
 }
-.alert--success {
-    background: var(--grn-dim);
-    border-color: rgba(16,185,129,.3);
-    color: var(--grn);
+.edit-breadcrumb a {
+    color: var(--s400); text-decoration: none;
+    transition: var(--transition);
 }
-.alert--danger {
-    background: var(--red-dim);
-    border-color: rgba(239,68,68,.3);
-    color: var(--red);
+.edit-breadcrumb a:hover { color: var(--g600); }
+.edit-breadcrumb .sep { color: var(--s300); }
+
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+.edit-header {
+    display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap;
+    gap: 16px; margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1.5px solid var(--s100);
 }
-.alert--info {
-    background: var(--blue-dim);
-    border-color: rgba(59,130,246,.3);
-    color: var(--blue);
+.edit-brand { display: flex; align-items: center; gap: 14px; }
+.edit-brand-icon {
+    width: 48px; height: 48px;
+    background: var(--g600); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.1rem; flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(46,133,64,.35);
 }
-.alert i { font-size: 16px; margin-right: 6px; }
+.edit-header-title {
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--s900); line-height: 1.2; letter-spacing: -.3px;
+}
+.edit-header-title em { font-style: normal; color: var(--g600); }
+.edit-header-sub {
+    font-size: .8rem; color: var(--s400); margin-top: 3px;
+    display: flex; align-items: center; gap: 8px;
+}
+.edit-header-sub i { color: var(--g500); }
+.edit-header-actions { display: flex; align-items: center; gap: 10px; }
+
+/* ══════════════════════════════════════════════
+   BOUTONS
+══════════════════════════════════════════════ */
+.btn-db {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: var(--r);
+    font-size: .8rem; font-weight: 500; border: none;
+    cursor: pointer; transition: var(--transition);
+    text-decoration: none; white-space: nowrap; line-height: 1;
+    font-family: var(--font);
+}
+.btn-db-primary {
+    background: var(--g600); color: white;
+    box-shadow: 0 2px 10px rgba(46,133,64,.3);
+}
+.btn-db-primary:hover {
+    background: var(--g700); color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    text-decoration: none;
+}
+.btn-db-ghost {
+    background: var(--white); color: var(--s600);
+    border: 1.5px solid var(--s200);
+}
+.btn-db-ghost:hover {
+    background: var(--s50); border-color: var(--s300);
+    color: var(--s900); text-decoration: none;
+}
+.btn-db-info {
+    background: var(--g50); color: var(--g600);
+    border: 1.5px solid var(--g200);
+}
+.btn-db-info:hover {
+    background: var(--g100); color: var(--g700);
+    border-color: var(--g300); transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════════
+   ALERTES
+══════════════════════════════════════════════ */
+.alert-modern {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px; border-radius: var(--rl);
+    margin-bottom: 20px; border: 1.5px solid transparent;
+    font-size: .875rem; background: var(--white);
+    box-shadow: var(--shadow-sm);
+}
+.alert-success {
+    background: var(--g50); border-color: var(--g200);
+    color: var(--g700);
+}
+.alert-danger {
+    background: #fee2e2; border-color: #fecaca;
+    color: #b91c1c;
+}
+.alert-info {
+    background: var(--g50); border-color: var(--g200);
+    color: var(--g600);
+}
+.alert-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.alert-success .alert-icon { background: var(--g100); color: var(--g600); }
+.alert-danger .alert-icon { background: #fecaca; color: #b91c1c; }
+.alert-info .alert-icon { background: var(--g100); color: var(--g600); }
+.alert-close {
+    margin-left: auto; background: none; border: none;
+    color: currentColor; opacity: .6; cursor: pointer;
+    font-size: 1rem; transition: var(--transition);
+}
+.alert-close:hover { opacity: 1; }
 .alert ul {
-    margin: 8px 0 0 20px;
-    padding: 0;
-}
-.alert .btn-close {
-    margin-left: auto;
+    margin: 8px 0 0 20px; padding: 0;
 }
 
-/* ══════════════════════════════════════
-   CARD
-══════════════════════════════════════ */
-.card {
-    background: var(--surf);
-    border: 1px solid var(--brd);
-    border-radius: var(--r);
-    overflow: hidden;
+/* ══════════════════════════════════════════════
+   CARTE PRINCIPALE
+══════════════════════════════════════════════ */
+.edit-card {
+    background: var(--white); border-radius: var(--rxl);
+    border: 1.5px solid var(--s100); overflow: hidden;
+    margin-bottom: 20px; box-shadow: var(--shadow-sm);
 }
-.card__head {
+.edit-card-header {
     padding: 18px 24px;
-    border-bottom: 1px solid var(--brd);
-    background: var(--surf2);
+    border-bottom: 1.5px solid var(--s100);
+    background: var(--white);
 }
-.card__title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 16px;
-    font-weight: 700;
-    margin: 0;
+.edit-card-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: .95rem; font-weight: 600; color: var(--s800); margin: 0;
 }
-.card__title i { font-size: 17px; color: var(--cyan); }
-.card__body {
-    padding: 28px;
-}
+.edit-card-title i { color: var(--g500); }
+.edit-card-body { padding: 28px; }
 
-/* ══════════════════════════════════════
-   FORM
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   FORMULAIRE
+══════════════════════════════════════════════ */
 .form-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    display: grid; grid-template-columns: repeat(2, 1fr);
     gap: 24px;
 }
+@media(max-width:768px){ .form-grid{ grid-template-columns:1fr; } }
+
 .form-group {
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
 }
 .form-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--txt);
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    font-size: .75rem; font-weight: 600; color: var(--s600);
+    margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+    text-transform: uppercase; letter-spacing: .5px;
 }
-.form-label i {
-    font-size: 12px;
-}
+.form-label i { font-size: .7rem; color: var(--g500); }
 .form-label .optional {
-    font-size: 12px;
-    font-weight: 400;
-    color: var(--txt3);
+    font-size: .65rem; font-weight: 400; color: var(--s400);
+    margin-left: 4px;
 }
-.form-control,
-.form-select {
-    padding: 10px 14px;
-    border-radius: 8px;
-    border: 1px solid var(--brd2);
-    font-size: 14px;
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    transition: all .15s;
-    background: var(--surf);
+.form-control, .form-select {
+    padding: 10px 14px; border-radius: var(--r);
+    border: 1.5px solid var(--s200); font-size: .875rem;
+    font-family: var(--font); transition: var(--transition);
+    background: var(--white);
 }
-.form-control:focus,
-.form-select:focus {
-    outline: none;
-    border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(59,130,246,.1);
+.form-control:focus, .form-select:focus {
+    outline: none; border-color: var(--g400);
+    box-shadow: 0 0 0 3px var(--g100);
 }
 .form-hint {
-    font-size: 11px;
-    color: var(--txt3);
-    margin-top: 4px;
+    font-size: .65rem; color: var(--s400); margin-top: 4px;
 }
 .input-group {
     display: flex;
 }
 .input-group-text {
-    padding: 10px 14px;
-    background: var(--surf2);
-    border: 1px solid var(--brd2);
-    border-right: none;
-    border-radius: 8px 0 0 8px;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--txt2);
+    padding: 10px 14px; background: var(--s100);
+    border: 1.5px solid var(--s200); border-right: none;
+    border-radius: var(--r) 0 0 var(--r); font-size: .75rem;
+    font-weight: 600; color: var(--s600);
 }
 .input-group .form-control {
-    border-radius: 0 8px 8px 0;
+    border-radius: 0 var(--r) var(--r) 0;
 }
 .invalid-feedback {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    color: var(--red);
-    margin-top: 4px;
+    display: flex; align-items: center; gap: 4px;
+    font-size: .7rem; color: #b91c1c; margin-top: 4px;
 }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    STATUS BOX
-══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .status-box {
-    background: var(--surf2);
-    border: 1px solid var(--brd);
-    border-radius: 10px;
-    padding: 16px;
+    background: var(--surface); border: 1.5px solid var(--s100);
+    border-radius: var(--rl); padding: 16px;
 }
 .status-display {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    display: flex; align-items: center; gap: 12px;
 }
 .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: var(--r); font-size: .8rem;
+    font-weight: 600; flex-shrink: 0;
 }
-.status-badge--success { background: var(--grn-dim); color: var(--grn); }
-.status-badge--warning { background: var(--yel-dim); color: var(--yel); }
-.status-badge--danger  { background: var(--red-dim); color: var(--red); }
-.status-badge--gray    { background: var(--surf2); color: var(--txt3); }
-.status-info {
-    flex: 1;
-}
+.status-badge--success { background: var(--g100); color: var(--g700); }
+.status-badge--warning { background: #fff3cd; color: #856404; }
+.status-badge--danger  { background: #fee2e2; color: #b91c1c; }
+.status-badge--gray    { background: var(--s100); color: var(--s600); }
+.status-info { flex: 1; }
 .status-meta {
-    font-size: 12px;
-    color: var(--txt3);
-    margin-top: 4px;
+    font-size: .7rem; color: var(--s400); margin-top: 4px;
 }
 .status-detail {
-    font-size: 12px;
-    margin-top: 4px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
+    font-size: .7rem; margin-top: 4px;
+    display: flex; align-items: center; gap: 4px;
+    color: var(--s500);
 }
-.status-detail i {
-    font-size: 11px;
-}
+.status-detail i { font-size: .6rem; }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    INFO BOX
-══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .info-box {
-    background: var(--blue-dim);
-    border: 1px solid rgba(59,130,246,.3);
-    border-radius: 8px;
-    padding: 12px;
-    margin-top: 12px;
-    display: flex;
-    gap: 10px;
+    background: var(--g50); border: 1.5px solid var(--g200);
+    border-radius: var(--r); padding: 12px; margin-top: 12px;
+    display: flex; gap: 10px;
 }
 .info-box i {
-    color: var(--blue);
-    flex-shrink: 0;
-    margin-top: 2px;
+    color: var(--g600); flex-shrink: 0; margin-top: 2px;
 }
 .info-box__content {
-    font-size: 12px;
-    color: var(--txt2);
+    font-size: .7rem; color: var(--s600);
 }
 .info-box__content strong {
-    display: block;
-    margin-bottom: 2px;
-    color: var(--txt);
+    display: block; margin-bottom: 2px; color: var(--s800);
 }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    META CARD
-══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .meta-card {
-    background: var(--surf2);
-    border: 1px solid var(--brd);
-    border-radius: 10px;
-    padding: 16px;
+    background: var(--surface); border: 1.5px solid var(--s100);
+    border-radius: var(--rl); padding: 16px;
 }
 .meta-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--txt3);
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    font-size: .7rem; font-weight: 600; color: var(--s400);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    text-transform: uppercase; letter-spacing: .5px;
 }
-.meta-title i {
-    font-size: 12px;
-}
+.meta-title i { font-size: .65rem; color: var(--g500); }
 .meta-row {
-    font-size: 12px;
-    color: var(--txt2);
-    margin-bottom: 4px;
-}
-.meta-row:last-child {
-    margin-bottom: 0;
+    font-size: .7rem; color: var(--s600); margin-bottom: 4px;
 }
 
-/* ══════════════════════════════════════
-   BUTTONS
-══════════════════════════════════════ */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    border: 1px solid;
-    text-decoration: none;
-    transition: all .15s;
-    cursor: pointer;
-    white-space: nowrap;
-}
-.btn--primary {
-    background: var(--blue);
-    border-color: var(--blue);
-    color: white;
-}
-.btn--primary:hover {
-    background: #2563eb;
-    border-color: #2563eb;
-    color: white;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(59,130,246,.3);
-}
-.btn--outline {
-    background: transparent;
-    border-color: var(--brd2);
-    color: var(--txt2);
-}
-.btn--outline:hover {
-    background: var(--surf2);
-    border-color: var(--brd2);
-    color: var(--txt);
-}
-.btn--info {
-    background: var(--cyan-dim);
-    border-color: rgba(6,182,212,.3);
-    color: var(--cyan);
-}
-.btn--info:hover {
-    background: rgba(6,182,212,.25);
-    border-color: var(--cyan);
-    color: var(--cyan);
-}
-.btn--warning {
-    background: var(--yel-dim);
-    border-color: rgba(234,179,8,.3);
-    color: var(--yel);
-    font-size: 12px;
-    padding: 6px 12px;
-}
-.btn--warning:hover {
-    background: rgba(234,179,8,.25);
-    border-color: var(--yel);
-    color: var(--yel);
-}
-
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    ACTIONS BAR
-══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .actions-bar {
-    padding-top: 24px;
-    margin-top: 24px;
-    border-top: 1px solid var(--brd);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding-top: 24px; margin-top: 24px;
+    border-top: 1.5px solid var(--s100);
+    display: flex; justify-content: space-between; align-items: center;
 }
 .actions-group {
-    display: flex;
-    gap: 8px;
+    display: flex; gap: 8px;
 }
 
-/* ══════════════════════════════════════
-   FULL WIDTH ELEMENT
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   FULL WIDTH
+══════════════════════════════════════════════ */
 .full-width {
     grid-column: 1 / -1;
 }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    RESPONSIVE
-══════════════════════════════════════ */
-@media (max-width: 768px) {
-    .re-header { padding: 16px 20px; }
-    .re-header__inner { flex-direction: column; align-items: flex-start; }
-    .re-container { padding: 0 20px 40px; }
-    .form-grid { grid-template-columns: 1fr; }
-    .card__body { padding: 20px; }
-    .actions-bar { flex-direction: column; gap: 12px; }
-    .actions-group { width: 100%; flex-direction: column; }
-    .btn { width: 100%; justify-content: center; }
+══════════════════════════════════════════════ */
+@media(max-width:768px){
+    .edit-page{ padding: 20px; }
+    .edit-header{ flex-direction: column; align-items: flex-start; }
+    .edit-card-body{ padding: 20px; }
+    .actions-bar{ flex-direction: column; gap: 12px; }
+    .actions-group{ width: 100%; flex-direction: column; }
+    .btn-db{ width: 100%; justify-content: center; }
 }
 </style>
-<?php $__env->stopPush(); ?>
 
-<?php $__env->startSection('content'); ?>
-
-
-<div class="re-header">
-    <div class="re-header__inner">
-        <div>
-            <div class="re-header__title">
-                <i class="fas fa-edit"></i>
-                Edit Room: <?php echo e($room->number); ?>
-
-            </div>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="<?php echo e(route('dashboard.index')); ?>">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="<?php echo e(route('room.index')); ?>">Rooms</a></li>
-                    <li class="breadcrumb-item"><a href="<?php echo e(route('room.show', $room->id)); ?>"><?php echo e($room->number); ?></a></li>
-                    <li class="breadcrumb-item active">Edit</li>
-                </ol>
-            </nav>
-        </div>
-        <a href="<?php echo e(route('room.show', $room->id)); ?>" class="btn btn--outline">
-            <i class="fas fa-eye"></i>
-            View Room
-        </a>
+<div class="edit-page">
+    <!-- Breadcrumb -->
+    <div class="edit-breadcrumb anim-1">
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <a href="<?php echo e(route('room.index')); ?>">Chambres</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <a href="<?php echo e(route('room.show', $room->id)); ?>">Chambre <?php echo e($room->number); ?></a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <span class="current">Modifier</span>
     </div>
-</div>
 
+    <!-- Header -->
+    <div class="edit-header anim-2">
+        <div class="edit-brand">
+            <div class="edit-brand-icon"><i class="fas fa-edit"></i></div>
+            <div>
+                <h1 class="edit-header-title">Modifier la <em>chambre</em></h1>
+                <p class="edit-header-sub">
+                    <i class="fas fa-door-open me-1"></i> Chambre <?php echo e($room->number); ?> · <?php echo e($room->name ?? 'Sans nom'); ?>
 
-<div class="re-container">
+                </p>
+            </div>
+        </div>
+        <div class="edit-header-actions">
+            <a href="<?php echo e(route('room.show', $room->id)); ?>" class="btn-db btn-db-ghost">
+                <i class="fas fa-eye me-2"></i> Voir
+            </a>
+        </div>
+    </div>
 
-    
+    <!-- Alertes -->
     <?php if($errors->any()): ?>
-    <div class="alert alert--danger">
-        <i class="fas fa-exclamation-triangle"></i>
+    <div class="alert-modern alert-danger anim-2">
+        <div class="alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
         <div style="flex:1">
-            <strong>Please fix the following errors:</strong>
+            <strong>Veuillez corriger les erreurs suivantes :</strong>
             <ul>
                 <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <li><?php echo e($error); ?></li>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </ul>
         </div>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
     </div>
     <?php endif; ?>
 
     <?php if(session('success')): ?>
-    <div class="alert alert--success">
-        <i class="fas fa-check-circle"></i>
+    <div class="alert-modern alert-success anim-2">
+        <div class="alert-icon"><i class="fas fa-check-circle"></i></div>
         <span><?php echo e(session('success')); ?></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
     </div>
     <?php endif; ?>
 
     <?php if(session('info')): ?>
-    <div class="alert alert--info">
-        <i class="fas fa-info-circle"></i>
+    <div class="alert-modern alert-info anim-2">
+        <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
         <span><?php echo session('info'); ?></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
     </div>
     <?php endif; ?>
 
-    
-    <div class="card">
-        <div class="card__head">
-            <h5 class="card__title">
+    <!-- Formulaire -->
+    <div class="edit-card anim-3">
+        <div class="edit-card-header">
+            <h5 class="edit-card-title">
                 <i class="fas fa-info-circle"></i>
-                Room Information
+                Informations de la chambre
             </h5>
         </div>
-        <div class="card__body">
+        <div class="edit-card-body">
             <form method="POST" action="<?php echo e(route('room.update', $room->id)); ?>">
                 <?php echo csrf_field(); ?>
                 <?php echo method_field('PUT'); ?>
                 
                 <div class="form-grid">
                     
-                    
+                    <!-- Numéro de chambre -->
                     <div class="form-group">
                         <label for="number" class="form-label">
-                            <i class="fas fa-hashtag" style="color:var(--blue)"></i>
-                            Room Number *
+                            <i class="fas fa-hashtag"></i>
+                            Numéro de chambre *
                         </label>
                         <input type="text" 
                                class="form-control <?php $__errorArgs = ['number'];
@@ -533,7 +462,7 @@ unset($__errorArgs, $__bag); ?>"
                                id="number" 
                                name="number" 
                                value="<?php echo e(old('number', $room->number)); ?>" 
-                               placeholder="Example: 101, 201, 301" 
+                               placeholder="Ex: 101, 201, 301" 
                                required>
                         <?php $__errorArgs = ['number'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -549,15 +478,15 @@ $message = $__bag->first($__errorArgs[0]); ?>
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-                        <div class="form-hint">Unique room identifier</div>
+                        <div class="form-hint">Identifiant unique de la chambre</div>
                     </div>
                     
-                    
+                    <!-- Nom de la chambre -->
                     <div class="form-group">
                         <label for="name" class="form-label">
-                            <i class="fas fa-signature" style="color:var(--blue)"></i>
-                            Room Name
-                            <span class="optional">(Optional)</span>
+                            <i class="fas fa-signature"></i>
+                            Nom de la chambre
+                            <span class="optional">(Optionnel)</span>
                         </label>
                         <input type="text" 
                                class="form-control <?php $__errorArgs = ['name'];
@@ -571,7 +500,7 @@ unset($__errorArgs, $__bag); ?>"
                                id="name" 
                                name="name" 
                                value="<?php echo e(old('name', $room->name)); ?>" 
-                               placeholder="Presidential Suite, Ocean View">
+                               placeholder="Suite Présidentielle, Vue Mer">
                         <?php $__errorArgs = ['name'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -586,14 +515,14 @@ $message = $__bag->first($__errorArgs[0]); ?>
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-                        <div class="form-hint">Descriptive name for the room</div>
+                        <div class="form-hint">Nom descriptif de la chambre</div>
                     </div>
                     
-                    
+                    <!-- Type de chambre -->
                     <div class="form-group">
                         <label for="type_id" class="form-label">
-                            <i class="fas fa-bed" style="color:var(--blue)"></i>
-                            Room Type *
+                            <i class="fas fa-bed"></i>
+                            Type de chambre *
                         </label>
                         <select id="type_id" 
                                 name="type_id" 
@@ -606,7 +535,7 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>" 
                                 required>
-                            <option value="" disabled>-- Select Type --</option>
+                            <option value="" disabled>-- Sélectionner un type --</option>
                             <?php $__currentLoopData = $types; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <option value="<?php echo e($type->id); ?>" <?php echo e(old('type_id', $room->type_id) == $type->id ? 'selected' : ''); ?>>
                                     <?php echo e($type->name); ?> 
@@ -632,42 +561,44 @@ endif;
 unset($__errorArgs, $__bag); ?>
                     </div>
                     
-                    
+                    <!-- Statut de la chambre -->
                     <div class="form-group">
                         <label class="form-label">
-                            <i class="fas fa-circle" style="color:var(--grn)"></i>
-                            Current Room Status
-                            <span class="optional">(Auto-managed)</span>
+                            <i class="fas fa-circle"></i>
+                            Statut actuel
+                            <span class="optional">(Auto-géré)</span>
                         </label>
                         
                         <div class="status-box">
                             <div class="status-display">
                                 <?php
-                                    $statusColor = match($room->roomStatus->code ?? '') {
-                                        'available' => 'success',
-                                        'occupied' => 'danger',
-                                        'reserved' => 'warning',
-                                        'maintenance' => 'gray',
+                                    $statusColor = match($room->roomStatus->name ?? '') {
+                                        'Disponible' => 'success',
+                                        'Occupée' => 'danger',
+                                        'Réservée' => 'warning',
+                                        'En maintenance' => 'gray',
+                                        'À nettoyer' => 'gray',
                                         default => 'gray'
                                     };
                                 ?>
                                 
                                 <span class="status-badge status-badge--<?php echo e($statusColor); ?>">
-                                    <i class="fas fa-<?php echo e(match($room->roomStatus->code ?? '') {
-                                        'available' => 'check',
-                                        'occupied' => 'user',
-                                        'reserved' => 'calendar-check',
-                                        'maintenance' => 'tools',
+                                    <i class="fas fa-<?php echo e(match($room->roomStatus->name ?? '') {
+                                        'Disponible' => 'check',
+                                        'Occupée' => 'user',
+                                        'Réservée' => 'calendar-check',
+                                        'En maintenance' => 'tools',
+                                        'À nettoyer' => 'broom',
                                         default => 'question-circle'
                                     }); ?>"></i>
-                                    <?php echo e($room->roomStatus->name ?? 'Unknown'); ?>
+                                    <?php echo e($room->roomStatus->name ?? 'Inconnu'); ?>
 
                                 </span>
                                 
                                 <div class="status-info">
                                     <div class="status-meta"><?php echo e($room->roomStatus->information ?? ''); ?></div>
                                     
-                                    <?php if(($room->roomStatus->code ?? '') == 'occupied'): ?>
+                                    <?php if($room->roomStatus->name == 'Occupée'): ?>
                                         <?php
                                             $activeTransaction = $room->transactions()
                                                 ->where('status', 'active')
@@ -676,13 +607,13 @@ unset($__errorArgs, $__bag); ?>
                                                 ->first();
                                         ?>
                                         <?php if($activeTransaction): ?>
-                                        <div class="status-detail" style="color:var(--red)">
+                                        <div class="status-detail">
                                             <i class="fas fa-user"></i>
                                             Client: <?php echo e($activeTransaction->customer->name); ?>
 
                                         </div>
                                         <?php endif; ?>
-                                    <?php elseif(($room->roomStatus->code ?? '') == 'reserved'): ?>
+                                    <?php elseif($room->roomStatus->name == 'Réservée'): ?>
                                         <?php
                                             $nextReservation = $room->transactions()
                                                 ->where('status', 'reservation')
@@ -691,24 +622,24 @@ unset($__errorArgs, $__bag); ?>
                                                 ->first();
                                         ?>
                                         <?php if($nextReservation): ?>
-                                        <div class="status-detail" style="color:var(--yel)">
+                                        <div class="status-detail">
                                             <i class="fas fa-calendar"></i>
-                                            Arrival: <?php echo e(\Carbon\Carbon::parse($nextReservation->check_in)->format('d/m/Y')); ?>
+                                            Arrivée: <?php echo e(\Carbon\Carbon::parse($nextReservation->check_in)->format('d/m/Y')); ?>
 
                                         </div>
                                         <?php endif; ?>
-                                    <?php elseif(($room->roomStatus->code ?? '') == 'maintenance'): ?>
+                                    <?php elseif($room->roomStatus->name == 'En maintenance'): ?>
                                         <?php if($room->maintenance_started_at): ?>
                                         <div class="status-detail">
                                             <i class="fas fa-clock"></i>
-                                            Since: <?php echo e(\Carbon\Carbon::parse($room->maintenance_started_at)->format('d/m/Y H:i')); ?>
+                                            Depuis: <?php echo e(\Carbon\Carbon::parse($room->maintenance_started_at)->format('d/m/Y H:i')); ?>
 
                                         </div>
                                         <?php endif; ?>
                                         <?php if($room->maintenance_reason): ?>
                                         <div class="status-detail">
                                             <i class="fas fa-sticky-note"></i>
-                                            Reason: <?php echo e($room->maintenance_reason); ?>
+                                            Raison: <?php echo e($room->maintenance_reason); ?>
 
                                         </div>
                                         <?php endif; ?>
@@ -722,28 +653,28 @@ unset($__errorArgs, $__bag); ?>
                         <div class="info-box">
                             <i class="fas fa-info-circle"></i>
                             <div class="info-box__content">
-                                <strong>Auto-managed status</strong>
-                                This status is automatically updated based on reservations and stays.
+                                <strong>Statut auto-géré</strong>
+                                Ce statut est automatiquement mis à jour en fonction des réservations et séjours.
                             </div>
                         </div>
                         
                         <?php if(auth()->user()->role == 'Super'): ?>
                         <div style="margin-top:12px">
-                            <button type="button" class="btn btn--warning" 
-                                    onclick="toggleMaintenance(<?php echo e($room->id); ?>, '<?php echo e($room->roomStatus->code ?? ''); ?>')">
+                            <button type="button" class="btn-db btn-db-info" 
+                                    onclick="toggleMaintenance(<?php echo e($room->id); ?>, '<?php echo e($room->roomStatus->name ?? ''); ?>')">
                                 <i class="fas fa-tools"></i>
-                                <?php echo e(($room->roomStatus->code ?? '') == 'maintenance' ? 'End Maintenance' : 'Set to Maintenance'); ?>
+                                <?php echo e($room->roomStatus->name == 'En maintenance' ? 'Terminer la maintenance' : 'Mettre en maintenance'); ?>
 
                             </button>
                         </div>
                         <?php endif; ?>
                     </div>
                     
-                    
+                    <!-- Capacité -->
                     <div class="form-group">
                         <label for="capacity" class="form-label">
-                            <i class="fas fa-users" style="color:var(--blue)"></i>
-                            Capacity *
+                            <i class="fas fa-users"></i>
+                            Capacité *
                         </label>
                         <input type="number" 
                                class="form-control <?php $__errorArgs = ['capacity'];
@@ -775,14 +706,14 @@ $message = $__bag->first($__errorArgs[0]); ?>
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
-                        <div class="form-hint">Number of guests (1-10)</div>
+                        <div class="form-hint">Nombre de personnes (1-10)</div>
                     </div>
                     
-                    
+                    <!-- Prix par nuit -->
                     <div class="form-group">
                         <label for="price" class="form-label">
-                            <i class="fas fa-money-bill-wave" style="color:var(--grn)"></i>
-                            Price per Night *
+                            <i class="fas fa-money-bill-wave"></i>
+                            Prix par nuit *
                         </label>
                         <div class="input-group">
                             <span class="input-group-text">FCFA</span>
@@ -818,11 +749,11 @@ endif;
 unset($__errorArgs, $__bag); ?>
                     </div>
                     
-                    
+                    <!-- Description de la vue -->
                     <div class="form-group">
                         <label for="view" class="form-label">
-                            <i class="fas fa-binoculars" style="color:var(--cyan)"></i>
-                            View Description
+                            <i class="fas fa-binoculars"></i>
+                            Description de la vue
                         </label>
                         <textarea class="form-control <?php $__errorArgs = ['view'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
@@ -835,7 +766,7 @@ unset($__errorArgs, $__bag); ?>"
                                   id="view" 
                                   name="view" 
                                   rows="1" 
-                                  placeholder="Sea view, Mountain view, City view"><?php echo e(old('view', $room->view)); ?></textarea>
+                                  placeholder="Vue sur mer, Vue sur montagne, Vue sur ville"><?php echo e(old('view', $room->view)); ?></textarea>
                         <?php $__errorArgs = ['view'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -852,41 +783,40 @@ endif;
 unset($__errorArgs, $__bag); ?>
                     </div>
                     
-                    
+                    <!-- Méta-informations -->
                     <div class="form-group">
                         <div class="meta-card">
                             <div class="meta-title">
                                 <i class="fas fa-calendar-alt"></i>
-                                Room Information
+                                Informations
                             </div>
-                            <div class="meta-row">Created: <?php echo e($room->created_at->format('d/m/Y H:i')); ?></div>
-                            <div class="meta-row">Last Updated: <?php echo e($room->updated_at->format('d/m/Y H:i')); ?></div>
+                            <div class="meta-row">Créée le: <?php echo e($room->created_at->format('d/m/Y H:i')); ?></div>
+                            <div class="meta-row">Dernière modification: <?php echo e($room->updated_at->format('d/m/Y H:i')); ?></div>
                         </div>
                     </div>
                     
                 </div>
                 
-                
+                <!-- Actions -->
                 <div class="actions-bar">
-                    <a href="<?php echo e(route('room.index')); ?>" class="btn btn--outline">
-                        <i class="fas fa-times"></i>
-                        Cancel
+                    <a href="<?php echo e(route('room.index')); ?>" class="btn-db btn-db-ghost">
+                        <i class="fas fa-times me-2"></i>
+                        Annuler
                     </a>
                     <div class="actions-group">
-                        <a href="<?php echo e(route('room.show', $room->id)); ?>" class="btn btn--info">
-                            <i class="fas fa-eye"></i>
-                            View
+                        <a href="<?php echo e(route('room.show', $room->id)); ?>" class="btn-db btn-db-info">
+                            <i class="fas fa-eye me-2"></i>
+                            Voir
                         </a>
-                        <button type="submit" class="btn btn--primary">
-                            <i class="fas fa-save"></i>
-                            Update Room
+                        <button type="submit" class="btn-db btn-db-primary">
+                            <i class="fas fa-save me-2"></i>
+                            Mettre à jour
                         </button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-
 </div>
 
 <?php $__env->stopSection(); ?>
@@ -895,37 +825,37 @@ unset($__errorArgs, $__bag); ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function toggleMaintenance(roomId, currentStatus) {
-    const isMaintenance = currentStatus === 'maintenance';
+    const isMaintenance = currentStatus === 'En maintenance';
     
     Swal.fire({
-        title: isMaintenance ? 'End Maintenance Mode?' : 'Set Room to Maintenance?',
+        title: isMaintenance ? 'Terminer la maintenance ?' : 'Mettre en maintenance ?',
         html: `
             <div style="text-align:left">
                 <p>${isMaintenance 
-                    ? 'This will mark the room as available again.' 
-                    : 'This will temporarily mark the room as unavailable.'}</p>
+                    ? 'Cette action marquera la chambre comme disponible à nouveau.' 
+                    : 'Cette action marquera temporairement la chambre comme indisponible.'}</p>
                 
                 ${!isMaintenance ? `
                 <div style="margin-bottom:16px">
-                    <label style="display:block;margin-bottom:6px;font-weight:600">Maintenance reason:</label>
+                    <label style="display:block;margin-bottom:6px;font-weight:600">Raison de la maintenance :</label>
                     <textarea id="maintenanceReason" class="form-control" rows="3" 
-                              placeholder="Cleaning, repairs, renovation..."></textarea>
+                              placeholder="Nettoyage, réparations, rénovation..."></textarea>
                 </div>
                 ` : ''}
             </div>
         `,
         icon: isMaintenance ? 'question' : 'warning',
         showCancelButton: true,
-        confirmButtonColor: isMaintenance ? '#10b981' : '#eab308',
-        cancelButtonColor: '#94a3b8',
-        confirmButtonText: isMaintenance ? 'Yes, end maintenance' : 'Yes, set to maintenance',
-        cancelButtonText: 'Cancel',
+        confirmButtonColor: isMaintenance ? '#1e6b2e' : '#eab308',
+        cancelButtonColor: '#9ba09b',
+        confirmButtonText: isMaintenance ? 'Oui, terminer' : 'Oui, mettre en maintenance',
+        cancelButtonText: 'Annuler',
         showLoaderOnConfirm: true,
         preConfirm: () => {
             if (!isMaintenance) {
                 const reason = document.getElementById('maintenanceReason').value;
                 if (!reason.trim()) {
-                    Swal.showValidationMessage('Please enter a maintenance reason');
+                    Swal.showValidationMessage('Veuillez entrer une raison de maintenance');
                     return false;
                 }
                 return { reason: reason.trim() };
@@ -937,8 +867,8 @@ function toggleMaintenance(roomId, currentStatus) {
             const reason = result.value?.reason || '';
             
             Swal.fire({
-                title: 'Processing...',
-                text: 'Please wait',
+                title: 'Traitement en cours...',
+                text: 'Veuillez patienter',
                 allowOutsideClick: false,
                 showConfirmButton: false,
                 didOpen: () => {
@@ -966,7 +896,7 @@ function toggleMaintenance(roomId, currentStatus) {
                 if (data.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Success!',
+                        title: 'Succès !',
                         text: data.message,
                         timer: 2000,
                         showConfirmButton: false
@@ -976,8 +906,8 @@ function toggleMaintenance(roomId, currentStatus) {
                 } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Error',
-                        text: data.message || 'Operation failed'
+                        title: 'Erreur',
+                        text: data.message || 'Opération échouée'
                     });
                 }
             })
@@ -985,8 +915,8 @@ function toggleMaintenance(roomId, currentStatus) {
                 console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: 'Network error occurred. Please try again.'
+                    title: 'Erreur',
+                    text: 'Erreur réseau. Veuillez réessayer.'
                 });
             });
         }

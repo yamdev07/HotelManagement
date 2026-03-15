@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Types de Chambres')
-@section('content')
+
+<?php $__env->startSection('title', 'Types de Chambres'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -397,53 +397,53 @@
             <div>
                 <h1 class="types-header-title">Types de <em>chambres</em></h1>
                 <p class="types-header-sub">
-                    <i class="fas fa-bed me-1"></i> {{ $types->count() }} type(s) disponible(s)
+                    <i class="fas fa-bed me-1"></i> <?php echo e($types->count()); ?> type(s) disponible(s)
                 </p>
             </div>
         </div>
         <div class="types-header-actions">
-            <a href="{{ route('type.create') }}" class="btn-db btn-db-primary">
+            <a href="<?php echo e(route('type.create')); ?>" class="btn-db btn-db-primary">
                 <i class="fas fa-plus-circle me-2"></i> Nouveau type
             </a>
-            <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('room.index')); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-bed me-2"></i> Voir les chambres
             </a>
         </div>
     </div>
 
     <!-- Alertes -->
-    @if(session('success'))
+    <?php if(session('success')): ?>
     <div class="alert-modern alert-success anim-2">
         <div class="alert-icon"><i class="fas fa-check-circle"></i></div>
-        <span>{{ session('success') }}</span>
+        <span><?php echo e(session('success')); ?></span>
         <button class="alert-close" onclick="this.parentElement.remove()">×</button>
     </div>
-    @endif
+    <?php endif; ?>
 
-    @if(session('error'))
+    <?php if(session('error')): ?>
     <div class="alert-modern alert-danger anim-2">
         <div class="alert-icon"><i class="fas fa-exclamation-circle"></i></div>
-        <span>{{ session('error') }}</span>
+        <span><?php echo e(session('error')); ?></span>
         <button class="alert-close" onclick="this.parentElement.remove()">×</button>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Statistiques -->
-    @php
+    <?php
         $activeTypes = $types->where('is_active', true)->count();
         $inactiveTypes = $types->count() - $activeTypes;
         $totalRooms = 0;
         foreach($types as $type) {
             $totalRooms += $type->rooms->count();
         }
-    @endphp
+    ?>
 
     <div class="stats-grid anim-3">
         <div class="stat-card stat-card--total">
             <div class="stat-card-head">
                 <div class="stat-card-icon"><i class="fas fa-list-alt"></i></div>
             </div>
-            <div class="stat-card-value">{{ $types->count() }}</div>
+            <div class="stat-card-value"><?php echo e($types->count()); ?></div>
             <div class="stat-card-label">Total types</div>
             <div class="stat-card-footer">
                 <i class="fas fa-tag"></i>
@@ -455,7 +455,7 @@
             <div class="stat-card-head">
                 <div class="stat-card-icon"><i class="fas fa-check-circle"></i></div>
             </div>
-            <div class="stat-card-value">{{ $activeTypes }}</div>
+            <div class="stat-card-value"><?php echo e($activeTypes); ?></div>
             <div class="stat-card-label">Actifs</div>
             <div class="stat-card-footer">
                 <i class="fas fa-eye"></i>
@@ -467,7 +467,7 @@
             <div class="stat-card-head">
                 <div class="stat-card-icon"><i class="fas fa-eye-slash"></i></div>
             </div>
-            <div class="stat-card-value">{{ $inactiveTypes }}</div>
+            <div class="stat-card-value"><?php echo e($inactiveTypes); ?></div>
             <div class="stat-card-label">Inactifs</div>
             <div class="stat-card-footer">
                 <i class="fas fa-clock"></i>
@@ -479,7 +479,7 @@
             <div class="stat-card-head">
                 <div class="stat-card-icon"><i class="fas fa-bed"></i></div>
             </div>
-            <div class="stat-card-value">{{ $totalRooms }}</div>
+            <div class="stat-card-value"><?php echo e($totalRooms); ?></div>
             <div class="stat-card-label">Chambres</div>
             <div class="stat-card-footer">
                 <i class="fas fa-door-open"></i>
@@ -500,7 +500,7 @@
             </button>
         </div>
         <div class="types-card-body">
-            @if($types->count() > 0)
+            <?php if($types->count() > 0): ?>
                 <div style="overflow-x:auto;">
                     <table class="types-table">
                         <thead>
@@ -515,14 +515,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($types as $type)
-                                @php
+                            <?php $__currentLoopData = $types; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <?php
                                     $roomCount = $type->rooms->count();
                                     $isPopular = $roomCount > 5;
-                                @endphp
+                                ?>
                                 <tr>
                                     <td class="ps-4">
-                                        <span class="badge badge--dark">#{{ $type->id }}</span>
+                                        <span class="badge badge--dark">#<?php echo e($type->id); ?></span>
                                     </td>
                                     <td>
                                         <div style="display:flex; align-items:center; gap:12px;">
@@ -531,106 +531,110 @@
                                             </div>
                                             <div>
                                                 <div class="fw-semibold" style="color:var(--s800); margin-bottom:4px;">
-                                                    {{ $type->name }}
+                                                    <?php echo e($type->name); ?>
+
                                                 </div>
-                                                @if($type->information)
+                                                <?php if($type->information): ?>
                                                     <div style="font-size:.7rem; color:var(--s400); max-width:250px;">
-                                                        {{ Str::limit($type->information, 60) }}
+                                                        <?php echo e(Str::limit($type->information, 60)); ?>
+
                                                     </div>
-                                                @else
+                                                <?php else: ?>
                                                     <div style="font-size:.7rem; color:var(--s400);">
                                                         <i class="fas fa-minus"></i> Aucune description
                                                     </div>
-                                                @endif
-                                                @if($isPopular)
+                                                <?php endif; ?>
+                                                <?php if($isPopular): ?>
                                                     <span class="badge badge--popular mt-1">
                                                         <i class="fas fa-star me-1"></i> Populaire
                                                     </span>
-                                                @endif
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
-                                        @if($type->base_price)
+                                        <?php if($type->base_price): ?>
                                             <div style="font-size:.9rem; font-weight:600; color:var(--s800); font-family:var(--mono);">
-                                                {{ number_format($type->base_price, 0, ',', ' ') }} FCFA
+                                                <?php echo e(number_format($type->base_price, 0, ',', ' ')); ?> FCFA
                                             </div>
                                             <div style="font-size:.65rem; color:var(--s400);">prix de base</div>
-                                        @else
+                                        <?php else: ?>
                                             <span style="color:var(--s400); font-size:.7rem;">Non défini</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td>
                                         <div style="display:flex; align-items:center; gap:6px;">
                                             <i class="fas fa-users" style="color:var(--g500); font-size:.7rem;"></i>
-                                            <span style="font-size:.8rem; color:var(--s800);">{{ $type->capacity ?? 1 }} personne(s)</span>
+                                            <span style="font-size:.8rem; color:var(--s800);"><?php echo e($type->capacity ?? 1); ?> personne(s)</span>
                                         </div>
-                                        @if($type->bed_type)
+                                        <?php if($type->bed_type): ?>
                                             <div style="font-size:.65rem; color:var(--s400); margin-top:2px;">
-                                                <i class="fas fa-bed"></i> Lit {{ $type->bed_type }}
+                                                <i class="fas fa-bed"></i> Lit <?php echo e($type->bed_type); ?>
+
                                             </div>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td class="text-center">
-                                        @if($type->is_active)
+                                        <?php if($type->is_active): ?>
                                             <span class="badge badge--success">
                                                 <i class="fas fa-check-circle me-1"></i> Actif
                                             </span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="badge badge--gray">
                                                 <i class="fas fa-eye-slash me-1"></i> Inactif
                                             </span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                     <td class="text-center">
                                         <div style="display:flex; flex-direction:column; align-items:center;">
                                             <span class="badge badge--info" style="padding:6px 12px;">
                                                 <i class="fas fa-door-closed me-1"></i>
-                                                {{ $roomCount }}
+                                                <?php echo e($roomCount); ?>
+
                                             </span>
-                                            @if($roomCount > 0)
+                                            <?php if($roomCount > 0): ?>
                                                 <div style="font-size:.6rem; color:var(--s400); margin-top:2px;">
-                                                    {{ $roomCount }} chambre(s)
+                                                    <?php echo e($roomCount); ?> chambre(s)
                                                 </div>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                     <td class="pe-4 text-end">
                                         <div style="display:flex; gap:4px; justify-content:flex-end;">
                                             <!-- Edit -->
-                                            <a href="{{ route('type.edit', $type->id) }}" 
+                                            <a href="<?php echo e(route('type.edit', $type->id)); ?>" 
                                                class="btn-db-icon" 
                                                title="Modifier">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             
                                             <!-- Voir les chambres -->
-                                            @if($roomCount > 0)
-                                                <a href="{{ route('room.index') }}?type={{ $type->id }}" 
+                                            <?php if($roomCount > 0): ?>
+                                                <a href="<?php echo e(route('room.index')); ?>?type=<?php echo e($type->id); ?>" 
                                                    class="btn-db-icon" 
                                                    title="Voir les chambres">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                            @endif
+                                            <?php endif; ?>
                                             
                                             <!-- Supprimer -->
                                             <form method="POST" 
-                                                  action="{{ route('type.destroy', $type->id) }}"
+                                                  action="<?php echo e(route('type.destroy', $type->id)); ?>"
                                                   style="display:inline"
-                                                  onsubmit="return confirmDelete('{{ $type->name }}', {{ $roomCount }})">
-                                                @csrf
-                                                @method('DELETE')
+                                                  onsubmit="return confirmDelete('<?php echo e($type->name); ?>', <?php echo e($roomCount); ?>)">
+                                                <?php echo csrf_field(); ?>
+                                                <?php echo method_field('DELETE'); ?>
                                                 <button type="submit" 
                                                         class="btn-db-icon btn-db-icon-danger"
                                                         title="Supprimer"
-                                                        {{ $roomCount > 0 ? 'disabled' : '' }}>
+                                                        <?php echo e($roomCount > 0 ? 'disabled' : ''); ?>>
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
                                         </div>
                                     </td>
                                 </tr>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </tbody>
                     </table>
                 </div>
@@ -640,7 +644,7 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                         <div style="font-size:.7rem; color:var(--s400);">
                             <i class="fas fa-info-circle me-1"></i>
-                            Affichage de {{ $types->count() }} type(s) de chambre
+                            Affichage de <?php echo e($types->count()); ?> type(s) de chambre
                         </div>
                         <div style="font-size:.7rem; color:var(--s400);">
                             <i class="fas fa-ban me-1" style="color:var(--s400);"></i>
@@ -648,7 +652,7 @@
                         </div>
                     </div>
                 </div>
-            @else
+            <?php else: ?>
                 <!-- Empty state -->
                 <div class="empty-state">
                     <div class="empty-icon"><i class="fas fa-bed"></i></div>
@@ -657,17 +661,17 @@
                         Commencez par créer votre premier type de chambre.<br>
                         Les types aident à organiser vos chambres par catégorie et tarif.
                     </p>
-                    <a href="{{ route('type.create') }}" class="btn-db btn-db-primary">
+                    <a href="<?php echo e(route('type.create')); ?>" class="btn-db btn-db-primary">
                         <i class="fas fa-plus-circle me-2"></i>
                         Créer un type
                     </a>
                 </div>
-            @endif
+            <?php endif; ?>
         </div>
     </div>
 
     <!-- Help Section -->
-    @if($types->count() > 0)
+    <?php if($types->count() > 0): ?>
     <div class="help-card anim-5">
         <div style="display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
             <div style="display:flex; align-items:center; gap:12px;">
@@ -681,18 +685,18 @@
                 </div>
             </div>
             <div style="margin-left:auto;">
-                <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost">
+                <a href="<?php echo e(route('room.index')); ?>" class="btn-db btn-db-ghost">
                     <i class="fas fa-bed me-2"></i>
                     Gérer les chambres
                 </a>
             </div>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Tooltips
@@ -722,4 +726,5 @@ function confirmDelete(typeName, roomCount) {
     return confirm(`Êtes-vous sûr de vouloir supprimer "${typeName}" ?\n\nCette action est irréversible.`);
 }
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/type/index.blade.php ENDPATH**/ ?>

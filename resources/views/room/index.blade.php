@@ -1,873 +1,594 @@
 @extends('template.master')
 
-@section('title', 'Room Management')
+@section('title', 'Gestion des Chambres')
 
-@push('styles')
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+@section('content')
 <style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    /* Palette principale - Vert */
-    --primary-50: #E8F5F0;
-    --primary-100: #C1E4D6;
-    --primary-200: #96D3BA;
-    --primary-300: #6BC29E;
-    --primary-400: #4BB589;
-    --primary-500: #2AA874;
-    --primary-600: #25A06C;
-    --primary-700: #1F9661;
-    --primary-800: #198C57;
-    --primary-900: #0F7C44;
+    /* ── Palette : 3 couleurs uniquement ── */
+    /* VERT */
+    --g50:  #f0faf0;
+    --g100: #d4edda;
+    --g200: #a8d5b5;
+    --g300: #72bb82;
+    --g400: #4a9e5c;
+    --g500: #2e8540;
+    --g600: #1e6b2e;
+    --g700: #155221;
+    --g800: #0d3a16;
+    --g900: #072210;
+    /* BLANC / SURFACE */
+    --white:    #ffffff;
+    --surface:  #f7f9f7;
+    --surface2: #eef3ee;
+    /* GRIS */
+    --s50:  #f8f9f8;
+    --s100: #eff0ef;
+    --s200: #dde0dd;
+    --s300: #c2c7c2;
+    --s400: #9ba09b;
+    --s500: #737873;
+    --s600: #545954;
+    --s700: #3a3e3a;
+    --s800: #252825;
+    --s900: #131513;
 
-    /* Couleurs utilitaires */
-    --success-500: #22C55E;
-    --danger-500: #EF4444;
-    --danger-600: #DC2626;
-    --warning-500: #F59E0B;
-    --warning-600: #D97706;
-    --info-500: #3B82F6;
-    --info-600: #2563EB;
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.05);
 
-    /* Neutres */
-    --gray-50: #F9FAFB;
-    --gray-100: #F3F4F6;
-    --gray-200: #E5E7EB;
-    --gray-300: #D1D5DB;
-    --gray-400: #9CA3AF;
-    --gray-500: #6B7280;
-    --gray-600: #4B5563;
-    --gray-700: #374151;
-    --gray-800: #1F2937;
-    --gray-900: #111827;
-
-    /* Ombres */
-    --shadow-sm: 0 1px 2px 0 rgba(42, 168, 116, 0.08);
-    --shadow-md: 0 4px 6px -1px rgba(42, 168, 116, 0.12);
-    --shadow-lg: 0 10px 15px -3px rgba(42, 168, 116, 0.15);
-    
-    /* Transitions */
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    /* Autres */
-    --r: 14px;
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s cubic-bezier(.4,0,.2,1);
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
 }
 
-* { 
-    box-sizing: border-box; 
-    margin:0; 
-    padding:0;
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.rooms-page {
+    padding: 28px 32px 64px;
+    background: var(--surface);
+    min-height: 100vh;
+    font-family: var(--font);
+    color: var(--s800);
 }
 
-body {
-    background: var(--gray-50);
-    color: var(--gray-900);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(.96); }
+    to   { opacity: 1; transform: scale(1); }
+}
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+.anim-3 { animation: fadeSlide .4s .16s ease both; }
+.anim-4 { animation: fadeSlide .4s .24s ease both; }
+.anim-5 { animation: fadeSlide .4s .32s ease both; }
+.anim-6 { animation: fadeSlide .4s .40s ease both; }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    HEADER
-══════════════════════════════════════ */
-.rm-header {
-    background: white;
-    border-bottom: 1px solid var(--gray-200);
-    padding: 24px 32px;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow-sm);
+══════════════════════════════════════════════ */
+.rooms-header {
+    display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap;
+    gap: 16px; margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1.5px solid var(--s100);
+}
+.rooms-brand { display: flex; align-items: center; gap: 14px; }
+.rooms-brand-icon {
+    width: 48px; height: 48px;
+    background: var(--g600); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.1rem; flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+}
+.rooms-header-title {
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--s900); line-height: 1.2; letter-spacing: -.3px;
+}
+.rooms-header-title em { font-style: normal; color: var(--g600); }
+.rooms-header-sub {
+    font-size: .8rem; color: var(--s400); margin-top: 3px;
+    display: flex; align-items: center; gap: 8px;
+}
+.rooms-header-sub i { color: var(--g500); }
+.rooms-header-actions { display: flex; align-items: center; gap: 10px; }
+
+/* ══════════════════════════════════════════════
+   BOUTONS
+══════════════════════════════════════════════ */
+.btn-db {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: var(--r);
+    font-size: .8rem; font-weight: 500; border: none;
+    cursor: pointer; transition: var(--transition);
+    text-decoration: none; white-space: nowrap; line-height: 1;
+    font-family: var(--font);
+}
+.btn-db-primary {
+    background: var(--g600); color: white;
+    box-shadow: 0 2px 10px rgba(46,133,64,.3);
+}
+.btn-db-primary:hover {
+    background: var(--g700); color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    text-decoration: none;
+}
+.btn-db-ghost {
+    background: var(--white); color: var(--s600);
+    border: 1.5px solid var(--s200);
+}
+.btn-db-ghost:hover {
+    background: var(--s50); border-color: var(--s300);
+    color: var(--s900); text-decoration: none;
+}
+.btn-db-icon {
+    width: 36px; height: 36px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px; font-size: .8rem;
+    background: var(--white); color: var(--s400);
+    border: 1.5px solid var(--s200); cursor: pointer;
+    transition: var(--transition); text-decoration: none;
+    font-family: var(--font);
+}
+.btn-db-icon:hover {
+    background: var(--g50); color: var(--g600);
+    border-color: var(--g200); transform: translateY(-1px);
 }
 
-.rm-header__inner {
-    max-width: 1600px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
+.btn-db-icon-danger:hover {
+    background: #fee2e2; color: #b91c1c;
+    border-color: #fecaca;
 }
 
-.rm-header__title {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.rm-header__icon {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.25rem;
-    box-shadow: 0 4px 10px rgba(42, 168, 116, 0.3);
-}
-
-.rm-header__title h1 {
-    font-size: 24px;
-    font-weight: 800;
-    letter-spacing: -.5px;
-    margin-bottom: 4px;
-    color: var(--gray-800);
-}
-
-.rm-header__stats {
-    font-size: 13px;
-    color: var(--gray-500);
-    margin-left: 64px;
-}
-
-.rm-header__stats span {
-    margin-right: 16px;
-    font-weight: 500;
-}
-
-.rm-header__stats strong {
-    color: var(--primary-600);
-    font-weight: 700;
-}
-
-/* ══════════════════════════════════════
-   STATISTICS
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   STAT CARDS
+══════════════════════════════════════════════ */
 .stats-grid {
-    max-width: 1600px;
-    margin: 0 auto 28px;
-    padding: 0 32px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    display: grid; grid-template-columns: repeat(4,1fr);
+    gap: 14px; margin-bottom: 24px;
 }
+@media(max-width:1100px){ .stats-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:560px) { .stats-grid{ grid-template-columns:1fr; } }
 
 .stat-card {
-    background: white;
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow-sm);
-    transition: var(--transition);
-    position: relative;
-    overflow: hidden;
+    background: var(--white); border-radius: var(--rl);
+    padding: 22px 20px 18px;
+    border: 1.5px solid var(--s100);
+    text-decoration: none; display: block;
+    position: relative; overflow: hidden;
+    transition: var(--transition); box-shadow: var(--shadow-xs);
 }
-
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
+    transform: translateY(-3px); box-shadow: var(--shadow-md);
+    border-color: var(--g200); text-decoration: none;
+}
+.stat-card::after {
+    content: ''; position: absolute;
+    bottom: 0; left: 0; right: 0; height: 3px;
+    background: var(--bar-c, var(--g400));
+    border-radius: 0 0 var(--rl) var(--rl);
 }
 
-.stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
+.stat-card--total { --bar-c: var(--g500); }
+.stat-card--available { --bar-c: var(--g600); }
+.stat-card--occupied { --bar-c: var(--g300); }
+.stat-card--maintenance { --bar-c: var(--s400); }
+
+.stat-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.stat-card-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
 }
+.stat-card--total .stat-card-icon { background: var(--g100); color: var(--g600); }
+.stat-card--available .stat-card-icon { background: var(--g50); color: var(--g600); }
+.stat-card--occupied .stat-card-icon { background: var(--g50); color: var(--g500); }
+.stat-card--maintenance .stat-card-icon { background: var(--s100); color: var(--s500); }
 
-.stat-card.total::before { background: var(--primary-500); }
-.stat-card.available::before { background: var(--success-500); }
-.stat-card.occupied::before { background: var(--primary-300); }
-.stat-card.maintenance::before { background: var(--warning-500); }
-
-.stat-number {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: var(--gray-800);
-    margin-bottom: 4px;
-    font-family: 'IBM Plex Mono', monospace;
+.stat-card-value {
+    font-size: 2.6rem; font-weight: 700; color: var(--s900);
+    line-height: 1; letter-spacing: -1px; margin-bottom: 4px;
+    font-family: var(--mono);
 }
-
-.stat-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--gray-500);
-    letter-spacing: 0.5px;
+.stat-card-label { font-size: .8rem; color: var(--s400); margin-bottom: 4px; }
+.stat-card-footer {
+    display: flex; align-items: center; gap: 5px;
+    font-size: .72rem; padding-top: 12px;
+    border-top: 1px solid var(--s100); color: var(--s400);
 }
+.stat-card--total .stat-card-footer { color: var(--g600); }
+.stat-card--available .stat-card-footer { color: var(--g600); }
 
-.stat-footer {
-    margin-top: 12px;
-    font-size: 0.688rem;
-    color: var(--gray-400);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.stat-footer i {
-    color: var(--primary-500);
-}
-
-/* ══════════════════════════════════════
-   ALERTS
-══════════════════════════════════════ */
-.alert {
-    padding: 14px 18px;
-    border-radius: 10px;
-    border: 1px solid;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.alert--success {
-    background: rgba(42, 168, 116, 0.1);
-    border-color: rgba(42, 168, 116, 0.3);
-    color: var(--primary-700);
-}
-
-.alert--danger {
-    background: rgba(239,68,68,.12);
-    border-color: rgba(239,68,68,.3);
-    color: var(--danger-500);
-}
-
-.alert i { font-size: 16px; }
-.alert .btn-close {
-    margin-left: auto;
-    opacity: .5;
-    cursor: pointer;
-    background: none;
-    border: none;
-    color: currentColor;
-}
-
-/* ══════════════════════════════════════
-   BUTTONS
-══════════════════════════════════════ */
-.btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 600;
-    border: 1px solid;
-    text-decoration: none;
-    transition: var(--transition);
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.btn--primary {
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
-    border-color: transparent;
-    color: white;
-    box-shadow: 0 4px 6px -1px rgba(42, 168, 116, 0.3);
-}
-
-.btn--primary:hover {
-    background: linear-gradient(135deg, var(--primary-800), var(--primary-600));
-    transform: translateY(-1px);
-    box-shadow: 0 6px 10px -2px rgba(42, 168, 116, 0.4);
-    color: white;
-}
-
-.btn i { font-size: 14px; }
-
-/* Action buttons */
-.btn-action {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    border: 2px solid var(--gray-200);
-    text-decoration: none;
-    transition: var(--transition);
-    cursor: pointer;
-    font-size: 14px;
-    background: white;
-}
-
-.btn-action:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
-
-.btn-view {
-    border-color: var(--primary-200);
-    color: var(--primary-600);
-}
-
-.btn-view:hover {
-    background: var(--primary-600);
-    border-color: var(--primary-600);
-    color: white;
-}
-
-.btn-edit {
-    border-color: rgba(42, 168, 116, 0.3);
-    color: var(--primary-500);
-}
-
-.btn-edit:hover {
-    background: var(--primary-500);
-    border-color: var(--primary-500);
-    color: white;
-}
-
-.btn-delete {
-    border-color: rgba(239,68,68,.3);
-    color: var(--danger-500);
-}
-
-.btn-delete:hover {
-    background: var(--danger-500);
-    border-color: var(--danger-500);
-    color: white;
-}
-
-/* ══════════════════════════════════════
-   MAIN CONTAINER
-══════════════════════════════════════ */
-.rm-container {
-    max-width: 1600px;
-    margin: 0 auto;
-    padding: 0 32px 48px;
-}
-
-/* ══════════════════════════════════════
-   ACTION BAR
-══════════════════════════════════════ */
-.action-bar {
-    background: white;
-    border-radius: 14px;
-    padding: 16px 20px;
-    margin-bottom: 24px;
-    border: 1px solid var(--gray-200);
+/* ══════════════════════════════════════════════
+   ALERTES
+══════════════════════════════════════════════ */
+.alert-modern {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px; border-radius: var(--rl);
+    margin-bottom: 20px; border: 1.5px solid transparent;
+    font-size: .875rem; background: var(--white);
     box-shadow: var(--shadow-sm);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
 }
+.alert-success {
+    background: var(--g50); border-color: var(--g200);
+    color: var(--g700);
+}
+.alert-danger {
+    background: #fee2e2; border-color: #fecaca;
+    color: #b91c1c;
+}
+.alert-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.alert-success .alert-icon { background: var(--g100); color: var(--g600); }
+.alert-danger .alert-icon { background: #fecaca; color: #b91c1c; }
+.alert-close {
+    margin-left: auto; background: none; border: none;
+    color: currentColor; opacity: .6; cursor: pointer;
+    font-size: 1rem; transition: var(--transition);
+}
+.alert-close:hover { opacity: 1; }
 
-.action-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+/* ══════════════════════════════════════════════
+   ACTION BAR
+══════════════════════════════════════════════ */
+.action-bar {
+    background: var(--white); border-radius: var(--rxl);
+    padding: 16px 20px; margin-bottom: 24px;
+    border: 1.5px solid var(--s100); box-shadow: var(--shadow-sm);
+    display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; gap: 16px;
 }
-
-.action-right {
-    flex: 1;
-    max-width: 400px;
-}
+.action-left { display: flex; align-items: center; gap: 12px; }
+.action-right { flex: 1; max-width: 400px; }
 
 .filter-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
-    border-radius: 30px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    background: var(--primary-100);
-    color: var(--primary-700);
-    border: 1px solid var(--primary-200);
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 30px; font-size: .75rem;
+    font-weight: 600; background: var(--g100); color: var(--g700);
+    border: 1px solid var(--g200);
 }
-
 .badge-count {
-    background: rgba(255, 255, 255, 0.5);
-    padding: 2px 6px;
-    border-radius: 20px;
-    font-size: 0.65rem;
-    font-weight: 600;
-    background: white;
+    background: var(--white); padding: 2px 6px; border-radius: 20px;
+    font-size: .65rem; font-weight: 600;
 }
 
-/* Search */
 .search-container {
-    position: relative;
-    width: 100%;
+    position: relative; width: 100%;
 }
-
 .search-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--gray-400);
-    font-size: 0.9rem;
-    pointer-events: none;
-    z-index: 2;
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%); color: var(--s400);
+    font-size: .9rem; pointer-events: none; z-index: 2;
 }
-
 .search-input {
-    width: 100%;
-    padding: 12px 16px 12px 42px;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    font-size: 0.875rem;
-    transition: var(--transition);
-    background: white;
-    font-family: 'Plus Jakarta Sans', sans-serif;
+    width: 100%; padding: 10px 16px 10px 42px;
+    border: 1.5px solid var(--s200); border-radius: var(--rl);
+    font-size: .875rem; transition: var(--transition);
+    background: var(--white); font-family: var(--font);
 }
-
 .search-input:focus {
-    outline: none;
-    border-color: var(--primary-500);
-    box-shadow: 0 0 0 3px rgba(42, 168, 116, 0.1);
+    outline: none; border-color: var(--g400);
+    box-shadow: 0 0 0 3px var(--g100);
 }
 
-/* ══════════════════════════════════════
-   CARD
-══════════════════════════════════════ */
-.card {
-    background: white;
-    border: 1px solid var(--gray-200);
-    border-radius: var(--r);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
+/* ══════════════════════════════════════════════
+   CARTE PRINCIPALE
+══════════════════════════════════════════════ */
+.rooms-card {
+    background: var(--white); border-radius: var(--rxl);
+    border: 1.5px solid var(--s100); overflow: hidden;
+    margin-bottom: 20px; box-shadow: var(--shadow-sm);
+}
+.rooms-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 24px; border-bottom: 1.5px solid var(--s100);
+    background: var(--white);
+}
+.rooms-card-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: .95rem; font-weight: 600; color: var(--s800); margin: 0;
+}
+.rooms-card-title i { color: var(--g500); }
+.rooms-card-badge {
+    background: var(--g100); color: var(--g700);
+    font-size: .7rem; font-weight: 600; padding: 4px 10px;
+    border-radius: 100px;
+}
+.rooms-card-body { padding: 0; }
+
+/* ══════════════════════════════════════════════
+   TABLEAU
+══════════════════════════════════════════════ */
+.rooms-table {
+    width: 100%; border-collapse: collapse;
+}
+.rooms-table thead th {
+    font-size: .65rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .7px; color: var(--s400);
+    padding: 14px 20px; background: var(--surface);
+    border-bottom: 1.5px solid var(--s100); white-space: nowrap;
+}
+.rooms-table tbody tr {
+    border-bottom: 1px solid var(--s100); transition: var(--transition);
+}
+.rooms-table tbody tr:last-child { border-bottom: none; }
+.rooms-table tbody tr:hover { background: var(--g50); }
+.rooms-table td {
+    padding: 16px 20px; vertical-align: middle;
 }
 
-.card__head {
-    padding: 18px 24px;
-    border-bottom: 1px solid var(--gray-200);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    background: var(--gray-50);
-}
-
-.card__title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--gray-700);
-}
-
-.card__title i { 
-    font-size: 18px;
-    color: var(--primary-500);
-}
-
-.card__badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 30px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    background: var(--primary-100);
-    color: var(--primary-700);
-    border: 1px solid var(--primary-200);
-}
-
-.card__body {
-    padding: 0;
-}
-
-/* ══════════════════════════════════════
-   TABLE
-══════════════════════════════════════ */
-.tbl {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.tbl thead {
-    background: var(--gray-50);
-}
-
-.tbl th {
-    padding: 14px 20px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--gray-500);
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    text-align: left;
-    border-bottom: 1px solid var(--gray-200);
-}
-
-.tbl td {
-    padding: 18px 20px;
-    font-size: 13px;
-    border-bottom: 1px solid var(--gray-100);
-    vertical-align: middle;
-}
-
-.tbl tbody tr:last-child td {
-    border-bottom: none;
-}
-
-.tbl tbody tr:hover {
-    background: var(--gray-50);
-}
-
-/* ══════════════════════════════════════
-   TABLE CELLS
-══════════════════════════════════════ */
 .room-num {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 15px;
-    font-weight: 600;
-    background: var(--primary-100);
-    padding: 4px 10px;
-    border-radius: 6px;
-    display: inline-block;
-    color: var(--primary-700);
+    font-family: var(--mono); font-size: .9rem; font-weight: 600;
+    background: var(--g100); padding: 4px 10px; border-radius: 6px;
+    display: inline-block; color: var(--g700);
 }
-
 .room-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--gray-800);
-    margin-bottom: 2px;
+    font-size: .9rem; font-weight: 600; color: var(--s800);
+    margin-bottom: 4px;
 }
-
 .room-meta {
-    font-size: 12px;
-    color: var(--gray-500);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 4px;
+    font-size: .7rem; color: var(--s400);
+    display: flex; align-items: center; gap: 4px;
+    margin-top: 2px;
 }
-
-.room-meta i {
-    font-size: 10px;
-    color: var(--primary-500);
-}
+.room-meta i { font-size: .6rem; color: var(--g500); }
 
 .room-type {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--gray-700);
+    font-size: .8rem; font-weight: 500; color: var(--s700);
 }
-
 .room-type__base {
-    font-size: 11px;
-    color: var(--gray-500);
-    margin-top: 3px;
+    font-size: .65rem; color: var(--s400); margin-top: 2px;
 }
 
 .room-capacity {
-    display: flex;
-    align-items: center;
-    gap: 6px;
+    display: flex; align-items: center; gap: 6px;
 }
-
-.room-capacity i {
-    color: var(--primary-500);
-}
+.room-capacity i { color: var(--g500); }
 
 .room-price {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--primary-700);
+    font-family: var(--mono); font-size: .9rem; font-weight: 600;
+    color: var(--g600);
 }
-
 .room-price__eur {
-    font-size: 11px;
-    color: var(--gray-500);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    margin-top: 2px;
+    font-size: .65rem; color: var(--s400); margin-top: 2px;
 }
-
 .room-price__custom {
-    font-size: 11px;
-    color: var(--warning-500);
-    margin-top: 3px;
-    display: flex;
-    align-items: center;
-    gap: 3px;
+    font-size: .65rem; color: var(--g300); margin-top: 2px;
+    display: flex; align-items: center; gap: 3px;
 }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    BADGES
-══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 600;
-    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 6px; font-size: .65rem;
+    font-weight: 600; white-space: nowrap;
+}
+.badge--success {
+    background: var(--g100); color: var(--g700);
+    border: 1px solid var(--g200);
+}
+.badge--warning {
+    background: #fff3cd; color: #856404;
+    border: 1px solid #ffeeba;
+}
+.badge--danger {
+    background: #fee2e2; color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+.badge--info {
+    background: var(--g50); color: var(--g600);
+    border: 1px solid var(--g200);
+}
+.badge--gray {
+    background: var(--s100); color: var(--s600);
+    border: 1px solid var(--s200);
 }
 
-.badge--success { 
-    background: var(--primary-100); 
-    color: var(--primary-700);
-    border: 1px solid var(--primary-200);
-}
-.badge--warning { 
-    background: rgba(245,158,11,.12); 
-    color: var(--warning-500);
-    border: 1px solid rgba(245,158,11,.3);
-}
-.badge--danger { 
-    background: rgba(239,68,68,.12); 
-    color: var(--danger-500);
-    border: 1px solid rgba(239,68,68,.3);
-}
-.badge--blue { 
-    background: rgba(59,130,246,.12); 
-    color: var(--info-500);
-    border: 1px solid rgba(59,130,246,.3);
-}
-.badge--purple { 
-    background: rgba(139,92,246,.12); 
-    color: #8b5cf6;
-    border: 1px solid rgba(139,92,246,.3);
-}
-.badge--gray { 
-    background: var(--gray-100); 
-    color: var(--gray-600);
-    border: 1px solid var(--gray-200);
-}
-
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    EMPTY STATE
-══════════════════════════════════════ */
-.empty {
-    padding: 64px 20px;
-    text-align: center;
+══════════════════════════════════════════════ */
+.empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 64px 24px; text-align: center;
 }
-
-.empty i {
-    font-size: 48px;
-    color: var(--gray-400);
-    opacity: .4;
-    margin-bottom: 20px;
+.empty-icon {
+    width: 80px; height: 80px; background: var(--g50);
+    border-radius: 50%; display: flex; align-items: center;
+    justify-content: center; font-size: 2rem; color: var(--g300);
+    margin-bottom: 20px; border: 2px solid var(--g100);
 }
-
-.empty h5 {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--gray-600);
+.empty-title {
+    font-size: 1rem; font-weight: 600; color: var(--s700);
     margin-bottom: 8px;
 }
-
-.empty p {
-    font-size: 14px;
-    color: var(--gray-500);
-    margin-bottom: 20px;
+.empty-text {
+    font-size: .8rem; color: var(--s400);
+    margin-bottom: 24px; max-width: 300px;
 }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    PAGINATION
-══════════════════════════════════════ */
+══════════════════════════════════════════════ */
 .pagination-wrap {
-    padding: 20px 24px;
-    border-top: 1px solid var(--gray-200);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 16px 24px; border-top: 1.5px solid var(--s100);
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--surface);
 }
-
 .pagination-info {
-    font-size: 13px;
-    color: var(--gray-500);
+    font-size: .75rem; color: var(--s400);
 }
-
 .pagination {
-    display: flex;
-    gap: 6px;
-    list-style: none;
+    display: flex; gap: 4px; list-style: none;
 }
-
-.page-item {
-    list-style: none;
-}
-
+.page-item { list-style: none; }
 .page-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    border: 1px solid var(--gray-200);
-    background: white;
-    color: var(--gray-600);
-    font-size: 0.875rem;
-    font-weight: 500;
-    transition: var(--transition);
-    text-decoration: none;
+    display: flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 8px;
+    border: 1.5px solid var(--s200); background: var(--white);
+    color: var(--s600); font-size: .75rem; font-weight: 500;
+    transition: var(--transition); text-decoration: none;
 }
-
 .page-link:hover {
-    background: var(--gray-50);
-    border-color: var(--gray-300);
-    color: var(--gray-800);
-    transform: translateY(-2px);
+    background: var(--g50); border-color: var(--g200);
+    color: var(--g700); transform: translateY(-1px);
 }
-
 .active .page-link {
-    background: var(--primary-500);
-    border-color: var(--primary-500);
+    background: var(--g600); border-color: var(--g600);
     color: white;
 }
 
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    ANIMATIONS
-══════════════════════════════════════ */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+══════════════════════════════════════════════ */
+.rooms-table tbody tr {
+    animation: fadeSlide .3s ease both;
 }
+.rooms-table tbody tr:nth-child(1) { animation-delay: .02s; }
+.rooms-table tbody tr:nth-child(2) { animation-delay: .04s; }
+.rooms-table tbody tr:nth-child(3) { animation-delay: .06s; }
+.rooms-table tbody tr:nth-child(4) { animation-delay: .08s; }
+.rooms-table tbody tr:nth-child(5) { animation-delay: .10s; }
 
-.tbl tbody tr {
-    animation: fadeIn .3s ease both;
-}
-
-.tbl tbody tr:nth-child(1) { animation-delay: .02s; }
-.tbl tbody tr:nth-child(2) { animation-delay: .04s; }
-.tbl tbody tr:nth-child(3) { animation-delay: .06s; }
-.tbl tbody tr:nth-child(4) { animation-delay: .08s; }
-.tbl tbody tr:nth-child(5) { animation-delay: .10s; }
-
-/* ══════════════════════════════════════
+/* ══════════════════════════════════════════════
    RESPONSIVE
-══════════════════════════════════════ */
-@media (max-width: 1200px) {
-    .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
+══════════════════════════════════════════════ */
+@media(max-width:1200px){
+    .stats-grid{ grid-template-columns:repeat(2,1fr); }
 }
-
-@media (max-width: 768px) {
-    .rm-header { padding: 20px; }
-    .rm-header__inner { flex-direction: column; align-items: flex-start; }
-    .rm-container { padding: 0 20px 40px; }
-    .stats-grid { 
-        grid-template-columns: 1fr;
-        padding: 0 20px;
-    }
-    .action-bar { flex-direction: column; align-items: stretch; }
-    .action-right { max-width: 100%; }
-    .card__head { padding: 16px 20px; flex-direction: column; align-items: flex-start; }
-    .tbl { display: block; overflow-x: auto; }
-    .tbl th,
-    .tbl td { padding: 12px; font-size: 12px; }
-    .room-num { font-size: 13px; }
-    .room-name { font-size: 13px; }
-    .room-price { font-size: 13px; }
-    .pagination-wrap { flex-direction: column; gap: 12px; align-items: flex-start; }
+@media(max-width:768px){
+    .rooms-page{ padding: 20px; }
+    .rooms-header{ flex-direction: column; align-items: flex-start; }
+    .rooms-header__inner{ width: 100%; }
+    .stats-grid{ grid-template-columns:1fr; }
+    .action-bar{ flex-direction: column; align-items: stretch; }
+    .action-right{ max-width: 100%; }
+    .rooms-card-header{ flex-direction: column; align-items: flex-start; gap: 10px; }
+    .rooms-table{ display: block; overflow-x: auto; }
+    .rooms-table td{ padding: 12px; }
+    .pagination-wrap{ flex-direction: column; gap: 12px; align-items: flex-start; }
 }
 </style>
-@endpush
 
-@section('content')
-
-{{-- ══════════════════════════════════════
-     HEADER
-══════════════════════════════════════ --}}
-<div class="rm-header">
-    <div class="rm-header__inner">
-        <div class="rm-header__title">
-            <div class="rm-header__icon">
-                <i class="fas fa-bed"></i>
-            </div>
+<div class="rooms-page">
+    <!-- Header -->
+    <div class="rooms-header anim-1">
+        <div class="rooms-brand">
+            <div class="rooms-brand-icon"><i class="fas fa-bed"></i></div>
             <div>
-                <h1>Room Management</h1>
-                <div class="rm-header__stats">
-                    <span><strong>{{ $rooms->total() }}</strong> rooms total</span>
+                <h1 class="rooms-header-title">Gestion des <em>chambres</em></h1>
+                <p class="rooms-header-sub">
+                    <i class="fas fa-door-open me-1"></i> {{ $rooms->total() }} chambres au total
                     @if($rooms->total() > 0)
-                        <span>Showing {{ $rooms->firstItem() }}-{{ $rooms->lastItem() }}</span>
+                        · Affichage {{ $rooms->firstItem() }}-{{ $rooms->lastItem() }}
                     @endif
-                </div>
+                </p>
             </div>
         </div>
-        <div>
-            <a href="{{ route('room.create') }}" class="btn btn--primary">
-                <i class="fas fa-plus-circle"></i>
-                Add New Room
+        <div class="rooms-header-actions">
+            <a href="{{ route('room.create') }}" class="btn-db btn-db-primary">
+                <i class="fas fa-plus-circle me-2"></i> Nouvelle chambre
             </a>
         </div>
     </div>
-</div>
 
-{{-- ══════════════════════════════════════
-     STATISTICS
-══════════════════════════════════════ --}}
-@php
-    $totalRooms = $rooms->total();
-    $availableRooms = $rooms->where('roomStatus.name', 'Available')->count();
-    $occupiedRooms = $rooms->where('roomStatus.name', 'Occupied')->count();
-    $maintenanceRooms = $rooms->where('roomStatus.name', 'Maintenance')->count();
-@endphp
+    <!-- Statistiques -->
+    @php
+        $totalRooms = $rooms->total();
+        $availableRooms = $rooms->where('roomStatus.name', 'Available')->count();
+        $occupiedRooms = $rooms->where('roomStatus.name', 'Occupied')->count();
+        $maintenanceRooms = $rooms->where('roomStatus.name', 'Maintenance')->count();
+    @endphp
 
-<div class="stats-grid">
-    <div class="stat-card total">
-        <div class="stat-number">{{ $totalRooms }}</div>
-        <div class="stat-label">Total Rooms</div>
-        <div class="stat-footer">
-            <i class="fas fa-building"></i>
-            All rooms in hotel
+    <div class="stats-grid anim-2">
+        <div class="stat-card stat-card--total">
+            <div class="stat-card-head">
+                <div class="stat-card-icon"><i class="fas fa-building"></i></div>
+            </div>
+            <div class="stat-card-value">{{ $totalRooms }}</div>
+            <div class="stat-card-label">Total chambres</div>
+            <div class="stat-card-footer">
+                <i class="fas fa-door-open"></i>
+                Capacité totale
+            </div>
+        </div>
+
+        <div class="stat-card stat-card--available">
+            <div class="stat-card-head">
+                <div class="stat-card-icon"><i class="fas fa-check-circle"></i></div>
+            </div>
+            <div class="stat-card-value">{{ $availableRooms }}</div>
+            <div class="stat-card-label">Disponibles</div>
+            <div class="stat-card-footer">
+                <i class="fas fa-door-open"></i>
+                Prêtes pour check-in
+            </div>
+        </div>
+
+        <div class="stat-card stat-card--occupied">
+            <div class="stat-card-head">
+                <div class="stat-card-icon"><i class="fas fa-user"></i></div>
+            </div>
+            <div class="stat-card-value">{{ $occupiedRooms }}</div>
+            <div class="stat-card-label">Occupées</div>
+            <div class="stat-card-footer">
+                <i class="fas fa-clock"></i>
+                En cours
+            </div>
+        </div>
+
+        <div class="stat-card stat-card--maintenance">
+            <div class="stat-card-head">
+                <div class="stat-card-icon"><i class="fas fa-tools"></i></div>
+            </div>
+            <div class="stat-card-value">{{ $maintenanceRooms }}</div>
+            <div class="stat-card-label">Maintenance</div>
+            <div class="stat-card-footer">
+                <i class="fas fa-exclamation-triangle"></i>
+                Hors service
+            </div>
         </div>
     </div>
-    
-    <div class="stat-card available">
-        <div class="stat-number">{{ $availableRooms }}</div>
-        <div class="stat-label">Available</div>
-        <div class="stat-footer">
-            <i class="fas fa-check-circle"></i>
-            Ready for check-in
-        </div>
-    </div>
-    
-    <div class="stat-card occupied">
-        <div class="stat-number">{{ $occupiedRooms }}</div>
-        <div class="stat-label">Occupied</div>
-        <div class="stat-footer">
-            <i class="fas fa-user"></i>
-            Currently occupied
-        </div>
-    </div>
-    
-    <div class="stat-card maintenance">
-        <div class="stat-number">{{ $maintenanceRooms }}</div>
-        <div class="stat-label">Maintenance</div>
-        <div class="stat-footer">
-            <i class="fas fa-tools"></i>
-            Under maintenance
-        </div>
-    </div>
-</div>
 
-{{-- ══════════════════════════════════════
-     MAIN CONTAINER
-══════════════════════════════════════ --}}
-<div class="rm-container">
-
-    {{-- ALERTS --}}
+    <!-- Alertes -->
     @if(session('success'))
-    <div class="alert alert--success">
-        <i class="fas fa-check-circle"></i>
+    <div class="alert-modern alert-success anim-2">
+        <div class="alert-icon"><i class="fas fa-check-circle"></i></div>
         <span>{{ session('success') }}</span>
-        <button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
     </div>
     @endif
 
     @if(session('failed'))
-    <div class="alert alert--danger">
-        <i class="fas fa-exclamation-circle"></i>
+    <div class="alert-modern alert-danger anim-2">
+        <div class="alert-icon"><i class="fas fa-exclamation-circle"></i></div>
         <span>{{ session('failed') }}</span>
-        <button type="button" class="btn-close" onclick="this.parentElement.remove()">×</button>
+        <button class="alert-close" onclick="this.parentElement.remove()">×</button>
     </div>
     @endif
 
-    {{-- ACTION BAR --}}
-    <div class="action-bar">
+    <!-- Action Bar -->
+    <div class="action-bar anim-3">
         <div class="action-left">
             <span class="filter-badge">
                 <i class="fas fa-bed"></i>
-                All Rooms
+                Toutes les chambres
                 <span class="badge-count">{{ $rooms->total() }}</span>
             </span>
         </div>
@@ -878,163 +599,175 @@ body {
                 <input type="text" 
                        class="search-input" 
                        id="searchInput"
-                       placeholder="Search rooms by number, name or type..." 
+                       placeholder="Rechercher par numéro, nom ou type..." 
                        autocomplete="off">
             </div>
         </div>
     </div>
 
-    {{-- TABLE CARD --}}
-    <div class="card">
-        <div class="card__head">
-            <div class="card__title">
+    <!-- Tableau des chambres -->
+    <div class="rooms-card anim-4">
+        <div class="rooms-card-header">
+            <h5 class="rooms-card-title">
                 <i class="fas fa-door-open"></i>
-                Rooms List
-            </div>
-            <span class="card__badge">
+                Liste des chambres
+            </h5>
+            <span class="rooms-card-badge">
                 <i class="fas fa-list"></i>
-                {{ $rooms->total() }} entries
+                {{ $rooms->total() }} entrées
             </span>
         </div>
-        <div class="card__body">
-            <table class="tbl" id="roomsTable">
-                <thead>
-                    <tr>
-                        <th>Room #</th>
-                        <th>Room Name</th>
-                        <th>Type</th>
-                        <th>Capacity</th>
-                        <th>Price (FCFA)</th>
-                        <th>Status</th>
-                        <th style="text-align: center;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($rooms as $room)
-                    <tr>
-                        <td>
-                            <span class="room-num">{{ $room->number }}</span>
-                        </td>
-                        <td>
-                            <div>
-                                <div class="room-name">
-                                    {{ $room->display_name ?? $room->getNameOrNumber() }}
+        <div class="rooms-card-body">
+            <div style="overflow-x:auto;">
+                <table class="rooms-table" id="roomsTable">
+                    <thead>
+                        <tr>
+                            <th>N° Chambre</th>
+                            <th>Nom</th>
+                            <th>Type</th>
+                            <th>Capacité</th>
+                            <th>Prix (FCFA)</th>
+                            <th>Statut</th>
+                            <th style="text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($rooms as $room)
+                        <tr>
+                            <td>
+                                <span class="room-num">{{ $room->number }}</span>
+                            </td>
+                            <td>
+                                <div>
+                                    <div class="room-name">
+                                        {{ $room->display_name ?? $room->getNameOrNumber() }}
+                                    </div>
+                                    @if($room->name && $room->name !== $room->display_name)
+                                    <div class="room-meta">
+                                        <i class="fas fa-tag"></i>
+                                        {{ $room->name }}
+                                    </div>
+                                    @endif
+                                    @if($room->view)
+                                    <div class="room-meta">
+                                        <i class="fas fa-mountain"></i>
+                                        {{ $room->view }}
+                                    </div>
+                                    @endif
                                 </div>
-                                @if($room->name && $room->name !== $room->display_name)
-                                <div class="room-meta">
-                                    <i class="fas fa-tag"></i>
-                                    {{ $room->name }}
+                            </td>
+                            <td>
+                                <div>
+                                    <div class="room-type">{{ $room->type->name ?? 'Standard' }}</div>
+                                    @if($room->type && $room->type->base_price)
+                                    <div class="room-type__base">
+                                        Base: {{ number_format($room->type->base_price, 0, ',', ' ') }} FCFA
+                                    </div>
+                                    @endif
                                 </div>
-                                @endif
-                                @if($room->view)
-                                <div class="room-meta">
-                                    <i class="fas fa-mountain"></i>
-                                    {{ $room->view }}
+                            </td>
+                            <td>
+                                <div class="room-capacity">
+                                    <i class="fas fa-users"></i>
+                                    <span>{{ $room->capacity }} personne(s)</span>
                                 </div>
-                                @endif
-                            </div>
-                        </td>
-                        <td>
-                            <div>
-                                <div class="room-type">{{ $room->type->name ?? 'Standard' }}</div>
-                                @if($room->type && $room->type->base_price)
-                                <div class="room-type__base">
-                                    Base: {{ number_format($room->type->base_price, 0, ',', ' ') }} FCFA
+                            </td>
+                            <td>
+                                <div>
+                                    <div class="room-price">{{ number_format($room->price, 0, ',', ' ') }} FCFA</div>
+                                    @if($room->price > 0)
+                                    <div class="room-price__eur">
+                                        ≈ €{{ number_format($room->price / 655, 2, ',', ' ') }}
+                                    </div>
+                                    @if($room->type && $room->type->base_price && $room->price != $room->type->base_price)
+                                    <div class="room-price__custom">
+                                        <i class="fas fa-exclamation-circle"></i>
+                                        Prix personnalisé
+                                    </div>
+                                    @endif
+                                    @endif
                                 </div>
-                                @endif
-                            </div>
-                        </td>
-                        <td>
-                            <div class="room-capacity">
-                                <i class="fas fa-users"></i>
-                                <span>{{ $room->capacity }} person(s)</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div>
-                                <div class="room-price">{{ number_format($room->price, 0, ',', ' ') }} FCFA</div>
-                                @if($room->price > 0)
-                                <div class="room-price__eur">
-                                    ≈ €{{ number_format($room->price / 655, 2, ',', ' ') }}
+                            </td>
+                            <td>
+                                @php
+                                    $statusColor = match($room->roomStatus->name ?? '') {
+                                        'Available' => 'success',
+                                        'Occupied' => 'warning',
+                                        'Maintenance' => 'danger',
+                                        'Dirty' => 'info',
+                                        default => 'gray'
+                                    };
+                                @endphp
+                                <span class="badge badge--{{ $statusColor }}">
+                                    <i class="{{ $room->status_icon ?? 'fa-door-closed' }}"></i>
+                                    {{ $room->roomStatus->name ?? 'Inconnu' }}
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                <div style="display: flex; gap: 6px; justify-content: center;">
+                                    <a href="{{ route('room.show', $room->id) }}" 
+                                       class="btn-db-icon" 
+                                       title="Voir détails">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    
+                                    <a href="{{ route('room.edit', $room->id) }}" 
+                                       class="btn-db-icon" 
+                                       title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    
+                                    @if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin')
+                                    <form method="POST" 
+                                          action="{{ route('room.destroy', $room->id) }}"
+                                          style="display:inline"
+                                          onsubmit="return confirm('Supprimer la chambre {{ $room->number }} ? Cette action est irréversible.')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                                class="btn-db-icon btn-db-icon-danger"
+                                                title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    @endif
                                 </div>
-                                @if($room->type && $room->type->base_price && $room->price != $room->type->base_price)
-                                <div class="room-price__custom">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    Custom price
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="7">
+                                <div class="empty-state">
+                                    <div class="empty-icon">
+                                        <i class="fas fa-door-closed"></i>
+                                    </div>
+                                    <p class="empty-title">Aucune chambre trouvée</p>
+                                    <p class="empty-text">Vous n'avez pas encore ajouté de chambres.</p>
+                                    <a href="{{ route('room.create') }}" class="btn-db btn-db-primary">
+                                        <i class="fas fa-plus-circle me-2"></i>
+                                        Ajouter une chambre
+                                    </a>
                                 </div>
-                                @endif
-                                @endif
-                            </div>
-                        </td>
-                        <td>
-                            <span class="badge badge--{{ $room->roomStatus->color ?? 'gray' }}">
-                                <i class="{{ $room->status_icon ?? 'fa-door-closed' }}"></i>
-                                {{ $room->roomStatus->name ?? 'Unknown' }}
-                            </span>
-                        </td>
-                        <td style="text-align: center;">
-                            <div style="display: flex; gap: 6px; justify-content: center;">
-                                <a href="{{ route('room.show', $room->id) }}" 
-                                   class="btn-action btn-view" 
-                                   title="View Details">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                                
-                                <a href="{{ route('room.edit', $room->id) }}" 
-                                   class="btn-action btn-edit" 
-                                   title="Edit Room">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                
-                                @if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin')
-                                <form method="POST" 
-                                      action="{{ route('room.destroy', $room->id) }}"
-                                      style="display:inline"
-                                      onsubmit="return confirm('Delete room {{ $room->number }}? This action cannot be undone.')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" 
-                                            class="btn-action btn-delete"
-                                            title="Delete Room">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </form>
-                                @endif
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="7">
-                            <div class="empty">
-                                <i class="fas fa-door-closed"></i>
-                                <h5>No Rooms Found</h5>
-                                <p>You haven't added any rooms yet. Start by adding your first room.</p>
-                                <a href="{{ route('room.create') }}" class="btn btn--primary">
-                                    <i class="fas fa-plus-circle"></i>
-                                    Add Your First Room
-                                </a>
-                            </div>
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
             
-            {{-- PAGINATION --}}
+            <!-- Pagination -->
             @if($rooms->hasPages())
             <div class="pagination-wrap">
                 <div class="pagination-info">
-                    Showing {{ $rooms->firstItem() }} to {{ $rooms->lastItem() }} of {{ $rooms->total() }} entries
+                    Affichage de {{ $rooms->firstItem() }} à {{ $rooms->lastItem() }} sur {{ $rooms->total() }} entrées
                 </div>
                 <div>
-                    {{ $rooms->links() }}
+                    {{ $rooms->onEachSide(1)->links('pagination::bootstrap-4') }}
                 </div>
             </div>
             @endif
         </div>
     </div>
-
 </div>
 
 @endsection
@@ -1043,7 +776,7 @@ body {
 <script>
 // Auto-hide alerts after 5 seconds
 setTimeout(() => {
-    const alerts = document.querySelectorAll('.alert');
+    const alerts = document.querySelectorAll('.alert-modern');
     alerts.forEach(alert => {
         alert.style.transition = 'opacity 0.5s';
         alert.style.opacity = '0';
@@ -1078,31 +811,28 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Show empty message if all rows hidden
         const visibleRows = Array.from(rows).filter(row => row.style.display !== 'none');
+        const emptyRow = table.querySelector('tbody tr:last-child');
+        
         if (visibleRows.length === 0 && rows.length > 0) {
-            const emptyRow = document.createElement('tr');
-            emptyRow.innerHTML = `
-                <td colspan="7">
-                    <div class="empty" style="padding: 40px 20px;">
-                        <i class="fas fa-search"></i>
-                        <h5>No Results Found</h5>
-                        <p>No rooms match your search criteria</p>
-                    </div>
-                </td>
-            `;
-            table.querySelector('tbody').appendChild(emptyRow);
+            if (!emptyRow || !emptyRow.querySelector('.empty-state')) {
+                const newEmptyRow = document.createElement('tr');
+                newEmptyRow.innerHTML = `
+                    <td colspan="7">
+                        <div class="empty-state" style="padding: 40px 20px;">
+                            <div class="empty-icon"><i class="fas fa-search"></i></div>
+                            <p class="empty-title">Aucun résultat</p>
+                            <p class="empty-text">Aucune chambre ne correspond à votre recherche</p>
+                        </div>
+                    </td>
+                `;
+                table.querySelector('tbody').appendChild(newEmptyRow);
+            }
         } else {
-            const emptyRow = table.querySelector('tbody tr:last-child');
-            if (emptyRow && emptyRow.querySelector('.empty h5')?.textContent === 'No Results Found') {
+            if (emptyRow && emptyRow.querySelector('.empty-state')) {
                 emptyRow.remove();
             }
         }
     });
-});
-
-// Tooltips
-document.addEventListener('DOMContentLoaded', () => {
-    const tooltips = [].slice.call(document.querySelectorAll('[title]'));
-    tooltips.map(el => new bootstrap.Tooltip(el));
 });
 </script>
 @endpush

@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Modifier le Type de Chambre')
-@section('content')
+
+<?php $__env->startSection('title', 'Modifier le Type de Chambre'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -263,11 +263,11 @@
 <div class="edit-type-page">
     <!-- Breadcrumb -->
     <div class="edit-type-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('type.index') }}">Types de chambres</a>
+        <a href="<?php echo e(route('type.index')); ?>">Types de chambres</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Modifier: {{ $type->name }}</span>
+        <span class="current">Modifier: <?php echo e($type->name); ?></span>
     </div>
 
     <!-- Header -->
@@ -277,12 +277,12 @@
             <div>
                 <h1 class="edit-type-header-title">Modifier le <em>type</em></h1>
                 <p class="edit-type-header-sub">
-                    <i class="fas fa-tag me-1"></i> {{ $type->name }} · Mise à jour des informations
+                    <i class="fas fa-tag me-1"></i> <?php echo e($type->name); ?> · Mise à jour des informations
                 </p>
             </div>
         </div>
         <div class="edit-type-header-actions">
-            <a href="{{ route('type.index') }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('type.index')); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-arrow-left me-2"></i> Retour
             </a>
         </div>
@@ -297,9 +297,9 @@
             </h5>
         </div>
         <div class="edit-type-card-body">
-            <form id="edit-type-form" method="POST" action="{{ route('type.update', $type->id) }}">
-                @csrf
-                @method('PUT')
+            <form id="edit-type-form" method="POST" action="<?php echo e(route('type.update', $type->id)); ?>">
+                <?php echo csrf_field(); ?>
+                <?php echo method_field('PUT'); ?>
                 
                 <div class="form-grid">
                     <!-- Nom -->
@@ -309,7 +309,7 @@
                             Nom du type <span class="required">*</span>
                         </label>
                         <input type="text" name="name" class="form-control" 
-                               value="{{ $type->name }}" required
+                               value="<?php echo e($type->name); ?>" required
                                placeholder="Ex: Standard, Deluxe, Suite">
                     </div>
                     
@@ -321,7 +321,7 @@
                         </label>
                         <div class="input-group">
                             <input type="number" name="base_price" class="form-control"
-                                   value="{{ $type->base_price }}" min="0"
+                                   value="<?php echo e($type->base_price); ?>" min="0"
                                    placeholder="50000">
                             <span class="input-group-text">FCFA</span>
                         </div>
@@ -336,11 +336,11 @@
                         </label>
                         <select name="capacity" class="form-select">
                             <option value="">-- Sélectionner --</option>
-                            @for($i = 1; $i <= 10; $i++)
-                                <option value="{{ $i }}" {{ $type->capacity == $i ? 'selected' : '' }}>
-                                    {{ $i }} personne(s)
+                            <?php for($i = 1; $i <= 10; $i++): ?>
+                                <option value="<?php echo e($i); ?>" <?php echo e($type->capacity == $i ? 'selected' : ''); ?>>
+                                    <?php echo e($i); ?> personne(s)
                                 </option>
-                            @endfor
+                            <?php endfor; ?>
                         </select>
                     </div>
                 </div>
@@ -352,13 +352,13 @@
                         Description
                     </label>
                     <textarea name="information" class="form-control" rows="4" 
-                              placeholder="Description du type de chambre...">{{ $type->information }}</textarea>
+                              placeholder="Description du type de chambre..."><?php echo e($type->information); ?></textarea>
                 </div>
                 
                 <!-- Statut actif -->
                 <div class="form-check" style="margin-top:16px;">
                     <input class="form-check-input" type="checkbox" value="1" 
-                           id="is_active" name="is_active" {{ $type->is_active ? 'checked' : '' }}>
+                           id="is_active" name="is_active" <?php echo e($type->is_active ? 'checked' : ''); ?>>
                     <label class="form-check-label" for="is_active">
                         Actif (disponible pour sélection)
                     </label>
@@ -369,7 +369,7 @@
                     <button type="submit" class="btn-db btn-db-warning">
                         <i class="fas fa-save me-2"></i> Mettre à jour
                     </button>
-                    <a href="{{ route('type.index') }}" class="btn-db btn-db-ghost">
+                    <a href="<?php echo e(route('type.index')); ?>" class="btn-db btn-db-ghost">
                         <i class="fas fa-times me-2"></i> Annuler
                     </a>
                 </div>
@@ -377,9 +377,9 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 // Gestion AJAX de la soumission
 document.addEventListener('DOMContentLoaded', function() {
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 if (data.success) {
                     alert(data.message);
-                    window.location.href = '{{ route("type.index") }}';
+                    window.location.href = '<?php echo e(route("type.index")); ?>';
                 } else {
                     alert(data.message || 'Erreur lors de la modification');
                     button.disabled = false;
@@ -423,4 +423,5 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/type/edit.blade.php ENDPATH**/ ?>
