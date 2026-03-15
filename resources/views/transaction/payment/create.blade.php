@@ -3,831 +3,549 @@
 @section('content')
 
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   DESIGN SYSTEM - MÊME STYLE QUE CHECK-IN
-═══════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
-    --primary-50: #ecfdf5;
-    --primary-100: #d1fae5;
-    --primary-400: #34d399;
-    --primary-500: #10b981;
-    --primary-600: #059669;
-    --primary-700: #047857;
-    --primary-800: #065f46;
+    /* ── Palette : 3 couleurs uniquement ── */
+    /* VERT */
+    --g50:  #f0faf0;
+    --g100: #d4edda;
+    --g200: #a8d5b5;
+    --g300: #72bb82;
+    --g400: #4a9e5c;
+    --g500: #2e8540;
+    --g600: #1e6b2e;
+    --g700: #155221;
+    --g800: #0d3a16;
+    --g900: #072210;
+    /* BLANC / SURFACE */
+    --white:    #ffffff;
+    --surface:  #f7f9f7;
+    --surface2: #eef3ee;
+    /* GRIS */
+    --s50:  #f8f9f8;
+    --s100: #eff0ef;
+    --s200: #dde0dd;
+    --s300: #c2c7c2;
+    --s400: #9ba09b;
+    --s500: #737873;
+    --s600: #545954;
+    --s700: #3a3e3a;
+    --s800: #252825;
+    --s900: #131513;
 
-    --amber-50: #fffbeb;
-    --amber-100: #fef3c7;
-    --amber-400: #fbbf24;
-    --amber-500: #f59e0b;
-    --amber-600: #d97706;
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.05);
 
-    --blue-50: #eff6ff;
-    --blue-100: #dbeafe;
-    --blue-500: #3b82f6;
-    --blue-600: #2563eb;
-
-    --gray-50: #f9fafb;
-    --gray-100: #f3f4f6;
-    --gray-200: #e5e7eb;
-    --gray-300: #d1d5db;
-    --gray-400: #9ca3af;
-    --gray-500: #6b7280;
-    --gray-600: #4b5563;
-    --gray-700: #374151;
-    --gray-800: #1f2937;
-    --gray-900: #111827;
-
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s cubic-bezier(.4,0,.2,1);
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
 }
 
-* { box-sizing: border-box; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 .payment-page {
-    background: var(--gray-50);
+    padding: 28px 32px 64px;
+    background: var(--surface);
     min-height: 100vh;
-    padding: 24px 32px;
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: var(--font);
+    color: var(--s800);
 }
 
-/* Breadcrumb */
-.breadcrumb-custom {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.813rem;
-    color: var(--gray-400);
-    margin-bottom: 24px;
-    flex-wrap: wrap;
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
-
-.breadcrumb-custom a {
-    color: var(--gray-400);
-    text-decoration: none;
-    transition: color 0.2s;
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(.96); }
+    to   { opacity: 1; transform: scale(1); }
 }
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+.anim-3 { animation: fadeSlide .4s .16s ease both; }
+.anim-4 { animation: fadeSlide .4s .24s ease both; }
+.anim-5 { animation: fadeSlide .4s .32s ease both; }
+.anim-6 { animation: fadeSlide .4s .40s ease both; }
 
-.breadcrumb-custom a:hover {
-    color: var(--primary-600);
+/* ══════════════════════════════════════════════
+   BREADCRUMB
+══════════════════════════════════════════════ */
+.payment-breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .8rem; color: var(--s400);
+    margin-bottom: 20px;
 }
-
-.breadcrumb-custom .separator {
-    color: var(--gray-300);
-    font-size: 0.688rem;
+.payment-breadcrumb a {
+    color: var(--s400); text-decoration: none;
+    transition: var(--transition);
 }
+.payment-breadcrumb a:hover { color: var(--g600); }
+.payment-breadcrumb .sep { color: var(--s300); }
 
-.breadcrumb-custom .current {
-    color: var(--gray-600);
-    font-weight: 500;
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+.payment-header {
+    display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap;
+    gap: 16px; margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1.5px solid var(--s100);
 }
-
-/* En-tête */
-.page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-    flex-wrap: wrap;
-    gap: 16px;
+.payment-brand { display: flex; align-items: center; gap: 14px; }
+.payment-brand-icon {
+    width: 48px; height: 48px;
+    background: var(--g600); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.1rem; flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(46,133,64,.35);
 }
-
-.header-title {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+.payment-header-title {
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--s900); line-height: 1.2; letter-spacing: -.3px;
 }
-
-.header-title h1 {
-    font-size: 1.875rem;
-    font-weight: 600;
-    color: var(--gray-800);
-    margin: 0;
+.payment-header-title em { font-style: normal; color: var(--g600); }
+.payment-header-sub {
+    font-size: .8rem; color: var(--s400); margin-top: 3px;
+    display: flex; align-items: center; gap: 8px;
 }
+.payment-header-actions { display: flex; align-items: center; gap: 10px; }
 
-.header-icon {
-    width: 48px;
-    height: 48px;
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.25rem;
-    box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
+/* ══════════════════════════════════════════════
+   CARTES
+══════════════════════════════════════════════ */
+.payment-card {
+    background: var(--white); border-radius: var(--rxl);
+    border: 1.5px solid var(--s100); overflow: hidden;
+    margin-bottom: 20px; box-shadow: var(--shadow-sm);
+    transition: var(--transition);
 }
+.payment-card:hover { border-color: var(--g200); box-shadow: var(--shadow-md); }
+.payment-card:last-child { margin-bottom: 0; }
 
-.header-subtitle {
-    color: var(--gray-500);
-    font-size: 0.875rem;
-    margin: 6px 0 0 60px;
+.payment-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px; border-bottom: 1.5px solid var(--s100);
+    background: var(--white); flex-wrap: wrap; gap: 12px;
 }
-
-/* Boutons */
-.btn-modern {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    border-radius: 10px;
-    font-weight: 500;
-    font-size: 0.875rem;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    text-decoration: none;
+.payment-card-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: .95rem; font-weight: 600; color: var(--s800); margin: 0;
 }
+.payment-card-title i { color: var(--g600); }
 
-.btn-primary-modern {
-    background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
-    color: white;
-    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.3);
-}
+.payment-card-body { padding: 24px; }
 
-.btn-primary-modern:hover {
-    background: linear-gradient(135deg, var(--primary-800), var(--primary-600));
-    transform: translateY(-1px);
-    box-shadow: 0 6px 8px -1px rgba(5, 150, 105, 0.4);
-    color: white;
-    text-decoration: none;
-}
-
-.btn-success-modern {
-    background: var(--primary-600);
-    color: white;
-}
-
-.btn-success-modern:hover {
-    background: var(--primary-700);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(5, 150, 105, 0.3);
-}
-
-.btn-outline-modern {
-    background: white;
-    color: var(--gray-700);
-    border: 1px solid var(--gray-200);
-    box-shadow: var(--shadow-sm);
-}
-
-.btn-outline-modern:hover {
-    background: var(--gray-50);
-    border-color: var(--gray-300);
-    color: var(--gray-900);
-    transform: translateY(-1px);
-    text-decoration: none;
-}
-
-.btn-outline-warning-modern {
-    background: white;
-    color: var(--amber-600);
-    border: 1px solid var(--amber-200);
-}
-
-.btn-outline-warning-modern:hover {
-    background: var(--amber-50);
-    border-color: var(--amber-300);
-    color: var(--amber-700);
-    transform: translateY(-1px);
-}
-
-.btn-outline-danger-modern {
-    background: white;
-    color: #ef4444;
-    border: 1px solid #fecaca;
-}
-
-.btn-outline-danger-modern:hover {
-    background: #fee2e2;
-    border-color: #fecaca;
-    color: #b91c1c;
-}
-
-.btn-sm-modern {
-    padding: 6px 14px;
-    font-size: 0.813rem;
-    border-radius: 8px;
-}
-
-.btn-lg-modern {
-    padding: 14px 28px;
-    font-size: 1rem;
-    border-radius: 12px;
-}
-
-.btn-icon-modern {
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: 1px solid var(--gray-200);
-    background: white;
-    color: var(--gray-600);
-    cursor: pointer;
-    transition: all 0.2s;
-    text-decoration: none;
-}
-
-.btn-icon-modern:hover {
-    background: var(--gray-50);
-    border-color: var(--gray-300);
-    color: var(--gray-800);
-    transform: translateY(-1px);
-}
-
-/* Cartes */
-.card-modern {
-    background: white;
-    border-radius: 20px;
-    border: 1px solid var(--gray-200);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    transition: all 0.2s;
-    height: 100%;
-}
-
-.card-modern:hover {
-    box-shadow: var(--shadow-md);
-    border-color: var(--gray-300);
-}
-
-.card-header-modern {
-    padding: 20px 24px;
-    border-bottom: 1px solid var(--gray-100);
-    background: white;
-}
-
-.card-header-modern h5 {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--gray-700);
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.card-header-modern h5 i {
-    color: var(--primary-500);
-}
-
-.card-body-modern {
-    padding: 24px;
-}
-
-/* Résumé transaction */
+/* ══════════════════════════════════════════════
+   RÉSUMÉ TRANSACTION
+══════════════════════════════════════════════ */
 .summary-card {
-    background: linear-gradient(135deg, #065f46, #047857);
-    border-radius: 20px;
+    background: var(--white); border-radius: var(--rxl);
+    border: 1.5px solid var(--s100); overflow: hidden;
+    margin-bottom: 24px; box-shadow: var(--shadow-sm);
     padding: 24px;
-    color: white;
-    margin-bottom: 24px;
-    box-shadow: var(--shadow-lg);
 }
 
 .summary-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 24px;
 }
+@media(max-width:768px){ .summary-grid{ grid-template-columns:1fr; } }
 
-@media (min-width: 768px) {
-    .summary-grid {
-        grid-template-columns: 2fr 1fr;
-    }
-}
-
-.summary-info {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
+.summary-info { display: flex; flex-direction: column; gap: 16px; }
 
 .info-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    display: flex; align-items: center; gap: 12px;
 }
-
 .info-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.15);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
-    color: white;
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--g50); color: var(--g600);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; flex-shrink: 0;
 }
-
-.info-content {
-    flex: 1;
-}
-
+.info-content { flex: 1; }
 .info-label {
-    font-size: 0.688rem;
-    text-transform: uppercase;
-    opacity: 0.7;
-    margin-bottom: 2px;
+    font-size: .7rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .5px; color: var(--s400); margin-bottom: 2px;
 }
-
 .info-value {
-    font-weight: 600;
-    font-size: 1rem;
+    font-weight: 600; color: var(--s800); font-size: 1rem;
 }
 
 .summary-amounts {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--surface); border-radius: var(--rl);
+    padding: 20px; border: 1.5px solid var(--s100);
 }
 
 .amount-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex; justify-content: space-between;
+    padding: 8px 0; border-bottom: 1px solid var(--s100);
 }
-
-.amount-row:last-child {
-    border-bottom: none;
-}
-
-.amount-label {
-    opacity: 0.8;
-}
-
-.amount-value {
-    font-weight: 600;
-}
-
+.amount-row:last-child { border-bottom: none; }
+.amount-label { color: var(--s400); }
+.amount-value { font-weight: 600; color: var(--s800); }
 .amount-total {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: var(--amber-400);
+    font-size: 1.25rem; font-weight: 700; color: var(--g600);
 }
 
 /* Barre de progression */
 .progress-container {
     margin-top: 16px;
 }
-
 .progress-bar-modern {
-    height: 8px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 8px;
+    height: 8px; background: var(--s100);
+    border-radius: 4px; overflow: hidden; margin-bottom: 8px;
 }
-
 .progress-fill {
-    height: 100%;
-    background: var(--amber-400);
-    border-radius: 4px;
-    transition: width 0.3s ease;
+    height: 100%; background: var(--g500);
+    border-radius: 4px; transition: width .3s ease;
 }
-
 .progress-text {
-    font-size: 0.75rem;
-    opacity: 0.8;
+    font-size: .75rem; color: var(--s400);
 }
 
-/* Méthodes de paiement */
-.methods-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.method-card-modern {
-    background: white;
-    border: 1px solid var(--gray-200);
-    border-radius: 16px;
-    padding: 20px 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-}
-
-.method-card-modern:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-    border-color: var(--primary-300);
-}
-
-.method-card-modern.active {
-    border-color: var(--primary-500);
-    background: var(--primary-50);
-    box-shadow: 0 0 0 3px var(--primary-100);
-}
-
-.method-radio {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 18px;
-    height: 18px;
-    accent-color: var(--primary-500);
-}
-
-.method-icon-wrapper {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
-    font-size: 1.5rem;
-}
-
-.method-icon-cash { background: var(--primary-100); color: var(--primary-600); }
-.method-icon-card { background: var(--blue-100); color: var(--blue-600); }
-.method-icon-transfer { background: var(--amber-100); color: var(--amber-600); }
-.method-icon-mobile { background: #f3e8ff; color: #9333ea; }
-.method-icon-fedapay { background: #ffe4e6; color: #e11d48; }
-.method-icon-check { background: var(--gray-100); color: var(--gray-600); }
-
-.method-name {
-    font-weight: 600;
-    color: var(--gray-800);
-    margin-bottom: 4px;
-}
-
-.method-description {
-    font-size: 0.688rem;
-    color: var(--gray-500);
-}
-
-/* Montant */
+/* ══════════════════════════════════════════════
+   MONTANT
+══════════════════════════════════════════════ */
 .amount-card {
-    background: white;
-    border-radius: 20px;
-    border: 1px solid var(--gray-200);
-    padding: 24px;
+    background: var(--white); border-radius: var(--rl);
+    border: 1.5px solid var(--s100); padding: 24px;
 }
 
 .amount-label-modern {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--gray-500);
-    margin-bottom: 8px;
-    letter-spacing: 0.5px;
+    display: block; font-size: .75rem; font-weight: 600;
+    text-transform: uppercase; color: var(--s400);
+    margin-bottom: 8px; letter-spacing: .5px;
 }
 
 .amount-input-wrapper {
-    position: relative;
-    margin-bottom: 16px;
+    position: relative; margin-bottom: 16px;
 }
-
 .amount-input {
-    width: 100%;
-    padding: 16px 20px;
-    border: 1px solid var(--gray-200);
-    border-radius: 12px;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--gray-800);
-    transition: all 0.2s;
+    width: 100%; padding: 16px 20px;
+    border: 1.5px solid var(--s200); border-radius: var(--rl);
+    font-size: 1.5rem; font-weight: 700; color: var(--s800);
+    transition: var(--transition); font-family: var(--mono);
 }
-
 .amount-input:focus {
-    outline: none;
-    border-color: var(--primary-500);
-    box-shadow: 0 0 0 3px var(--primary-100);
+    outline: none; border-color: var(--g400);
+    box-shadow: 0 0 0 3px var(--g100);
 }
-
 .amount-input.error {
-    border-color: #ef4444;
-    background: #fee2e2;
+    border-color: var(--s500); background: #fee2e2;
 }
-
 .amount-currency {
-    position: absolute;
-    right: 20px;
-    top: 50%;
+    position: absolute; right: 20px; top: 50%;
     transform: translateY(-50%);
-    font-size: 0.875rem;
-    color: var(--gray-400);
-    pointer-events: none;
+    color: var(--s400); font-size: .875rem;
 }
 
 .quick-amounts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 16px;
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
 }
-
 .quick-amount-btn {
-    padding: 8px 16px;
-    border-radius: 30px;
-    font-size: 0.75rem;
-    font-weight: 500;
-    background: var(--gray-100);
-    color: var(--gray-700);
-    border: 1px solid var(--gray-200);
-    cursor: pointer;
-    transition: all 0.2s;
+    padding: 8px 16px; border-radius: 30px; font-size: .75rem;
+    font-weight: 500; background: var(--s100); color: var(--s700);
+    border: 1.5px solid var(--s200); cursor: pointer;
+    transition: var(--transition);
 }
-
 .quick-amount-btn:hover {
-    background: var(--primary-100);
-    border-color: var(--primary-200);
-    color: var(--primary-700);
-    transform: translateY(-1px);
+    background: var(--g50); border-color: var(--g300);
+    color: var(--g700); transform: translateY(-1px);
 }
-
 .quick-amount-btn.full {
-    background: var(--primary-100);
-    color: var(--primary-700);
-    border-color: var(--primary-200);
+    background: var(--g100); color: var(--g700);
+    border-color: var(--g200); font-weight: 600;
 }
 
-/* Champs de méthode */
+/* ══════════════════════════════════════════════
+   MÉTHODES DE PAIEMENT
+══════════════════════════════════════════════ */
+.methods-grid {
+    display: grid; grid-template-columns: repeat(3,1fr);
+    gap: 12px; margin-bottom: 24px;
+}
+@media(max-width:768px){ .methods-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:480px){ .methods-grid{ grid-template-columns:1fr; } }
+
+.method-card-modern {
+    background: var(--white); border: 1.5px solid var(--s200);
+    border-radius: var(--rl); padding: 20px 16px;
+    cursor: pointer; transition: var(--transition);
+    position: relative;
+}
+.method-card-modern:hover {
+    transform: translateY(-2px); box-shadow: var(--shadow-md);
+    border-color: var(--g300);
+}
+.method-card-modern.active {
+    border-color: var(--g500); background: var(--g50);
+    box-shadow: 0 0 0 3px var(--g100);
+}
+
+.method-radio {
+    position: absolute; top: 12px; right: 12px;
+    width: 18px; height: 18px; accent-color: var(--g500);
+}
+
+.method-icon-wrapper {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 12px; font-size: 1.5rem;
+    background: var(--g50); color: var(--g600);
+}
+
+.method-name {
+    font-weight: 600; color: var(--s800); margin-bottom: 4px;
+}
+.method-description {
+    font-size: .688rem; color: var(--s400);
+}
+
+/* ══════════════════════════════════════════════
+   CHAMPS DE FORMULAIRE
+══════════════════════════════════════════════ */
 .method-fields-modern {
-    background: var(--gray-50);
-    border-radius: 16px;
-    padding: 20px;
-    margin-top: 16px;
-    border: 1px solid var(--gray-200);
+    background: var(--surface); border-radius: var(--rl);
+    padding: 20px; margin-top: 16px;
+    border: 1.5px solid var(--s100);
 }
 
 .form-group-modern {
     margin-bottom: 16px;
 }
-
 .form-label-modern {
-    display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    color: var(--gray-500);
-    margin-bottom: 6px;
+    display: block; font-size: .75rem; font-weight: 600;
+    text-transform: uppercase; color: var(--s400);
+    margin-bottom: 6px; letter-spacing: .5px;
 }
-
 .form-control-modern {
-    width: 100%;
-    padding: 12px 16px;
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    font-size: 0.875rem;
-    transition: all 0.2s;
+    width: 100%; padding: 12px 16px;
+    border: 1.5px solid var(--s200); border-radius: var(--r);
+    font-size: .875rem; transition: var(--transition);
+    font-family: var(--font);
 }
-
 .form-control-modern:focus {
-    outline: none;
-    border-color: var(--primary-500);
-    box-shadow: 0 0 0 3px var(--primary-100);
+    outline: none; border-color: var(--g400);
+    box-shadow: 0 0 0 3px var(--g100);
 }
-
 .form-control-modern[readonly] {
-    background: var(--gray-100);
-    color: var(--gray-500);
+    background: var(--s100); color: var(--s500);
+    border-color: var(--s200);
 }
 
-/* Alertes */
+/* ══════════════════════════════════════════════
+   ALERTES
+══════════════════════════════════════════════ */
 .alert-modern {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 16px 20px;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    border: 1px solid transparent;
-    font-size: 0.875rem;
-    background: white;
-    box-shadow: var(--shadow-md);
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 18px; border-radius: var(--rl);
+    margin-bottom: 16px; border: 1.5px solid transparent;
+    font-size: .875rem; background: var(--white);
+    box-shadow: var(--shadow-sm);
 }
-
 .alert-warning {
-    background: var(--amber-50);
-    border-color: var(--amber-200);
-    color: var(--amber-700);
+    background: #fff3cd; border-color: #ffeeba;
+    color: #856404;
 }
-
 .alert-info {
-    background: var(--blue-50);
-    border-color: var(--blue-200);
-    color: var(--blue-700);
+    background: var(--g50); border-color: var(--g200);
+    color: var(--g700);
 }
-
-.alert-success {
-    background: var(--primary-50);
-    border-color: var(--primary-200);
-    color: var(--primary-700);
-}
-
 .alert-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
 }
+.alert-warning .alert-icon { background: #ffc107; color: #856404; }
+.alert-info .alert-icon { background: var(--g100); color: var(--g600); }
 
-.alert-warning .alert-icon {
-    background: var(--amber-500);
-    color: white;
-}
-
-.alert-info .alert-icon {
-    background: var(--blue-500);
-    color: white;
-}
-
-/* Debug panel */
-.debug-panel {
-    background: var(--gray-900);
-    color: var(--gray-300);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    font-family: 'Courier New', monospace;
-    font-size: 0.813rem;
-    border: 1px solid var(--gray-700);
-}
-
-.debug-panel .debug-title {
-    color: var(--gray-400);
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-}
-
-.debug-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 12px;
-}
-
-.debug-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    border-bottom: 1px solid var(--gray-700);
-}
-
-.debug-label {
-    color: var(--gray-400);
-}
-
-.debug-value {
-    color: var(--amber-400);
-    font-weight: 500;
-}
-
-/* Action bar */
+/* ══════════════════════════════════════════════
+   BARRE D'ACTIONS
+══════════════════════════════════════════════ */
 .action-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-    margin-top: 24px;
-    padding: 20px;
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--gray-200);
+    display: flex; justify-content: space-between;
+    align-items: center; flex-wrap: wrap; gap: 16px;
+    margin-top: 24px; padding: 20px;
+    background: var(--white); border-radius: var(--rxl);
+    border: 1.5px solid var(--s100);
 }
 
 .action-buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+    display: flex; gap: 8px; flex-wrap: wrap;
 }
 
-/* Modal */
+/* ══════════════════════════════════════════════
+   BOUTONS
+══════════════════════════════════════════════ */
+.btn-modern {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: var(--r);
+    font-size: .8rem; font-weight: 500; border: none;
+    cursor: pointer; transition: var(--transition);
+    text-decoration: none; white-space: nowrap;
+    font-family: var(--font);
+}
+
+.btn-primary-modern {
+    background: var(--g600); color: white;
+    box-shadow: 0 2px 10px rgba(46,133,64,.3);
+}
+.btn-primary-modern:hover {
+    background: var(--g700); color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    text-decoration: none;
+}
+
+.btn-outline-modern {
+    background: var(--white); color: var(--s600);
+    border: 1.5px solid var(--s200);
+}
+.btn-outline-modern:hover {
+    background: var(--s50); border-color: var(--s300);
+    color: var(--s900); text-decoration: none;
+}
+
+.btn-success-modern {
+    background: var(--g600); color: white;
+}
+.btn-success-modern:hover {
+    background: var(--g700); transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(46,133,64,.25);
+}
+
+.btn-outline-warning-modern {
+    background: var(--white); color: #856404;
+    border: 1.5px solid #ffeeba;
+}
+.btn-outline-warning-modern:hover {
+    background: #fff3cd; border-color: #ffc107;
+    color: #856404; transform: translateY(-1px);
+}
+
+.btn-outline-danger-modern {
+    background: var(--white); color: var(--s500);
+    border: 1.5px solid var(--s200);
+}
+.btn-outline-danger-modern:hover {
+    background: #fee2e2; border-color: #fecaca;
+    color: #b91c1c;
+}
+
+.btn-sm-modern { padding: 6px 12px; font-size: .75rem; border-radius: 6px; }
+.btn-lg-modern { padding: 12px 24px; font-size: .9rem; border-radius: var(--rl); }
+
+.btn-icon-modern {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1.5px solid var(--s200); background: var(--white);
+    color: var(--s500); cursor: pointer; transition: var(--transition);
+    text-decoration: none; font-size: .8rem;
+}
+.btn-icon-modern:hover {
+    background: var(--g50); border-color: var(--g300);
+    color: var(--g600); transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════════
+   DEBUG PANEL
+══════════════════════════════════════════════ */
+.debug-panel {
+    background: var(--s900); color: var(--s300);
+    border-radius: var(--rl); padding: 16px 20px;
+    margin-bottom: 20px; font-family: var(--mono);
+    font-size: .813rem; border: 1.5px solid var(--s700);
+}
+.debug-panel .debug-title {
+    color: var(--s400); font-size: .75rem;
+    text-transform: uppercase; margin-bottom: 12px;
+}
+.debug-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
+    gap: 12px;
+}
+.debug-item {
+    display: flex; justify-content: space-between;
+    padding: 4px 0; border-bottom: 1px solid var(--s700);
+}
+.debug-label { color: var(--s400); }
+.debug-value { color: var(--g300); font-weight: 500; }
+
+/* ══════════════════════════════════════════════
+   MODAL
+══════════════════════════════════════════════ */
 .modal-modern .modal-content {
-    border-radius: 20px;
-    border: none;
-    overflow: hidden;
+    border-radius: var(--rxl); border: 1.5px solid var(--s200);
+    overflow: hidden; box-shadow: var(--shadow-lg);
 }
-
 .modal-modern .modal-header {
-    background: var(--gray-50);
-    border-bottom: 1px solid var(--gray-200);
-    padding: 20px 24px;
+    background: var(--surface); border-bottom: 1.5px solid var(--s100);
+    padding: 18px 24px;
 }
-
 .modal-modern .modal-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--gray-700);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: .95rem; font-weight: 600; color: var(--s800);
+    display: flex; align-items: center; gap: 8px;
 }
-
-.modal-modern .modal-body {
-    padding: 24px;
-}
-
+.modal-modern .modal-body { padding: 24px; }
 .modal-modern .modal-footer {
-    background: var(--gray-50);
-    border-top: 1px solid var(--gray-200);
+    background: var(--surface); border-top: 1.5px solid var(--s100);
     padding: 16px 24px;
 }
-
 .modal-modern pre {
-    max-height: 400px;
-    overflow: auto;
-    background: var(--gray-900);
-    color: var(--gray-300);
-    padding: 16px;
-    border-radius: 8px;
-    font-size: 0.813rem;
+    max-height: 400px; overflow: auto;
+    background: var(--s900); color: var(--s300);
+    padding: 16px; border-radius: var(--rl);
+    font-size: .813rem; font-family: var(--mono);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .payment-page {
-        padding: 16px;
-    }
-    
-    .summary-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .methods-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .action-bar {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .action-buttons {
-        justify-content: stretch;
-    }
-    
-    .action-buttons .btn-modern {
-        flex: 1;
-    }
-}
-
-@media (max-width: 480px) {
-    .methods-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+@media(max-width:768px){
+    .payment-page{ padding: 16px; }
+    .action-bar{ flex-direction: column; align-items: stretch; }
+    .action-buttons{ justify-content: stretch; }
+    .action-buttons .btn-modern{ flex: 1; }
 }
 </style>
 
 <div class="payment-page">
     <!-- Breadcrumb -->
-    <div class="breadcrumb-custom">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
-        <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
+    <div class="payment-breadcrumb anim-1">
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('transaction.index') }}">Transactions</a>
-        <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('transaction.show', $transaction) }}">#{{ $transaction->id }}</a>
-        <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Paiement</span>
     </div>
 
     <!-- En-tête -->
-    <div class="page-header">
-        <div class="header-title">
-            <span class="header-icon">
-                <i class="fas fa-money-bill-wave"></i>
-            </span>
-            <h1>Effectuer un paiement</h1>
+    <div class="payment-header anim-2">
+        <div class="payment-brand">
+            <div class="payment-brand-icon"><i class="fas fa-money-bill-wave"></i></div>
+            <div>
+                <h1 class="payment-header-title">Effectuer un <em>paiement</em></h1>
+                <p class="payment-header-sub">
+                    <i class="fas fa-user me-1"></i> {{ $transaction->customer->name }} 
+                    <i class="fas fa-circle fa-xs" style="color:var(--s300); font-size:4px;"></i>
+                    <i class="fas fa-door-open me-1"></i> #{{ $transaction->room->number }}
+                </p>
+            </div>
         </div>
-        <p class="header-subtitle">Transaction #{{ $transaction->id }} · {{ $transaction->customer->name }}</p>
     </div>
 
     <!-- Debug panel (admin only) -->
     @if(auth()->user()->isAdmin())
-    <div class="debug-panel fade-in d-none" id="debug-panel">
+    <div class="debug-panel fade-in anim-2 d-none" id="debug-panel">
         <div class="debug-title">
             <i class="fas fa-bug me-1"></i> Informations de débogage
         </div>
@@ -879,13 +597,11 @@
     @endif
 
     <!-- Résumé de la transaction -->
-    <div class="summary-card fade-in">
+    <div class="summary-card anim-3">
         <div class="summary-grid">
             <div class="summary-info">
                 <div class="info-row">
-                    <div class="info-icon">
-                        <i class="fas fa-user"></i>
-                    </div>
+                    <div class="info-icon"><i class="fas fa-user"></i></div>
                     <div class="info-content">
                         <div class="info-label">Client</div>
                         <div class="info-value">{{ $transaction->customer->name }}</div>
@@ -893,9 +609,7 @@
                 </div>
                 
                 <div class="info-row">
-                    <div class="info-icon">
-                        <i class="fas fa-bed"></i>
-                    </div>
+                    <div class="info-icon"><i class="fas fa-bed"></i></div>
                     <div class="info-content">
                         <div class="info-label">Chambre</div>
                         <div class="info-value">#{{ $transaction->room->number }} · {{ $transaction->room->type->name ?? 'Standard' }}</div>
@@ -903,14 +617,12 @@
                 </div>
                 
                 <div class="info-row">
-                    <div class="info-icon">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
+                    <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
                     <div class="info-content">
                         <div class="info-label">Période</div>
                         <div class="info-value">
                             {{ $transaction->check_in->format('d/m/Y') }} 
-                            <i class="fas fa-arrow-right mx-2"></i>
+                            <i class="fas fa-arrow-right mx-2" style="color:var(--s300); font-size:.7rem;"></i>
                             {{ $transaction->check_out->format('d/m/Y') }}
                             ({{ $transaction->getNightsAttribute() }} nuits)
                         </div>
@@ -951,14 +663,14 @@
         <div class="row g-4">
             <!-- Colonne gauche - Montant -->
             <div class="col-lg-5">
-                <div class="card-modern fade-in">
-                    <div class="card-header-modern">
-                        <h5>
+                <div class="payment-card anim-4">
+                    <div class="payment-card-header">
+                        <h5 class="payment-card-title">
                             <i class="fas fa-money-bill-wave"></i>
                             Montant du paiement
                         </h5>
                     </div>
-                    <div class="card-body-modern">
+                    <div class="payment-card-body">
                         <div class="amount-card">
                             <label class="amount-label-modern">Montant à payer</label>
                             <div class="amount-input-wrapper">
@@ -1001,9 +713,7 @@
                             
                             <div id="amountInfo" class="mt-3">
                                 <div class="alert-modern alert-info" id="remainingAfter">
-                                    <div class="alert-icon">
-                                        <i class="fas fa-info"></i>
-                                    </div>
+                                    <div class="alert-icon"><i class="fas fa-info"></i></div>
                                     <div>
                                         Reste après paiement: 
                                         <strong id="remainingAfterValue">{{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA</strong>
@@ -1021,14 +731,14 @@
             
             <!-- Colonne droite - Méthode de paiement -->
             <div class="col-lg-7">
-                <div class="card-modern fade-in">
-                    <div class="card-header-modern">
-                        <h5>
+                <div class="payment-card anim-5">
+                    <div class="payment-card-header">
+                        <h5 class="payment-card-title">
                             <i class="fas fa-credit-card"></i>
                             Méthode de paiement
                         </h5>
                     </div>
-                    <div class="card-body-modern">
+                    <div class="payment-card-body">
                         <!-- Méthodes de paiement -->
                         <div class="methods-grid" id="paymentMethods">
                             @php
@@ -1045,7 +755,7 @@
                                            class="method-radio"
                                            {{ $loop->first ? 'checked' : '' }}
                                            required>
-                                    <div class="method-icon-wrapper method-icon-{{ $method == 'cash' ? 'cash' : ($method == 'card' ? 'card' : ($method == 'transfer' ? 'transfer' : ($method == 'mobile_money' ? 'mobile' : ($method == 'fedapay' ? 'fedapay' : 'check')))) }}">
+                                    <div class="method-icon-wrapper">
                                         <i class="fas {{ $details['icon'] }}"></i>
                                     </div>
                                     <div class="method-name">{{ $details['label'] }}</div>
@@ -1099,24 +809,6 @@
                                                 placeholder="Ex: 01 23 45 67 89">
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-user me-1"></i> Nom du compte
-                                            </label>
-                                            <input type="text" name="account_name" class="form-control-modern" 
-                                                placeholder="Nom du titulaire">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-hashtag me-1"></i> ID Transaction
-                                            </label>
-                                            <input type="text" name="mobile_transaction_id" class="form-control-modern" 
-                                                placeholder="ID de transaction">
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -1150,29 +842,6 @@
                                                 placeholder="***" maxlength="3">
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-credit-card me-1"></i> Type de carte
-                                            </label>
-                                            <select name="card_type" class="form-control-modern">
-                                                <option value="">-- Choisir --</option>
-                                                <option value="Visa">Visa</option>
-                                                <option value="Mastercard">Mastercard</option>
-                                                <option value="Amex">American Express</option>
-                                                <option value="CB">Carte Bancaire</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-user me-1"></i> Nom du titulaire
-                                            </label>
-                                            <input type="text" name="card_holder" class="form-control-modern" 
-                                                placeholder="Nom sur la carte">
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -1195,42 +864,6 @@
                                             </label>
                                             <input type="text" name="account_number" class="form-control-modern" 
                                                 placeholder="Numéro de compte">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-qrcode me-1"></i> Code IBAN
-                                            </label>
-                                            <input type="text" name="iban" class="form-control-modern" 
-                                                placeholder="FR76 XXXX XXXX XXXX">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-barcode me-1"></i> Code BIC/SWIFT
-                                            </label>
-                                            <input type="text" name="bic" class="form-control-modern" 
-                                                placeholder="BIC/SWIFT">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-user me-1"></i> Bénéficiaire
-                                            </label>
-                                            <input type="text" name="beneficiary" class="form-control-modern" 
-                                                placeholder="Nom du bénéficiaire">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-calendar me-1"></i> Date de virement
-                                            </label>
-                                            <input type="date" name="transfer_date" class="form-control-modern" 
-                                                value="{{ now()->format('Y-m-d') }}">
                                         </div>
                                     </div>
                                 </div>
@@ -1257,30 +890,6 @@
                                                 placeholder="ID de transaction">
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-mobile-alt me-1"></i> Méthode
-                                            </label>
-                                            <select name="fedapay_method" class="form-control-modern">
-                                                <option value="card">Carte bancaire</option>
-                                                <option value="mobile">Mobile Money</option>
-                                                <option value="wallet">Wallet Fedapay</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-check-circle me-1"></i> Statut
-                                            </label>
-                                            <select name="fedapay_status" class="form-control-modern">
-                                                <option value="approved">Approuvé</option>
-                                                <option value="pending">En attente</option>
-                                                <option value="completed">Complété</option>
-                                            </select>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -1305,24 +914,6 @@
                                                 placeholder="Nom de la banque">
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-user me-1"></i> Émetteur
-                                            </label>
-                                            <input type="text" name="issuer_name" class="form-control-modern" 
-                                                placeholder="Nom de l'émetteur">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-calendar me-1"></i> Date d'émission
-                                            </label>
-                                            <input type="date" name="issue_date" class="form-control-modern" 
-                                                value="{{ now()->format('Y-m-d') }}">
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
@@ -1338,44 +929,29 @@
                                                 value="{{ auth()->user()->name }}" readonly>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="form-group-modern">
-                                            <label class="form-label-modern">
-                                                <i class="fas fa-check-circle me-1"></i> Monnaie rendue
-                                            </label>
-                                            <input type="text" name="change_given" class="form-control-modern" 
-                                                placeholder="Monnaie à rendre">
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Référence automatique (cachée) -->
+                            <!-- Référence automatique -->
                             <input type="hidden" name="reference" id="reference" value="">
                             
                             <div class="alert-modern alert-info mt-3">
-                                <div class="alert-icon">
-                                    <i class="fas fa-info-circle"></i>
-                                </div>
+                                <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
                                 <div>
-                                    <small>
-                                        Une référence de paiement sera générée automatiquement.
-                                        <br>
-                                        <span id="referenceDisplay" class="fw-bold"></span>
-                                    </small>
+                                    <small>Référence: <span id="referenceDisplay" class="fw-bold"></span></small>
                                 </div>
                             </div>
-                        </div>>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         
         <!-- Barre d'actions -->
-        <div class="action-bar fade-in">
+        <div class="action-bar anim-6">
             <a href="{{ route('transaction.show', $transaction) }}" class="btn-modern btn-outline-modern">
                 <i class="fas fa-arrow-left me-2"></i>
-                Retour à la transaction
+                Retour
             </a>
             
             <div class="action-buttons">
@@ -1402,7 +978,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-code"></i>
+                    <i class="fas fa-code me-2"></i>
                     Réponse API
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -1432,9 +1008,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Éléments DOM
     const amountInput = document.getElementById('amount');
-    const descriptionInput = document.getElementById('description');
     const remainingAfter = document.getElementById('remainingAfterValue');
-    const remainingAfterDiv = document.getElementById('remainingAfter');
     const amountWarning = document.getElementById('amountWarning');
     const warningMessage = document.getElementById('warningMessage');
     const progressBar = document.getElementById('progressBar');
@@ -1447,10 +1021,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const referenceDisplay = document.getElementById('referenceDisplay');
     
     let currentRemaining = remaining;
-    let currentAmount = amountInput.value;
     
     // Initialisation
     updateReference();
+    updateMethodFields();
     
     // Fonction pour mettre à jour la référence
     function updateReference() {
@@ -1471,18 +1045,32 @@ document.addEventListener('DOMContentLoaded', function() {
         referenceDisplay.textContent = ref;
     }
     
+    // Fonction pour mettre à jour les champs selon la méthode
+    function updateMethodFields() {
+        const method = document.querySelector('input[name="payment_method"]:checked')?.value || 'cash';
+        
+        // Cacher tous les groupes
+        document.querySelectorAll('.method-fields-group').forEach(group => {
+            group.style.display = 'none';
+        });
+        
+        // Afficher le groupe correspondant
+        const activeGroup = document.getElementById(`fields_${method}`);
+        if (activeGroup) {
+            activeGroup.style.display = 'block';
+        }
+    }
+    
     // Mettre à jour les calculs
     function updateCalculations() {
         const amount = parseFloat(amountInput.value) || 0;
         const newRemaining = currentRemaining - amount;
         const newPaymentRate = ((totalPayment + amount) / totalPrice) * 100;
         
-        // Mettre à jour l'affichage
         remainingAfter.textContent = `${newRemaining.toLocaleString('fr-FR')} CFA`;
         progressBar.style.width = `${newPaymentRate}%`;
         progressText.textContent = `${newPaymentRate.toFixed(1)}% du séjour payé`;
         
-        // Valider le montant
         if (amount > currentRemaining) {
             amountWarning.classList.remove('d-none');
             warningMessage.innerHTML = `
@@ -1502,18 +1090,14 @@ document.addEventListener('DOMContentLoaded', function() {
             amountInput.classList.remove('error');
         }
         
-        // Mettre à jour le bouton de soumission
         const method = document.querySelector('input[name="payment_method"]:checked')?.value;
-        if (method) {
+        if (method && amount > 0) {
             const methodLabel = document.querySelector(`label[for="method_${method}"] .method-name`).textContent;
-            
-            if (amount === currentRemaining && amount > 0) {
-                submitText.innerHTML = `<i class="fas fa-check me-2"></i>Payer la totalité (${methodLabel})`;
-            } else if (amount > 0) {
-                submitText.innerHTML = `<i class="fas fa-money-bill-wave me-2"></i>Payer ${amount.toLocaleString('fr-FR')} CFA (${methodLabel})`;
-            } else {
-                submitText.innerHTML = 'Enregistrer le paiement';
-            }
+            submitText.innerHTML = amount === currentRemaining ? 
+                `Payer la totalité (${methodLabel})` : 
+                `Payer ${amount.toLocaleString('fr-FR')} CFA (${methodLabel})`;
+        } else {
+            submitText.innerHTML = 'Enregistrer le paiement';
         }
     }
     
@@ -1523,58 +1107,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const amount = parseFloat(this.getAttribute('data-amount'));
             amountInput.value = amount;
             updateCalculations();
-            
-            // Animation
-            this.classList.add('btn-primary-modern');
-            setTimeout(() => {
-                this.classList.remove('btn-primary-modern');
-            }, 300);
         });
     });
     
     // Gérer le changement de méthode de paiement
     document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
         radio.addEventListener('change', function() {
-            // Mettre à jour les cartes actives
             document.querySelectorAll('.method-card-modern').forEach(card => {
                 card.classList.remove('active');
             });
             this.closest('label').classList.add('active');
-            
-            // Mettre à jour la référence
             updateReference();
-            
-            // Mettre à jour la description par défaut
-            const method = this.value;
-            const descriptions = {
-                'cash': 'Paiement en espèces comptant',
-                'card': 'Paiement par carte bancaire',
-                'transfer': 'Paiement par virement bancaire',
-                'mobile_money': 'Paiement par Mobile Money',
-                'fedapay': 'Paiement par Fedapay',
-                'check': 'Paiement par chèque'
-            };
-            
-            if (!descriptionInput.value) {
-                descriptionInput.value = descriptions[method] || '';
-            }
-            
+            updateMethodFields();
             updateCalculations();
         });
     });
     
     // Gérer la saisie du montant
-    amountInput.addEventListener('input', function() {
-        let value = parseFloat(this.value) || 0;
-        
-        // Limiter à currentRemaining
-        if (value > currentRemaining) {
-            value = currentRemaining;
-            this.value = currentRemaining;
-        }
-        
-        updateCalculations();
-    });
+    amountInput.addEventListener('input', updateCalculations);
     
     // Valider le formulaire
     validateBtn.addEventListener('click', function() {
@@ -1627,11 +1177,10 @@ document.addEventListener('DOMContentLoaded', function() {
             title: 'Validation réussie',
             html: `
                 <div class="text-start">
-                    <p>Le formulaire est prêt à être soumis.</p>
-                    <div class="alert alert-success">
+                    <div class="alert alert-success mb-0" style="background:var(--g50); border-color:var(--g200); color:var(--g700);">
                         <strong>Montant:</strong> ${amount.toLocaleString('fr-FR')} CFA<br>
                         <strong>Méthode:</strong> ${methodLabel}<br>
-                        <strong>Reste à payer:</strong> ${(currentRemaining - amount).toLocaleString('fr-FR')} CFA
+                        <strong>Reste:</strong> ${(currentRemaining - amount).toLocaleString('fr-FR')} CFA
                     </div>
                 </div>
             `,
@@ -1656,7 +1205,6 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
-        // Désactiver le bouton
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Traitement...';
         
@@ -1680,13 +1228,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     html: `
                         <div class="text-start">
                             <p>${data.message}</p>
-                            <div class="alert alert-success">
+                            <div class="alert alert-success" style="background:var(--g50); border-color:var(--g200); color:var(--g700);">
                                 <strong>Montant:</strong> ${data.data.payment.amount.toLocaleString('fr-FR')} CFA<br>
-                                <strong>Référence:</strong> ${data.data.payment.reference}<br>
-                                ${data.data.transaction.is_fully_paid ? 
-                                    '<div class="mt-2"><i class="fas fa-trophy me-2"></i>Transaction entièrement payée !</div>' : 
-                                    `<div class="mt-2">Reste: ${data.data.transaction.remaining.toLocaleString('fr-FR')} CFA</div>`
-                                }
+                                <strong>Référence:</strong> ${data.data.payment.reference}
                             </div>
                         </div>
                     `,
@@ -1733,97 +1277,34 @@ document.addEventListener('DOMContentLoaded', function() {
     @if(auth()->user()->isAdmin())
         const debugPanel = document.getElementById('debug-panel');
         
-        document.getElementById('hide-debug').addEventListener('click', function() {
-            debugPanel.classList.add('d-none');
-        });
-        
-        document.getElementById('refresh-debug').addEventListener('click', async function() {
-            const btn = this;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>';
-            
-            try {
-                const response = await fetch(`/api/transactions/${transactionId}/check-status`);
-                const data = await response.json();
-                
-                // Mettre à jour les valeurs
-                location.reload();
-            } catch (error) {
-                console.error('Erreur:', error);
-            } finally {
-                btn.innerHTML = '<i class="fas fa-sync-alt me-1"></i> Actualiser';
-            }
-        });
-        
-        document.getElementById('force-sync').addEventListener('click', async function() {
-            const result = await Swal.fire({
-                title: 'Synchroniser ?',
-                text: 'Recalculer tous les totaux',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Oui',
-                cancelButtonText: 'Non'
+        if (document.getElementById('hide-debug')) {
+            document.getElementById('hide-debug').addEventListener('click', function() {
+                debugPanel.classList.add('d-none');
             });
-            
-            if (result.isConfirmed) {
-                const btn = this;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>';
-                
+        }
+        
+        if (document.getElementById('refresh-debug')) {
+            document.getElementById('refresh-debug').addEventListener('click', async function() {
+                location.reload();
+            });
+        }
+        
+        if (document.getElementById('show-api')) {
+            document.getElementById('show-api').addEventListener('click', async function() {
                 try {
-                    const response = await fetch(`/api/transactions/${transactionId}/force-sync`);
+                    const response = await fetch(`/api/transactions/${transactionId}/check-status`);
                     const data = await response.json();
                     
-                    if (data.success) {
-                        Swal.fire('Succès', data.message, 'success');
-                        setTimeout(() => location.reload(), 1000);
-                    }
+                    document.getElementById('apiResponseContent').textContent = JSON.stringify(data, null, 2);
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('apiModal'));
+                    modal.show();
                 } catch (error) {
                     console.error('Erreur:', error);
-                } finally {
-                    btn.innerHTML = '<i class="fas fa-cogs me-1"></i> Synchroniser';
                 }
-            }
-        });
-        
-        document.getElementById('show-api').addEventListener('click', async function() {
-            try {
-                const response = await fetch(`/api/transactions/${transactionId}/check-status`);
-                const data = await response.json();
-                
-                document.getElementById('apiResponseContent').textContent = JSON.stringify(data, null, 2);
-                
-                const modal = new bootstrap.Modal(document.getElementById('apiModal'));
-                modal.show();
-            } catch (error) {
-                console.error('Erreur:', error);
-            }
-        });
+            });
+        }
     @endif
 });
-// Gérer l'affichage des champs selon la méthode
-function updateMethodFields() {
-    const method = document.querySelector('input[name="payment_method"]:checked')?.value || 'cash';
-    
-    // Cacher tous les groupes
-    document.querySelectorAll('.method-fields-group').forEach(group => {
-        group.style.display = 'none';
-    });
-    
-    // Afficher le groupe correspondant
-    const activeGroup = document.getElementById(`fields_${method}`);
-    if (activeGroup) {
-        activeGroup.style.display = 'block';
-    }
-}
-
-// Ajouter l'écouteur sur les changements de méthode
-document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        // Code existant...
-        updateMethodFields();
-    });
-});
-
-// Initialiser
-updateMethodFields();
 </script>
-@endsection 
+@endsection

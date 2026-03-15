@@ -753,11 +753,9 @@
 }
 </style>
 <?php $__env->stopPush(); ?>
-
 <?php $__env->startPush('scripts'); ?>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-
     // ── Enlever le focus rectangle sur tous les boutons/liens ──
     document.querySelectorAll('button, a').forEach(el => {
         el.addEventListener('mousedown', e => e.preventDefault());
@@ -846,14 +844,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (this.dataset.view === 'list') {
                 grid.classList.add('view-list');
-                // Passer les colonnes en full-width
                 grid.querySelectorAll('.room-item').forEach(item => {
                     item.classList.remove('col-lg-4', 'col-md-6');
                     item.classList.add('col-12');
                 });
             } else {
                 grid.classList.remove('view-list');
-                // Restaurer la grille
                 grid.querySelectorAll('.room-item').forEach(item => {
                     item.classList.remove('col-12');
                     item.classList.add('col-lg-4', 'col-md-6');
