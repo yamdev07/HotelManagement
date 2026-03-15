@@ -1,6 +1,5 @@
-@extends('template.master')
-@section('title', 'Modifier Utilisateur')
-@section('content')
+<?php $__env->startSection('title', 'Modifier Utilisateur'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -251,11 +250,11 @@
 <div class="edit-user-page">
     <!-- Breadcrumb -->
     <div class="edit-user-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('user.index') }}">Utilisateurs</a>
+        <a href="<?php echo e(route('user.index')); ?>">Utilisateurs</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('user.show', $user->id) }}">{{ $user->name }}</a>
+        <a href="<?php echo e(route('user.show', $user->id)); ?>"><?php echo e($user->name); ?></a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Modifier</span>
     </div>
@@ -267,32 +266,32 @@
             <div>
                 <h1 class="edit-user-header-title">Modifier <em>l'utilisateur</em></h1>
                 <p class="edit-user-header-sub">
-                    <i class="fas fa-user me-1"></i> {{ $user->name }} · Mise à jour des informations
+                    <i class="fas fa-user me-1"></i> <?php echo e($user->name); ?> · Mise à jour des informations
                 </p>
             </div>
         </div>
         <div class="edit-user-header-actions">
-            <a href="{{ route('user.show', $user->id) }}" class="btn-db btn-db-ghost">
+            <a href="<?php echo e(route('user.show', $user->id)); ?>" class="btn-db btn-db-ghost">
                 <i class="fas fa-eye me-2"></i> Voir le profil
             </a>
         </div>
     </div>
 
     <!-- Alertes d'erreurs -->
-    @if ($errors->any())
+    <?php if($errors->any()): ?>
         <div class="alert-db alert-db-danger anim-2">
             <i class="fas fa-exclamation-circle" style="font-size:1.2rem;"></i>
             <div style="flex:1">
                 <strong>Veuillez corriger les erreurs suivantes :</strong>
                 <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <li><?php echo e($error); ?></li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </ul>
             </div>
             <button class="btn-close" onclick="this.parentElement.remove()">×</button>
         </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Formulaire -->
     <div class="edit-user-card anim-3">
@@ -303,9 +302,9 @@
             </h5>
         </div>
         <div class="edit-user-card-body">
-            <form method="POST" action="{{ route('user.update', ['user' => $user->id]) }}">
-                @method('PUT')
-                @csrf
+            <form method="POST" action="<?php echo e(route('user.update', ['user' => $user->id])); ?>">
+                <?php echo method_field('PUT'); ?>
+                <?php echo csrf_field(); ?>
                 
                 <div class="form-grid">
                     <!-- Nom -->
@@ -314,14 +313,29 @@
                             <i class="fas fa-user"></i>
                             Nom complet <span class="required">*</span>
                         </label>
-                        <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                               id="name" name="name" value="{{ $user->name }}"
+                        <input type="text" class="form-control <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                               id="name" name="name" value="<?php echo e($user->name); ?>"
                                placeholder="Nom de l'utilisateur">
-                        @error('name')
+                        <?php $__errorArgs = ['name'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <div class="text-danger">
-                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                             </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                     
                     <!-- Email -->
@@ -330,14 +344,29 @@
                             <i class="fas fa-envelope"></i>
                             Email <span class="required">*</span>
                         </label>
-                        <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                               id="email" name="email" value="{{ $user->email }}"
+                        <input type="email" class="form-control <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" 
+                               id="email" name="email" value="<?php echo e($user->email); ?>"
                                placeholder="email@exemple.com">
-                        @error('email')
+                        <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <div class="text-danger">
-                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                             </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                     </div>
                     
                     <!-- Rôle -->
@@ -346,27 +375,42 @@
                             <i class="fas fa-shield-alt"></i>
                             Rôle <span class="required">*</span>
                         </label>
-                        <select id="role" name="role" class="form-select @error('role') is-invalid @enderror">
+                        <select id="role" name="role" class="form-select <?php $__errorArgs = ['role'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>">
                             <option selected disabled hidden>-- Sélectionner un rôle --</option>
-                            @if (in_array($user->role, ['Super', 'Admin']))
-                                <option value="Super" @if ($user->role == 'Super') selected @endif>Super Admin</option>
-                                <option value="Admin" @if ($user->role == 'Admin') selected @endif>Administrateur</option>
-                            @endif
-                            @if ($user->role == 'Customer')
-                                <option value="Customer" @if ($user->role == 'Customer') selected @endif>Client</option>
-                            @endif
-                            @if ($user->role == 'Receptionist')
-                                <option value="Receptionist" @if ($user->role == 'Receptionist') selected @endif>Réceptionniste</option>
-                            @endif
-                            @if ($user->role == 'Housekeeping')
-                                <option value="Housekeeping" @if ($user->role == 'Housekeeping') selected @endif>Housekeeping</option>
-                            @endif
+                            <?php if(in_array($user->role, ['Super', 'Admin'])): ?>
+                                <option value="Super" <?php if($user->role == 'Super'): ?> selected <?php endif; ?>>Super Admin</option>
+                                <option value="Admin" <?php if($user->role == 'Admin'): ?> selected <?php endif; ?>>Administrateur</option>
+                            <?php endif; ?>
+                            <?php if($user->role == 'Customer'): ?>
+                                <option value="Customer" <?php if($user->role == 'Customer'): ?> selected <?php endif; ?>>Client</option>
+                            <?php endif; ?>
+                            <?php if($user->role == 'Receptionist'): ?>
+                                <option value="Receptionist" <?php if($user->role == 'Receptionist'): ?> selected <?php endif; ?>>Réceptionniste</option>
+                            <?php endif; ?>
+                            <?php if($user->role == 'Housekeeping'): ?>
+                                <option value="Housekeeping" <?php if($user->role == 'Housekeeping'): ?> selected <?php endif; ?>>Housekeeping</option>
+                            <?php endif; ?>
                         </select>
-                        @error('role')
+                        <?php $__errorArgs = ['role'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
                             <div class="text-danger">
-                                <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                                <i class="fas fa-exclamation-circle"></i> <?php echo e($message); ?>
+
                             </div>
-                        @enderror
+                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                         <div class="form-hint" style="font-size:.65rem; color:var(--s400); margin-top:4px;">
                             <i class="fas fa-info-circle"></i> Le rôle détermine les permissions de l'utilisateur
                         </div>
@@ -375,7 +419,7 @@
                 
                 <!-- Actions -->
                 <div class="actions-bar">
-                    <a href="{{ route('user.index') }}" class="btn-db btn-db-ghost">
+                    <a href="<?php echo e(route('user.index')); ?>" class="btn-db btn-db-ghost">
                         <i class="fas fa-times me-2"></i> Annuler
                     </a>
                     <button type="submit" class="btn-db btn-db-primary">
@@ -386,4 +430,5 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/user/edit.blade.php ENDPATH**/ ?>
