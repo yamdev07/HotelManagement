@@ -3,32 +3,355 @@
 <?php $__env->startSection('title', 'Rapports & Analytics'); ?>
 
 <?php $__env->startSection('content'); ?>
-<div class="container-fluid py-4">
 
-    <!-- ================================================ -->
-    <!-- PAGE HEADER -->
-    <!-- ================================================ -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h3 class="fw-bold mb-0">📊 Rapports & Analytics</h3>
-            <small class="text-muted">Performance • Finances • Opérations • Tendances</small>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+    /* ── Palette : 3 couleurs uniquement ── */
+    /* VERT */
+    --g50:  #f0faf0;
+    --g100: #d4edda;
+    --g200: #a8d5b5;
+    --g300: #72bb82;
+    --g400: #4a9e5c;
+    --g500: #2e8540;
+    --g600: #1e6b2e;
+    --g700: #155221;
+    --g800: #0d3a16;
+    --g900: #072210;
+    /* BLANC / SURFACE */
+    --white:    #ffffff;
+    --surface:  #f7f9f7;
+    --surface2: #eef3ee;
+    /* GRIS */
+    --s50:  #f8f9f8;
+    --s100: #eff0ef;
+    --s200: #dde0dd;
+    --s300: #c2c7c2;
+    --s400: #9ba09b;
+    --s500: #737873;
+    --s600: #545954;
+    --s700: #3a3e3a;
+    --s800: #252825;
+    --s900: #131513;
+
+    --shadow-xs: 0 1px 2px rgba(0,0,0,.04);
+    --shadow-sm: 0 1px 6px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,.08), 0 2px 4px rgba(0,0,0,.04);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,.10), 0 4px 12px rgba(0,0,0,.05);
+
+    --r:   8px;
+    --rl:  14px;
+    --rxl: 20px;
+    --transition: all .2s cubic-bezier(.4,0,.2,1);
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+.reports-page {
+    padding: 28px 32px 64px;
+    background: var(--surface);
+    min-height: 100vh;
+    font-family: var(--font);
+    color: var(--s800);
+}
+
+/* ── Animations ── */
+@keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+    from { opacity: 0; transform: scale(.96); }
+    to   { opacity: 1; transform: scale(1); }
+}
+.anim-1 { animation: fadeSlide .4s ease both; }
+.anim-2 { animation: fadeSlide .4s .08s ease both; }
+.anim-3 { animation: fadeSlide .4s .16s ease both; }
+.anim-4 { animation: fadeSlide .4s .24s ease both; }
+.anim-5 { animation: fadeSlide .4s .32s ease both; }
+.anim-6 { animation: fadeSlide .4s .40s ease both; }
+
+/* ══════════════════════════════════════════════
+   BREADCRUMB
+══════════════════════════════════════════════ */
+.reports-breadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    font-size: .8rem; color: var(--s400);
+    margin-bottom: 20px;
+}
+.reports-breadcrumb a {
+    color: var(--s400); text-decoration: none;
+    transition: var(--transition);
+}
+.reports-breadcrumb a:hover { color: var(--g600); }
+.reports-breadcrumb .sep { color: var(--s300); }
+.reports-breadcrumb .current { color: var(--s600); font-weight: 500; }
+
+/* ══════════════════════════════════════════════
+   HEADER
+══════════════════════════════════════════════ */
+.reports-header {
+    display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap;
+    gap: 16px; margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1.5px solid var(--s100);
+}
+.reports-brand { display: flex; align-items: center; gap: 14px; }
+.reports-brand-icon {
+    width: 48px; height: 48px;
+    background: var(--g600); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.1rem; flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+}
+.reports-header-title {
+    font-size: 1.4rem; font-weight: 700;
+    color: var(--s900); line-height: 1.2; letter-spacing: -.3px;
+}
+.reports-header-title em { font-style: normal; color: var(--g600); }
+.reports-header-sub {
+    font-size: .8rem; color: var(--s400); margin-top: 3px;
+    display: flex; align-items: center; gap: 8px;
+}
+.reports-header-sub i { color: var(--g500); }
+.reports-header-actions { display: flex; align-items: center; gap: 10px; }
+
+/* ══════════════════════════════════════════════
+   BOUTONS
+══════════════════════════════════════════════ */
+.btn-db {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: var(--r);
+    font-size: .8rem; font-weight: 500; border: none;
+    cursor: pointer; transition: var(--transition);
+    text-decoration: none; white-space: nowrap; line-height: 1;
+    font-family: var(--font);
+}
+.btn-db-primary {
+    background: var(--g600); color: white;
+    box-shadow: 0 2px 10px rgba(46,133,64,.3);
+}
+.btn-db-primary:hover {
+    background: var(--g700); color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    text-decoration: none;
+}
+.btn-db-ghost {
+    background: var(--white); color: var(--s600);
+    border: 1.5px solid var(--s200);
+}
+.btn-db-ghost:hover {
+    background: var(--s50); border-color: var(--s300);
+    color: var(--s900); text-decoration: none;
+}
+.btn-db-outline-primary {
+    background: transparent; color: var(--g600);
+    border: 1.5px solid var(--g200);
+}
+.btn-db-outline-primary:hover {
+    background: var(--g50); color: var(--g700);
+    border-color: var(--g300); transform: translateY(-1px);
+}
+
+/* ══════════════════════════════════════════════
+   FILTER CARD
+══════════════════════════════════════════════ */
+.filter-card {
+    background: var(--white); border-radius: var(--rxl);
+    border: 1.5px solid var(--s100); overflow: hidden;
+    margin-bottom: 24px; box-shadow: var(--shadow-sm);
+}
+.filter-card-body {
+    padding: 20px 24px;
+}
+.form-label {
+    font-size: .7rem; font-weight: 600; color: var(--s600);
+    margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px;
+}
+.form-control, .form-select {
+    padding: 8px 12px; border-radius: var(--r);
+    border: 1.5px solid var(--s200); font-size: .8rem;
+    font-family: var(--font); transition: var(--transition);
+    background: var(--white); width: 100%;
+}
+.form-control:focus, .form-select:focus {
+    outline: none; border-color: var(--g400);
+    box-shadow: 0 0 0 3px var(--g100);
+}
+
+/* ══════════════════════════════════════════════
+   KPI CARDS
+══════════════════════════════════════════════ */
+.kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 14px; margin-bottom: 20px;
+}
+@media(max-width:1100px){ .kpi-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:560px){ .kpi-grid{ grid-template-columns:1fr; } }
+
+.kpi-card {
+    background: var(--white); border-radius: var(--rl);
+    padding: 20px; border: 1.5px solid var(--s100);
+    box-shadow: var(--shadow-xs); transition: var(--transition);
+}
+.kpi-card:hover {
+    transform: translateY(-3px); box-shadow: var(--shadow-md);
+    border-color: var(--g200);
+}
+.kpi-icon {
+    width: 48px; height: 48px; border-radius: var(--rl);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; margin-right: 14px;
+}
+.kpi-icon-primary { background: var(--g50); color: var(--g600); }
+.kpi-icon-success { background: var(--g100); color: var(--g700); }
+.kpi-icon-info { background: var(--g50); color: var(--g500); }
+.kpi-icon-warning { background: #fff3cd; color: #856404; }
+.kpi-icon-secondary { background: var(--s100); color: var(--s600); }
+.kpi-icon-dark { background: var(--s200); color: var(--s700); }
+.kpi-icon-danger { background: #fee2e2; color: #b91c1c; }
+
+.kpi-value {
+    font-size: 1.4rem; font-weight: 700; color: var(--s800);
+    line-height: 1.2; font-family: var(--mono);
+}
+.kpi-label {
+    font-size: .75rem; color: var(--s400); text-transform: uppercase;
+    letter-spacing: .5px; margin-bottom: 2px;
+}
+.kpi-meta {
+    font-size: .7rem; color: var(--s400);
+}
+
+/* ══════════════════════════════════════════════
+   CARDS
+══════════════════════════════════════════════ */
+.report-card {
+    background: var(--white); border-radius: var(--rxl);
+    border: 1.5px solid var(--s100); overflow: hidden;
+    margin-bottom: 20px; box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+.report-card:hover { box-shadow: var(--shadow-md); }
+
+.report-card-header {
+    padding: 16px 20px; border-bottom: 1.5px solid var(--s100);
+    background: var(--white); display: flex;
+    align-items: center; justify-content: space-between;
+}
+.report-card-title {
+    display: flex; align-items: center; gap: 8px;
+    font-size: .9rem; font-weight: 600; color: var(--s800); margin: 0;
+}
+.report-card-title i { color: var(--g500); }
+.report-card-badge {
+    background: var(--g100); color: var(--g700);
+    font-size: .7rem; font-weight: 600; padding: 4px 10px;
+    border-radius: 100px;
+}
+.report-card-body { padding: 20px; }
+.report-card-body-p0 { padding: 0; }
+
+/* ══════════════════════════════════════════════
+   TABLES
+══════════════════════════════════════════════ */
+.report-table {
+    width: 100%; border-collapse: collapse;
+}
+.report-table thead th {
+    font-size: .65rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .7px; color: var(--s400);
+    padding: 12px 16px; background: var(--surface);
+    border-bottom: 1.5px solid var(--s100); white-space: nowrap;
+}
+.report-table tbody td {
+    padding: 12px 16px; font-size: .8rem; color: var(--s600);
+    border-bottom: 1px solid var(--s100);
+}
+.report-table tbody tr:hover { background: var(--g50); }
+.report-table tfoot td {
+    padding: 12px 16px; background: var(--surface);
+    border-top: 1.5px solid var(--s100);
+    font-weight: 600; color: var(--s800);
+}
+
+/* ══════════════════════════════════════════════
+   PROGRESS BAR
+══════════════════════════════════════════════ */
+.progress {
+    height: 20px; background: var(--s100);
+    border-radius: 10px; overflow: hidden;
+}
+.progress-bar {
+    height: 100%; background: var(--g500);
+    border-radius: 10px; font-size: .7rem;
+    line-height: 20px; color: white; padding: 0 8px;
+}
+
+/* ══════════════════════════════════════════════
+   BADGES
+══════════════════════════════════════════════ */
+.badge-db {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 30px; font-size: .7rem;
+    font-weight: 600;
+}
+.badge-db-primary { background: var(--g100); color: var(--g700); }
+.badge-db-success { background: var(--g100); color: var(--g700); }
+.badge-db-warning { background: #fff3cd; color: #856404; }
+.badge-db-danger { background: #fee2e2; color: #b91c1c; }
+.badge-db-info { background: var(--g50); color: var(--g600); }
+.badge-db-secondary { background: var(--s100); color: var(--s600); }
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+@media(max-width:768px){
+    .reports-page{ padding: 20px; }
+    .reports-header{ flex-direction: column; align-items: flex-start; }
+    .filter-card-body .row{ gap: 10px; }
+    .btn-db{ width: 100%; justify-content: center; }
+}
+</style>
+
+<div class="reports-page">
+    <!-- Breadcrumb -->
+    <div class="reports-breadcrumb anim-1">
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
+        <span class="current">Rapports & Analytics</span>
+    </div>
+
+    <!-- Header -->
+    <div class="reports-header anim-2">
+        <div class="reports-brand">
+            <div class="reports-brand-icon"><i class="fas fa-chart-line"></i></div>
+            <div>
+                <h1 class="reports-header-title">Rapports & <em>Analytics</em></h1>
+                <p class="reports-header-sub">
+                    <i class="fas fa-chart-pie me-1"></i> Performance · Finances · Opérations · Tendances
+                </p>
+            </div>
         </div>
-
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-primary" onclick="window.print()">
-                <i class="fas fa-print me-2"></i>Imprimer
+        <div class="reports-header-actions">
+            <button class="btn-db btn-db-outline-primary" onclick="window.print()">
+                <i class="fas fa-print me-2"></i> Imprimer
             </button>
-            <button class="btn btn-hotel-primary" id="exportPdf">
-                <i class="fas fa-download me-2"></i>Export PDF
+            <button class="btn-db btn-db-primary" id="exportPdf">
+                <i class="fas fa-download me-2"></i> Export PDF
             </button>
         </div>
     </div>
 
-    <!-- ================================================ -->
-    <!-- FILTERS & DATE RANGE -->
-    <!-- ================================================ -->
-    <div class="card shadow-sm border-0 rounded-3 mb-4">
-        <div class="card-body">
+    <!-- Filtres -->
+    <div class="filter-card anim-3">
+        <div class="filter-card-body">
             <form method="GET" action="<?php echo e(route('reports.index')); ?>" class="row g-3 align-items-end">
                 <div class="col-md-3">
                     <label class="form-label">Période</label>
@@ -51,163 +374,139 @@
                     <input type="date" name="date_to" class="form-control" value="<?php echo e(request('date_to', now()->format('Y-m-d'))); ?>">
                 </div>
                 <div class="col-md-3">
-                    <button type="submit" class="btn btn-hotel-primary w-100">
-                        <i class="fas fa-filter me-2"></i>Appliquer
+                    <button type="submit" class="btn-db btn-db-primary w-100">
+                        <i class="fas fa-filter me-2"></i> Appliquer
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- ================================================ -->
-    <!-- KPI CARDS - ROW 1 (FINANCIAL) -->
-    <!-- ================================================ -->
-    <div class="row g-3 mb-4">
-
+    <!-- KPI Cards - Row 1 (Financial) -->
+    <div class="kpi-grid anim-4">
         <!-- Total Revenue -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-3 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
-                        <i class="fas fa-wallet fa-lg"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h6 class="text-muted mb-1">Chiffre d'affaires</h6>
-                        <h4 class="fw-bold"><?php echo e(number_format($totalRevenue ?? 0, 0, ',', ' ')); ?> CFA</h4>
-                    </div>
+        <div class="kpi-card">
+            <div class="d-flex align-items-center">
+                <div class="kpi-icon kpi-icon-primary me-3">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">Chiffre d'affaires</div>
+                    <div class="kpi-value"><?php echo e(number_format($totalRevenue ?? 0, 0, ',', ' ')); ?> CFA</div>
                 </div>
             </div>
         </div>
 
         <!-- Total Payments -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-3 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="bg-success text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
-                        <i class="fas fa-credit-card fa-lg"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h6 class="text-muted mb-1">Paiements encaissés</h6>
-                        <h4 class="fw-bold"><?php echo e(number_format($totalPaymentsAmount ?? 0, 0, ',', ' ')); ?> CFA</h4>
-                        <small class="text-muted"><?php echo e($paymentsCount ?? 0); ?> transactions</small>
-                    </div>
+        <div class="kpi-card">
+            <div class="d-flex align-items-center">
+                <div class="kpi-icon kpi-icon-success me-3">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">Paiements encaissés</div>
+                    <div class="kpi-value"><?php echo e(number_format($totalPaymentsAmount ?? 0, 0, ',', ' ')); ?> CFA</div>
+                    <div class="kpi-meta"><?php echo e($paymentsCount ?? 0); ?> transactions</div>
                 </div>
             </div>
         </div>
 
         <!-- Average Night Rate -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-3 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="bg-info text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
-                        <i class="fas fa-moon fa-lg"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h6 class="text-muted mb-1">Prix moyen / nuit</h6>
-                        <h4 class="fw-bold"><?php echo e(number_format($averageNightRate ?? 0, 0, ',', ' ')); ?> CFA</h4>
-                    </div>
+        <div class="kpi-card">
+            <div class="d-flex align-items-center">
+                <div class="kpi-icon kpi-icon-info me-3">
+                    <i class="fas fa-moon"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">Prix moyen / nuit</div>
+                    <div class="kpi-value"><?php echo e(number_format($averageNightRate ?? 0, 0, ',', ' ')); ?> CFA</div>
                 </div>
             </div>
         </div>
 
         <!-- RevPAR -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-3 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="bg-warning text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
-                        <i class="fas fa-chart-line fa-lg"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h6 class="text-muted mb-1">RevPAR</h6>
-                        <h4 class="fw-bold"><?php echo e(number_format($revPAR ?? 0, 0, ',', ' ')); ?> CFA</h4>
-                    </div>
+        <div class="kpi-card">
+            <div class="d-flex align-items-center">
+                <div class="kpi-icon kpi-icon-warning me-3">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">RevPAR</div>
+                    <div class="kpi-value"><?php echo e(number_format($revPAR ?? 0, 0, ',', ' ')); ?> CFA</div>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- ================================================ -->
-    <!-- KPI CARDS - ROW 2 (OPERATIONAL) -->
-    <!-- ================================================ -->
-    <div class="row g-3 mb-4">
-
+    <!-- KPI Cards - Row 2 (Operational) -->
+    <div class="kpi-grid anim-5">
         <!-- Occupancy Rate -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-3 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="bg-secondary text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
-                        <i class="fas fa-bed fa-lg"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h6 class="text-muted mb-1">Taux d'occupation</h6>
-                        <h4 class="fw-bold"><?php echo e($occupancyRate ?? 0); ?>%</h4>
-                        <small class="text-muted"><?php echo e($occupiedRooms ?? 0); ?>/<?php echo e($totalRooms ?? 0); ?> chambres</small>
-                    </div>
+        <div class="kpi-card">
+            <div class="d-flex align-items-center">
+                <div class="kpi-icon kpi-icon-secondary me-3">
+                    <i class="fas fa-bed"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">Taux d'occupation</div>
+                    <div class="kpi-value"><?php echo e($occupancyRate ?? 0); ?>%</div>
+                    <div class="kpi-meta"><?php echo e($occupiedRooms ?? 0); ?>/<?php echo e($totalRooms ?? 0); ?> chambres</div>
                 </div>
             </div>
         </div>
 
         <!-- Check-ins / Check-outs -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-3 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="bg-dark text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
-                        <i class="fas fa-exchange-alt fa-lg"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h6 class="text-muted mb-1">Arrivées / Départs</h6>
-                        <h4 class="fw-bold"><?php echo e($checkinsCount ?? 0); ?> / <?php echo e($checkoutsCount ?? 0); ?></h4>
-                    </div>
+        <div class="kpi-card">
+            <div class="d-flex align-items-center">
+                <div class="kpi-icon kpi-icon-dark me-3">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">Arrivées / Départs</div>
+                    <div class="kpi-value"><?php echo e($checkinsCount ?? 0); ?> / <?php echo e($checkoutsCount ?? 0); ?></div>
                 </div>
             </div>
         </div>
 
         <!-- Total Nights -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-3 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="bg-purple text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
-                        <i class="fas fa-sun fa-lg"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h6 class="text-muted mb-1">Nuitées vendues</h6>
-                        <h4 class="fw-bold"><?php echo e($totalNights ?? 0); ?></h4>
-                    </div>
+        <div class="kpi-card">
+            <div class="d-flex align-items-center">
+                <div class="kpi-icon kpi-icon-primary me-3">
+                    <i class="fas fa-sun"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">Nuitées vendues</div>
+                    <div class="kpi-value"><?php echo e($totalNights ?? 0); ?></div>
                 </div>
             </div>
         </div>
 
         <!-- Average Stay -->
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 rounded-3 p-3">
-                <div class="d-flex align-items-center">
-                    <div class="bg-danger text-white rounded-circle d-flex justify-content-center align-items-center" style="width: 48px; height: 48px;">
-                        <i class="fas fa-clock fa-lg"></i>
-                    </div>
-                    <div class="ms-3">
-                        <h6 class="text-muted mb-1">Séjour moyen</h6>
-                        <h4 class="fw-bold"><?php echo e($averageStayLength ?? 0); ?> nuits</h4>
-                    </div>
+        <div class="kpi-card">
+            <div class="d-flex align-items-center">
+                <div class="kpi-icon kpi-icon-danger me-3">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div>
+                    <div class="kpi-label">Séjour moyen</div>
+                    <div class="kpi-value"><?php echo e($averageStayLength ?? 0); ?> nuits</div>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- ================================================ -->
-    <!-- CHARTS SECTION - ROW 1 -->
-    <!-- ================================================ -->
-    <div class="row g-4 mb-4">
-
+    <!-- Charts Section - Row 1 -->
+    <div class="row g-4 mb-4 anim-6">
         <!-- Revenue Chart -->
         <div class="col-lg-8">
-            <div class="card shadow-sm border-0 rounded-3 h-100">
-                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-                    <h6 class="fw-bold mb-0">📈 Évolution du chiffre d'affaires</h6>
-                    <span class="badge bg-primary"><?php echo e($periodLabel ?? 'Période sélectionnée'); ?></span>
+            <div class="report-card h-100">
+                <div class="report-card-header">
+                    <h5 class="report-card-title">
+                        <i class="fas fa-chart-line"></i>
+                        Évolution du chiffre d'affaires
+                    </h5>
+                    <span class="report-card-badge"><?php echo e($periodLabel ?? 'Période sélectionnée'); ?></span>
                 </div>
-                <div class="card-body">
+                <div class="report-card-body">
                     <canvas id="revenueChart" style="height: 300px;"></canvas>
                 </div>
             </div>
@@ -215,38 +514,40 @@
 
         <!-- Payment Methods Chart -->
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0 rounded-3 h-100">
-                <div class="card-header bg-white border-0">
-                    <h6 class="fw-bold mb-0">💳 Répartition des paiements</h6>
+            <div class="report-card h-100">
+                <div class="report-card-header">
+                    <h5 class="report-card-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Répartition des paiements
+                    </h5>
                 </div>
-                <div class="card-body">
+                <div class="report-card-body">
                     <canvas id="paymentChart" style="height: 250px;"></canvas>
-                    <div class="mt-3 small">
+                    <div class="mt-3">
                         <?php $__currentLoopData = $paymentSummary ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $method): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="d-flex justify-content-between mb-1">
-                            <span><i class="<?php echo e($method['icon']); ?> me-1"></i><?php echo e($method['label']); ?></span>
-                            <span class="fw-bold"><?php echo e(number_format($method['percentage'] ?? 0, 1)); ?>%</span>
+                        <div class="d-flex justify-content-between mb-1" style="font-size:.75rem;">
+                            <span style="color:var(--s600);"><i class="<?php echo e($method['icon'] ?? 'fas fa-circle'); ?> me-1" style="color:var(--g500);"></i><?php echo e($method['label'] ?? 'N/A'); ?></span>
+                            <span class="fw-bold" style="color:var(--s800);"><?php echo e(number_format($method['percentage'] ?? 0, 1)); ?>%</span>
                         </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- ================================================ -->
-    <!-- CHARTS SECTION - ROW 2 -->
-    <!-- ================================================ -->
+    <!-- Charts Section - Row 2 -->
     <div class="row g-4 mb-4">
-
         <!-- Occupancy Chart -->
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0 rounded-3 h-100">
-                <div class="card-header bg-white border-0">
-                    <h6 class="fw-bold mb-0">🏨 Occupation des chambres</h6>
+            <div class="report-card h-100">
+                <div class="report-card-header">
+                    <h5 class="report-card-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Occupation des chambres
+                    </h5>
                 </div>
-                <div class="card-body">
+                <div class="report-card-body">
                     <canvas id="occupancyChart" style="height: 250px;"></canvas>
                 </div>
             </div>
@@ -254,11 +555,14 @@
 
         <!-- Room Status Chart -->
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0 rounded-3 h-100">
-                <div class="card-header bg-white border-0">
-                    <h6 class="fw-bold mb-0">🧹 Statut des chambres</h6>
+            <div class="report-card h-100">
+                <div class="report-card-header">
+                    <h5 class="report-card-title">
+                        <i class="fas fa-chart-bar"></i>
+                        Statut des chambres
+                    </h5>
                 </div>
-                <div class="card-body">
+                <div class="report-card-body">
                     <canvas id="roomStatusChart" style="height: 250px;"></canvas>
                 </div>
             </div>
@@ -266,34 +570,36 @@
 
         <!-- Checkout Times Chart -->
         <div class="col-lg-4">
-            <div class="card shadow-sm border-0 rounded-3 h-100">
-                <div class="card-header bg-white border-0">
-                    <h6 class="fw-bold mb-0">⏰ Horaires de départ</h6>
+            <div class="report-card h-100">
+                <div class="report-card-header">
+                    <h5 class="report-card-title">
+                        <i class="fas fa-chart-pie"></i>
+                        Horaires de départ
+                    </h5>
                 </div>
-                <div class="card-body">
+                <div class="report-card-body">
                     <canvas id="checkoutTimesChart" style="height: 250px;"></canvas>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- ================================================ -->
-    <!-- TABLES SECTION - TOP PERFORMERS -->
-    <!-- ================================================ -->
-    <div class="row g-4">
-
+    <!-- Tables Section - Top Performers -->
+    <div class="row g-4 mb-4">
         <!-- Top Rooms -->
         <div class="col-lg-6">
-            <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-header bg-white border-0 d-flex justify-content-between">
-                    <h6 class="fw-bold mb-0">🏆 Top 5 chambres les plus rentables</h6>
-                    <a href="<?php echo e(route('room.index')); ?>" class="text-decoration-none small">Voir tout</a>
+            <div class="report-card">
+                <div class="report-card-header">
+                    <h5 class="report-card-title">
+                        <i class="fas fa-trophy"></i>
+                        Top 5 chambres les plus rentables
+                    </h5>
+                    <a href="<?php echo e(route('room.index')); ?>" class="btn-db btn-db-ghost" style="padding:4px 12px;">Voir tout</a>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
+                <div class="report-card-body-p0">
+                    <div style="overflow-x:auto;">
+                        <table class="report-table">
+                            <thead>
                                 <tr>
                                     <th>Chambre</th>
                                     <th>Type</th>
@@ -305,18 +611,18 @@
                                 <?php $__empty_1 = true; $__currentLoopData = $topRooms ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $room): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
                                     <td>
-                                        <strong><?php echo e($room['number'] ?? 'N/A'); ?></strong>
+                                        <span style="font-weight:600; color:var(--s800);"><?php echo e($room['number'] ?? 'N/A'); ?></span>
                                         <?php if(!empty($room['name'])): ?>
-                                        <small class="d-block text-muted"><?php echo e($room['name']); ?></small>
+                                        <div style="font-size:.7rem; color:var(--s400);"><?php echo e($room['name']); ?></div>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?php echo e($room['type'] ?? 'N/A'); ?></td>
-                                    <td><?php echo e($room['nights'] ?? 0); ?></td>
-                                    <td class="text-end fw-bold"><?php echo e(number_format($room['revenue'] ?? 0, 0, ',', ' ')); ?> CFA</td>
+                                    <td style="color:var(--s600);"><?php echo e($room['type'] ?? 'N/A'); ?></td>
+                                    <td style="color:var(--s600);"><?php echo e($room['nights'] ?? 0); ?></td>
+                                    <td class="text-end fw-bold" style="color:var(--s800); font-family:var(--mono);"><?php echo e(number_format($room['revenue'] ?? 0, 0, ',', ' ')); ?> CFA</td>
                                 </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">
+                                    <td colspan="4" class="text-center py-4" style="color:var(--s400);">
                                         <i class="fas fa-info-circle me-2"></i>Aucune donnée disponible
                                     </td>
                                 </tr>
@@ -330,15 +636,18 @@
 
         <!-- Top Customers -->
         <div class="col-lg-6">
-            <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-header bg-white border-0 d-flex justify-content-between">
-                    <h6 class="fw-bold mb-0">👥 Top 5 clients</h6>
-                    <a href="<?php echo e(route('customer.index')); ?>" class="text-decoration-none small">Voir tout</a>
+            <div class="report-card">
+                <div class="report-card-header">
+                    <h5 class="report-card-title">
+                        <i class="fas fa-users"></i>
+                        Top 5 clients
+                    </h5>
+                    <a href="<?php echo e(route('customer.index')); ?>" class="btn-db btn-db-ghost" style="padding:4px 12px;">Voir tout</a>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
+                <div class="report-card-body-p0">
+                    <div style="overflow-x:auto;">
+                        <table class="report-table">
+                            <thead>
                                 <tr>
                                     <th>Client</th>
                                     <th>Séjours</th>
@@ -350,18 +659,18 @@
                                 <?php $__empty_1 = true; $__currentLoopData = $topCustomers ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $customer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
                                     <td>
-                                        <strong><?php echo e($customer['name'] ?? 'N/A'); ?></strong>
+                                        <span style="font-weight:600; color:var(--s800);"><?php echo e($customer['name'] ?? 'N/A'); ?></span>
                                         <?php if(!empty($customer['email'])): ?>
-                                        <small class="d-block text-muted"><?php echo e($customer['email']); ?></small>
+                                        <div style="font-size:.7rem; color:var(--s400);"><?php echo e($customer['email']); ?></div>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?php echo e($customer['stays'] ?? 0); ?></td>
-                                    <td><?php echo e($customer['nights'] ?? 0); ?></td>
-                                    <td class="text-end fw-bold"><?php echo e(number_format($customer['spent'] ?? 0, 0, ',', ' ')); ?> CFA</td>
+                                    <td style="color:var(--s600);"><?php echo e($customer['stays'] ?? 0); ?></td>
+                                    <td style="color:var(--s600);"><?php echo e($customer['nights'] ?? 0); ?></td>
+                                    <td class="text-end fw-bold" style="color:var(--s800); font-family:var(--mono);"><?php echo e(number_format($customer['spent'] ?? 0, 0, ',', ' ')); ?> CFA</td>
                                 </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
-                                    <td colspan="4" class="text-center py-4 text-muted">
+                                    <td colspan="4" class="text-center py-4" style="color:var(--s400);">
                                         <i class="fas fa-info-circle me-2"></i>Aucune donnée disponible
                                     </td>
                                 </tr>
@@ -372,24 +681,23 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- ================================================ -->
-    <!-- RECEPTIONIST PERFORMANCE TABLE -->
-    <!-- ================================================ -->
-    <div class="row g-4 mt-2">
-
+    <!-- Receptionist Performance Table -->
+    <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-header bg-white border-0 d-flex justify-content-between">
-                    <h6 class="fw-bold mb-0">👤 Performance des réceptionnistes</h6>
-                    <a href="<?php echo e(route('receptionist.stats')); ?>" class="text-decoration-none small">Détails</a>
+            <div class="report-card">
+                <div class="report-card-header">
+                    <h5 class="report-card-title">
+                        <i class="fas fa-user-tie"></i>
+                        Performance des réceptionnistes
+                    </h5>
+                    <a href="<?php echo e(route('receptionist.stats')); ?>" class="btn-db btn-db-ghost" style="padding:4px 12px;">Détails</a>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
+                <div class="report-card-body-p0">
+                    <div style="overflow-x:auto;">
+                        <table class="report-table">
+                            <thead>
                                 <tr>
                                     <th>Réceptionniste</th>
                                     <th>Sessions</th>
@@ -403,19 +711,15 @@
                             <tbody>
                                 <?php $__empty_1 = true; $__currentLoopData = $receptionistPerformance ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $recep): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
-                                    <td><strong><?php echo e($recep['name'] ?? 'N/A'); ?></strong></td>
+                                    <td><span style="font-weight:600; color:var(--s800);"><?php echo e($recep['name'] ?? 'N/A'); ?></span></td>
                                     <td><?php echo e($recep['sessions'] ?? 0); ?></td>
                                     <td><?php echo e($recep['checkins'] ?? 0); ?></td>
                                     <td><?php echo e($recep['checkouts'] ?? 0); ?></td>
                                     <td><?php echo e($recep['reservations'] ?? 0); ?></td>
-                                    <td class="text-end fw-bold"><?php echo e(number_format($recep['total'] ?? 0, 0, ',', ' ')); ?> CFA</td>
+                                    <td class="text-end fw-bold" style="color:var(--s800); font-family:var(--mono);"><?php echo e(number_format($recep['total'] ?? 0, 0, ',', ' ')); ?> CFA</td>
                                     <td class="text-center">
-                                        <div class="progress" style="height: 20px;">
-                                            <div class="progress-bar bg-success" role="progressbar" 
-                                                style="width: <?php echo e($recep['productivity'] ?? 0); ?>%;" 
-                                                aria-valuenow="<?php echo e($recep['productivity'] ?? 0); ?>" 
-                                                aria-valuemin="0" 
-                                                aria-valuemax="100">
+                                        <div class="progress" style="height:20px; width:100px; margin:0 auto;">
+                                            <div class="progress-bar" role="progressbar" style="width: <?php echo e($recep['productivity'] ?? 0); ?>%;">
                                                 <?php echo e($recep['productivity'] ?? 0); ?>%
                                             </div>
                                         </div>
@@ -423,7 +727,7 @@
                                 </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
-                                    <td colspan="7" class="text-center py-4 text-muted">
+                                    <td colspan="7" class="text-center py-4" style="color:var(--s400);">
                                         <i class="fas fa-info-circle me-2"></i>Aucune donnée disponible
                                     </td>
                                 </tr>
@@ -434,24 +738,23 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- ================================================ -->
-    <!-- PAYMENT SUMMARY TABLE -->
-    <!-- ================================================ -->
-    <div class="row g-4 mt-2">
-
+    <!-- Payment Summary Table -->
+    <div class="row g-4 mb-4">
         <div class="col-12">
-            <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-header bg-white border-0 d-flex justify-content-between">
-                    <h6 class="fw-bold mb-0">💰 Synthèse détaillée des paiements</h6>
-                    <a href="<?php echo e(route('payment.index')); ?>" class="text-decoration-none small">Voir tout</a>
+            <div class="report-card">
+                <div class="report-card-header">
+                    <h5 class="report-card-title">
+                        <i class="fas fa-money-bill-wave"></i>
+                        Synthèse détaillée des paiements
+                    </h5>
+                    <a href="<?php echo e(route('payment.index')); ?>" class="btn-db btn-db-ghost" style="padding:4px 12px;">Voir tout</a>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
+                <div class="report-card-body-p0">
+                    <div style="overflow-x:auto;">
+                        <table class="report-table">
+                            <thead>
                                 <tr>
                                     <th>Méthode</th>
                                     <th class="text-end">Montant</th>
@@ -464,23 +767,23 @@
                                 <?php $__currentLoopData = $paymentSummary ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $method): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <tr>
                                     <td>
-                                        <i class="<?php echo e($method['icon'] ?? 'fas fa-circle'); ?> me-2"></i><?php echo e($method['label'] ?? 'N/A'); ?>
-
+                                        <i class="<?php echo e($method['icon'] ?? 'fas fa-circle'); ?> me-2" style="color:var(--g500);"></i>
+                                        <span style="color:var(--s800);"><?php echo e($method['label'] ?? 'N/A'); ?></span>
                                     </td>
-                                    <td class="text-end fw-bold"><?php echo e(number_format($method['amount'] ?? 0, 0, ',', ' ')); ?> CFA</td>
-                                    <td class="text-end"><?php echo e(number_format($method['percentage'] ?? 0, 1)); ?>%</td>
-                                    <td class="text-end"><?php echo e($method['count'] ?? 0); ?></td>
-                                    <td class="text-end"><?php echo e(number_format($method['average'] ?? 0, 0, ',', ' ')); ?> CFA</td>
+                                    <td class="text-end fw-bold" style="color:var(--s800); font-family:var(--mono);"><?php echo e(number_format($method['amount'] ?? 0, 0, ',', ' ')); ?> CFA</td>
+                                    <td class="text-end" style="color:var(--s600);"><?php echo e(number_format($method['percentage'] ?? 0, 1)); ?>%</td>
+                                    <td class="text-end" style="color:var(--s600);"><?php echo e($method['count'] ?? 0); ?></td>
+                                    <td class="text-end" style="color:var(--s600);"><?php echo e(number_format($method['average'] ?? 0, 0, ',', ' ')); ?> CFA</td>
                                 </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </tbody>
-                            <tfoot class="bg-light fw-bold">
+                            <tfoot>
                                 <tr>
-                                    <td>TOTAL</td>
-                                    <td class="text-end"><?php echo e(number_format($totalPaymentsAmount ?? 0, 0, ',', ' ')); ?> CFA</td>
-                                    <td class="text-end">100%</td>
-                                    <td class="text-end"><?php echo e($paymentsCount ?? 0); ?></td>
-                                    <td class="text-end"><?php echo e(number_format($averagePayment ?? 0, 0, ',', ' ')); ?> CFA</td>
+                                    <td><strong style="color:var(--s800);">TOTAL</strong></td>
+                                    <td class="text-end fw-bold" style="color:var(--s800); font-family:var(--mono);"><?php echo e(number_format($totalPaymentsAmount ?? 0, 0, ',', ' ')); ?> CFA</td>
+                                    <td class="text-end fw-bold" style="color:var(--s800);">100%</td>
+                                    <td class="text-end fw-bold" style="color:var(--s800);"><?php echo e($paymentsCount ?? 0); ?></td>
+                                    <td class="text-end fw-bold" style="color:var(--s800);"><?php echo e(number_format($averagePayment ?? 0, 0, ',', ' ')); ?> CFA</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -488,24 +791,23 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- ================================================ -->
-    <!-- RECENT TRANSACTIONS -->
-    <!-- ================================================ -->
-    <div class="row g-4 mt-2">
-
+    <!-- Recent Transactions -->
+    <div class="row g-4">
         <div class="col-12">
-            <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-header bg-white border-0 d-flex justify-content-between">
-                    <h6 class="fw-bold mb-0">🔄 Dernières transactions</h6>
-                    <a href="<?php echo e(route('transaction.index')); ?>" class="text-decoration-none small">Voir tout</a>
+            <div class="report-card">
+                <div class="report-card-header">
+                    <h5 class="report-card-title">
+                        <i class="fas fa-history"></i>
+                        Dernières transactions
+                    </h5>
+                    <a href="<?php echo e(route('transaction.index')); ?>" class="btn-db btn-db-ghost" style="padding:4px 12px;">Voir tout</a>
                 </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
+                <div class="report-card-body-p0">
+                    <div style="overflow-x:auto;">
+                        <table class="report-table">
+                            <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Client</th>
@@ -519,23 +821,23 @@
                             <tbody>
                                 <?php $__empty_1 = true; $__currentLoopData = $recentTransactions ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $transaction): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
-                                    <td>#<?php echo e($transaction->id); ?></td>
-                                    <td><?php echo e($transaction->customer->name ?? 'N/A'); ?></td>
+                                    <td><span style="color:var(--g600); font-family:var(--mono);">#<?php echo e($transaction->id); ?></span></td>
+                                    <td><span style="color:var(--s800);"><?php echo e($transaction->customer->name ?? 'N/A'); ?></span></td>
                                     <td><?php echo e($transaction->room->number ?? 'N/A'); ?></td>
-                                    <td><?php echo e(\Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y')); ?></td>
-                                    <td><?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?></td>
-                                    <td class="text-end fw-bold"><?php echo e(number_format($transaction->total_price ?? 0, 0, ',', ' ')); ?> CFA</td>
+                                    <td style="font-family:var(--mono);"><?php echo e(\Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y')); ?></td>
+                                    <td style="font-family:var(--mono);"><?php echo e(\Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y')); ?></td>
+                                    <td class="text-end fw-bold" style="color:var(--s800); font-family:var(--mono);"><?php echo e(number_format($transaction->total_price ?? 0, 0, ',', ' ')); ?> CFA</td>
                                     <td>
                                         <?php
                                             $statusColors = [
-                                                'reservation' => 'info',
-                                                'active' => 'success',
-                                                'completed' => 'secondary',
-                                                'cancelled' => 'danger',
-                                                'no_show' => 'warning'
+                                                'reservation' => 'badge-db-info',
+                                                'active' => 'badge-db-success',
+                                                'completed' => 'badge-db-secondary',
+                                                'cancelled' => 'badge-db-danger',
+                                                'no_show' => 'badge-db-warning'
                                             ];
                                         ?>
-                                        <span class="badge bg-<?php echo e($statusColors[$transaction->status] ?? 'secondary'); ?>">
+                                        <span class="badge-db <?php echo e($statusColors[$transaction->status] ?? 'badge-db-secondary'); ?>">
                                             <?php echo e($transaction->status); ?>
 
                                         </span>
@@ -543,7 +845,7 @@
                                 </tr>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
-                                    <td colspan="7" class="text-center py-4 text-muted">
+                                    <td colspan="7" class="text-center py-4" style="color:var(--s400);">
                                         <i class="fas fa-info-circle me-2"></i>Aucune transaction récente
                                     </td>
                                 </tr>
@@ -554,9 +856,7 @@
                 </div>
             </div>
         </div>
-
     </div>
-
 </div>
 <?php $__env->stopSection(); ?>
 
@@ -602,10 +902,9 @@
     if (document.getElementById('revenueChart')) {
         const ctx = document.getElementById('revenueChart').getContext('2d');
         
-        // Si pas de données, afficher un message
         if (!revenueData || revenueData.length === 0 || revenueData.every(v => v === 0)) {
-            ctx.font = '14px Arial';
-            ctx.fillStyle = '#999';
+            ctx.font = '14px DM Sans';
+            ctx.fillStyle = '#737873';
             ctx.textAlign = 'center';
             ctx.fillText('Aucune donnée disponible pour cette période', ctx.canvas.width/2, ctx.canvas.height/2);
         } else {
@@ -617,11 +916,11 @@
                         label: 'Chiffre d\'affaires (CFA)',
                         data: revenueData,
                         borderWidth: 3,
-                        borderColor: '#0d6efd',
-                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        borderColor: '#2e8540',
+                        backgroundColor: 'rgba(46, 133, 64, 0.1)',
                         fill: true,
                         tension: 0.3,
-                        pointBackgroundColor: '#0d6efd',
+                        pointBackgroundColor: '#2e8540',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         pointRadius: 5
@@ -647,8 +946,10 @@
                                 callback: function(value) {
                                     return value.toLocaleString() + ' CFA';
                                 }
-                            }
-                        }
+                            },
+                            grid: { color: '#dde0dd' }
+                        },
+                        x: { grid: { display: false } }
                     }
                 }
             });
@@ -662,8 +963,8 @@
         const ctx = document.getElementById('paymentChart').getContext('2d');
         
         if (!paymentData || paymentData.length === 0 || paymentData.every(v => v === 0)) {
-            ctx.font = '14px Arial';
-            ctx.fillStyle = '#999';
+            ctx.font = '14px DM Sans';
+            ctx.fillStyle = '#737873';
             ctx.textAlign = 'center';
             ctx.fillText('Aucun paiement pour cette période', ctx.canvas.width/2, ctx.canvas.height/2);
         } else {
@@ -674,13 +975,13 @@
                     datasets: [{
                         data: paymentData,
                         backgroundColor: [
-                            '#28a745', // cash - green
+                            '#2e8540', // cash - green
                             '#dc3545', // card - red
-                            '#17a2b8', // mobile - cyan
+                            '#1e6b2e', // mobile - dark green
                             '#ffc107', // transfer - yellow
                             '#6f42c1', // fedapay - purple
                             '#fd7e14', // check - orange
-                            '#6c757d'  // other - gray
+                            '#737873'  // other - gray
                         ],
                         borderWidth: 0
                     }]
@@ -689,7 +990,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: { position: 'bottom', labels: { color: '#545954', font: { size: 11 } } },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -716,8 +1017,8 @@
         const total = occupied + available;
         
         if (total === 0) {
-            ctx.font = '14px Arial';
-            ctx.fillStyle = '#999';
+            ctx.font = '14px DM Sans';
+            ctx.fillStyle = '#737873';
             ctx.textAlign = 'center';
             ctx.fillText('Aucune chambre disponible', ctx.canvas.width/2, ctx.canvas.height/2);
         } else {
@@ -727,7 +1028,7 @@
                     labels: ['Occupées', 'Disponibles'],
                     datasets: [{
                         data: [occupied, available],
-                        backgroundColor: ['#dc3545', '#28a745'],
+                        backgroundColor: ['#dc3545', '#2e8540'],
                         borderWidth: 0
                     }]
                 },
@@ -735,7 +1036,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' },
+                        legend: { position: 'bottom', labels: { color: '#545954', font: { size: 11 } } },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -761,8 +1062,8 @@
         const ctx = document.getElementById('roomStatusChart').getContext('2d');
         
         if (!roomStatusData || roomStatusData.length === 0 || roomStatusData.every(v => v === 0)) {
-            ctx.font = '14px Arial';
-            ctx.fillStyle = '#999';
+            ctx.font = '14px DM Sans';
+            ctx.fillStyle = '#737873';
             ctx.textAlign = 'center';
             ctx.fillText('Aucune donnée de statut', ctx.canvas.width/2, ctx.canvas.height/2);
         } else {
@@ -774,12 +1075,12 @@
                         label: 'Nombre de chambres',
                         data: roomStatusData,
                         backgroundColor: [
-                            '#28a745', // disponible - green
+                            '#2e8540', // disponible - green
                             '#dc3545', // occupée - red
                             '#ffc107', // maintenance - yellow
-                            '#17a2b8', // réservée - cyan
+                            '#1e6b2e', // réservée - dark green
                             '#6f42c1', // nettoyage - purple
-                            '#6c757d'  // sale - gray
+                            '#737873'  // sale - gray
                         ],
                         borderRadius: 5
                     }]
@@ -793,8 +1094,10 @@
                     scales: {
                         y: {
                             beginAtZero: true,
-                            ticks: { stepSize: 1 }
-                        }
+                            ticks: { stepSize: 1, color: '#545954' },
+                            grid: { color: '#dde0dd' }
+                        },
+                        x: { ticks: { color: '#545954' }, grid: { display: false } }
                     }
                 }
             });
@@ -808,8 +1111,8 @@
         const ctx = document.getElementById('checkoutTimesChart').getContext('2d');
         
         if (!checkoutTimesData || checkoutTimesData.every(v => v === 0)) {
-            ctx.font = '14px Arial';
-            ctx.fillStyle = '#999';
+            ctx.font = '14px DM Sans';
+            ctx.fillStyle = '#737873';
             ctx.textAlign = 'center';
             ctx.fillText('Aucun départ enregistré', ctx.canvas.width/2, ctx.canvas.height/2);
         } else {
@@ -819,7 +1122,7 @@
                     labels: ['Avant 12h', '12h-14h (largesse)', 'Après 14h (late checkout)'],
                     datasets: [{
                         data: checkoutTimesData,
-                        backgroundColor: ['#28a745', '#ffc107', '#dc3545'],
+                        backgroundColor: ['#2e8540', '#ffc107', '#dc3545'],
                         borderWidth: 0
                     }]
                 },
@@ -827,7 +1130,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom' }
+                        legend: { position: 'bottom', labels: { color: '#545954', font: { size: 11 } } }
                     }
                 }
             });
@@ -838,7 +1141,7 @@
     // EXPORT PDF FUNCTION
     // ================================================
     document.getElementById('exportPdf')?.addEventListener('click', function() {
-        const element = document.querySelector('.container-fluid');
+        const element = document.querySelector('.reports-page');
         const opt = {
             margin: [0.5, 0.5, 0.5, 0.5],
             filename: 'rapport-hotel-<?php echo e(now()->format('Y-m-d')); ?>.pdf',
@@ -850,31 +1153,5 @@
     });
 
 </script>
-
-<style>
-    .bg-purple { background-color: #6f42c1; }
-    .badge { font-size: 0.8rem; padding: 0.35rem 0.65rem; }
-    .card { transition: transform 0.2s; }
-    .card:hover { transform: translateY(-2px); }
-    .table th { font-weight: 600; color: #495057; }
-    .btn-hotel-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        color: white;
-    }
-    .btn-hotel-primary:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        color: white;
-    }
-    .progress {
-        background-color: #e9ecef;
-        border-radius: 10px;
-    }
-    .progress-bar {
-        border-radius: 10px;
-        font-size: 0.75rem;
-        line-height: 20px;
-    }
-</style>
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/reports/index.blade.php ENDPATH**/ ?>
