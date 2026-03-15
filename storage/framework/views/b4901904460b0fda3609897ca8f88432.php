@@ -1,6 +1,6 @@
-@extends('template.master')
-@section('title', 'Effectuer un Paiement')
-@section('content')
+
+<?php $__env->startSection('title', 'Effectuer un Paiement'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -519,11 +519,11 @@
 <div class="payment-page">
     <!-- Breadcrumb -->
     <div class="payment-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.index') }}">Transactions</a>
+        <a href="<?php echo e(route('transaction.index')); ?>">Transactions</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.show', $transaction) }}">#{{ $transaction->id }}</a>
+        <a href="<?php echo e(route('transaction.show', $transaction)); ?>">#<?php echo e($transaction->id); ?></a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Paiement</span>
     </div>
@@ -535,16 +535,17 @@
             <div>
                 <h1 class="payment-header-title">Effectuer un <em>paiement</em></h1>
                 <p class="payment-header-sub">
-                    <i class="fas fa-user me-1"></i> {{ $transaction->customer->name }} 
+                    <i class="fas fa-user me-1"></i> <?php echo e($transaction->customer->name); ?> 
                     <i class="fas fa-circle fa-xs" style="color:var(--s300); font-size:4px;"></i>
-                    <i class="fas fa-door-open me-1"></i> #{{ $transaction->room->number }}
+                    <i class="fas fa-door-open me-1"></i> #<?php echo e($transaction->room->number); ?>
+
                 </p>
             </div>
         </div>
     </div>
 
     <!-- Debug panel (admin only) -->
-    @if(auth()->user()->isAdmin())
+    <?php if(auth()->user()->isAdmin()): ?>
     <div class="debug-panel fade-in anim-2 d-none" id="debug-panel">
         <div class="debug-title">
             <i class="fas fa-bug me-1"></i> Informations de débogage
@@ -553,29 +554,29 @@
             <div>
                 <div class="debug-item">
                     <span class="debug-label">Transaction ID:</span>
-                    <span class="debug-value">#{{ $transaction->id }}</span>
+                    <span class="debug-value">#<?php echo e($transaction->id); ?></span>
                 </div>
                 <div class="debug-item">
                     <span class="debug-label">Statut:</span>
-                    <span class="debug-value">{{ $transaction->status }}</span>
+                    <span class="debug-value"><?php echo e($transaction->status); ?></span>
                 </div>
                 <div class="debug-item">
                     <span class="debug-label">Total (colonne):</span>
-                    <span class="debug-value">{{ number_format($transaction->total_price, 0, ',', ' ') }} CFA</span>
+                    <span class="debug-value"><?php echo e(number_format($transaction->total_price, 0, ',', ' ')); ?> CFA</span>
                 </div>
             </div>
             <div>
                 <div class="debug-item">
                     <span class="debug-label">Total (calculé):</span>
-                    <span class="debug-value">{{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA</span>
+                    <span class="debug-value"><?php echo e(number_format($transaction->getTotalPrice(), 0, ',', ' ')); ?> CFA</span>
                 </div>
                 <div class="debug-item">
                     <span class="debug-label">Payé (calculé):</span>
-                    <span class="debug-value">{{ number_format($transaction->getTotalPayment(), 0, ',', ' ') }} CFA</span>
+                    <span class="debug-value"><?php echo e(number_format($transaction->getTotalPayment(), 0, ',', ' ')); ?> CFA</span>
                 </div>
                 <div class="debug-item">
                     <span class="debug-label">Reste (calculé):</span>
-                    <span class="debug-value">{{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA</span>
+                    <span class="debug-value"><?php echo e(number_format($transaction->getRemainingPayment(), 0, ',', ' ')); ?> CFA</span>
                 </div>
             </div>
         </div>
@@ -594,7 +595,7 @@
             </button>
         </div>
     </div>
-    @endif
+    <?php endif; ?>
 
     <!-- Résumé de la transaction -->
     <div class="summary-card anim-3">
@@ -604,7 +605,7 @@
                     <div class="info-icon"><i class="fas fa-user"></i></div>
                     <div class="info-content">
                         <div class="info-label">Client</div>
-                        <div class="info-value">{{ $transaction->customer->name }}</div>
+                        <div class="info-value"><?php echo e($transaction->customer->name); ?></div>
                     </div>
                 </div>
                 
@@ -612,7 +613,7 @@
                     <div class="info-icon"><i class="fas fa-bed"></i></div>
                     <div class="info-content">
                         <div class="info-label">Chambre</div>
-                        <div class="info-value">#{{ $transaction->room->number }} · {{ $transaction->room->type->name ?? 'Standard' }}</div>
+                        <div class="info-value">#<?php echo e($transaction->room->number); ?> · <?php echo e($transaction->room->type->name ?? 'Standard'); ?></div>
                     </div>
                 </div>
                 
@@ -621,10 +622,11 @@
                     <div class="info-content">
                         <div class="info-label">Période</div>
                         <div class="info-value">
-                            {{ $transaction->check_in->format('d/m/Y') }} 
+                            <?php echo e($transaction->check_in->format('d/m/Y')); ?> 
                             <i class="fas fa-arrow-right mx-2" style="color:var(--s300); font-size:.7rem;"></i>
-                            {{ $transaction->check_out->format('d/m/Y') }}
-                            ({{ $transaction->getNightsAttribute() }} nuits)
+                            <?php echo e($transaction->check_out->format('d/m/Y')); ?>
+
+                            (<?php echo e($transaction->getNightsAttribute()); ?> nuits)
                         </div>
                     </div>
                 </div>
@@ -633,23 +635,23 @@
             <div class="summary-amounts">
                 <div class="amount-row">
                     <span class="amount-label">Total séjour</span>
-                    <span class="amount-value">{{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA</span>
+                    <span class="amount-value"><?php echo e(number_format($transaction->getTotalPrice(), 0, ',', ' ')); ?> CFA</span>
                 </div>
                 <div class="amount-row">
                     <span class="amount-label">Déjà payé</span>
-                    <span class="amount-value">{{ number_format($transaction->getTotalPayment(), 0, ',', ' ') }} CFA</span>
+                    <span class="amount-value"><?php echo e(number_format($transaction->getTotalPayment(), 0, ',', ' ')); ?> CFA</span>
                 </div>
                 <div class="amount-row">
                     <span class="amount-label">Reste à payer</span>
-                    <span class="amount-value amount-total">{{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA</span>
+                    <span class="amount-value amount-total"><?php echo e(number_format($transaction->getRemainingPayment(), 0, ',', ' ')); ?> CFA</span>
                 </div>
                 
                 <div class="progress-container">
                     <div class="progress-bar-modern">
-                        <div class="progress-fill" id="progressBar" style="width: {{ $transaction->getPaymentRate() }}%"></div>
+                        <div class="progress-fill" id="progressBar" style="width: <?php echo e($transaction->getPaymentRate()); ?>%"></div>
                     </div>
                     <div class="progress-text" id="progressText">
-                        {{ number_format($transaction->getPaymentRate(), 1) }}% du séjour payé
+                        <?php echo e(number_format($transaction->getPaymentRate(), 1)); ?>% du séjour payé
                     </div>
                 </div>
             </div>
@@ -657,8 +659,8 @@
     </div>
 
     <!-- Formulaire de paiement -->
-    <form action="{{ route('transaction.payment.store', $transaction) }}" method="POST" id="paymentForm">
-        @csrf
+    <form action="<?php echo e(route('transaction.payment.store', $transaction)); ?>" method="POST" id="paymentForm">
+        <?php echo csrf_field(); ?>
         
         <div class="row g-4">
             <!-- Colonne gauche - Montant -->
@@ -679,15 +681,15 @@
                                        id="amount"
                                        name="amount"
                                        min="100"
-                                       max="{{ $transaction->getRemainingPayment() }}"
+                                       max="<?php echo e($transaction->getRemainingPayment()); ?>"
                                        step="100"
-                                       value="{{ min($transaction->getRemainingPayment(), $transaction->getRemainingPayment()) }}"
+                                       value="<?php echo e(min($transaction->getRemainingPayment(), $transaction->getRemainingPayment())); ?>"
                                        required>
                                 <span class="amount-currency">FCFA</span>
                             </div>
                             
                             <div class="quick-amounts">
-                                @php
+                                <?php
                                     $remaining = $transaction->getRemainingPayment();
                                     $quickAmounts = [
                                         min(1000, $remaining),
@@ -698,17 +700,17 @@
                                         $remaining
                                     ];
                                     $quickAmounts = array_unique(array_filter($quickAmounts));
-                                @endphp
+                                ?>
                                 
-                                @foreach($quickAmounts as $quickAmount)
-                                    @if($quickAmount >= 100)
+                                <?php $__currentLoopData = $quickAmounts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $quickAmount): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php if($quickAmount >= 100): ?>
                                         <button type="button" 
-                                                class="quick-amount-btn {{ $quickAmount == $remaining ? 'full' : '' }}"
-                                                data-amount="{{ $quickAmount }}">
-                                            {{ number_format($quickAmount, 0, ',', ' ') }} CFA
+                                                class="quick-amount-btn <?php echo e($quickAmount == $remaining ? 'full' : ''); ?>"
+                                                data-amount="<?php echo e($quickAmount); ?>">
+                                            <?php echo e(number_format($quickAmount, 0, ',', ' ')); ?> CFA
                                         </button>
-                                    @endif
-                                @endforeach
+                                    <?php endif; ?>
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
                             
                             <div id="amountInfo" class="mt-3">
@@ -716,7 +718,7 @@
                                     <div class="alert-icon"><i class="fas fa-info"></i></div>
                                     <div>
                                         Reste après paiement: 
-                                        <strong id="remainingAfterValue">{{ number_format($transaction->getRemainingPayment(), 0, ',', ' ') }} CFA</strong>
+                                        <strong id="remainingAfterValue"><?php echo e(number_format($transaction->getRemainingPayment(), 0, ',', ' ')); ?> CFA</strong>
                                     </div>
                                 </div>
                             </div>
@@ -741,27 +743,28 @@
                     <div class="payment-card-body">
                         <!-- Méthodes de paiement -->
                         <div class="methods-grid" id="paymentMethods">
-                            @php
+                            <?php
                                 $paymentMethods = \App\Models\Payment::getPaymentMethods();
-                            @endphp
+                            ?>
                             
-                            @foreach($paymentMethods as $method => $details)
-                                <label class="method-card-modern {{ $loop->first ? 'active' : '' }}" 
-                                       for="method_{{ $method }}">
+                            <?php $__currentLoopData = $paymentMethods; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $method => $details): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                <label class="method-card-modern <?php echo e($loop->first ? 'active' : ''); ?>" 
+                                       for="method_<?php echo e($method); ?>">
                                     <input type="radio" 
                                            name="payment_method" 
-                                           id="method_{{ $method }}"
-                                           value="{{ $method }}"
+                                           id="method_<?php echo e($method); ?>"
+                                           value="<?php echo e($method); ?>"
                                            class="method-radio"
-                                           {{ $loop->first ? 'checked' : '' }}
+                                           <?php echo e($loop->first ? 'checked' : ''); ?>
+
                                            required>
                                     <div class="method-icon-wrapper">
-                                        <i class="fas {{ $details['icon'] }}"></i>
+                                        <i class="fas <?php echo e($details['icon']); ?>"></i>
                                     </div>
-                                    <div class="method-name">{{ $details['label'] }}</div>
-                                    <div class="method-description">{{ $details['description'] }}</div>
+                                    <div class="method-name"><?php echo e($details['label']); ?></div>
+                                    <div class="method-description"><?php echo e($details['description']); ?></div>
                                 </label>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                         </div>
                         
                         <!-- Champs spécifiques -->
@@ -926,7 +929,7 @@
                                                 <i class="fas fa-user me-1"></i> Reçu par
                                             </label>
                                             <input type="text" name="received_by" class="form-control-modern" 
-                                                value="{{ auth()->user()->name }}" readonly>
+                                                value="<?php echo e(auth()->user()->name); ?>" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -949,7 +952,7 @@
         
         <!-- Barre d'actions -->
         <div class="action-bar anim-6">
-            <a href="{{ route('transaction.show', $transaction) }}" class="btn-modern btn-outline-modern">
+            <a href="<?php echo e(route('transaction.show', $transaction)); ?>" class="btn-modern btn-outline-modern">
                 <i class="fas fa-arrow-left me-2"></i>
                 Retour
             </a>
@@ -993,18 +996,18 @@
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     console.log('=== PAGE DE PAIEMENT INITIALISÉE ===');
     
-    const transactionId = {{ $transaction->id }};
-    const remaining = {{ $transaction->getRemainingPayment() }};
-    const totalPrice = {{ $transaction->getTotalPrice() }};
-    const totalPayment = {{ $transaction->getTotalPayment() }};
+    const transactionId = <?php echo e($transaction->id); ?>;
+    const remaining = <?php echo e($transaction->getRemainingPayment()); ?>;
+    const totalPrice = <?php echo e($transaction->getTotalPrice()); ?>;
+    const totalPayment = <?php echo e($transaction->getTotalPayment()); ?>;
     
     // Éléments DOM
     const amountInput = document.getElementById('amount');
@@ -1274,7 +1277,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 30000);
     
     // Debug panel (admin only)
-    @if(auth()->user()->isAdmin())
+    <?php if(auth()->user()->isAdmin()): ?>
         const debugPanel = document.getElementById('debug-panel');
         
         if (document.getElementById('hide-debug')) {
@@ -1304,7 +1307,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         }
-    @endif
+    <?php endif; ?>
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/transaction/payment/create.blade.php ENDPATH**/ ?>

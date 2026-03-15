@@ -216,7 +216,7 @@ class Room extends Model
         $checkIn = Carbon::parse($checkIn)->startOfDay();
         $checkOut = Carbon::parse($checkOut)->startOfDay();
 
-        if ($this->room_status_id != self::STATUS_AVAILABLE) {
+        if (!in_array($this->room_status_id, [self::STATUS_AVAILABLE, self::STATUS_DIRTY])) {
             return false;
         }
 
