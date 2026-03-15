@@ -7,6 +7,7 @@ use App\Http\Requests\ChooseRoomRequest;
 use App\Models\Customer;
 use App\Models\Room;
 use App\Models\Transaction;
+use App\Models\User; 
 use App\Repositories\Interface\PaymentRepositoryInterface;
 use App\Repositories\Interface\ReservationRepositoryInterface;
 use App\Repositories\Interface\TransactionRepositoryInterface;
@@ -14,6 +15,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Notifications\NewRoomReservationDownPayment;
 
 class TransactionRoomReservationController extends Controller
 {
@@ -409,6 +411,7 @@ class TransactionRoomReservationController extends Controller
                 }
 
                 // ============ CRÉATION DU PAIEMENT (si acompte) ============
+                $payment = null;
                 if ($downPayment > 0) {
                     \Log::info('💰 Création du paiement: '.number_format($downPayment, 0, ',', ' ').' FCFA');
 
@@ -492,6 +495,10 @@ class TransactionRoomReservationController extends Controller
                 } catch (\Exception $e) {
                     \Log::warning('⚠️ Erreur mise à jour statut chambre: '.$e->getMessage());
                 }
+
+                // ============ ENVOI DES NOTIFICATIONS ============
+                $this->sendReservationNotifications($transaction, $payment, $user, $customer, $room, $days, $totalPrice, $downPayment, $paymentMethod);
+
                 // ============ CONFIRMATION ============
                 DB::commit();
                 \Log::info('✅ Transaction BDD confirmée avec succès');
@@ -572,6 +579,46 @@ class TransactionRoomReservationController extends Controller
         }
     }
 
+    /**
+     * ✅ NOUVELLE MÉTHODE CORRIGÉE : Envoyer les notifications après une réservation
+     */
+    private function sendReservationNotifications($transaction, $payment, $user, $customer, $room, $days, $totalPrice, $downPayment, $paymentMethod)
+    {
+        try {
+            // Notifier les réceptionnistes et admins
+            $staffUsers = User::whereIn('role', ['Receptionist', 'Admin', 'Super'])->get();
+            
+            $notificationCount = 0;
+
+            foreach ($staffUsers as $staffUser) {
+                try {
+                    // Utiliser la notification avec les données complètes
+                    $staffUser->notify(new \App\Notifications\NewRoomReservationDownPayment($transaction, $payment));
+                    $notificationCount++;
+                } catch (\Exception $e) {
+                    \Log::warning('⚠️ Erreur envoi notification staff: ' . $e->getMessage());
+                }
+            }
+
+            // Notifier le client s'il a un compte
+            if ($customer->user) {
+                try {
+                    $customer->user->notify(new \App\Notifications\NewRoomReservationDownPayment($transaction, $payment));
+                    $notificationCount++;
+                } catch (\Exception $e) {
+                    \Log::warning('⚠️ Erreur envoi notification client: ' . $e->getMessage());
+                }
+            }
+
+            \Log::info("✅ {$notificationCount} notifications envoyées pour la réservation #{$transaction->id}");
+
+        } catch (\Exception $e) {
+            \Log::error('❌ Erreur lors de l\'envoi des notifications', [
+                'transaction_id' => $transaction->id ?? 'N/A',
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
     /**
      * Construire le message de succès avec l'utilisateur
      */

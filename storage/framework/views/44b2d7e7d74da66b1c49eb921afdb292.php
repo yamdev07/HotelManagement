@@ -1,6 +1,5 @@
-@extends('template.master')
-@section('title', 'Notifications')
-@section('content')
+<?php $__env->startSection('title', 'Notifications'); ?>
+<?php $__env->startSection('content'); ?>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
@@ -388,7 +387,7 @@
 <div class="notifications-page">
     <!-- Breadcrumb -->
     <div class="notifications-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="<?php echo e(route('dashboard.index')); ?>"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Notifications</span>
     </div>
@@ -409,12 +408,12 @@
                 <div class="stat-mini-item">
                     <span class="stat-mini-dot dot-unread"></span>
                     <span class="stat-mini-label">Non lues</span>
-                    <span class="stat-mini-value">{{ auth()->user()->unreadNotifications->count() }}</span>
+                    <span class="stat-mini-value"><?php echo e(auth()->user()->unreadNotifications->count()); ?></span>
                 </div>
                 <div class="stat-mini-item">
                     <span class="stat-mini-dot dot-read"></span>
                     <span class="stat-mini-label">Lues</span>
-                    <span class="stat-mini-value">{{ auth()->user()->readNotifications->count() }}</span>
+                    <span class="stat-mini-value"><?php echo e(auth()->user()->readNotifications->count()); ?></span>
                 </div>
             </div>
         </div>
@@ -430,12 +429,13 @@
                 Non lues
             </span>
             <div class="timeline__cards">
-                @forelse (auth()->user()->unreadNotifications as $notification)
+                <?php $__empty_1 = true; $__currentLoopData = auth()->user()->unreadNotifications; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $notification): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <div class="notification-card notification-card--unread">
                         <div class="notification-card__header">
                             <div class="notification-card__time">
                                 <i class="fas fa-clock"></i>
-                                {{ Helper::dateFormatTimeNoYear($notification->created_at) }}
+                                <?php echo e(Helper::dateFormatTimeNoYear($notification->created_at)); ?>
+
                             </div>
                             <span class="notification-card__badge badge-unread">
                                 <i class="fas fa-circle me-1" style="font-size:.5rem;"></i>
@@ -444,13 +444,14 @@
                         </div>
                         <div class="notification-card__content">
                             <p class="notification-card__message">
-                                {{ $notification->data['message'] ?? 'Nouvelle notification' }}
+                                <?php echo e($notification->data['message'] ?? 'Nouvelle notification'); ?>
+
                             </p>
                         </div>
                         <div class="notification-card__footer">
-                            <a href="{{ route('notification.routeTo', $notification->id) }}" 
+                            <a href="<?php echo e(route('notification.routeTo', $notification->id)); ?>" 
                                class="notification-card__link"
-                               onclick="event.preventDefault(); markAsReadAndRedirect('{{ $notification->id }}', '{{ $notification->data['url'] ?? '#' }}')">
+                               onclick="event.preventDefault(); markAsReadAndRedirect('<?php echo e($notification->id); ?>', '<?php echo e($notification->data['url'] ?? '#'); ?>')">
                                 <i class="fas fa-eye"></i>
                                 Voir les détails
                             </a>
@@ -460,7 +461,7 @@
                             </span>
                         </div>
                     </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="empty-state">
                         <div class="empty-icon">
                             <i class="fas fa-bell-slash"></i>
@@ -468,7 +469,7 @@
                         <p class="empty-title">Aucune notification non lue</p>
                         <p class="empty-text">Vous n'avez pas de nouvelles notifications</p>
                     </div>
-                @endforelse
+                <?php endif; ?>
             </div>
         </div>
 
@@ -479,12 +480,13 @@
                 Lues
             </span>
             <div class="timeline__cards">
-                @forelse (auth()->user()->readNotifications as $notification)
+                <?php $__empty_1 = true; $__currentLoopData = auth()->user()->readNotifications; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $notification): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <div class="notification-card notification-card--read">
                         <div class="notification-card__header">
                             <div class="notification-card__time">
                                 <i class="fas fa-clock"></i>
-                                {{ Helper::dateFormatTimeNoYear($notification->created_at) }}
+                                <?php echo e(Helper::dateFormatTimeNoYear($notification->created_at)); ?>
+
                             </div>
                             <span class="notification-card__badge badge-read">
                                 <i class="fas fa-check me-1"></i>
@@ -493,11 +495,12 @@
                         </div>
                         <div class="notification-card__content">
                             <p class="notification-card__message">
-                                {{ $notification->data['message'] ?? 'Notification' }}
+                                <?php echo e($notification->data['message'] ?? 'Notification'); ?>
+
                             </p>
                         </div>
                         <div class="notification-card__footer">
-                            <a href="{{ $notification->data['url'] ?? '#' }}" class="notification-card__link">
+                            <a href="<?php echo e($notification->data['url'] ?? '#'); ?>" class="notification-card__link">
                                 <i class="fas fa-eye"></i>
                                 Voir les détails
                             </a>
@@ -507,7 +510,7 @@
                             </span>
                         </div>
                     </div>
-                @empty
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <div class="empty-state">
                         <div class="empty-icon">
                             <i class="fas fa-bell"></i>
@@ -515,23 +518,23 @@
                         <p class="empty-title">Aucune notification</p>
                         <p class="empty-text">Vous n'avez pas encore de notifications</p>
                     </div>
-                @endforelse
+                <?php endif; ?>
             </div>
         </div>
 
     </div>
 </div>
 
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('footer')
+<?php $__env->startSection('footer'); ?>
 <script>
 // Fonction pour marquer comme lu et rediriger
 function markAsReadAndRedirect(notificationId, url) {
     fetch(`/notification-to/${notificationId}`, {
         method: 'GET',
         headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>',
             'Accept': 'application/json'
         }
     })
@@ -554,4 +557,5 @@ document.addEventListener('DOMContentLoaded', function() {
     // Vous pouvez ajouter un bouton "Tout marquer comme lu" ici
 });
 </script>
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP ELITEBOOK\Desktop\dev\Laravel-Hotel-main\resources\views/notification/index.blade.php ENDPATH**/ ?>
