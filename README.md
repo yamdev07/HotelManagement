@@ -226,6 +226,12 @@ Planned improvements:
 
 - Reporting & analytics
 
+## Live Demo
+
+The application is currently used by Cactus Hotel.
+
+Demo: https://lecactushotel.bj
+
 ## Author
 
 Yoann Adigbonon
