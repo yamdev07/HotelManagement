@@ -9,7 +9,7 @@ It contains:
 - a secured internal management dashboard for hotel staff
 
 ![Lint](https://github.com/yamdev07/HotelManagement/actions/workflows/ci.yml/badge.svg)
-
+![Tests](https://github.com/yamdev07/HotelManagement/actions/workflows/tests.yml/badge.svg)
 ---
 
 ## Business Workflow
