@@ -1,3 +1,4 @@
+
 <?php $__env->startSection('title', 'Notifications'); ?>
 <?php $__env->startSection('content'); ?>
 

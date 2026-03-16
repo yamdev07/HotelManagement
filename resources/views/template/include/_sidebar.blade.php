@@ -7,17 +7,17 @@
     <!-- Logo -->
     <a href="{{ route('dashboard.index') }}" class="sidebar-logo">
         <div class="d-flex align-items-center">
-            <div class="">
+            <div>
                 <img src="{{ asset('img/logo_cactus1.jpeg') }}"
                     alt="Hotel Cactus"
-                    style="height: 42px; border-radius: 8px;">
+                    style="height: 38px; border-radius: 8px; flex-shrink:0;">
             </div>
             <div class="brand-text ms-2">
                 <span class="brand-name">Hotel Management</span>
                 <small class="brand-subtitle d-block">Gestion Hôtelière</small>
             </div>
         </div>
-        <button id="toggle-sidebar" class="btn btn-icon">
+        <button id="toggle-sidebar" class="btn-icon-toggle" title="Réduire">
             <i class="fas fa-bars"></i>
         </button>
     </a>
@@ -25,12 +25,10 @@
     <!-- Sidebar Inner -->
     <div class="sidebar-inner">
 
-        <!-- Sidebar Header (mobile) -->
-        <div class="sidebar-header">
-            <span class="header-title">
-                <i class="fas fa-bars me-2"></i>Menu
-            </span>
-            <button id="toggle-sidebar-sm" class="btn btn-icon">
+        <!-- Sidebar Header (mobile only) -->
+        <div class="sidebar-header-mobile">
+            <span class="header-title-mobile"><i class="fas fa-bars me-2"></i>Menu</span>
+            <button id="toggle-sidebar-sm" class="btn-icon-toggle">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -42,27 +40,19 @@
                 @php
                     $currentRoute = Route::currentRouteName() ?: '';
                     $activeClass = function($routeName, $exact = true) use ($currentRoute) {
-                        if ($exact) {
-                            return $currentRoute === $routeName ? 'active' : '';
-                        }
+                        if ($exact) return $currentRoute === $routeName ? 'active' : '';
                         return str_starts_with($currentRoute, $routeName) ? 'active' : '';
                     };
-                    
-                    // Vérifier si l'utilisateur a une session active
                     $hasActiveSession = isset($activeSession) && $activeSession;
                 @endphp
 
-                <!-- ═══════════════════════════════════════
-                     TABLEAU DE BORD
-                     ═══════════════════════════════════════ -->
+                <!-- TABLEAU DE BORD -->
                 <div class="nav-section">
                     <div class="nav-section-title">Tableau de Bord</div>
 
                     <a href="{{ route('dashboard.index') }}"
-                       class="nav-item {{ $activeClass('dashboard.index') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-chart-pie"></i>
-                        </div>
+                       class="nav-item {{ $activeClass('dashboard.index') }}" data-tooltip="Dashboard">
+                        <div class="nav-icon"><i class="fas fa-chart-pie"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Dashboard</div>
                             <div class="nav-subtitle">Vue d'ensemble</div>
@@ -72,10 +62,8 @@
                     @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                         @if(Route::has('availability.dashboard'))
                         <a href="{{ route('availability.dashboard') }}"
-                           class="nav-item {{ $activeClass('availability.', false) }}">
-                            <div class="nav-icon">
-                                <i class="fas fa-th-large"></i>
-                            </div>
+                           class="nav-item {{ $activeClass('availability.', false) }}" data-tooltip="Disponibilité">
+                            <div class="nav-icon"><i class="fas fa-th-large"></i></div>
                             <div class="nav-content">
                                 <div class="nav-title">Disponibilité</div>
                                 <div class="nav-subtitle">Inventaire en temps réel</div>
@@ -84,28 +72,24 @@
                         @endif
                     @endif
                 </div>
-                <!-- ═══════════════════════════════════════
-                     ACTIONS RAPIDES — Check-in & Réservation
-                     ═══════════════════════════════════════ -->
+
+                <!-- ACTIONS RAPIDES -->
                 @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                 <div class="nav-section">
                     <div class="nav-section-title">Actions Rapides</div>
 
-                    <!-- Check-in -->
                     @php
                         $isCheckinActive = in_array($currentRoute, [
-                            'checkin.index', 'checkin.search', 'checkin.show',
-                            'checkin.direct', 'checkin.process-direct-checkin',
-                            'checkin.quick', 'checkin.availability'
+                            'checkin.index','checkin.search','checkin.show',
+                            'checkin.direct','checkin.process-direct-checkin',
+                            'checkin.quick','checkin.availability'
                         ]);
                     @endphp
 
                     @if(Route::has('checkin.index'))
                     <a href="{{ route('checkin.index') }}"
-                       class="nav-item nav-item--highlight {{ $isCheckinActive ? 'active' : '' }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-door-open"></i>
-                        </div>
+                       class="nav-item nav-item--highlight {{ $isCheckinActive ? 'active' : '' }}" data-tooltip="Check-in/out">
+                        <div class="nav-icon"><i class="fas fa-door-open"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Check-in/Check-out</div>
                             <div class="nav-subtitle">Enregistrement clients</div>
@@ -113,13 +97,10 @@
                     </a>
                     @endif
 
-                    <!-- Nouvelle Réservation -->
                     @if(Route::has('transaction.reservation.createIdentity'))
                     <a href="{{ route('transaction.reservation.createIdentity') }}"
-                       class="nav-item nav-item--highlight {{ $activeClass('transaction.reservation.createIdentity') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-calendar-plus"></i>
-                        </div>
+                       class="nav-item nav-item--highlight {{ $activeClass('transaction.reservation.createIdentity') }}" data-tooltip="Nouvelle Réservation">
+                        <div class="nav-icon"><i class="fas fa-calendar-plus"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Nouvelle Réservation</div>
                             <div class="nav-subtitle">Créer rapidement</div>
@@ -129,20 +110,15 @@
                 </div>
                 @endif
 
-
-                <!-- ═══════════════════════════════════════
-                     OPÉRATIONS
-                     ═══════════════════════════════════════ -->
+                <!-- OPÉRATIONS -->
                 @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                 <div class="nav-section">
                     <div class="nav-section-title">Opérations</div>
 
                     @if(Route::has('transaction.index'))
                     <a href="{{ route('transaction.index') }}"
-                       class="nav-item {{ ($activeClass('transaction.', false) && !str_contains($currentRoute, 'transaction.reservation.')) ? 'active' : '' }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-shopping-bag"></i>
-                        </div>
+                       class="nav-item {{ ($activeClass('transaction.', false) && !str_contains($currentRoute, 'transaction.reservation.')) ? 'active' : '' }}" data-tooltip="Liste Clients">
+                        <div class="nav-icon"><i class="fas fa-shopping-bag"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Liste des Clients</div>
                             <div class="nav-subtitle">Réservations & Séjours</div>
@@ -152,10 +128,8 @@
 
                     @if(Route::has('cashier.dashboard'))
                     <a href="{{ route('cashier.dashboard') }}"
-                       class="nav-item {{ $activeClass('cashier.', false) }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-cash-register"></i>
-                        </div>
+                       class="nav-item {{ $activeClass('cashier.', false) }}" data-tooltip="Caisse">
+                        <div class="nav-icon"><i class="fas fa-cash-register"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Caisse</div>
                             <div class="nav-subtitle">Sessions & Encaissements</div>
@@ -165,10 +139,8 @@
 
                     @if(Route::has('restaurant.index'))
                     <a href="{{ route('restaurant.index') }}"
-                       class="nav-item {{ $activeClass('restaurant.', false) }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-utensils"></i>
-                        </div>
+                       class="nav-item {{ $activeClass('restaurant.', false) }}" data-tooltip="Restaurant">
+                        <div class="nav-icon"><i class="fas fa-utensils"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Restaurant</div>
                             <div class="nav-subtitle">Menus & Commandes</div>
@@ -178,19 +150,15 @@
                 </div>
                 @endif
 
-                <!-- ═══════════════════════════════════════
-                     GESTION
-                     ═══════════════════════════════════════ -->
+                <!-- GESTION -->
                 @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                 <div class="nav-section">
                     <div class="nav-section-title">Gestion</div>
 
                     @if(Route::has('customer.index'))
                     <a href="{{ route('customer.index') }}"
-                       class="nav-item {{ $activeClass('customer.index') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
+                       class="nav-item {{ $activeClass('customer.index') }}" data-tooltip="Clients">
+                        <div class="nav-icon"><i class="fas fa-users"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Clients</div>
                             <div class="nav-subtitle">Gestion des clients</div>
@@ -200,10 +168,8 @@
 
                     @if(Route::has('room.index'))
                     <a href="{{ route('room.index') }}"
-                       class="nav-item {{ $activeClass('room.index') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-bed"></i>
-                        </div>
+                       class="nav-item {{ $activeClass('room.index') }}" data-tooltip="Chambres">
+                        <div class="nav-icon"><i class="fas fa-bed"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Chambres</div>
                             <div class="nav-subtitle">
@@ -215,10 +181,8 @@
 
                     @if(Route::has('type.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
                     <a href="{{ route('type.index') }}"
-                       class="nav-item restricted {{ $activeClass('type.index') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-layer-group"></i>
-                        </div>
+                       class="nav-item restricted {{ $activeClass('type.index') }}" data-tooltip="Types Chambres">
+                        <div class="nav-icon"><i class="fas fa-layer-group"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Types de Chambres</div>
                             <div class="nav-subtitle">Catégories & Tarifs</div>
@@ -229,150 +193,86 @@
                     @if(Route::has('payments.index'))
                     @php $isPaymentActive = $activeClass('payments.', false) || $activeClass('payment.', false); @endphp
                     <a href="{{ route('payments.index') }}"
-                       class="nav-item {{ $isPaymentActive ? 'active' : '' }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-credit-card"></i>
-                        </div>
+                       class="nav-item {{ $isPaymentActive ? 'active' : '' }}" data-tooltip="Paiements">
+                        <div class="nav-icon"><i class="fas fa-credit-card"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Paiements</div>
                             <div class="nav-subtitle">Transactions financières</div>
                         </div>
                     </a>
                     @endif
+                </div>
+                @endif
 
-                    @if(Route::has('reservation.index') && auth()->user()->role == 'Receptionist')
-                    <a href="{{ route('reservation.index') }}"
-                       class="nav-item {{ $activeClass('reservation.index') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-calendar-alt"></i>
-                        </div>
+                <!-- NETTOYAGE -->
+                @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']))
+                <div class="nav-section">
+                    <div class="nav-section-title">Nettoyage</div>
+
+                    @if(Route::has('housekeeping.dashboard'))
+                    <a href="{{ route('housekeeping.dashboard') }}"
+                       class="nav-item {{ $activeClass('housekeeping.', false) }}" data-tooltip="Housekeeping">
+                        <div class="nav-icon"><i class="fas fa-broom"></i></div>
                         <div class="nav-content">
-                            <div class="nav-title">Réservations</div>
-                            <div class="nav-subtitle">Créer, modifier, consulter</div>
+                            <div class="nav-title">Housekeeping</div>
+                            <div class="nav-subtitle">Nettoyage & Maintenance</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    @if(Route::has('checkin.index') && in_array(auth()->user()->role, ['Housekeeping']))
+                    @php
+                        $isCheckinActive = in_array($currentRoute, [
+                            'checkin.index','checkin.search','checkin.show',
+                            'checkin.direct','checkin.process-direct-checkin',
+                            'checkin.quick','checkin.availability'
+                        ]);
+                    @endphp
+                    <a href="{{ route('checkin.index') }}"
+                       class="nav-item nav-item--readonly {{ $isCheckinActive ? 'active' : '' }}"
+                       title="Mode lecture seule" data-tooltip="Check-in (lecture)">
+                        <div class="nav-icon"><i class="fas fa-door-open"></i></div>
+                        <div class="nav-content">
+                            <div class="nav-title">Check-in/Check-out</div>
+                            <div class="nav-subtitle">Visualisation</div>
+                        </div>
+                        <span class="readonly-tag">👁️</span>
+                    </a>
+                    @endif
+
+                    @if(Route::has('roomstatus.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                    <a href="{{ route('roomstatus.index') }}"
+                       class="nav-item {{ $activeClass('roomstatus.index') }}" data-tooltip="Statuts">
+                        <div class="nav-icon"><i class="fas fa-flag"></i></div>
+                        <div class="nav-content">
+                            <div class="nav-title">Statuts Chambres</div>
+                            <div class="nav-subtitle">États & Couleurs</div>
+                        </div>
+                    </a>
+                    @endif
+
+                    @if(Route::has('facility.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                    <a href="{{ route('facility.index') }}"
+                       class="nav-item {{ $activeClass('facility.index') }}" data-tooltip="Équipements">
+                        <div class="nav-icon"><i class="fas fa-tools"></i></div>
+                        <div class="nav-content">
+                            <div class="nav-title">Équipements</div>
+                            <div class="nav-subtitle">Services & Commodités</div>
                         </div>
                     </a>
                     @endif
                 </div>
                 @endif
 
-                <!-- ═══════════════════════════════════════
-     NETTOYAGE
-     ═══════════════════════════════════════ -->
-@if(in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']))
-<div class="nav-section">
-    <div class="nav-section-title">Nettoyage</div>
-
-    @if(Route::has('housekeeping.dashboard'))
-    <a href="{{ route('housekeeping.dashboard') }}"
-       class="nav-item {{ $activeClass('housekeeping.', false) }}">
-        <div class="nav-icon">
-            <i class="fas fa-broom"></i>
-        </div>
-        <div class="nav-content">
-            <div class="nav-title">Housekeeping</div>
-            <div class="nav-subtitle">Nettoyage & Maintenance</div>
-        </div>
-    </a>
-    @endif
-
-    <!-- ✅ BOUTONS CHECK-IN/CHECK-OUT POUR HOUSEKEEPING (LECTURE SEULE) -->
-    @if(Route::has('checkin.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']))
-    @php
-        $isCheckinActive = in_array($currentRoute, [
-            'checkin.index', 'checkin.search', 'checkin.show',
-            'checkin.direct', 'checkin.process-direct-checkin',
-            'checkin.quick', 'checkin.availability'
-        ]);
-    @endphp
-    <a href="{{ route('checkin.index') }}"
-       class="nav-item nav-item--readonly {{ $isCheckinActive ? 'active' : '' }}"
-       @if(auth()->user()->role == 'Housekeeping')
-       title="Mode lecture seule - Visualisation uniquement"
-       @endif>
-        <div class="nav-icon">
-            <i class="fas fa-door-open"></i>
-        </div>
-        <div class="nav-content">
-            <div class="nav-title">Check-in/Check-out</div>
-            <div class="nav-subtitle">
-                @if(auth()->user()->role == 'Housekeeping')
-                Visualisation
-                @else
-                Enregistrement clients
-                @endif
-            </div>
-        </div>
-        @if(auth()->user()->role == 'Housekeeping')
-        <div class="ms-2">
-            <span class="badge bg-info" style="font-size: 0.6rem;">👁️ Lecture seule</span>
-        </div>
-        @endif
-    </a>
-    @endif
-
-    @if(Route::has('roomstatus.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
-    <a href="{{ route('roomstatus.index') }}"
-       class="nav-item {{ $activeClass('roomstatus.index') }}">
-        <div class="nav-icon">
-            <i class="fas fa-flag"></i>
-        </div>
-        <div class="nav-content">
-            <div class="nav-title">Statuts Chambres</div>
-            <div class="nav-subtitle">États & Couleurs</div>
-        </div>
-    </a>
-    @endif
-
-    @if(Route::has('facility.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
-    <a href="{{ route('facility.index') }}"
-       class="nav-item {{ $activeClass('facility.index') }}">
-        <div class="nav-icon">
-            <i class="fas fa-tools"></i>
-        </div>
-        <div class="nav-content">
-            <div class="nav-title">Équipements</div>
-            <div class="nav-subtitle">Services & Commodités</div>
-        </div>
-    </a>
-    @endif
-</div>
-@endif
-
-<!-- AJOUTER CE CSS DANS LA PARTIE STYLE -->
-<style>
-/* Style pour les éléments en lecture seule */
-.nav-item--readonly {
-    opacity: 0.9;
-}
-.nav-item--readonly:hover {
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.02));
-    border-left-color: #3b82f6;
-}
-.nav-item--readonly .nav-icon {
-    background: rgba(59, 130, 246, 0.1);
-    color: #60a5fa;
-}
-.bg-info {
-    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: 500;
-}
-</style>
-
-                <!-- ═══════════════════════════════════════
-                     ADMINISTRATION
-                     ═══════════════════════════════════════ -->
+                <!-- ADMINISTRATION -->
                 @if(in_array(auth()->user()->role, ['Super', 'Admin']))
                 <div class="nav-section">
                     <div class="nav-section-title">Administration</div>
 
                     @if(Route::has('user.index') && auth()->user()->role == 'Super')
                     <a href="{{ route('user.index') }}"
-                       class="nav-item restricted {{ $activeClass('user.index') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-user-cog"></i>
-                        </div>
+                       class="nav-item restricted {{ $activeClass('user.index') }}" data-tooltip="Utilisateurs">
+                        <div class="nav-icon"><i class="fas fa-user-cog"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Utilisateurs</div>
                             <div class="nav-subtitle">Gestion des comptes</div>
@@ -382,10 +282,8 @@
 
                     @if(Route::has('reports.index'))
                     <a href="{{ route('reports.index') }}"
-                       class="nav-item {{ $activeClass('reports.index') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-file-alt"></i>
-                        </div>
+                       class="nav-item {{ $activeClass('reports.index') }}" data-tooltip="Rapports">
+                        <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Rapports</div>
                             <div class="nav-subtitle">Analyses & Statistiques</div>
@@ -395,10 +293,8 @@
 
                     @if(Route::has('activity.index'))
                     <a href="{{ route('activity.index') }}"
-                       class="nav-item {{ $activeClass('activity.index') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-history"></i>
-                        </div>
+                       class="nav-item {{ $activeClass('activity.index') }}" data-tooltip="Journal">
+                        <div class="nav-icon"><i class="fas fa-history"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Journal</div>
                             <div class="nav-subtitle">Activités système</div>
@@ -408,18 +304,14 @@
                 </div>
                 @endif
 
-                <!-- ═══════════════════════════════════════
-                     MON COMPTE
-                     ═══════════════════════════════════════ -->
+                <!-- MON COMPTE -->
                 <div class="nav-section">
                     <div class="nav-section-title">Mon Compte</div>
 
                     @if(Route::has('profile.index'))
                     <a href="{{ route('profile.index') }}"
-                       class="nav-item {{ $activeClass('profile.', false) }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-user"></i>
-                        </div>
+                       class="nav-item {{ $activeClass('profile.', false) }}" data-tooltip="Profil">
+                        <div class="nav-icon"><i class="fas fa-user"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Profil</div>
                             <div class="nav-subtitle">Mes informations</div>
@@ -429,10 +321,8 @@
 
                     @if(auth()->user()->role == 'Customer' && Route::has('transaction.myReservations'))
                     <a href="{{ route('transaction.myReservations') }}"
-                       class="nav-item {{ $activeClass('transaction.myReservations') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-book"></i>
-                        </div>
+                       class="nav-item {{ $activeClass('transaction.myReservations') }}" data-tooltip="Mes Réservations">
+                        <div class="nav-icon"><i class="fas fa-book"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Mes Réservations</div>
                             <div class="nav-subtitle">Historique</div>
@@ -442,7 +332,7 @@
 
                     @if(Route::has('notification.index'))
                     <a href="{{ route('notification.index') }}"
-                       class="nav-item {{ $activeClass('notification.index') }}">
+                       class="nav-item {{ $activeClass('notification.index') }}" data-tooltip="Notifications">
                         <div class="nav-icon">
                             <i class="fas fa-bell"></i>
                             @if(auth()->user()->unreadNotifications->count() > 0)
@@ -458,10 +348,8 @@
 
                     @if(auth()->user()->role == 'Receptionist' && Route::has('receptionist.session.active'))
                     <a href="{{ route('receptionist.session.active') }}"
-                       class="nav-item {{ $activeClass('receptionist.session.', false) }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-user-clock"></i>
-                        </div>
+                       class="nav-item {{ $activeClass('receptionist.session.', false) }}" data-tooltip="Ma Session">
+                        <div class="nav-icon"><i class="fas fa-user-clock"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Ma Session</div>
                             <div class="nav-subtitle">Suivi d'activité</div>
@@ -469,78 +357,27 @@
                     </a>
                     @endif
 
-                    <!-- ═══════════════════════════════════════
-                         DÉCONNEXION AVEC PROTECTION
-                         ═══════════════════════════════════════ -->
+                    <!-- DÉCONNEXION -->
                     @if($hasActiveSession)
-                        <!-- Version bloquée - session active -->
-                        <div class="nav-item nav-item--logout"
-                             onclick="event.preventDefault(); 
-                                      if (typeof Swal !== 'undefined') {
-                                          Swal.fire({
-                                              title: '⚠️ Session Active',
-                                              html: 'Vous avez une session active <strong>#{{ $activeSession->id }}</strong>.<br><br>' +
-                                                    'Veuillez la clôturer avant de vous déconnecter.',
-                                              icon: 'warning',
-                                              confirmButtonColor: '#10b981',
-                                              confirmButtonText: 'Compris',
-                                              showCancelButton: true,
-                                              cancelButtonText: 'Aller à la session',
-                                              cancelButtonColor: '#3b82f6'
-                                          }).then((result) => {
-                                              if (result.dismiss === Swal.DismissReason.cancel) {
-                                                  window.location.href = '{{ route("cashier.sessions.show", $activeSession) }}';
-                                              }
-                                          });
-                                      } else {
-                                          alert('❌ Session active #{{ $activeSession->id }}. Veuillez clôturer avant de vous déconnecter.');
-                                      }"
-                             style="cursor: pointer; opacity: 0.7;"
-                             title="Déconnexion impossible - Clôturez d'abord votre session #{{ $activeSession->id }}">
-                            <div class="nav-icon">
-                                <i class="fas fa-sign-out-alt" style="color: #ef4444;"></i>
-                            </div>
-                            <div class="nav-content">
-                                <div class="nav-title" style="color: #ef4444;">Déconnexion (bloquée)</div>
-                                <div class="nav-subtitle">Session #{{ $activeSession->id }} active</div>
-                            </div>
+                    <div class="nav-item nav-item--logout"
+                         onclick="if(typeof Swal!=='undefined'){Swal.fire({title:'⚠️ Session Active',html:'Vous avez une session active <strong>#{{ $activeSession->id }}</strong>.<br><br>Veuillez la clôturer avant de vous déconnecter.',icon:'warning',confirmButtonColor:'#1e6b2e',confirmButtonText:'Compris',showCancelButton:true,cancelButtonText:'Aller à la session',cancelButtonColor:'#545954'}).then(r=>{if(r.dismiss===Swal.DismissReason.cancel)window.location.href='{{ route("cashier.sessions.show", $activeSession) }}';});}else{alert('Session active. Clôturez d\'abord.');}"
+                         style="cursor:pointer;opacity:.7" data-tooltip="Déconnexion bloquée">
+                        <div class="nav-icon"><i class="fas fa-sign-out-alt" style="color:#fca5a5"></i></div>
+                        <div class="nav-content">
+                            <div class="nav-title" style="color:#fca5a5">Déconnexion (bloquée)</div>
+                            <div class="nav-subtitle">Session #{{ $activeSession->id }} active</div>
                         </div>
+                    </div>
                     @else
-                        <!-- Version normale - pas de session active -->
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                            @csrf
-                        </form>
-                        <a href="#" class="nav-item nav-item--logout"
-                           onclick="event.preventDefault(); 
-                                    if (typeof Swal !== 'undefined') {
-                                        Swal.fire({
-                                            title: 'Déconnexion',
-                                            text: 'Voulez-vous vraiment vous déconnecter ?',
-                                            icon: 'question',
-                                            showCancelButton: true,
-                                            confirmButtonColor: '#10b981',
-                                            cancelButtonColor: '#64748b',
-                                            confirmButtonText: 'Oui, déconnecter',
-                                            cancelButtonText: 'Annuler'
-                                        }).then((result) => {
-                                            if (result.isConfirmed) {
-                                                document.getElementById('logout-form').submit();
-                                            }
-                                        });
-                                    } else {
-                                        if (confirm('Déconnecter votre session ?')) {
-                                            document.getElementById('logout-form').submit();
-                                        }
-                                    }
-                                    return false;">
-                            <div class="nav-icon">
-                                <i class="fas fa-sign-out-alt"></i>
-                            </div>
-                            <div class="nav-content">
-                                <div class="nav-title">Déconnexion</div>
-                                <div class="nav-subtitle">Quitter la session</div>
-                            </div>
-                        </a>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none">@csrf</form>
+                    <a href="#" class="nav-item nav-item--logout"
+                       onclick="event.preventDefault();if(typeof Swal!=='undefined'){Swal.fire({title:'Déconnexion',text:'Voulez-vous vraiment vous déconnecter ?',icon:'question',showCancelButton:true,confirmButtonColor:'#1e6b2e',cancelButtonColor:'#545954',confirmButtonText:'Oui, déconnecter',cancelButtonText:'Annuler'}).then(r=>{if(r.isConfirmed)document.getElementById('logout-form').submit();});}else{if(confirm('Déconnecter ?'))document.getElementById('logout-form').submit();}return false;" data-tooltip="Déconnexion">
+                        <div class="nav-icon"><i class="fas fa-sign-out-alt"></i></div>
+                        <div class="nav-content">
+                            <div class="nav-title">Déconnexion</div>
+                            <div class="nav-subtitle">Quitter la session</div>
+                        </div>
+                    </a>
                     @endif
                 </div>
 
@@ -553,197 +390,162 @@
                 <div class="user-avatar">
                     @php
                         $avatarPath = null;
-                        
                         if (auth()->user()->avatar) {
                             if (str_starts_with(auth()->user()->avatar, '/img/user/')) {
                                 $avatarPath = asset(auth()->user()->avatar);
-                            } 
-                            elseif (str_starts_with(auth()->user()->avatar, 'storage/') || str_contains(auth()->user()->avatar, 'storage/')) {
+                            } elseif (str_starts_with(auth()->user()->avatar, 'storage/') || str_contains(auth()->user()->avatar, 'storage/')) {
                                 $avatarPath = asset(auth()->user()->avatar);
-                            }
-                            else {
+                            } else {
                                 $avatarPath = asset('storage/' . auth()->user()->avatar);
                             }
                         }
                     @endphp
-
                     @if($avatarPath)
-                        <img src="{{ $avatarPath }}" 
-                             alt="{{ auth()->user()->name }}"
-                             onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=059669&color=fff&size=40';">
+                        <img src="{{ $avatarPath }}" alt="{{ auth()->user()->name }}"
+                             onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=1e6b2e&color=fff&size=40';">
                     @else
-                        <div class="avatar-placeholder">
-                            <i class="fas fa-user"></i>
-                        </div>
+                        <div class="avatar-placeholder"><i class="fas fa-user"></i></div>
                     @endif
                 </div>
                 <div class="user-info">
                     <div class="user-name">{{ auth()->user()->name }}</div>
-                    <div class="user-role">
+                    <div class="user-role-badge">
                         @switch(auth()->user()->role)
-                            @case('Super')
-                                <span class="badge bg-danger">Super Admin</span>
-                                @break
-                            @case('Admin')
-                                <span class="badge bg-primary">Administrateur</span>
-                                @break
-                            @case('Receptionist')
-                                <span class="badge bg-success">Réceptionniste</span>
-                                @break
-                            @case('Housekeeping')
-                                <span class="badge bg-warning">Femme de Chambre</span>
-                                @break
-                            @case('Customer')
-                                <span class="badge bg-info">Client</span>
-                                @break
-                            @default
-                                <span class="badge bg-secondary">{{ auth()->user()->role }}</span>
+                            @case('Super')    <span class="role-pill role-super">Super Admin</span>@break
+                            @case('Admin')    <span class="role-pill role-admin">Administrateur</span>@break
+                            @case('Receptionist') <span class="role-pill role-recep">Réceptionniste</span>@break
+                            @case('Housekeeping') <span class="role-pill role-house">Femme de Chambre</span>@break
+                            @case('Customer') <span class="role-pill role-cust">Client</span>@break
+                            @default          <span class="role-pill role-other">{{ auth()->user()->role }}</span>
                         @endswitch
                     </div>
                     @if($hasActiveSession)
-                    <div class="session-indicator mt-1">
-                        <small class="text-success">
-                            <i class="fas fa-circle fa-xs"></i> Session #{{ $activeSession->id }} active
-                        </small>
+                    <div class="session-dot">
+                        <span class="dot-live"></span>
+                        <small>Session #{{ $activeSession->id }}</small>
                     </div>
                     @endif
                 </div>
             </div>
-
-            <div class="datetime-info mt-2 pt-2 border-top border-white-10">
-                <small class="text-white-50 d-block">
-                    <i class="far fa-clock me-1"></i>
-                    <span id="sidebar-datetime">{{ now()->format('d/m/Y H:i') }}</span>
-                </small>
+            <div class="sidebar-time">
+                <i class="far fa-clock"></i>
+                <span id="sidebar-datetime">{{ now()->format('d/m/Y H:i') }}</span>
             </div>
         </div>
 
     </div>
 </aside>
 
-<!-- Le CSS et JavaScript restent identiques -->
 <style>
-/* ─── Base ─────────────────────────────────── */
+/* ════════════════════════════════════════
+   SIDEBAR — BASE
+════════════════════════════════════════ */
 .sidebar {
     width: 272px;
     background: linear-gradient(170deg, #064e3b 0%, #065f46 55%, #047857 100%);
     color: #fff;
     position: fixed;
-    left: 0;
-    top: 0;
+    left: 0; top: 0;
     height: 100vh;
     z-index: 1001;
-    transition: width 0.3s cubic-bezier(.4,0,.2,1), transform 0.3s cubic-bezier(.4,0,.2,1);
+    transition: width .3s cubic-bezier(.4,0,.2,1);
     display: flex;
     flex-direction: column;
     box-shadow: 4px 0 24px rgba(0,0,0,.18);
+    /* CRITIQUE : empêcher que le fond blanc du body transparaisse */
+    overflow: hidden;
 }
 
-/* ─── Logo ─────────────────────────────────── */
+/* ════════════════════════════════════════
+   LOGO
+════════════════════════════════════════ */
 .sidebar-logo {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 20px;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-    color: #fff;
-    text-decoration: none;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid rgba(255,255,255,.09);
+    color: #fff; text-decoration: none;
     flex-shrink: 0;
+    background: rgba(0,0,0,.08);
     transition: background .2s;
+    min-height: 64px;
 }
-.sidebar-logo:hover { background: rgba(255,255,255,.04); }
+.sidebar-logo:hover { background: rgba(0,0,0,.14); text-decoration: none; color: #fff; }
 
 .brand-text { flex: 1; min-width: 0; }
-.brand-name {
-    font-size: 1rem;
-    font-weight: 700;
-    display: block;
-    line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.brand-subtitle {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,.6);
-    font-weight: 400;
-    margin-top: 2px;
-    white-space: nowrap;
-}
+.brand-name  { font-size: .92rem; font-weight: 700; display: block; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.brand-subtitle { font-size: .68rem; color: rgba(255,255,255,.55); margin-top: 2px; }
 
-/* ─── Toggle button ─────────────────────────── */
-#toggle-sidebar {
+/* ════════════════════════════════════════
+   TOGGLE BUTTONS
+════════════════════════════════════════ */
+.btn-icon-toggle {
     background: rgba(255,255,255,.1);
-    border: none;
-    color: #fff;
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    flex-shrink: 0;
-    transition: background .2s, transform .3s;
+    border: none; color: #fff;
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+    transition: background .2s;
+    font-size: .85rem;
 }
-#toggle-sidebar:hover { background: rgba(255,255,255,.2); }
+.btn-icon-toggle:hover { background: rgba(255,255,255,.2); }
 
-/* ─── Inner layout ──────────────────────────── */
+/* ════════════════════════════════════════
+   INNER LAYOUT
+════════════════════════════════════════ */
 .sidebar-inner {
     flex: 1;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     min-height: 0;
+    /* CRITIQUE : le fond doit rester vert */
+    background: inherit;
 }
-.sidebar-header { 
-    display: none; 
-    padding: 0 20px 16px; 
+
+/* Mobile header — masqué sur desktop */
+.sidebar-header-mobile {
+    display: none;
 }
+
 .sidebar-body {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 12px 0 8px;
+    padding: 10px 0 8px;
     scrollbar-width: thin;
     scrollbar-color: rgba(255,255,255,.15) transparent;
 }
-.sidebar-body::-webkit-scrollbar { width: 4px; }
-.sidebar-body::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,.15);
-    border-radius: 2px;
-}
+.sidebar-body::-webkit-scrollbar { width: 3px; }
+.sidebar-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
 
-/* ─── Nav section ───────────────────────────── */
+/* ════════════════════════════════════════
+   NAV SECTIONS
+════════════════════════════════════════ */
 .nav-menu { padding: 0; }
-.nav-section { margin-bottom: 4px; }
+.nav-section { margin-bottom: 2px; }
 
 .nav-section-title {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: rgba(255,255,255,.38);
-    padding: 10px 20px 4px;
-    font-weight: 700;
+    font-size: .62rem; text-transform: uppercase;
+    letter-spacing: .8px; color: rgba(255,255,255,.35);
+    padding: 10px 18px 4px; font-weight: 700;
 }
 
-/* ─── Nav item ──────────────────────────────── */
+/* ════════════════════════════════════════
+   NAV ITEMS
+════════════════════════════════════════ */
 .nav-item {
-    display: flex;
-    align-items: center;
-    padding: 9px 20px;
+    display: flex; align-items: center;
+    padding: 9px 18px;
     color: rgba(255,255,255,.78);
     text-decoration: none;
-    transition: background .18s ease, border-left-color .18s ease, padding-left .18s ease, color .18s ease;
-    position: relative;
+    transition: background .18s, border-left-color .18s, padding-left .18s, color .18s;
     border-left: 3px solid transparent;
-    cursor: pointer;
-    margin: 1px 0;
+    cursor: pointer; margin: 1px 0;
+    position: relative;
 }
 .nav-item:hover {
     color: #fff;
-    background: linear-gradient(90deg, rgba(52,211,153,.14), rgba(52,211,153,.02));
+    background: linear-gradient(90deg, rgba(52,211,153,.15), rgba(52,211,153,.02));
     border-left-color: rgba(52,211,153,.6);
-    padding-left: 24px;
+    padding-left: 22px;
     text-decoration: none;
 }
 .nav-item.active {
@@ -753,452 +555,334 @@
     font-weight: 500;
 }
 
-/* ─── Highlight items ─────────────────────────── */
-.nav-item--highlight .nav-icon {
-    background: rgba(16,185,129,.18);
-    color: #6ee7b7;
-}
-.nav-item--highlight .nav-title {
-    font-weight: 600;
-    font-size: 0.95rem;
-}
+.nav-item--highlight .nav-icon { background: rgba(16,185,129,.18); color: #6ee7b7; }
+.nav-item--highlight .nav-title { font-weight: 600; }
 .nav-item--highlight:hover .nav-icon,
-.nav-item--highlight.active .nav-icon {
-    background: rgba(16,185,129,.28);
-    color: #34d399;
-    transform: scale(1.08);
-}
+.nav-item--highlight.active .nav-icon { background: rgba(16,185,129,.28); color: #34d399; transform: scale(1.08); }
 
-/* ─── Logout item ───────────────────────────── */
 .nav-item--logout:hover {
     background: linear-gradient(90deg, rgba(239,68,68,.14), transparent);
-    border-left-color: rgba(239,68,68,.5);
+    border-left-color: rgba(239,68,68,.4);
     color: #fca5a5;
 }
-.nav-item--logout:hover .nav-icon { color: #fca5a5; }
+.nav-item--readonly .nav-icon { background: rgba(255,255,255,.06); color: rgba(255,255,255,.5); }
 
-/* ─── Nav icon ──────────────────────────────── */
 .nav-icon {
-    width: 34px;
-    height: 34px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 12px;
-    background: rgba(255,255,255,.06);
-    border-radius: 8px;
-    font-size: 0.92rem;
-    flex-shrink: 0;
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    margin-right: 11px;
+    background: rgba(255,255,255,.07);
+    border-radius: 8px; font-size: .85rem; flex-shrink: 0;
     transition: background .18s, color .18s, transform .18s;
 }
-.nav-item.active .nav-icon {
-    background: rgba(16,185,129,.2);
-    color: #34d399;
-    transform: scale(1.06);
-}
+.nav-item.active .nav-icon { background: rgba(16,185,129,.22); color: #34d399; transform: scale(1.05); }
 
-/* ─── Nav content ───────────────────────────── */
-.nav-content { min-width: 0; }
-.nav-title {
-    font-size: 0.88rem;
-    font-weight: 500;
-    color: inherit;
-    line-height: 1.25;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.nav-subtitle {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,.45);
-    margin-top: 1px;
-    line-height: 1.3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+.nav-content { min-width: 0; flex: 1; }
+.nav-title    { font-size: .84rem; font-weight: 500; color: inherit; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-subtitle { font-size: .68rem; color: rgba(255,255,255,.42); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-/* ─── Badge notification ─────────────────────── */
 .nav-badge {
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-    font-size: 0.65rem;
-    padding: 2px 5px;
-    border-radius: 10px;
-    min-width: 17px;
-    text-align: center;
-    font-weight: 700;
-    box-shadow: 0 2px 6px rgba(239,68,68,.35);
+    position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+    background: #ef4444; color: white;
+    font-size: .6rem; padding: 2px 5px; border-radius: 10px;
+    min-width: 16px; text-align: center; font-weight: 700;
 }
-
-/* ─── Restricted ────────────────────────────── */
 .nav-item.restricted::after {
-    content: "🔒";
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.72rem;
-    opacity: 0.4;
+    content: "🔒"; position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+    font-size: .68rem; opacity: .35;
 }
+.readonly-tag { font-size: .65rem; margin-left: auto; opacity: .5; }
 
-/* ─── Footer ────────────────────────────────── */
+/* ════════════════════════════════════════
+   FOOTER
+════════════════════════════════════════ */
 .sidebar-footer {
-    padding: 16px 20px;
-    border-top: 1px solid rgba(255,255,255,.08);
-    background: rgba(0,0,0,.12);
+    padding: 14px 18px;
+    border-top: 1px solid rgba(255,255,255,.09);
+    background: rgba(0,0,0,.14);
     flex-shrink: 0;
 }
 .user-profile { display: flex; align-items: center; gap: 10px; }
-.user-avatar { width: 38px; height: 38px; flex-shrink: 0; }
+.user-avatar  { width: 36px; height: 36px; flex-shrink: 0; }
 .user-avatar img {
-    width: 100%; height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid rgba(255,255,255,.15);
+    width: 100%; height: 100%; border-radius: 50%;
+    object-fit: cover; border: 2px solid rgba(255,255,255,.15);
 }
 .avatar-placeholder {
-    width: 100%; height: 100%;
-    border-radius: 50%;
+    width: 100%; height: 100%; border-radius: 50%;
     background: linear-gradient(135deg, #10b981, #047857);
     display: flex; align-items: center; justify-content: center;
-    color: white; font-size: 1rem;
+    color: white; font-size: .95rem;
     border: 2px solid rgba(255,255,255,.15);
 }
 .user-info { flex: 1; min-width: 0; }
-.user-name {
-    color: #fff; font-weight: 600; font-size: 0.85rem;
-    line-height: 1.2; margin-bottom: 3px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.user-name  { color: #fff; font-weight: 600; font-size: .82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+
+.role-pill {
+    font-size: .6rem; padding: 2px 7px;
+    border-radius: 4px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .3px; color: white;
+    display: inline-block;
 }
-.user-role .badge {
-    font-size: 0.65rem; padding: 2px 6px;
-    border-radius: 4px; font-weight: 600;
-    text-transform: uppercase; letter-spacing: 0.4px;
+.role-super { background: rgba(220,38,38,.75); }
+.role-admin { background: rgba(37,99,235,.75); }
+.role-recep { background: rgba(16,185,129,.75); }
+.role-house { background: rgba(245,158,11,.75); }
+.role-cust  { background: rgba(6,182,212,.75); }
+.role-other { background: rgba(100,116,139,.75); }
+
+.session-dot { display: flex; align-items: center; gap: 5px; margin-top: 3px; }
+.session-dot small { font-size: .62rem; color: rgba(255,255,255,.5); }
+.dot-live {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #34d399; display: inline-block;
+    animation: pulse-dot 2s infinite;
 }
-.session-indicator .text-success {
-    font-size: 0.68rem; display: flex; align-items: center; gap: 4px;
+@keyframes pulse-dot {
+    0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(52,211,153,.5); }
+    50%      { opacity:.6; box-shadow:0 0 0 4px rgba(52,211,153,0); }
 }
-.session-indicator .fa-circle {
-    font-size: 0.55rem; animation: pulse 2s infinite;
+
+.sidebar-time {
+    display: flex; align-items: center; gap: 6px;
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    font-size: .68rem; color: rgba(255,255,255,.38);
 }
-.datetime-info small { font-size: 0.72rem; color: rgba(255,255,255,.4); }
 #sidebar-datetime { font-family: 'Courier New', monospace; font-weight: 500; }
 
-/* ─── Badge colors ──────────────────────────── */
-.bg-danger   { background: linear-gradient(135deg, #dc2626, #b91c1c) !important; }
-.bg-primary  { background: linear-gradient(135deg, #3b82f6, #1d4ed8) !important; }
-.bg-success  { background: linear-gradient(135deg, #10b981, #047857) !important; }
-.bg-warning  { background: linear-gradient(135deg, #f59e0b, #d97706) !important; }
-.bg-info     { background: linear-gradient(135deg, #06b6d4, #0891b2) !important; }
-.bg-secondary{ background: linear-gradient(135deg, #64748b, #475569) !important; }
-
-.border-white-10 { border-color: rgba(255,255,255,.08) !important; }
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50%       { opacity: 0.4; }
-}
-
-/* ─── Collapsed ─────────────────────────────── */
-.sidebar.collapsed { width: 68px; }
-
+/* ════════════════════════════════════════
+   COLLAPSED (desktop)
+════════════════════════════════════════ */
+.sidebar.collapsed { width: 64px; }
 .sidebar.collapsed .brand-text,
 .sidebar.collapsed .nav-content,
 .sidebar.collapsed .nav-section-title,
 .sidebar.collapsed .nav-badge,
 .sidebar.collapsed .user-info,
-.sidebar.collapsed .datetime-info,
-.sidebar.collapsed .restricted::after {
-    display: none;
-}
-.sidebar.collapsed .sidebar-logo {
-    justify-content: center;
-    padding: 18px 10px;
-}
-.sidebar.collapsed .nav-item {
-    justify-content: center;
-    padding: 11px 0;
-    border-left-width: 2px;
-}
+.sidebar.collapsed .sidebar-time,
+.sidebar.collapsed .restricted::after,
+.sidebar.collapsed .readonly-tag { display: none; }
+.sidebar.collapsed .sidebar-logo { justify-content: center; padding: 16px 8px; }
+.sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; border-left-width: 2px; }
 .sidebar.collapsed .nav-item:hover { padding-left: 0; }
-.sidebar.collapsed .nav-icon { margin-right: 0; width: 38px; height: 38px; }
+.sidebar.collapsed .nav-icon { margin-right: 0; width: 36px; height: 36px; }
 .sidebar.collapsed .user-profile { justify-content: center; }
 .sidebar.collapsed .user-avatar { margin: 0; }
 .sidebar.collapsed .sidebar-footer { padding: 12px 8px; }
 
-/* Tooltip on collapsed */
-.sidebar.collapsed .nav-item { position: relative; }
+/* Tooltip collapsed */
 .sidebar.collapsed .nav-item::before {
     content: attr(data-tooltip);
-    position: absolute;
-    left: calc(100% + 10px);
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(6,78,59,.97);
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 6px;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity .15s;
-    z-index: 9999;
+    position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%);
+    background: rgba(6,78,59,.97); color: #fff;
+    padding: 5px 10px; border-radius: 6px; font-size: .78rem;
+    white-space: nowrap; pointer-events: none; opacity: 0;
+    transition: opacity .15s; z-index: 9999;
     box-shadow: 0 4px 12px rgba(0,0,0,.3);
 }
 .sidebar.collapsed .nav-item:hover::before { opacity: 1; }
 
-/* ─── Mobile sidebar overlay ───────────────── */
+/* ════════════════════════════════════════
+   OVERLAY MOBILE
+════════════════════════════════════════ */
 .sidebar-overlay {
     display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: fixed; inset: 0;
     background: rgba(0,0,0,.6);
-    z-index: 1000;
-    opacity: 0;
+    z-index: 1000; opacity: 0;
     transition: opacity .3s;
-    backdrop-filter: blur(2px);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
 }
-.sidebar-overlay.show {
-    display: block;
-    opacity: 1;
-}
+.sidebar-overlay.show { display: block; opacity: 1; }
 
-/* ─── Mobile ────────────────────────────────── */
+/* ════════════════════════════════════════
+   MOBILE ≤ 768px
+════════════════════════════════════════ */
 @media (max-width: 768px) {
+
+    /* ── Sidebar hors écran par défaut ── */
     .sidebar {
-        width: 85vw;
-        max-width: 320px;
+        width: 82vw;
+        max-width: 300px;
+        /* IMPORTANT : décalage hors écran, pas transform sur height */
         transform: translateX(-100%);
-        box-shadow: 6px 0 32px rgba(0,0,0,.3);
+        transition: transform .28s cubic-bezier(.4,0,.2,1);
+        /* Toujours pleine hauteur, couleur verte */
         height: 100vh;
-        overflow: hidden;
+        height: 100dvh; /* dynamic viewport pour les navigateurs modernes */
+        z-index: 1050;
+        /* Forcer le fond vert — le body blanc ne doit pas transparaître */
+        background: linear-gradient(170deg, #064e3b 0%, #065f46 55%, #047857 100%) !important;
     }
-    .sidebar.show { 
+
+    /* ── Sidebar ouvert ── */
+    .sidebar.show {
         transform: translateX(0);
     }
-    
-    /* Hide desktop toggle */
+
+    /* ── Pas de collapsed sur mobile ── */
+    .sidebar.collapsed { width: 82vw; max-width: 300px; }
+    .sidebar.collapsed .brand-text,
+    .sidebar.collapsed .nav-content,
+    .sidebar.collapsed .nav-section-title,
+    .sidebar.collapsed .user-info,
+    .sidebar.collapsed .sidebar-time { display: block !important; }
+    .sidebar.collapsed .nav-item { justify-content: flex-start; padding: 9px 18px; }
+    .sidebar.collapsed .nav-icon { margin-right: 11px; width: 32px; height: 32px; }
+    .sidebar.collapsed .user-profile { justify-content: flex-start; }
+    .sidebar.collapsed .sidebar-logo { justify-content: space-between; padding: 16px 18px; }
+
+    /* ── Bouton toggle desktop caché sur mobile ── */
     #toggle-sidebar { display: none !important; }
-    
-    /* Show mobile header */
-    .sidebar-header {
+
+    /* ── Header mobile visible ── */
+    .sidebar-header-mobile {
         display: flex !important;
-        justify-content: space-between;
-        align-items: center;
-        padding: 16px 20px;
-        border-bottom: 1px solid rgba(255,255,255,.08);
-        background: rgba(0,0,0,.1);
+        align-items: center; justify-content: space-between;
+        padding: 12px 18px;
+        border-bottom: 1px solid rgba(255,255,255,.09);
+        background: rgba(0,0,0,.12);
         flex-shrink: 0;
     }
-    .sidebar-header .header-title {
-        color: white;
-        font-size: 1rem;
-        font-weight: 700;
-        display: flex !important;
-        align-items: center;
-        gap: 8px;
+    .header-title-mobile {
+        color: white; font-size: .88rem; font-weight: 700;
+        display: flex; align-items: center; gap: 8px;
     }
-    .sidebar-header button {
-        background: rgba(255,255,255,.1);
-        color: white;
-        border: none;
-        width: 38px;
-        height: 38px;
-        border-radius: 8px;
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        transition: background .2s, transform .2s;
-        font-size: 1.1rem;
-    }
-    .sidebar-header button:hover {
-        background: rgba(255,255,255,.2);
-        transform: rotate(90deg);
-    }
-    
-    /* Logo section - keep visible on mobile */
-    .sidebar-logo { 
-        padding: 14px 20px;
-        border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-    .sidebar-logo img {
-        height: 36px !important;
-    }
-    .brand-name {
-        font-size: 0.95rem !important;
-    }
-    .brand-subtitle {
-        font-size: 0.7rem !important;
-    }
-    
-    /* Sidebar inner - ensure proper height */
+
+    /* ── Inner : flex colonne avec scroll ── */
     .sidebar-inner {
-        display: flex;
-        flex-direction: column;
-        height: 100%;
-        overflow: hidden;
+        flex: 1; display: flex; flex-direction: column;
+        min-height: 0; overflow: hidden;
+        /* Fond vert explicite */
+        background: transparent;
     }
-    
-    /* Sidebar body - scrollable area */
+
+    /* ── Body scrollable ── */
     .sidebar-body {
-        flex: 1;
-        overflow-y: auto !important;
-        overflow-x: hidden;
+        flex: 1; overflow-y: auto; overflow-x: hidden;
         padding: 8px 0;
         -webkit-overflow-scrolling: touch;
+        /* Fond vert pour le scroll */
+        background: transparent;
     }
-    
-    /* Nav sections - ensure visibility */
-    .nav-section {
-        display: block !important;
-        margin-bottom: 8px;
-    }
-    .nav-section-title {
-        display: block !important;
-        padding: 8px 20px 4px;
-        font-size: 0.65rem;
-    }
-    
-    /* Nav items - ensure proper display */
-    .nav-item {
-        display: flex !important;
-        padding: 10px 20px;
-        margin: 1px 0;
-    }
-    .nav-icon {
-        display: flex !important;
-        width: 36px;
-        height: 36px;
-    }
-    .nav-content {
-        display: block !important;
-    }
-    .nav-title,
-    .nav-subtitle {
-        display: block !important;
-    }
-    
-    /* Footer adjustments */
-    .sidebar-footer {
-        padding: 12px 16px;
-        flex-shrink: 0;
-        border-top: 1px solid rgba(255,255,255,.08);
-    }
-    .user-avatar {
-        width: 36px;
-        height: 36px;
-    }
-    .user-name {
-        font-size: 0.82rem;
-    }
-    .user-role .badge {
-        font-size: 0.62rem;
-    }
-    .datetime-info {
-        margin-top: 8px;
-        padding-top: 8px;
-    }
+
+    /* ── Footer toujours visible ── */
+    .sidebar-footer { flex-shrink: 0; }
+
+    /* ── Taille des éléments nav ── */
+    .nav-section-title { padding: 8px 18px 3px; font-size: .6rem; }
+    .nav-item { padding: 9px 18px; }
+    .nav-title { font-size: .82rem; }
+    .nav-subtitle { font-size: .67rem; }
+    .nav-icon { width: 30px; height: 30px; font-size: .82rem; margin-right: 10px; }
+
+    /* ── Footer compact ── */
+    .sidebar-footer { padding: 12px 16px; }
+    .user-name { font-size: .8rem; }
 }
 
-@media (max-width: 480px) {
-    .sidebar {
-        width: 100vw;
-        max-width: none;
-    }
-    
-    .nav-item {
-        padding: 9px 16px;
-    }
-    .nav-section-title {
-        padding-left: 16px;
-        padding-right: 16px;
-    }
+/* ════════════════════════════════════════
+   TRÈS PETIT ÉCRAN ≤ 380px
+════════════════════════════════════════ */
+@media (max-width: 380px) {
+    .sidebar { width: 92vw; max-width: none; }
+    .nav-item { padding: 8px 14px; }
+    .nav-icon { width: 28px; height: 28px; margin-right: 9px; }
+    .brand-name { font-size: .85rem; }
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const sidebar      = document.getElementById('sidebar');
-    const sidebarOverlay = document.getElementById('sidebar-overlay');
-    const toggleBtn    = document.getElementById('toggle-sidebar');
-    const toggleBtnSm  = document.getElementById('toggle-sidebar-sm');
+    const sidebar        = document.getElementById('sidebar');
+    const overlay        = document.getElementById('sidebar-overlay');
+    const toggleDesktop  = document.getElementById('toggle-sidebar');
+    const toggleMobile   = document.getElementById('toggle-sidebar-sm');
 
-    /* ── Add data-tooltip for collapsed mode ── */
+    /* ── Data-tooltip pour collapsed desktop ── */
     document.querySelectorAll('.nav-item').forEach(item => {
         const title = item.querySelector('.nav-title');
-        if (title) item.setAttribute('data-tooltip', title.textContent.trim());
+        if (title && !item.getAttribute('data-tooltip')) {
+            item.setAttribute('data-tooltip', title.textContent.trim());
+        }
     });
 
-    /* ── Toggle desktop collapse ── */
-    function applyCollapsed(collapsed) {
+    /* ════════════════════════════════════════
+       DESKTOP : collapse/expand
+    ════════════════════════════════════════ */
+    function setCollapsed(collapsed) {
+        if (window.innerWidth <= 768) return; // pas de collapse sur mobile
         sidebar.classList.toggle('collapsed', collapsed);
-        if (toggleBtn) {
-            toggleBtn.querySelector('i').className = collapsed
-                ? 'fas fa-chevron-right'
-                : 'fas fa-bars';
+        if (toggleDesktop) {
+            toggleDesktop.querySelector('i').className = collapsed ? 'fas fa-chevron-right' : 'fas fa-bars';
         }
         localStorage.setItem('sidebarCollapsed', collapsed);
     }
 
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', function (e) {
+    if (toggleDesktop) {
+        toggleDesktop.addEventListener('click', function (e) {
             e.preventDefault();
-            applyCollapsed(!sidebar.classList.contains('collapsed'));
+            setCollapsed(!sidebar.classList.contains('collapsed'));
         });
     }
 
-    /* ── Restore state ── */
-    if (localStorage.getItem('sidebarCollapsed') === 'true') {
-        applyCollapsed(true);
+    // Restore collapsed state on desktop
+    if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === 'true') {
+        setCollapsed(true);
     }
 
-    /* ── Toggle mobile sidebar ── */
+    /* ════════════════════════════════════════
+       MOBILE : open/close
+    ════════════════════════════════════════ */
+    function openSidebar() {
+        sidebar.classList.add('show');
+        overlay.classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove('show');
+        overlay.classList.remove('show');
+        document.body.style.overflow = '';
+    }
+
     function toggleMobileSidebar() {
-        const isOpen = sidebar.classList.toggle('show');
-        sidebarOverlay.classList.toggle('show', isOpen);
-        
-        // Prevent body scroll when sidebar is open
-        document.body.style.overflow = isOpen ? 'hidden' : '';
+        sidebar.classList.contains('show') ? closeSidebar() : openSidebar();
     }
 
-    if (toggleBtnSm) {
-        toggleBtnSm.addEventListener('click', function (e) {
+    if (toggleMobile) {
+        toggleMobile.addEventListener('click', function (e) {
             e.stopPropagation();
-            toggleMobileSidebar();
+            closeSidebar();
         });
     }
 
-    /* ── Close on overlay click ── */
-    if (sidebarOverlay) {
-        sidebarOverlay.addEventListener('click', function () {
-            toggleMobileSidebar();
-        });
+    if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
     }
 
-    /* ── Close on nav link click (mobile) ── */
-    if (window.innerWidth < 768) {
-        document.querySelectorAll('.nav-item[href]').forEach(link => {
-            link.addEventListener('click', () => {
-                setTimeout(() => {
-                    sidebar.classList.remove('show');
-                    sidebarOverlay.classList.remove('show');
-                    document.body.style.overflow = '';
-                }, 200);
-            });
+    // Fermer sur navigation (mobile)
+    document.querySelectorAll('.nav-item').forEach(link => {
+        link.addEventListener('click', function() {
+            if (window.innerWidth <= 768) {
+                setTimeout(closeSidebar, 150);
+            }
         });
-    }
+    });
 
-    /* ── Real-time clock ── */
+    /* ════════════════════════════════════════
+       EXPOSER openSidebar globalement
+       (pour le bouton hamburger dans _mobile-header.blade.php)
+    ════════════════════════════════════════ */
+    window.openSidebar  = openSidebar;
+    window.closeSidebar = closeSidebar;
+    window.toggleMobileSidebar = toggleMobileSidebar;
+
+    /* ════════════════════════════════════════
+       HORLOGE
+    ════════════════════════════════════════ */
     function updateClock() {
         const el = document.getElementById('sidebar-datetime');
         if (!el) return;
@@ -1210,12 +894,16 @@ document.addEventListener('DOMContentLoaded', function () {
     updateClock();
     setInterval(updateClock, 30000);
 
-    /* ── Handle resize ── */
+    /* ════════════════════════════════════════
+       RESIZE
+    ════════════════════════════════════════ */
     window.addEventListener('resize', function() {
         if (window.innerWidth > 768) {
-            sidebar.classList.remove('show');
-            sidebarOverlay.classList.remove('show');
-            document.body.style.overflow = '';
+            closeSidebar();
+            // Re-appliquer l'état collapsed si sauvegardé
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                sidebar.classList.add('collapsed');
+            }
         }
     });
 });
