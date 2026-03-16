@@ -507,30 +507,53 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
     });
 });
 
-// ==================== CHECK-IN AVANCÉ (RÉCEPTIONNISTES + ADMINS) ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist']], function () {
-    Route::prefix('checkin')->name('checkin.')->group(function () {
-        // Routes sans paramètres d'abord
-        Route::get('/', [CheckInController::class, 'index'])->name('index');
-        Route::get('/search', [CheckInController::class, 'search'])->name('search');
-        Route::get('/direct', [CheckInController::class, 'directCheckIn'])->name('direct');
-        Route::post('/process-direct-checkin', [CheckInController::class, 'processDirectCheckIn'])->name('process-direct-checkin');
-        Route::get('/availability/check', [CheckInController::class, 'checkAvailability'])->name('availability');
+// ==================== CHECK-IN (GESTION COMPLÈTE AVEC PERMISSIONS) ====================
 
-        // Routes avec paramètre {transaction}
-        Route::prefix('{transaction}')->group(function () {
-            Route::get('/', [CheckInController::class, 'show'])->name('show');
-            Route::post('/', [CheckInController::class, 'store'])->name('store');
-            Route::post('/quick', [CheckInController::class, 'quickCheckIn'])->name('quick');
+    // Routes GET (lecture) - Accessibles à Housekeeping, Réceptionnistes et Admins
+    Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Housekeeping']], function () {
+        Route::prefix('checkin')->name('checkin.')->group(function () {
+            // Routes GET uniquement (lecture seule)
+            Route::get('/', [CheckInController::class, 'index'])->name('index')
+                ->middleware('checkrole:Super,Admin,Receptionist,Housekeeping');
+                
+            Route::get('/search', [CheckInController::class, 'search'])->name('search')
+                ->middleware('checkrole:Super,Admin,Receptionist,Housekeeping');
+                
+            Route::get('/availability/check', [CheckInController::class, 'checkAvailability'])->name('availability')
+                ->middleware('checkrole:Super,Admin,Receptionist,Housekeeping');
+            
+            // Route show avec paramètre
+            Route::prefix('{transaction}')->group(function () {
+                Route::get('/', [CheckInController::class, 'show'])->name('show')
+                    ->middleware('checkrole:Super,Admin,Receptionist,Housekeeping');
+            });
         });
     });
 
-    Route::get('/checkin-dashboard', [DashboardController::class, 'checkinDashboard'])->name('checkin.dashboard');
+    // Routes d'action (POST/PUT) - Réservées aux réceptionnistes et admins UNIQUEMENT
+    Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist']], function () {
+        Route::prefix('checkin')->name('checkin.')->group(function () {
+            // Routes d'action (création/modification)
+            Route::get('/direct', [CheckInController::class, 'directCheckIn'])->name('direct')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+                
+            Route::post('/process-direct-checkin', [CheckInController::class, 'processDirectCheckIn'])->name('process-direct-checkin')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            
+            // Routes POST avec paramètre
+            Route::prefix('{transaction}')->group(function () {
+                Route::post('/', [CheckInController::class, 'store'])->name('store')
+                    ->middleware('checkrole:Super,Admin,Receptionist');
+                    
+                Route::post('/quick', [CheckInController::class, 'quickCheckIn'])->name('quick')
+                    ->middleware('checkrole:Super,Admin,Receptionist');
+            });
+        });
 
-    // ==================== CAISSE RÉCEPTION ====================
-    // ⚠️ CES ROUTES ONT ÉTÉ SUPPRIMÉES CAR ELLES ÉTAIENT EN DOUBLE
-    // Elles sont déjà définies dans le groupe principal plus haut
-});
+        // Dashboard checkin
+        Route::get('/checkin-dashboard', [DashboardController::class, 'checkinDashboard'])->name('checkin.dashboard')
+            ->middleware('checkrole:Super,Admin,Receptionist');
+    });
 
 // ==================== HOUSEKEEPING POUR RÉCEPTION ====================
 Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'checkrole:Super,Admin,Housekeeping,Receptionist'])->group(function () {
@@ -539,6 +562,31 @@ Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'check
     Route::get('/dashboard', [HousekeepingController::class, 'index'])->name('dashboard');
     Route::get('/to-clean', [HousekeepingController::class, 'toClean'])->name('to-clean');
     Route::get('/quick-list/{status}', [HousekeepingController::class, 'quickList'])->name('quick-list');
+
+
+    // ✅ AJOUTER CES NOUVELLES ROUTES POUR VOIR LES CHECK-IN/OUT
+    Route::get('/checkins', [HousekeepingController::class, 'viewCheckins'])->name('checkins')
+        ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
+    
+    Route::get('/checkouts', [HousekeepingController::class, 'viewCheckouts'])->name('checkouts')
+        ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
+    
+    Route::get('/today-schedule', [HousekeepingController::class, 'todaySchedule'])->name('today-schedule')
+        ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
+    
+    Route::get('/room/{room}/status', [HousekeepingController::class, 'roomStatus'])->name('room.status')
+        ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
+    
+    Route::get('/occupied-rooms', [HousekeepingController::class, 'occupiedRooms'])->name('occupied-rooms')
+        ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
+    
+    // Routes pour les statistiques en lecture seule
+    Route::get('/stats/checkins-today', [HousekeepingController::class, 'checkinsToday'])->name('stats.checkins-today')
+        ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
+    
+    Route::get('/stats/checkouts-today', [HousekeepingController::class, 'checkoutsToday'])->name('stats.checkouts-today')
+        ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
+
 
     Route::post('/room/{room}/clean', [HousekeepingController::class, 'cleanRoom'])
         ->name('clean-room')

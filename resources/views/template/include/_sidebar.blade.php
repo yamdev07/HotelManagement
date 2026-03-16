@@ -256,52 +256,109 @@
                 @endif
 
                 <!-- ═══════════════════════════════════════
-                     NETTOYAGE
-                     ═══════════════════════════════════════ -->
-                @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']))
-                <div class="nav-section">
-                    <div class="nav-section-title">Nettoyage</div>
+     NETTOYAGE
+     ═══════════════════════════════════════ -->
+@if(in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']))
+<div class="nav-section">
+    <div class="nav-section-title">Nettoyage</div>
 
-                    @if(Route::has('housekeeping.dashboard'))
-                    <a href="{{ route('housekeeping.dashboard') }}"
-                       class="nav-item {{ $activeClass('housekeeping.', false) }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-broom"></i>
-                        </div>
-                        <div class="nav-content">
-                            <div class="nav-title">Housekeeping</div>
-                            <div class="nav-subtitle">Nettoyage & Maintenance</div>
-                        </div>
-                    </a>
-                    @endif
+    @if(Route::has('housekeeping.dashboard'))
+    <a href="{{ route('housekeeping.dashboard') }}"
+       class="nav-item {{ $activeClass('housekeeping.', false) }}">
+        <div class="nav-icon">
+            <i class="fas fa-broom"></i>
+        </div>
+        <div class="nav-content">
+            <div class="nav-title">Housekeeping</div>
+            <div class="nav-subtitle">Nettoyage & Maintenance</div>
+        </div>
+    </a>
+    @endif
 
-                    @if(Route::has('roomstatus.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
-                    <a href="{{ route('roomstatus.index') }}"
-                       class="nav-item {{ $activeClass('roomstatus.index') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-flag"></i>
-                        </div>
-                        <div class="nav-content">
-                            <div class="nav-title">Statuts Chambres</div>
-                            <div class="nav-subtitle">États & Couleurs</div>
-                        </div>
-                    </a>
-                    @endif
-
-                    @if(Route::has('facility.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
-                    <a href="{{ route('facility.index') }}"
-                       class="nav-item {{ $activeClass('facility.index') }}">
-                        <div class="nav-icon">
-                            <i class="fas fa-tools"></i>
-                        </div>
-                        <div class="nav-content">
-                            <div class="nav-title">Équipements</div>
-                            <div class="nav-subtitle">Services & Commodités</div>
-                        </div>
-                    </a>
-                    @endif
-                </div>
+    <!-- ✅ BOUTONS CHECK-IN/CHECK-OUT POUR HOUSEKEEPING (LECTURE SEULE) -->
+    @if(Route::has('checkin.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']))
+    @php
+        $isCheckinActive = in_array($currentRoute, [
+            'checkin.index', 'checkin.search', 'checkin.show',
+            'checkin.direct', 'checkin.process-direct-checkin',
+            'checkin.quick', 'checkin.availability'
+        ]);
+    @endphp
+    <a href="{{ route('checkin.index') }}"
+       class="nav-item nav-item--readonly {{ $isCheckinActive ? 'active' : '' }}"
+       @if(auth()->user()->role == 'Housekeeping')
+       title="Mode lecture seule - Visualisation uniquement"
+       @endif>
+        <div class="nav-icon">
+            <i class="fas fa-door-open"></i>
+        </div>
+        <div class="nav-content">
+            <div class="nav-title">Check-in/Check-out</div>
+            <div class="nav-subtitle">
+                @if(auth()->user()->role == 'Housekeeping')
+                Visualisation
+                @else
+                Enregistrement clients
                 @endif
+            </div>
+        </div>
+        @if(auth()->user()->role == 'Housekeeping')
+        <div class="ms-2">
+            <span class="badge bg-info" style="font-size: 0.6rem;">👁️ Lecture seule</span>
+        </div>
+        @endif
+    </a>
+    @endif
+
+    @if(Route::has('roomstatus.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
+    <a href="{{ route('roomstatus.index') }}"
+       class="nav-item {{ $activeClass('roomstatus.index') }}">
+        <div class="nav-icon">
+            <i class="fas fa-flag"></i>
+        </div>
+        <div class="nav-content">
+            <div class="nav-title">Statuts Chambres</div>
+            <div class="nav-subtitle">États & Couleurs</div>
+        </div>
+    </a>
+    @endif
+
+    @if(Route::has('facility.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
+    <a href="{{ route('facility.index') }}"
+       class="nav-item {{ $activeClass('facility.index') }}">
+        <div class="nav-icon">
+            <i class="fas fa-tools"></i>
+        </div>
+        <div class="nav-content">
+            <div class="nav-title">Équipements</div>
+            <div class="nav-subtitle">Services & Commodités</div>
+        </div>
+    </a>
+    @endif
+</div>
+@endif
+
+<!-- AJOUTER CE CSS DANS LA PARTIE STYLE -->
+<style>
+/* Style pour les éléments en lecture seule */
+.nav-item--readonly {
+    opacity: 0.9;
+}
+.nav-item--readonly:hover {
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.02));
+    border-left-color: #3b82f6;
+}
+.nav-item--readonly .nav-icon {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+}
+.bg-info {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+</style>
 
                 <!-- ═══════════════════════════════════════
                      ADMINISTRATION
