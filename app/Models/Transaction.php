@@ -40,7 +40,6 @@ class Transaction extends Model
         'late_checkout_fee',
         'late_checkout',
         'expected_checkout_time',
-
     ];
 
     protected $casts = [
@@ -55,26 +54,17 @@ class Transaction extends Model
 
     // Constantes pour les statuts
     const STATUS_RESERVATION = 'reservation';
-
     const STATUS_ACTIVE = 'active';
-
     const STATUS_COMPLETED = 'completed';
-
     const STATUS_CANCELLED = 'cancelled';
-
     const STATUS_NO_SHOW = 'no_show';
-
     const STATUS_PENDING_CHECKOUT = 'pending_checkout'; 
-
     const STATUS_RESERVED_WAITING = 'reserved_waiting'; 
 
     // Types de pièces d'identité
     const ID_TYPE_PASSPORT = 'passeport';
-
     const ID_TYPE_CNI = 'cni';
-
     const ID_TYPE_DRIVER_LICENSE = 'permis';
-
     const ID_TYPE_OTHER = 'autre';
 
     /**
@@ -99,7 +89,6 @@ class Transaction extends Model
 
     /**
      * Créer un snapshot pour le journal d'activité
-     * Cela évite "Objet supprimé" quand la transaction est supprimée
      */
     public function getLogSnapshot(): array
     {
@@ -274,6 +263,22 @@ class Transaction extends Model
     }
 
     /**
+     * Vérifie si la transaction est en attente de check-out
+     */
+    public function isPendingCheckout()
+    {
+        return $this->status === self::STATUS_PENDING_CHECKOUT;
+    }
+
+    /**
+     * Vérifie si la transaction est une réservation en attente
+     */
+    public function isReservedWaiting()
+    {
+        return $this->status === self::STATUS_RESERVED_WAITING;
+    }
+
+    /**
      * Vérifier si le séjour est en cours (dates actuelles)
      */
     public function isOngoing()
@@ -318,6 +323,125 @@ class Transaction extends Model
     public function isCheckedOut()
     {
         return ! is_null($this->actual_check_out);
+    }
+
+    /**
+     * Vérifier si la transaction peut être annulée
+     */
+    public function canBeCancelled()
+    {
+        // 1. Déjà annulée ? Non
+        if ($this->isCancelled()) {
+            return false;
+        }
+        
+        // 2. Déjà no show ? Non
+        if ($this->isNoShow()) {
+            return false;
+        }
+        
+        // 3. Seulement les réservations peuvent être annulées
+        if (!$this->isReservation()) {
+            return false;
+        }
+        
+        // 4. Vérifier la date d'arrivée
+        $checkIn = Carbon::parse($this->check_in);
+        
+        // Si la date d'arrivée est passée de plus de 24h
+        if ($checkIn->isPast() && $checkIn->diffInHours(now()) > 24) {
+            return false; // Trop tard pour annuler, utiliser No Show
+        }
+        
+        return true;
+    }
+
+    /**
+     * Obtenir la raison pour laquelle l'annulation est impossible
+     */
+    public function getCannotCancelReason()
+    {
+        if ($this->isCancelled()) {
+            return 'Cette réservation est déjà annulée.';
+        }
+        
+        if ($this->isNoShow()) {
+            return 'Cette réservation est déjà marquée comme "No Show".';
+        }
+        
+        if (!$this->isReservation()) {
+            if ($this->isActive()) {
+                return 'Impossible d\'annuler un client déjà installé.';
+            }
+            if ($this->isCompleted()) {
+                return 'Impossible d\'annuler un séjour terminé.';
+            }
+            return 'Cette réservation ne peut pas être annulée.';
+        }
+        
+        $checkIn = Carbon::parse($this->check_in);
+        
+        if ($checkIn->isPast()) {
+            $hoursPassed = $checkIn->diffInHours(now());
+            if ($hoursPassed > 24) {
+                return 'La date d\'arrivée est dépassée depuis plus de 24h. Utilisez "No Show" à la place.';
+            }
+            return 'La date d\'arrivée est dépassée. Vous pouvez encore annuler ou utiliser "No Show".';
+        }
+        
+        if ($this->completedPayments()->exists()) {
+            return 'Des paiements ont été effectués. Vous devez procéder à un remboursement.';
+        }
+        
+        return null;
+    }
+
+    /**
+     * Vérifier si la transaction peut être marquée comme No Show
+     */
+    public function canBeNoShow()
+    {
+        // 1. Déjà annulée ou no show ? Non
+        if ($this->isCancelled() || $this->isNoShow()) {
+            return false;
+        }
+        
+        // 2. Seulement les réservations
+        if (!$this->isReservation()) {
+            return false;
+        }
+        
+        // 3. La date d'arrivée doit être passée
+        $checkIn = Carbon::parse($this->check_in);
+        if (!$checkIn->isPast()) {
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
+     * Vérifier si la transaction peut être restaurée
+     */
+    public function canBeRestored()
+    {
+        return $this->isCancelled() || $this->isNoShow();
+    }
+
+    /**
+     * Vérifier si la transaction peut être checkée-in
+     */
+    public function canBeCheckedIn()
+    {
+        return $this->isReservation() && ! $this->isCancelled() && ! $this->isNoShow();
+    }
+
+    /**
+     * Vérifier si la transaction peut être checkée-out
+     */
+    public function canBeCheckedOut()
+    {
+        return $this->isActive() && $this->isFullyPaid();
     }
 
     /**
@@ -507,7 +631,7 @@ class Transaction extends Model
 
         $updateData = ['status' => $newStatus];
 
-        if ($newStatus === self::STATUS_CANCELLED) {
+        if ($newStatus === self::STATUS_CANCELLED || $newStatus === self::STATUS_NO_SHOW) {
             $updateData['cancelled_at'] = Carbon::now();
             $updateData['cancelled_by'] = $userId;
             $updateData['cancel_reason'] = $reason;
@@ -540,6 +664,91 @@ class Transaction extends Model
     }
 
     /**
+     * Annuler la transaction
+     */
+    public function cancel($userId, $reason = null)
+    {
+        return $this->changeStatus(self::STATUS_CANCELLED, $userId, $reason);
+    }
+
+    /**
+     * Marquer comme No Show (client non présenté)
+     */
+    public function markAsNoShow($userId, $reason = null)
+    {
+        if (!$this->canBeNoShow()) {
+            throw new \Exception('Cette réservation ne peut pas être marquée comme No Show.');
+        }
+        
+        DB::beginTransaction();
+        
+        try {
+            $oldStatus = $this->status;
+            
+            $this->update([
+                'status' => self::STATUS_NO_SHOW,
+                'cancelled_by' => $userId,
+                'cancel_reason' => $reason ?? 'Client non présenté',
+                'cancelled_at' => now(),
+            ]);
+            
+            // Libérer la chambre
+            if ($this->room) {
+                $this->room->update(['room_status_id' => Room::STATUS_AVAILABLE]);
+            }
+            
+            // Logger le no-show
+            activity()
+                ->causedBy(User::find($userId))
+                ->performedOn($this)
+                ->withProperties([
+                    'old_status' => $oldStatus,
+                    'new_status' => self::STATUS_NO_SHOW,
+                    'reason' => $reason,
+                ])
+                ->log('a marqué comme no-show');
+            
+            DB::commit();
+            
+            return true;
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Restaurer une transaction annulée ou no show
+     */
+    public function restoreTransaction()
+    {
+        if (!$this->canBeRestored()) {
+            throw new \Exception('Cette transaction ne peut pas être restaurée.');
+        }
+        
+        $oldStatus = $this->status;
+
+        $this->update([
+            'status' => self::STATUS_RESERVATION,
+            'cancelled_at' => null,
+            'cancelled_by' => null,
+            'cancel_reason' => null,
+        ]);
+
+        // Logger la restauration
+        activity()
+            ->performedOn($this)
+            ->withProperties([
+                'old_status' => $oldStatus,
+                'new_status' => self::STATUS_RESERVATION,
+            ])
+            ->log('a restauré la réservation annulée');
+
+        return true;
+    }
+
+    /**
      * Obtenir le label du statut pour l'affichage
      */
     public function getStatusLabelAttribute()
@@ -550,9 +759,65 @@ class Transaction extends Model
             self::STATUS_COMPLETED => 'Séjour terminé',
             self::STATUS_CANCELLED => 'Annulée',
             self::STATUS_NO_SHOW => 'No Show',
+            self::STATUS_PENDING_CHECKOUT => 'En attente de départ',
+            self::STATUS_RESERVED_WAITING => 'En attente de chambre',
         ];
 
         return $labels[$this->status] ?? ucfirst($this->status);
+    }
+
+    /**
+     * Obtenir la couleur du statut
+     */
+    public function getStatusColorAttribute()
+    {
+        $colors = [
+            self::STATUS_RESERVATION => 'warning',
+            self::STATUS_ACTIVE => 'success',
+            self::STATUS_COMPLETED => 'info',
+            self::STATUS_CANCELLED => 'danger',
+            self::STATUS_NO_SHOW => 'secondary',
+            self::STATUS_PENDING_CHECKOUT => 'primary',
+            self::STATUS_RESERVED_WAITING => 'dark',
+        ];
+
+        return $colors[$this->status] ?? 'secondary';
+    }
+
+    /**
+     * Obtenir l'icône du statut
+     */
+    public function getStatusIconAttribute()
+    {
+        $icons = [
+            self::STATUS_RESERVATION => 'fa-calendar-check',
+            self::STATUS_ACTIVE => 'fa-bed',
+            self::STATUS_COMPLETED => 'fa-check-circle',
+            self::STATUS_CANCELLED => 'fa-times-circle',
+            self::STATUS_NO_SHOW => 'fa-user-slash',
+            self::STATUS_PENDING_CHECKOUT => 'fa-clock',
+            self::STATUS_RESERVED_WAITING => 'fa-hourglass-half',
+        ];
+
+        return $icons[$this->status] ?? 'fa-circle';
+    }
+
+    /**
+     * Obtenir la classe CSS pour le badge
+     */
+    public function getStatusBadgeClassAttribute()
+    {
+        $classes = [
+            self::STATUS_RESERVATION => 'badge bg-warning',
+            self::STATUS_ACTIVE => 'badge bg-success',
+            self::STATUS_COMPLETED => 'badge bg-info',
+            self::STATUS_CANCELLED => 'badge bg-danger',
+            self::STATUS_NO_SHOW => 'badge bg-secondary',
+            self::STATUS_PENDING_CHECKOUT => 'badge bg-primary',
+            self::STATUS_RESERVED_WAITING => 'badge bg-dark',
+        ];
+
+        return $classes[$this->status] ?? 'badge bg-secondary';
     }
 
     /**
@@ -581,38 +846,6 @@ class Transaction extends Model
             self::ID_TYPE_DRIVER_LICENSE => 'Permis de Conduire',
             self::ID_TYPE_OTHER => 'Autre',
         ];
-    }
-
-    /**
-     * Obtenir la couleur du statut
-     */
-    public function getStatusColorAttribute()
-    {
-        $colors = [
-            self::STATUS_RESERVATION => 'warning',
-            self::STATUS_ACTIVE => 'success',
-            self::STATUS_COMPLETED => 'info',
-            self::STATUS_CANCELLED => 'danger',
-            self::STATUS_NO_SHOW => 'secondary',
-        ];
-
-        return $colors[$this->status] ?? 'secondary';
-    }
-
-    /**
-     * Obtenir l'icône du statut
-     */
-    public function getStatusIconAttribute()
-    {
-        $icons = [
-            self::STATUS_RESERVATION => 'fa-calendar-check',
-            self::STATUS_ACTIVE => 'fa-bed',
-            self::STATUS_COMPLETED => 'fa-check-circle',
-            self::STATUS_CANCELLED => 'fa-times-circle',
-            self::STATUS_NO_SHOW => 'fa-user-slash',
-        ];
-
-        return $icons[$this->status] ?? 'fa-circle';
     }
 
     /**
@@ -722,7 +955,7 @@ class Transaction extends Model
     }
 
     /**
-     * Calculer le total des paiements COMPLÉTÉS - MÉTHODE CRITIQUE CORRIGÉE
+     * Calculer le total des paiements COMPLÉTÉS
      */
     public function getTotalPayment()
     {
@@ -763,7 +996,7 @@ class Transaction extends Model
     }
 
     /**
-     * Calculer le montant restant à payer - MÉTHODE CORRIGÉE
+     * Calculer le montant restant à payer
      */
     public function getRemainingPayment()
     {
@@ -802,7 +1035,7 @@ class Transaction extends Model
     }
 
     /**
-     * Vérifier si la transaction est complètement payée - MÉTHODE CORRIGÉE
+     * Vérifier si la transaction est complètement payée
      */
     public function isFullyPaid()
     {
@@ -812,41 +1045,7 @@ class Transaction extends Model
     }
 
     /**
-     * Annuler la transaction
-     */
-    public function cancel($userId, $reason = null)
-    {
-        return $this->changeStatus(self::STATUS_CANCELLED, $userId, $reason);
-    }
-
-    /**
-     * Restaurer une transaction annulée
-     */
-    public function restoreTransaction()
-    {
-        $oldStatus = $this->status;
-
-        $this->update([
-            'status' => self::STATUS_RESERVATION,
-            'cancelled_at' => null,
-            'cancelled_by' => null,
-            'cancel_reason' => null,
-        ]);
-
-        // Logger la restauration
-        activity()
-            ->performedOn($this)
-            ->withProperties([
-                'old_status' => $oldStatus,
-                'new_status' => self::STATUS_RESERVATION,
-            ])
-            ->log('a restauré la réservation annulée');
-
-        return true;
-    }
-
-    /**
-     * Recalculer et mettre à jour le statut des paiements - MÉTHODE CRITIQUE
+     * Recalculer et mettre à jour le statut des paiements
      */
     public function updatePaymentStatus()
     {
@@ -898,38 +1097,6 @@ class Transaction extends Model
             Log::error("Erreur mise à jour statut paiement transaction #{$this->id}: ".$e->getMessage());
             throw $e;
         }
-    }
-
-    /**
-     * Vérifier si la transaction peut être annulée
-     */
-    public function canBeCancelled()
-    {
-        return $this->isReservation() && ! $this->isCancelled();
-    }
-
-    /**
-     * Vérifier si la transaction peut être restaurée
-     */
-    public function canBeRestored()
-    {
-        return $this->isCancelled();
-    }
-
-    /**
-     * Vérifier si la transaction peut être checkée-in
-     */
-    public function canBeCheckedIn()
-    {
-        return $this->isReservation() && ! $this->isCancelled() && ! $this->isNoShow();
-    }
-
-    /**
-     * Vérifier si la transaction peut être checkée-out
-     */
-    public function canBeCheckedOut()
-    {
-        return $this->isActive() && $this->isFullyPaid();
     }
 
     /**
@@ -998,27 +1165,13 @@ class Transaction extends Model
             self::STATUS_COMPLETED => 'Séjour terminé (est parti)',
             self::STATUS_CANCELLED => 'Annulée',
             self::STATUS_NO_SHOW => 'No Show (pas venu)',
+            self::STATUS_PENDING_CHECKOUT => 'En attente de départ',
+            self::STATUS_RESERVED_WAITING => 'En attente de chambre',
         ];
     }
 
     /**
-     * Obtenir la classe CSS pour le badge
-     */
-    public function getStatusBadgeClassAttribute()
-    {
-        $classes = [
-            self::STATUS_RESERVATION => 'badge bg-warning',
-            self::STATUS_ACTIVE => 'badge bg-success',
-            self::STATUS_COMPLETED => 'badge bg-info',
-            self::STATUS_CANCELLED => 'badge bg-danger',
-            self::STATUS_NO_SHOW => 'badge bg-secondary',
-        ];
-
-        return $classes[$this->status] ?? 'badge bg-secondary';
-    }
-
-    /**
-     * Synchroniser manuellement les totaux - MÉTHODE IMPORTANTE
+     * Synchroniser manuellement les totaux
      */
     public function syncPaymentTotals()
     {
@@ -1196,50 +1349,6 @@ class Transaction extends Model
     }
 
     /**
-     * Marquer comme no-show
-     */
-    public function markAsNoShow($userId, $reason = null)
-    {
-        $oldStatus = $this->status;
-
-        $this->update([
-            'status' => self::STATUS_NO_SHOW,
-            'cancelled_by' => $userId,
-            'cancel_reason' => $reason ?? 'No-show',
-            'cancelled_at' => now(),
-        ]);
-
-        // Logger le no-show
-        activity()
-            ->causedBy(User::find($userId))
-            ->performedOn($this)
-            ->withProperties([
-                'old_status' => $oldStatus,
-                'new_status' => self::STATUS_NO_SHOW,
-                'reason' => $reason,
-            ])
-            ->log('a marqué comme no-show');
-
-        return true;
-    }
-
-    /**
-     * Vérifie si la transaction est en attente de check-out
-     */
-    public function isPendingCheckout()
-    {
-        return $this->status === self::STATUS_PENDING_CHECKOUT;
-    }
-
-    /**
-     * Vérifie si la transaction est une réservation en attente
-     */
-    public function isReservedWaiting()
-    {
-        return $this->status === self::STATUS_RESERVED_WAITING;
-    }
-
-    /**
      * Créer une réservation pour une chambre qui sera libérée aujourd'hui
      */
     public static function createWaitingReservation($data)
@@ -1337,8 +1446,6 @@ class Transaction extends Model
         
         return true;
     }
-
-    // Dans app/Models/Transaction.php
 
     /**
      * Vérifier si le supplément late checkout est payé

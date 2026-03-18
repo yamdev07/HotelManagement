@@ -1,0 +1,1 @@
+{"version":2,"defects":{"Tests\\Feature\\SmokeTest::test_homepage_is_accessible":7},"times":{"Tests\\Feature\\SmokeTest::test_homepage_is_accessible":6.334,"Tests\\Feature\\SmokeTest::test_login_page_is_accessible":0.246}}

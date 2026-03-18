@@ -1329,26 +1329,66 @@ class TransactionController extends Controller
      */
     private function canCancelReservation(Transaction $transaction): bool
     {
+        // 1. Déjà annulée ? Non
         if ($transaction->status == 'cancelled') {
             return false;
         }
-
-        $checkInDateTime = Carbon::parse($transaction->check_in); 
-        $now = Carbon::now();
-
-        // Si la date d'arrivée est passée, on ne peut pas annuler
-        if ($now->gt($checkInDateTime)) {
+        
+        // 2. Déjà no show ? Non
+        if ($transaction->status == 'no_show') {
             return false;
         }
 
-        // Moins de 2h avant l'arrivée (12h), on bloque l'annulation
-        $hoursBeforeCheckIn = $now->diffInHours($checkInDateTime, false);
-        if ($hoursBeforeCheckIn < 2 && $hoursBeforeCheckIn > 0) {
-            Log::info('❌ Annulation impossible - Moins de 2h avant check-in', [
-                'heures_restantes' => $hoursBeforeCheckIn,
-                'check_in' => $checkInDateTime->format('d/m/Y H:i')
-            ]);
+        // 3. Seulement les réservations peuvent être annulées
+        if ($transaction->status != 'reservation') {
             return false;
+        }
+
+        $checkInDateTime = Carbon::parse($transaction->check_in);
+        $checkInDay = $checkInDateTime->copy()->startOfDay();
+        $now = Carbon::now();
+
+        // ✅ MODIFICATION ICI : Permettre l'annulation même si la date est passée
+        // Si la date d'arrivée est passée, on autorise l'annulation (client non présenté)
+        if ($checkInDay->isPast()) {
+            Log::info('✅ Annulation autorisée - Client non présenté', [
+                'transaction_id' => $transaction->id,
+                'check_in_day' => $checkInDay->format('d/m/Y'),
+                'aujourd_hui' => $now->format('d/m/Y')
+            ]);
+            return true;
+        }
+
+        // Si la date d'arrivée est aujourd'hui, vérifier l'heure
+        if ($now->isSameDay($checkInDay)) {
+            // Heure de check-in (12h)
+            $checkInTime = $checkInDay->copy()->setTime(12, 0, 0);
+            
+            // Si on est après 12h le jour J, on peut encore annuler (client non présenté)
+            if ($now->gte($checkInTime)) {
+                Log::info('✅ Annulation autorisée - Après 12h, client non présenté', [
+                    'check_in_day' => $checkInDay->format('d/m/Y'),
+                    'heure_actuelle' => $now->format('H:i')
+                ]);
+                return true;
+            }
+            
+            // Moins de 2h avant 12h, on bloque
+            $hoursBeforeCheckIn = $now->diffInHours($checkInTime, false);
+            if ($hoursBeforeCheckIn < 2 && $hoursBeforeCheckIn > 0) {
+                Log::info('❌ Annulation impossible - Moins de 2h avant check-in', [
+                    'heures_restantes' => $hoursBeforeCheckIn,
+                    'check_in' => $checkInDateTime->format('d/m/Y H:i')
+                ]);
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // Si la date d'arrivée est dans le futur, on peut annuler
+        if ($checkInDay->isFuture()) {
+            return true;
         }
 
         return true;

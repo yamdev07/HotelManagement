@@ -1235,7 +1235,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     `,
                     icon: 'success',
-                    confirmButtonText: 'Voir la transaction'
+                    confirmButtonText: 'Retour sur le dashboard'
                 }).then(() => {
                     window.location.href = `/transactions/${transactionId}`;
                 });

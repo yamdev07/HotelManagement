@@ -9,7 +9,7 @@ It contains:
 - a secured internal management dashboard for hotel staff
 
 ![Lint](https://github.com/yamdev07/HotelManagement/actions/workflows/ci.yml/badge.svg)
-
+![Tests](https://github.com/yamdev07/HotelManagement/actions/workflows/tests.yml/badge.svg)
 ---
 
 ## Business Workflow
@@ -225,6 +225,12 @@ Planned improvements:
 - REST API for mobile app
 
 - Reporting & analytics
+
+## Live Demo
+
+The application is currently used by Cactus Hotel.
+
+Demo: https://lecactushotel.bj
 
 ## Author
 
