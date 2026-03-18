@@ -159,6 +159,7 @@
     background: var(--green-700);
     transform: translateY(-1px);
     color: white;
+    text-decoration: none;
 }
 .btn-gray {
     background: var(--white);
@@ -169,6 +170,7 @@
     background: var(--green-50);
     border-color: var(--green-200);
     color: var(--green-700);
+    text-decoration: none;
 }
 .btn-outline {
     background: var(--white);
@@ -179,6 +181,7 @@
     background: var(--green-50);
     border-color: var(--green-200);
     color: var(--green-700);
+    text-decoration: none;
 }
 .btn-sm {
     padding: 6px 12px;
@@ -264,32 +267,6 @@
 .filter-badge:hover {
     background: rgba(255,255,255,.25);
     transform: translateY(-1px);
-}
-
-/* ══════════════════════════════════════════════
-   LOADING INDICATOR
-══════════════════════════════════════════════ */
-.search-loading {
-    display: none;
-}
-.search-loading.active {
-    display: block;
-}
-.loading-spinner {
-    text-align: center;
-    padding: 40px;
-}
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid var(--gray-200);
-    border-top-color: var(--green-600);
-    border-radius: 50%;
-    animation: spin .8s linear infinite;
-    margin: 0 auto 16px;
-}
-@keyframes spin {
-    to { transform: rotate(360deg); }
 }
 
 /* ══════════════════════════════════════════════
@@ -395,6 +372,8 @@
 .status-reservation { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
 .status-active { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
 .status-completed { background: var(--gray-100); color: var(--gray-600); border: 1.5px solid var(--gray-200); }
+.status-cancelled { background: var(--red-50); color: var(--red-600); border: 1.5px solid var(--red-100); }
+.status-no_show { background: var(--gray-100); color: var(--gray-600); border: 1.5px solid var(--gray-200); }
 
 .customer-avatar {
     width: 56px;
@@ -431,6 +410,7 @@
     font-weight: 600;
 }
 .badge-green { background: var(--green-50); color: var(--green-700); border: 1.5px solid var(--green-200); }
+.badge-gray { background: var(--gray-100); color: var(--gray-600); border: 1.5px solid var(--gray-200); }
 
 /* ══════════════════════════════════════════════
    EMPTY STATE
@@ -505,6 +485,77 @@
     border-color: var(--green-200);
     color: var(--green-700);
 }
+.alert-red {
+    background: var(--red-50);
+    border-color: var(--red-100);
+    color: var(--red-600);
+}
+.alert-gray {
+    background: var(--gray-100);
+    border-color: var(--gray-200);
+    color: var(--gray-600);
+}
+
+/* ── Loading indicator ── */
+.search-loading {
+    display: none;
+}
+.search-loading.active {
+    display: block;
+}
+.loading-spinner {
+    text-align: center;
+    padding: 40px;
+}
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid var(--gray-200);
+    border-top-color: var(--green-600);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin: 0 auto 16px;
+}
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Pagination ── */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    margin-top: 20px;
+}
+.page-item {
+    display: inline-block;
+}
+.page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--r);
+    background: var(--white);
+    border: 1.5px solid var(--gray-200);
+    color: var(--gray-600);
+    font-size: .8rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: var(--transition);
+}
+.page-link:hover {
+    background: var(--green-50);
+    border-color: var(--green-200);
+    color: var(--green-700);
+    text-decoration: none;
+}
+.page-item.active .page-link {
+    background: var(--green-600);
+    border-color: var(--green-600);
+    color: white;
+}
 </style>
 
 <div class="search-page">
@@ -571,6 +622,12 @@
                 <span class="filter-badge" onclick="setFilter('active')">
                     <i class="fas fa-bed"></i>Dans l'hôtel
                 </span>
+                <span class="filter-badge" onclick="setFilter('cancelled')">
+                    <i class="fas fa-ban"></i>Annulées
+                </span>
+                <span class="filter-badge" onclick="setFilter('no_show')">
+                    <i class="fas fa-user-slash"></i>No Show
+                </span>
             </div>
         </form>
     </div>
@@ -589,7 +646,7 @@
             <h5><i class="fas fa-list-ul"></i> Résultats de recherche</h5>
             <?php if(isset($search) && $search): ?>
                 <div>
-                    <span class="badge badge-green"><?php echo e($reservations->count()); ?> résultat(s)</span>
+                    <span class="badge badge-green"><?php echo e($reservations->total()); ?> résultat(s)</span>
                     <a href="<?php echo e(route('checkin.search')); ?>" class="btn btn-sm btn-gray ms-2">
                         <i class="fas fa-times"></i> Effacer
                     </a>
@@ -657,6 +714,17 @@
                             $totalPaid = $transaction->getTotalPayment();
                             $totalPrice = $transaction->getTotalPrice();
                             $remaining = $totalPrice - $totalPaid;
+                            $initials = strtoupper(substr($transaction->customer->name, 0, 2));
+                            
+                            // Déterminer la classe de statut
+                            $statusClass = match($transaction->status) {
+                                'reservation' => 'status-reservation',
+                                'active' => 'status-active',
+                                'completed' => 'status-completed',
+                                'cancelled' => 'status-cancelled',
+                                'no_show' => 'status-no_show',
+                                default => 'status-reservation'
+                            };
                         ?>
                         <div class="reservation-item">
                             <div class="reservation-header">
@@ -665,7 +733,7 @@
                                         <i class="fas fa-hashtag"></i> #<?php echo e($transaction->id); ?>
 
                                     </span>
-                                    <span class="reservation-status status-<?php echo e($transaction->status); ?>">
+                                    <span class="reservation-status <?php echo e($statusClass); ?>">
                                         <?php echo e($transaction->status_label); ?>
 
                                     </span>
@@ -680,7 +748,7 @@
                             <div class="row align-items-center">
                                 <div class="col-md-2">
                                     <div class="customer-avatar">
-                                        <?php echo e(substr($transaction->customer->name, 0, 1)); ?>
+                                        <?php echo e($initials); ?>
 
                                     </div>
                                 </div>
@@ -772,14 +840,29 @@
                                     </small>
                                 </div>
                             </div>
+                            
+                            <?php if($transaction->status == 'cancelled' && $transaction->cancel_reason): ?>
+                                <div class="mt-2 small text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Raison: <?php echo e($transaction->cancel_reason); ?>
+
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php if($transaction->status == 'no_show'): ?>
+                                <div class="mt-2 small text-muted">
+                                    <i class="fas fa-user-slash me-1"></i>
+                                    Client non présenté
+                                </div>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
                 
                 
                 <?php if($reservations->hasPages()): ?>
-                    <div class="d-flex justify-content-center mt-4">
-                        <?php echo e($reservations->appends(['search' => $search])->links()); ?>
+                    <div class="pagination">
+                        <?php echo e($reservations->appends(['search' => $search])->links('pagination::simple-bootstrap-4')); ?>
 
                     </div>
                 <?php endif; ?>
@@ -843,6 +926,12 @@ function setFilter(type) {
         case 'active':
             input.value = 'statut:active';
             break;
+        case 'cancelled':
+            input.value = 'statut:cancelled';
+            break;
+        case 'no_show':
+            input.value = 'statut:no_show';
+            break;
     }
     document.getElementById('search-form').submit();
 }
@@ -860,26 +949,28 @@ function quickCheckIn(id) {
             'Content-Type': 'application/json'
         }
     })
-    .then(r => r.json())
+    .then(response => response.json())
     .then(data => {
         loader.classList.remove('active');
         if (data.success) {
+            // Afficher une notification de succès
             const alert = document.createElement('div');
             alert.className = 'alert alert-green';
-            alert.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message || 'Check-in effectué'}`;
+            alert.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message || 'Check-in effectué avec succès'}`;
             document.querySelector('.search-page').prepend(alert);
             setTimeout(() => location.reload(), 1500);
         } else {
-            alert('Erreur: ' + (data.error || 'Échec'));
+            alert('Erreur: ' + (data.error || 'Échec du check-in'));
         }
     })
-    .catch(() => {
+    .catch(error => {
         loader.classList.remove('active');
-        alert('Erreur réseau');
+        console.error('Erreur:', error);
+        alert('Erreur réseau lors du check-in');
     });
 }
 
-// Recherche automatique
+// Recherche automatique après délai
 let timeout;
 document.getElementById('search-input')?.addEventListener('input', function() {
     clearTimeout(timeout);
@@ -888,6 +979,15 @@ document.getElementById('search-input')?.addEventListener('input', function() {
             document.getElementById('loading-indicator').classList.add('active');
             document.getElementById('search-form').submit();
         }, 800);
+    }
+});
+
+// Soumettre le formulaire avec la touche Entrée
+document.getElementById('search-input')?.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('loading-indicator').classList.add('active');
+        document.getElementById('search-form').submit();
     }
 });
 </script>
