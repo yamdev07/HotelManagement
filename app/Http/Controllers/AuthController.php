@@ -20,7 +20,12 @@ class AuthController extends Controller
         if (Auth::attempt($request->only('email', 'password'))) {
             activity()->causedBy(auth()->user())->log('User logged into the portal');
 
-            return redirect('dashboard')->with('success', 'Welcome '.auth()->user()->name);
+            // Redirection intelligente selon le rôle
+            if (auth()->user()->role === 'Customer') {
+                return redirect()->route('transaction.myReservations')->with('success', 'Bienvenue ' . auth()->user()->name);
+            }
+
+            return redirect()->route('dashboard.index')->with('success', 'Welcome ' . auth()->user()->name);
         }
 
         return redirect('login')->with('failed', 'Incorrect email / password');

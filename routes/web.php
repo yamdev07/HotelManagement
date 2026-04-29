@@ -393,19 +393,24 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
     });
 });
 
-// ==================== ROUTES POUR TOUS LES UTILISATEURS AUTHENTIFIÉS ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant']], function () {
-    // ==================== DASHBOARD ====================
-    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+    // ==================== DASHBOARD (RESTEINT) ====================
+    Route::prefix('dashboard')->name('dashboard.')->middleware('checkrole:Super,Admin,Housekeeping,Receptionist,Servant')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('index');
         Route::get('/data', [DashboardController::class, 'getDashboardData'])->name('data');
         Route::get('/stats', [DashboardController::class, 'updateStats'])->name('stats');
         Route::get('/debug', [DashboardController::class, 'debug'])->name('debug');
     });
 
+// ==================== ROUTES POUR TOUS LES UTILISATEURS AUTHENTIFIÉS ====================
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant']], function () {
+
     Route::get('/home', function () {
+        if (auth()->user()->role === 'Customer') {
+            return redirect()->route('transaction.myReservations');
+        }
         return redirect()->route('dashboard.index');
     })->name('home');
+
 
     // ==================== ACTIVITY LOG ====================
     Route::prefix('activity')->name('activity.')->group(function () {
@@ -674,6 +679,9 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Housekeeping']], f
 
 // ==================== ROUTE ADMIN ====================
 Route::get('/admin', function () {
+    if (auth()->user()->role === 'Customer') {
+        return redirect()->route('transaction.myReservations');
+    }
     return redirect()->route('dashboard.index');
 })->name('admin');
 
@@ -927,6 +935,9 @@ Route::middleware(['auth', 'checkrole:Super,Admin,Receptionist'])->group(functio
 // ==================== ROUTE FALLBACK ====================
 Route::fallback(function () {
     if (auth()->check()) {
+        if (auth()->user()->role === 'Customer') {
+            return redirect()->route('transaction.myReservations')->with('error', 'Page non trouvée.');
+        }
         return redirect()->route('dashboard.index')->with('error', 'Page non trouvée.');
     }
 
