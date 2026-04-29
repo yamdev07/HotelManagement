@@ -1,293 +1,3 @@
-
-<?php $__env->startSection('title', 'Restaurant - Commandes'); ?>
-<?php $__env->startSection('content'); ?>
-
-<?php echo $__env->make('restaurant.partials.nav-tabs', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="mb-0">Gestion des Commandes</h3>
-    <div class="d-flex gap-2">
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newOrderModal">
-            <i class="fas fa-plus me-2"></i> Nouvelle Commande
-        </button>
-    </div>
-</div>
-
-<!-- Statistiques -->
-<div class="row mb-4">
-    <div class="col-xl-3 col-md-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-1">En attente</h6>
-                        <h3 class="mb-0 text-warning"><?php echo e($pendingOrders ?? 0); ?></h3>
-                    </div>
-                    <div class="bg-warning bg-opacity-10 p-3 rounded">
-                        <i class="fas fa-clock fa-2x text-warning"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-1">Livrées</h6>
-                        <h3 class="mb-0 text-success"><?php echo e($deliveredOrders ?? 0); ?></h3>
-                    </div>
-                    <div class="bg-success bg-opacity-10 p-3 rounded">
-                        <i class="fas fa-check-circle fa-2x text-success"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-1">CA (auj.)</h6>
-                        <h3 class="mb-0 text-primary"><?php echo e(number_format($todayRevenue ?? 0, 0, ',', ' ')); ?> CFA</h3>
-                    </div>
-                    <div class="bg-primary bg-opacity-10 p-3 rounded">
-                        <i class="fas fa-coins fa-2x text-primary"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-1">Mois</h6>
-                        <h3 class="mb-0 text-info"><?php echo e($monthlyOrders ?? 0); ?></h3>
-                    </div>
-                    <div class="bg-info bg-opacity-10 p-3 rounded">
-                        <i class="fas fa-calendar-alt fa-2x text-info"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="card shadow-sm border-0">
-    <div class="card-body p-0">
-        <!-- Filtres -->
-        <div class="p-3 border-bottom">
-            <div class="row">
-                <div class="col-md-3">
-                    <label class="form-label">Statut</label>
-                    <select class="form-select" id="statusFilter">
-                        <option value="">Tous les statuts</option>
-                        <option value="pending">En attente</option>
-                        <option value="preparing">En préparation</option>
-                        <option value="delivered">Livré</option>
-                        <option value="paid">Payé</option>
-                        <option value="cancelled">Annulé</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Date de</label>
-                    <input type="date" class="form-control" id="dateFrom">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Date à</label>
-                    <input type="date" class="form-control" id="dateTo">
-                </div>
-                <div class="col-md-3 d-flex align-items-end">
-                    <button class="btn btn-primary w-100" id="applyFilters">
-                        <i class="fas fa-filter me-1"></i> Appliquer
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Table des commandes -->
-        <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th>#</th>
-                        <th>Client</th>
-                        <th>Chambre</th>
-                        <th>Transaction</th>
-                        <th>Menus</th>
-                        <th>Total</th>
-                        <th>Statut</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php $__empty_1 = true; $__currentLoopData = $orders; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $order): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                    <tr data-status="<?php echo e($order->status); ?>">
-                        <td><strong>#<?php echo e(str_pad($order->id, 6, '0', STR_PAD_LEFT)); ?></strong></td>
-                        <td>
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0 me-2">
-                                    <i class="fas fa-user-circle text-primary"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    <?php echo e($order->customer_name ?? 'Client non spécifié'); ?>
-
-                                    <?php if($order->customer_phone): ?>
-                                    <br><small class="text-muted"><?php echo e($order->customer_phone); ?></small>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <?php if($order->room_id): ?>
-                            <span class="badge bg-info">Ch. <?php echo e($order->room_number); ?></span>
-                            <?php else: ?>
-                            <span class="text-muted">-</span>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <?php if($order->transaction_id): ?>
-                            <span class="badge bg-success">Trans. #<?php echo e($order->transaction_id); ?></span>
-                            <?php else: ?>
-                            <span class="text-muted">-</span>
-                            <?php endif; ?>
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-info view-items" 
-                                    data-order-id="<?php echo e($order->id); ?>"
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#orderDetailsModal">
-                                <?php echo e($order->items_count ?? 0); ?> article(s)
-                            </button>
-                        </td>
-                        <td>
-                            <strong class="text-primary"><?php echo e(number_format($order->total, 0, ',', ' ')); ?> CFA</strong>
-                        </td>
-                        <td>
-                            <?php
-                                $statusColors = [
-                                    'pending' => 'warning',
-                                    'preparing' => 'info',
-                                    'delivered' => 'success',
-                                    'paid' => 'primary',
-                                    'cancelled' => 'danger'
-                                ];
-                                $statusLabels = [
-                                    'pending' => 'En attente',
-                                    'preparing' => 'En préparation',
-                                    'delivered' => 'Livré',
-                                    'paid' => 'Payé',
-                                    'cancelled' => 'Annulé'
-                                ];
-                            ?>
-                            <span class="badge bg-<?php echo e($statusColors[$order->status] ?? 'secondary'); ?>">
-                                <?php echo e($statusLabels[$order->status] ?? $order->status); ?>
-
-                            </span>
-                        </td>
-                        <td>
-                            <?php echo e($order->created_at->format('d/m/Y H:i')); ?>
-
-                        </td>
-                        <td>
-                            <div class="dropdown">
-                                <button class="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#orderDetailsModal" data-order-id="<?php echo e($order->id); ?>">
-                                            <i class="fas fa-eye me-2"></i> Détails
-                                        </a>
-                                    </li>
-                                    <?php if($order->status == 'pending'): ?>
-                                    <li>
-                                        <a class="dropdown-item change-status" href="#" data-order-id="<?php echo e($order->id); ?>" data-status="preparing">
-                                            <i class="fas fa-play me-2"></i> Préparer
-                                        </a>
-                                    </li>
-                                    <?php endif; ?>
-                                    <?php if($order->status == 'preparing'): ?>
-                                    <li>
-                                        <a class="dropdown-item change-status" href="#" data-order-id="<?php echo e($order->id); ?>" data-status="delivered">
-                                            <i class="fas fa-check me-2"></i> Livrer
-                                        </a>
-                                    </li>
-                                    <?php endif; ?>
-                                    <?php if(in_array($order->status, ['delivered', 'pending'])): ?>
-                                    <li>
-                                        <a class="dropdown-item change-status" href="#" data-order-id="<?php echo e($order->id); ?>" data-status="paid">
-                                            <i class="fas fa-money-bill-wave me-2"></i> Marquer payé
-                                        </a>
-                                    </li>
-                                    <?php endif; ?>
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item text-danger cancel-order" href="#" data-order-id="<?php echo e($order->id); ?>">
-                                            <i class="fas fa-times me-2"></i> Annuler
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                    <tr>
-                        <td colspan="8" class="text-center py-5">
-                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                            <h4>Aucune commande trouvée</h4>
-                            <p class="text-muted">Aucune commande n'a été passée pour le moment.</p>
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newOrderModal">
-                                <i class="fas fa-plus me-1"></i> Créer la première commande
-                            </button>
-                        </td>
-                    </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Pagination -->
-        <?php if($orders->hasPages()): ?>
-        <div class="p-3 border-top">
-            <?php echo e($orders->links()); ?>
-
-        </div>
-        <?php endif; ?>
-    </div>
-</div>
-
-<!-- Modal Détails de la commande -->
-<div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Détails de la commande #<span id="orderId"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="orderDetailsContent">
-                    <!-- Contenu chargé dynamiquement -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="button" class="btn btn-primary" id="printOrder">
-                    <i class="fas fa-print me-1"></i> Imprimer
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- ════════════════════════════════════════════════
      MODAL NOUVELLE COMMANDE — ADMIN 5 ÉTOILES
 ════════════════════════════════════════════════ -->
@@ -295,7 +5,7 @@
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content nom-card">
 
-            
+            {{-- En-tête --}}
             <div class="nom-header">
                 <div class="nom-header-left">
                     <div class="nom-icon-wrap"><i class="fas fa-utensils"></i></div>
@@ -307,7 +17,7 @@
                 <button type="button" class="nom-close" data-bs-dismiss="modal">✕</button>
             </div>
 
-            
+            {{-- Barre de progression --}}
             <div class="nom-steps">
                 <div class="nom-step active" data-step="1"><div class="nom-dot">1</div><span>Client</span></div>
                 <div class="nom-step-line"></div>
@@ -318,9 +28,9 @@
                 <div class="nom-step" data-step="4"><div class="nom-dot">4</div><span>Confirmation</span></div>
             </div>
 
-            <form action="<?php echo e(route('restaurant.orders.store')); ?>" method="POST" id="newOrderForm">
-            <?php echo csrf_field(); ?>
-            
+            <form action="{{ route('restaurant.orders.store') }}" method="POST" id="newOrderForm">
+            @csrf
+            {{-- Champs cachés --}}
             <input type="hidden" name="customer_id"     id="h-customer-id">
             <input type="hidden" name="customer_name"   id="h-customer-name">
             <input type="hidden" name="phone"           id="h-phone">
@@ -333,34 +43,33 @@
 
             <div class="nom-body">
 
-                
+                {{-- ── ÉTAPE 1 : Identification du client ── --}}
                 <div class="nom-panel active" id="nom-panel-1">
                     <div class="nom-panel-title"><i class="fas fa-user me-2"></i>Identification du client</div>
                     <p class="nom-desc">Sélectionnez un client existant ou saisissez ses informations manuellement.</p>
 
-                    
+                    {{-- Toggle client existant / nouveau --}}
                     <div class="nom-toggle-row mb-4">
                         <button type="button" class="nom-toggle active" id="tog-existing">Client existant</button>
                         <button type="button" class="nom-toggle" id="tog-new">Saisie manuelle</button>
                     </div>
 
-                    
+                    {{-- Client existant --}}
                     <div id="block-existing">
                         <div class="nom-field">
                             <label class="nom-label">Sélectionner un client <span class="nom-req">*</span></label>
                             <select class="nom-input nom-select" id="n-customer-select">
                                 <option value="">— Rechercher un client —</option>
-                                <?php $__currentLoopData = $customers ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $customer): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <option value="<?php echo e($customer->id); ?>"
-                                        data-name="<?php echo e($customer->name); ?>"
-                                        data-room="<?php echo e($customer->room_number ?? ''); ?>"
-                                        data-phone="<?php echo e($customer->phone ?? ''); ?>"
-                                        data-email="<?php echo e($customer->email ?? ''); ?>">
-                                    <?php echo e($customer->name); ?>
-
-                                    <?php if(!empty($customer->room_number)): ?> — Chambre <?php echo e($customer->room_number); ?><?php endif; ?>
+                                @foreach($customers ?? [] as $customer)
+                                <option value="{{ $customer->id }}"
+                                        data-name="{{ $customer->name }}"
+                                        data-room="{{ $customer->room_number ?? '' }}"
+                                        data-phone="{{ $customer->phone ?? '' }}"
+                                        data-email="{{ $customer->email ?? '' }}">
+                                    {{ $customer->name }}
+                                    @if(!empty($customer->room_number)) — Chambre {{ $customer->room_number }}@endif
                                 </option>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                @endforeach
                             </select>
                         </div>
                         <div class="nom-grid-3 mt-3" id="existing-info" style="display:none">
@@ -370,7 +79,7 @@
                         </div>
                     </div>
 
-                    
+                    {{-- Nouveau client --}}
                     <div id="block-new" style="display:none">
                         <div class="nom-grid-2">
                             <div class="nom-field">
@@ -411,7 +120,7 @@
                     <div class="nom-err mt-2" id="n-err-client"></div>
                 </div>
 
-                
+                {{-- ── ÉTAPE 2 : Sélection des plats ── --}}
                 <div class="nom-panel" id="nom-panel-2">
                     <div class="nom-panel-title"><i class="fas fa-utensils me-2"></i>Sélection des plats</div>
                     <p class="nom-desc">Cliquez sur un plat pour l'ajouter à la commande.</p>
@@ -425,38 +134,38 @@
                     </div>
 
                     <div class="nom-menu-grid" id="nom-menu-grid">
-                        <?php $__currentLoopData = $menus ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $menu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="nom-dish" data-cat="<?php echo e($menu->category); ?>"
-                             data-id="<?php echo e($menu->id); ?>" data-name="<?php echo e($menu->name); ?>" data-price="<?php echo e($menu->price); ?>">
+                        @foreach($menus ?? [] as $menu)
+                        <div class="nom-dish" data-cat="{{ $menu->category }}"
+                             data-id="{{ $menu->id }}" data-name="{{ $menu->name }}" data-price="{{ $menu->price }}">
                             <div class="nom-dish-img">
-                                <?php if($menu->image): ?>
-                                    <img src="<?php echo e($menu->image_url); ?>" alt="<?php echo e($menu->name); ?>">
-                                <?php else: ?>
+                                @if($menu->image)
+                                    <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}">
+                                @else
                                     <div class="nom-dish-noimg"><i class="fas fa-utensils"></i></div>
-                                <?php endif; ?>
+                                @endif
                             </div>
                             <div class="nom-dish-body">
-                                <div class="nom-dish-name"><?php echo e($menu->name); ?></div>
-                                <?php if($menu->description): ?>
-                                <div class="nom-dish-desc"><?php echo e(Str::limit($menu->description, 55)); ?></div>
-                                <?php endif; ?>
+                                <div class="nom-dish-name">{{ $menu->name }}</div>
+                                @if($menu->description)
+                                <div class="nom-dish-desc">{{ Str::limit($menu->description, 55) }}</div>
+                                @endif
                                 <div class="nom-dish-footer">
-                                    <span class="nom-dish-price"><?php echo e(number_format($menu->price, 0, ',', ' ')); ?> CFA</span>
-                                    <div class="nom-qty" id="nqty-<?php echo e($menu->id); ?>" style="display:none">
-                                        <button type="button" class="nom-qty-btn nom-qminus" data-id="<?php echo e($menu->id); ?>">−</button>
-                                        <span class="nom-qval" id="nqval-<?php echo e($menu->id); ?>">0</span>
-                                        <button type="button" class="nom-qty-btn nom-qplus"  data-id="<?php echo e($menu->id); ?>">+</button>
+                                    <span class="nom-dish-price">{{ number_format($menu->price, 0, ',', ' ') }} CFA</span>
+                                    <div class="nom-qty" id="nqty-{{ $menu->id }}" style="display:none">
+                                        <button type="button" class="nom-qty-btn nom-qminus" data-id="{{ $menu->id }}">−</button>
+                                        <span class="nom-qval" id="nqval-{{ $menu->id }}">0</span>
+                                        <button type="button" class="nom-qty-btn nom-qplus"  data-id="{{ $menu->id }}">+</button>
                                     </div>
-                                    <button type="button" class="nom-add-btn" id="naddbtn-<?php echo e($menu->id); ?>" data-id="<?php echo e($menu->id); ?>">
+                                    <button type="button" class="nom-add-btn" id="naddbtn-{{ $menu->id }}" data-id="{{ $menu->id }}">
                                         <i class="fas fa-plus"></i> Ajouter
                                     </button>
                                 </div>
                             </div>
                         </div>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        @endforeach
                     </div>
 
-                    
+                    {{-- Mini panier --}}
                     <div class="nom-basket" id="nom-basket" style="display:none">
                         <div class="nom-basket-title"><i class="fas fa-shopping-cart me-2"></i>Sélection en cours</div>
                         <div id="nom-basket-items"></div>
@@ -465,7 +174,7 @@
                     <div class="nom-err mt-2" id="n-err-items"></div>
                 </div>
 
-                
+                {{-- ── ÉTAPE 3 : Préférences & Paiement ── --}}
                 <div class="nom-panel" id="nom-panel-3">
                     <div class="nom-panel-title"><i class="fas fa-heart me-2"></i>Préférences alimentaires</div>
                     <p class="nom-desc">Informations importantes pour la préparation de la commande.</p>
@@ -508,7 +217,7 @@
                         <textarea class="nom-input nom-textarea" id="n-notes" rows="3" placeholder="Cuisson particulière, présentation souhaitée, message spécial…"></textarea>
                     </div>
 
-                    
+                    {{-- ════ FACTURATION : choix critique ════ --}}
                     <div class="nom-section-lbl mt-4">Mode de facturation</div>
                     <div class="nom-billing-grid">
                         <label class="nom-billing-choice" id="lbl-room-bill">
@@ -535,7 +244,7 @@
                         </label>
                     </div>
 
-                    
+                    {{-- Bloc chambre (visible si "room") --}}
                     <div id="block-room-billing" class="mt-3 p-3 rounded" style="background:#f0fdf4; border:1px solid #86efac;">
                         <div class="nom-ic-label mb-1">Chambre liée</div>
                         <div id="room-billing-info" class="fw-bold text-success">
@@ -544,7 +253,7 @@
                         <small class="text-muted d-block mt-1">La commande s'ajoutera automatiquement à la facture de la chambre.</small>
                     </div>
 
-                    
+                    {{-- Bloc paiement direct (visible si "direct") --}}
                     <div id="block-direct-billing" style="display:none" class="mt-3">
                         <div class="nom-section-lbl">Mode de règlement</div>
                         <div class="nom-pay-grid">
@@ -560,7 +269,7 @@
                     </div>
                 </div>
 
-                
+                {{-- ── ÉTAPE 4 : Récapitulatif ── --}}
                 <div class="nom-panel" id="nom-panel-4">
                     <div class="nom-panel-title"><i class="fas fa-check-circle me-2 text-success"></i>Récapitulatif de la commande</div>
 
@@ -582,9 +291,9 @@
                     </div>
                 </div>
 
-            </div>
+            </div>{{-- /nom-body --}}
 
-            
+            {{-- Pied --}}
             <div class="nom-footer">
                 <button type="button" class="nom-btn nom-btn-ghost" id="nom-prev" style="display:none">
                     <i class="fas fa-arrow-left me-1"></i> Précédent
@@ -604,9 +313,8 @@
         </div>
     </div>
 </div>
-<?php $__env->stopSection(); ?>
 
-<?php $__env->startPush('styles'); ?>
+@push('styles')
 <style>
 /* ══════════════════════════════════════
    MODAL COMMANDE ADMIN
@@ -848,11 +556,14 @@
 .table tbody tr:hover { background-color:rgba(0,123,255,.04); }
 .badge { font-size:.75em; padding:.35em .65em; }
 </style>
-<?php $__env->stopPush(); ?>
+@endpush
 
-<?php $__env->startPush('scripts'); ?>
+@push('scripts')
 <script>
-$(document).ready(function() {
+// Attente asynchrone de jQuery (app.js charge jQuery via Vite)
+function initNomModal() {
+    if (!window.$) { setTimeout(initNomModal, 50); return; }
+    $(document).ready(function() {
 
     /* ══════════════════════════════
        FILTRES TABLE
@@ -871,7 +582,7 @@ $(document).ready(function() {
         if (!orderId) return;
         $('#orderId').text(orderId);
         $.ajax({
-            url: `<?php echo e(url('restaurant/orders')); ?>/${orderId}`,
+            url: `{{ url('restaurant/orders') }}/${orderId}`,
             success: r => $('#orderDetailsContent').html(r.html),
             error: () => $('#orderDetailsContent').html('<div class="alert alert-danger">Erreur de chargement.</div>')
         });
@@ -886,8 +597,8 @@ $(document).ready(function() {
         Swal.fire({ title:'Confirmer', text:'Changer le statut ?', icon:'question', showCancelButton:true, confirmButtonText:'Oui', cancelButtonText:'Non' })
         .then(r => {
             if (!r.isConfirmed) return;
-            $.ajax({ url:`<?php echo e(url('restaurant/orders')); ?>/${orderId}`, type:'PUT',
-                data:{ _token:'<?php echo e(csrf_token()); ?>', status },
+            $.ajax({ url:`{{ url('restaurant/orders') }}/${orderId}`, type:'PUT',
+                data:{ _token:'{{ csrf_token() }}', status },
                 success:()=>Swal.fire('Succès !','Statut mis à jour.','success').then(()=>location.reload()),
                 error:()=>Swal.fire('Erreur !','Une erreur est survenue.','error')
             });
@@ -900,8 +611,8 @@ $(document).ready(function() {
         Swal.fire({ title:'Annuler la commande ?', icon:'warning', showCancelButton:true, confirmButtonText:'Oui, annuler', cancelButtonText:'Non', reverseButtons:true })
         .then(r => {
             if (!r.isConfirmed) return;
-            $.ajax({ url:`<?php echo e(url('restaurant/orders')); ?>/${orderId}/cancel`, type:'PUT',
-                data:{ _token:'<?php echo e(csrf_token()); ?>' },
+            $.ajax({ url:`{{ url('restaurant/orders') }}/${orderId}/cancel`, type:'PUT',
+                data:{ _token:'{{ csrf_token() }}' },
                 success:()=>Swal.fire('Annulé !','','success').then(()=>location.reload()),
                 error:()=>Swal.fire('Erreur !','','error')
             });
@@ -1166,7 +877,8 @@ $(document).ready(function() {
         $('#block-room-billing').show(); $('#block-direct-billing').hide();
         $('#room-billing-display').text('— sera déduite du client sélectionné —').removeClass('text-warning').addClass('text-success');
     });
-});
+    });
+}
+initNomModal();
 </script>
-<?php $__env->stopPush(); ?>
-<?php echo $__env->make('template.master', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\HP\HotelManagement\resources\views/restaurant/orders.blade.php ENDPATH**/ ?>
+@endpush

@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             RoomSeeder::class,
             // ImageSeeder::class,
             DemoUserSeeder::class,
+            MenuSeeder::class,
         ]);
     }
 }

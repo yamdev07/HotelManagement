@@ -17,12 +17,14 @@ class UserSeeder extends Seeder
     public function run()
     {
         // User::factory(5)->create();
-        User::create([
-            'name' => 'Wailan Tirajoh',
-            'email' => 'wailantirajoh@gmail.com',
-            'password' => Hash::make('wailan'),
-            'role' => 'Super',
-            'random_key' => Str::random(60),
-        ]);
+        User::updateOrCreate(
+            ['email' => 'wailantirajoh@gmail.com'],
+            [
+                'name' => 'Wailan Tirajoh',
+                'password' => Hash::make('wailan'),
+                'role' => 'Super',
+                'random_key' => Str::random(60),
+            ]
+        );
     }
 }

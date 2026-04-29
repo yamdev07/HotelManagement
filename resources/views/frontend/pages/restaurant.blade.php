@@ -383,7 +383,7 @@
                        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(92,51,23,0.4)'"
                        onmouseout="this.style.transform='none';this.style.boxShadow='0 6px 20px rgba(92,51,23,0.3)'">
                         <i class="fas fa-globe-africa"></i>
-                        🌍 Spécialités Africaines
+                        Spécialités Africaines
                         <span style="background:rgba(255,255,255,0.2);border-radius:20px;padding:2px 9px;font-size:11px;">Nouveau</span>
                     </a>
                 </div>
@@ -407,7 +407,7 @@
                     <div class="menu-card">
                         @if($menu->image)
                         <div class="menu-card-img">
-                            <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}">
+                            <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}" onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
                         </div>
                         @else
                         <div class="menu-card-noimg"><i class="fas fa-utensils"></i></div>
@@ -584,7 +584,7 @@
                                  data-price="{{ $menu->price }}">
                                 <div class="om-dish-img">
                                     @if($menu->image)
-                                        <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}">
+                                        <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}" onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
                                     @else
                                         <div class="om-dish-noimg">🍴</div>
                                     @endif

@@ -492,6 +492,8 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
         Route::middleware('checkrole:Super,Admin,Receptionist')->group(function () {
             Route::get('/create', [RestaurantController::class, 'create'])->name('create');
             Route::post('/store', [RestaurantController::class, 'store'])->name('store');
+            Route::get('/menus/{id}/edit', [RestaurantController::class, 'edit'])->name('menus.edit');
+            Route::put('/menus/{id}', [RestaurantController::class, 'update'])->name('menus.update');
             Route::delete('/menus/{id}', [RestaurantController::class, 'destroy'])->name('menus.destroy');
         });
 

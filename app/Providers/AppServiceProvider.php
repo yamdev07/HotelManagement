@@ -23,6 +23,8 @@ use App\Repositories\Interface\UserRepositoryInterface;
 use App\Services\SessionActivityService;
 use Illuminate\Support\ServiceProvider;
 
+use Illuminate\Pagination\Paginator;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -53,6 +55,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Paginator::useBootstrapFive();
+        // you can also use Paginator::useBootstrapFour() or Paginator::useBootstrap() if Bootstrap 5 is not used.
     }
 }

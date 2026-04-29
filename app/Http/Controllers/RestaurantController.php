@@ -56,6 +56,36 @@ class RestaurantController extends Controller
             ->with('success', 'Menu ajouté avec succès!');
     }
 
+    // Afficher le formulaire de modification
+    public function edit($id)
+    {
+        $menu = Menu::findOrFail($id);
+        return view('restaurant.edit', compact('menu'));
+    }
+
+    // Mettre à jour un menu existant
+    public function update(Request $request, $id)
+    {
+        $menu = Menu::findOrFail($id);
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('menus', 'public');
+            $validated['image'] = $path;
+        }
+
+        $menu->update($validated);
+
+        return redirect()->route('restaurant.index')
+            ->with('success', 'Menu modifié avec succès!');
+    }
+
     // Afficher toutes les commandes
     public function orders()
     {

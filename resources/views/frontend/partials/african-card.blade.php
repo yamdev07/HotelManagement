@@ -2,7 +2,7 @@
     {{-- Image --}}
     @if($menu->image)
     <div class="africa-card-img">
-        <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}" loading="lazy">
+        <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}" loading="lazy" onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
         <div class="africa-card-badge">
             @if($menu->category === 'plat') Plat principal
             @elseif($menu->category === 'entree') Entrée
