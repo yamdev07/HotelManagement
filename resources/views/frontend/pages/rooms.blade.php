@@ -1,878 +1,1138 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Nos Chambres - Hôtel Cactus Palace')
+@section('title', 'Chambres & Suites — Cactus Palace 5 Étoiles')
+
+@push('styles')
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<style>
+    :root {
+        --cactus-green: #1A472A;
+        --cactus-light: #2E5C3F;
+        --cactus-dark:  #0F2918;
+        --gold-accent:  #C9A961;
+        --gold-light:   #E8D5A3;
+        --light-bg:     #F8FAF9;
+        --white:        #FFFFFF;
+        --text-dark:    #1A1A1A;
+        --text-gray:    #6B7280;
+        --border-color: #E5E7EB;
+        --transition:   all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        --shadow-sm:    0 2px 8px rgba(0,0,0,0.06);
+        --shadow-md:    0 8px 24px rgba(0,0,0,0.10);
+        --shadow-lg:    0 20px 50px rgba(0,0,0,0.14);
+    }
+
+    /* ── HERO ── */
+    .rooms-hero {
+        position: relative;
+        min-height: 72vh;
+        display: flex;
+        align-items: center;
+        background: url('https://images.unsplash.com/photo-1631049307264-da0ec9d70304?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+        background-attachment: fixed;
+        overflow: hidden;
+    }
+    .rooms-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(15,41,24,0.88) 0%, rgba(26,71,42,0.72) 50%, rgba(201,169,97,0.12) 100%);
+    }
+    .rooms-hero .container { position: relative; z-index: 2; }
+
+    .hero-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 22px;
+        background: rgba(201,169,97,0.15);
+        border: 1px solid rgba(201,169,97,0.4);
+        border-radius: 50px;
+        color: var(--gold-accent);
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        margin-bottom: 24px;
+    }
+    .rooms-hero h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(2.8rem, 6vw, 5rem);
+        font-weight: 700;
+        color: var(--white);
+        line-height: 1.1;
+        margin-bottom: 20px;
+        letter-spacing: -1px;
+    }
+    .rooms-hero h1 em { font-style: italic; color: var(--gold-accent); }
+    .rooms-hero .hero-lead {
+        font-size: 1.1rem;
+        color: rgba(255,255,255,0.78);
+        max-width: 580px;
+        line-height: 1.8;
+        margin-bottom: 36px;
+    }
+    .hero-counters {
+        display: flex;
+        gap: 40px;
+        padding-top: 36px;
+        border-top: 1px solid rgba(255,255,255,0.15);
+        margin-top: 36px;
+        flex-wrap: wrap;
+    }
+    .hero-counter .number {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gold-accent);
+        line-height: 1;
+    }
+    .hero-counter .label {
+        font-size: 11px;
+        color: rgba(255,255,255,0.6);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        margin-top: 4px;
+    }
+    /* ── FILTER BAR ── */
+    .filter-bar {
+        background: var(--white);
+        border-bottom: 1px solid var(--border-color);
+        padding: 28px 0;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    }
+    .filter-bar .form-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--cactus-green);
+        margin-bottom: 8px;
+        display: block;
+    }
+    .filter-bar .form-select {
+        border: 1.5px solid var(--border-color);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        color: var(--text-dark);
+        background-color: var(--white);
+        transition: var(--transition);
+        height: 44px;
+    }
+    .filter-bar .form-select:focus {
+        border-color: var(--cactus-green);
+        box-shadow: 0 0 0 3px rgba(26,71,42,0.08);
+        outline: none;
+    }
+    .btn-filter {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 11px 24px;
+        background: var(--cactus-green);
+        color: var(--white);
+        border: 2px solid var(--cactus-green);
+        border-radius: 8px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+        height: 44px;
+    }
+    .btn-filter:hover { background: transparent; color: var(--cactus-green); }
+    .btn-filter-reset {
+        background: transparent;
+        color: var(--text-gray);
+        border-color: var(--border-color);
+    }
+    .btn-filter-reset:hover { border-color: var(--cactus-green); color: var(--cactus-green); background: transparent; }
+
+    /* ── ACTIVE FILTERS ── */
+    .active-filters {
+        background: rgba(26,71,42,0.04);
+        border-bottom: 1px solid rgba(26,71,42,0.08);
+        padding: 12px 0;
+    }
+    .filter-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        background: rgba(26,71,42,0.08);
+        color: var(--cactus-green);
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    /* ── SORT / VIEW BAR ── */
+    .sort-view-bar {
+        padding: 20px 0 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .sort-view-bar .results-count {
+        font-size: 0.9rem;
+        color: var(--text-gray);
+    }
+    .sort-view-bar .results-count strong { color: var(--cactus-green); }
+    .sort-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .sort-group span {
+        font-size: 12px;
+        color: var(--text-gray);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .btn-sort {
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        border: 1.5px solid var(--border-color);
+        border-radius: 6px;
+        background: var(--white);
+        color: var(--text-gray);
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    .btn-sort:hover, .btn-sort.active {
+        border-color: var(--cactus-green);
+        color: var(--cactus-green);
+        background: rgba(26,71,42,0.04);
+    }
+    .btn-view {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid var(--border-color);
+        border-radius: 6px;
+        background: var(--white);
+        color: var(--text-gray);
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 0.85rem;
+    }
+    .btn-view:hover, .btn-view.active {
+        border-color: var(--cactus-green);
+        color: var(--cactus-green);
+        background: rgba(26,71,42,0.04);
+    }
+
+    /* ── ROOM CARDS ── */
+    .rooms-section { background: var(--light-bg); padding: 40px 0 80px; }
+
+    .room-card {
+        background: var(--white);
+        border-radius: 20px;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .room-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+        border-color: transparent;
+    }
+
+    /* Image */
+    .room-img-wrap {
+        position: relative;
+        height: 260px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    .room-img-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.7s ease;
+        display: block;
+    }
+    .room-card:hover .room-img-wrap img { transform: scale(1.06); }
+
+    /* Overlay gradient on image */
+    .room-img-wrap::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(15,41,24,0.5) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    /* Badges on image */
+    .room-badge-status {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 2;
+        padding: 5px 12px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        backdrop-filter: blur(8px);
+    }
+    .room-badge-status.available {
+        background: rgba(34,197,94,0.15);
+        border: 1px solid rgba(34,197,94,0.5);
+        color: #16a34a;
+        background: rgba(255,255,255,0.92);
+    }
+    .room-badge-status.unavailable {
+        background: rgba(255,255,255,0.92);
+        border: 1px solid rgba(239,68,68,0.3);
+        color: #dc2626;
+    }
+
+    .room-badge-type {
+        position: absolute;
+        bottom: 16px;
+        left: 16px;
+        z-index: 2;
+        padding: 5px 14px;
+        background: var(--gold-accent);
+        color: var(--cactus-dark);
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .room-fav-btn {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        z-index: 2;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255,255,255,0.92);
+        color: #aaa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+        font-size: 0.9rem;
+        outline: none;
+        padding: 0;
+    }
+    .room-fav-btn:hover, .room-fav-btn.active {
+        background: #FF5252;
+        color: var(--white);
+    }
+
+    .room-img-count {
+        position: absolute;
+        bottom: 16px;
+        right: 16px;
+        z-index: 2;
+        padding: 4px 10px;
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(6px);
+        color: var(--white);
+        border-radius: 50px;
+        font-size: 11px;
+    }
+
+    /* Card body */
+    .room-card-body {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+
+    .room-number-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--text-gray);
+        margin-bottom: 6px;
+    }
+
+    .room-name {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 4px;
+        line-height: 1.3;
+    }
+
+    .room-desc {
+        font-size: 0.875rem;
+        color: var(--text-gray);
+        line-height: 1.7;
+        margin-bottom: 16px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 46px;
+    }
+
+    /* Room specs row */
+    .room-specs {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .room-spec {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: var(--text-gray);
+    }
+    .room-spec i {
+        color: var(--cactus-green);
+        font-size: 11px;
+        width: 14px;
+    }
+
+    /* Facilities */
+    .room-facilities {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 20px;
+    }
+    .facility-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        background: rgba(26,71,42,0.06);
+        color: var(--cactus-green);
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 500;
+    }
+    .facility-more {
+        background: rgba(201,169,97,0.12);
+        color: #9A7830;
+    }
+
+    /* Price + CTA */
+    .room-footer {
+        margin-top: auto;
+        padding-top: 18px;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    .room-price .amount {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--cactus-green);
+        line-height: 1;
+    }
+    .room-price .per-night {
+        font-size: 11px;
+        color: var(--text-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 2px;
+    }
+    .room-next-avail {
+        font-size: 11px;
+        color: #d97706;
+        margin-top: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .room-actions { display: flex; gap: 8px; }
+    .btn-room-detail {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 18px;
+        background: var(--cactus-green);
+        color: var(--white);
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+        border: 2px solid var(--cactus-green);
+        white-space: nowrap;
+    }
+    .btn-room-detail:hover { background: transparent; color: var(--cactus-green); }
+    .btn-room-book {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 18px;
+        background: var(--gold-accent);
+        color: var(--cactus-dark);
+        border-radius: 8px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+        border: 2px solid var(--gold-accent);
+        white-space: nowrap;
+    }
+    .btn-room-book:hover { background: transparent; color: #9A7830; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+        text-align: center;
+        padding: 80px 20px;
+        background: var(--white);
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+    }
+    .empty-state .icon-wrap {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        background: rgba(26,71,42,0.06);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.2rem;
+        color: var(--cactus-green);
+        margin-bottom: 24px;
+    }
+    .empty-state h4 {
+        font-family: 'Playfair Display', serif;
+        color: var(--text-dark);
+        margin-bottom: 10px;
+    }
+    .empty-state p { color: var(--text-gray); margin-bottom: 28px; }
+
+    /* ── PAGINATION ── */
+    .pagination .page-link {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px !important;
+        border: 1.5px solid var(--border-color);
+        color: var(--text-dark);
+        margin: 0 3px;
+        font-size: 0.875rem;
+        transition: var(--transition);
+    }
+    .pagination .page-link:hover { border-color: var(--cactus-green); color: var(--cactus-green); background: rgba(26,71,42,0.04); }
+    .pagination .page-item.active .page-link { background: var(--cactus-green); border-color: var(--cactus-green); color: var(--white); }
+    .pagination .page-item.disabled .page-link { opacity: 0.4; }
+
+    /* ── STATS SECTION ── */
+    .stats-section {
+        background: var(--cactus-dark);
+        padding: 80px 0;
+    }
+    .stat-block { text-align: center; }
+    .stat-block .stat-num {
+        font-family: 'Playfair Display', serif;
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--gold-accent);
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+    .stat-block .stat-label {
+        font-size: 12px;
+        color: rgba(255,255,255,0.6);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+    }
+    .stat-block .stat-desc {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.4);
+        margin-top: 6px;
+    }
+    .stat-divider {
+        width: 1px;
+        background: rgba(255,255,255,0.1);
+        margin: 0 auto;
+    }
+
+    /* ── CTA ── */
+    .cta-rooms {
+        background: linear-gradient(135deg, var(--cactus-dark) 0%, var(--cactus-green) 60%, var(--cactus-light) 100%);
+        padding: 90px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    .cta-rooms::before {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -8%;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        background: rgba(201,169,97,0.07);
+    }
+    .cta-rooms .container { position: relative; z-index: 1; }
+    .cta-rooms h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+        color: var(--white);
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+    .cta-rooms p {
+        font-size: 1.05rem;
+        color: rgba(255,255,255,0.72);
+        max-width: 520px;
+        line-height: 1.8;
+        margin-bottom: 36px;
+    }
+    .btn-cta-gold {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 36px;
+        background: var(--gold-accent);
+        color: var(--cactus-dark);
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-decoration: none;
+        border: 2px solid var(--gold-accent);
+        transition: var(--transition);
+    }
+    .btn-cta-gold:hover { background: transparent; color: var(--gold-accent); }
+    .btn-cta-white {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 36px;
+        background: rgba(255,255,255,0.1);
+        color: var(--white);
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        text-decoration: none;
+        border: 2px solid rgba(255,255,255,0.3);
+        transition: var(--transition);
+    }
+    .btn-cta-white:hover { background: rgba(255,255,255,0.18); color: var(--white); }
+
+    /* ── LIST VIEW ── */
+    #rooms-grid.view-list .room-item { flex: 0 0 100% !important; max-width: 100% !important; }
+    #rooms-grid.view-list .room-card { flex-direction: row; }
+    #rooms-grid.view-list .room-card:hover { transform: none; box-shadow: var(--shadow-md); }
+    #rooms-grid.view-list .room-img-wrap { flex: 0 0 300px; height: auto; min-height: 220px; }
+    #rooms-grid.view-list .room-card-body { padding: 28px; }
+    #rooms-grid.view-list .room-desc { -webkit-line-clamp: 3; min-height: unset; }
+
+    /* ── ANIMATIONS ── */
+    .room-item { animation: fadeUp 0.5s ease-out both; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .room-item:nth-child(1) { animation-delay:.05s }
+    .room-item:nth-child(2) { animation-delay:.10s }
+    .room-item:nth-child(3) { animation-delay:.15s }
+    .room-item:nth-child(4) { animation-delay:.20s }
+    .room-item:nth-child(5) { animation-delay:.25s }
+    .room-item:nth-child(6) { animation-delay:.30s }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 991px) {
+        .hero-counters { gap: 24px; }
+        #rooms-grid.view-list .room-img-wrap { flex: 0 0 220px; }
+    }
+    @media (max-width: 767px) {
+        .rooms-hero { min-height: 85vh; background-attachment: scroll; }
+        .filter-bar { padding: 18px 0; position: static; }
+        #rooms-grid.view-list .room-card { flex-direction: column; }
+        #rooms-grid.view-list .room-img-wrap { flex: none; height: 220px; }
+    }
+    @media (max-width: 576px) {
+        .room-footer { flex-direction: column; align-items: flex-start; }
+        .room-actions { width: 100%; }
+        .btn-room-detail, .btn-room-book { flex: 1; justify-content: center; }
+    }
+
+    *:focus, *:focus-visible { outline: none !important; box-shadow: none !important; }
+</style>
+@endpush
 
 @section('content')
-    <!-- Hero Section pour les chambres -->
-    <section class="hero-section-rooms">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-8 mx-auto text-center">
-                    <h1 class="display-4 mb-4">Nos Chambres & Suites</h1>
-                    <p class="lead mb-4">Découvrez l'harmonie entre confort luxueux et élégance naturelle</p>
-                    <div class="d-flex justify-content-center align-items-center gap-3">
-                        <span class="badge bg-success">
-                            <i class="fas fa-bed me-1"></i>{{ $rooms->total() }} Chambres
-                        </span>
-                        <span class="badge bg-info">
-                            <i class="fas fa-check-circle me-1"></i>{{ $availableCount ?? 0 }} Disponibles
-                        </span>
-                        <span class="badge bg-warning">
-                            <i class="fas fa-star me-1"></i>{{ $distinctTypes ?? 0 }} Types
-                        </span>
+
+{{-- ── HERO ── --}}
+<section class="rooms-hero">
+    <div class="container">
+        <div class="row align-items-center py-5">
+            <div class="col-lg-8" data-aos="fade-right">
+                <div class="hero-eyebrow">
+                    <i class="fas fa-star" style="font-size:10px;"></i>
+                    Hôtel 5 Étoiles — Cotonou, Bénin
+                    <i class="fas fa-star" style="font-size:10px;"></i>
+                </div>
+                <h1>
+                    Chambres &<br>
+                    <em>Suites d'Exception</em>
+                </h1>
+                <p class="hero-lead">
+                    Chaque chambre du Cactus Palace est pensée comme un sanctuaire de confort —
+                    matériaux nobles, literie premium et atmosphère apaisante pour un repos parfait.
+                </p>
+                <div class="hero-counters">
+                    <div class="hero-counter">
+                        <div class="number">{{ $totalRooms ?? 0 }}</div>
+                        <div class="label">Chambres</div>
+                    </div>
+                    <div class="hero-counter">
+                        <div class="number">{{ $availableCount ?? 0 }}</div>
+                        <div class="label">Disponibles</div>
+                    </div>
+                    <div class="hero-counter">
+                        <div class="number">{{ $distinctTypes ?? 0 }}</div>
+                        <div class="label">Catégories</div>
+                    </div>
+                    <div class="hero-counter">
+                        <div class="number">4.8★</div>
+                        <div class="label">Satisfaction</div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- Section de filtres -->
-    <section class="py-4" style="background-color: #E8F5E9;">
-        <div class="container">
-            <form action="{{ route('frontend.rooms') }}" method="GET" id="filterForm">
-                <div class="row g-3 align-items-center">
-                    <div class="col-lg-3">
-                        <div class="form-group">
-                            <label for="type" class="form-label" style="color: #2E7D32; font-weight: 500;">
-                                <i class="fas fa-filter me-2"></i>Type de chambre
-                            </label>
-                            <select class="form-select" id="type" name="type" style="border: 1px solid #C8E6C9;">
-                                <option value="">Tous les types</option>
-                                @foreach($types as $type)
-                                    <option value="{{ $type->id }}" {{ request('type') == $type->id ? 'selected' : '' }}>
-                                        {{ $type->name }} ({{ $type->rooms_count ?? 0 }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="form-group">
-                            <label for="capacity" class="form-label" style="color: #2E7D32; font-weight: 500;">
-                                <i class="fas fa-users me-2"></i>Capacité
-                            </label>
-                            <select class="form-select" id="capacity" name="capacity" style="border: 1px solid #C8E6C9;">
-                                <option value="">Toute capacité</option>
-                                @for($i = 1; $i <= 5; $i++)
-                                    @php $count = $roomsByCapacity[$i] ?? 0; @endphp
-                                    <option value="{{ $i }}" {{ request('capacity') == $i ? 'selected' : '' }}>
-                                        {{ $i }} personne{{ $i > 1 ? 's' : '' }} ({{ $count }})
-                                    </option>
-                                @endfor
-                                <option value="6" {{ request('capacity') == 6 ? 'selected' : '' }}>6+ personnes</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="form-group">
-                            <label for="price_range" class="form-label" style="color: #2E7D32; font-weight: 500;">
-                                <i class="fas fa-money-bill me-2"></i>Budget/nuit (FCFA)
-                            </label>
-                            <select class="form-select" id="price_range" name="price_range" style="border: 1px solid #C8E6C9;">
-                                <option value="">Tous les prix</option>
-                                <option value="0-50000" {{ request('price_range') == '0-50000' ? 'selected' : '' }}>
-                                    < 50 000 FCFA ({{ $priceRanges['0-50000'] ?? 0 }})
-                                </option>
-                                <option value="50000-100000" {{ request('price_range') == '50000-100000' ? 'selected' : '' }}>
-                                    50k - 100k FCFA ({{ $priceRanges['50000-100000'] ?? 0 }})
-                                </option>
-                                <option value="100000-150000" {{ request('price_range') == '100000-150000' ? 'selected' : '' }}>
-                                    100k - 150k FCFA ({{ $priceRanges['100000-150000'] ?? 0 }})
-                                </option>
-                                <option value="150000-200000" {{ request('price_range') == '150000-200000' ? 'selected' : '' }}>
-                                    150k - 200k FCFA ({{ $priceRanges['150000-200000'] ?? 0 }})
-                                </option>
-                                <option value="200000+" {{ request('price_range') == '200000+' ? 'selected' : '' }}>
-                                    > 200k FCFA ({{ $priceRanges['200000+'] ?? 0 }})
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 text-lg-end">
-                        <div class="d-flex gap-2 mt-4">
-                            <button type="submit" class="btn" style="background-color: #4CAF50; border-color: #4CAF50; color: white; padding: 10px 20px;">
-                                <i class="fas fa-search me-2"></i>Filtrer
-                            </button>
-                            <a href="{{ route('frontend.rooms') }}" class="btn" style="background-color: #FF9800; border-color: #FF9800; color: white; padding: 10px 20px;">
-                                <i class="fas fa-redo me-2"></i>Réinitialiser
-                            </a>
-                        </div>
+</section>
+
+{{-- ── FILTER BAR ── --}}
+<div class="filter-bar">
+    <div class="container">
+        <form action="{{ route('frontend.rooms') }}" method="GET" id="filterForm">
+            <div class="row g-3 align-items-end">
+                <div class="col-lg-3 col-md-6">
+                    <label for="type" class="form-label"><i class="fas fa-layer-group me-2"></i>Catégorie</label>
+                    <select class="form-select" id="type" name="type">
+                        <option value="">Toutes les catégories</option>
+                        @foreach($types as $type)
+                            <option value="{{ $type->id }}" {{ request('type') == $type->id ? 'selected' : '' }}>
+                                {{ $type->name }} ({{ $type->rooms_count ?? 0 }})
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label for="capacity" class="form-label"><i class="fas fa-users me-2"></i>Occupants</label>
+                    <select class="form-select" id="capacity" name="capacity">
+                        <option value="">Toute capacité</option>
+                        @for($i = 1; $i <= 5; $i++)
+                            @php $count = $roomsByCapacity[$i] ?? 0; @endphp
+                            <option value="{{ $i }}" {{ request('capacity') == $i ? 'selected' : '' }}>
+                                {{ $i }} personne{{ $i > 1 ? 's' : '' }} ({{ $count }})
+                            </option>
+                        @endfor
+                        <option value="6" {{ request('capacity') == 6 ? 'selected' : '' }}>6+ personnes</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label for="price_range" class="form-label"><i class="fas fa-tag me-2"></i>Budget / nuit</label>
+                    <select class="form-select" id="price_range" name="price_range">
+                        <option value="">Tous les tarifs</option>
+                        <option value="0-50000"      {{ request('price_range')=='0-50000'      ?'selected':'' }}>Moins de 50 000 FCFA ({{ $priceRanges['0-50000'] ?? 0 }})</option>
+                        <option value="50000-100000"  {{ request('price_range')=='50000-100000' ?'selected':'' }}>50k — 100k FCFA ({{ $priceRanges['50000-100000'] ?? 0 }})</option>
+                        <option value="100000-150000" {{ request('price_range')=='100000-150000'?'selected':'' }}>100k — 150k FCFA ({{ $priceRanges['100000-150000'] ?? 0 }})</option>
+                        <option value="150000-200000" {{ request('price_range')=='150000-200000'?'selected':'' }}>150k — 200k FCFA ({{ $priceRanges['150000-200000'] ?? 0 }})</option>
+                        <option value="200000+"       {{ request('price_range')=='200000+'      ?'selected':'' }}>Plus de 200k FCFA ({{ $priceRanges['200000+'] ?? 0 }})</option>
+                    </select>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label" style="opacity:0;">Actions</label>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn-filter flex-fill justify-content-center">
+                            <i class="fas fa-search"></i> Rechercher
+                        </button>
+                        <a href="{{ route('frontend.rooms') }}" class="btn-filter btn-filter-reset" style="padding:11px 16px;">
+                            <i class="fas fa-redo"></i>
+                        </a>
                     </div>
                 </div>
-            </form>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ── ACTIVE FILTERS ── --}}
+@if(request()->hasAny(['type', 'capacity', 'price_range']))
+<div class="active-filters">
+    <div class="container d-flex align-items-center gap-3 flex-wrap">
+        <span style="font-size:12px;color:var(--text-gray);text-transform:uppercase;letter-spacing:1px;">Filtres actifs :</span>
+        @if(request('type'))
+            <span class="filter-chip"><i class="fas fa-layer-group" style="font-size:10px;"></i>{{ \App\Models\Type::find(request('type'))->name ?? '' }}</span>
+        @endif
+        @if(request('capacity'))
+            <span class="filter-chip"><i class="fas fa-users" style="font-size:10px;"></i>{{ request('capacity') }} personne(s)</span>
+        @endif
+        @if(request('price_range'))
+            <span class="filter-chip"><i class="fas fa-tag" style="font-size:10px;"></i>{{ request('price_range') }} FCFA</span>
+        @endif
+        <strong style="color:var(--cactus-green);font-size:13px;">{{ $rooms->total() }} résultat(s)</strong>
+        <a href="{{ route('frontend.rooms') }}" style="font-size:12px;color:var(--text-gray);text-decoration:none;margin-left:auto;">
+            <i class="fas fa-times me-1"></i>Effacer tout
+        </a>
+    </div>
+</div>
+@endif
+
+{{-- ── ROOMS LIST ── --}}
+<section class="rooms-section">
+    <div class="container">
+
+        {{-- Sort + View bar --}}
+        <div class="sort-view-bar">
+            <p class="results-count mb-0">
+                <strong>{{ $rooms->total() }}</strong> chambre{{ $rooms->total() > 1 ? 's' : '' }} trouvée{{ $rooms->total() > 1 ? 's' : '' }}
+            </p>
+            <div class="d-flex align-items-center gap-3">
+                <div class="sort-group">
+                    <span>Trier</span>
+                    <button class="btn-sort sort-btn" data-sort="price_asc">Prix ↑</button>
+                    <button class="btn-sort sort-btn" data-sort="price_desc">Prix ↓</button>
+                    <button class="btn-sort sort-btn" data-sort="capacity_desc">Capacité</button>
+                    <button class="btn-sort sort-btn" data-sort="name_asc">A–Z</button>
+                </div>
+                <div class="d-flex gap-1">
+                    <button class="btn-view view-btn active" data-view="grid" title="Vue grille"><i class="fas fa-th-large"></i></button>
+                    <button class="btn-view view-btn" data-view="list" title="Vue liste"><i class="fas fa-list"></i></button>
+                </div>
+            </div>
         </div>
-    </section>
 
-    <!-- Résultats de recherche -->
-    @if(request()->hasAny(['type', 'capacity', 'price_range']))
-    <section class="py-3" style="background-color: #F1F8E9;">
-        <div class="container">
-            <div class="alert alert-success border-0 d-flex align-items-center justify-content-between">
-                <div>
-                    <i class="fas fa-filter me-2"></i>
-                    <strong>{{ $rooms->total() }} chambre(s)</strong> correspondant à vos critères
-                    @if(request('type')) • Type: {{ \App\Models\Type::find(request('type'))->name ?? '' }} @endif
-                    @if(request('capacity')) • Capacité: {{ request('capacity') }} personne(s) @endif
-                    @if(request('price_range')) • Budget: {{ request('price_range') }} FCFA @endif
+        {{-- Grid --}}
+        <div id="rooms-grid" class="row g-4 mt-1">
+            @forelse($rooms as $room)
+            <div class="col-lg-4 col-md-6 room-item"
+                 data-price="{{ $room->price }}"
+                 data-name="{{ strtolower($room->name) }}"
+                 data-capacity="{{ $room->capacity }}">
+                <div class="room-card">
+
+                    {{-- Image --}}
+                    <div class="room-img-wrap">
+                        @php
+                            $imageUrl = asset('img/default/default-room.png');
+                            $roomFolder = public_path('img/room/' . $room->number);
+                            if(is_dir($roomFolder)) {
+                                foreach(scandir($roomFolder) as $file) {
+                                    if($file !== '.' && $file !== '..' && preg_match('/\.(jpg|jpeg|png|gif)$/i', $file)) {
+                                        $imageUrl = asset('img/room/' . $room->number . '/' . $file);
+                                        break;
+                                    }
+                                }
+                            }
+                        @endphp
+                        <img src="{{ $imageUrl }}"
+                             alt="{{ $room->name }}"
+                             onerror="this.onerror=null;this.src='{{ asset('img/room/gamesetting.png') }}';">
+
+                        {{-- Status badge --}}
+                        <span class="room-badge-status {{ $room->is_available_today ? 'available' : 'unavailable' }}">
+                            @if($room->is_available_today)
+                                <i class="fas fa-circle" style="font-size:7px;color:#16a34a;margin-right:4px;"></i>Disponible
+                            @else
+                                <i class="fas fa-circle" style="font-size:7px;color:#dc2626;margin-right:4px;"></i>Occupée
+                            @endif
+                        </span>
+
+                        {{-- Type badge --}}
+                        <span class="room-badge-type">{{ $room->type->name ?? 'Standard' }}</span>
+
+                        {{-- Favorite --}}
+                        <button class="room-fav-btn favorite-btn" data-room-id="{{ $room->id }}" tabindex="-1">
+                            <i class="far fa-heart"></i>
+                        </button>
+
+                        {{-- Image count --}}
+                        @if($room->images && $room->images->count() > 1)
+                        <span class="room-img-count"><i class="fas fa-images me-1"></i>{{ $room->images->count() }}</span>
+                        @endif
+                    </div>
+
+                    {{-- Body --}}
+                    <div class="room-card-body">
+                        <div class="room-number-label">Chambre {{ $room->number }}</div>
+                        <h3 class="room-name">{{ $room->name }}</h3>
+                        <p class="room-desc">{{ $room->type->description_fr ?? 'Chambre élégante dotée d\'équipements haut de gamme pour un séjour inoubliable.' }}</p>
+
+                        {{-- Specs --}}
+                        <div class="room-specs">
+                            <div class="room-spec">
+                                <i class="fas fa-users"></i>
+                                <span>{{ $room->capacity }} pers.</span>
+                            </div>
+                            <div class="room-spec">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                                <span>{{ $room->size ?? '25' }} m²</span>
+                            </div>
+                            <div class="room-spec">
+                                <i class="fas fa-building"></i>
+                                <span>Étage {{ $room->floor ?? 'RDC' }}</span>
+                            </div>
+                            @if($room->view)
+                            <div class="room-spec">
+                                <i class="fas fa-eye"></i>
+                                <span>{{ Str::limit($room->view, 18) }}</span>
+                            </div>
+                            @endif
+                        </div>
+
+                        {{-- Facilities --}}
+                        @if($room->facilities->count())
+                        <div class="room-facilities">
+                            @foreach($room->facilities->take(4) as $facility)
+                                <span class="facility-tag">
+                                    <i class="fas fa-{{ $facility->icon ?? 'check' }}" style="font-size:9px;"></i>
+                                    {{ $facility->name }}
+                                </span>
+                            @endforeach
+                            @if($room->facilities->count() > 4)
+                                <span class="facility-tag facility-more">+{{ $room->facilities->count() - 4 }}</span>
+                            @endif
+                        </div>
+                        @endif
+
+                        {{-- Footer --}}
+                        <div class="room-footer">
+                            <div class="room-price">
+                                <div class="amount">{{ $room->type->formatted_price ?? 'N/A' }}</div>
+                                <div class="per-night">par nuit</div>
+                                @if(!$room->is_available_today && $room->next_available_date)
+                                <div class="room-next-avail">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    Dispo le {{ \Carbon\Carbon::parse($room->next_available_date)->format('d/m/Y') }}
+                                </div>
+                                @endif
+                            </div>
+                            <div class="room-actions">
+                                <a href="{{ route('frontend.room.details', $room->id) }}" class="btn-room-detail">
+                                    <i class="fas fa-eye"></i> Voir
+                                </a>
+                                @if($room->is_available_today)
+                                <a href="{{ route('frontend.reservation') }}?room_id={{ $room->id }}" class="btn-room-book">
+                                    <i class="fas fa-calendar-check"></i> Réserver
+                                </a>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <a href="{{ route('frontend.rooms') }}" class="btn btn-sm btn-outline-success">
-                        <i class="fas fa-times me-1"></i>Effacer filtres
+            </div>
+            @empty
+            <div class="col-12">
+                <div class="empty-state">
+                    <div class="icon-wrap"><i class="fas fa-bed"></i></div>
+                    <h4>Aucune chambre trouvée</h4>
+                    <p>Aucune chambre ne correspond à vos critères de recherche.<br>Essayez d'élargir vos filtres.</p>
+                    <div class="d-flex justify-content-center gap-3 flex-wrap">
+                        <a href="{{ route('frontend.rooms') }}" class="btn-room-detail">
+                            <i class="fas fa-redo"></i> Voir toutes les chambres
+                        </a>
+                        <a href="{{ route('frontend.contact') }}" class="btn-room-book">
+                            <i class="fas fa-headset"></i> Contacter le service client
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endforelse
+        </div>
+
+        {{-- Pagination --}}
+        @if($rooms->hasPages())
+        <div class="mt-5 pt-3 d-flex justify-content-center">
+            {{ $rooms->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
+        </div>
+        @endif
+    </div>
+</section>
+
+{{-- ── STATS ── --}}
+<section class="stats-section" data-aos="fade-up">
+    <div class="container">
+        <div class="row g-4 text-center">
+            <div class="col-lg-3 col-6">
+                <div class="stat-block">
+                    <div class="stat-num">{{ $totalRooms ?? 0 }}</div>
+                    <div class="stat-label">Chambres & Suites</div>
+                    <div class="stat-desc">Pour tous vos séjours</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="stat-block">
+                    <div class="stat-num">{{ $availableCount ?? 0 }}</div>
+                    <div class="stat-label">Disponibles ce soir</div>
+                    <div class="stat-desc">Prêtes à vous accueillir</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="stat-block">
+                    <div class="stat-num">{{ $distinctTypes ?? 0 }}</div>
+                    <div class="stat-label">Catégories</div>
+                    <div class="stat-desc">Standard à Suite Royale</div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="stat-block">
+                    <div class="stat-num">4.8<span style="font-size:1.5rem;">★</span></div>
+                    <div class="stat-label">Satisfaction client</div>
+                    <div class="stat-desc">Note moyenne 2024</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ── CTA ── --}}
+<section class="cta-rooms" data-aos="fade-up">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-7">
+                <span style="display:inline-block;padding:6px 18px;background:rgba(201,169,97,0.15);border:1px solid rgba(201,169,97,0.35);border-radius:50px;color:var(--gold-accent);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;">
+                    Besoin d'aide ?
+                </span>
+                <h2>Trouvez la chambre<br>parfaite pour vous</h2>
+                <p>
+                    Notre service client est disponible 24h/24 pour vous conseiller
+                    et vous aider à choisir le séjour qui correspond à vos envies et votre budget.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="{{ route('frontend.reservation') }}" class="btn-cta-gold">
+                        <i class="fas fa-calendar-check"></i> Réserver maintenant
+                    </a>
+                    <a href="{{ route('frontend.contact') }}" class="btn-cta-white">
+                        <i class="fas fa-headset"></i> Service client
                     </a>
                 </div>
             </div>
-        </div>
-    </section>
-    @endif
-
-    <!-- Liste des chambres -->
-    <section class="py-5">
-        <div class="container">
-            <!-- Tri et vue -->
-            <div class="row mb-4">
-                <div class="col-md-6">
-                    <div class="d-flex align-items-center flex-wrap gap-2">
-                        <span class="me-1 text-muted"><i class="fas fa-sort me-1"></i>Trier par:</span>
-                        <div class="btn-group" role="group">
-                            <button type="button" class="btn btn-outline-success sort-btn" data-sort="price_asc">Prix ↑</button>
-                            <button type="button" class="btn btn-outline-success sort-btn" data-sort="price_desc">Prix ↓</button>
-                            <button type="button" class="btn btn-outline-success sort-btn" data-sort="name_asc">Nom A-Z</button>
-                            <button type="button" class="btn btn-outline-success sort-btn" data-sort="capacity_desc">Capacité</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 text-end">
-                    <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-success view-btn active" data-view="grid">
-                            <i class="fas fa-th-large"></i>
-                        </button>
-                        <button type="button" class="btn btn-outline-success view-btn" data-view="list">
-                            <i class="fas fa-list"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Grille / Liste -->
-            <div id="rooms-grid" class="row g-4">
-                @forelse($rooms as $room)
-                <div class="col-lg-4 col-md-6 room-item"
-                     data-price="{{ $room->price }}"
-                     data-name="{{ strtolower($room->name) }}"
-                     data-capacity="{{ $room->capacity }}">
-                    <div class="card room-card h-100 border-0 shadow-sm" style="border-top: 4px solid #4CAF50;">
-
-                        <!-- Badge statut -->
-                        <div class="room-status-badge" style="position: absolute; top: 15px; right: 15px; z-index: 1;">
-                            @if($room->is_available_today)
-                                <span class="badge bg-success" style="padding: 6px 12px; font-weight: 600;">
-                                    <i class="fas fa-check-circle me-1"></i>Disponible
-                                </span>
-                            @else
-                                <span class="badge bg-danger" style="padding: 6px 12px; font-weight: 600;">
-                                    <i class="fas fa-times-circle me-1"></i>Non disponible
-                                </span>
-                            @endif
-                        </div>
-
-                        <!-- Favoris -->
-                        <div class="room-favorite" style="position: absolute; top: 15px; left: 15px; z-index: 1;">
-                            <button class="favorite-btn" data-room-id="{{ $room->id }}" tabindex="-1">
-                                <i class="far fa-heart"></i>
-                            </button>
-                        </div>
-
-                        <!-- Image -->
-                        <div class="room-image-container" style="height: 250px; overflow: hidden;">
-                            @php
-                                $defaultImage = asset('img/default/default-room.png');
-                                $imageUrl = $defaultImage;
-                                $roomFolder = public_path('img/room/' . $room->number);
-                                if(is_dir($roomFolder)) {
-                                    $files = scandir($roomFolder);
-                                    foreach($files as $file) {
-                                        if($file != '.' && $file != '..' && preg_match('/\.(jpg|jpeg|png|gif)$/i', $file)) {
-                                            $imageUrl = asset('img/room/' . $room->number . '/' . $file);
-                                            break;
-                                        }
-                                    }
-                                }
-                            @endphp
-                            <img src="{{ $imageUrl }}"
-                                 class="card-img-top room-image"
-                                 alt="{{ $room->name }}"
-                                 onerror="this.onerror=null; this.src='{{ asset('img/room/gamesetting.png') }}';"
-                                 style="height: 100%; width: 100%; object-fit: cover; transition: transform 0.5s ease;">
-                            @if($room->images && $room->images->count() > 1)
-                            <div style="position: absolute; bottom: 10px; right: 10px;">
-                                <span class="badge bg-dark opacity-75">
-                                    <i class="fas fa-images me-1"></i>{{ $room->images->count() }}
-                                </span>
-                            </div>
-                            @endif
-                        </div>
-
-                        <!-- Corps -->
-                        <div class="card-body d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div>
-                                    <h5 class="card-title mb-1" style="color: #2E7D32; font-weight: 600;">{{ $room->name }}</h5>
-                                    <h6 class="text-muted mb-2">
-                                        <i class="fas fa-door-closed me-1"></i>{{ $room->type->name ?? 'Chambre Standard' }}
-                                    </h6>
-                                </div>
-                                <div class="text-end">
-                                    <span class="badge" style="background-color: #81C784; color: white;">
-                                        <i class="fas fa-user-friends me-1"></i>{{ $room->capacity }}
-                                    </span>
-                                    <div class="mt-1">
-                                        <span class="badge" style="background-color: #2196F3; color: white;">
-                                            Chambre {{ $room->number }}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            @php
-                                $theme = '';
-                                if ($room->view) {
-                                    $parts = explode(' - ', $room->view);
-                                    if (count($parts) > 1) { $theme = trim($parts[0]); }
-                                }
-                            @endphp
-
-                            @if($theme)
-                            <div class="room-theme mb-3">
-                                <span class="badge" style="background-color: #E8F5E9; color: #2E7D32; font-weight: 500; border: 1px solid #C8E6C9;">
-                                    <i class="fas fa-leaf me-1"></i>{{ $theme }}
-                                </span>
-                            </div>
-                            @endif
-
-                            @if($room->view)
-                            <div class="room-description mb-3">
-                                <p class="card-text text-muted mb-1" style="font-size: 0.9rem; line-height: 1.4; min-height: 60px;">
-                                    <i class="fas fa-quote-left me-1 text-success"></i>
-                                    {{ Str::limit($room->view, 80) }}
-                                </p>
-                                <small class="text-muted">
-                                    <a href="{{ route('frontend.room.details', $room->id) }}" class="text-success text-decoration-none">
-                                        Lire la suite <i class="fas fa-arrow-right ms-1"></i>
-                                    </a>
-                                </small>
-                            </div>
-                            @endif
-
-                            <!-- Équipements -->
-                            <div class="room-equipments mb-3">
-                                <h6 class="text-muted mb-2" style="font-size: 0.85rem;">
-                                    <i class="fas fa-concierge-bell me-1"></i>Équipements
-                                </h6>
-                                <div class="d-flex flex-wrap gap-1">
-                                    @foreach($room->facilities->take(4) as $facility)
-                                        <span class="badge bg-light text-dark border" style="font-size: 0.75rem;">
-                                            <i class="fas fa-{{ $facility->icon ?? 'check' }} me-1"></i>{{ $facility->name }}
-                                        </span>
-                                    @endforeach
-                                    @if($room->facilities->count() > 4)
-                                        <span class="badge bg-light text-dark border" style="font-size: 0.75rem;">
-                                            +{{ $room->facilities->count() - 4 }}
-                                        </span>
-                                    @endif
-                                </div>
-                            </div>
-
-                            <!-- Détails surface / étage -->
-                            <div class="room-details mb-3">
-                                <div class="row">
-                                    <div class="col-6">
-                                        <small class="text-muted d-block">
-                                            <i class="fas fa-expand-arrows-alt me-1"></i> {{ $room->size ?? '25' }} m²
-                                        </small>
-                                    </div>
-                                    <div class="col-6">
-                                        <small class="text-muted d-block">
-                                            <i class="fas fa-building me-1"></i> Étage {{ $room->floor ?? 'RDC' }}
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Prix + boutons — poussés tout en bas -->
-                            <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
-                                <div>
-                                    <span class="h4 mb-0" style="color: #4CAF50;">
-                                        {{ number_format($room->price, 0, ',', ' ') }} FCFA
-                                    </span>
-                                    <small class="text-muted d-block">par nuit</small>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <a href="{{ route('frontend.room.details', $room->id) }}"
-                                       class="btn btn-sm"
-                                       style="background-color: #4CAF50; border-color: #4CAF50; color: white;">
-                                        <i class="fas fa-eye me-1"></i> Détails
-                                    </a>
-                                    @if($room->is_available_today)
-                                        <a href="{{ route('frontend.reservation') }}?room_id={{ $room->id }}"
-                                           class="btn btn-sm"
-                                           style="color: #4CAF50; border-color: #4CAF50; background-color: transparent;">
-                                            <i class="fas fa-calendar-check me-1"></i> Réserver
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
-
-                            @if(!$room->is_available_today && $room->next_available_date)
-                            <div class="mt-2">
-                                <small class="text-warning">
-                                    <i class="fas fa-calendar-alt me-1"></i>
-                                    Disponible à partir du {{ \Carbon\Carbon::parse($room->next_available_date)->format('d/m/Y') }}
-                                </small>
-                            </div>
-                            @endif
-                        </div>
-
-                        {{-- Footer : masqué en vue liste (évite la collision avec "Disponible") --}}
-                        <div class="card-footer bg-transparent border-top-0 pt-0 room-card-footer">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">
-                                    <i class="fas fa-clock me-1"></i>
-                                    @if($room->room_status_id == 1)
-                                        <span class="text-success">Prête à accueillir</span>
-                                    @elseif($room->room_status_id == 3)
-                                        <span class="text-warning">En nettoyage</span>
-                                    @elseif($room->room_status_id == 4)
-                                        <span class="text-danger">En maintenance</span>
-                                    @else
-                                        <span class="text-secondary">Statut: {{ $room->roomStatus->name ?? 'N/A' }}</span>
-                                    @endif
-                                </small>
-                                <small class="text-muted">
-                                    <i class="fas fa-star me-1 text-warning"></i>
-                                    {{ $room->average_rating ?? '4.5' }}/5
-                                </small>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-                @empty
-                <div class="col-12">
-                    <div class="text-center py-5" style="background-color: #F1F8E9; border-radius: 10px;">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-4"
-                             style="width: 80px; height: 80px; background-color: #C8E6C9;">
-                            <i class="fas fa-bed fa-2x" style="color: #2E7D32;"></i>
-                        </div>
-                        <h4 style="color: #2E7D32;">Aucune chambre trouvée</h4>
-                        <p class="text-muted mb-4">Aucune chambre ne correspond à vos critères de recherche.</p>
-                        <div class="d-flex justify-content-center gap-3">
-                            <a href="{{ route('frontend.rooms') }}" class="btn" style="background-color: #4CAF50; border-color: #4CAF50; color: white;">
-                                <i class="fas fa-redo me-1"></i> Voir toutes les chambres
-                            </a>
-                            <a href="{{ route('frontend.contact') }}" class="btn btn-outline-success">
-                                <i class="fas fa-question-circle me-1"></i> Demander conseil
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                @endforelse
-            </div>
-
-            <!-- Pagination -->
-            @if($rooms->hasPages())
-            <div class="mt-5 pt-4">
-                <nav aria-label="Navigation des chambres" class="d-flex justify-content-center">
-                    {{ $rooms->onEachSide(1)->links('vendor.pagination.bootstrap-5') }}
-                </nav>
-            </div>
-            @endif
-        </div>
-    </section>
-
-    <!-- Section comparaison -->
-    <section class="py-5" style="background-color: #F8FDF9;">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 style="color: #2E7D32;"><i class="fas fa-balance-scale me-2"></i>Comparez nos chambres</h2>
-                <p class="text-muted">Trouvez celle qui correspond parfaitement à vos besoins</p>
-            </div>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" style="border-color: #C8E6C9;">
-                    <thead style="background-color: #E8F5E9;">
-                        <tr>
-                            <th style="color: #2E7D32;">Chambre</th>
-                            <th style="color: #2E7D32;">Type</th>
-                            <th style="color: #2E7D32;">Capacité</th>
-                            <th style="color: #2E7D32;">Surface</th>
-                            <th style="color: #2E7D32;">Prix/nuit</th>
-                            <th style="color: #2E7D32;">Équipements</th>
-                            <th style="color: #2E7D32;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($rooms->take(3) as $room)
-                        <tr>
-                            <td>
-                                <strong>{{ $room->name }}</strong>
-                                <div class="small text-muted">Chambre {{ $room->number }}</div>
-                            </td>
-                            <td>{{ $room->type->name }}</td>
-                            <td class="text-center">
-                                <span class="badge" style="background-color: #81C784;">{{ $room->capacity }}</span>
-                            </td>
-                            <td>{{ $room->size ?? 'N/A' }} m²</td>
-                            <td><strong style="color: #4CAF50;">{{ number_format($room->price, 0, ',', ' ') }} FCFA</strong></td>
-                            <td>
-                                <div class="d-flex flex-wrap gap-1">
-                                    @foreach($room->facilities->take(3) as $facility)
-                                        <span class="badge bg-light text-dark" style="font-size: 0.7rem;">{{ $facility->name }}</span>
-                                    @endforeach
-                                </div>
-                            </td>
-                            <td>
-                                <a href="{{ route('frontend.room.details', $room->id) }}" class="btn btn-sm btn-success">
-                                    <i class="fas fa-eye me-1"></i>Voir
-                                </a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- Section statistiques -->
-    <section class="py-5" style="background-color: #F1F8E9;">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 style="color: #2E7D32;">Notre Sélection en Chiffres</h2>
-                <p class="text-muted">La qualité au service de votre confort</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-md-3">
-                    <div class="text-center">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                             style="width: 80px; height: 80px; background-color: #4CAF50;">
-                            <i class="fas fa-bed fa-2x text-white"></i>
-                        </div>
-                        <h3 style="color: #2E7D32;">{{ $totalRooms ?? 0 }}</h3>
-                        <h5 style="color: #2E7D32;">Chambres</h5>
-                        <p class="text-muted">Types variés pour tous vos besoins</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                             style="width: 80px; height: 80px; background-color: #2196F3;">
-                            <i class="fas fa-check-circle fa-2x text-white"></i>
-                        </div>
-                        <h3 style="color: #2196F3;">{{ $availableCount ?? 0 }}</h3>
-                        <h5 style="color: #2196F3;">Disponibles</h5>
-                        <p class="text-muted">Chambres prêtes à vous accueillir</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                             style="width: 80px; height: 80px; background-color: #FF9800;">
-                            <i class="fas fa-users fa-2x text-white"></i>
-                        </div>
-                        <h3 style="color: #FF9800;">{{ $averageCapacity ?? 2 }}</h3>
-                        <h5 style="color: #FF9800;">Capacité moyenne</h5>
-                        <p class="text-muted">Personnes par chambre</p>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center">
-                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                             style="width: 80px; height: 80px; background-color: #9C27B0;">
-                            <i class="fas fa-star fa-2x text-white"></i>
-                        </div>
-                        <h3 style="color: #9C27B0;">4.8/5</h3>
-                        <h5 style="color: #9C27B0;">Satisfaction</h5>
-                        <p class="text-muted">Note moyenne de nos clients</p>
+            <div class="col-lg-5 mt-5 mt-lg-0 text-lg-end" data-aos="fade-left">
+                <div style="display:inline-block;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px 36px;">
+                    <div style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;color:var(--gold-accent);line-height:1;">5★</div>
+                    <div style="color:rgba(255,255,255,0.9);font-weight:600;margin:8px 0 4px;">Cactus Palace</div>
+                    <div style="color:rgba(255,255,255,0.5);font-size:0.85rem;">Haie Vive, Cotonou — Bénin</div>
+                    <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;color:rgba(255,255,255,0.5);">
+                        <i class="fas fa-phone me-2" style="color:var(--gold-accent);"></i>
+                        Réservations & informations
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Section CTA -->
-    <section class="py-5">
-        <div class="container">
-            <div class="card border-0 shadow-sm" style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9); border: 1px solid #A5D6A7;">
-                <div class="card-body p-5">
-                    <div class="row align-items-center">
-                        <div class="col-lg-8">
-                            <h3 style="color: #2E7D32;">
-                                <i class="fas fa-question-circle me-2"></i>Besoin d'aide pour choisir ?
-                            </h3>
-                            <p class="text-muted mb-0">Notre équipe est à votre disposition pour vous conseiller et vous aider à trouver la chambre parfaite pour votre séjour.</p>
-                            <div class="mt-3">
-                                <a href="https://wa.me/229XXXXXXXXX" target="_blank" class="btn btn-success me-2">
-                                    <i class="fab fa-whatsapp me-2"></i>WhatsApp
-                                </a>
-                                <a href="mailto:reservations@lecactushotel.bj" class="btn btn-outline-success me-2">
-                                    <i class="fas fa-envelope me-2"></i>Email
-                                </a>
-                                <a href="tel:+229XXXXXXXXX" class="btn btn-outline-success">
-                                    <i class="fas fa-phone-alt me-2"></i>Appeler
-                                </a>
-                            </div>
-                        </div>
-                        <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
-                            <div class="d-grid">
-                                <a href="{{ route('frontend.contact') }}" class="btn btn-lg" style="background-color: #2E7D32; border-color: #2E7D32; color: white;">
-                                    <i class="fas fa-calendar-check me-2"></i> Demander un devis
-                                </a>
-                                <small class="text-muted mt-2">Réponse sous 24h maximum</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 @endsection
 
-@push('styles')
-<style>
-/* ── RESET FOCUS GLOBAL ── */
-*:focus,
-*:focus-visible {
-    outline: none !important;
-    box-shadow: none !important;
-    -webkit-tap-highlight-color: transparent !important;
-}
-
-/* ── HERO ── */
-.hero-section-rooms {
-    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
-                url('https://images.unsplash.com/photo-1584132967334-10e028bd69f7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-    background-size: cover;
-    background-position: center;
-    color: white;
-    padding: 150px 0;
-}
-
-/* ── CARDS ── */
-.room-card {
-    transition: all 0.3s ease;
-    border-radius: 12px;
-    overflow: hidden;
-}
-
-.room-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 20px 40px rgba(76,175,80,0.2) !important;
-}
-
-.room-card:hover .room-image {
-    transform: scale(1.05);
-}
-
-.room-image-container {
-    position: relative;
-    overflow: hidden;
-}
-
-/* ── BOUTON FAVORI ── */
-.favorite-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: none;
-    background-color: rgba(255,255,255,0.9);
-    color: #aaa;
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s, transform 0.15s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    outline: none !important;
-    -webkit-tap-highlight-color: transparent;
-    padding: 0;
-    font-size: 0.95rem;
-}
-
-.favorite-btn:hover {
-    background-color: #FF5252;
-    color: white;
-    transform: scale(1.1);
-    box-shadow: 0 4px 12px rgba(255,82,82,0.4);
-}
-
-.favorite-btn:active,
-.favorite-btn:focus,
-.favorite-btn:focus-visible {
-    outline: none !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
-}
-
-.favorite-btn.active {
-    background-color: #FF5252;
-    color: white;
-    box-shadow: 0 4px 12px rgba(255,82,82,0.4);
-}
-
-/* ── BOUTONS TRI / VUE ── */
-.sort-btn.active,
-.view-btn.active {
-    background-color: #4CAF50 !important;
-    color: white !important;
-}
-
-.form-select:focus {
-    border-color: #4CAF50 !important;
-    box-shadow: 0 0 0 0.2rem rgba(76,175,80,0.25) !important;
-    outline: none !important;
-}
-
-/* ═══════════════════════════════════════
-   VUE LISTE — layout horizontal propre
-═══════════════════════════════════════ */
-
-/* Chaque item prend toute la largeur */
-#rooms-grid.view-list .room-item {
-    flex: 0 0 100% !important;
-    max-width: 100% !important;
-    width: 100% !important;
-}
-
-/* La carte devient une ligne */
-#rooms-grid.view-list .room-card {
-    flex-direction: row !important;
-    height: auto !important;
-    min-height: 200px;
-    align-items: stretch;
-}
-
-/* Pas de translateY au hover en vue liste */
-#rooms-grid.view-list .room-card:hover {
-    transform: none !important;
-    box-shadow: 0 4px 20px rgba(76,175,80,0.15) !important;
-}
-
-/* Image fixe à gauche */
-#rooms-grid.view-list .room-image-container {
-    flex: 0 0 260px !important;
-    width: 260px !important;
-    height: auto !important;
-    min-height: 200px;
-}
-
-/* Corps flex colonne */
-#rooms-grid.view-list .card-body {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    padding: 18px 20px;
-    overflow: hidden;
-}
-
-/* Description courte en liste */
-#rooms-grid.view-list .room-description p {
-    min-height: unset !important;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-}
-
-/* Prix + boutons collés en bas */
-#rooms-grid.view-list .card-body .mt-auto {
-    margin-top: auto !important;
-}
-
-/* *** CORRECTION PRINCIPALE ***
-   Footer masqué en vue liste → évite la collision
-   "Prête à accueillir" / "Disponible" */
-#rooms-grid.view-list .room-card-footer {
-    display: none !important;
-}
-
-/* Badges repositionnés en vue liste */
-#rooms-grid.view-list .room-status-badge {
-    top: 10px !important;
-    right: 10px !important;
-}
-
-#rooms-grid.view-list .room-favorite {
-    top: 10px !important;
-    left: 10px !important;
-}
-
-/* ── ANIMATIONS ── */
-.room-item {
-    animation: fadeInUp 0.5s ease-out both;
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-.room-item:nth-child(1) { animation-delay: 0.05s; }
-.room-item:nth-child(2) { animation-delay: 0.10s; }
-.room-item:nth-child(3) { animation-delay: 0.15s; }
-.room-item:nth-child(4) { animation-delay: 0.20s; }
-.room-item:nth-child(5) { animation-delay: 0.25s; }
-.room-item:nth-child(6) { animation-delay: 0.30s; }
-
-/* ── RESPONSIVE ── */
-@media (max-width: 768px) {
-    .hero-section-rooms { padding: 100px 0; }
-    .hero-section-rooms h1 { font-size: 2.2rem; }
-
-    /* En mobile, repasse en colonne */
-    #rooms-grid.view-list .room-card { flex-direction: column !important; }
-    #rooms-grid.view-list .room-image-container {
-        flex: none !important;
-        width: 100% !important;
-        height: 200px !important;
-    }
-    #rooms-grid.view-list .room-card-footer { display: block !important; }
-}
-
-@media (max-width: 576px) {
-    .card-title { font-size: 1.1rem; }
-    .card-text { font-size: 0.85rem; }
-}
-</style>
-@endpush
 @push('scripts')
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // ── Enlever le focus rectangle sur tous les boutons/liens ──
+AOS.init({ duration: 800, easing: 'ease-out-cubic', once: true, offset: 80 });
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Remove focus outline
     document.querySelectorAll('button, a').forEach(el => {
         el.addEventListener('mousedown', e => e.preventDefault());
-        el.addEventListener('click', function() { this.blur(); });
+        el.addEventListener('click', function () { this.blur(); });
     });
 
-    // ── Favoris ──
-    document.querySelectorAll('.favorite-btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const roomId = this.dataset.roomId;
-            const icon = this.querySelector('i');
+    // Auto-submit filters
+    document.querySelectorAll('#type, #capacity, #price_range').forEach(s => {
+        s.addEventListener('change', () => document.getElementById('filterForm').submit());
+    });
 
+    // Favorites
+    const favorites = JSON.parse(localStorage.getItem('room_favorites') || '[]');
+    document.querySelectorAll('.favorite-btn').forEach(btn => {
+        if (favorites.includes(btn.dataset.roomId)) {
+            btn.classList.add('active');
+            btn.querySelector('i').classList.replace('far', 'fas');
+        }
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const id = this.dataset.roomId;
+            const icon = this.querySelector('i');
             this.classList.toggle('active');
             if (this.classList.contains('active')) {
                 icon.classList.replace('far', 'fas');
-                showToast('Chambre ajoutée aux favoris ❤️', 'success');
+                let favs = JSON.parse(localStorage.getItem('room_favorites') || '[]');
+                if (!favs.includes(id)) favs.push(id);
+                localStorage.setItem('room_favorites', JSON.stringify(favs));
             } else {
                 icon.classList.replace('fas', 'far');
-                showToast('Chambre retirée des favoris', 'info');
+                let favs = JSON.parse(localStorage.getItem('room_favorites') || '[]');
+                localStorage.setItem('room_favorites', JSON.stringify(favs.filter(x => x !== id)));
             }
-
-            let favorites = JSON.parse(localStorage.getItem('room_favorites') || '[]');
-            if (this.classList.contains('active')) {
-                if (!favorites.includes(roomId)) favorites.push(roomId);
-            } else {
-                favorites = favorites.filter(id => id !== roomId);
-            }
-            localStorage.setItem('room_favorites', JSON.stringify(favorites));
             this.blur();
         });
     });
 
-    function restoreFavorites() {
-        const favorites = JSON.parse(localStorage.getItem('room_favorites') || '[]');
-        document.querySelectorAll('.favorite-btn').forEach(btn => {
-            if (favorites.includes(btn.dataset.roomId)) {
-                btn.classList.add('active');
-                btn.querySelector('i').classList.replace('far', 'fas');
-            }
-        });
-    }
-
-    // ── Auto-submit filtres ──
-    document.querySelectorAll('#type, #capacity, #price_range').forEach(select => {
-        select.addEventListener('change', () => document.getElementById('filterForm').submit());
-    });
-
-    // ── Tri ──
+    // Sort
     document.querySelectorAll('.sort-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-            sortRooms(this.dataset.sort);
+            const grid = document.getElementById('rooms-grid');
+            const items = [...grid.querySelectorAll('.room-item')];
+            items.sort((a, b) => {
+                switch (this.dataset.sort) {
+                    case 'price_asc':     return +a.dataset.price - +b.dataset.price;
+                    case 'price_desc':    return +b.dataset.price - +a.dataset.price;
+                    case 'name_asc':      return a.dataset.name.localeCompare(b.dataset.name);
+                    case 'capacity_desc': return +b.dataset.capacity - +a.dataset.capacity;
+                }
+            });
+            items.forEach(i => grid.appendChild(i));
         });
     });
 
-    function sortRooms(sortType) {
-        const container = document.getElementById('rooms-grid');
-        const items = Array.from(container.querySelectorAll('.room-item'));
-        items.sort((a, b) => {
-            switch(sortType) {
-                case 'price_asc':     return +a.dataset.price - +b.dataset.price;
-                case 'price_desc':    return +b.dataset.price - +a.dataset.price;
-                case 'name_asc':      return a.dataset.name.localeCompare(b.dataset.name);
-                case 'capacity_desc': return +b.dataset.capacity - +a.dataset.capacity;
-                default: return 0;
-            }
-        });
-        items.forEach(item => container.appendChild(item));
-        items.forEach((item, i) => {
-            item.style.animationDelay = `${i * 0.05}s`;
-            item.classList.remove('room-item');
-            void item.offsetWidth;
-            item.classList.add('room-item');
-        });
-    }
-
-    // ── Vue grille / liste ──
+    // Grid / List view
     document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-
             const grid = document.getElementById('rooms-grid');
-
             if (this.dataset.view === 'list') {
                 grid.classList.add('view-list');
-                grid.querySelectorAll('.room-item').forEach(item => {
-                    item.classList.remove('col-lg-4', 'col-md-6');
-                    item.classList.add('col-12');
+                grid.querySelectorAll('.room-item').forEach(i => {
+                    i.classList.remove('col-lg-4', 'col-md-6');
+                    i.classList.add('col-12');
                 });
             } else {
                 grid.classList.remove('view-list');
-                grid.querySelectorAll('.room-item').forEach(item => {
-                    item.classList.remove('col-12');
-                    item.classList.add('col-lg-4', 'col-md-6');
+                grid.querySelectorAll('.room-item').forEach(i => {
+                    i.classList.remove('col-12');
+                    i.classList.add('col-lg-4', 'col-md-6');
                 });
             }
         });
     });
-
-    // ── Toasts ──
-    function showToast(message, type = 'success') {
-        const toast = document.createElement('div');
-        toast.className = `toast align-items-center text-bg-${type} border-0`;
-        toast.setAttribute('role', 'alert');
-        toast.innerHTML = `
-            <div class="d-flex">
-                <div class="toast-body">${message}</div>
-                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-            </div>`;
-        const container = document.getElementById('toastContainer') || createToastContainer();
-        container.appendChild(toast);
-        const bsToast = new bootstrap.Toast(toast);
-        bsToast.show();
-        toast.addEventListener('hidden.bs.toast', () => toast.remove());
-    }
-
-    function createToastContainer() {
-        const c = document.createElement('div');
-        c.id = 'toastContainer';
-        c.className = 'toast-container position-fixed bottom-0 end-0 p-3';
-        document.body.appendChild(c);
-        return c;
-    }
-
-    restoreFavorites();
 });
 </script>
 @endpush

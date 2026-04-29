@@ -3,12 +3,13 @@
 @section('title', 'Réservation en ligne - Hôtel Cactus Palace')
 
 @push('styles')
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-    --primary: #4CAF50;
-    --primary-dark: #2E7D32;
-    --primary-light: #E8F5E9;
+    --primary: #1A472A;
+    --primary-dark: #0F2918;
+    --primary-light: rgba(201,169,97,0.08);
+    --gold: #C9A961;
     --error: #e53935;
     --error-light: #FFEBEE;
 }
@@ -20,16 +21,30 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
 /* Hero */
 .hero-reservation {
-    background: linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
-                url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920') center/cover;
-    color: white; padding: 100px 0 60px; text-align: center;
+    background: linear-gradient(rgba(15,41,24,.72), rgba(15,41,24,.85)),
+                url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920') center/cover fixed;
+    color: white; padding: 140px 0 80px; text-align: center; position: relative;
 }
-.hero-reservation h1 { font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem; }
+.hero-reservation .eyebrow-badge {
+    display: inline-block; background: rgba(201,169,97,.2); color: var(--gold);
+    border: 1px solid rgba(201,169,97,.4); padding: .4rem 1.4rem;
+    border-radius: 50px; font-size: .8rem; letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 1.5rem;
+}
+.hero-reservation h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem,5vw,3.2rem); font-weight: 700; margin-bottom: 1rem;
+}
+.hero-reservation h1 em { color: var(--gold); font-style: italic; }
+.hero-reservation .lead { color: rgba(255,255,255,.8); font-size: 1.05rem; }
 
 /* Cards */
-.card { border: none; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,.08); margin-bottom: 1.5rem; }
-.card-header { background: var(--primary); color: white; border-radius: 12px 12px 0 0 !important; padding: 1rem 1.5rem; border: none; }
-.card-header h4 { margin: 0; font-size: 1.25rem; font-weight: 700; }
+.card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,.08); margin-bottom: 1.5rem; }
+.card-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white; border-radius: 12px 12px 0 0 !important; padding: 1rem 1.5rem; border: none;
+}
+.card-header h4 { margin: 0; font-size: 1.1rem; font-weight: 700; font-family: 'Playfair Display', serif; }
 .card-body { padding: 1.5rem; }
 
 /* ══════════════════════════════
@@ -39,7 +54,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
     font-weight: 600; color: #333; margin-bottom: .5rem;
     display: flex; align-items: center; gap: .35rem;
 }
-.label-icon { font-size: .8rem; color: var(--primary); }
+.label-icon { font-size: .8rem; color: var(--gold); }
 
 .form-control,
 .form-select {
@@ -49,8 +64,8 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 }
 .form-control:focus,
 .form-select:focus {
-    border-color: var(--primary) !important;
-    box-shadow: 0 0 0 3px rgba(76,175,80,.12) !important;
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 3px rgba(201,169,97,.15) !important;
     outline: none !important;
 }
 
@@ -60,7 +75,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
     border-color: var(--primary) !important;
     background-color: #fafffa;
     padding-right: 2.5rem;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%234CAF50' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%231A472A' d='M2.3 6.73.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
     background-repeat: no-repeat; background-position: right 1rem center; background-size: 1rem;
 }
 
@@ -99,7 +114,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 }
 .input-wrapper .form-control { padding-left: 2.4rem; }
 .input-wrapper .form-control:focus ~ .input-icon,
-.input-wrapper .form-control.is-valid ~ .input-icon { color: var(--primary); }
+.input-wrapper .form-control.is-valid ~ .input-icon { color: var(--gold); }
 .input-wrapper .form-control.is-invalid ~ .input-icon { color: var(--error); }
 
 .field-hint { font-size: .76rem; color: #999; margin-top: .25rem; }
@@ -122,7 +137,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 }
 .progress-fill {
     position: absolute; top: 16px; left: 0; height: 2px;
-    background: var(--primary); z-index: 1; transition: width .4s ease; width: 0%;
+    background: linear-gradient(90deg, var(--primary), var(--gold)); z-index: 1; transition: width .4s ease; width: 0%;
 }
 .step { display: flex; flex-direction: column; align-items: center; gap: .4rem; position: relative; z-index: 2; }
 .step-circle {
@@ -130,11 +145,11 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
     display: flex; align-items: center; justify-content: center;
     font-size: .75rem; font-weight: 700; transition: all .3s;
 }
-.step.active .step-circle { background: var(--primary); color: white; }
-.step.done   .step-circle { background: var(--primary-dark); color: white; }
+.step.active .step-circle { background: var(--gold); color: var(--primary-dark); }
+.step.done   .step-circle { background: var(--primary); color: white; }
 .step-label { font-size: .7rem; color: #999; font-weight: 600; white-space: nowrap; }
 .step.active .step-label,
-.step.done   .step-label  { color: var(--primary-dark); }
+.step.done   .step-label  { color: var(--primary); }
 
 /* Room cards */
 .room-card {
@@ -142,42 +157,50 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
     padding: 1rem; cursor: pointer; transition: all .25s;
     background: white; margin-bottom: .75rem;
 }
-.room-card:hover { border-color: var(--primary); transform: translateX(4px); box-shadow: 0 4px 12px rgba(76,175,80,.15); }
-.room-card.selected { border-color: var(--primary); background: var(--primary-light); box-shadow: 0 0 0 3px rgba(76,175,80,.2); }
+.room-card:hover { border-color: var(--gold); transform: translateX(4px); box-shadow: 0 4px 12px rgba(201,169,97,.2); }
+.room-card.selected { border-color: var(--gold); background: rgba(201,169,97,.06); box-shadow: 0 0 0 3px rgba(201,169,97,.25); }
 .room-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: .5rem; }
-.room-name { font-size: 1.05rem; font-weight: 700; color: var(--primary-dark); }
+.room-name { font-size: 1.05rem; font-weight: 700; color: var(--primary); font-family: 'Playfair Display', serif; }
 .room-number { font-size: .83rem; color: #777; }
 .room-meta { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
-.room-price { font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+.room-price { font-size: 1.3rem; font-weight: 800; color: var(--gold); }
 .room-price-unit { font-size: .78rem; color: #999; }
+.badge-room-capacity { background: var(--primary); color: white; padding: .3rem .7rem; border-radius: 20px; font-size: .75rem; }
+.badge-room-total { background: var(--gold); color: var(--primary-dark); padding: .3rem .7rem; border-radius: 20px; font-size: .75rem; font-weight: 700; }
 
 #roomsList::-webkit-scrollbar { width: 8px; }
 #roomsList::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-#roomsList::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+#roomsList::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
 
 /* Summary */
 .summary-box {
-    background: var(--primary-light); border-left: 4px solid var(--primary);
+    background: rgba(201,169,97,.07); border-left: 4px solid var(--gold);
     border-radius: 8px; padding: 1.25rem;
 }
 .summary-row { display: flex; justify-content: space-between; margin-bottom: .75rem; }
 .summary-row:last-child { margin-bottom: 0; }
-.summary-total { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+.summary-total { font-size: 1.5rem; font-weight: 800; color: var(--gold); font-family: 'Playfair Display', serif; }
 
 /* Buttons */
 .btn { border-radius: 8px; padding: .75rem 1.5rem; font-weight: 600; transition: all .25s; }
 .btn:focus, .btn:focus-visible { outline: none !important; box-shadow: none !important; }
-.btn-primary { background: var(--primary); border-color: var(--primary); }
-.btn-primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); transform: translateY(-1px); }
-.btn-primary:disabled { background: #ccc; border-color: #ccc; transform: none; }
-.btn-lg { padding: 1rem 2rem; font-size: 1.1rem; }
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-color: var(--primary); color: white;
+}
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--gold) 0%, #b8924f 100%);
+    border-color: var(--gold); color: var(--primary-dark); transform: translateY(-1px);
+}
+.btn-primary:disabled { background: #ccc; border-color: #ccc; transform: none; color: white; }
+.btn-lg { padding: 1rem 2rem; font-size: 1.05rem; letter-spacing: .5px; }
 
 /* Features sidebar */
 .feature-item { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 1rem; }
 .feature-icon {
     flex-shrink: 0; width: 40px; height: 40px;
-    background: var(--primary-light); border-radius: 50%;
-    display: flex; align-items: center; justify-content: center; color: var(--primary);
+    background: rgba(201,169,97,.12); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; color: var(--gold);
 }
 .feature-content h6 { margin-bottom: .25rem; font-weight: 600; }
 .feature-content small { color: #666; }
@@ -203,8 +226,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
 <section class="hero-reservation">
     <div class="container">
-        <h1><i class="fas fa-calendar-check me-2"></i>Réservation en ligne</h1>
-        <p class="lead">Choisissez votre chambre et réservez en quelques clics</p>
+        <div class="eyebrow-badge"><i class="fas fa-star me-2"></i>Hôtel Cactus Palace 5★</div>
+        <h1>Réservez votre <em>séjour</em></h1>
+        <p class="lead">Choisissez votre chambre et confirmez en quelques clics</p>
     </div>
 </section>
 
@@ -484,10 +508,10 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                         <hr class="my-4">
                         <h6 class="fw-bold mb-3">Besoin d'aide ?</h6>
                         <div class="d-grid gap-2">
-                            <a href="https://wa.me/229XXXXX" target="_blank" class="btn btn-success">
+                            <a href="https://wa.me/229XXXXX" target="_blank" class="btn btn-primary">
                                 <i class="fab fa-whatsapp me-2"></i>WhatsApp
                             </a>
-                            <a href="tel:+229XXXXX" class="btn btn-outline-primary">
+                            <a href="tel:+229XXXXX" class="btn" style="border:2px solid var(--primary);color:var(--primary);font-weight:600;">
                                 <i class="fas fa-phone me-2"></i>Appeler
                             </a>
                         </div>
@@ -502,12 +526,12 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 <div class="modal fade" id="successModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header" style="background:var(--primary);color:white;border:none">
-                <h5 class="modal-title"><i class="fas fa-check-circle me-2"></i>Réservation confirmée !</h5>
+            <div class="modal-header" style="background:linear-gradient(135deg,#1A472A,#0F2918);color:white;border:none">
+                <h5 class="modal-title" style="font-family:'Playfair Display',serif;"><i class="fas fa-check-circle me-2" style="color:#C9A961"></i>Réservation confirmée !</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body text-center p-4">
-                <i class="fas fa-check-circle fa-4x mb-3" style="color:var(--primary)"></i>
+                <i class="fas fa-check-circle fa-4x mb-3" style="color:#C9A961"></i>
                 <h4>Merci pour votre réservation !</h4>
                 <p id="modalMessage" class="text-muted"></p>
                 <div id="modalDetails" class="alert alert-success text-start" style="display:none">
@@ -738,7 +762,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         this.disabled = true;
         this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Recherche...';
-        roomsList.innerHTML = '<div class="loading-state"><div class="spinner-border text-success"></div><p class="mt-2 text-muted">Recherche des chambres...</p></div>';
+        roomsList.innerHTML = '<div class="loading-state"><div class="spinner-border" style="color:#1A472A"></div><p class="mt-2 text-muted">Recherche des chambres...</p></div>';
 
         try {
             const p = new URLSearchParams({ check_in: checkIn.value, check_out: checkOut.value, adults: $('adults').value });
@@ -791,7 +815,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <div class="room-name">${room.name}</div>
                         <div class="room-number">Chambre ${room.number} · ${room.type_name || 'Standard'}</div>
                     </div>
-                    <span class="badge bg-success"><i class="fas fa-users me-1"></i>${room.capacity} pers.</span>
+                    <span class="badge-room-capacity"><i class="fas fa-users me-1"></i>${room.capacity} pers.</span>
                 </div>
                 <div class="room-meta">
                     <div>
@@ -799,7 +823,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <span class="room-price-unit"> FCFA/nuit</span>
                     </div>
                     <div class="ms-auto">
-                        <span class="badge bg-primary">${total.toLocaleString()} FCFA total</span>
+                        <span class="badge-room-total">${total.toLocaleString()} FCFA total</span>
                     </div>
                 </div>
             </div>`;

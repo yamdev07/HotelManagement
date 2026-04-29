@@ -71,7 +71,7 @@
                         </tr>
                         <tr>
                             <th>Total:</th>
-                            <td class="h5 text-primary">{{ number_format($order->total, 2) }} €</td>
+                            <td class="h5 text-primary">{{ number_format($order->total, 0, ',', ' ') }} FCFA</td>
                         </tr>
                         @if($order->payment_method)
                         <tr>
@@ -116,9 +116,9 @@
                             <td>
                                 <div class="d-flex align-items-center">
                                     @if($item->menu->image)
-                                    <img src="{{ asset('storage/' . $item->menu->image) }}" 
-                                         alt="{{ $item->menu->name }}" 
-                                         class="rounded me-3" 
+                                    <img src="{{ $item->menu->image_url }}"
+                                         alt="{{ $item->menu->name }}"
+                                         class="rounded me-3"
                                          style="width: 50px; height: 50px; object-fit: cover;">
                                     @endif
                                     <div>
@@ -129,9 +129,9 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="text-center">{{ number_format($item->price, 2) }} €</td>
+                            <td class="text-center">{{ number_format($item->price, 0, ',', ' ') }} FCFA</td>
                             <td class="text-center">{{ $item->quantity }}</td>
-                            <td class="text-center">{{ number_format($item->price * $item->quantity, 2) }} €</td>
+                            <td class="text-center">{{ number_format($item->price * $item->quantity, 0, ',', ' ') }} FCFA</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -140,23 +140,23 @@
                             <th colspan="3" class="text-end">Sous-total:</th>
                             <th class="text-center">{{ number_format($order->items->sum(function($item) {
                                 return $item->price * $item->quantity;
-                            }), 2) }} €</th>
+                            }), 0, ',', ' ') }} FCFA</th>
                         </tr>
                         @if($order->tax_rate > 0)
                         <tr>
                             <th colspan="3" class="text-end">Taxes ({{ $order->tax_rate }}%):</th>
-                            <th class="text-center">{{ number_format($order->total * $order->tax_rate / 100, 2) }} €</th>
+                            <th class="text-center">{{ number_format($order->total * $order->tax_rate / 100, 0, ',', ' ') }} FCFA</th>
                         </tr>
                         @endif
                         @if($order->discount > 0)
                         <tr>
                             <th colspan="3" class="text-end">Réduction:</th>
-                            <th class="text-center text-danger">-{{ number_format($order->discount, 2) }} €</th>
+                            <th class="text-center text-danger">-{{ number_format($order->discount, 0, ',', ' ') }} FCFA</th>
                         </tr>
                         @endif
                         <tr class="table-active">
                             <th colspan="3" class="text-end">Total:</th>
-                            <th class="text-center h5">{{ number_format($order->total, 2) }} €</th>
+                            <th class="text-center h5">{{ number_format($order->total, 0, ',', ' ') }} FCFA</th>
                         </tr>
                     </tfoot>
                 </table>

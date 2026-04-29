@@ -22,185 +22,164 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+
     <!-- Styles personnalisés -->
     <style>
         :root {
-            --primary-color: #4CAF50; /* Vert principal */
-            --secondary-color: #81C784; /* Vert secondaire */
-            --light-color: #F1F8E9; /* Vert très clair */
-            --dark-color: #2E7D32; /* Vert foncé */
-            --accent-color: #C8E6C9; /* Vert accent */
+            --cactus-green: #1A472A;
+            --cactus-dark:  #0F2918;
+            --gold-accent:  #C9A961;
+            --gold-light:   rgba(201,169,97,.12);
+            --primary-color: #1A472A;
+            --dark-color:    #1A472A;
         }
-        
+
+        *, *::before, *::after { box-sizing: border-box; }
+
         body {
             font-family: 'Montserrat', sans-serif;
             color: #333;
-            background-color: var(--light-color);
+            background-color: #fff;
         }
-        
+
         h1, h2, h3, h4, h5, h6 {
             font-family: 'Playfair Display', serif;
             font-weight: 700;
-            color: var(--dark-color);
+            color: var(--cactus-dark);
         }
-        
-        .bg-primary-custom {
-            background-color: var(--primary-color) !important;
+
+        /* ── Navbar ── */
+        .cp-navbar {
+            background: rgba(255,255,255,.96);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(201,169,97,.2);
+            transition: background .3s, box-shadow .3s;
         }
-        
-        .text-primary-custom {
-            color: var(--primary-color) !important;
+        .cp-navbar.scrolled {
+            background: rgba(15,41,24,.97);
+            box-shadow: 0 2px 20px rgba(0,0,0,.3);
         }
-        
-        .btn-primary-custom {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
-        }
-        
-        .btn-primary-custom:hover {
-            background-color: #388E3C;
-            border-color: #388E3C;
-        }
-        
+
         .navbar-brand {
             font-family: 'Playfair Display', serif;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             font-weight: 700;
-            color: var(--dark-color) !important;
+            color: var(--cactus-dark) !important;
+            transition: color .3s;
         }
-        
-        .hero-section {
-            background: url('https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: white;
-            padding: 180px 0;
-            position: relative;
-        }
-        
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
-            z-index: 1;
-        }
-        
-        .hero-section .container {
-            position: relative;
-            z-index: 2;
-        }
-        
-        .room-card {
-            transition: transform 0.3s ease;
-            border: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            background-color: white;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .room-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
-        }
-        
-        .footer {
-            background-color: var(--dark-color);
-            color: white;
-        }
-        
-        .social-icons a {
-            color: white;
-            margin: 0 10px;
-            font-size: 1.2rem;
-            transition: color 0.3s ease;
-        }
-        
-        .social-icons a:hover {
-            color: var(--secondary-color);
-        }
-        
+        .cp-navbar.scrolled .navbar-brand { color: #fff !important; }
+        .cp-navbar.scrolled .navbar-brand span { color: var(--gold-accent) !important; }
+
         .nav-link {
-            color: var(--dark-color) !important;
+            color: #333 !important;
             font-weight: 500;
+            font-size: .9rem;
+            letter-spacing: .3px;
+            position: relative;
+            padding: .5rem .9rem !important;
+            transition: color .25s;
         }
-        
-        .nav-link:hover {
-            color: var(--primary-color) !important;
+        .nav-link::after {
+            content: '';
+            position: absolute; bottom: 0; left: .9rem; right: .9rem;
+            height: 2px; background: var(--gold-accent);
+            transform: scaleX(0); transition: transform .25s;
         }
-        
+        .nav-link:hover::after,
+        .nav-link.active::after { transform: scaleX(1); }
+        .nav-link:hover { color: var(--cactus-green) !important; }
+
+        .cp-navbar.scrolled .nav-link { color: rgba(255,255,255,.85) !important; }
+        .cp-navbar.scrolled .nav-link:hover { color: var(--gold-accent) !important; }
+
+        /* Navbar toggler on dark */
+        .cp-navbar.scrolled .navbar-toggler { border-color: rgba(201,169,97,.5); }
+        .cp-navbar.scrolled .navbar-toggler-icon {
+            filter: invert(1);
+        }
+
+        .btn-primary-custom {
+            background: linear-gradient(135deg, var(--cactus-green), var(--cactus-dark));
+            border: none; color: #fff; border-radius: 50px;
+            padding: .5rem 1.4rem; font-weight: 600; font-size: .88rem;
+            transition: all .25s;
+        }
+        .btn-primary-custom:hover {
+            background: linear-gradient(135deg, var(--gold-accent), #b8924f);
+            color: var(--cactus-dark); transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(201,169,97,.35);
+        }
         .btn-outline-primary-custom {
-            color: var(--primary-color);
-            border-color: var(--primary-color);
+            border: 2px solid var(--cactus-green); color: var(--cactus-green);
+            border-radius: 50px; padding: .45rem 1.3rem; font-weight: 600; font-size: .88rem;
+            background: transparent; transition: all .25s;
         }
-        
         .btn-outline-primary-custom:hover {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-            color: white;
+            background: var(--cactus-green); color: #fff;
         }
-        
-        /* Styles pour les formulaires */
-        .form-control:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 0.25rem rgba(129, 199, 132, 0.25);
+        .cp-navbar.scrolled .btn-outline-primary-custom {
+            border-color: var(--gold-accent); color: var(--gold-accent);
         }
-        
-        /* Cartes et conteneurs */
-        .card {
-            border: 1px solid rgba(76, 175, 80, 0.1);
-            background-color: white;
+        .cp-navbar.scrolled .btn-outline-primary-custom:hover {
+            background: var(--gold-accent); color: var(--cactus-dark);
         }
-        
-        .card-header {
-            background-color: var(--accent-color);
-            border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+
+        /* ── Footer ── */
+        .footer {
+            background: linear-gradient(180deg, var(--cactus-dark) 0%, #07180e 100%);
+            color: rgba(255,255,255,.8);
         }
-        
-        /* Tables */
-        .table-hover tbody tr:hover {
-            background-color: var(--accent-color);
+        .footer h4, .footer h5 { color: #fff; }
+        .footer h5 { font-size: 1rem; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 1.2rem; }
+        .footer h5::after {
+            content: ''; display: block; width: 30px; height: 2px;
+            background: var(--gold-accent); margin: .4rem auto 0;
         }
-        
-        /* Alertes */
-        .alert-success {
-            background-color: var(--accent-color);
-            border-color: var(--secondary-color);
-            color: var(--dark-color);
+        .footer p { color: rgba(255,255,255,.65); font-size: .88rem; line-height: 1.7; }
+        .footer a.footer-link {
+            color: rgba(255,255,255,.65); text-decoration: none; font-size: .88rem;
+            display: block; margin-bottom: .5rem; transition: color .2s, padding-left .2s;
         }
-        
-        /* Badges */
-        .badge.bg-primary {
-            background-color: var(--primary-color) !important;
+        .footer a.footer-link:hover { color: var(--gold-accent); padding-left: 5px; }
+        .footer-contact p { display: flex; align-items: center; justify-content: center; gap: .7rem; }
+        .footer-contact .contact-icon {
+            color: var(--gold-accent); width: 16px; flex-shrink: 0; margin-top: 3px;
         }
-        
-        /* Boutons Hero Section */
-        .hero-section .btn-primary-custom {
-            background-color: #2E7D32;
-            border-color: #2E7D32;
+
+        .social-icons a {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 38px; height: 38px; border-radius: 50%;
+            border: 1px solid rgba(201,169,97,.35);
+            color: rgba(255,255,255,.7); margin-right: .4rem;
+            font-size: 1rem; transition: all .25s;
         }
-        
-        .hero-section .btn-primary-custom:hover {
-            background-color: #1B5E20;
-            border-color: #1B5E20;
+        .social-icons a:hover {
+            background: var(--gold-accent); border-color: var(--gold-accent);
+            color: var(--cactus-dark); transform: translateY(-2px);
         }
-        
-        .hero-section .btn-outline-light {
-            border-color: white;
-            color: white;
+
+        .footer-divider {
+            border-color: rgba(255,255,255,.08);
         }
-        
-        .hero-section .btn-outline-light:hover {
-            background-color: white;
-            color: var(--dark-color);
+        .footer-bottom {
+            font-size: .8rem; color: rgba(255,255,255,.4);
+        }
+        .footer-bottom a { color: var(--gold-accent); text-decoration: none; }
+
+        /* ── Global utilities ── */
+        .text-primary-custom { color: var(--cactus-green) !important; }
+        .bg-primary-custom   { background-color: var(--cactus-green) !important; }
+        .badge.bg-primary    { background-color: var(--cactus-green) !important; }
+
+        @media (max-width: 991px) {
+            .nav-link::after { display: none; }
+            .navbar-collapse { background: #fff; padding: 1rem; border-radius: 8px; margin-top: .5rem; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+            .cp-navbar.scrolled .navbar-collapse { background: var(--cactus-dark); }
+        }
+        @media (max-width: 576px) {
+            .navbar-brand { font-size: 1.2rem; }
         }
     </style>
     
@@ -208,48 +187,49 @@
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm fixed-top">
+    <nav class="navbar navbar-expand-lg cp-navbar fixed-top" id="mainNavbar">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center" href="{{ route('frontend.home') }}">
-                <img src="{{ asset('img/logo_cactus.png') }}"
-                    alt="Hôtel Le Cactus"
-                    class="me-2"
-                    style="height: 45px; width: auto;">
-                <span>Le cactus Hotel</span>
+            <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('frontend.home') }}">
+                <img src="{{ asset('img/logo_cactus.png') }}" alt="Hôtel Cactus Palace"
+                     style="height:42px;width:auto;">
+                <span>Le <span style="color:var(--gold-accent)">Cactus</span> Hotel</span>
             </a>
 
-
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('frontend.home') }}">Accueil</a>
+                        <a class="nav-link {{ request()->routeIs('frontend.home') ? 'active' : '' }}"
+                           href="{{ route('frontend.home') }}">Accueil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('frontend.rooms') }}">Chambres & Suites</a>
+                        <a class="nav-link {{ request()->routeIs('frontend.rooms*') ? 'active' : '' }}"
+                           href="{{ route('frontend.rooms') }}">Chambres &amp; Suites</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('frontend.restaurant') }}">Restaurant</a>
+                        <a class="nav-link {{ request()->routeIs('frontend.restaurant*') ? 'active' : '' }}"
+                           href="{{ route('frontend.restaurant') }}">Restaurant</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('frontend.services') }}">Services</a>
+                        <a class="nav-link {{ request()->routeIs('frontend.services*') ? 'active' : '' }}"
+                           href="{{ route('frontend.services') }}">Services</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ route('frontend.contact') }}">Contact</a>
+                        <a class="nav-link {{ request()->routeIs('frontend.contact*') ? 'active' : '' }}"
+                           href="{{ route('frontend.contact') }}">Contact</a>
                     </li>
-                    
-                    <!-- Bouton dashboard pour les utilisateurs connectés -->
+
                     @auth
-                    <li class="nav-item ms-2">
+                    <li class="nav-item ms-lg-2">
                         <a href="{{ route('dashboard.index') }}" class="btn btn-outline-primary-custom">
                             <i class="fas fa-tachometer-alt me-1"></i> Dashboard
                         </a>
                     </li>
                     @else
-                    <li class="nav-item ms-2">
+                    <li class="nav-item ms-lg-2">
                         <a href="{{ route('login') }}" class="btn btn-primary-custom">
                             <i class="fas fa-sign-in-alt me-1"></i> Connexion
                         </a>
@@ -261,58 +241,97 @@
     </nav>
 
     <!-- Contenu principal -->
-    <main style="padding-top: 76px;">
+    <main style="padding-top: 72px;">
         @yield('content')
     </main>
 
     <!-- Footer -->
-    <footer class="footer py-5 mt-5">
+    <footer class="footer pt-5 pb-0 mt-5">
         <div class="container">
-            <div class="row">
-                <div class="col-lg-4 mb-4">
-                    <h4 class="mb-3">Cactus Palace</h4>
-                    <p>Un hôtel 5 étoiles offrant des services exceptionnels dans un cadre luxueux et paisible.</p>
+            <div class="row gy-4 text-center">
+
+                {{-- Brand column --}}
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center justify-content-center gap-2 mb-3">
+                        <img src="{{ asset('img/logo_cactus.png') }}" alt="Cactus Palace" style="height:40px;filter:brightness(10)">
+                        <h4 class="mb-0" style="color:#fff;font-size:1.4rem;">Cactus <span style="color:var(--gold-accent)">Palace</span></h4>
+                    </div>
+                    <p>Un havre de luxe 5 étoiles au cœur de Cotonou, offrant des services d'exception dans un cadre raffiné.</p>
+                    <div class="d-flex align-items-center justify-content-center gap-1 mt-3" style="color:var(--gold-accent);font-size:.82rem;letter-spacing:1px;">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        <span class="ms-1">Hôtel 5 étoiles</span>
+                    </div>
                     <div class="social-icons mt-3">
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                        <a href="#" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
                     </div>
                 </div>
-                
-                <div class="col-lg-4 mb-4">
-                    <h5 class="mb-3">Liens rapides</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="{{ route('frontend.home') }}" class="text-white text-decoration-none">Accueil</a></li>
-                        <li><a href="{{ route('frontend.rooms') }}" class="text-white text-decoration-none">Chambres</a></li>
-                        <li><a href="{{ route('frontend.restaurant') }}" class="text-white text-decoration-none">Restaurant</a></li>
-                        <li><a href="{{ route('frontend.services') }}" class="text-white text-decoration-none">Services</a></li>
-                        <li><a href="{{ route('frontend.contact') }}" class="text-white text-decoration-none">Contact</a></li>
-                    </ul>
+
+                {{-- Quick links --}}
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h5>Navigation</h5>
+                    <a href="{{ route('frontend.home') }}" class="footer-link">Accueil</a>
+                    <a href="{{ route('frontend.rooms') }}" class="footer-link">Chambres &amp; Suites</a>
+                    <a href="{{ route('frontend.restaurant') }}" class="footer-link">Restaurant</a>
+                    <a href="{{ route('frontend.services') }}" class="footer-link">Services</a>
+                    <a href="{{ route('frontend.contact') }}" class="footer-link">Contact</a>
+                    <a href="{{ route('frontend.reservation') }}" class="footer-link">Réservation</a>
                 </div>
-                
-                <div class="col-lg-4 mb-4">
-                    <h5 class="mb-3">Contact & Localisation</h5>
-                    <p><i class="fas fa-map-marker-alt me-2"></i> Haie Vive, Cotonou, Bénin</p>
-                    <p><i class="fas fa-phone me-2"></i> +229 01 XX XX XX XX</p>
-                    <p><i class="fas fa-phone me-2"></i> +229 02 XX XX XX XX</p>
-                    <p><i class="fas fa-envelope me-2"></i> contact@cactushotel.com</p>
-                    <p><i class="fas fa-envelope me-2"></i> reservation@cactushotel.com</p>
+
+                {{-- Services --}}
+                <div class="col-lg-2 col-md-6 col-6">
+                    <h5>Services</h5>
+                    <a href="#" class="footer-link">Spa &amp; Bien-être</a>
+                    <a href="#" class="footer-link">Piscine</a>
+                    <a href="#" class="footer-link">Salle de sport</a>
+                    <a href="#" class="footer-link">Conciergerie</a>
+                    <a href="#" class="footer-link">Room Service</a>
+                    <a href="#" class="footer-link">Transferts</a>
                 </div>
+
+                {{-- Contact --}}
+                <div class="col-lg-4 col-md-6 footer-contact">
+                    <h5>Contact</h5>
+                    <p><i class="fas fa-map-marker-alt contact-icon"></i>Haie Vive, Cotonou, Bénin</p>
+                    <p><i class="fas fa-phone contact-icon"></i>+229 01 XX XX XX XX</p>
+                    <p><i class="fab fa-whatsapp contact-icon"></i>+229 01 XX XX XX XX</p>
+                    <p><i class="fas fa-envelope contact-icon"></i>contact@cactushotel.com</p>
+                    <p><i class="fas fa-clock contact-icon"></i>Réception 24h/24 — 7j/7</p>
+                </div>
+
             </div>
-            
-            <hr class="my-4" style="border-color: rgba(255,255,255,0.1);">
-            
-            <div class="text-center">
-                <p class="mb-0">&copy; {{ date('Y') }} Cactus Palace - Haie Vive, Cotonou. Tous droits réservés.</p>
+
+            <hr class="footer-divider my-4">
+
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-center pb-4 footer-bottom">
+                <p class="mb-1 mb-sm-0">&copy; {{ date('Y') }} Cactus Palace · Haie Vive, Cotonou. Tous droits réservés.</p>
+                <p class="mb-0">Conçu avec <i class="fas fa-heart" style="color:var(--gold-accent)"></i> pour l'excellence</p>
             </div>
         </div>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery pour le frontend -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- SweetAlert2 pour les alertes utilisateur -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <!-- Scripts personnalisés -->
     @stack('scripts')
+
+    <script>
+    (function(){
+        var nav = document.getElementById('mainNavbar');
+        if (!nav) return;
+        function onScroll() {
+            nav.classList.toggle('scrolled', window.scrollY > 50);
+        }
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
+    })();
+    </script>
 </body>
 </html>

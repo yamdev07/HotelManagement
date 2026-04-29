@@ -351,12 +351,16 @@
         // ✅ Calculer le total payé
         $totalPayments = $allPayments->sum('amount');
         
-        // ✅ Calculer le prix total du séjour
-        $totalSejour = $transaction->getTotalPrice();
+        // ✅ Calculer les montants détaillés
+        $roomSubtotal    = $transaction->room->price * $transaction->nights;
+        $restaurantOrders = $transaction->restaurantOrders->whereNotIn('status', ['paid', 'cancelled']);
+        $restaurantTotal = $restaurantOrders->sum('total');
+        $extrasTotal     = $transaction->extras->sum(fn($e) => $e->amount * $e->quantity);
+        $grandTotal      = $transaction->getTotalPrice();
         
         // ✅ Vérifier s'il y a un late checkout
-        $hasLateCheckout = $transaction->check_out_actual && 
-                          \Carbon\Carbon::parse($transaction->check_out_actual)->gt(
+        $hasLateCheckout = $transaction->actual_check_out &&
+                          \Carbon\Carbon::parse($transaction->actual_check_out)->gt(
                               \Carbon\Carbon::parse($transaction->check_out)
                           );
         
@@ -367,7 +371,7 @@
         
         if ($hasLateCheckout) {
             $roomPrice = $transaction->room->price;
-            $checkOutActual = \Carbon\Carbon::parse($transaction->check_out_actual);
+            $checkOutActual = \Carbon\Carbon::parse($transaction->actual_check_out);
             $checkOutOriginal = \Carbon\Carbon::parse($transaction->check_out);
             $extraHours = $checkOutActual->diffInHours($checkOutOriginal);
             
@@ -386,12 +390,11 @@
             }
             
             // ✅ Ajouter les frais au total du séjour
-            $totalSejour += $extraCharge;
+            $grandTotal += $extraCharge;
         }
-        
+
         // ✅ Calculer le solde restant
-        $remaining = max(0, $totalSejour - $totalPayments);
-        
+        $remaining = max(0, $grandTotal - $totalPayments);
         // ✅ Déterminer le statut global
         $isFullyPaid = $remaining <= 0;
     @endphp
@@ -496,7 +499,7 @@
                         @if($hasLateCheckout)
                             <p class="mb-2">
                                 <strong style="color: #dc3545;">Départ effectif :</strong> 
-                                {{ \Carbon\Carbon::parse($transaction->check_out_actual)->format('d/m/Y H:i') }}
+                                {{ \Carbon\Carbon::parse($transaction->actual_check_out)->format('d/m/Y H:i') }}
                             </p>
                             <p class="mb-0">
                                 <strong style="color: #dc3545;">Dépassement :</strong> 
@@ -543,7 +546,7 @@
                                 </td>
                                 <td class="text-center">{{ $transaction->getDateDifferenceWithPlural() }}</td>
                                 <td class="text-right font-weight-bold" style="color: #28a745;">
-                                    {{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} FCFA
+                                    {{ number_format($transaction->room->price * $transaction->nights, 0, ',', ' ') }} FCFA
                                 </td>
                             </tr>
                             
@@ -575,6 +578,102 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Détails des commandes restaurant -->
+            @php
+                $restaurantOrders = $transaction->restaurantOrders->whereNotIn('status', ['paid', 'cancelled']);
+            @endphp
+
+            <div class="mb-4">
+                <h6 class="section-title">
+                    <i class="fas fa-utensils"></i>
+                    COMMANDES RESTAURANT
+                </h6>
+
+                @if($restaurantOrders->isNotEmpty())
+                    <div style="overflow-x: auto;">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Commande</th>
+                                    <th>Menu</th>
+                                    <th class="text-center">Prix</th>
+                                    <th class="text-center">Quantité</th>
+                                    <th class="text-right">Sous-total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($restaurantOrders as $order)
+                                    @foreach($order->items as $item)
+                                    <tr>
+                                        <td>#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</td>
+                                        <td>{{ $item->menu->name ?? 'Article' }}</td>
+                                        <td class="text-center">{{ number_format($item->price, 0, ',', ' ') }} FCFA</td>
+                                        <td class="text-center">{{ $item->quantity }}</td>
+                                        <td class="text-right">{{ number_format($item->price * $item->quantity, 0, ',', ' ') }} FCFA</td>
+                                    </tr>
+                                    @endforeach
+                                    <tr class="table-secondary">
+                                        <td colspan="4" class="text-end"><strong>Total commande {{ strtoupper($order->status) }}</strong></td>
+                                        <td class="text-right"><strong>{{ number_format($order->total, 0, ',', ' ') }} FCFA</strong></td>
+                                    </tr>
+                                @endforeach
+                                <tr class="table-success">
+                                    <td colspan="4" class="text-end"><strong>Total restaurant</strong></td>
+                                    <td class="text-right"><strong>{{ number_format($restaurantTotal, 0, ',', ' ') }} FCFA</strong></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107;">
+                        <p class="mb-0 text-center">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            Aucune commande restaurant enregistrée pour cette transaction.
+                        </p>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Extras (minibar, lessive, services) -->
+            @if($transaction->extras->isNotEmpty())
+            <div class="mb-4">
+                <h6 class="section-title">
+                    <i class="fas fa-concierge-bell"></i>
+                    EXTRAS & SERVICES
+                </h6>
+                <div style="overflow-x: auto;">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Catégorie</th>
+                                <th>Description</th>
+                                <th class="text-center">Prix unit.</th>
+                                <th class="text-center">Qté</th>
+                                <th class="text-right">Sous-total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($transaction->extras as $extra)
+                            <tr>
+                                <td><small>{{ $extra->category_label }}</small></td>
+                                <td>{{ $extra->description }}</td>
+                                <td class="text-center">{{ number_format($extra->amount, 0, ',', ' ') }} FCFA</td>
+                                <td class="text-center">{{ $extra->quantity }}</td>
+                                <td class="text-right font-weight-bold" style="color: #28a745;">
+                                    {{ number_format($extra->subtotal, 0, ',', ' ') }} FCFA
+                                </td>
+                            </tr>
+                            @endforeach
+                            <tr class="table-success">
+                                <td colspan="4" class="text-end"><strong>Total extras</strong></td>
+                                <td class="text-right"><strong>{{ number_format($extrasTotal, 0, ',', ' ') }} FCFA</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            @endif
 
             <!-- HISTORIQUE COMPLET DES PAIEMENTS -->
             <div class="mb-4">
@@ -668,35 +767,41 @@
             </div>
 
             <!-- Récapitulatif des montants -->
-            <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-                <div style="flex: 1; text-align: center;">
+            <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 140px; text-align: center;">
                     <div class="info-box">
-                        <p class="mb-1 text-muted">Total Séjour</p>
+                        <p class="mb-1 text-muted">🛏 Chambre</p>
                         <p class="mb-0 amount" style="color: #28a745;">
-                            {{ number_format($totalSejour, 0, ',', ' ') }} FCFA
+                            {{ number_format($roomSubtotal, 0, ',', ' ') }} FCFA
+                        </p>
+                    </div>
+                </div>
+                <div style="flex: 1; min-width: 140px; text-align: center;">
+                    <div class="info-box">
+                        <p class="mb-1 text-muted">🍽 Restaurant</p>
+                        <p class="mb-0 amount" style="color: #28a745;">
+                            {{ number_format($restaurantTotal, 0, ',', ' ') }} FCFA
+                        </p>
+                    </div>
+                </div>
+                @if($extrasTotal > 0)
+                <div style="flex: 1; min-width: 140px; text-align: center;">
+                    <div class="info-box">
+                        <p class="mb-1 text-muted">🔔 Extras</p>
+                        <p class="mb-0 amount" style="color: #28a745;">
+                            {{ number_format($extrasTotal, 0, ',', ' ') }} FCFA
+                        </p>
+                    </div>
+                </div>
+                @endif
+                <div style="flex: 1; min-width: 140px; text-align: center;">
+                    <div class="info-box">
+                        <p class="mb-1 text-muted">📋 Total Facture</p>
+                        <p class="mb-0 amount" style="color: #28a745;">
+                            {{ number_format($grandTotal, 0, ',', ' ') }} FCFA
                         </p>
                         @if($hasLateCheckout && $extraCharge > 0)
                         <small class="text-muted">(dont {{ number_format($extraCharge, 0, ',', ' ') }} FCFA de frais)</small>
-                        @endif
-                    </div>
-                </div>
-                <div style="flex: 1; text-align: center;">
-                    <div class="info-box">
-                        <p class="mb-1 text-muted">Total Payé</p>
-                        <p class="mb-0 amount" style="color: #28a745;">
-                            {{ number_format($totalPayments, 0, ',', ' ') }} FCFA
-                        </p>
-                        <small class="text-muted">{{ $allPayments->count() }} paiement(s)</small>
-                    </div>
-                </div>
-                <div style="flex: 1; text-align: center;">
-                    <div class="info-box">
-                        <p class="mb-1 text-muted">Solde Restant</p>
-                        <p class="mb-0 amount" style="color: {{ $remaining <= 0 ? '#28a745' : '#dc3545' }};">
-                            {{ number_format($remaining, 0, ',', ' ') }} FCFA
-                        </p>
-                        @if($remaining <= 0)
-                        <small class="text-success">✓ Facture soldée</small>
                         @endif
                     </div>
                 </div>

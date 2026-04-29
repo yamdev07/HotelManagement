@@ -44,11 +44,11 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="price" class="form-label">Prix (€) <span class="text-danger">*</span></label>
+                    <label for="price" class="form-label">Prix (FCFA) <span class="text-danger">*</span></label>
                     <div class="input-group">
-                        <input type="number" step="0.01" class="form-control @error('price') is-invalid @enderror" 
+                        <input type="number" step="1" class="form-control @error('price') is-invalid @enderror"
                                id="price" name="price" value="{{ old('price') }}" min="0" required>
-                        <span class="input-group-text">€</span>
+                        <span class="input-group-text">FCFA</span>
                     </div>
                     @error('price')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -124,13 +124,9 @@ function removeImagePreview() {
 
 // Validation du prix
 document.getElementById('price').addEventListener('input', function(e) {
-    let value = parseFloat(e.target.value);
-    if (value < 0) {
-        e.target.value = 0;
-    }
-    if (value > 1000) {
-        e.target.value = 1000;
-    }
+    let value = parseInt(e.target.value);
+    if (value < 0 || isNaN(value)) e.target.value = 0;
+    if (value > 9999999) e.target.value = 9999999;
 });
 </script>
 

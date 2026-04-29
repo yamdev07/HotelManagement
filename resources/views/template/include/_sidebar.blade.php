@@ -143,7 +143,7 @@
                         <div class="nav-icon"><i class="fas fa-utensils"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Restaurant</div>
-                            <div class="nav-subtitle">Menus & Commandes</div>
+                            <div class="nav-subtitle">Menus, Commandes, Stock & Ventes</div>
                         </div>
                     </a>
                     @endif
@@ -452,7 +452,6 @@
     display: flex;
     flex-direction: column;
     box-shadow: 4px 0 24px rgba(0,0,0,.18);
-    /* CRITIQUE : empêcher que le fond blanc du body transparaisse */
     overflow: hidden;
 }
 
@@ -496,14 +495,10 @@
     flex: 1;
     display: flex; flex-direction: column;
     min-height: 0;
-    /* CRITIQUE : le fond doit rester vert */
     background: inherit;
 }
 
-/* Mobile header — masqué sur desktop */
-.sidebar-header-mobile {
-    display: none;
-}
+.sidebar-header-mobile { display: none; }
 
 .sidebar-body {
     flex: 1;
@@ -652,7 +647,7 @@
 #sidebar-datetime { font-family: 'Courier New', monospace; font-weight: 500; }
 
 /* ════════════════════════════════════════
-   COLLAPSED (desktop)
+   COLLAPSED (desktop) — réduit à 64px
 ════════════════════════════════════════ */
 .sidebar.collapsed { width: 64px; }
 .sidebar.collapsed .brand-text,
@@ -671,7 +666,7 @@
 .sidebar.collapsed .user-avatar { margin: 0; }
 .sidebar.collapsed .sidebar-footer { padding: 12px 8px; }
 
-/* Tooltip collapsed */
+/* Tooltip quand collapsed */
 .sidebar.collapsed .nav-item::before {
     content: attr(data-tooltip);
     position: absolute; left: calc(100% + 10px); top: 50%; transform: translateY(-50%);
@@ -693,7 +688,6 @@
     z-index: 1000; opacity: 0;
     transition: opacity .3s;
     backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
 }
 .sidebar-overlay.show { display: block; opacity: 1; }
 
@@ -701,28 +695,18 @@
    MOBILE ≤ 768px
 ════════════════════════════════════════ */
 @media (max-width: 768px) {
-
-    /* ── Sidebar hors écran par défaut ── */
     .sidebar {
         width: 82vw;
         max-width: 300px;
-        /* IMPORTANT : décalage hors écran, pas transform sur height */
         transform: translateX(-100%);
         transition: transform .28s cubic-bezier(.4,0,.2,1);
-        /* Toujours pleine hauteur, couleur verte */
         height: 100vh;
-        height: 100dvh; /* dynamic viewport pour les navigateurs modernes */
         z-index: 1050;
-        /* Forcer le fond vert — le body blanc ne doit pas transparaître */
         background: linear-gradient(170deg, #064e3b 0%, #065f46 55%, #047857 100%) !important;
     }
+    .sidebar.show { transform: translateX(0); }
 
-    /* ── Sidebar ouvert ── */
-    .sidebar.show {
-        transform: translateX(0);
-    }
-
-    /* ── Pas de collapsed sur mobile ── */
+    /* Annuler collapsed sur mobile */
     .sidebar.collapsed { width: 82vw; max-width: 300px; }
     .sidebar.collapsed .brand-text,
     .sidebar.collapsed .nav-content,
@@ -734,10 +718,8 @@
     .sidebar.collapsed .user-profile { justify-content: flex-start; }
     .sidebar.collapsed .sidebar-logo { justify-content: space-between; padding: 16px 18px; }
 
-    /* ── Bouton toggle desktop caché sur mobile ── */
     #toggle-sidebar { display: none !important; }
 
-    /* ── Header mobile visible ── */
     .sidebar-header-mobile {
         display: flex !important;
         align-items: center; justify-content: space-between;
@@ -750,91 +732,68 @@
         color: white; font-size: .88rem; font-weight: 700;
         display: flex; align-items: center; gap: 8px;
     }
-
-    /* ── Inner : flex colonne avec scroll ── */
-    .sidebar-inner {
-        flex: 1; display: flex; flex-direction: column;
-        min-height: 0; overflow: hidden;
-        /* Fond vert explicite */
-        background: transparent;
-    }
-
-    /* ── Body scrollable ── */
-    .sidebar-body {
-        flex: 1; overflow-y: auto; overflow-x: hidden;
-        padding: 8px 0;
-        -webkit-overflow-scrolling: touch;
-        /* Fond vert pour le scroll */
-        background: transparent;
-    }
-
-    /* ── Footer toujours visible ── */
+    .sidebar-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
     .sidebar-footer { flex-shrink: 0; }
-
-    /* ── Taille des éléments nav ── */
-    .nav-section-title { padding: 8px 18px 3px; font-size: .6rem; }
-    .nav-item { padding: 9px 18px; }
-    .nav-title { font-size: .82rem; }
-    .nav-subtitle { font-size: .67rem; }
-    .nav-icon { width: 30px; height: 30px; font-size: .82rem; margin-right: 10px; }
-
-    /* ── Footer compact ── */
-    .sidebar-footer { padding: 12px 16px; }
-    .user-name { font-size: .8rem; }
 }
 
-/* ════════════════════════════════════════
-   TRÈS PETIT ÉCRAN ≤ 380px
-════════════════════════════════════════ */
 @media (max-width: 380px) {
     .sidebar { width: 92vw; max-width: none; }
-    .nav-item { padding: 8px 14px; }
-    .nav-icon { width: 28px; height: 28px; margin-right: 9px; }
-    .brand-name { font-size: .85rem; }
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const sidebar        = document.getElementById('sidebar');
-    const overlay        = document.getElementById('sidebar-overlay');
-    const toggleDesktop  = document.getElementById('toggle-sidebar');
-    const toggleMobile   = document.getElementById('toggle-sidebar-sm');
+    var sidebar       = document.getElementById('sidebar');
+    var overlay       = document.getElementById('sidebar-overlay');
+    var toggleDesktop = document.getElementById('toggle-sidebar');
+    var toggleMobile  = document.getElementById('toggle-sidebar-sm');
+    var content       = document.getElementById('page-content-wrapper');
 
-    /* ── Data-tooltip pour collapsed desktop ── */
-    document.querySelectorAll('.nav-item').forEach(item => {
-        const title = item.querySelector('.nav-title');
+    /* ── data-tooltip auto ── */
+    document.querySelectorAll('.nav-item').forEach(function(item) {
+        var title = item.querySelector('.nav-title');
         if (title && !item.getAttribute('data-tooltip')) {
             item.setAttribute('data-tooltip', title.textContent.trim());
         }
     });
 
     /* ════════════════════════════════════════
-       DESKTOP : collapse/expand
+       DESKTOP : collapse / expand
+       Met aussi à jour le margin-left du contenu
     ════════════════════════════════════════ */
     function setCollapsed(collapsed) {
-        if (window.innerWidth <= 768) return; // pas de collapse sur mobile
+        if (window.innerWidth <= 768) return;
+
         sidebar.classList.toggle('collapsed', collapsed);
-        if (toggleDesktop) {
-            toggleDesktop.querySelector('i').className = collapsed ? 'fas fa-chevron-right' : 'fas fa-bars';
-        }
         localStorage.setItem('sidebarCollapsed', collapsed);
+
+        /* ← CORRECTION PRINCIPALE : on met à jour le contenu */
+        if (content) {
+            content.style.marginLeft = collapsed ? '64px' : '272px';
+        }
+
+        if (toggleDesktop) {
+            toggleDesktop.querySelector('i').className = collapsed
+                ? 'fas fa-chevron-right'
+                : 'fas fa-bars';
+        }
     }
 
     if (toggleDesktop) {
-        toggleDesktop.addEventListener('click', function (e) {
+        toggleDesktop.addEventListener('click', function(e) {
             e.preventDefault();
             setCollapsed(!sidebar.classList.contains('collapsed'));
         });
     }
 
-    // Restore collapsed state on desktop
-    if (window.innerWidth > 768 && localStorage.getItem('sidebarCollapsed') === 'true') {
-        setCollapsed(true);
+    /* Restaurer l'état au chargement */
+    if (window.innerWidth > 768) {
+        var saved = localStorage.getItem('sidebarCollapsed') === 'true';
+        setCollapsed(saved);
     }
 
     /* ════════════════════════════════════════
-       MOBILE : open/close
+       MOBILE : open / close (overlay)
     ════════════════════════════════════════ */
     function openSidebar() {
         sidebar.classList.add('show');
@@ -853,7 +812,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     if (toggleMobile) {
-        toggleMobile.addEventListener('click', function (e) {
+        toggleMobile.addEventListener('click', function(e) {
             e.stopPropagation();
             closeSidebar();
         });
@@ -863,28 +822,37 @@ document.addEventListener('DOMContentLoaded', function () {
         overlay.addEventListener('click', closeSidebar);
     }
 
-    // Fermer sur navigation (mobile)
-    document.querySelectorAll('.nav-item').forEach(link => {
+    /* Fermer sidebar mobile après clic sur lien */
+    document.querySelectorAll('.nav-item').forEach(function(link) {
         link.addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
-                setTimeout(closeSidebar, 150);
-            }
+            if (window.innerWidth <= 768) setTimeout(closeSidebar, 150);
         });
     });
 
-    /* ════════════════════════════════════════
-       EXPOSER openSidebar globalement
-       (pour le bouton hamburger dans _mobile-header.blade.php)
-    ════════════════════════════════════════ */
-    window.openSidebar  = openSidebar;
-    window.closeSidebar = closeSidebar;
+    /* Exposer globalement pour _mobile-header.blade.php */
+    window.openSidebar         = openSidebar;
+    window.closeSidebar        = closeSidebar;
     window.toggleMobileSidebar = toggleMobileSidebar;
+
+    /* ════════════════════════════════════════
+       RESIZE
+    ════════════════════════════════════════ */
+    window.addEventListener('resize', function() {
+        if (window.innerWidth > 768) {
+            closeSidebar();
+            var saved = localStorage.getItem('sidebarCollapsed') === 'true';
+            setCollapsed(saved);
+        } else {
+            /* Mobile : contenu pleine largeur */
+            if (content) content.style.marginLeft = '0';
+        }
+    });
 
     /* ════════════════════════════════════════
        HORLOGE
     ════════════════════════════════════════ */
     function updateClock() {
-        const el = document.getElementById('sidebar-datetime');
+        var el = document.getElementById('sidebar-datetime');
         if (!el) return;
         el.textContent = new Date().toLocaleDateString('fr-FR', {
             day: '2-digit', month: '2-digit', year: 'numeric',
@@ -893,18 +861,5 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     updateClock();
     setInterval(updateClock, 30000);
-
-    /* ════════════════════════════════════════
-       RESIZE
-    ════════════════════════════════════════ */
-    window.addEventListener('resize', function() {
-        if (window.innerWidth > 768) {
-            closeSidebar();
-            // Re-appliquer l'état collapsed si sauvegardé
-            if (localStorage.getItem('sidebarCollapsed') === 'true') {
-                sidebar.classList.add('collapsed');
-            }
-        }
-    });
 });
 </script>

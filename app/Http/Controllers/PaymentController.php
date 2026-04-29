@@ -843,6 +843,8 @@ class PaymentController extends Controller
                     $query->with([
                         'customer',
                         'room.type',
+                        'restaurantOrders.items.menu',
+                        'extras.user',
                         'payments' => function ($q) {
                             $q->where('status', Payment::STATUS_COMPLETED)->orderBy('created_at', 'asc');
                         },

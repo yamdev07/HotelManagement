@@ -12,81 +12,51 @@ class TransactionRepository implements TransactionRepositoryInterface
 {
     public function store($request, Customer $customer, Room $room)
     {
-        \Log::info('🔵 === TRANSACTION REPOSITORY STORE ===');
-        \Log::info('🔵 Customer: '.$customer->id);
-        \Log::info('🔵 Room: '.$room->id);
-        \Log::info('🔵 Request keys:', array_keys($request->all()));
-
         try {
-            // DEBUG détaillé
-            \Log::info('🔵 Form data received:', [
-                'check_in' => $request->check_in,
-                'check_out' => $request->check_out,
-                'person_count' => $request->person_count,
-                'has_person_count' => $request->has('person_count'),
-                'all_data' => $request->all(),
-            ]);
-
-            // ⭐ CORRECTION : Définir person_count par défaut
             $personCount = $request->person_count ?? 1;
 
-            // Si c'est null, vide ou "NOT SET"
             if (empty($personCount) || $personCount === 'NOT SET') {
                 $personCount = 1;
-                \Log::warning('⚠️ person_count manquant, utilisation de la valeur par défaut: 1');
             }
 
-            // Calculs
-            $checkIn = \Carbon\Carbon::parse($request->check_in);
-            $checkOut = \Carbon\Carbon::parse($request->check_out);
-            $days = $checkOut->diffInDays($checkIn);
-            if ($days == 0) {
-                $days = 1;
-            }
+            $checkIn  = Carbon::parse($request->check_in);
+            $checkOut = Carbon::parse($request->check_out);
+            $days     = max(1, $checkOut->diffInDays($checkIn));
 
             $totalPrice = $room->price * $days;
 
-            \Log::info('🔵 Calcul: '.$days.' jours, '.$personCount.' pers, prix: '.$totalPrice);
-
-            // Données de la transaction
             $data = [
-                'user_id' => auth()->check() ? auth()->id() : 1,
-                'customer_id' => $customer->id,
-                'room_id' => $room->id,
-                'check_in' => $request->check_in,
-                'check_out' => $request->check_out,
-                'status' => 'reservation',
+                'user_id'      => auth()->check() ? auth()->id() : 1,
+                'customer_id'  => $customer->id,
+                'room_id'      => $room->id,
+                'check_in'     => $request->check_in,
+                'check_out'    => $request->check_out,
+                'status'       => 'reservation',
                 'person_count' => $personCount,
-                'total_price' => $totalPrice,
-                'adults' => $personCount,
-                'children' => 0,
-                'notes' => $request->notes ?? null,
+                'total_price'  => $totalPrice,
+                'adults'       => $personCount,
+                'children'     => 0,
+                'notes'        => $request->notes ?? null,
             ];
 
-            \Log::info('🔵 Transaction data to create:', $data);
-
-            // ⭐ TEST DIRECT avec try-catch interne
             try {
-                $transaction = Transaction::create($data);
-                \Log::info('✅ Transaction créée ID: '.$transaction->id);
-                \Log::info('🔵 Transaction details:', $transaction->toArray());
-
-                return $transaction;
-
+                return Transaction::create($data);
             } catch (\Illuminate\Database\QueryException $qe) {
-                \Log::error('❌ QueryException: '.$qe->getMessage());
-                \Log::error('❌ SQL: '.$qe->getSql());
-                \Log::error('❌ Bindings: '.json_encode($qe->getBindings()));
+                \Log::error('QueryException TransactionRepository: ' . $qe->getMessage(), [
+                    'sql'      => $qe->getSql(),
+                    'bindings' => $qe->getBindings(),
+                ]);
                 throw $qe;
             }
 
         } catch (\Exception $e) {
-            \Log::error('❌ ERREUR TransactionRepository: '.$e->getMessage());
-            \Log::error('❌ File: '.$e->getFile().' Line: '.$e->getLine());
-            \Log::error('❌ Trace: '.$e->getTraceAsString());
+            \Log::error('Erreur TransactionRepository::store: ' . $e->getMessage(), [
+                'file'         => $e->getFile(),
+                'line'         => $e->getLine(),
+                'person_count' => $request->person_count ?? 'null',
+            ]);
 
-            // Relancer avec message amélioré
-            throw new \Exception('Erreur création transaction: '.$e->getMessage().' (person_count='.($request->person_count ?? 'null').')');
+            throw new \Exception('Erreur création transaction: ' . $e->getMessage());
         }
     }
 
@@ -97,10 +67,8 @@ class TransactionRepository implements TransactionRepositoryInterface
     {
         return Transaction::with(['user', 'room', 'room.type', 'customer', 'payments'])
             ->where(function ($query) {
-                // Seulement les statuts actifs : réservation et actif
                 $query->whereIn('status', ['reservation', 'active'])
                     ->orWhere(function ($q) {
-                        // Ou les transactions avec check_out futur
                         $q->where('check_out', '>=', Carbon::now())
                             ->whereNotIn('status', ['cancelled', 'no_show', 'completed']);
                     });
@@ -142,9 +110,8 @@ class TransactionRepository implements TransactionRepositoryInterface
     {
         return Transaction::with(['user', 'room', 'room.type', 'customer', 'payments'])
             ->where(function ($query) {
-                // Transactions avec statuts terminaux
                 $query->whereIn('status', ['completed', 'cancelled', 'no_show'])
-                    ->orWhere('check_out', '<', Carbon::now()); // Ou dates passées
+                    ->orWhere('check_out', '<', Carbon::now());
             })
             ->when($request->filled('search'), function ($query) use ($request) {
                 $search = $request->search;
@@ -230,29 +197,22 @@ class TransactionRepository implements TransactionRepositoryInterface
         $now = Carbon::now();
 
         return [
-            'total' => Transaction::count(),
-            'active' => Transaction::whereIn('status', ['reservation', 'active'])
-                ->where('check_out', '>=', $now)
-                ->count(),
-            'reservation' => Transaction::where('status', 'reservation')
-                ->where('check_in', '>=', $now)
-                ->count(),
-            'in_hotel' => Transaction::where('status', 'active')
-                ->where('check_in', '<=', $now)
-                ->where('check_out', '>=', $now)
-                ->count(),
-            'cancelled' => Transaction::where('status', 'cancelled')->count(),
-            'completed' => Transaction::where('status', 'completed')->count(),
-            'no_show' => Transaction::where('status', 'no_show')->count(),
-            'expired' => Transaction::where('check_out', '<', $now)
-                ->whereNotIn('status', ['cancelled', 'no_show', 'completed'])
-                ->count(),
+            'total'          => Transaction::count(),
+            'active'         => Transaction::whereIn('status', ['reservation', 'active'])
+                ->where('check_out', '>=', $now)->count(),
+            'reservation'    => Transaction::where('status', 'reservation')
+                ->where('check_in', '>=', $now)->count(),
+            'in_hotel'       => Transaction::where('status', 'active')
+                ->where('check_in', '<=', $now)->where('check_out', '>=', $now)->count(),
+            'cancelled'      => Transaction::where('status', 'cancelled')->count(),
+            'completed'      => Transaction::where('status', 'completed')->count(),
+            'no_show'        => Transaction::where('status', 'no_show')->count(),
+            'expired'        => Transaction::where('check_out', '<', $now)
+                ->whereNotIn('status', ['cancelled', 'no_show', 'completed'])->count(),
             'today_checkins' => Transaction::whereDate('check_in', $now->toDateString())
-                ->whereIn('status', ['reservation', 'active'])
-                ->count(),
+                ->whereIn('status', ['reservation', 'active'])->count(),
             'today_checkouts' => Transaction::whereDate('check_out', $now->toDateString())
-                ->whereIn('status', ['active', 'reservation'])
-                ->count(),
+                ->whereIn('status', ['active', 'reservation'])->count(),
         ];
     }
 
@@ -292,7 +252,7 @@ class TransactionRepository implements TransactionRepositoryInterface
         $today = Carbon::today();
 
         return [
-            'checkins' => Transaction::with(['customer', 'room'])
+            'checkins'  => Transaction::with(['customer', 'room'])
                 ->whereDate('check_in', $today)
                 ->where('status', 'reservation')
                 ->orderBy('check_in', 'ASC')
@@ -311,7 +271,7 @@ class TransactionRepository implements TransactionRepositoryInterface
     public function checkRoomAvailability($roomId, $checkIn, $checkOut, $excludeTransactionId = null)
     {
         $query = Transaction::where('room_id', $roomId)
-            ->whereIn('status', ['reservation', 'active']) // Seulement les réservations actives
+            ->whereIn('status', ['reservation', 'active'])
             ->where(function ($q) use ($checkIn, $checkOut) {
                 $q->whereBetween('check_in', [$checkIn, $checkOut])
                     ->orWhereBetween('check_out', [$checkIn, $checkOut])

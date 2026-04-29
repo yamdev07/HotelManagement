@@ -13,15 +13,15 @@ class Room extends Model
     use HasFactory, LogsActivity;
 
     protected $fillable = [
-        'type_id',
-        'room_status_id',
         'number',
         'name',
-        'capacity',
+        'type_id',
+        'room_status_id',
         'price',
-        'view',
+        'capacity',
         'description',
-        'size',
+        'order',
+        'active',
         'last_cleaned_at',
         'maintenance_started_at',
         'maintenance_ended_at',
@@ -44,12 +44,16 @@ class Room extends Model
         'full_name',
     ];
 
-    protected $casts = [
-        'last_cleaned_at' => 'datetime',
-        'maintenance_started_at' => 'datetime',
-        'maintenance_ended_at' => 'datetime',
-        'price' => 'decimal:2',
-    ];
+    protected $casts = ['active' => 'boolean'];
+    public function floorPlan()
+    {
+        return $this->hasOne(FloorPlan::class);
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('active', true);
+    }
 
     // Constantes pour les statuts
     const STATUS_AVAILABLE = 1;      // Disponible

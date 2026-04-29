@@ -145,6 +145,22 @@ class Transaction extends Model
     }
 
     /**
+     * Relation avec les commandes restaurant
+     */
+    public function restaurantOrders()
+    {
+        return $this->hasMany(RestaurantOrder::class);
+    }
+
+    /**
+     * Relation avec les extras (minibar, services, etc.)
+     */
+    public function extras()
+    {
+        return $this->hasMany(TransactionExtra::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
      * Relation avec l'utilisateur qui a annulé
      */
     public function cancelledBy()
@@ -849,7 +865,7 @@ class Transaction extends Model
     }
 
     /**
-     * Calculer le prix total - Inclut le supplément late checkout si présent
+     * Calculer le prix total - Inclut le supplément late checkout et les commandes restaurant
      */
     public function getTotalPrice()
     {
@@ -860,27 +876,36 @@ class Transaction extends Model
         $hasLateCheckout = $this->late_checkout ?? false;
         $lateFee = (float) ($this->late_checkout_fee ?? 0);
         
-        // 3. Prix total = base + (late fee seulement si late checkout actif)
-        $totalWithLate = $basePrice;
+        // 3. Calculer le total des commandes restaurant (hors commandes payées directement)
+        $restaurantTotal = $this->restaurantOrders()
+            ->whereNotIn('status', ['paid', 'cancelled'])
+            ->sum('total');
+
+        // 4. Calculer le total des extras (minibar, lessive, services)
+        $extrasTotal = $this->extras()->sum(\Illuminate\Support\Facades\DB::raw('amount * quantity'));
+
+        // 5. Prix total = base + restaurant + extras
+        $totalWithExtras = $basePrice + $restaurantTotal + $extrasTotal;
         if ($hasLateCheckout && $lateFee > 0) {
-            $totalWithLate = $basePrice + $lateFee;
+            $totalWithExtras += $lateFee;
         }
-        
-        // 4. Si le champ total_price existe et est différent, le mettre à jour
-        if ($this->total_price && abs($totalWithLate - (float) $this->total_price) > 1) {
+
+        // 6. Si le champ total_price existe et est différent, le mettre à jour
+        if ($this->total_price && abs($totalWithExtras - (float) $this->total_price) > 1) {
             \Log::info("Correction prix transaction #{$this->id}", [
                 'base_price' => $basePrice,
+                'restaurant_total' => $restaurantTotal,
                 'has_late_checkout' => $hasLateCheckout,
                 'late_fee' => $lateFee,
                 'ancien' => $this->total_price,
-                'nouveau' => $totalWithLate,
+                'nouveau' => $totalWithExtras,
             ]);
             
-            $this->total_price = $totalWithLate;
+            $this->total_price = $totalWithExtras;
             $this->saveQuietly();
         }
         
-        return (float) ($this->total_price ?? $totalWithLate);
+        return (float) ($this->total_price ?? $totalWithExtras);
     }
 
     /**

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\RestaurantReservation;
 use App\Models\Room;
 use App\Models\Type;
 use App\Models\Transaction;
 use App\Models\Customer;
 use App\Models\User;
+use App\Notifications\ReservationNotification;
+use App\Notifications\RestaurantReservationNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +19,13 @@ use Illuminate\Support\Str;
 
 class FrontendController extends Controller
 {
+    public function __construct()
+    {
+        if (class_exists(\Debugbar::class)) {
+            \Debugbar::disable();
+        }
+    }
+
     // Page d'accueil du site vitrine
     public function home()
     {
@@ -774,7 +784,18 @@ public function rooms(Request $request)
                 ->log('réservation en ligne');
 
             DB::commit();
-            
+
+            // Notifier tout le personnel (sauf les clients)
+            try {
+                $transaction->load(['customer', 'room']);
+                $staffUsers = User::staff()->get();
+                foreach ($staffUsers as $staffUser) {
+                    $staffUser->notify(new ReservationNotification($transaction));
+                }
+            } catch (\Exception $notifException) {
+                Log::warning('Erreur envoi notification réservation: ' . $notifException->getMessage());
+            }
+
             Log::info('=== RÉSERVATION RÉUSSIE ===');
             Log::info('Résumé:', [
                 'client_id' => $customer->id,
@@ -895,6 +916,17 @@ public function rooms(Request $request)
         return view('frontend.pages.restaurant', compact('menus'));
     }
 
+    // Page spécialités africaines
+    public function africanSpecialties()
+    {
+        $menus = Menu::where('is_african', true)->get();
+        $entrees  = $menus->where('category', 'entree')->values();
+        $plats    = $menus->where('category', 'plat')->values();
+        $desserts = $menus->where('category', 'dessert')->values();
+        $boissons = $menus->where('category', 'boisson')->values();
+        return view('frontend.pages.african-specialties', compact('menus', 'entrees', 'plats', 'desserts', 'boissons'));
+    }
+
     // Services
     public function services()
     {
@@ -954,15 +986,34 @@ public function rooms(Request $request)
         ]);
 
         try {
-            Log::info('Réservation restaurant reçue:', $validated);
-            
+            $reservation = RestaurantReservation::create([
+                'name'             => $validated['name'],
+                'phone'            => $validated['phone'],
+                'reservation_date' => $validated['date'],
+                'reservation_time' => $validated['time'],
+                'persons'          => $validated['persons'],
+                'table_type'       => $validated['table_type'] ?? null,
+                'notes'            => $validated['notes'] ?? null,
+                'status'           => 'pending',
+            ]);
+
+            // Notifier tout le personnel
+            try {
+                $staffUsers = User::staff()->get();
+                foreach ($staffUsers as $staffUser) {
+                    $staffUser->notify(new RestaurantReservationNotification($reservation));
+                }
+            } catch (\Exception $notifException) {
+                Log::warning('Erreur envoi notification réservation restaurant: ' . $notifException->getMessage());
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Réservation envoyée avec succès ! Nous vous contacterons pour confirmer.',
             ]);
         } catch (\Exception $e) {
             Log::error('Erreur réservation restaurant: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Une erreur est survenue. Veuillez réessayer.',

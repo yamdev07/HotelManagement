@@ -498,7 +498,7 @@
                                 </div>
 
                                 <div class="room-description">
-                                    {{ $room->view ?? 'Description non disponible' }}
+                                    {{ $room->type->description_fr ?? 'Description non disponible' }}
                                 </div>
 
                                 <a href="{{ route('transaction.reservation.confirmation', [

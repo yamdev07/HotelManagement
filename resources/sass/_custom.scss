@@ -43,11 +43,16 @@ body.sidebar-layout {
     position: relative;
 }
 
+/* Mobile (default) : pleine largeur, pas de sidebar */
 #page-content-wrapper {
     background: transparent;
-    padding-left: 0; // Mobile: no sidebar
+    padding-left: 0;
     min-width: 0;
-    width: 100%;
+
+    /* ⚠️ NE PAS mettre width: 100% ici.
+       Sur desktop, margin-left: 272px + width: 100% = débordement de 272px.
+       Un élément block sans width explicite prend automatiquement
+       (100% parent - margin-left - margin-right) = comportement correct. */
 }
 
 /* ===================================
@@ -1689,24 +1694,18 @@ body.sidebar-layout {
     }
 }
 
-/* Medium devices (tablets, 768px and up) */
+/* Medium devices (tablets, 992px and up) */
 @media (min-width: 992px) {
     body.sidebar-layout {
-        padding-top: 0; // Remove mobile header space
+        padding-top: 0;
     }
 
     .mobile-header {
-        display: none; // Hide mobile header on tablets+
+        display: none;
     }
 
-    #sidebar-wrapper {
-        display: block; // Show sidebar on tablets+
-        margin-left: 0;
-    }
-
-    #page-content-wrapper {
-        padding-left: 280px; // Make room for sidebar
-    }
+    /* #page-content-wrapper : le margin-left est géré par master.blade.php via JS/MutationObserver
+       NE PAS ajouter padding-left ici, sinon double décalage (margin + padding) */
 
     .welcome-section {
         padding: 2rem;

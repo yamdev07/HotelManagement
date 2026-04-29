@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TransactionExtraController;
 use App\Http\Controllers\AuthorizationController;
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\CashierSessionController;
@@ -36,13 +37,16 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::get('/debug-test', function () {
-    dd([
-        'route_name' => 'debug-test',
-        'time' => now(),
-        'server' => $_SERVER['SERVER_SOFTWARE'] ?? 'unknown',
-        'url' => url()->current(),
-    ]);
+Route::get('/admin/restaurant-layout', function () {
+    return redirect()->route('admin.floor-plan.index');
+})->middleware(['auth', 'checkrole:Super,Admin'])->name('admin.restaurant-layout');
+
+use App\Http\Controllers\Admin\FloorPlanController;
+
+// ==================== ROUTES PLAN DE SALLE (Admin) ====================
+Route::middleware(['auth', 'checkrole:Super,Admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/floor-plan',       [FloorPlanController::class, 'index'])->name('floor-plan.index');
+    Route::post('/floor-plan/save', [FloorPlanController::class, 'save'])->name('floor-plan.save');
 });
 
 // ==================== ROUTES FRONTEND (Site Vitrine) ====================
@@ -50,6 +54,7 @@ Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
 Route::get('/chambres', [FrontendController::class, 'rooms'])->name('frontend.rooms');
 Route::get('/chambre/{id}', [FrontendController::class, 'roomDetails'])->name('frontend.room.details');
 Route::get('/restaurant-vitrine', [FrontendController::class, 'restaurant'])->name('frontend.restaurant');
+Route::get('/specialites-africaines', [FrontendController::class, 'africanSpecialties'])->name('frontend.african');
 Route::get('/services', [FrontendController::class, 'services'])->name('frontend.services');
 Route::get('/contact', [FrontendController::class, 'contact'])->name('frontend.contact');
 Route::post('/contact/submit', [FrontendController::class, 'contactSubmit'])->name('frontend.contact.submit');
@@ -64,6 +69,8 @@ Route::get('/api/available-rooms', [FrontendController::class, 'availableRooms']
 // ==================== ROUTES D'AUTHENTIFICATION ====================
 Route::view('/login', 'auth.login')->name('login.index');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::view('/register', 'auth.register')->name('register.index');
+Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 // ==================== ROUTE LOGOUT GLOBALE ====================
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -305,6 +312,19 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
             // IMPORTANT: La route show DOIT ÊTRE ICI, DANS LE GROUPE
             Route::get('/', [TransactionController::class, 'show'])->name('show')
                 ->middleware('checkrole:Super,Admin,Receptionist');
+
+            // ── COMPTE SÉJOUR (facture temps réel) ──
+            Route::get('/compte-sejour', [TransactionController::class, 'compteSejour'])
+                ->name('compte-sejour')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+
+            // ── EXTRAS (minibar, lessive, services) ──
+            Route::post('/extras', [TransactionExtraController::class, 'store'])
+                ->name('extras.store')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::delete('/extras/{extra}', [TransactionExtraController::class, 'destroy'])
+                ->name('extras.destroy')
+                ->middleware('checkrole:Super,Admin,Receptionist');
         });
     });
     // ==================== ÉQUIPEMENTS ====================
@@ -473,6 +493,25 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
             Route::get('/create', [RestaurantController::class, 'create'])->name('create');
             Route::post('/store', [RestaurantController::class, 'store'])->name('store');
             Route::delete('/menus/{id}', [RestaurantController::class, 'destroy'])->name('menus.destroy');
+        });
+
+        // Plan de salle — Super et Admin uniquement
+        Route::middleware('checkrole:Super,Admin')->group(function () {
+            Route::get('/layout', [RestaurantController::class, 'layout'])->name('layout');
+            Route::post('/layout/save', [RestaurantController::class, 'saveLayout'])->name('layout.save');
+        });
+
+        // Gestion du stock — Super, Admin, Receptionist
+        Route::middleware('checkrole:Super,Admin,Receptionist')->group(function () {
+            Route::get('/stock', [RestaurantController::class, 'stock'])->name('stock');
+            Route::post('/stock', [RestaurantController::class, 'storeIngredient'])->name('stock.store');
+            Route::post('/stock/{id}', [RestaurantController::class, 'updateIngredient'])->name('stock.update');
+            Route::delete('/stock/{id}', [RestaurantController::class, 'destroyIngredient'])->name('stock.destroy');
+        });
+
+        // Suivi des ventes — Super, Admin
+        Route::middleware('checkrole:Super,Admin')->group(function () {
+            Route::get('/sales', [RestaurantController::class, 'sales'])->name('sales');
         });
     });
 });
