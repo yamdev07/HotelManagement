@@ -10,7 +10,7 @@ class RoomPolicy
 {
     public function viewAny(User $user): bool
     {
-        return true; // Listing accessible à tous les staff + frontend
+        return true;
     }
 
     public function view(User $user, Room $room): bool
@@ -20,21 +20,21 @@ class RoomPolicy
 
     public function create(User $user): bool
     {
-        return UserRole::from($user->role)->canManageRooms();
+        return $user->role->canManageRooms();
     }
 
     public function update(User $user, Room $room): bool
     {
-        return UserRole::from($user->role)->canManageRooms();
+        return $user->role->canManageRooms();
     }
 
     public function delete(User $user, Room $room): bool
     {
-        return $user->role === UserRole::Super->value;
+        return $user->role === UserRole::Super;
     }
 
     public function updateStatus(User $user): bool
     {
-        return UserRole::from($user->role)->isStaff();
+        return $user->role->isStaff();
     }
 }

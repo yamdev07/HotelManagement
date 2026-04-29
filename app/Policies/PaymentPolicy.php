@@ -10,42 +10,34 @@ class PaymentPolicy
 {
     public function viewAny(User $user): bool
     {
-        return UserRole::from($user->role)->isStaff();
+        return $user->role->isStaff();
     }
 
     public function view(User $user, Payment $payment): bool
     {
-        if (UserRole::from($user->role)->isStaff()) {
+        if ($user->role->isStaff()) {
             return true;
         }
 
-        // Un client voit ses paiements via sa transaction
         return $user->customer?->id === optional($payment->transaction)->customer_id;
     }
 
     public function create(User $user): bool
     {
-        return UserRole::from($user->role)->canProcessPayments();
+        return $user->role->canProcessPayments();
     }
 
     public function cancel(User $user, Payment $payment): bool
     {
-        $role = UserRole::from($user->role);
-
-        if (in_array($user->role, [UserRole::Super->value, UserRole::Admin->value])) {
+        if (in_array($user->role, [UserRole::Super, UserRole::Admin])) {
             return true;
         }
 
-        // Receptionist / Cashier ne peut annuler que les paiements en attente
-        if ($role->canProcessPayments() && $payment->status === 'pending') {
-            return true;
-        }
-
-        return false;
+        return $user->role->canProcessPayments() && $payment->status === 'pending';
     }
 
     public function refund(User $user): bool
     {
-        return in_array($user->role, [UserRole::Super->value, UserRole::Admin->value]);
+        return in_array($user->role, [UserRole::Super, UserRole::Admin]);
     }
 }

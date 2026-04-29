@@ -10,27 +10,26 @@ class TransactionPolicy
 {
     public function viewAny(User $user): bool
     {
-        return UserRole::from($user->role)->isStaff();
+        return $user->role->isStaff();
     }
 
     public function view(User $user, Transaction $transaction): bool
     {
-        if (UserRole::from($user->role)->isStaff()) {
+        if ($user->role->isStaff()) {
             return true;
         }
 
-        // Un client voit uniquement ses propres réservations
         return $user->customer?->id === $transaction->customer_id;
     }
 
     public function create(User $user): bool
     {
-        return UserRole::from($user->role)->canManageReservations();
+        return $user->role->canManageReservations();
     }
 
     public function update(User $user, Transaction $transaction): bool
     {
-        if (! UserRole::from($user->role)->canManageReservations()) {
+        if (! $user->role->canManageReservations()) {
             return false;
         }
 
@@ -39,12 +38,12 @@ class TransactionPolicy
 
     public function updateStatus(User $user): bool
     {
-        return UserRole::from($user->role)->canManageReservations();
+        return $user->role->canManageReservations();
     }
 
     public function cancel(User $user, Transaction $transaction): bool
     {
-        if (! UserRole::from($user->role)->canManageReservations()) {
+        if (! $user->role->canManageReservations()) {
             return false;
         }
 
@@ -53,23 +52,22 @@ class TransactionPolicy
 
     public function markAsNoShow(User $user, Transaction $transaction): bool
     {
-        return UserRole::from($user->role)->canManageReservations()
-            && $transaction->canBeNoShow();
+        return $user->role->canManageReservations() && $transaction->canBeNoShow();
     }
 
     public function restore(User $user, Transaction $transaction): bool
     {
-        return in_array($user->role, [UserRole::Super->value, UserRole::Admin->value])
+        return in_array($user->role, [UserRole::Super, UserRole::Admin])
             && $transaction->canBeRestored();
     }
 
     public function delete(User $user): bool
     {
-        return $user->role === UserRole::Super->value;
+        return $user->role === UserRole::Super;
     }
 
     public function forceDelete(User $user): bool
     {
-        return $user->role === UserRole::Super->value;
+        return $user->role === UserRole::Super;
     }
 }

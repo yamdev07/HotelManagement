@@ -9,21 +9,17 @@ class UserPolicy
 {
     public function viewAny(User $user): bool
     {
-        return UserRole::from($user->role)->canManageUsers();
+        return $user->role->canManageUsers();
     }
 
     public function view(User $user, User $target): bool
     {
-        if ($user->id === $target->id) {
-            return true;
-        }
-
-        return UserRole::from($user->role)->canManageUsers();
+        return $user->id === $target->id || $user->role->canManageUsers();
     }
 
     public function create(User $user): bool
     {
-        return UserRole::from($user->role)->canManageUsers();
+        return $user->role->canManageUsers();
     }
 
     public function update(User $user, User $target): bool
@@ -38,16 +34,15 @@ class UserPolicy
 
     public function resetPassword(User $user, User $target): bool
     {
-        return in_array($user->role, [UserRole::Super->value, UserRole::Admin->value]);
+        return in_array($user->role, [UserRole::Super, UserRole::Admin]);
     }
 
     public function assignRole(User $user, string $newRole): bool
     {
-        // Seul Super peut créer des Supers
         if ($newRole === UserRole::Super->value) {
-            return $user->role === UserRole::Super->value;
+            return $user->role === UserRole::Super;
         }
 
-        return in_array($user->role, [UserRole::Super->value, UserRole::Admin->value]);
+        return in_array($user->role, [UserRole::Super, UserRole::Admin]);
     }
 }

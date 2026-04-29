@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Enums\TransactionStatus;
 use App\Enums\UserRole;
-use App\Models\Customer;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -58,7 +57,6 @@ class TransactionPolicyTest extends TestCase
     {
         $super = User::factory()->create(['role' => UserRole::Super->value]);
         $admin = User::factory()->create(['role' => UserRole::Admin->value]);
-        $tx    = Transaction::factory()->make();
 
         $this->assertTrue($super->can('delete', Transaction::class));
         $this->assertFalse($admin->can('delete', Transaction::class));
@@ -70,26 +68,18 @@ class TransactionPolicyTest extends TestCase
 
     public function test_receptionist_can_cancel_a_reservation(): void
     {
-        $user        = User::factory()->create(['role' => UserRole::Receptionist->value]);
-        $transaction = Transaction::factory()->create([
-            'status'   => TransactionStatus::Reservation->value,
-            'check_in' => now()->addDays(3),
-            'check_out' => now()->addDays(5),
-        ]);
+        $user = User::factory()->create(['role' => UserRole::Receptionist->value]);
+        $tx   = Transaction::factory()->make(['status' => TransactionStatus::Reservation->value]);
 
-        $this->assertTrue($user->can('cancel', $transaction));
+        $this->assertTrue($user->can('cancel', $tx));
     }
 
     public function test_receptionist_cannot_cancel_active_transaction(): void
     {
-        $user        = User::factory()->create(['role' => UserRole::Receptionist->value]);
-        $transaction = Transaction::factory()->create([
-            'status'   => TransactionStatus::Active->value,
-            'check_in' => now()->subDay(),
-            'check_out' => now()->addDays(2),
-        ]);
+        $user = User::factory()->create(['role' => UserRole::Receptionist->value]);
+        $tx   = Transaction::factory()->make(['status' => TransactionStatus::Active->value]);
 
-        $this->assertFalse($user->can('cancel', $transaction));
+        $this->assertFalse($user->can('cancel', $tx));
     }
 
     // -----------------------------------------------------------------------
@@ -99,11 +89,7 @@ class TransactionPolicyTest extends TestCase
     public function test_admin_can_restore_cancelled_transaction(): void
     {
         $admin = User::factory()->create(['role' => UserRole::Admin->value]);
-        $tx    = Transaction::factory()->create([
-            'status'   => TransactionStatus::Cancelled->value,
-            'check_in' => now()->addDays(1),
-            'check_out' => now()->addDays(3),
-        ]);
+        $tx    = Transaction::factory()->make(['status' => TransactionStatus::Cancelled->value]);
 
         $this->assertTrue($admin->can('restore', $tx));
     }
@@ -111,11 +97,7 @@ class TransactionPolicyTest extends TestCase
     public function test_receptionist_cannot_restore_transaction(): void
     {
         $user = User::factory()->create(['role' => UserRole::Receptionist->value]);
-        $tx   = Transaction::factory()->create([
-            'status'   => TransactionStatus::Cancelled->value,
-            'check_in' => now()->addDays(1),
-            'check_out' => now()->addDays(3),
-        ]);
+        $tx   = Transaction::factory()->make(['status' => TransactionStatus::Cancelled->value]);
 
         $this->assertFalse($user->can('restore', $tx));
     }
