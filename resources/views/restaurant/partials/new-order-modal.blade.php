@@ -23,9 +23,7 @@
                 <div class="nom-step-line"></div>
                 <div class="nom-step" data-step="2"><div class="nom-dot">2</div><span>Client</span></div>
                 <div class="nom-step-line"></div>
-                <div class="nom-step" data-step="3"><div class="nom-dot">3</div><span>Préférences</span></div>
-                <div class="nom-step-line"></div>
-                <div class="nom-step" data-step="4"><div class="nom-dot">4</div><span>Confirmation</span></div>
+                <div class="nom-step" data-step="3"><div class="nom-dot">3</div><span>Confirmation</span></div>
             </div>
 
             <form action="{{ route('restaurant.orders.store') }}" method="POST" id="newOrderForm">
@@ -190,139 +188,76 @@
                                 <label class="nom-label">Email</label>
                                 <input type="email" class="nom-input" id="n-email" placeholder="email@exemple.com">
                             </div>
-                            <div class="nom-field">
-                                <label class="nom-label">N° de chambre</label>
-                                <input type="text" class="nom-input" id="n-room" placeholder="Ex : 214">
-                            </div>
-                            <div class="nom-field">
-                                <label class="nom-label">Occasion</label>
-                                <select class="nom-input nom-select" id="n-occasion">
-                                    <option value="">— Sélectionner —</option>
-                                    <option value="romantique">🌹 Dîner romantique</option>
-                                    <option value="anniversaire">🎂 Anniversaire</option>
-                                    <option value="affaires">💼 Repas d'affaires</option>
-                                    <option value="famille">👨‍👩‍👧 Famille</option>
-                                </select>
-                            </div>
                         </div>
                     </div>
-                    <div class="nom-err mt-2" id="n-err-client"></div>
                 </div>
 
-                {{-- ── ÉTAPE 3 : Préférences & Paiement ── --}}
+                {{-- ── ÉTAPE 3 : Notes, Facturation & Confirmation ── --}}
                 <div class="nom-panel" id="nom-panel-3">
-                    <div class="nom-panel-title"><i class="fas fa-heart me-2"></i>Préférences alimentaires</div>
-                    <p class="nom-desc">Informations importantes pour la préparation de la commande.</p>
+                    <div class="nom-panel-title"><i class="fas fa-check-circle me-2 text-success"></i>Confirmation & Facturation</div>
+                    <p class="nom-desc">Vérifiez la commande, ajoutez des notes et choisissez le mode de facturation.</p>
 
-                    <div class="nom-section-lbl">Allergènes signalés</div>
-                    <div class="nom-allergen-grid">
-                        <label class="nom-allergen"><input type="checkbox" value="gluten"><span>🌾 Gluten</span></label>
-                        <label class="nom-allergen"><input type="checkbox" value="lactose"><span>🥛 Lactose</span></label>
-                        <label class="nom-allergen"><input type="checkbox" value="oeufs"><span>🥚 Œufs</span></label>
-                        <label class="nom-allergen"><input type="checkbox" value="fruits-a-coque"><span>🥜 Fruits à coque</span></label>
-                        <label class="nom-allergen"><input type="checkbox" value="crustaces"><span>🦐 Crustacés</span></label>
-                        <label class="nom-allergen"><input type="checkbox" value="poisson"><span>🐟 Poisson</span></label>
-                        <label class="nom-allergen"><input type="checkbox" value="soja"><span>🫘 Soja</span></label>
-                        <label class="nom-allergen"><input type="checkbox" value="celeri"><span>🥬 Céleri</span></label>
-                    </div>
-
-                    <div class="nom-field mt-3">
-                        <label class="nom-label">Autres allergies / restrictions</label>
-                        <input type="text" class="nom-input" id="n-allergies-custom" placeholder="Ex : arachides, alcool…">
-                    </div>
-
-                    <div class="nom-section-lbl mt-4">Cuisson préférée</div>
-                    <div class="nom-radio-row">
-                        <label class="nom-radio"><input type="radio" name="n_cuisson" value="saignant"> Saignant</label>
-                        <label class="nom-radio"><input type="radio" name="n_cuisson" value="a-point" checked> À point</label>
-                        <label class="nom-radio"><input type="radio" name="n_cuisson" value="bien-cuit"> Bien cuit</label>
-                    </div>
-
-                    <div class="nom-section-lbl mt-4">Régime alimentaire</div>
-                    <div class="nom-radio-row">
-                        <label class="nom-radio"><input type="radio" name="n_regime" value="aucun" checked> Standard</label>
-                        <label class="nom-radio"><input type="radio" name="n_regime" value="vegetarien"> 🥦 Végétarien</label>
-                        <label class="nom-radio"><input type="radio" name="n_regime" value="vegan"> 🌱 Vegan</label>
-                        <label class="nom-radio"><input type="radio" name="n_regime" value="halal"> ☪️ Halal</label>
-                        <label class="nom-radio"><input type="radio" name="n_regime" value="kasher"> ✡️ Kasher</label>
-                    </div>
-
-                    <div class="nom-field mt-4">
-                        <label class="nom-label">Notes pour le chef</label>
-                        <textarea class="nom-input nom-textarea" id="n-notes" rows="3" placeholder="Cuisson particulière, présentation souhaitée, message spécial…"></textarea>
-                    </div>
-
-                    {{-- ════ FACTURATION : choix critique ════ --}}
-                    <div class="nom-section-lbl mt-4">Mode de facturation</div>
-                    <div class="nom-billing-grid">
-                        <label class="nom-billing-choice" id="lbl-room-bill">
-                            <input type="radio" name="n_billing" value="room" checked id="billing-room">
-                            <div class="nom-billing-body">
-                                <span class="nom-billing-icon">🔑</span>
-                                <div>
-                                    <div class="nom-billing-title">Mettre sur la chambre</div>
-                                    <div class="nom-billing-sub">Ajouté à la facture du séjour</div>
-                                </div>
-                                <span class="nom-billing-check">✓</span>
+                    <div class="row gx-4">
+                        <div class="col-md-6 mb-4 mb-md-0">
+                            <div class="nom-section-lbl">Mode de facturation</div>
+                            <div class="nom-billing-grid">
+                                <label class="nom-billing-choice" id="lbl-room-bill">
+                                    <input type="radio" name="n_billing" value="room" checked id="billing-room">
+                                    <div class="nom-billing-body">
+                                        <span class="nom-billing-icon">🔑</span>
+                                        <div>
+                                            <div class="nom-billing-title">Chambre</div>
+                                            <div class="nom-billing-sub">Sur la facture</div>
+                                        </div>
+                                        <span class="nom-billing-check">✓</span>
+                                    </div>
+                                </label>
+                                <label class="nom-billing-choice" id="lbl-direct-pay">
+                                    <input type="radio" name="n_billing" value="direct" id="billing-direct">
+                                    <div class="nom-billing-body">
+                                        <span class="nom-billing-icon">💵</span>
+                                        <div>
+                                            <div class="nom-billing-title">Paiement direct</div>
+                                            <div class="nom-billing-sub">Libre</div>
+                                        </div>
+                                        <span class="nom-billing-check">✓</span>
+                                    </div>
+                                </label>
                             </div>
-                        </label>
-                        <label class="nom-billing-choice" id="lbl-direct-pay">
-                            <input type="radio" name="n_billing" value="direct" id="billing-direct">
-                            <div class="nom-billing-body">
-                                <span class="nom-billing-icon">💵</span>
-                                <div>
-                                    <div class="nom-billing-title">Paiement direct</div>
-                                    <div class="nom-billing-sub">Le client paie maintenant</div>
+
+                            {{-- Bloc paiement direct (visible si "direct") --}}
+                            <div id="block-direct-billing" style="display:none" class="mt-3">
+                                <div class="nom-section-lbl mb-2">Mode de règlement</div>
+                                <div class="nom-pay-grid">
+                                    <label class="nom-pay"><input type="radio" name="n_payment" value="cash" checked>
+                                        <div class="nom-pay-body"><span>💵</span><span>Espèces</span></div></label>
+                                    <label class="nom-pay"><input type="radio" name="n_payment" value="card">
+                                        <div class="nom-pay-body"><span>💳</span><span>Carte</span></div></label>
+                                    <label class="nom-pay"><input type="radio" name="n_payment" value="mobile_money">
+                                        <div class="nom-pay-body"><span>📲</span><span>Mobile Money</span></div></label>
+                                    <label class="nom-pay"><input type="radio" name="n_payment" value="bank_transfer">
+                                        <div class="nom-pay-body"><span>🏦</span><span>Virement</span></div></label>
                                 </div>
-                                <span class="nom-billing-check">✓</span>
                             </div>
-                        </label>
-                    </div>
 
-                    {{-- Bloc chambre (visible si "room") --}}
-                    <div id="block-room-billing" class="mt-3 p-3 rounded" style="background:#f0fdf4; border:1px solid #86efac;">
-                        <div class="nom-ic-label mb-1">Chambre liée</div>
-                        <div id="room-billing-info" class="fw-bold text-success">
-                            <span id="room-billing-display">— sera déduite du client sélectionné —</span>
+                            <div class="nom-field mt-3">
+                                <label class="nom-label">Notes pour le chef</label>
+                                <textarea class="nom-input nom-textarea" id="n-notes" rows="2" placeholder="Ex: sans oignons, cuisson à point..."></textarea>
+                            </div>
                         </div>
-                        <small class="text-muted d-block mt-1">La commande s'ajoutera automatiquement à la facture de la chambre.</small>
-                    </div>
 
-                    {{-- Bloc paiement direct (visible si "direct") --}}
-                    <div id="block-direct-billing" style="display:none" class="mt-3">
-                        <div class="nom-section-lbl">Mode de règlement</div>
-                        <div class="nom-pay-grid">
-                            <label class="nom-pay"><input type="radio" name="n_payment" value="cash" checked>
-                                <div class="nom-pay-body"><span>💵</span><span>Espèces</span></div></label>
-                            <label class="nom-pay"><input type="radio" name="n_payment" value="card">
-                                <div class="nom-pay-body"><span>💳</span><span>Carte</span></div></label>
-                            <label class="nom-pay"><input type="radio" name="n_payment" value="mobile_money">
-                                <div class="nom-pay-body"><span>📲</span><span>Mobile Money</span></div></label>
-                            <label class="nom-pay"><input type="radio" name="n_payment" value="bank_transfer">
-                                <div class="nom-pay-body"><span>🏦</span><span>Virement</span></div></label>
+                        <div class="col-md-6 border-start ps-md-4">
+                            <div class="nom-section-lbl">Aperçu de la commande</div>
+                            <div class="nom-recap-block mb-3 p-3 bg-light rounded border">
+                                <div class="nom-recap-title mb-2"><i class="fas fa-user me-1 text-primary"></i> Client</div>
+                                <div id="nrecap-client" class="small"></div>
+                            </div>
+
+                            <div class="nom-recap-block p-3 bg-light rounded border">
+                                <div class="nom-recap-title mb-2"><i class="fas fa-utensils me-1 text-primary"></i> Plats (Total: <span id="nrecap-total"></span>)</div>
+                                <div id="nrecap-items" style="max-height: 180px; overflow-y: auto;"></div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-
-                {{-- ── ÉTAPE 4 : Récapitulatif ── --}}
-                <div class="nom-panel" id="nom-panel-4">
-                    <div class="nom-panel-title"><i class="fas fa-check-circle me-2 text-success"></i>Récapitulatif de la commande</div>
-
-                    <div class="nom-recap-grid">
-                        <div class="nom-recap-block">
-                            <div class="nom-recap-title"><i class="fas fa-user me-1"></i> Client</div>
-                            <div id="nrecap-client"></div>
-                        </div>
-                        <div class="nom-recap-block">
-                            <div class="nom-recap-title"><i class="fas fa-heart me-1"></i> Préférences</div>
-                            <div id="nrecap-prefs"></div>
-                        </div>
-                    </div>
-
-                    <div class="nom-recap-block mt-3">
-                        <div class="nom-recap-title"><i class="fas fa-utensils me-1"></i> Plats commandés</div>
-                        <div id="nrecap-items"></div>
-                        <div class="nom-recap-total">Total : <strong id="nrecap-total">0 CFA</strong></div>
                     </div>
                 </div>
 
@@ -849,8 +784,8 @@ function initNomModal() {
     $('#nom-prev').click(function(){ goNomStep(nomStep - 1); });
 
     function goNomStep(n) {
-        if (n < 1 || n > 4) return;
-        if (n === 4) buildNomRecap();
+        if (n < 1 || n > 3) return;
+        if (n === 3) buildNomRecap();
         $('.nom-step').each(function(){
             const s = parseInt($(this).data('step'));
             $(this).toggleClass('active', s === n).toggleClass('done', s < n);
@@ -859,9 +794,9 @@ function initNomModal() {
         $(`#nom-panel-${n}`).addClass('active');
         nomStep = n;
         $('#nom-prev').toggle(n > 1);
-        $('#nom-next').toggle(n < 4);
-        $('#nom-submit').toggle(n === 4);
-        if (n === 4) $('#nom-next').hide();
+        $('#nom-next').toggle(n < 3);
+        $('#nom-submit').toggle(n === 3);
+        if (n === 3) $('#nom-next').hide();
     }
 
 
@@ -1049,6 +984,9 @@ function initNomModal() {
 
         listEl.innerHTML = html;
         totalEl.textContent = total.toLocaleString('fr-FR') + ' CFA';
+        
+        // Mettre à jour l'aperçu latéral en temps réel
+        buildNomRecap();
     }
 
     /* ── Récapitulatif ── */
@@ -1062,30 +1000,35 @@ function initNomModal() {
         } else {
             clientHtml = `<div class="nom-recap-line"><span>Nom</span>${$('#n-prenom').val()} ${$('#n-nom').val()}</div>
                           <div class="nom-recap-line"><span>Tél.</span>${$('#n-phone').val()}</div>`;
-            if ($('#n-room').val()) clientHtml += `<div class="nom-recap-line"><span>Chambre</span>${$('#n-room').val()}</div>`;
         }
         $('#nrecap-client').html(clientHtml);
 
-        const allergens = [];
-        $('.nom-allergen input:checked').each(function(){ allergens.push($(this).val()); });
-        const custom = $('#n-allergies-custom').val().trim();
-        if (custom) allergens.push(custom);
-        const cuisson = $('input[name="n_cuisson"]:checked').val();
-        const regime  = $('input[name="n_regime"]:checked').val();
         const billing = $('input[name="n_billing"]:checked').val();
         const payment = billing === 'room' ? 'room_charge' : ($('input[name="n_payment"]:checked').val() || 'cash');
-        const billingLabel = billing === 'room' ? '🔑 Facturé sur la chambre' : '💵 Paiement direct (' + payment + ')';
-        let prefHtml = `<div class="nom-recap-line"><span>Cuisson</span>${cuisson}</div>
-                        <div class="nom-recap-line"><span>Régime</span>${regime}</div>
-                        <div class="nom-recap-line"><span>Facturation</span>${billingLabel}</div>`;
-        if (allergens.length) prefHtml += `<div class="nom-recap-line"><span>Allergies</span>${allergens.join(', ')}</div>`;
+        const billingLabel = billing === 'room' ? '<i class="fas fa-hotel text-primary me-2"></i>Facturé sur la chambre' : '<i class="fas fa-money-bill-wave text-success me-2"></i>Paiement direct (' + payment + ')';
+        let prefHtml = `<div class="nom-recap-line"><span>Facturation</span>${billingLabel}</div>`;
+        const notesFree = $('#n-notes').val().trim();
+        if (notesFree) prefHtml += `<div class="nom-recap-line"><span>Notes</span>${notesFree}</div>`;
         $('#nrecap-prefs').html(prefHtml);
 
         const items = Object.values(nomItems);
         let itemsHtml = '', total = 0;
         items.forEach(it => {
             const sub = it.price * it.quantity; total += sub;
-            itemsHtml += `<div class="nom-recap-item"><span>${it.name} × ${it.quantity}</span><strong>${sub.toLocaleString('fr-FR')} CFA</strong></div>`;
+            itemsHtml += `
+            <div class="nom-recap-item d-flex align-items-center mb-2 pb-2" style="border-bottom: 1px solid #eaeaea;">
+                <img src="${it.image}" class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd;" onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
+                <div class="flex-grow-1">
+                    <div style="font-size: 0.9rem; font-weight: 600; color: #333;">${it.name}</div>
+                    <div style="font-size: 0.8rem; color: #666;">${it.price.toLocaleString('fr-FR')} CFA / unité</div>
+                    <div class="d-flex align-items-center mt-1">
+                        <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center p-0 nom-qminus" data-id="${it.menu_id}" style="width: 24px; height: 24px; border-radius: 50%;">−</button>
+                        <span class="mx-2 fw-semibold" style="min-width: 15px; text-align: center;">${it.quantity}</span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary d-flex align-items-center justify-content-center p-0 nom-qplus" data-id="${it.menu_id}" style="width: 24px; height: 24px; border-radius: 50%;">+</button>
+                    </div>
+                </div>
+                <div class="fw-bold" style="color: #d4af37; font-size: 0.95rem;">${Math.round(sub).toLocaleString('fr-FR')} CFA</div>
+            </div>`;
         });
         $('#nrecap-items').html(itemsHtml);
         $('#nrecap-total').text(total.toLocaleString('fr-FR') + ' CFA');
@@ -1104,17 +1047,10 @@ function initNomModal() {
             $('#h-customer-name').val(($('#n-prenom').val()+' '+$('#n-nom').val()).trim());
             $('#h-phone').val($('#n-phone').val());
             $('#h-email').val($('#n-email').val());
-            // Si facturation chambre → envoyer numéro de chambre manuel
-            $('#h-room').val(billing === 'room' ? $('#n-room').val() : '');
+            $('#h-room').val(''); // Un nouveau client n'a pas de chambre
         }
 
-        const noteParts = [];
-        if (allergens.length) noteParts.push('Allergies : ' + allergens.join(', '));
-        if (cuisson !== 'a-point') noteParts.push('Cuisson : ' + cuisson);
-        if (regime !== 'aucun') noteParts.push('Régime : ' + regime);
-        const notesFree = $('#n-notes').val().trim();
-        if (notesFree) noteParts.push(notesFree);
-        $('#h-notes').val(noteParts.join(' | '));
+        $('#h-notes').val($('#n-notes').val().trim());
         $('#h-payment').val(payment);
         $('#h-items').val(JSON.stringify(items.map(i => ({ menu_id: i.menu_id, quantity: i.quantity }))));
         $('#h-total').val(total.toFixed(2));

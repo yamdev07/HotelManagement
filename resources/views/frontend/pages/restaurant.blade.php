@@ -1053,20 +1053,10 @@
                                     </div>
                                     <div class="om-hint">Laissez vide si vous n'êtes pas résident</div>
                                 </div>
-                                <div class="om-field">
-                                    <label class="om-label">Occasion</label>
-                                    <select class="om-input om-select" id="f-occasion">
-                                        <option value="">— Sélectionner —</option>
-                                        <option value="romantique">Dîner romantique</option>
-                                        <option value="anniversaire">Anniversaire</option>
-                                        <option value="affaires">Repas d'affaires</option>
-                                        <option value="famille">Repas en famille</option>
-                                        <option value="autre">Autre</option>
-                                    </select>
-                                </div>
+
                                 <div class="om-field col-span-2" style="grid-column: span 2;">
                                     <label class="om-label">Notes spéciales</label>
-                                    <textarea class="om-input" id="f-notes" rows="2" placeholder="Allergies, cuisson, heure souhaitée..."></textarea>
+                                    <textarea class="om-input" id="f-notes" rows="2" placeholder="Allergies, cuisson..."></textarea>
                                 </div>
                             </div>
                         </div>
@@ -1314,6 +1304,16 @@
             background: #0e0e0e;
             box-shadow: 0 40px 80px rgba(0, 0, 0, .6);
             font-family: 'Georgia', 'Times New Roman', serif;
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh;
+        }
+
+        #orderForm {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
         }
 
         /* En-tête */
@@ -2347,14 +2347,11 @@
                 const phone = $('#f-phone').val().trim();
                 const email = $('#f-email').val().trim();
                 const room = $('#f-room').val().trim();
-                const occasion = $('#f-occasion').val();
-
                 const notes = $('#f-notes').val().trim();
                 let idHtml = `<div class="om-recap-line"><span>Client</span>${prenom} ${nom}</div>
                       <div class="om-recap-line"><span>Téléphone</span>${phone}</div>`;
                 if (email) idHtml += `<div class="om-recap-line"><span>Email</span>${email}</div>`;
                 if (room) idHtml += `<div class="om-recap-line"><span>Chambre</span>${room}</div>`;
-                if (occasion) idHtml += `<div class="om-recap-line"><span>Occasion</span>${occasion}</div>`;
                 if (notes) idHtml += `<div class="om-recap-line"><span>Notes</span>${notes}</div>`;
                 $('#recap-identity').html(idHtml);
 
@@ -2387,9 +2384,7 @@
                 $('#hEmail').val(email);
                 $('#hRoom').val(room);
                 const notesVal = $('#f-notes').val().trim();
-                let fullNotes = (occasion ? 'Occasion: ' + occasion : '');
-                if (notesVal) fullNotes += (fullNotes ? ' | ' : '') + 'Notes: ' + notesVal;
-                $('#hNotes').val(fullNotes);
+                $('#hNotes').val(notesVal);
                 // Mode de paiement
                 const isGuest = room !== '';
                 const paymentMode = isGuest ? 'room_bill' : $('input[name="payment_choice"]:checked').val();

@@ -112,35 +112,38 @@ class RestaurantController extends Controller
         $customers = Customer::all();
         $menus = Menu::all();
 
-        // Statistiques globales (indépendantes des filtres)
-        $pendingOrders = RestaurantOrder::where('status', 'pending')->count();
-        $deliveredOrders = RestaurantOrder::where('status', 'delivered')->count();
+        // Statistiques du jour
         $todayRevenue = RestaurantOrder::whereDate('created_at', today())
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'delivered']) // ou juste 'paid', à adapter
             ->sum('total');
-        
+            
         $todayRoomRevenue = RestaurantOrder::whereDate('created_at', today())
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'delivered'])
             ->whereNotNull('room_id')
             ->sum('total');
             
         $todayNoRoomRevenue = RestaurantOrder::whereDate('created_at', today())
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'delivered'])
             ->whereNull('room_id')
             ->sum('total');
 
-        $monthlyOrders = RestaurantOrder::whereMonth('created_at', now()->month)->count();
+        // Nombres de commandes par statut (seulement du jour ou en cours)
+        $pendingOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'pending')->count();
+        $preparingOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'preparing')->count();
+        $deliveredOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'delivered')->count();
+        $paidOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'paid')->count();
+        $cancelledOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'cancelled')->count();
 
-        // Nouveaux totaux demandés
-        $totalAll = RestaurantOrder::where('status', '!=', 'cancelled')->sum('total');
-        $totalRoom = RestaurantOrder::where('status', '!=', 'cancelled')->whereNotNull('room_id')->sum('total');
-        $totalNoRoom = RestaurantOrder::where('status', '!=', 'cancelled')->whereNull('room_id')->sum('total');
+        // Répartition volumétrique
+        $todayOrdersTotal = RestaurantOrder::whereDate('created_at', today())->count();
+        $todayOrdersRoom = RestaurantOrder::whereDate('created_at', today())->whereNotNull('room_id')->count();
+        $todayOrdersNoRoom = RestaurantOrder::whereDate('created_at', today())->whereNull('room_id')->count();
 
         return view('restaurant.orders', compact(
             'orders', 'customers', 'menus',
-            'pendingOrders', 'deliveredOrders',
-            'todayRevenue', 'todayRoomRevenue', 'todayNoRoomRevenue', 
-            'monthlyOrders', 'totalAll', 'totalRoom', 'totalNoRoom'
+            'todayRevenue', 'todayRoomRevenue', 'todayNoRoomRevenue',
+            'pendingOrders', 'preparingOrders', 'deliveredOrders', 'paidOrders', 'cancelledOrders',
+            'todayOrdersTotal', 'todayOrdersRoom', 'todayOrdersNoRoom'
         ));
     }
 

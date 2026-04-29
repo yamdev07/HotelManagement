@@ -13,62 +13,14 @@
     </div>
 </div>
 
-<!-- Statistiques -->
+<!-- Statistiques du Jour -->
 <div class="row mb-4 align-items-stretch">
-    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
-        <div class="card border-0 shadow-sm border-start border-primary border-4 h-100">
-            <div class="card-body d-flex flex-column justify-content-center">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-1">Total Global</h6>
-                        <h3 class="mb-0 text-primary">{{ number_format($totalAll ?? 0, 0, ',', ' ') }} CFA</h3>
-                    </div>
-                    <div class="bg-primary bg-opacity-10 p-3 rounded">
-                        <i class="fas fa-wallet fa-2x text-primary"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
-        <div class="card border-0 shadow-sm border-start border-success border-4 h-100">
-            <div class="card-body d-flex flex-column justify-content-center">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-1">Liaison Chambre</h6>
-                        <h3 class="mb-0 text-success">{{ number_format($totalRoom ?? 0, 0, ',', ' ') }} CFA</h3>
-                    </div>
-                    <div class="bg-success bg-opacity-10 p-3 rounded">
-                        <i class="fas fa-bed fa-2x text-success"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
-        <div class="card border-0 shadow-sm border-start border-info border-4 h-100">
-            <div class="card-body d-flex flex-column justify-content-center">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="text-muted mb-1">Hors Chambre</h6>
-                        <h3 class="mb-0 text-info">{{ number_format($totalNoRoom ?? 0, 0, ',', ' ') }} CFA</h3>
-                    </div>
-                    <div class="bg-info bg-opacity-10 p-3 rounded">
-                        <i class="fas fa-user fa-2x text-info"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
         <div class="card border-0 shadow-sm border-start border-warning border-4 h-100">
             <div class="card-body p-3 d-flex flex-column justify-content-between">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <div>
-                        <h6 class="text-muted mb-0 small">CA Global (auj.)</h6>
+                        <h6 class="text-muted mb-0 small">CA du jour</h6>
                         <h4 class="mb-0 text-warning">{{ number_format($todayRevenue ?? 0, 0, ',', ' ') }} CFA</h4>
                     </div>
                     <div class="bg-warning bg-opacity-10 p-2 rounded">
@@ -84,6 +36,89 @@
                     <div class="col-6 ps-2">
                         <small class="text-muted d-block" style="font-size: 0.65rem;">Hors-Ch.</small>
                         <span class="fw-bold text-info" style="font-size: 0.8rem;">{{ number_format($todayNoRoomRevenue ?? 0, 0, ',', ' ') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+        <div class="card border-0 shadow-sm border-start border-primary border-4 h-100">
+            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div>
+                        <h6 class="text-muted mb-0 small">Commandes (Auj.)</h6>
+                        <h4 class="mb-0 text-primary">{{ $todayOrdersTotal ?? 0 }}</h4>
+                    </div>
+                    <div class="bg-primary bg-opacity-10 p-2 rounded">
+                        <i class="fas fa-receipt text-primary"></i>
+                    </div>
+                </div>
+                <hr class="my-1 opacity-25">
+                <div class="row g-0">
+                    <div class="col-6 border-end px-1">
+                        <small class="text-muted d-block" style="font-size: 0.65rem;">Chambre</small>
+                        <span class="fw-bold text-success" style="font-size: 0.8rem;">{{ $todayOrdersRoom ?? 0 }}</span>
+                    </div>
+                    <div class="col-6 ps-2">
+                        <small class="text-muted d-block" style="font-size: 0.65rem;">Hors-Ch.</small>
+                        <span class="fw-bold text-info" style="font-size: 0.8rem;">{{ $todayOrdersNoRoom ?? 0 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+        <div class="card border-0 shadow-sm border-start border-danger border-4 h-100">
+            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div>
+                        <h6 class="text-muted mb-0 small">Attente / Préparation (Auj.)</h6>
+                        <h4 class="mb-0 text-danger">{{ ($pendingOrders ?? 0) + ($preparingOrders ?? 0) }}</h4>
+                    </div>
+                    <div class="bg-danger bg-opacity-10 p-2 rounded">
+                        <i class="fas fa-fire text-danger"></i>
+                    </div>
+                </div>
+                <hr class="my-1 opacity-25">
+                <div class="row g-0">
+                    <div class="col-6 border-end px-1">
+                        <small class="text-muted d-block" style="font-size: 0.65rem;">En attente</small>
+                        <span class="fw-bold text-danger" style="font-size: 0.8rem;">{{ $pendingOrders ?? 0 }}</span>
+                    </div>
+                    <div class="col-6 ps-2">
+                        <small class="text-muted d-block" style="font-size: 0.65rem;">Préparation</small>
+                        <span class="fw-bold text-warning" style="font-size: 0.8rem;">{{ $preparingOrders ?? 0 }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
+        <div class="card border-0 shadow-sm border-start border-success border-4 h-100">
+            <div class="card-body p-3 d-flex flex-column justify-content-between">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <div>
+                        <h6 class="text-muted mb-0 small">Terminées / Autres</h6>
+                        <h4 class="mb-0 text-success">{{ ($deliveredOrders ?? 0) + ($paidOrders ?? 0) + ($cancelledOrders ?? 0) }}</h4>
+                    </div>
+                    <div class="bg-success bg-opacity-10 p-2 rounded">
+                        <i class="fas fa-check-double text-success"></i>
+                    </div>
+                </div>
+                <hr class="my-1 opacity-25">
+                <div class="row g-0">
+                    <div class="col-4 border-end px-1 text-center">
+                        <small class="text-muted d-block" style="font-size: 0.65rem;">Livrées</small>
+                        <span class="fw-bold text-success" style="font-size: 0.8rem;">{{ $deliveredOrders ?? 0 }}</span>
+                    </div>
+                    <div class="col-4 border-end px-1 text-center">
+                        <small class="text-muted d-block" style="font-size: 0.65rem;">Payées</small>
+                        <span class="fw-bold text-primary" style="font-size: 0.8rem;">{{ $paidOrders ?? 0 }}</span>
+                    </div>
+                    <div class="col-4 px-1 text-center">
+                        <small class="text-muted d-block" style="font-size: 0.65rem;">Annulées</small>
+                        <span class="fw-bold text-secondary" style="font-size: 0.8rem;">{{ $cancelledOrders ?? 0 }}</span>
                     </div>
                 </div>
             </div>
@@ -313,7 +348,7 @@
 
 <!-- Modal Détails de la commande -->
 <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Détails de la commande #<span id="orderId"></span></h5>
