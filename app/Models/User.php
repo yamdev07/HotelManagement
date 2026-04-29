@@ -66,6 +66,11 @@ class User extends Authenticatable
             return asset('img/default/default-user.jpg');
         }
 
+        // Si c'est une URL externe
+        if (str_starts_with($this->avatar, 'http')) {
+            return $this->avatar;
+        }
+
         // Le fichier est directement dans /public/img/user/
         $fullPath = 'img/user/'.trim($this->avatar, '/');
 

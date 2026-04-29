@@ -19,10 +19,10 @@ class RestaurantController extends Controller
     public function index()
     {
         $menus = Menu::paginate(12);
-        // MODIFIEZ CETTE LIGNE : enlevez le where('status', 'active')
+        $allMenus = Menu::all(); // Pour le modal (panier)
         $customers = Customer::all();
 
-        return view('restaurant.index', compact('menus', 'customers'));
+        return view('restaurant.index', compact('menus', 'allMenus', 'customers'));
     }
 
     // Afficher le formulaire de création

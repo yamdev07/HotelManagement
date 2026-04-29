@@ -19,9 +19,9 @@
 
             {{-- Barre de progression --}}
             <div class="nom-steps">
-                <div class="nom-step active" data-step="1"><div class="nom-dot">1</div><span>Client</span></div>
+                <div class="nom-step active" data-step="1"><div class="nom-dot">1</div><span>Plats</span></div>
                 <div class="nom-step-line"></div>
-                <div class="nom-step" data-step="2"><div class="nom-dot">2</div><span>Plats</span></div>
+                <div class="nom-step" data-step="2"><div class="nom-dot">2</div><span>Client</span></div>
                 <div class="nom-step-line"></div>
                 <div class="nom-step" data-step="3"><div class="nom-dot">3</div><span>Préférences</span></div>
                 <div class="nom-step-line"></div>
@@ -43,8 +43,53 @@
 
             <div class="nom-body">
 
-                {{-- ── ÉTAPE 1 : Identification du client ── --}}
+                {{-- ── ÉTAPE 1 : Récapitulatif du panier ── --}}
                 <div class="nom-panel active" id="nom-panel-1">
+                    <div class="nom-panel-title"><i class="fas fa-shopping-cart me-2"></i>Détail de la commande</div>
+                    <p class="nom-desc">Voici les plats sélectionnés. Ajustez les quantités ou supprimez un article avant de continuer.</p>
+
+                    {{-- Tableau récapitulatif du panier --}}
+                    <div id="cart-review-empty" class="nom-cart-empty" style="display:none">
+                        <i class="fas fa-shopping-cart fa-2x mb-2 text-muted"></i>
+                        <p class="text-muted mb-3">Votre panier est vide.</p>
+                        <small class="text-muted">Ajoutez des plats depuis la page restaurant puis revenez ici.</small>
+                    </div>
+
+                    <div id="cart-review-list">
+                        {{-- Rempli dynamiquement par JS --}}
+                    </div>
+
+                    <div id="cart-review-footer" class="nom-cart-footer" style="display:none">
+                        <div class="nom-cart-total-line">
+                            <span>Total de la commande</span>
+                            <strong id="cart-review-total">0 CFA</strong>
+                        </div>
+                    </div>
+
+                    <div class="nom-err mt-2" id="n-err-items"></div>
+                </div>
+
+                {{-- Grille menus cachée — nécessaire pour les boutons #naddbtn-* utilisés par la page index --}}
+                <div style="display:none" aria-hidden="true">
+                    @php $modalMenus = $allMenus ?? $menus ?? []; @endphp
+                    @foreach($modalMenus as $menu)
+                    <div class="nom-dish" data-cat="{{ $menu->category }}"
+                         data-id="{{ $menu->id }}" data-name="{{ $menu->name }}" data-price="{{ $menu->price }}"
+                         data-image="{{ $menu->image_url }}">
+                        <div class="nom-qty" id="nqty-{{ $menu->id }}">
+                            <button type="button" class="nom-qty-btn nom-qminus" data-id="{{ $menu->id }}">−</button>
+                            <span class="nom-qval" id="nqval-{{ $menu->id }}">0</span>
+                            <button type="button" class="nom-qty-btn nom-qplus" data-id="{{ $menu->id }}">+</button>
+                        </div>
+                        <button type="button" class="nom-add-btn" id="naddbtn-{{ $menu->id }}" data-id="{{ $menu->id }}">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    @endforeach
+                </div>
+
+                {{-- ── ÉTAPE 2 : Identification du client ── --}}
+                <div class="nom-panel" id="nom-panel-2">
                     <div class="nom-panel-title"><i class="fas fa-user me-2"></i>Identification du client</div>
                     <p class="nom-desc">Sélectionnez un client existant ou saisissez ses informations manuellement.</p>
 
@@ -57,9 +102,54 @@
                     {{-- Client existant --}}
                     <div id="block-existing">
                         <div class="nom-field">
-                            <label class="nom-label">Sélectionner un client <span class="nom-req">*</span></label>
-                            <select class="nom-input nom-select" id="n-customer-select">
-                                <option value="">— Rechercher un client —</option>
+                            {{-- État : Sélection --}}
+                            <div id="customer-selection-ui">
+                                <div class="nom-search-wrap">
+                                    <input type="text" class="nom-input" id="n-customer-search" placeholder="Nom, téléphone, n° de chambre...">
+                                    <i class="fas fa-search nom-search-icon"></i>
+                                </div>
+
+                                <div class="nom-customer-list-box mt-3" id="customer-list-box">
+                                    @foreach($customers ?? [] as $customer)
+                                    <div class="nom-customer-item" 
+                                         data-id="{{ $customer->id }}"
+                                         data-name="{{ $customer->name }}"
+                                         data-room="{{ $customer->room_number ?? '' }}"
+                                         data-phone="{{ $customer->phone ?? '' }}"
+                                         data-email="{{ $customer->email ?? '' }}"
+                                         data-search="{{ strtolower($customer->name . ' ' . ($customer->phone ?? '') . ' ' . ($customer->room_number ?? '')) }}">
+                                        <img src="{{ $customer->avatar_url }}" 
+                                             onerror="this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg'"
+                                             class="nom-c-avatar">
+                                        <div class="nom-c-info">
+                                            <div class="nom-c-name">{{ $customer->name }}</div>
+                                            <div class="nom-c-sub">
+                                                @if($customer->room_number)<span class="badge bg-info p-1" style="font-size:0.6rem">🔑 {{ $customer->room_number }}</span>@endif
+                                                @if($customer->phone)<span><i class="fas fa-phone fa-xs"></i> {{ $customer->phone }}</span>@endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            {{-- État : Sélectionné --}}
+                            <div id="selected-customer-card" class="nom-selected-card mt-2" style="display:none">
+                                <div class="nom-selected-body">
+                                    <img src="" id="sel-c-avatar" class="nom-c-avatar">
+                                    <div class="nom-c-info">
+                                        <div class="nom-c-name" id="sel-c-name"></div>
+                                        <div class="nom-c-sub" id="sel-c-sub"></div>
+                                    </div>
+                                    <button type="button" class="nom-btn-change" id="change-customer-btn" title="Modifier le choix">
+                                        <i class="fas fa-sync-alt"></i> Modifier
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            {{-- Select caché pour garder la compatibilité JS --}}
+                            <select id="n-customer-select" style="display:none">
+                                <option value="">— Sélectionner —</option>
                                 @foreach($customers ?? [] as $customer)
                                 <option value="{{ $customer->id }}"
                                         data-name="{{ $customer->name }}"
@@ -67,7 +157,6 @@
                                         data-phone="{{ $customer->phone ?? '' }}"
                                         data-email="{{ $customer->email ?? '' }}">
                                     {{ $customer->name }}
-                                    @if(!empty($customer->room_number)) — Chambre {{ $customer->room_number }}@endif
                                 </option>
                                 @endforeach
                             </select>
@@ -118,60 +207,6 @@
                         </div>
                     </div>
                     <div class="nom-err mt-2" id="n-err-client"></div>
-                </div>
-
-                {{-- ── ÉTAPE 2 : Sélection des plats ── --}}
-                <div class="nom-panel" id="nom-panel-2">
-                    <div class="nom-panel-title"><i class="fas fa-utensils me-2"></i>Sélection des plats</div>
-                    <p class="nom-desc">Cliquez sur un plat pour l'ajouter à la commande.</p>
-
-                    <div class="nom-filters" id="nom-cat-filters">
-                        <button type="button" class="nom-filter active" data-cat="all">Tous</button>
-                        <button type="button" class="nom-filter" data-cat="entree">Entrées</button>
-                        <button type="button" class="nom-filter" data-cat="plat">Plats</button>
-                        <button type="button" class="nom-filter" data-cat="dessert">Desserts</button>
-                        <button type="button" class="nom-filter" data-cat="boisson">Boissons</button>
-                    </div>
-
-                    <div class="nom-menu-grid" id="nom-menu-grid">
-                        @foreach($menus ?? [] as $menu)
-                        <div class="nom-dish" data-cat="{{ $menu->category }}"
-                             data-id="{{ $menu->id }}" data-name="{{ $menu->name }}" data-price="{{ $menu->price }}">
-                            <div class="nom-dish-img">
-                                @if($menu->image)
-                                    <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}">
-                                @else
-                                    <div class="nom-dish-noimg"><i class="fas fa-utensils"></i></div>
-                                @endif
-                            </div>
-                            <div class="nom-dish-body">
-                                <div class="nom-dish-name">{{ $menu->name }}</div>
-                                @if($menu->description)
-                                <div class="nom-dish-desc">{{ Str::limit($menu->description, 55) }}</div>
-                                @endif
-                                <div class="nom-dish-footer">
-                                    <span class="nom-dish-price">{{ number_format($menu->price, 0, ',', ' ') }} CFA</span>
-                                    <div class="nom-qty" id="nqty-{{ $menu->id }}" style="display:none">
-                                        <button type="button" class="nom-qty-btn nom-qminus" data-id="{{ $menu->id }}">−</button>
-                                        <span class="nom-qval" id="nqval-{{ $menu->id }}">0</span>
-                                        <button type="button" class="nom-qty-btn nom-qplus"  data-id="{{ $menu->id }}">+</button>
-                                    </div>
-                                    <button type="button" class="nom-add-btn" id="naddbtn-{{ $menu->id }}" data-id="{{ $menu->id }}">
-                                        <i class="fas fa-plus"></i> Ajouter
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-
-                    {{-- Mini panier --}}
-                    <div class="nom-basket" id="nom-basket" style="display:none">
-                        <div class="nom-basket-title"><i class="fas fa-shopping-cart me-2"></i>Sélection en cours</div>
-                        <div id="nom-basket-items"></div>
-                        <div class="nom-basket-total">Sous-total : <strong id="nom-basket-total">0 CFA</strong></div>
-                    </div>
-                    <div class="nom-err mt-2" id="n-err-items"></div>
                 </div>
 
                 {{-- ── ÉTAPE 3 : Préférences & Paiement ── --}}
@@ -319,14 +354,16 @@
 /* ══════════════════════════════════════
    MODAL COMMANDE ADMIN
 ══════════════════════════════════════ */
-.nom-card { border:none; border-radius:16px; overflow:hidden; background:#fff; box-shadow:0 30px 70px rgba(0,0,0,.18); }
+.nom-card { border:none; border-radius:16px; overflow:hidden; background:#fff; box-shadow:0 30px 70px rgba(0,0,0,.18); display:flex; flex-direction:column; max-height: 90vh; }
+#newOrderForm { display:flex; flex-direction:column; flex:1; overflow:hidden; }
 
 .nom-header {
     display:flex; align-items:center; justify-content:space-between;
-    padding:18px 24px;
+    padding:18px 24px; flex-shrink:0;
     background:linear-gradient(135deg,#1e293b,#0f172a);
     border-bottom:2px solid #d4af37;
 }
+
 .nom-header-left { display:flex; align-items:center; gap:12px; }
 .nom-icon-wrap {
     width:38px; height:38px; background:#d4af37; border-radius:10px;
@@ -347,6 +384,7 @@
 .nom-steps {
     display:flex; align-items:center; padding:14px 24px;
     background:#f8fafc; border-bottom:1px solid #e2e8f0;
+    flex-shrink:0;
 }
 .nom-step { display:flex; align-items:center; gap:6px; flex:1; }
 .nom-dot {
@@ -364,7 +402,7 @@
 .nom-step-line { flex:1; height:1px; background:#e2e8f0; margin:0 6px; }
 
 /* Corps */
-.nom-body { padding:24px; background:#fff; min-height:320px; }
+.nom-body { padding:24px; background:#fff; flex:1; overflow-y:auto; min-height:320px; }
 .nom-panel { display:none; animation:nomIn .28s ease; }
 .nom-panel.active { display:block; }
 @keyframes nomIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
@@ -521,6 +559,7 @@
 .nom-footer {
     display:flex; align-items:center; padding:14px 24px;
     background:#f8fafc; border-top:1px solid #e2e8f0;
+    flex-shrink:0;
 }
 .nom-btn {
     padding:9px 20px; border-radius:8px; font-size:.8rem; font-weight:600;
@@ -555,6 +594,94 @@
 .card:hover { transform:translateY(-2px); }
 .table tbody tr:hover { background-color:rgba(0,123,255,.04); }
 .badge { font-size:.75em; padding:.35em .65em; }
+
+/* ── Cart Review (étape 1 du modal) ── */
+.nom-cart-empty {
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:40px 20px; text-align:center;
+    background:#f8fafc; border:2px dashed #e2e8f0; border-radius:12px;
+}
+.nom-cart-row {
+    display:flex; align-items:center; gap:12px;
+    padding:12px 14px; border:1px solid #e2e8f0; border-radius:10px;
+    background:#fff; margin-bottom:8px;
+    transition:border-color .16s;
+}
+.nom-cart-row:hover { border-color:#d4af37; }
+.nom-cart-row-info { flex:1; min-width:0; }
+.nom-cart-row-img { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; border: 1px solid #e2e8f0; flex-shrink: 0; }
+.nom-cart-row-img-none { width: 45px; height: 45px; border-radius: 6px; background: #f1f5f9; color: #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.nom-cart-row-name { font-size:.85rem; font-weight:700; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.nom-cart-row-price { font-size:.7rem; color:#94a3b8; margin-top:2px; }
+.nom-cart-row-controls {
+    display:flex; align-items:center; gap:8px;
+    background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:4px 8px;
+}
+.nom-cr-btn {
+    width:24px; height:24px; border-radius:50%; border:1px solid #d4af37;
+    background:transparent; color:#d4af37; font-size:1rem; font-weight:700;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    line-height:1; transition:all .14s;
+}
+.nom-cr-btn:hover { background:#d4af37; color:#0f172a; }
+.nom-cr-qty { font-size:.85rem; font-weight:700; color:#0f172a; min-width:20px; text-align:center; }
+.nom-cart-row-sub { font-size:.82rem; font-weight:700; color:#d4af37; white-space:nowrap; min-width:90px; text-align:right; }
+.nom-cr-remove {
+    background:transparent; border:none; color:#cbd5e1; cursor:pointer;
+    font-size:.8rem; padding:4px; border-radius:50%; transition:all .14s;
+    display:flex; align-items:center; justify-content:center;
+}
+.nom-cr-remove:hover { background:#fee2e2; color:#e11d48; }
+.nom-cart-footer {
+    margin-top:12px; padding:12px 16px;
+    background:linear-gradient(135deg,#fffbeb,#fef3c7);
+    border:1px solid #fde68a; border-radius:10px;
+}
+.nom-cart-total-line {
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:.9rem; color:#92740a;
+}
+.nom-cart-total-line strong { font-size:1.05rem; color:#d4af37; }
+
+/* ── Recherche de client (étape 2) ── */
+.nom-search-wrap { position: relative; width: 100%; }
+.nom-search-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; }
+.nom-customer-list-box {
+    max-height: 280px; overflow-y: auto;
+    border: 1px solid #e2e8f0; border-radius: 12px;
+    background: #fff; padding: 6px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+}
+.nom-customer-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 9px;
+    cursor: pointer; transition: all .16s;
+    border: 1px solid transparent; margin-bottom: 4px;
+}
+.nom-customer-item:hover { background: #f8fafc; border-color: #e2e8f0; }
+.nom-customer-item.selected { 
+    background: #f0faf0; border-color: #10b981; 
+    box-shadow: 0 4px 6px -1px rgba(16,185,129,0.1); 
+}
+.nom-c-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; flex-shrink: 0; }
+.nom-customer-item.selected .nom-c-avatar { border-color: #10b981; }
+.nom-c-info { flex: 1; min-width: 0; }
+.nom-c-name { font-size: .88rem; font-weight: 700; color: #1e293b; }
+.nom-c-sub { font-size: .72rem; color: #94a3b8; margin-top: 1px; display: flex; align-items: center; gap: 10px; }
+.nom-c-sub i { color: #cbd5e1; }
+
+/* Carte client sélectionné */
+.nom-selected-card {
+    background: #f8fafc; border: 1.5px solid #d4af37; border-radius: 12px;
+    padding: 12px 16px; animation: nomIn .25s ease;
+}
+.nom-selected-body { display: flex; align-items: center; gap: 14px; }
+.nom-btn-change {
+    background: #fff; border: 1px solid #e2e8f0; color: #64748b;
+    padding: 6px 12px; border-radius: 8px; font-size: .7rem; font-weight: 600;
+    cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 5px;
+}
+.nom-btn-change:hover { background: #f1f5f9; color: #1e293b; border-color: #cbd5e1; }
 </style>
 @endpush
 
@@ -625,7 +752,7 @@ function initNomModal() {
        NOUVELLE COMMANDE — MULTI-ÉTAPES
     ══════════════════════════════════════════ */
     let nomStep = 1;
-    let nomItems = {};   // { id: {menu_id, name, price, quantity} }
+    let nomItems = JSON.parse(localStorage.getItem('restaurant_cart') || '{}');
     let nomMode  = 'existing'; // 'existing' | 'new'
 
     /* Toggle client existant / nouveau */
@@ -640,26 +767,57 @@ function initNomModal() {
         $('#block-new').show(); $('#block-existing').hide();
     });
 
-    /* Affichage infos client sélectionné */
-    $('#n-customer-select').change(function(){
-        const sel = $(this).find(':selected');
-        const room = sel.data('room'), phone = sel.data('phone'), email = sel.data('email');
-        if ($(this).val()) {
-            $('#disp-room').text(room || '—');
-            $('#disp-phone').text(phone || '—');
-            $('#disp-email').text(email || '—');
-            $('#existing-info').show();
-            // Mettre à jour l'affichage de facturation chambre
-            if (room) {
-                $('#room-billing-display').text('Chambre ' + room + ' — ' + sel.data('name'));
-            } else {
-                $('#room-billing-display').text('Ce client n\'a pas de chambre active');
-                $('#room-billing-display').addClass('text-warning').removeClass('text-success');
-            }
+    /* ── Recherche et Sélection Client ── */
+    $(document).on('input', '#n-customer-search', function() {
+        const q = $(this).val().toLowerCase();
+        $('.nom-customer-item').each(function() {
+            const searchStr = $(this).data('search');
+            $(this).toggle(searchStr.indexOf(q) > -1);
+        });
+    });
+
+    $(document).on('click', '.nom-customer-item', function() {
+        const $this = $(this);
+        $('.nom-customer-item').removeClass('selected');
+        $this.addClass('selected');
+        
+        const id = $this.data('id');
+        const name = $this.data('name');
+        const room = $this.data('room');
+        const avatar = $this.find('.nom-c-avatar').attr('src');
+        const sub = $this.find('.nom-c-sub').html();
+        
+        // Mettre à jour le select caché pour la compatibilité avec le reste du code
+        $('#n-customer-select').val(id);
+        
+        // Remplir la carte résumé
+        $('#sel-c-avatar').attr('src', avatar);
+        $('#sel-c-name').text(name);
+        $('#sel-c-sub').html(sub);
+        
+        // Basculer l'affichage
+        $('#customer-selection-ui').hide();
+        $('#selected-customer-card').fadeIn();
+
+        // Afficher les infos sous la liste (toujours utile pour le récap)
+        $('#disp-room').text(room || '—');
+        $('#disp-phone').text($this.data('phone') || '—');
+        $('#disp-email').text($this.data('email') || '—');
+        $('#existing-info').fadeIn();
+        
+        // Mettre à jour l'affichage de facturation chambre
+        const billingMsg = $('#room-billing-display');
+        if (room) {
+            billingMsg.text(`Garantie sur Chambre ${room} (${name})`).removeClass('text-warning').addClass('text-success');
         } else {
-            $('#existing-info').hide();
-            $('#room-billing-display').text('— sera déduite du client sélectionné —');
+            billingMsg.text(`Attention : ${name} n'est relié à aucune chambre active.`).removeClass('text-success').addClass('text-warning');
         }
+    });
+
+    $(document).on('click', '#change-customer-btn', function() {
+        $('#selected-customer-card').hide();
+        $('#customer-selection-ui').fadeIn();
+        $('#n-customer-search').focus();
     });
 
     /* Basculer entre facturation chambre / direct */
@@ -691,8 +849,19 @@ function initNomModal() {
         if (n === 4) $('#nom-next').hide();
     }
 
+
+
     function validateNomStep(step) {
         if (step === 1) {
+            // Étape 1 : au moins un plat
+            if (Object.keys(nomItems).length === 0) {
+                $('#n-err-items').text('Veuillez ajouter au moins un plat.');
+                return false;
+            }
+            $('#n-err-items').text('');
+        }
+        if (step === 2) {
+            // Étape 2 : identification client
             $('#n-err-client').text('');
             if (nomMode === 'existing') {
                 if (!$('#n-customer-select').val()) {
@@ -707,13 +876,6 @@ function initNomModal() {
                 return ok;
             }
         }
-        if (step === 2) {
-            if (Object.keys(nomItems).length === 0) {
-                $('#n-err-items').text('Veuillez ajouter au moins un plat.');
-                return false;
-            }
-            $('#n-err-items').text('');
-        }
         return true;
     }
 
@@ -725,11 +887,17 @@ function initNomModal() {
         else { $('.nom-dish').hide(); $(`.nom-dish[data-cat="${cat}"]`).show(); }
     });
 
-    /* ── Ajout / retrait de plats ── */
+    /* ── Ajout / retrait de plats (boutons cachés, utilisés depuis la page index) ── */
     $(document).on('click', '.nom-add-btn', function(){
         const id = $(this).data('id');
         const d  = $(`.nom-dish[data-id="${id}"]`);
-        if (!nomItems[id]) nomItems[id] = { menu_id:id, name:d.data('name'), price:parseFloat(d.data('price')), quantity:1 };
+        if (!nomItems[id]) nomItems[id] = { 
+            menu_id: id, 
+            name: d.data('name'), 
+            price: parseFloat(d.data('price')), 
+            image: d.data('image'),
+            quantity: 1 
+        };
         else nomItems[id].quantity++;
         nomUpdateDish(id); nomRenderBasket();
     });
@@ -745,28 +913,127 @@ function initNomModal() {
         nomUpdateDish(id); nomRenderBasket();
     });
 
+    /* ── Contrôles du récapitulatif panier (étape 1 du modal) ── */
+    $(document).on('click', '.nom-cr-plus', function(){
+        const id = $(this).data('id');
+        if (nomItems[id]) { nomItems[id].quantity++; nomUpdateDish(id); nomRenderBasket(); }
+    });
+    $(document).on('click', '.nom-cr-minus', function(){
+        const id = $(this).data('id');
+        if (!nomItems[id]) return;
+        nomItems[id].quantity--;
+        if (nomItems[id].quantity <= 0) delete nomItems[id];
+        nomUpdateDish(id); nomRenderBasket();
+    });
+    $(document).on('click', '.nom-cr-remove', function(){
+        const id = $(this).data('id');
+        delete nomItems[id];
+        nomUpdateDish(id); nomRenderBasket();
+    });
+
     function nomUpdateDish(id) {
         const item = nomItems[id];
         if (item && item.quantity > 0) {
             $(`#naddbtn-${id}`).hide(); $(`#nqty-${id}`).show(); $(`#nqval-${id}`).text(item.quantity);
             $(`.nom-dish[data-id="${id}"]`).addClass('selected');
+            
+            // Synchronisation avec la page principale
+            $(`#main-add-btn-${id}`).addClass('d-none');
+            $(`#main-qty-wrapper-${id}`).removeClass('d-none').addClass('d-flex');
+            $(`#main-qval-${id}`).text(item.quantity);
         } else {
             $(`#naddbtn-${id}`).show(); $(`#nqty-${id}`).hide(); $(`#nqval-${id}`).text(0);
             $(`.nom-dish[data-id="${id}"]`).removeClass('selected');
+            
+            // Synchronisation avec la page principale
+            $(`#main-add-btn-${id}`).removeClass('d-none');
+            $(`#main-qty-wrapper-${id}`).addClass('d-none').removeClass('d-flex');
+            $(`#main-qval-${id}`).text(0);
         }
     }
 
     function nomRenderBasket() {
-        const items = Object.values(nomItems);
-        if (!items.length) { $('#nom-basket').hide(); return; }
-        $('#nom-basket').show();
-        let html = '', total = 0;
-        items.forEach(it => {
-            const sub = it.price * it.quantity; total += sub;
-            html += `<div class="nom-basket-item"><span>${it.name} × ${it.quantity}</span><strong>${sub.toLocaleString('fr-FR')} CFA</strong></div>`;
+        localStorage.setItem('restaurant_cart', JSON.stringify(nomItems));
+        
+        // Synchroniser l'affichage de tous les produits sur la page
+        $('.main-qty-controls').each(function() {
+            nomUpdateDish($(this).data('id'));
         });
-        $('#nom-basket-items').html(html);
-        $('#nom-basket-total').text(total.toLocaleString('fr-FR') + ' CFA');
+
+        const items = Object.values(nomItems);
+        let totalCount = 0;
+        items.forEach(it => { totalCount += it.quantity; });
+
+        // Mise à jour du badge compteur sur la page
+        let counterBadge = document.getElementById('cart-counter');
+        if (counterBadge) {
+            counterBadge.innerText = totalCount;
+            counterBadge.style.display = totalCount > 0 ? 'inline-block' : 'none';
+        }
+
+        // Mise à jour du récapitulatif étape 1
+        nomRenderCartReview();
+    }
+
+    function nomRenderCartReview() {
+        const items = Object.values(nomItems);
+        const listEl   = document.getElementById('cart-review-list');
+        const emptyEl  = document.getElementById('cart-review-empty');
+        const footerEl = document.getElementById('cart-review-footer');
+        const totalEl  = document.getElementById('cart-review-total');
+
+        if (!listEl) return;
+
+        if (!items.length) {
+            listEl.innerHTML   = '';
+            emptyEl.style.display  = 'flex';
+            footerEl.style.display = 'none';
+            return;
+        }
+
+        emptyEl.style.display  = 'none';
+        footerEl.style.display = 'block';
+
+        let total = 0;
+        let html  = '';
+        items.forEach(it => {
+            const sub = it.price * it.quantity;
+            total += sub;
+            
+            // Récupérer l'image depuis l'objet ou depuis le DOM en fallback
+            let imgUrl = it.image;
+            if (!imgUrl) {
+                // Fallback si l'item en localStorage n'avait pas l'image (ancien panier)
+                imgUrl = document.querySelector(`.nom-dish[data-id="${it.menu_id}"]`)?.dataset.image;
+            }
+            
+            const defaultImg = 'https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';
+            let imgHtml = '';
+            if (imgUrl) {
+                imgHtml = `<img src="${imgUrl}" class="nom-cart-row-img" alt="${it.name}" onerror="this.src='${defaultImg}'">`;
+            } else {
+                imgHtml = `<img src="${defaultImg}" class="nom-cart-row-img" alt="${it.name}">`;
+            }
+            
+            html += `
+            <div class="nom-cart-row" data-id="${it.menu_id}">
+                ${imgHtml}
+                <div class="nom-cart-row-info">
+                    <div class="nom-cart-row-name">${it.name}</div>
+                    <div class="nom-cart-row-price">${it.price.toLocaleString('fr-FR')} CFA / unité</div>
+                </div>
+                <div class="nom-cart-row-controls">
+                    <button type="button" class="nom-cr-btn nom-cr-minus" data-id="${it.menu_id}">−</button>
+                    <span class="nom-cr-qty">${it.quantity}</span>
+                    <button type="button" class="nom-cr-btn nom-cr-plus" data-id="${it.menu_id}">+</button>
+                </div>
+                <div class="nom-cart-row-sub">${sub.toLocaleString('fr-FR')} CFA</div>
+                <button type="button" class="nom-cr-remove" data-id="${it.menu_id}" title="Retirer"><i class="fas fa-times"></i></button>
+            </div>`;
+        });
+
+        listEl.innerHTML = html;
+        totalEl.textContent = total.toLocaleString('fr-FR') + ' CFA';
     }
 
     /* ── Récapitulatif ── */
@@ -850,6 +1117,7 @@ function initNomModal() {
         $.ajax({
             url: $(this).attr('action'), type:'POST', data:fd, processData:false, contentType:false,
             success: function() {
+                localStorage.removeItem('restaurant_cart');
                 Swal.fire({ icon:'success', title:'Commande enregistrée !', confirmButtonColor:'#10b981' })
                 .then(() => { bootstrap.Modal.getInstance(document.getElementById('newOrderModal'))?.hide(); location.reload(); });
             },
@@ -863,21 +1131,34 @@ function initNomModal() {
 
     /* ── Reset à la fermeture ── */
     document.getElementById('newOrderModal').addEventListener('hidden.bs.modal', function(){
-        nomItems = {}; nomStep = 1; nomMode = 'existing';
-        $('#newOrderForm')[0].reset();
-        goNomStep(1);
-        $('#n-customer-select').val(''); $('#existing-info').hide();
-        $('.nom-dish').removeClass('selected');
-        $('.nom-qty').hide(); $('.nom-add-btn').show();
-        $('#nom-basket').hide();
-        $('#tog-existing').addClass('active'); $('#tog-new').removeClass('active');
-        $('#block-existing').show(); $('#block-new').hide();
+        nomStep = 1; nomMode = 'existing';
+        // Reset selection UI
+        $('#selected-customer-card').hide();
+        $('#customer-selection-ui').show();
+        $('.nom-customer-item').removeClass('selected');
+        $('#n-customer-select').val('');
+        $('#n-customer-search').val('');
+        $('.nom-customer-item').show();
+        
         // Reset billing
         $('#billing-room').prop('checked', true);
         $('#block-room-billing').show(); $('#block-direct-billing').hide();
-        $('#room-billing-display').text('— sera déduite du client sélectionné —').removeClass('text-warning').addClass('text-success');
+        $('#room-billing-display').text('\u2014 sera déduite du client sélectionné \u2014').removeClass('text-warning').addClass('text-success');
+        goNomStep(1);
     });
+
+    document.getElementById('newOrderModal').addEventListener('show.bs.modal', function(){
+        // Restaurer l'affichage initial depuis le cache quand on l'ouvre
+        Object.keys(nomItems).forEach(id => {
+            nomUpdateDish(id);
+        });
+        nomRenderBasket();
     });
+
+    // ── Initialiser le compteur du panier dès le chargement de la page ──
+    nomRenderBasket();
+
+    }); // fin $(document).ready
 }
 initNomModal();
 </script>
