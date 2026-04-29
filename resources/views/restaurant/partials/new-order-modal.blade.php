@@ -704,7 +704,7 @@ function initNomModal() {
     /* ══════════════════════════════
        DÉTAILS COMMANDE
     ══════════════════════════════ */
-    $(document).on('click', '.view-items, [data-order-id]', function() {
+    $(document).on('click', '.view-items, button[data-bs-target="#orderDetailsModal"]', function() {
         const orderId = $(this).data('order-id');
         if (!orderId) return;
         $('#orderId').text(orderId);
@@ -716,24 +716,39 @@ function initNomModal() {
     });
 
     /* ══════════════════════════════
-       CHANGEMENT DE STATUT
+       CHANGEMENT DE STATUT (direct, sans confirmation)
     ══════════════════════════════ */
-    $('.change-status').click(function(e) {
+    $(document).on('click', '.change-status', function(e) {
         e.preventDefault();
-        const orderId = $(this).data('order-id'), status = $(this).data('status');
-        Swal.fire({ title:'Confirmer', text:'Changer le statut ?', icon:'question', showCancelButton:true, confirmButtonText:'Oui', cancelButtonText:'Non' })
-        .then(r => {
-            if (!r.isConfirmed) return;
-            $.ajax({ url:`{{ url('restaurant/orders') }}/${orderId}`, type:'PUT',
-                data:{ _token:'{{ csrf_token() }}', status },
-                success:()=>Swal.fire('Succès !','Statut mis à jour.','success').then(()=>location.reload()),
-                error:()=>Swal.fire('Erreur !','Une erreur est survenue.','error')
-            });
+        e.stopImmediatePropagation();
+        const btn = $(this);
+        const orderId = btn.data('order-id');
+        const newStatus = btn.data('status');
+
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i>');
+
+        $.ajax({
+            url: `{{ url('restaurant/orders') }}/${orderId}`,
+            type: 'PUT',
+            data: { _token: '{{ csrf_token() }}', status: newStatus },
+            success: function() {
+                location.reload();
+            },
+            error: function(xhr) {
+                btn.prop('disabled', false);
+                const icons = { preparing: 'fa-play', delivered: 'fa-check', paid: 'fa-money-bill-wave' };
+                btn.html(`<i class="fas ${icons[newStatus] || 'fa-sync'}"></i>`);
+                Swal.fire('Erreur', xhr.responseJSON?.message || 'Action impossible.', 'error');
+            }
         });
     });
 
-    $('.cancel-order').click(function(e) {
+    /* ══════════════════════════════
+       ANNULATION COMMANDE
+    ══════════════════════════════ */
+    $(document).on('click', '.cancel-order', function(e) {
         e.preventDefault();
+        e.stopImmediatePropagation();
         const orderId = $(this).data('order-id');
         Swal.fire({ title:'Annuler la commande ?', icon:'warning', showCancelButton:true, confirmButtonText:'Oui, annuler', cancelButtonText:'Non', reverseButtons:true })
         .then(r => {

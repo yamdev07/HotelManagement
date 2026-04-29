@@ -87,28 +87,60 @@ class RestaurantController extends Controller
     }
 
     // Afficher toutes les commandes
-    public function orders()
+    public function orders(Request $request)
     {
-        $orders = RestaurantOrder::with(['customer', 'items.menu'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $query = RestaurantOrder::with(['customer', 'items.menu'])
+            ->orderBy('created_at', 'desc');
 
-        // MODIFIEZ CETTE LIGNE AUSSI : enlevez le where('status', 'active')
+        // Filtrage par statut
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filtrage par date de début
+        if ($request->filled('from')) {
+            $query->whereDate('created_at', '>=', $request->from);
+        }
+
+        // Filtrage par date de fin
+        if ($request->filled('to')) {
+            $query->whereDate('created_at', '<=', $request->to);
+        }
+
+        $orders = $query->paginate(15)->withQueryString();
+
         $customers = Customer::all();
         $menus = Menu::all();
 
-        // Statistiques (ces status sont pour RestaurantOrder, PAS pour Customer)
+        // Statistiques globales (indépendantes des filtres)
         $pendingOrders = RestaurantOrder::where('status', 'pending')->count();
         $deliveredOrders = RestaurantOrder::where('status', 'delivered')->count();
         $todayRevenue = RestaurantOrder::whereDate('created_at', today())
             ->where('status', 'paid')
             ->sum('total');
+        
+        $todayRoomRevenue = RestaurantOrder::whereDate('created_at', today())
+            ->where('status', 'paid')
+            ->whereNotNull('room_id')
+            ->sum('total');
+            
+        $todayNoRoomRevenue = RestaurantOrder::whereDate('created_at', today())
+            ->where('status', 'paid')
+            ->whereNull('room_id')
+            ->sum('total');
+
         $monthlyOrders = RestaurantOrder::whereMonth('created_at', now()->month)->count();
+
+        // Nouveaux totaux demandés
+        $totalAll = RestaurantOrder::where('status', '!=', 'cancelled')->sum('total');
+        $totalRoom = RestaurantOrder::where('status', '!=', 'cancelled')->whereNotNull('room_id')->sum('total');
+        $totalNoRoom = RestaurantOrder::where('status', '!=', 'cancelled')->whereNull('room_id')->sum('total');
 
         return view('restaurant.orders', compact(
             'orders', 'customers', 'menus',
             'pendingOrders', 'deliveredOrders',
-            'todayRevenue', 'monthlyOrders'
+            'todayRevenue', 'todayRoomRevenue', 'todayNoRoomRevenue', 
+            'monthlyOrders', 'totalAll', 'totalRoom', 'totalNoRoom'
         ));
     }
 
