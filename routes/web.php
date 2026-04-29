@@ -37,18 +37,6 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::get('/admin/restaurant-layout', function () {
-    return redirect()->route('admin.floor-plan.index');
-})->middleware(['auth', 'checkrole:Super,Admin'])->name('admin.restaurant-layout');
-
-use App\Http\Controllers\Admin\FloorPlanController;
-
-// ==================== ROUTES PLAN DE SALLE (Admin) ====================
-Route::middleware(['auth', 'checkrole:Super,Admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/floor-plan',       [FloorPlanController::class, 'index'])->name('floor-plan.index');
-    Route::post('/floor-plan/save', [FloorPlanController::class, 'save'])->name('floor-plan.save');
-});
-
 // ==================== ROUTES FRONTEND (Site Vitrine) ====================
 Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
 Route::get('/chambres', [FrontendController::class, 'rooms'])->name('frontend.rooms');
@@ -494,20 +482,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
             Route::get('/menus/{id}/edit', [RestaurantController::class, 'edit'])->name('menus.edit');
             Route::put('/menus/{id}', [RestaurantController::class, 'update'])->name('menus.update');
             Route::delete('/menus/{id}', [RestaurantController::class, 'destroy'])->name('menus.destroy');
-        });
-
-        // Plan de salle — Super et Admin uniquement
-        Route::middleware('checkrole:Super,Admin')->group(function () {
-            Route::get('/layout', [RestaurantController::class, 'layout'])->name('layout');
-            Route::post('/layout/save', [RestaurantController::class, 'saveLayout'])->name('layout.save');
-        });
-
-        // Gestion du stock — Super, Admin, Receptionist
-        Route::middleware('checkrole:Super,Admin,Receptionist')->group(function () {
-            Route::get('/stock', [RestaurantController::class, 'stock'])->name('stock');
-            Route::post('/stock', [RestaurantController::class, 'storeIngredient'])->name('stock.store');
-            Route::post('/stock/{id}', [RestaurantController::class, 'updateIngredient'])->name('stock.update');
-            Route::delete('/stock/{id}', [RestaurantController::class, 'destroyIngredient'])->name('stock.destroy');
         });
 
         // Suivi des ventes — Super, Admin

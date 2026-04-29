@@ -143,7 +143,7 @@
                         <div class="nav-icon"><i class="fas fa-utensils"></i></div>
                         <div class="nav-content">
                             <div class="nav-title">Restaurant</div>
-                            <div class="nav-subtitle">Menus, Commandes, Stock & Ventes</div>
+                            <div class="nav-subtitle">Menus, Commandes & Ventes</div>
                         </div>
                     </a>
                     @endif
