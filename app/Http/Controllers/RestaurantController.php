@@ -18,7 +18,17 @@ class RestaurantController extends Controller
     {
         $menus = Menu::paginate(12);
         $allMenus = Menu::all(); // Pour le modal (panier)
-        $customers = Customer::all();
+        
+        $customers = Customer::with(['transactions' => function ($q) {
+            $q->whereIn('status', ['active', 'reservation'])
+              ->where('check_out', '>=', now())
+              ->with('room')
+              ->latest();
+        }])->get()->map(function ($customer) {
+            $activeTransaction = $customer->transactions->first();
+            $customer->room_number = $activeTransaction?->room?->number ?? null;
+            return $customer;
+        });
 
         return view('restaurant.index', compact('menus', 'allMenus', 'customers'));
     }
@@ -107,7 +117,17 @@ class RestaurantController extends Controller
 
         $orders = $query->paginate(15)->withQueryString();
 
-        $customers = Customer::all();
+        $customers = Customer::with(['transactions' => function ($q) {
+            $q->whereIn('status', ['active', 'reservation'])
+              ->where('check_out', '>=', now())
+              ->with('room')
+              ->latest();
+        }])->get()->map(function ($customer) {
+            $activeTransaction = $customer->transactions->first();
+            $customer->room_number = $activeTransaction?->room?->number ?? null;
+            return $customer;
+        });
+        
         $menus = Menu::all();
 
         // Statistiques du jour
