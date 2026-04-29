@@ -9,7 +9,7 @@ use App\Models\ReceptionistAction;
 use App\Models\ReceptionistSession;
 use App\Models\Transaction;
 use App\Models\Room;
-use App\Repositories\Interface\TransactionRepositoryInterface;
+use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;

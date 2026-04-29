@@ -5,7 +5,7 @@ namespace App\Repositories\Implementation;
 use App\Models\Customer;
 use App\Models\Room;
 use App\Models\Transaction;
-use App\Repositories\Interface\TransactionRepositoryInterface;
+use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use Carbon\Carbon;
 
 class TransactionRepository implements TransactionRepositoryInterface

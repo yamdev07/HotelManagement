@@ -3,7 +3,7 @@
 namespace App\Repositories\Implementation;
 
 use App\Models\RoomStatus;
-use App\Repositories\Interface\RoomStatusRepositoryInterface;
+use App\Repositories\Interfaces\RoomStatusRepositoryInterface;
 use Illuminate\Http\Request;
 
 class RoomStatusRepository implements RoomStatusRepositoryInterface

@@ -111,11 +111,11 @@
                 @endif
 
                 <!-- OPÉRATIONS -->
-                @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
+                @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist', 'Servant']))
                 <div class="nav-section">
                     <div class="nav-section-title">Opérations</div>
 
-                    @if(Route::has('transaction.index'))
+                    @if(Route::has('transaction.index') && !auth()->user()->isServant())
                     <a href="{{ route('transaction.index') }}"
                        class="nav-item {{ ($activeClass('transaction.', false) && !str_contains($currentRoute, 'transaction.reservation.')) ? 'active' : '' }}" data-tooltip="Liste Clients">
                         <div class="nav-icon"><i class="fas fa-shopping-bag"></i></div>
@@ -415,7 +415,8 @@
                             @case('Admin')    <span class="role-pill role-admin">Administrateur</span>@break
                             @case('Receptionist') <span class="role-pill role-recep">Réceptionniste</span>@break
                             @case('Housekeeping') <span class="role-pill role-house">Femme de Chambre</span>@break
-                            @case('Customer') <span class="role-pill role-cust">Client</span>@break
+                            @case('Servant')      <span class="role-pill role-recep">Serveur</span>@break
+                            @case('Customer')     <span class="role-pill role-cust">Client</span>@break
                             @default          <span class="role-pill role-other">{{ auth()->user()->role }}</span>
                         @endswitch
                     </div>

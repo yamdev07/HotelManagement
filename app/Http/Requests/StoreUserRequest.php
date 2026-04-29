@@ -27,6 +27,6 @@ class StoreUserRequest extends FormRequest
             'name' => 'required',
             'email' => 'required|unique:users,email',
             'password' => 'required',
-            'role' => 'required|in:Admin,Receptionist,Housekeeping,Customer',        ];
+            'role' => 'required|in:Admin,Receptionist,Housekeeping,Customer,Servant',        ];
     }
 }

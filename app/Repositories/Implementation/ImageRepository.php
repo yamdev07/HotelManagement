@@ -2,7 +2,7 @@
 
 namespace App\Repositories\Implementation;
 
-use App\Repositories\Interface\ImageRepositoryInterface;
+use App\Repositories\Interfaces\ImageRepositoryInterface;
 use Intervention\Image\Facades\Image as InterImage;
 
 class ImageRepository implements ImageRepositoryInterface

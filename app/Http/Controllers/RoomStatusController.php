@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreRoomStatusRequest;
 use App\Models\RoomStatus;
-use App\Repositories\Interface\RoomStatusRepositoryInterface;
+use App\Repositories\Interfaces\RoomStatusRepositoryInterface;
 use Illuminate\Http\Request;
 
 class RoomStatusController extends Controller

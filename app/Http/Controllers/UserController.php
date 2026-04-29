@@ -6,7 +6,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Models\Customer;
 use App\Models\User;
-use App\Repositories\Interface\UserRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 

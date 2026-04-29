@@ -3,7 +3,7 @@
 namespace App\Repositories\Implementation;
 
 use App\Models\Type;
-use App\Repositories\Interface\TypeRepositoryInterface;
+use App\Repositories\Interfaces\TypeRepositoryInterface;
 
 class TypeRepository implements TypeRepositoryInterface
 {

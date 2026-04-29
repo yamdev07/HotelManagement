@@ -157,11 +157,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Vérifie si l'utilisateur a une session active
+     * Vérifie si l'utilisateur est un serveur (Servant)
      */
-    public function hasActiveSession(): bool
+    public function isServant(): bool
     {
-        return $this->activeCashierSession !== null;
+        return $this->role === 'Servant';
     }
 
     /**
@@ -177,6 +177,8 @@ class User extends Authenticatable
             $permissions = ['manage_users', 'view_reports', 'manage_settings'];
         } elseif ($this->isReceptionist() || $this->isCashier()) {
             $permissions = ['manage_bookings', 'process_payments', 'view_cashier_dashboard'];
+        } elseif ($this->isServant()) {
+            $permissions = ['manage_restaurant', 'view_cashier_dashboard', 'process_payments'];
         } elseif ($this->isCustomer()) {
             $permissions = ['view_bookings', 'make_payments'];
         }
@@ -307,6 +309,7 @@ class User extends Authenticatable
             'Receptionist' => 'Réceptionniste',
             'Cashier' => 'Caissier',
             'Housekeeping' => 'Housekeeping',
+            'Servant' => 'Serveur',
             'Customer' => 'Client',
         ];
 
@@ -324,6 +327,7 @@ class User extends Authenticatable
             'Receptionist' => 'fas fa-concierge-bell',
             'Cashier' => 'fas fa-cash-register',
             'Housekeeping' => 'fas fa-broom',
+            'Servant' => 'fas fa-utensils',
             'Customer' => 'fas fa-user',
         ];
 
@@ -341,6 +345,7 @@ class User extends Authenticatable
             'Receptionist' => 'info',
             'Cashier' => 'success',
             'Housekeeping' => 'warning',
+            'Servant' => 'info',
             'Customer' => 'secondary',
         ];
 

@@ -3,7 +3,7 @@
 namespace App\Repositories\Implementation;
 
 use App\Models\User;
-use App\Repositories\Interface\UserRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Str;
 
 class UserRepository implements UserRepositoryInterface

@@ -361,6 +361,9 @@
                             @if ($user->role == 'Housekeeping')
                                 <option value="Housekeeping" @if ($user->role == 'Housekeeping') selected @endif>Housekeeping</option>
                             @endif
+                            @if ($user->role == 'Servant')
+                                <option value="Servant" @if ($user->role == 'Servant') selected @endif>Serveur</option>
+                            @endif
                         </select>
                         @error('role')
                             <div class="text-danger">

@@ -138,7 +138,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super']], function () {
 });
 
 // ==================== ROUTES ADMIN + RÉCEPTIONNISTES (AVEC RESTRICTIONS) ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'admin.restrict', 'receptionist.restrict']], function () {
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Servant', 'admin.restrict', 'receptionist.restrict']], function () {
 
     // ==================== IMAGES ====================
     Route::post('/room/{room}/image/upload', [ImageController::class, 'store'])->name('image.store')
@@ -406,7 +406,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
 });
 
 // ==================== ROUTES POUR TOUS LES UTILISATEURS AUTHENTIFIÉS ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist']], function () {
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant']], function () {
     // ==================== DASHBOARD ====================
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('index');
@@ -518,7 +518,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
 });
 
 // ==================== DISPONIBILITÉ DES CHAMBRES ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist']], function () {
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant']], function () {
     Route::prefix('availability')->name('availability.')->group(function () {
         // Routes sans paramètres d'abord
         Route::get('/dashboard', [AvailabilityController::class, 'dashboard'])->name('dashboard');
