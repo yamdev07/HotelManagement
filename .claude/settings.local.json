@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php vendor/bin/phpunit tests/Unit --colors=never)",
+      "Bash(php artisan *)"
+    ]
+  }
+}

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -42,11 +43,12 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'email_verified_at' => 'datetime',
-        'last_login_at' => 'datetime',
-        'is_active' => 'boolean',
-        'login_attempts' => 'integer',
+        'email_verified_at'  => 'datetime',
+        'last_login_at'      => 'datetime',
         'last_login_attempt' => 'datetime',
+        'is_active'          => 'boolean',
+        'login_attempts'     => 'integer',
+        'role'               => UserRole::class,
     ];
 
     /**
@@ -84,28 +86,19 @@ class User extends Authenticatable
         return $this->hasOne(Customer::class);
     }
 
-    /**
-     * Vérifie si l'utilisateur est un client.
-     */
     public function isCustomer(): bool
     {
-        return $this->role === 'Customer';
+        return $this->role === UserRole::Customer;
     }
 
-    /**
-     * Vérifie si l'utilisateur est un admin ou super-admin.
-     */
     public function isAdmin(): bool
     {
-        return in_array($this->role, ['Admin', 'Super']);
+        return in_array($this->role, [UserRole::Admin, UserRole::Super]);
     }
 
-    /**
-     * Vérifie si l'utilisateur est super-admin.
-     */
     public function isSuper(): bool
     {
-        return $this->role === 'Super';
+        return $this->role === UserRole::Super;
     }
 
     /**
@@ -126,29 +119,19 @@ class User extends Authenticatable
             ->first();
     }
 
-    /**
-     * Vérifie si l'utilisateur peut démarrer une session
-     */
     public function canStartSession(): bool
     {
-        return ! $this->activeCashierSession &&
-            in_array($this->role, ['Receptionist', 'Admin', 'Super', 'Cashier']);
+        return ! $this->activeCashierSession && $this->role?->canProcessPayments();
     }
 
-    /**
-     * Vérifie si l'utilisateur est un réceptionniste
-     */
     public function isReceptionist(): bool
     {
-        return $this->role === 'Receptionist';
+        return $this->role === UserRole::Receptionist;
     }
 
-    /**
-     * Vérifie si l'utilisateur est un caissier
-     */
     public function isCashier(): bool
     {
-        return $this->role === 'Cashier';
+        return $this->role === UserRole::Cashier;
     }
 
     /**
@@ -159,24 +142,15 @@ class User extends Authenticatable
         return $this->activeCashierSession !== null;
     }
 
-    /**
-     * Les permissions de l'utilisateur
-     */
     public function getPermissionsAttribute(): array
     {
-        $permissions = [];
-
-        if ($this->isSuper()) {
-            $permissions = ['all'];
-        } elseif ($this->isAdmin()) {
-            $permissions = ['manage_users', 'view_reports', 'manage_settings'];
-        } elseif ($this->isReceptionist() || $this->isCashier()) {
-            $permissions = ['manage_bookings', 'process_payments', 'view_cashier_dashboard'];
-        } elseif ($this->isCustomer()) {
-            $permissions = ['view_bookings', 'make_payments'];
-        }
-
-        return $permissions;
+        return match (true) {
+            $this->isSuper()                        => ['all'],
+            $this->isAdmin()                        => ['manage_users', 'view_reports', 'manage_settings'],
+            $this->isReceptionist() || $this->isCashier() => ['manage_bookings', 'process_payments', 'view_cashier_dashboard'],
+            $this->isCustomer()                     => ['view_bookings', 'make_payments'],
+            default                                 => [],
+        };
     }
 
     /**
@@ -267,115 +241,51 @@ class User extends Authenticatable
         return $query->where('is_active', true);
     }
 
-    /**
-     * Scope pour les utilisateurs par rôle
-     */
-    public function scopeByRole($query, $role)
+    public function scopeByRole($query, UserRole|string $role): mixed
     {
-        return $query->where('role', $role);
+        $value = $role instanceof UserRole ? $role->value : $role;
+        return $query->where('role', $value);
     }
 
-    /**
-     * Scope pour les administrateurs
-     */
-    public function scopeAdmins($query)
+    public function scopeAdmins($query): mixed
     {
-        return $query->whereIn('role', ['Admin', 'Super']);
+        return $query->whereIn('role', [UserRole::Admin->value, UserRole::Super->value]);
     }
 
-    /**
-     * Scope pour le personnel
-     */
-    public function scopeStaff($query)
+    public function scopeStaff($query): mixed
     {
-        return $query->whereIn('role', ['Admin', 'Super', 'Receptionist', 'Cashier', 'Housekeeping']);
+        return $query->whereIn('role', UserRole::staffValues());
     }
 
-    /**
-     * Obtenir le rôle formaté
-     */
-    public function getFormattedRoleAttribute()
+    public function getFormattedRoleAttribute(): string
     {
-        $roles = [
-            'Super' => 'Super Admin',
-            'Admin' => 'Administrateur',
-            'Receptionist' => 'Réceptionniste',
-            'Cashier' => 'Caissier',
-            'Housekeeping' => 'Housekeeping',
-            'Customer' => 'Client',
-        ];
-
-        return $roles[$this->role] ?? $this->role;
+        return $this->role?->label() ?? (string) $this->role;
     }
 
-    /**
-     * Obtenir l'icône du rôle
-     */
-    public function getRoleIconAttribute()
+    public function getRoleIconAttribute(): string
     {
-        $icons = [
-            'Super' => 'fas fa-crown',
-            'Admin' => 'fas fa-user-shield',
-            'Receptionist' => 'fas fa-concierge-bell',
-            'Cashier' => 'fas fa-cash-register',
-            'Housekeeping' => 'fas fa-broom',
-            'Customer' => 'fas fa-user',
-        ];
-
-        return $icons[$this->role] ?? 'fas fa-user';
+        return $this->role?->icon() ?? 'fas fa-user';
     }
 
-    /**
-     * Obtenir la couleur du rôle
-     */
-    public function getRoleColorAttribute()
+    public function getRoleColorAttribute(): string
     {
-        $colors = [
-            'Super' => 'danger',
-            'Admin' => 'primary',
-            'Receptionist' => 'info',
-            'Cashier' => 'success',
-            'Housekeeping' => 'warning',
-            'Customer' => 'secondary',
-        ];
-
-        return $colors[$this->role] ?? 'secondary';
+        return $this->role?->color() ?? 'secondary';
     }
 
-    /**
-     * Vérifier si l'utilisateur peut modifier un autre utilisateur
-     */
     public function canEditUser(User $targetUser): bool
     {
-        if ($this->id === $targetUser->id) {
-            return true; // Peut modifier son propre profil
-        }
-
-        if ($this->isSuper()) {
-            return true; // Super admin peut modifier tout le monde
-        }
-
-        if ($this->isAdmin() && ! $targetUser->isSuper()) {
-            return true; // Admin peut modifier sauf les super admins
-        }
+        if ($this->id === $targetUser->id) return true;
+        if ($this->isSuper()) return true;
+        if ($this->isAdmin() && ! $targetUser->isSuper()) return true;
 
         return false;
     }
 
-    /**
-     * Vérifier si l'utilisateur peut supprimer un autre utilisateur
-     */
     public function canDeleteUser(User $targetUser): bool
     {
-        if ($this->id === $targetUser->id) {
-            return false; // Ne peut pas se supprimer soi-même
-        }
+        if ($this->id === $targetUser->id) return false;
 
-        if ($this->isSuper() && ! $targetUser->isSuper()) {
-            return true; // Super admin peut supprimer sauf les autres super admins
-        }
-
-        return false;
+        return $this->isSuper() && ! $targetUser->isSuper();
     }
 
     /**
@@ -456,11 +366,16 @@ class User extends Authenticatable
             });
     }
 
-    /**
-     * Vérifier si l'avatar est l'avatar par défaut
-     */
     public function hasDefaultAvatar(): bool
     {
         return ! $this->avatar || str_contains($this->avatar, 'default-user.jpg');
+    }
+
+    /**
+     * Renvoie la valeur string du rôle (compatible avec les comparaisons dans les vues).
+     */
+    public function getRoleValueAttribute(): string
+    {
+        return $this->role instanceof UserRole ? $this->role->value : (string) $this->role;
     }
 }
