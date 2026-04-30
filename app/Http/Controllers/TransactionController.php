@@ -513,6 +513,16 @@ class TransactionController extends Controller
         ]);
     }
 
+    public function lateCheckoutStatus(Transaction $transaction)
+    {
+        $this->authorize('view', $transaction);
+
+        return response()->json([
+            'success' => true,
+            'data'    => $transaction->getLateCheckoutPaymentStatus(),
+        ]);
+    }
+
     public function markAsArrived(Transaction $transaction)
     {
         $this->authorize('updateStatus', Transaction::class);
