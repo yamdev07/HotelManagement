@@ -876,9 +876,12 @@ class Transaction extends Model
         $hasLateCheckout = $this->late_checkout ?? false;
         $lateFee = (float) ($this->late_checkout_fee ?? 0);
         
-        // 3. Calculer le total des commandes restaurant (hors commandes payées directement)
+        // 3. Calculer le total des commandes restaurant sur facture chambre (uniquement livrées)
+        // Les commandes en attente/préparation ne sont pas encore sur la facture.
+        // Les commandes payées directement (non room_charge) ne s'ajoutent pas non plus.
         $restaurantTotal = $this->restaurantOrders()
-            ->whereNotIn('status', ['paid', 'cancelled'])
+            ->where('payment_method', 'room_charge')
+            ->where('status', 'delivered')
             ->sum('total');
 
         // 4. Calculer le total des extras (minibar, lessive, services)
@@ -905,7 +908,7 @@ class Transaction extends Model
             $this->saveQuietly();
         }
         
-        return (float) ($this->total_price ?? $totalWithExtras);
+        return (float) $totalWithExtras;
     }
 
     /**
@@ -1115,6 +1118,28 @@ class Transaction extends Model
                 'total_payment' => $totalPaid,
                 'remaining' => $this->getRemainingPayment(),
             ]);
+
+            // Auto-marquer les commandes restaurant "room_charge" livrées comme "payées"
+            // si la transaction est entièrement soldée (solde restant <= 0)
+            if ($this->getRemainingPayment() <= 0) {
+                $this->restaurantOrders()
+                    ->where('payment_method', 'room_charge')
+                    ->where('status', 'delivered')
+                    ->update(['status' => 'paid']);
+
+                Log::info("Commandes restaurant de la transaction #{$this->id} marquées comme payées.");
+            } else {
+                // Si le solde redevient positif (ex: annulation de paiement), 
+                // on remet les commandes "room_charge" en "delivered"
+                $updatedCount = $this->restaurantOrders()
+                    ->where('payment_method', 'room_charge')
+                    ->where('status', 'paid')
+                    ->update(['status' => 'delivered']);
+
+                if ($updatedCount > 0) {
+                    Log::info("{$updatedCount} commandes restaurant de la transaction #{$this->id} remises en 'Livré' (Solde positif).");
+                }
+            }
 
             return (float) $totalPaid;
 

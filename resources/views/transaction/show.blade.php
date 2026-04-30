@@ -1149,6 +1149,61 @@
                         </div>
                     </div>
 
+                    <!-- Consommations Restaurant (Room Charge) -->
+                    @php
+                        $restOrders = $transaction->restaurantOrders()->where('payment_method', 'room_charge')->get();
+                        $restTotal = $restOrders->where('status', 'delivered')->sum('total');
+                    @endphp
+                    
+                    @if($restOrders->count() > 0)
+                    <div class="divider"></div>
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="mb-3" style="font-weight: 600; color: var(--gray-700);">
+                                <i class="fas fa-utensils me-2 text-primary"></i>Consommations Restaurant (Facture Chambre)
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-hover border-0">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th class="border-0 small text-muted">ID</th>
+                                            <th class="border-0 small text-muted">Date</th>
+                                            <th class="border-0 small text-muted">Statut</th>
+                                            <th class="border-0 small text-muted text-end">Montant</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($restOrders as $ro)
+                                        <tr>
+                                            <td class="align-middle">#{{ $ro->id }}</td>
+                                            <td class="align-middle">{{ $ro->created_at->format('d/m/H:i') }}</td>
+                                            <td class="align-middle">
+                                                @if($ro->status === 'delivered')
+                                                    <span class="badge bg-success-subtle text-success px-2 py-1">Livré (Sur facture)</span>
+                                                @elseif($ro->status === 'paid')
+                                                    <span class="badge bg-primary-subtle text-primary px-2 py-1">Payé</span>
+                                                @elseif($ro->status === 'cancelled')
+                                                    <span class="badge bg-danger-subtle text-danger px-2 py-1">Annulé</span>
+                                                @else
+                                                    <span class="badge bg-warning-subtle text-warning px-2 py-1">{{ $ro->status }} (Non facturé)</span>
+                                                @endif
+                                            </td>
+                                            <td class="align-middle text-end fw-bold text-dark">{{ number_format($ro->total, 0, ',', ' ') }} CFA</td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                    <tfoot class="border-top">
+                                        <tr>
+                                            <td colspan="3" class="text-end small text-muted">Total ajouté à la facture :</td>
+                                            <td class="text-end fw-bold text-primary">{{ number_format($restTotal, 0, ',', ' ') }} CFA</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     <!-- Liste des paiements -->
                     @if($payments && $payments->count() > 0)
                         <p class="detail-label mb-3">Historique des paiements</p>

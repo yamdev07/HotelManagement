@@ -28,7 +28,7 @@ class PaymentController extends Controller
         }
 
         if ($request->filled('method')) {
-            $query->where('payment_method', $request->method);
+            $query->where('payment_method', $request->input('method'));
         }
 
         if ($request->filled('search')) {
@@ -730,8 +730,7 @@ class PaymentController extends Controller
 
             // Recalculer le total de la transaction
             if ($transaction) {
-                $transaction->updatePaymentStatus();
-                $transaction->refresh();
+                $this->forceUpdateTransactionTotals($transaction);
             }
 
             // Journalisation
@@ -798,8 +797,7 @@ class PaymentController extends Controller
 
             // Recalculer le total de la transaction
             if ($payment->transaction) {
-                $payment->transaction->updatePaymentStatus();
-                $payment->transaction->refresh();
+                $this->forceUpdateTransactionTotals($payment->transaction);
             }
 
             // Journalisation
@@ -899,7 +897,7 @@ class PaymentController extends Controller
             ->orderBy('created_at', 'DESC');
 
         if ($request->filled('method')) {
-            $query->where('payment_method', $request->method);
+            $query->where('payment_method', $request->input('method'));
         }
 
         if ($request->filled('status')) {

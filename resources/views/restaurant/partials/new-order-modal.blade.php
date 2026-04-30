@@ -708,6 +708,7 @@ function initNomModal() {
     let nomStep = 1;
     let nomItems = JSON.parse(localStorage.getItem('restaurant_cart') || '{}');
     let nomMode  = 'existing'; // 'existing' | 'new'
+    let selectedCustomerRoom = ''; // Numéro de chambre du client sélectionné
 
     /* Toggle client existant / nouveau */
     $('#tog-existing').click(function(){
@@ -761,6 +762,7 @@ function initNomModal() {
         
         // Mettre à jour l'affichage de facturation chambre
         const billingMsg = $('#room-billing-display');
+        selectedCustomerRoom = room || ''; // Stocker pour l'envoi
         if (room) {
             billingMsg.text(`Garantie sur Chambre ${room} (${name})`).removeClass('text-warning').addClass('text-success');
         } else {
@@ -1056,7 +1058,7 @@ function initNomModal() {
             $('#h-phone').val(sel.data('phone') || '');
             $('#h-email').val(sel.data('email') || '');
             // Si facturation chambre → envoyer le numéro de chambre pour lier à la transaction
-            $('#h-room').val(billing === 'room' ? (sel.data('room') || '') : '');
+            $('#h-room').val(billing === 'room' ? selectedCustomerRoom : '');
         } else {
             $('#h-customer-id').val('');
             $('#h-customer-name').val(($('#n-prenom').val()+' '+$('#n-nom').val()).trim());

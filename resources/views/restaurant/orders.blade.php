@@ -293,14 +293,18 @@
                                 </button>
                                 @endif
 
-                                {{-- Payer (pending ou delivered → paid) --}}
-                                @if(in_array($order->status, ['delivered', 'pending']))
+                                {{-- Payer (pending ou delivered → paid) -- Uniquement si paiement direct --}}
+                                @if(in_array($order->status, ['delivered', 'pending']) && $order->payment_method !== 'room_charge')
                                 <button class="btn btn-sm btn-primary change-status"
                                         title="Marquer comme payé"
                                         data-order-id="{{ $order->id }}"
                                         data-status="paid">
                                     <i class="fas fa-money-bill-wave"></i>
                                 </button>
+                                @elseif($order->status === 'delivered' && $order->payment_method === 'room_charge')
+                                <span class="badge bg-info" title="Sera payé via la facture chambre">
+                                    <i class="fas fa-hotel"></i> Sur facture
+                                </span>
                                 @endif
 
                                 {{-- Annuler (si pas déjà payé ou annulé) --}}
@@ -399,6 +403,47 @@ $(document).ready(function() {
         else url.searchParams.delete('from');
         
         window.location.href = url.toString();
+    });
+
+    // Changement de statut
+    $(document).on('click', '.change-status', function() {
+        const orderId = $(this).data('order-id');
+        const status = $(this).data('status');
+        $.post(`/restaurant/orders/${orderId}/status`, { status }, function() {
+            location.reload();
+        }).fail(function(xhr) {
+            const msg = xhr.responseJSON?.message || 'Erreur lors du changement de statut.';
+            Swal.fire({ icon: 'warning', title: 'Action impossible', text: msg });
+        });
+    });
+
+    // Annulation de commande
+    $(document).on('click', '.cancel-order', function() {
+        const orderId = $(this).data('order-id');
+        Swal.fire({
+            title: 'Êtes-vous sûr ?',
+            text: "Cette commande sera annulée.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Oui, annuler',
+            cancelButtonText: 'Non'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: `/restaurant/orders/${orderId}/cancel`,
+                    type: 'PUT',
+                    success: function() {
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        const msg = xhr.responseJSON?.message || 'Erreur lors de l\'annulation.';
+                        Swal.fire('Erreur', msg, 'error');
+                    }
+                });
+            }
+        });
     });
 
     // Afficher les détails

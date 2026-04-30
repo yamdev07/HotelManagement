@@ -251,12 +251,8 @@ class RestaurantController extends Controller
                 ]);
             }
 
-            if ($transactionId) {
-                $transaction = Transaction::find($transactionId);
-                if ($transaction) {
-                    $transaction->update(['total_price' => $transaction->getTotalPrice()]);
-                }
-            }
+            // Ne PAS encore mettre à jour le total de la transaction à la création.
+            // Le montant sera ajouté à la facture uniquement quand la commande sera "livrée".
 
             DB::commit();
 
@@ -285,7 +281,34 @@ class RestaurantController extends Controller
             'status' => 'required|in:pending,preparing,delivered,paid,cancelled',
         ]);
 
-        $order->update(['status' => $request->status]);
+        $newStatus = $request->status;
+
+        // Règle : les commandes "sur chambre" ne peuvent pas être manuellement marquées "payées"
+        if ($newStatus === 'paid' && $order->payment_method === 'room_charge') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Cette commande est sur facture chambre. Elle sera marquée payée automatiquement lors du règlement de la transaction.'
+            ], 422);
+        }
+
+        $order->update(['status' => $newStatus]);
+
+        // Règle : quand la commande passe en "livré", on ajoute son montant à la facture (si room_charge)
+        if ($newStatus === 'delivered' && $order->payment_method === 'room_charge' && $order->transaction_id) {
+            $transaction = Transaction::find($order->transaction_id);
+            if ($transaction) {
+                $transaction->update(['total_price' => $transaction->getTotalPrice()]);
+                $transaction->updatePaymentStatus(); // Vérifier si le solde reste à 0 (déjà payé d'avance)
+            }
+        }
+
+        // Règle : si la commande est annulée et était livrée (donc déjà sur la facture), recalculer
+        if ($newStatus === 'cancelled' && $order->payment_method === 'room_charge' && $order->transaction_id) {
+            $transaction = Transaction::find($order->transaction_id);
+            if ($transaction) {
+                $transaction->update(['total_price' => $transaction->getTotalPrice()]);
+            }
+        }
 
         return response()->json(['success' => true]);
     }
@@ -382,7 +405,6 @@ class RestaurantController extends Controller
             if ($room) {
                 $transaction = Transaction::where('room_id', $room->id)
                     ->whereIn('status', ['active', 'pending_checkout'])
-                    ->where('check_out', '>=', now())
                     ->latest()
                     ->first();
 
