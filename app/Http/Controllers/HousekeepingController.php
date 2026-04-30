@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Enums\RoomStatus;
 use App\Models\Room;
+use App\Models\Transaction;
+use App\Models\User;
 use App\Services\HousekeepingService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
@@ -328,6 +331,359 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('completeInspection: '.$e->getMessage());
             return back()->with('error', "Erreur lors de la fin d'inspection: ".$e->getMessage());
+        }
+    }
+
+    public function cleanRoom(Room $room)
+    {
+        try {
+            $newStatus = $this->housekeeping->finishCleaning($room, Auth::id());
+            $statusText = $newStatus === RoomStatus::Available ? 'Disponible' : 'Occupée';
+            return back()->with('success', "Chambre {$room->number} marquée comme propre. Statut: {$statusText}");
+        } catch (\Throwable $e) {
+            Log::error('cleanRoom: '.$e->getMessage());
+            return back()->with('error', 'Erreur: '.$e->getMessage());
+        }
+    }
+
+    public function markAsCleaned(Room $room)
+    {
+        return $this->cleanRoom($room);
+    }
+
+    public function viewCheckins()
+    {
+        try {
+            $checkins = $this->housekeeping->getTodayArrivals();
+            return view('housekeeping.index', [
+                'roomsByStatus'   => $this->housekeeping->getRoomsByStatus(),
+                'stats'           => $this->housekeeping->getStats($this->housekeeping->getRoomsByStatus()),
+                'todayArrivals'   => $checkins,
+                'todayDepartures' => collect(),
+            ]);
+        } catch (\Throwable $e) {
+            return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
+        }
+    }
+
+    public function viewCheckouts()
+    {
+        try {
+            $checkouts = $this->housekeeping->getTodayDepartures();
+            return view('housekeeping.index', [
+                'roomsByStatus'   => $this->housekeeping->getRoomsByStatus(),
+                'stats'           => $this->housekeeping->getStats($this->housekeeping->getRoomsByStatus()),
+                'todayDepartures' => $checkouts,
+                'todayArrivals'   => collect(),
+            ]);
+        } catch (\Throwable $e) {
+            return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
+        }
+    }
+
+    public function todaySchedule()
+    {
+        try {
+            $roomsByStatus   = $this->housekeeping->getRoomsByStatus();
+            $stats           = $this->housekeeping->getStats($roomsByStatus);
+            $todayDepartures = $this->housekeeping->getTodayDepartures();
+            $todayArrivals   = $this->housekeeping->getTodayArrivals();
+            return view('housekeeping.index', compact('roomsByStatus', 'stats', 'todayDepartures', 'todayArrivals'));
+        } catch (\Throwable $e) {
+            return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
+        }
+    }
+
+    public function roomStatus(Room $room)
+    {
+        return response()->json([
+            'success' => true,
+            'data'    => [
+                'id'         => $room->id,
+                'number'     => $room->number,
+                'status_id'  => $room->room_status_id,
+                'status'     => optional($room->roomStatus)->name,
+                'is_occupied' => $this->housekeeping->isRoomOccupied($room->id),
+            ],
+        ]);
+    }
+
+    public function occupiedRooms()
+    {
+        try {
+            $rooms = Room::with(['type', 'roomStatus'])
+                ->where('room_status_id', RoomStatus::Occupied->value)
+                ->orderBy('number')->get();
+            $roomsByStatus   = $this->housekeeping->getRoomsByStatus();
+            $stats           = $this->housekeeping->getStats($roomsByStatus);
+            $todayDepartures = $this->housekeeping->getTodayDepartures();
+            $todayArrivals   = $this->housekeeping->getTodayArrivals();
+            return view('housekeeping.index', compact('roomsByStatus', 'stats', 'todayDepartures', 'todayArrivals'));
+        } catch (\Throwable $e) {
+            return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
+        }
+    }
+
+    public function checkinsToday()
+    {
+        $count = Transaction::whereIn('status', ['reservation', 'confirmed'])
+            ->whereDate('check_in', Carbon::today())->count();
+        return response()->json(['success' => true, 'count' => $count]);
+    }
+
+    public function checkoutsToday()
+    {
+        $count = Transaction::whereIn('status', ['active', 'checked_in'])
+            ->whereDate('check_out', Carbon::today())->count();
+        return response()->json(['success' => true, 'count' => $count]);
+    }
+
+    public function stats()
+    {
+        try {
+            $roomsByStatus = $this->housekeeping->getRoomsByStatus();
+            $stats         = $this->housekeeping->getStats($roomsByStatus);
+            return redirect()->route('housekeeping.index')->with(compact('stats'));
+        } catch (\Throwable $e) {
+            return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
+        }
+    }
+
+    public function schedule()
+    {
+        return $this->todaySchedule();
+    }
+
+    public function dailyReport(Request $request)
+    {
+        try {
+            $today = Carbon::today();
+
+            $cleanedToday = Room::with(['type', 'roomStatus'])
+                ->whereDate('last_cleaned_at', $today)
+                ->get();
+
+            $toClean = Room::with(['type', 'roomStatus', 'activeTransactions'])
+                ->where(function ($q) {
+                    $q->where('room_status_id', RoomStatus::Dirty->value)
+                        ->orWhere('room_status_id', RoomStatus::Cleaning->value);
+                })->orderBy('number')->get();
+
+            $cleanedByUser = [];
+            if (Schema::hasColumn('rooms', 'cleaned_by')) {
+                $cleanedByUser = DB::table('rooms')
+                    ->select('cleaned_by', DB::raw('count(*) as count'))
+                    ->whereDate('last_cleaned_at', $today)
+                    ->whereNotNull('cleaned_by')
+                    ->groupBy('cleaned_by')
+                    ->pluck('count', 'cleaned_by')
+                    ->toArray();
+            }
+
+            $stats = [
+                'cleaned_today'   => $cleanedToday->count(),
+                'to_clean'        => $toClean->count(),
+                'cleaned_by_user' => $cleanedByUser,
+            ];
+
+            return view('housekeeping.daily-report', compact('today', 'stats', 'cleanedToday', 'toClean'));
+        } catch (\Throwable $e) {
+            Log::error('dailyReport: '.$e->getMessage());
+            return back()->with('error', 'Erreur: '.$e->getMessage());
+        }
+    }
+
+    public function reports(Request $request)
+    {
+        try {
+            $date = $request->filled('date') ? Carbon::parse($request->date) : Carbon::today();
+
+            $cleanedRooms = Room::with(['type', 'roomStatus'])
+                ->whereDate('last_cleaned_at', $date)
+                ->orderBy('number')->get();
+
+            $cleanedByUser = collect();
+            if (Schema::hasColumn('rooms', 'cleaned_by')) {
+                $cleanedByUser = DB::table('rooms')
+                    ->join('users', 'rooms.cleaned_by', '=', 'users.id')
+                    ->select('users.name', DB::raw('count(*) as cleaned_count'))
+                    ->whereDate('rooms.last_cleaned_at', $date)
+                    ->whereNotNull('rooms.cleaned_by')
+                    ->groupBy('users.id', 'users.name')
+                    ->get();
+            }
+
+            $staff = User::whereIn('role', ['Housekeeping', 'Admin', 'Super'])->orderBy('name')->get();
+            $types = \App\Models\Type::orderBy('name')->get();
+
+            $availableDates = DB::table('rooms')
+                ->selectRaw('DATE(last_cleaned_at) as date')
+                ->whereNotNull('last_cleaned_at')
+                ->groupByRaw('DATE(last_cleaned_at)')
+                ->orderByRaw('DATE(last_cleaned_at) DESC')
+                ->limit(30)
+                ->get();
+
+            return view('housekeeping.reports', compact('cleanedRooms', 'cleanedByUser', 'staff', 'types', 'availableDates', 'date'));
+        } catch (\Throwable $e) {
+            Log::error('reports: '.$e->getMessage());
+            return back()->with('error', 'Erreur: '.$e->getMessage());
+        }
+    }
+
+    public function monthlyStats(Request $request)
+    {
+        try {
+            $selectedMonth = $request->filled('month')
+                ? Carbon::parse($request->month . '-01')
+                : Carbon::now()->startOfMonth();
+
+            $topCleaners = collect();
+            if (Schema::hasColumn('rooms', 'cleaned_by')) {
+                $topCleaners = DB::table('rooms')
+                    ->join('users', 'rooms.cleaned_by', '=', 'users.id')
+                    ->select('users.id', 'users.name', DB::raw('count(*) as cleaned_count'))
+                    ->whereYear('rooms.last_cleaned_at', $selectedMonth->year)
+                    ->whereMonth('rooms.last_cleaned_at', $selectedMonth->month)
+                    ->whereNotNull('rooms.cleaned_by')
+                    ->groupBy('users.id', 'users.name')
+                    ->orderByDesc('cleaned_count')
+                    ->limit(10)
+                    ->get();
+            }
+
+            $mostCleanedRooms = DB::table('rooms')
+                ->select('rooms.id', 'rooms.number', DB::raw('count(*) as cleaned_count'))
+                ->whereYear('last_cleaned_at', $selectedMonth->year)
+                ->whereMonth('last_cleaned_at', $selectedMonth->month)
+                ->groupBy('rooms.id', 'rooms.number')
+                ->orderByDesc('cleaned_count')
+                ->limit(10)
+                ->get();
+
+            $availableMonths = DB::table('rooms')
+                ->selectRaw("DATE_FORMAT(last_cleaned_at, '%Y-%m') as month")
+                ->whereNotNull('last_cleaned_at')
+                ->groupByRaw("DATE_FORMAT(last_cleaned_at, '%Y-%m')")
+                ->orderByRaw("DATE_FORMAT(last_cleaned_at, '%Y-%m') DESC")
+                ->limit(24)
+                ->pluck('month');
+
+            $monthlyStats = DB::table('rooms')
+                ->selectRaw("DATE(last_cleaned_at) as date, count(*) as cleaned_count")
+                ->whereYear('last_cleaned_at', $selectedMonth->year)
+                ->whereMonth('last_cleaned_at', $selectedMonth->month)
+                ->groupByRaw('DATE(last_cleaned_at)')
+                ->orderByRaw('DATE(last_cleaned_at)')
+                ->get();
+
+            $bestDay = $monthlyStats->sortByDesc('cleaned_count')->first();
+
+            return view('housekeeping.monthly-stats', compact(
+                'selectedMonth', 'topCleaners', 'mostCleanedRooms',
+                'availableMonths', 'monthlyStats', 'bestDay'
+            ));
+        } catch (\Throwable $e) {
+            Log::error('monthlyStats: '.$e->getMessage());
+            return back()->with('error', 'Erreur: '.$e->getMessage());
+        }
+    }
+
+    public function scanApi(Request $request)
+    {
+        $request->validate([
+            'room_number' => 'required|string|max:10',
+            'action'      => 'required|in:start-cleaning,finish-cleaning,maintenance,clean',
+        ]);
+
+        $room = Room::where('number', $request->room_number)->first();
+
+        if (! $room) {
+            return response()->json(['success' => false, 'message' => 'Chambre '.$request->room_number.' non trouvée'], 404);
+        }
+
+        try {
+            match ($request->action) {
+                'start-cleaning'  => $this->housekeeping->startCleaning($room, Auth::id()),
+                'finish-cleaning', 'clean' => $this->housekeeping->finishCleaning($room, Auth::id()),
+                'maintenance'     => $room->update(['room_status_id' => RoomStatus::Maintenance->value]),
+            };
+
+            return response()->json([
+                'success' => true,
+                'message' => "Action effectuée pour la chambre {$room->number}",
+                'room'    => ['id' => $room->id, 'number' => $room->number],
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function assignCleaner(Request $request)
+    {
+        $request->validate([
+            'room_id'    => 'required|exists:rooms,id',
+            'cleaner_id' => 'required|exists:users,id',
+        ]);
+
+        try {
+            $room = Room::findOrFail($request->room_id);
+            $data = [];
+            if (Schema::hasColumn('rooms', 'cleaned_by')) {
+                $data['cleaned_by'] = $request->cleaner_id;
+            }
+            if (! empty($data)) {
+                $room->update($data);
+            }
+            return back()->with('success', "Nettoyeur assigné à la chambre {$room->number}");
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Erreur: '.$e->getMessage());
+        }
+    }
+
+    public function updatePriority(Request $request)
+    {
+        $request->validate([
+            'room_id'  => 'required|exists:rooms,id',
+            'priority' => 'required|in:high,medium,low',
+        ]);
+
+        try {
+            $room = Room::findOrFail($request->room_id);
+            if (Schema::hasColumn('rooms', 'cleaning_priority')) {
+                $room->update(['cleaning_priority' => $request->priority]);
+            }
+            return back()->with('success', "Priorité mise à jour pour la chambre {$room->number}");
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Erreur: '.$e->getMessage());
+        }
+    }
+
+    public function export(Request $request)
+    {
+        try {
+            $date  = $request->filled('date') ? Carbon::parse($request->date) : Carbon::today();
+            $rooms = Room::with(['type', 'roomStatus'])
+                ->whereDate('last_cleaned_at', $date)
+                ->orderBy('number')->get();
+
+            $csv  = "Chambre,Type,Statut,Nettoyée le,Nettoyée par\n";
+            foreach ($rooms as $room) {
+                $csv .= implode(',', [
+                    $room->number,
+                    optional($room->type)->name ?? '',
+                    optional($room->roomStatus)->name ?? '',
+                    $room->last_cleaned_at ?? '',
+                    $room->cleaned_by ?? '',
+                ])."\n";
+            }
+
+            return response($csv, 200, [
+                'Content-Type'        => 'text/csv',
+                'Content-Disposition' => 'attachment; filename="housekeeping-'.$date->format('Y-m-d').'.csv"',
+            ]);
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Erreur export: '.$e->getMessage());
         }
     }
 }
