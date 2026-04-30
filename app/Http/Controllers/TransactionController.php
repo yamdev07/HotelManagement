@@ -260,6 +260,259 @@ class TransactionController extends Controller
         }
     }
 
+    // -----------------------------------------------------------------------
+    // Vue invoice (impression)
+    // -----------------------------------------------------------------------
+
+    public function invoice(Transaction $transaction)
+    {
+        $this->authorize('view', $transaction);
+        $transaction->load(['customer.user', 'room.type', 'user', 'payments']);
+        return view('transaction.show', compact('transaction') + [
+            'payments'     => $transaction->payments,
+            'nights'       => $transaction->check_in->diffInDays($transaction->check_out),
+            'totalPrice'   => $transaction->getTotalPrice(),
+            'totalPayment' => $transaction->getTotalPayment(),
+            'remaining'    => $transaction->getRemainingPayment(),
+            'isFullyPaid'  => $transaction->isFullyPaid(),
+            'isExpired'    => $transaction->check_out->isPast(),
+            'canCancel'    => $transaction->canBeCancelled() || auth()->user()->isSuper(),
+            'printMode'    => true,
+        ]);
+    }
+
+    // -----------------------------------------------------------------------
+    // Historique des activités
+    // -----------------------------------------------------------------------
+
+    public function history(Transaction $transaction)
+    {
+        $this->authorize('view', $transaction);
+        $transaction->load(['customer.user', 'room.type', 'user', 'payments']);
+
+        $histories = \Spatie\Activitylog\Models\Activity::where('subject_type', Transaction::class)
+            ->where('subject_id', $transaction->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $payments = $transaction->payments()->orderByDesc('created_at')->get();
+
+        return view('transaction.history', compact('transaction', 'histories', 'payments'));
+    }
+
+    // -----------------------------------------------------------------------
+    // Réservations du client connecté
+    // -----------------------------------------------------------------------
+
+    public function myReservations(\Illuminate\Http\Request $request)
+    {
+        $customer = auth()->user()->customer;
+
+        $transactions = $customer
+            ? Transaction::where('customer_id', $customer->id)
+                ->whereNotIn('status', ['cancelled', 'completed', 'no_show'])
+                ->with(['room.type'])
+                ->orderByDesc('created_at')
+                ->get()
+            : collect();
+
+        $transactionsExpired = $customer
+            ? Transaction::where('customer_id', $customer->id)
+                ->whereIn('status', ['completed', 'cancelled', 'no_show'])
+                ->with(['room.type'])
+                ->orderByDesc('created_at')
+                ->get()
+            : collect();
+
+        return view('transaction.my-reservations', compact('transactions', 'transactionsExpired'));
+    }
+
+    // -----------------------------------------------------------------------
+    // Export CSV
+    // -----------------------------------------------------------------------
+
+    public function export(string $type)
+    {
+        $this->authorize('viewAny', Transaction::class);
+
+        $transactions = Transaction::with(['customer', 'room', 'user'])
+            ->orderByDesc('created_at')
+            ->get();
+
+        $filename = 'transactions_' . now()->format('Ymd_His') . '.csv';
+        $headers  = [
+            'Content-Type'        => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ];
+
+        $callback = function () use ($transactions) {
+            $out = fopen('php://output', 'w');
+            fprintf($out, chr(0xEF) . chr(0xBB) . chr(0xBF)); // BOM UTF-8
+            fputcsv($out, ['#', 'Client', 'Chambre', 'Arrivée', 'Départ', 'Statut', 'Prix total', 'Total payé', 'Reste'], ';');
+            foreach ($transactions as $tx) {
+                fputcsv($out, [
+                    $tx->id,
+                    optional($tx->customer)->name,
+                    optional($tx->room)->number,
+                    $tx->check_in?->format('d/m/Y'),
+                    $tx->check_out?->format('d/m/Y'),
+                    $tx->status_label,
+                    $tx->getTotalPrice(),
+                    $tx->getTotalPayment(),
+                    $tx->getRemainingPayment(),
+                ], ';');
+            }
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    // -----------------------------------------------------------------------
+    // Late checkout
+    // -----------------------------------------------------------------------
+
+    public function lateCheckout(\Illuminate\Http\Request $request, Transaction $transaction)
+    {
+        $this->authorize('update', $transaction);
+
+        $request->validate([
+            'expected_checkout_time' => ['required', 'string'],
+            'late_checkout_fee'      => ['required', 'numeric', 'min:0'],
+        ]);
+
+        $transaction->update([
+            'late_checkout'           => true,
+            'late_checkout_fee'       => $request->late_checkout_fee,
+            'expected_checkout_time'  => $request->expected_checkout_time,
+            'total_price'             => (float) $transaction->total_price + (float) $request->late_checkout_fee,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Late checkout enregistré.']);
+        }
+
+        return redirect()->back()->with('success', 'Late checkout enregistré.');
+    }
+
+    // -----------------------------------------------------------------------
+    // Early checkout
+    // -----------------------------------------------------------------------
+
+    public function earlyCheckout(\Illuminate\Http\Request $request, Transaction $transaction)
+    {
+        $this->authorize('update', $transaction);
+
+        $request->validate([
+            'new_check_out' => ['required', 'date', 'before_or_equal:' . $transaction->check_out->format('Y-m-d')],
+        ]);
+
+        $newCheckOut  = \Carbon\Carbon::parse($request->new_check_out)->endOfDay();
+        $nights       = $transaction->check_in->diffInDays($newCheckOut);
+        $newPrice     = max(1, $nights) * (float) optional($transaction->room)->price;
+
+        $transaction->update([
+            'check_out'   => $newCheckOut,
+            'total_price' => $newPrice,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success'    => true,
+                'message'    => 'Early checkout enregistré.',
+                'new_checkout' => $newCheckOut->format('d/m/Y'),
+                'new_price'  => $newPrice,
+            ]);
+        }
+
+        return redirect()->back()->with('success', 'Early checkout enregistré.');
+    }
+
+    // -----------------------------------------------------------------------
+    // AJAX helpers
+    // -----------------------------------------------------------------------
+
+    public function checkEarlyCheckoutPossibility(Transaction $transaction)
+    {
+        $this->authorize('view', $transaction);
+
+        return response()->json([
+            'possible'   => $transaction->isActive(),
+            'check_in'   => $transaction->check_in?->format('Y-m-d'),
+            'check_out'  => $transaction->check_out?->format('Y-m-d'),
+            'status'     => $transaction->status,
+            'is_active'  => $transaction->isActive(),
+        ]);
+    }
+
+    public function checkPaymentStatus(Transaction $transaction)
+    {
+        $this->authorize('view', $transaction);
+
+        $transaction->updatePaymentStatus();
+
+        return response()->json([
+            'total_price'   => (float) $transaction->total_price,
+            'total_payment' => $transaction->getTotalPayment(),
+            'remaining'     => $transaction->getRemainingPayment(),
+            'is_fully_paid' => $transaction->isFullyPaid(),
+            'status'        => $transaction->status,
+        ]);
+    }
+
+    public function checkIfCanComplete(Transaction $transaction)
+    {
+        $this->authorize('view', $transaction);
+
+        return response()->json([
+            'can_complete' => $transaction->canBeCheckedOut(),
+            'is_active'    => $transaction->isActive(),
+            'is_fully_paid' => $transaction->isFullyPaid(),
+            'remaining'    => $transaction->getRemainingPayment(),
+        ]);
+    }
+
+    public function checkAvailability(\Illuminate\Http\Request $request, Transaction $transaction)
+    {
+        $this->authorize('view', $transaction);
+
+        $request->validate([
+            'check_in'  => ['required', 'date'],
+            'check_out' => ['required', 'date', 'after:check_in'],
+        ]);
+
+        $available = Transaction::isRoomAvailableForPeriod(
+            $transaction->room_id,
+            $request->check_in,
+            $request->check_out,
+            $transaction->id
+        );
+
+        return response()->json(['available' => $available]);
+    }
+
+    public function showDetails(Transaction $transaction)
+    {
+        $this->authorize('view', $transaction);
+
+        $transaction->load(['customer.user', 'room.type', 'user', 'payments']);
+
+        return response()->json([
+            'id'            => $transaction->id,
+            'customer'      => optional($transaction->customer)->name,
+            'room'          => optional($transaction->room)->number,
+            'check_in'      => $transaction->check_in?->format('d/m/Y'),
+            'check_out'     => $transaction->check_out?->format('d/m/Y'),
+            'status'        => $transaction->status,
+            'status_label'  => $transaction->status_label,
+            'total_price'   => $transaction->getTotalPrice(),
+            'total_payment' => $transaction->getTotalPayment(),
+            'remaining'     => $transaction->getRemainingPayment(),
+            'is_fully_paid' => $transaction->isFullyPaid(),
+            'payments_count' => $transaction->payments->count(),
+        ]);
+    }
+
     public function markAsArrived(Transaction $transaction)
     {
         $this->authorize('updateStatus', Transaction::class);
