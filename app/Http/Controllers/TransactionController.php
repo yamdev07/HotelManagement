@@ -404,28 +404,54 @@ class TransactionController extends Controller
         $this->authorize('update', $transaction);
 
         $request->validate([
-            'new_check_out' => ['required', 'date', 'before_or_equal:' . $transaction->check_out->format('Y-m-d')],
+            'refund_policy'        => ['required', 'in:full,partial,none'],
+            'refund_amount'        => ['nullable', 'numeric', 'min:0'],
+            'payment_method'       => ['required', 'string'],
+            'early_checkout_reason'=> ['nullable', 'string', 'max:500'],
         ]);
 
-        $newCheckOut  = \Carbon\Carbon::parse($request->new_check_out)->endOfDay();
-        $nights       = $transaction->check_in->diffInDays($newCheckOut);
-        $newPrice     = max(1, $nights) * (float) optional($transaction->room)->price;
+        $today        = \Carbon\Carbon::today()->endOfDay();
+        $actualNights = max(1, $transaction->check_in->diffInDays($today));
+        $newPrice     = $actualNights * (float) optional($transaction->room)->price;
 
-        $transaction->update([
-            'check_out'   => $newCheckOut,
-            'total_price' => $newPrice,
-        ]);
+        $refundAmount = match($request->refund_policy) {
+            'full'    => max(0, $transaction->getTotalPayment() - $newPrice),
+            'partial' => (float) ($request->refund_amount ?? 0),
+            default   => 0,
+        };
 
-        if ($request->expectsJson()) {
-            return response()->json([
-                'success'    => true,
-                'message'    => 'Early checkout enregistré.',
-                'new_checkout' => $newCheckOut->format('d/m/Y'),
-                'new_price'  => $newPrice,
+        \Illuminate\Support\Facades\DB::transaction(function () use ($transaction, $today, $newPrice, $refundAmount, $request) {
+            $transaction->update([
+                'check_out'             => $today,
+                'total_price'           => $newPrice,
+                'status'                => 'completed',
+                'actual_check_out'      => now(),
+                'early_checkout'        => true,
+                'early_checkout_refund' => $refundAmount,
+                'early_checkout_reason' => $request->early_checkout_reason,
             ]);
-        }
 
-        return redirect()->back()->with('success', 'Early checkout enregistré.');
+            if ($refundAmount > 0) {
+                \App\Models\Payment::create([
+                    'user_id'        => auth()->id(),
+                    'created_by'     => auth()->id(),
+                    'transaction_id' => $transaction->id,
+                    'amount'         => $refundAmount,
+                    'payment_method' => $request->payment_method,
+                    'status'         => \App\Models\Payment::STATUS_REFUNDED,
+                    'reference'      => 'EARLY-' . $transaction->id . '-' . time(),
+                    'description'    => 'Remboursement early checkout',
+                    'payment_date'   => now(),
+                ]);
+            }
+
+            if ($transaction->room) {
+                $transaction->room->update(['room_status_id' => \App\Enums\RoomStatus::Dirty->value]);
+            }
+        });
+
+        return redirect()->route('transaction.show', $transaction)
+            ->with('success', 'Early checkout enregistré.' . ($refundAmount > 0 ? " Remboursement : " . number_format($refundAmount, 0, ',', ' ') . " FCFA." : ''));
     }
 
     // -----------------------------------------------------------------------

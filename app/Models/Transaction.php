@@ -39,6 +39,9 @@ class Transaction extends Model
         'nationality',
         'late_checkout_fee',
         'late_checkout',
+        'early_checkout',
+        'early_checkout_refund',
+        'early_checkout_reason',
         'expected_checkout_time',
     ];
 
