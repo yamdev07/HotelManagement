@@ -48,8 +48,12 @@ class User extends Authenticatable
         'last_login_attempt' => 'datetime',
         'is_active'          => 'boolean',
         'login_attempts'     => 'integer',
-        'role'               => UserRole::class,
     ];
+
+    public function getRoleEnumAttribute(): ?UserRole
+    {
+        return UserRole::tryFrom($this->attributes['role'] ?? '');
+    }
 
     /**
      * Configuration du logging d'activité
@@ -88,17 +92,17 @@ class User extends Authenticatable
 
     public function isCustomer(): bool
     {
-        return $this->role === UserRole::Customer;
+        return $this->roleEnum === UserRole::Customer;
     }
 
     public function isAdmin(): bool
     {
-        return in_array($this->role, [UserRole::Admin, UserRole::Super]);
+        return in_array($this->roleEnum, [UserRole::Admin, UserRole::Super]);
     }
 
     public function isSuper(): bool
     {
-        return $this->role === UserRole::Super;
+        return $this->roleEnum === UserRole::Super;
     }
 
     /**
@@ -121,17 +125,17 @@ class User extends Authenticatable
 
     public function canStartSession(): bool
     {
-        return ! $this->activeCashierSession && $this->role?->canProcessPayments();
+        return ! $this->activeCashierSession && $this->roleEnum?->canProcessPayments();
     }
 
     public function isReceptionist(): bool
     {
-        return $this->role === UserRole::Receptionist;
+        return $this->roleEnum === UserRole::Receptionist;
     }
 
     public function isCashier(): bool
     {
-        return $this->role === UserRole::Cashier;
+        return $this->roleEnum === UserRole::Cashier;
     }
 
     /**
@@ -259,17 +263,17 @@ class User extends Authenticatable
 
     public function getFormattedRoleAttribute(): string
     {
-        return $this->role?->label() ?? (string) $this->role;
+        return $this->roleEnum?->label() ?? (string) $this->role;
     }
 
     public function getRoleIconAttribute(): string
     {
-        return $this->role?->icon() ?? 'fas fa-user';
+        return $this->roleEnum?->icon() ?? 'fas fa-user';
     }
 
     public function getRoleColorAttribute(): string
     {
-        return $this->role?->color() ?? 'secondary';
+        return $this->roleEnum?->color() ?? 'secondary';
     }
 
     public function canEditUser(User $targetUser): bool
@@ -376,6 +380,6 @@ class User extends Authenticatable
      */
     public function getRoleValueAttribute(): string
     {
-        return $this->role instanceof UserRole ? $this->role->value : (string) $this->role;
+        return (string) $this->role;
     }
 }

@@ -3,10 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\TransactionStatus;
-use App\Models\Customer;
-use App\Models\Room;
 use App\Models\Transaction;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class TransactionFactory extends Factory
@@ -15,10 +12,11 @@ class TransactionFactory extends Factory
 
     public function definition(): array
     {
+        // Lightweight defaults — no sub-factories so make() never touches the DB.
         return [
-            'user_id'      => User::factory(),
-            'customer_id'  => Customer::factory(),
-            'room_id'      => Room::factory(),
+            'user_id'      => 1,
+            'customer_id'  => 1,
+            'room_id'      => 1,
             'check_in'     => now()->addDays(1)->format('Y-m-d'),
             'check_out'    => now()->addDays(3)->format('Y-m-d'),
             'status'       => TransactionStatus::Reservation->value,

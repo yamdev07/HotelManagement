@@ -9,17 +9,17 @@ class UserPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->role->canManageUsers();
+        return $user->roleEnum->canManageUsers();
     }
 
     public function view(User $user, User $target): bool
     {
-        return $user->id === $target->id || $user->role->canManageUsers();
+        return $user->id === $target->id || $user->roleEnum->canManageUsers();
     }
 
     public function create(User $user): bool
     {
-        return $user->role->canManageUsers();
+        return $user->roleEnum->canManageUsers();
     }
 
     public function update(User $user, User $target): bool
@@ -34,15 +34,15 @@ class UserPolicy
 
     public function resetPassword(User $user, User $target): bool
     {
-        return in_array($user->role, [UserRole::Super, UserRole::Admin]);
+        return in_array($user->roleEnum, [UserRole::Super, UserRole::Admin]);
     }
 
     public function assignRole(User $user, string $newRole): bool
     {
         if ($newRole === UserRole::Super->value) {
-            return $user->role === UserRole::Super;
+            return $user->roleEnum === UserRole::Super;
         }
 
-        return in_array($user->role, [UserRole::Super, UserRole::Admin]);
+        return in_array($user->roleEnum, [UserRole::Super, UserRole::Admin]);
     }
 }

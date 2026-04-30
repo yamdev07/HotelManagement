@@ -26,12 +26,12 @@ class CashierSessionService
 
     public function canUserStartSession(User $user, ?CashierSession $activeSession): bool
     {
-        return ! $activeSession && ($user->role?->canProcessPayments() ?? false);
+        return ! $activeSession && ($user->roleEnum?->canProcessPayments() ?? false);
     }
 
     public function isAdmin(User $user): bool
     {
-        return in_array($user->role, [UserRole::Admin, UserRole::Super]);
+        return in_array($user->roleEnum, [UserRole::Admin, UserRole::Super]);
     }
 
     public function getTodayStats(User $user): array

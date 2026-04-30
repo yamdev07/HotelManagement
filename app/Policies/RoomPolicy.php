@@ -20,21 +20,21 @@ class RoomPolicy
 
     public function create(User $user): bool
     {
-        return $user->role->canManageRooms();
+        return $user->roleEnum->canManageRooms();
     }
 
     public function update(User $user, Room $room): bool
     {
-        return $user->role->canManageRooms();
+        return $user->roleEnum->canManageRooms();
     }
 
     public function delete(User $user, Room $room): bool
     {
-        return $user->role === UserRole::Super;
+        return $user->roleEnum === UserRole::Super;
     }
 
     public function updateStatus(User $user): bool
     {
-        return $user->role->isStaff();
+        return $user->roleEnum->isStaff();
     }
 }

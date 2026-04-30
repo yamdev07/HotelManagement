@@ -10,12 +10,12 @@ class PaymentPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->role->isStaff();
+        return $user->roleEnum->isStaff();
     }
 
     public function view(User $user, Payment $payment): bool
     {
-        if ($user->role->isStaff()) {
+        if ($user->roleEnum->isStaff()) {
             return true;
         }
 
@@ -24,20 +24,20 @@ class PaymentPolicy
 
     public function create(User $user): bool
     {
-        return $user->role->canProcessPayments();
+        return $user->roleEnum->canProcessPayments();
     }
 
     public function cancel(User $user, Payment $payment): bool
     {
-        if (in_array($user->role, [UserRole::Super, UserRole::Admin])) {
+        if (in_array($user->roleEnum, [UserRole::Super, UserRole::Admin])) {
             return true;
         }
 
-        return $user->role->canProcessPayments() && $payment->status === 'pending';
+        return $user->roleEnum->canProcessPayments() && $payment->status === 'pending';
     }
 
     public function refund(User $user): bool
     {
-        return in_array($user->role, [UserRole::Super, UserRole::Admin]);
+        return in_array($user->roleEnum, [UserRole::Super, UserRole::Admin]);
     }
 }

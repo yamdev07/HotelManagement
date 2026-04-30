@@ -10,12 +10,12 @@ class TransactionPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->role->isStaff();
+        return $user->roleEnum->isStaff();
     }
 
     public function view(User $user, Transaction $transaction): bool
     {
-        if ($user->role->isStaff()) {
+        if ($user->roleEnum->isStaff()) {
             return true;
         }
 
@@ -24,12 +24,12 @@ class TransactionPolicy
 
     public function create(User $user): bool
     {
-        return $user->role->canManageReservations();
+        return $user->roleEnum->canManageReservations();
     }
 
     public function update(User $user, Transaction $transaction): bool
     {
-        if (! $user->role->canManageReservations()) {
+        if (! $user->roleEnum->canManageReservations()) {
             return false;
         }
 
@@ -38,12 +38,12 @@ class TransactionPolicy
 
     public function updateStatus(User $user): bool
     {
-        return $user->role->canManageReservations();
+        return $user->roleEnum->canManageReservations();
     }
 
     public function cancel(User $user, Transaction $transaction): bool
     {
-        if (! $user->role->canManageReservations()) {
+        if (! $user->roleEnum->canManageReservations()) {
             return false;
         }
 
@@ -52,22 +52,22 @@ class TransactionPolicy
 
     public function markAsNoShow(User $user, Transaction $transaction): bool
     {
-        return $user->role->canManageReservations() && $transaction->canBeNoShow();
+        return $user->roleEnum->canManageReservations() && $transaction->canBeNoShow();
     }
 
     public function restore(User $user, Transaction $transaction): bool
     {
-        return in_array($user->role, [UserRole::Super, UserRole::Admin])
+        return in_array($user->roleEnum, [UserRole::Super, UserRole::Admin])
             && $transaction->canBeRestored();
     }
 
     public function delete(User $user): bool
     {
-        return $user->role === UserRole::Super;
+        return $user->roleEnum === UserRole::Super;
     }
 
     public function forceDelete(User $user): bool
     {
-        return $user->role === UserRole::Super;
+        return $user->roleEnum === UserRole::Super;
     }
 }

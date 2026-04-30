@@ -16,7 +16,7 @@ class CheckRole
         }
 
         $user     = Auth::user();
-        $userRole = UserRole::tryFrom($user->role);
+        $userRole = $user->roleEnum;
 
         // Super admin bypass
         if ($userRole === UserRole::Super) {
