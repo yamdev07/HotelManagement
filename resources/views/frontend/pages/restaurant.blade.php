@@ -1072,7 +1072,7 @@
                                 commande ?</p>
 
                             <div class="om-payment-grid"
-                                style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px;">
                                 <label class="om-payment-card active" id="pay-card-cash">
                                     <input type="radio" name="payment_choice" value="cash" checked
                                         style="display:none">
@@ -1080,15 +1080,39 @@
                                     <div class="om-pc-label">Espèces</div>
                                     <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                 </label>
+                                <label class="om-payment-card" id="pay-card-mobile">
+                                    <input type="radio" name="payment_choice" value="mobile_money" style="display:none">
+                                    <div class="om-pc-icon"><i class="fas fa-mobile-alt"></i></div>
+                                    <div class="om-pc-label">Mobile Money</div>
+                                    <div class="om-pc-status"><i class="fas fa-check-circle d-none"></i></div>
+                                </label>
                                 <label class="om-payment-card" id="pay-card-card">
                                     <input type="radio" name="payment_choice" value="card" style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-credit-card"></i></div>
-                                    <div class="om-pc-label">Carte / Mobile</div>
+                                    <div class="om-pc-label">Carte Bancaire</div>
+                                    <div class="om-pc-status"><i class="fas fa-check-circle d-none"></i></div>
+                                </label>
+                                <label class="om-payment-card" id="pay-card-fedapay">
+                                    <input type="radio" name="payment_choice" value="fedapay" style="display:none">
+                                    <div class="om-pc-icon"><i class="fas fa-wallet"></i></div>
+                                    <div class="om-pc-label">Fedapay</div>
+                                    <div class="om-pc-status"><i class="fas fa-check-circle d-none"></i></div>
+                                </label>
+                                <label class="om-payment-card" id="pay-card-transfer">
+                                    <input type="radio" name="payment_choice" value="transfer" style="display:none">
+                                    <div class="om-pc-icon"><i class="fas fa-university"></i></div>
+                                    <div class="om-pc-label">Virement</div>
+                                    <div class="om-pc-status"><i class="fas fa-check-circle d-none"></i></div>
+                                </label>
+                                <label class="om-payment-card" id="pay-card-check">
+                                    <input type="radio" name="payment_choice" value="check" style="display:none">
+                                    <div class="om-pc-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                                    <div class="om-pc-label">Chèque</div>
                                     <div class="om-pc-status"><i class="fas fa-check-circle d-none"></i></div>
                                 </label>
                                 <div id="room-payment-notice" class="col-span-2 d-none" style="grid-column: span 2;">
                                     <div class="om-payment-card active w-100" style="cursor: default;">
-                                        <input type="radio" name="payment_choice" value="room_bill" style="display:none">
+                                        <input type="radio" name="payment_choice" value="room_charge" style="display:none">
                                         <div class="om-pc-icon"><i class="fas fa-hotel"></i></div>
                                         <div class="om-pc-label">Facture de la chambre</div>
                                         <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
@@ -2287,14 +2311,18 @@
 
                 // Gérer l'affichage des modes de paiement selon le statut guest
                 if (isGuest) {
-                    $('#pay-card-cash, #pay-card-card, #payment-normal-hint').addClass('d-none');
+                    $('.om-payment-card:not(#room-payment-notice .om-payment-card)').parent().filter(':not(#room-payment-notice)').addClass('d-none');
+                    // Plus simple: cacher tous les labels de paiement sauf celui de la chambre
+                    $('#panel-2 label.om-payment-card').addClass('d-none');
                     $('#room-payment-notice, #payment-room-hint').removeClass('d-none');
-                    $('input[name="payment_choice"][value="room_bill"]').prop('checked', true);
+                    $('#payment-normal-hint').addClass('d-none');
+                    $('input[name="payment_choice"][value="room_charge"]').prop('checked', true);
                 } else {
-                    $('#pay-card-cash, #pay-card-card, #payment-normal-hint').removeClass('d-none');
+                    $('#panel-2 label.om-payment-card').removeClass('d-none');
                     $('#room-payment-notice, #payment-room-hint').addClass('d-none');
-                    // Remettre cash par défaut si c'était sur room_bill
-                    if ($('input[name="payment_choice"]:checked').val() === 'room_bill') {
+                    $('#payment-normal-hint').removeClass('d-none');
+                    // Remettre cash par défaut si c'était sur room_charge
+                    if ($('input[name="payment_choice"]:checked').val() === 'room_charge') {
                         $('input[name="payment_choice"][value="cash"]').prop('checked', true);
                         $('.om-payment-card').removeClass('active');
                         $('#pay-card-cash').addClass('active');
@@ -2387,16 +2415,19 @@
                 $('#hNotes').val(notesVal);
                 // Mode de paiement
                 const isGuest = room !== '';
-                const paymentMode = isGuest ? 'room_bill' : $('input[name="payment_choice"]:checked').val();
+                const paymentMode = isGuest ? 'room_charge' : $('input[name="payment_choice"]:checked').val();
                 
                 let paymentLabel = '';
-                if (paymentMode === 'room_bill') {
-                    paymentLabel = '<i class="fas fa-hotel me-2"></i> Sur facture (Chambre ' + room + ')';
-                } else if (paymentMode === 'cash') {
-                    paymentLabel = '💵 Espèces (à la livraison)';
-                } else {
-                    paymentLabel = '💳 Carte / Mobile';
-                }
+                const methods = {
+                    'room_charge': '<i class="fas fa-hotel me-2"></i> Sur facture (Chambre ' + room + ')',
+                    'cash': '💵 Espèces (à la livraison)',
+                    'mobile_money': '📲 Mobile Money',
+                    'card': '💳 Carte Bancaire',
+                    'fedapay': '💳 Fedapay / En ligne',
+                    'transfer': '🏦 Virement Bancaire',
+                    'check': '📄 Chèque'
+                };
+                paymentLabel = methods[paymentMode] || paymentMode;
                 
                 $('#recap-payment-method').html(paymentLabel);
                 $('#hPayment').val(paymentMode);

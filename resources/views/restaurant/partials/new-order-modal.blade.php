@@ -235,8 +235,12 @@
                                         <div class="nom-pay-body"><span>💳</span><span>Carte</span></div></label>
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="mobile_money">
                                         <div class="nom-pay-body"><span>📲</span><span>Mobile Money</span></div></label>
-                                    <label class="nom-pay"><input type="radio" name="n_payment" value="bank_transfer">
+                                    <label class="nom-pay"><input type="radio" name="n_payment" value="transfer">
                                         <div class="nom-pay-body"><span>🏦</span><span>Virement</span></div></label>
+                                    <label class="nom-pay"><input type="radio" name="n_payment" value="fedapay">
+                                        <div class="nom-pay-body"><span>💳</span><span>Fedapay</span></div></label>
+                                    <label class="nom-pay"><input type="radio" name="n_payment" value="check">
+                                        <div class="nom-pay-body"><span>📄</span><span>Chèque</span></div></label>
                                 </div>
                             </div>
 
@@ -464,7 +468,7 @@
 .nom-radio input { display:none; }
 
 /* Paiement */
-.nom-pay-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+.nom-pay-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(100px, 1fr)); gap:8px; }
 @media(max-width:600px){ .nom-pay-grid{grid-template-columns:repeat(2,1fr);} }
 .nom-pay {
     cursor:pointer; border:1px solid #e2e8f0; border-radius:9px;
@@ -1005,7 +1009,18 @@ function initNomModal() {
 
         const billing = $('input[name="n_billing"]:checked').val();
         const payment = billing === 'room' ? 'room_charge' : ($('input[name="n_payment"]:checked').val() || 'cash');
-        const billingLabel = billing === 'room' ? '<i class="fas fa-hotel text-primary me-2"></i>Facturé sur la chambre' : '<i class="fas fa-money-bill-wave text-success me-2"></i>Paiement direct (' + payment + ')';
+        
+        const methodLabels = {
+            'room_charge': '<i class="fas fa-hotel text-primary me-2"></i>Facturé sur la chambre',
+            'cash': '<i class="fas fa-money-bill-wave text-success me-2"></i>Paiement direct (Espèces)',
+            'card': '<i class="fas fa-credit-card text-success me-2"></i>Paiement direct (Carte)',
+            'mobile_money': '<i class="fas fa-mobile-alt text-success me-2"></i>Paiement direct (Mobile Money)',
+            'transfer': '<i class="fas fa-university text-success me-2"></i>Paiement direct (Virement)',
+            'fedapay': '<i class="fas fa-wallet text-success me-2"></i>Paiement direct (Fedapay)',
+            'check': '<i class="fas fa-file-invoice-dollar text-success me-2"></i>Paiement direct (Chèque)'
+        };
+        
+        const billingLabel = methodLabels[payment] || ('Paiement direct (' + payment + ')');
         let prefHtml = `<div class="nom-recap-line"><span>Facturation</span>${billingLabel}</div>`;
         const notesFree = $('#n-notes').val().trim();
         if (notesFree) prefHtml += `<div class="nom-recap-line"><span>Notes</span>${notesFree}</div>`;

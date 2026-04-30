@@ -206,6 +206,14 @@ class RestaurantController extends Controller
                 $validated['room_number'] ?? null
             );
 
+            // Si on a trouvé une transaction mais pas encore de customer, lier au client de la transaction
+            if (!$customerId && $transactionId) {
+                $transaction = Transaction::find($transactionId);
+                if ($transaction) {
+                    $customerId = $transaction->customer_id;
+                }
+            }
+
             $items = json_decode($validated['items'], true);
             $calculatedTotal = 0;
 

@@ -52,6 +52,9 @@ Route::post('/reservation/request', [FrontendController::class, 'reservationRequ
 Route::get('/reservation', [FrontendController::class, 'reservationForm'])->name('frontend.reservation');
 Route::post('/reservation/submit', [FrontendController::class, 'submitReservation'])->name('frontend.reservation.submit');
 
+// Commande restaurant depuis la vitrine (public)
+Route::post('/restaurant/orders', [RestaurantController::class, 'storeOrder'])->name('restaurant.orders.store');
+
 Route::get('/api/available-rooms', [FrontendController::class, 'availableRooms'])->name('api.available-rooms');
 
 // ==================== ROUTES D'AUTHENTIFICATION ====================
@@ -467,7 +470,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
         // Routes sans paramètres d'abord
         Route::get('/', [RestaurantController::class, 'index'])->name('index');
         Route::get('/orders', [RestaurantController::class, 'orders'])->name('orders');
-        Route::post('/orders', [RestaurantController::class, 'storeOrder'])->name('orders.store');
+        // Route::post('/orders', [RestaurantController::class, 'storeOrder'])->name('orders.store'); // Déplacée en public
 
         // Routes avec paramètre {id}
         Route::prefix('orders/{id}')->group(function () {
