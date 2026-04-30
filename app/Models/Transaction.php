@@ -17,6 +17,9 @@ class Transaction extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
 
+    // Spatie auto-logging disabled — manual activity() calls in methods provide richer context
+    protected static $recordEvents = [];
+
     protected $fillable = [
         'user_id',
         'customer_id',

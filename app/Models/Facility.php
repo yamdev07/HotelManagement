@@ -11,6 +11,8 @@ class Facility extends Model
 {
     use HasFactory, LogsActivity;
 
+    protected static $recordEvents = [];
+
     protected $fillable = [
         'name',
         'detail',

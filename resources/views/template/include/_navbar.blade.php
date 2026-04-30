@@ -130,7 +130,7 @@
                         </li>
                         <li>
                             <a class="dropdown-item d-flex align-items-center"
-                               href="{{ route('activity-log.index') }}">
+                               href="{{ route('activity.index') }}">
                                 <i class="fas fa-history me-3 text-info"></i>
                                 Activity Log
                             </a>

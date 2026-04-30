@@ -12,6 +12,8 @@ class Payment extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
 
+    protected static $recordEvents = [];
+
     protected $fillable = [
         'user_id',
         'created_by',

@@ -13,6 +13,8 @@ class Room extends Model
 {
     use HasFactory, LogsActivity;
 
+    protected static $recordEvents = [];
+
     protected $fillable = [
         'type_id',
         'room_status_id',
