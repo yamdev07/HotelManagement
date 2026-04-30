@@ -212,6 +212,54 @@ class TransactionController extends Controller
         }
     }
 
+    public function extend(Transaction $transaction)
+    {
+        $this->authorize('update', $transaction);
+
+        $transaction->load(['customer.user', 'room.type']);
+
+        return view('transaction.extend', [
+            'transaction'   => $transaction,
+            'suggestedDate' => $transaction->check_out->copy()->addDay(),
+        ]);
+    }
+
+    public function processExtend(\Illuminate\Http\Request $request, Transaction $transaction)
+    {
+        $this->authorize('update', $transaction);
+
+        $request->validate([
+            'new_check_out'     => ['required', 'date', 'after:' . $transaction->check_out->format('Y-m-d')],
+            'additional_nights' => ['required', 'integer', 'min:1', 'max:30'],
+        ]);
+
+        try {
+            $newCheckOut    = \Carbon\Carbon::parse($request->new_check_out)->endOfDay();
+            $pricePerNight  = (float) optional($transaction->room)->price;
+            $extraNights    = (int) $request->additional_nights;
+            $extraAmount    = $pricePerNight * $extraNights;
+
+            $transaction->update([
+                'check_out'   => $newCheckOut,
+                'total_price' => (float) $transaction->total_price + $extraAmount,
+            ]);
+
+            \Illuminate\Support\Facades\Log::info("Transaction #{$transaction->id} prolongée", [
+                'by'           => auth()->id(),
+                'new_check_out' => $newCheckOut,
+                'extra_nights' => $extraNights,
+                'extra_amount' => $extraAmount,
+            ]);
+
+            return redirect()->route('transaction.show', $transaction)
+                ->with('success', "Séjour prolongé de {$extraNights} nuit(s). Nouveau départ : {$newCheckOut->format('d/m/Y')}.");
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Erreur prolongation', ['id' => $transaction->id, 'error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Erreur lors de la prolongation.')->withInput();
+        }
+    }
+
     public function markAsArrived(Transaction $transaction)
     {
         $this->authorize('updateStatus', Transaction::class);
