@@ -1210,7 +1210,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         try {
             const formData = new FormData(this);
-            
+
             const response = await fetch(this.action, {
                 method: 'POST',
                 headers: {
@@ -1219,9 +1219,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: formData
             });
-            
-            const data = await response.json();
-            
+
+            let data;
+            try {
+                data = await response.json();
+            } catch {
+                const status = response.status;
+                if (status === 419) throw new Error('Session expirée. Rechargez la page et réessayez.');
+                if (status === 403) throw new Error('Action non autorisée.');
+                if (status >= 500) throw new Error('Erreur serveur. Contactez l\'administrateur si le problème persiste.');
+                throw new Error('Réponse inattendue du serveur. Réessayez.');
+            }
+
             if (data.success) {
                 Swal.fire({
                     title: '✅ Succès',

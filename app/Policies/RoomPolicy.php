@@ -8,6 +8,11 @@ use App\Models\User;
 
 class RoomPolicy
 {
+    public function before(User $user, string $ability): ?bool
+    {
+        return $user->roleEnum === UserRole::Super ? true : null;
+    }
+
     public function viewAny(User $user): bool
     {
         return true;

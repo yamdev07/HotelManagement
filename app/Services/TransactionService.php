@@ -114,9 +114,9 @@ class TransactionService
      *
      * @throws TransactionException
      */
-    public function cancel(Transaction $transaction, string $reason): Transaction
+    public function cancel(Transaction $transaction, string $reason, bool $force = false): Transaction
     {
-        if (! $transaction->canBeCancelled()) {
+        if (! $force && ! $transaction->canBeCancelled()) {
             $msg = $transaction->getCannotCancelReason() ?? 'Annulation non autorisée.';
             throw TransactionException::cannotCancel($msg);
         }
