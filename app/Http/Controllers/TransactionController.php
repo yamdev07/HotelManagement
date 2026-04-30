@@ -57,7 +57,7 @@ class TransactionController extends Controller
         $remaining   = $totalPrice - $totalPayment;
         $isFullyPaid = $remaining <= 0;
         $isExpired   = $checkOut->isPast();
-        $canCancel   = $transaction->canBeCancelled();
+        $canCancel   = $transaction->canBeCancelled() || auth()->user()->isSuper();
 
         return view('transaction.show', compact(
             'transaction', 'payments', 'nights', 'totalPrice',
@@ -169,7 +169,8 @@ class TransactionController extends Controller
         ]);
 
         try {
-            $this->transactionService->cancel($transaction, $request->cancel_reason);
+            $force = auth()->user()->isSuper();
+            $this->transactionService->cancel($transaction, $request->cancel_reason, $force);
 
             return redirect()->route('transaction.show', $transaction)
                 ->with('success', 'Réservation annulée avec succès.');
