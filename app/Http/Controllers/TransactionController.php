@@ -598,7 +598,7 @@ class TransactionController extends Controller
             ->pluck('room_id')
             ->toArray();
 
-        $allRooms = \App\Models\Room::with('type', 'roomStatus')->get();
+        $allRooms = \App\Models\Room::with('type', 'roomStatus', 'images')->get();
 
         $available = $allRooms->filter(
             fn ($r) => ! in_array($r->id, $occupiedIds) || $r->id === $currentRoomId

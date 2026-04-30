@@ -33,7 +33,7 @@ class ReservationRepository implements ReservationRepositoryInterface
         }
 
         // Construire la requête manuellement pour voir
-        $query = Room::with('type', 'roomStatus');
+        $query = Room::with('type', 'roomStatus', 'images');
 
         // 1. Capacité
         $query->where('capacity', '>=', $request->count_person);
