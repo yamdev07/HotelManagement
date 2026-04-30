@@ -129,15 +129,15 @@ class PaymentController extends Controller
             return redirect()->route('transaction.show', $transaction)->with('success', $message);
 
         } catch (HotelException $e) {
-            if ($request->ajax()) {
+            if ($request->expectsJson()) {
                 return response()->json(['success' => false, 'message' => $e->getMessage()], $e->httpStatusCode());
             }
             return redirect()->back()->with('error', $e->getMessage())->withInput();
 
         } catch (\Exception $e) {
             Log::error('Erreur paiement', ['transaction_id' => $transaction->id, 'error' => $e->getMessage()]);
-            if ($request->ajax()) {
-                return response()->json(['success' => false, 'message' => 'Erreur interne.'], 500);
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Erreur interne lors du paiement.'], 500);
             }
             return redirect()->back()->with('error', 'Erreur interne lors du paiement.')->withInput();
         }
