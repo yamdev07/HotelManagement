@@ -12,6 +12,8 @@ class CashierSession extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
 
+    protected static $recordEvents = [];
+
     protected $fillable = [
         'user_id',
         'initial_balance',

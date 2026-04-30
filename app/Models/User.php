@@ -13,6 +13,8 @@ class User extends Authenticatable
 {
     use HasFactory, LogsActivity, Notifiable;
 
+    protected static $recordEvents = [];
+
     /**
      * Les attributs assignables en masse.
      *

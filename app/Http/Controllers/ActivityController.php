@@ -49,41 +49,9 @@ class ActivityController extends Controller
         return view('activity.index', compact('activities', 'users', 'totalActivities'));
     }
 
-    // Nouvelle méthode pour la route /all
     public function all(Request $request)
     {
-        $query = Activity::with(['causer', 'subject'])
-            ->orderBy('created_at', 'desc');
-
-        // Filtres
-        if ($request->filled('user_id')) {
-            $query->where('causer_id', $request->user_id)
-                ->where('causer_type', User::class);
-        }
-
-        if ($request->filled('event')) {
-            $query->where('event', $request->event);
-        }
-
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        if ($request->filled('search')) {
-            $query->where('description', 'like', '%'.$request->search.'%');
-        }
-
-        // Pas de pagination pour /all - on prend tout
-        $activities = $query->get();
-        $users = User::orderBy('name')->get();
-        $totalActivities = Activity::count();
-
-        // UTILISE activity/all.blade.php
-        return view('activity.all', compact('activities', 'users', 'totalActivities'));
+        return redirect()->route('activity.index', $request->query());
     }
 
     public function show($id)

@@ -17,6 +17,9 @@ class Transaction extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes;
 
+    // Spatie auto-logging disabled — manual activity() calls in methods provide richer context
+    protected static $recordEvents = [];
+
     protected $fillable = [
         'user_id',
         'customer_id',
@@ -39,6 +42,9 @@ class Transaction extends Model
         'nationality',
         'late_checkout_fee',
         'late_checkout',
+        'early_checkout',
+        'early_checkout_refund',
+        'early_checkout_reason',
         'expected_checkout_time',
     ];
 

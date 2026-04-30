@@ -13,6 +13,8 @@ class Customer extends Model
 {
     use HasFactory, LogsActivity, Notifiable;
 
+    protected static $recordEvents = [];
+
     protected $fillable = [
         'name',
         'address',

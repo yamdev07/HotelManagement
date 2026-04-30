@@ -7,10 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use App\Models\Image;
 
 class Room extends Model
 {
     use HasFactory, LogsActivity;
+
+    protected static $recordEvents = [];
 
     protected $fillable = [
         'type_id',
@@ -180,24 +183,30 @@ class Room extends Model
     /**
      * Obtenir la première image
      */
-    public function firstImage()
+    public function firstImage(): string
     {
-        if ($this->relationLoaded('images') && $this->images->isNotEmpty()) {
-            $firstImage = $this->images->first();
+        $image = $this->relationLoaded('images')
+            ? $this->images->first()
+            : $this->images()->first();
 
-            if (method_exists($firstImage, 'getRoomImage')) {
-                return $firstImage->getRoomImage();
-            }
+        return $this->resolveImageUrl($image);
+    }
 
-            return $firstImage->url ?? asset('img/default/default-room.png');
+    private function resolveImageUrl(?Image $image): string
+    {
+        if (! $image) {
+            return asset('img/default/default-room.png');
         }
 
-        $image = $this->images()->first();
-        if ($image) {
-            return $image->getRoomImage();
+        if (str_starts_with($image->url, 'http://') || str_starts_with($image->url, 'https://')) {
+            return $image->url;
         }
 
-        return asset('img/default/default-room.png');
+        $path = 'img/room/' . $this->number . '/' . ltrim($image->url, '/');
+
+        return file_exists(public_path($path))
+            ? asset($path)
+            : asset('img/default/default-room.png');
     }
 
     /**
@@ -1198,8 +1207,8 @@ class Room extends Model
 
         return $this->images->map(function ($image) {
             return [
-                'url' => $image->getRoomImage(),
-                'alt' => $image->alt_text ?? $this->display_name,
+                'url' => $this->resolveImageUrl($image),
+                'alt' => $this->display_name,
             ];
         });
     }
