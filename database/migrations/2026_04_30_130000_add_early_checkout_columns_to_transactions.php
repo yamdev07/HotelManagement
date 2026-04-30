@@ -10,13 +10,13 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             if (! Schema::hasColumn('transactions', 'early_checkout')) {
-                $table->boolean('early_checkout')->default(false)->after('late_checkout');
+                $table->boolean('early_checkout')->default(false);
             }
             if (! Schema::hasColumn('transactions', 'early_checkout_refund')) {
-                $table->decimal('early_checkout_refund', 10, 2)->nullable()->after('early_checkout');
+                $table->decimal('early_checkout_refund', 10, 2)->nullable();
             }
             if (! Schema::hasColumn('transactions', 'early_checkout_reason')) {
-                $table->string('early_checkout_reason')->nullable()->after('early_checkout_refund');
+                $table->string('early_checkout_reason')->nullable();
             }
         });
     }
