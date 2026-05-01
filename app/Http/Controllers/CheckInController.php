@@ -449,7 +449,7 @@ class CheckInController extends Controller
     public function directCheckIn()
     {
         $availableRooms = Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
-            ->with(['type', 'roomStatus'])
+            ->with(['type', 'roomStatus', 'images'])
             ->orderBy('number')
             ->get();
 
