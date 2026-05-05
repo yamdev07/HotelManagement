@@ -280,6 +280,12 @@
         }
 
         /* ── MENU SECTION ── */
+        .menu-section .container {
+            max-width: 95%;
+            padding-left: 10px;
+            padding-right: 10px;
+        }
+
         .menu-section {
             background: var(--white);
             padding: 80px 0;
@@ -315,12 +321,14 @@
 
         .menu-card {
             background: var(--white);
-            border-radius: 16px;
+            border-radius: 20px;
             border: 1px solid var(--border-color);
             overflow: hidden;
             transition: var(--transition);
             height: 100%;
             display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
         }
 
         .menu-card:hover {
@@ -331,9 +339,11 @@
 
         .menu-card-img {
             flex-shrink: 0;
-            width: 140px;
+            width: 100%;
+            height: 180px;
             overflow: hidden;
             background: var(--light-bg);
+            position: relative;
         }
 
         .menu-card-img img {
@@ -348,8 +358,8 @@
         }
 
         .menu-card-noimg {
-            width: 140px;
-            height: 100%;
+            width: 100%;
+            height: 180px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -647,11 +657,11 @@
             border: 2px solid white;
         }
 
-        /* Checkout Grid */
+        /* Checkout Grid — Vertical stack for side panel */
         .om-checkout-grid {
             display: grid;
-            grid-template-columns: 1fr 340px;
-            gap: 24px;
+            grid-template-columns: 1fr;
+            gap: 20px;
             align-items: start;
         }
 
@@ -896,9 +906,9 @@
             </div>
 
             {{-- Grille menu (une catégorie à la fois par défaut) --}}
-            <div class="row g-4" id="menuList">
+            <div class="row g-3" id="menuList">
                 @forelse($menus as $menu)
-                    <div class="col-lg-6 menu-item" data-category="{{ $menu->category }}" data-aos="fade-up"
+                    <div class="col-xl-3 col-lg-3 col-md-6 menu-item" data-category="{{ $menu->category }}" data-aos="fade-up"
                         data-aos-delay="{{ ($loop->index % 4) * 60 }}">
                         <div class="menu-card">
                             @if ($menu->image)
@@ -963,35 +973,37 @@
     </section>
 
     <!-- ═══════════════════════════════════════════
-             MODAL COMMANDE — 5 ÉTOILES
+             OFFCANVAS COMMANDE — LUXURY SIDE PANEL
         ════════════════════════════════════════════ -->
-    <div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content om-card">
-
-                {{-- En-tête --}}
-                <div class="om-header">
-                    <div class="om-header-left">
-                        <span class="om-crown"><i class="fas fa-crown"></i></span>
-                        <div>
-                            <div class="om-title">Votre Commande</div>
-                            <div class="om-subtitle">Restaurant Gastronomique — Cactus Palace</div>
-                        </div>
+    <div class="offcanvas offcanvas-end v-offcanvas" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" data-bs-backdrop="static">
+        <div class="v-offcanvas-content">
+            {{-- En-tête --}}
+            <div class="om-header">
+                <div class="om-header-left">
+                    <span class="om-crown"><i class="fas fa-crown"></i></span>
+                    <div>
+                        <div class="om-title">Finaliser ma Commande</div>
+                        <div class="om-subtitle">Cactus Palace — Expérience Gastronomique</div>
                     </div>
-                    <button type="button" class="om-close" data-bs-dismiss="modal"><i
-                            class="fas fa-times"></i></button>
                 </div>
+                <button type="button" class="om-close" data-bs-dismiss="offcanvas"><i class="fas fa-times"></i></button>
+            </div>
 
                 {{-- Barre de progression --}}
                 <div class="om-steps">
                     <div class="om-step active" data-step="1">
                         <div class="om-step-dot">1</div>
-                        <div class="om-step-lbl">Vos informations</div>
+                        <div class="om-step-lbl">Identification</div>
                     </div>
                     <div class="om-step-line"></div>
                     <div class="om-step" data-step="2">
                         <div class="om-step-dot">2</div>
-                        <div class="om-step-lbl">Validation & Paiement</div>
+                        <div class="om-step-lbl">Paiement</div>
+                    </div>
+                    <div class="om-step-line"></div>
+                    <div class="om-step" data-step="3">
+                        <div class="om-step-dot">3</div>
+                        <div class="om-step-lbl">Récapitulatif</div>
                     </div>
                 </div>
 
@@ -1015,34 +1027,13 @@
                             </div>
                             <p class="om-panel-desc">Pour personnaliser votre expérience et vous contacter si besoin.</p>
                             <div class="om-grid-2">
-                                <div class="om-field">
-                                    <label class="om-label">Prénom <span class="om-req">*</span></label>
-                                    <input type="text" class="om-input" id="f-prenom" placeholder="Samuel"
-                                        autocomplete="given-name">
-                                    <div class="om-err" id="err-prenom"></div>
-                                </div>
-                                <div class="om-field">
-                                    <label class="om-label">Nom de famille <span class="om-req">*</span></label>
-                                    <input type="text" class="om-input" id="f-nom" placeholder="ABAS"
-                                        autocomplete="family-name">
-                                    <div class="om-err" id="err-nom"></div>
-                                </div>
-                                <div class="om-field">
-                                    <label class="om-label">Téléphone <span class="om-req">*</span></label>
+                                <div class="om-field" style="grid-column: span 2;">
+                                    <label class="om-label">Nom complet <span class="om-req">*</span></label>
                                     <div class="om-input-icon">
-                                        <span class="om-icon"><i class="fas fa-mobile-alt"></i></span>
-                                        <input type="tel" class="om-input has-icon" id="f-phone"
-                                            placeholder="+229 01 00 00 00" autocomplete="tel">
+                                        <span class="om-icon"><i class="fas fa-user"></i></span>
+                                        <input type="text" class="om-input has-icon" id="f-fullname" placeholder="Ex: Jean Dupont" autocomplete="name">
                                     </div>
-                                    <div class="om-err" id="err-phone"></div>
-                                </div>
-                                <div class="om-field">
-                                    <label class="om-label">Adresse email</label>
-                                    <div class="om-input-icon">
-                                        <span class="om-icon"><i class="fas fa-envelope"></i></span>
-                                        <input type="email" class="om-input has-icon" id="f-email"
-                                            placeholder="samuel02@gmail.com" autocomplete="email">
-                                    </div>
+                                    <div class="om-err" id="err-fullname"></div>
                                 </div>
                                 <div class="om-field">
                                     <label class="om-label">Numéro de chambre</label>
@@ -1052,7 +1043,9 @@
                                             placeholder="Ex : 214">
                                     </div>
                                     <div class="om-hint">Laissez vide si vous n'êtes pas résident</div>
+                                    <div id="err-room" class="small mt-1"></div>
                                 </div>
+
 
                                 <div class="om-field col-span-2" style="grid-column: span 2;">
                                     <label class="om-label">Notes spéciales</label>
@@ -1237,7 +1230,7 @@
                     </div>
 
                 </form>
-            </div>
+            </div>{{-- /v-offcanvas-content --}}
         </div>
     </div>
 
@@ -1319,18 +1312,35 @@
 @push('styles')
     <style>
         /* ══════════════════════════════════════════════════════
-       MODAL 5 ÉTOILES — ORDER MODAL
+       OFFCANVAS LUXURY — SIDE ORDER PANEL
     ══════════════════════════════════════════════════════ */
-        .om-card {
-            border: none;
-            border-radius: 20px;
-            overflow: hidden;
-            background: #0e0e0e;
-            box-shadow: 0 40px 80px rgba(0, 0, 0, .6);
-            font-family: 'Georgia', 'Times New Roman', serif;
+        .v-offcanvas {
+            width: 480px !important;
+            background: #0e0e0e !important;
+            border-left: 1px solid rgba(212, 175, 55, 0.3) !important;
+            box-shadow: -20px 0 50px rgba(0,0,0,0.8) !important;
+            color: #fff;
+        }
+
+        @media (max-width: 576px) {
+            .v-offcanvas {
+                width: 100% !important;
+            }
+        }
+
+        .v-offcanvas-content {
             display: flex;
             flex-direction: column;
-            max-height: 90vh;
+            height: 100%;
+        }
+
+        .om-card {
+            border: none;
+            background: transparent;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
         }
 
         #orderForm {
@@ -1469,8 +1479,7 @@
         .om-body {
             padding: 28px 30px;
             background: #111;
-            min-height: 340px;
-            max-height: 70vh;
+            flex: 1;
             overflow-y: auto;
         }
 
@@ -1517,14 +1526,14 @@
             font-family: system-ui, sans-serif;
         }
 
-        /* Grille 2 colonnes */
+        /* Grille 2 colonnes — Forcée en 1 col dans le panneau latéral si étroit */
         .om-grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
 
-        @media(max-width:600px) {
+        @media(max-width:991px) {
             .om-grid-2 {
                 grid-template-columns: 1fr;
             }
@@ -1979,14 +1988,8 @@
         /* ── Récapitulatif ── */
         .om-recap-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
-        }
-
-        @media(max-width:600px) {
-            .om-recap-grid {
-                grid-template-columns: 1fr;
-            }
+            grid-template-columns: 1fr; /* Une seule colonne dans le panneau latéral pour plus de lisibilité */
+            gap: 20px;
         }
 
         .om-recap-block {
@@ -2072,7 +2075,19 @@
 
         .om-footer-right {
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            align-items: center;
+        }
+
+        @media(max-width:480px) {
+            .om-footer {
+                padding: 15px 20px;
+                justify-content: space-between;
+            }
+            .om-btn {
+                padding: 8px 16px;
+                font-size: 0.75rem;
+            }
         }
 
         .om-btn {
@@ -2089,44 +2104,39 @@
             gap: 6px;
         }
 
-        .om-btn-ghost {
-            background: transparent;
-            color: #666;
-            border: 1px solid #2a2a2a;
-        }
-
-        .om-btn-ghost:hover {
-            color: #a09060;
-            border-color: #3a3a3a;
-        }
-
         .om-btn-outline {
             background: transparent;
-            color: #888;
-            border: 1px solid #2a2a2a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #777;
         }
 
         .om-btn-outline:hover {
-            color: #ccc;
-            border-color: #555;
+            border-color: #d4af37;
+            color: #d4af37;
+            background: rgba(212, 175, 55, 0.05);
         }
 
         .om-btn-gold {
-            background: linear-gradient(135deg, #d4af37, #b8962e);
-            color: #0e0e0e;
-            box-shadow: 0 4px 14px rgba(212, 175, 55, .3);
+            background: var(--gold-accent);
+            color: var(--cactus-dark);
+            border: 1px solid var(--gold-accent);
         }
 
         .om-btn-gold:hover {
-            background: linear-gradient(135deg, #e0c048, #c8a030);
-            box-shadow: 0 6px 20px rgba(212, 175, 55, .4);
+            background: transparent;
+            color: var(--gold-accent);
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
             transform: translateY(-1px);
         }
 
         .om-btn-gold:disabled {
-            opacity: .5;
+            background: #2a2a2a;
+            border-color: #333;
+            color: #555;
             cursor: not-allowed;
             transform: none;
+            box-shadow: none;
+            opacity: 0.6;
         }
     </style>
 @endpush
@@ -2167,10 +2177,7 @@
                 const data = {
                     items: orderItems,
                     customer: {
-                        prenom: $('#f-prenom').val(),
-                        nom: $('#f-nom').val(),
-                        phone: $('#f-phone').val(),
-                        email: $('#f-email').val(),
+                        fullname: $('#f-fullname').val(),
                         room: $('#f-room').val()
                     }
                 };
@@ -2188,10 +2195,7 @@
                         } else {
                             orderItems = data.items || {};
                             if (data.customer) {
-                                $('#f-prenom').val(data.customer.prenom || '');
-                                $('#f-nom').val(data.customer.nom || '');
-                                $('#f-phone').val(data.customer.phone || '');
-                                $('#f-email').val(data.customer.email || '');
+                                $('#f-fullname').val(data.customer.fullname || '');
                                 $('#f-room').val(data.customer.room || '');
                             }
                         }
@@ -2205,7 +2209,7 @@
             }
 
             // Sauvegarder auto quand on saisit des infos
-            $(document).on('input', '#f-prenom, #f-nom, #f-phone, #f-email, #f-room', saveCart);
+            $(document).on('input', '#f-fullname, #f-room', saveCart);
 
             // --- 1. Gestion des clics sur la grille principale ---
             $(document).on('click', '.add-to-order', function() {
@@ -2279,22 +2283,78 @@
                 }
             }
 
-            // --- 2. Ouverture du Modal Checkout ---
+            // --- 2. Ouverture de l'Offcanvas Checkout ---
             $('#floating-cart').click(function() {
                 goToStep(1);
-                new bootstrap.Modal(document.getElementById('orderModal')).show();
+                const offcanvasElement = document.getElementById('orderModal');
+                const bsOffcanvas = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
+                bsOffcanvas.show();
             });
 
-            /* ── Navigation Modal ── */
+            /* ── Navigation (async car vérif chambre AJAX) ── */
             $('#om-next').click(function() {
-                if (validateStep(currentStep)) goToStep(currentStep + 1);
+                validateAndNext();
             });
-            $('#om-prev').click(function() {
-                goToStep(currentStep - 1);
-            });
+
+            function validateAndNext() {
+                const step = currentStep;
+                if (step !== 1) {
+                    // Les autres étapes : validation sync simple
+                    goToStep(step + 1);
+                    return;
+                }
+
+                // Étape 1 : validation du nom
+                let ok = true;
+                if (!$('#f-fullname').val().trim()) {
+                    $('#err-fullname').text('Le nom complet est requis.');
+                    ok = false;
+                } else {
+                    $('#err-fullname').text('');
+                }
+                if (!ok) return;
+
+                const roomVal = $('#f-room').val().trim();
+
+                // Pas de chambre → passer librement à l'étape suivante
+                if (!roomVal) {
+                    $('#err-room').text('');
+                    goToStep(2);
+                    return;
+                }
+
+                // Chambre renseignée → vérifier qu'un client y séjourne
+                const $btn = $('#om-next').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Vérification…');
+                $.get('/api/restaurant/check-room', { room_number: roomVal })
+                    .done(function(res) {
+                        if (res.valid) {
+                            $('#err-room').text(''); // Effacer les erreurs précédentes
+                            goToStep(3); // Chambre confirmée → on saute le paiement
+                        } else {
+
+                            $('#err-room').html(
+                                `<span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>${res.message}</span>`
+                            );
+                        }
+                    })
+                    .fail(function() {
+                        $('#err-room').html('<span class="text-danger"><i class="fas fa-exclamation-circle me-1"></i>Impossible de vérifier la chambre. Réessayez.</span>');
+                    })
+                    .always(function() {
+                        $btn.prop('disabled', false).html('Suivant <i class="fas fa-arrow-right ms-1"></i>');
+                    });
+            }
+
+            function validateStep(step) {
+                // Conservé pour compatibilité (plus utilisé sur step 1)
+                return true;
+            }
+
+            $('#om-prev').click(function() { goToStep(currentStep - 1); });
 
             function goToStep(n) {
                 if (n < 1 || n > TOTAL_STEPS) return;
+
 
                 const isGuest = $('#f-room').val().trim() !== '';
 
@@ -2311,23 +2371,25 @@
 
                 // Gérer l'affichage des modes de paiement selon le statut guest
                 if (isGuest) {
-                    $('.om-payment-card:not(#room-payment-notice .om-payment-card)').parent().filter(':not(#room-payment-notice)').addClass('d-none');
-                    // Plus simple: cacher tous les labels de paiement sauf celui de la chambre
+                    // Cacher tous les labels (méthodes manuelles) et montrer la facture chambre
                     $('#panel-2 label.om-payment-card').addClass('d-none');
                     $('#room-payment-notice, #payment-room-hint').removeClass('d-none');
                     $('#payment-normal-hint').addClass('d-none');
                     $('input[name="payment_choice"][value="room_charge"]').prop('checked', true);
                 } else {
+                    // Montrer tous les labels (méthodes manuelles) et cacher la facture chambre
                     $('#panel-2 label.om-payment-card').removeClass('d-none');
                     $('#room-payment-notice, #payment-room-hint').addClass('d-none');
                     $('#payment-normal-hint').removeClass('d-none');
-                    // Remettre cash par défaut si c'était sur room_charge
+                    
+                    // Si on était sur room_charge, repasser sur cash par défaut
                     if ($('input[name="payment_choice"]:checked').val() === 'room_charge') {
                         $('input[name="payment_choice"][value="cash"]').prop('checked', true);
                         $('.om-payment-card').removeClass('active');
                         $('#pay-card-cash').addClass('active');
                     }
                 }
+
 
                 $('.om-step').each(function() {
                     const s = parseInt($(this).data('step'));
@@ -2346,23 +2408,11 @@
             function validateStep(step) {
                 if (step === 1) {
                     let ok = true;
-                    if (!$('#f-prenom').val().trim()) {
-                        $('#err-prenom').text('Le prénom est requis.');
+                    if (!$('#f-fullname').val().trim()) {
+                        $('#err-fullname').text('Le nom complet est requis.');
                         ok = false;
                     } else {
-                        $('#err-prenom').text('');
-                    }
-                    if (!$('#f-nom').val().trim()) {
-                        $('#err-nom').text('Le nom est requis.');
-                        ok = false;
-                    } else {
-                        $('#err-nom').text('');
-                    }
-                    if (!$('#f-phone').val().trim()) {
-                        $('#err-phone').text('Le téléphone est requis.');
-                        ok = false;
-                    } else {
-                        $('#err-phone').text('');
+                        $('#err-fullname').text('');
                     }
                     return ok;
                 }
@@ -2370,15 +2420,10 @@
             }
 
             function buildRecap() {
-                const prenom = $('#f-prenom').val().trim();
-                const nom = $('#f-nom').val().trim();
-                const phone = $('#f-phone').val().trim();
-                const email = $('#f-email').val().trim();
+                const fullname = $('#f-fullname').val().trim();
                 const room = $('#f-room').val().trim();
                 const notes = $('#f-notes').val().trim();
-                let idHtml = `<div class="om-recap-line"><span>Client</span>${prenom} ${nom}</div>
-                      <div class="om-recap-line"><span>Téléphone</span>${phone}</div>`;
-                if (email) idHtml += `<div class="om-recap-line"><span>Email</span>${email}</div>`;
+                let idHtml = `<div class="om-recap-line"><span>Client</span>${fullname}</div>`;
                 if (room) idHtml += `<div class="om-recap-line"><span>Chambre</span>${room}</div>`;
                 if (notes) idHtml += `<div class="om-recap-line"><span>Notes</span>${notes}</div>`;
                 $('#recap-identity').html(idHtml);
@@ -2407,9 +2452,9 @@
                 $('#recap-total').text(Math.round(total).toLocaleString('fr-FR') + ' FCFA');
 
                 // Champs cachés pour l'envoi
-                $('#hCustomerName').val(prenom + ' ' + nom);
-                $('#hPhone').val(phone);
-                $('#hEmail').val(email);
+                $('#hCustomerName').val(fullname);
+                $('#hPhone').val('');
+                $('#hEmail').val('');
                 $('#hRoom').val(room);
                 const notesVal = $('#f-notes').val().trim();
                 $('#hNotes').val(notesVal);
@@ -2419,13 +2464,13 @@
                 
                 let paymentLabel = '';
                 const methods = {
-                    'room_charge': '<i class="fas fa-hotel me-2"></i> Sur facture (Chambre ' + room + ')',
-                    'cash': '💵 Espèces (à la livraison)',
-                    'mobile_money': '📲 Mobile Money',
-                    'card': '💳 Carte Bancaire',
-                    'fedapay': '💳 Fedapay / En ligne',
-                    'transfer': '🏦 Virement Bancaire',
-                    'check': '📄 Chèque'
+                    'room_charge': '<i class="fas fa-hotel text-primary me-2"></i> Sur facture (Chambre ' + room + ')',
+                    'cash': '<i class="fas fa-money-bill-wave text-success me-2"></i> Espèces',
+                    'mobile_money': '<i class="fas fa-mobile-alt text-warning me-2"></i> Mobile Money',
+                    'card': '<i class="fas fa-credit-card text-primary me-2"></i> Carte Bancaire',
+                    'fedapay': '<i class="fas fa-wallet text-indigo me-2"></i> Fedapay / En ligne',
+                    'transfer': '<i class="fas fa-university text-info me-2"></i> Virement Bancaire',
+                    'check': '<i class="fas fa-file-invoice-dollar text-secondary me-2"></i> Chèque'
                 };
                 paymentLabel = methods[paymentMode] || paymentMode;
                 

@@ -361,7 +361,40 @@ class RestaurantController extends Controller
         return response()->json($menus);
     }
 
+    // API publique — vérifier si une chambre a un client actif
+    public function checkRoomGuest(Request $request)
+    {
+        $roomNumber = trim($request->get('room_number', ''));
+        if (!$roomNumber) {
+            return response()->json(['valid' => false, 'message' => 'Numéro de chambre manquant.']);
+        }
+
+        $room = Room::where('number', $roomNumber)->first();
+        if (!$room) {
+            return response()->json(['valid' => false, 'message' => "La chambre {$roomNumber} n'existe pas."]);
+        }
+
+        $transaction = Transaction::where('room_id', $room->id)
+            ->whereIn('status', ['active', 'pending_checkout'])
+            ->latest()
+            ->first();
+
+        if (!$transaction) {
+            return response()->json([
+                'valid' => false,
+                'message' => "Aucun client actif dans la chambre {$roomNumber}. Veuillez vérifier le numéro ou laisser ce champ vide."
+            ]);
+        }
+
+        return response()->json([
+            'valid' => true,
+            'customer_name' => $transaction->customer->name ?? null,
+            'room' => $roomNumber,
+        ]);
+    }
+
     // Méthode utilitaire pour obtenir l'ID de la chambre
+
     private function getRoomIdFromNumber($roomNumber)
     {
         if (! $roomNumber) {
@@ -503,7 +536,11 @@ class RestaurantController extends Controller
             'name' => $data['customer_name'] ?? 'Client Restaurant',
             'phone' => $data['phone'] ?? null,
             'email' => $data['email'] ?? null,
-            'notes' => 'Client créé automatiquement depuis la commande restaurant',
+            'address' => 'Non renseignée',
+            'gender' => 'male',
+            'job' => 'Non spécifié',
+            'birthdate' => now()->subYears(30)->format('Y-m-d'),
+            'user_id' => auth()->id() ?? 1,
         ]);
     }
 }

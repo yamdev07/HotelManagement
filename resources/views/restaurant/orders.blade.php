@@ -4,269 +4,152 @@
 
 @include('restaurant.partials.nav-tabs')
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="mb-0">Gestion des Commandes</h3>
-    <div class="d-flex gap-2">
-        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#newOrderModal">
-            <i class="fas fa-plus me-2"></i> Nouvelle Commande
+<div class="db-page">
+    <div class="db-header anim-1">
+        <div>
+            <h1 class="db-title-h1">Gestion des Commandes</h1>
+            <p class="text-muted small">Suivez et traitez les commandes des clients en temps réel</p>
+        </div>
+        <button class="btn-db-primary" data-bs-toggle="modal" data-bs-target="#newOrderModal">
+            <i class="fas fa-plus"></i> Nouvelle Commande
         </button>
     </div>
-</div>
 
-<!-- Statistiques du Jour -->
-<div class="row mb-4 align-items-stretch">
-    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
-        <div class="card border-0 shadow-sm border-start border-warning border-4 h-100">
-            <div class="card-body p-3 d-flex flex-column justify-content-between">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <div>
-                        <h6 class="text-muted mb-0 small">CA du jour</h6>
-                        <h4 class="mb-0 text-warning">{{ number_format($todayRevenue ?? 0, 0, ',', ' ') }} CFA</h4>
-                    </div>
-                    <div class="bg-warning bg-opacity-10 p-2 rounded">
-                        <i class="fas fa-coins text-warning"></i>
-                    </div>
-                </div>
-                <hr class="my-1 opacity-25">
-                <div class="row g-0">
-                    <div class="col-6 border-end px-1">
-                        <small class="text-muted d-block" style="font-size: 0.65rem;">Chambre</small>
-                        <span class="fw-bold text-success" style="font-size: 0.8rem;">{{ number_format($todayRoomRevenue ?? 0, 0, ',', ' ') }}</span>
-                    </div>
-                    <div class="col-6 ps-2">
-                        <small class="text-muted d-block" style="font-size: 0.65rem;">Hors-Ch.</small>
-                        <span class="fw-bold text-info" style="font-size: 0.8rem;">{{ number_format($todayNoRoomRevenue ?? 0, 0, ',', ' ') }}</span>
-                    </div>
-                </div>
+    <!-- Statistiques du Jour -->
+    <div class="kpi-grid anim-2">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: var(--g50); color: var(--g600);"><i class="fas fa-coins"></i></div>
+            <div class="kpi-data">
+                <div class="kpi-label">CA DU JOUR</div>
+                <div class="kpi-value text-success">{{ number_format($todayRevenue ?? 0, 0, ',', ' ') }}</div>
             </div>
         </div>
-    </div>    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
-        <div class="card border-0 shadow-sm border-start border-primary border-4 h-100">
-            <div class="card-body p-3 d-flex flex-column justify-content-between">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <div>
-                        <h6 class="text-muted mb-0 small">Commandes (Auj.)</h6>
-                        <h4 class="mb-0 text-primary">{{ $todayOrdersTotal ?? 0 }}</h4>
-                    </div>
-                    <div class="bg-primary bg-opacity-10 p-2 rounded">
-                        <i class="fas fa-receipt text-primary"></i>
-                    </div>
-                </div>
-                <hr class="my-1 opacity-25">
-                <div class="row g-0">
-                    <div class="col-6 border-end px-1">
-                        <small class="text-muted d-block" style="font-size: 0.65rem;">Chambre</small>
-                        <span class="fw-bold text-success" style="font-size: 0.8rem;">{{ $todayOrdersRoom ?? 0 }}</span>
-                    </div>
-                    <div class="col-6 ps-2">
-                        <small class="text-muted d-block" style="font-size: 0.65rem;">Hors-Ch.</small>
-                        <span class="fw-bold text-info" style="font-size: 0.8rem;">{{ $todayOrdersNoRoom ?? 0 }}</span>
-                    </div>
-                </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: #eff6ff; color: #2563eb;"><i class="fas fa-receipt"></i></div>
+            <div class="kpi-data">
+                <div class="kpi-label">COMMANDES (AUJ.)</div>
+                <div class="kpi-value text-primary">{{ $todayOrdersTotal ?? 0 }}</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: #fff1f2; color: #e11d48;"><i class="fas fa-fire"></i></div>
+            <div class="kpi-data">
+                <div class="kpi-label">EN ATTENTE / PRÉP.</div>
+                <div class="kpi-value text-danger">{{ ($pendingOrders ?? 0) + ($preparingOrders ?? 0) }}</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: #f0fdf4; color: #10b981;"><i class="fas fa-check-double"></i></div>
+            <div class="kpi-data">
+                <div class="kpi-label">LIVRÉES / PAYÉES</div>
+                <div class="kpi-value text-success">{{ ($deliveredOrders ?? 0) + ($paidOrders ?? 0) }}</div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
-        <div class="card border-0 shadow-sm border-start border-danger border-4 h-100">
-            <div class="card-body p-3 d-flex flex-column justify-content-between">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <div>
-                        <h6 class="text-muted mb-0 small">Attente / Préparation (Auj.)</h6>
-                        <h4 class="mb-0 text-danger">{{ ($pendingOrders ?? 0) + ($preparingOrders ?? 0) }}</h4>
-                    </div>
-                    <div class="bg-danger bg-opacity-10 p-2 rounded">
-                        <i class="fas fa-fire text-danger"></i>
-                    </div>
-                </div>
-                <hr class="my-1 opacity-25">
-                <div class="row g-0">
-                    <div class="col-6 border-end px-1">
-                        <small class="text-muted d-block" style="font-size: 0.65rem;">En attente</small>
-                        <span class="fw-bold text-danger" style="font-size: 0.8rem;">{{ $pendingOrders ?? 0 }}</span>
-                    </div>
-                    <div class="col-6 ps-2">
-                        <small class="text-muted d-block" style="font-size: 0.65rem;">Préparation</small>
-                        <span class="fw-bold text-warning" style="font-size: 0.8rem;">{{ $preparingOrders ?? 0 }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-3 mb-xl-0">
-        <div class="card border-0 shadow-sm border-start border-success border-4 h-100">
-            <div class="card-body p-3 d-flex flex-column justify-content-between">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <div>
-                        <h6 class="text-muted mb-0 small">Terminées / Autres</h6>
-                        <h4 class="mb-0 text-success">{{ ($deliveredOrders ?? 0) + ($paidOrders ?? 0) + ($cancelledOrders ?? 0) }}</h4>
-                    </div>
-                    <div class="bg-success bg-opacity-10 p-2 rounded">
-                        <i class="fas fa-check-double text-success"></i>
-                    </div>
-                </div>
-                <hr class="my-1 opacity-25">
-                <div class="row g-0">
-                    <div class="col-4 border-end px-1 text-center">
-                        <small class="text-muted d-block" style="font-size: 0.65rem;">Livrées</small>
-                        <span class="fw-bold text-success" style="font-size: 0.8rem;">{{ $deliveredOrders ?? 0 }}</span>
-                    </div>
-                    <div class="col-4 border-end px-1 text-center">
-                        <small class="text-muted d-block" style="font-size: 0.65rem;">Payées</small>
-                        <span class="fw-bold text-primary" style="font-size: 0.8rem;">{{ $paidOrders ?? 0 }}</span>
-                    </div>
-                    <div class="col-4 px-1 text-center">
-                        <small class="text-muted d-block" style="font-size: 0.65rem;">Annulées</small>
-                        <span class="fw-bold text-secondary" style="font-size: 0.8rem;">{{ $cancelledOrders ?? 0 }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="card shadow-sm border-0">
-    <div class="card-body p-0">
+    <div class="db-card anim-3">
         <!-- Filtres -->
-        <div class="p-3 border-bottom">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-3">
-                    <label class="form-label">Statut</label>
-                    <select class="form-select" id="statusFilter">
-                        <option value="">Tous les statuts</option>
-                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>En attente</option>
-                        <option value="preparing" {{ request('status') == 'preparing' ? 'selected' : '' }}>En préparation</option>
-                        <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Livré</option>
-                        <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Payé</option>
-                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Annulé</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Date de</label>
-                    <input type="date" class="form-control" id="dateFrom" value="{{ request('from') }}">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Date à</label>
-                    <input type="date" class="form-control" id="dateTo" value="{{ request('to') }}">
-                </div>
-                <div class="col-md-3 d-flex gap-2">
-                    <button class="btn btn-primary flex-grow-1" id="applyFilters">
-                        <i class="fas fa-filter me-1"></i> Appliquer
-                    </button>
-                    @if(request()->hasAny(['status','from','to']))
-                    <a href="{{ route('restaurant.orders') }}" class="btn btn-outline-secondary" title="Réinitialiser les filtres">
-                        <i class="fas fa-times"></i>
-                    </a>
-                    @endif
-                </div>
-            </div>
+        <div class="filter-row mb-4">
+            <select class="db-input" id="statusFilter" style="width: 200px;">
+                <option value="">Tous les statuts</option>
+                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>En attente</option>
+                <option value="preparing" {{ request('status') == 'preparing' ? 'selected' : '' }}>En préparation</option>
+                <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Livré</option>
+                <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Payé</option>
+                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Annulé</option>
+            </select>
+            <input type="date" class="db-input" id="dateFrom" value="{{ request('from') }}" title="Du">
+            <input type="date" class="db-input" id="dateTo" value="{{ request('to') }}" title="Au">
+            <button class="btn-db-primary" id="applyFilters" style="height:42px; padding:0 24px;">
+                <i class="fas fa-filter"></i> Filtrer
+            </button>
             @if(request()->hasAny(['status','from','to']))
-            <div class="mt-2">
-                <small class="text-muted">
-                    <i class="fas fa-info-circle me-1"></i>
-                    Filtres actifs :
-                    @if(request('status'))
-                        <span class="badge bg-secondary me-1">Statut: {{ ['pending'=>'En attente','preparing'=>'En préparation','delivered'=>'Livré','paid'=>'Payé','cancelled'=>'Annulé'][request('status')] ?? request('status') }}</span>
-                    @endif
-                    @if(request('from'))
-                        <span class="badge bg-secondary me-1">Du: {{ \Carbon\Carbon::parse(request('from'))->format('d/m/Y') }}</span>
-                    @endif
-                    @if(request('to'))
-                        <span class="badge bg-secondary me-1">Au: {{ \Carbon\Carbon::parse(request('to'))->format('d/m/Y') }}</span>
-                    @endif
-                </small>
-            </div>
+                <a href="{{ route('restaurant.orders') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="height:42px; width:42px; border-radius:10px;">
+                    <i class="fas fa-times"></i>
+                </a>
             @endif
         </div>
 
         <!-- Table des commandes -->
         <div class="table-responsive">
-            <table class="table table-hover mb-0">
-                <thead class="table-light">
+            <table class="db-table">
+                <thead>
                     <tr>
-                        <th>#</th>
+                        <th>ID</th>
                         <th>Client</th>
                         <th>Chambre</th>
-                        <th>Transaction</th>
-                        <th>Menus</th>
-                        <th>Total</th>
+                        <th class="text-center">Menus</th>
+                        <th class="text-end">Total</th>
                         <th>Statut</th>
                         <th>Date</th>
-                        <th style="min-width:140px;">Actions</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($orders as $order)
                     <tr data-status="{{ $order->status }}">
-                        <td><strong>#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</strong></td>
+                        <td class="fw-bold">#{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</td>
                         <td>
-                            <div class="d-flex align-items-center">
-                                <div class="flex-shrink-0 me-2">
-                                    <i class="fas fa-user-circle text-primary"></i>
-                                </div>
-                                <div class="flex-grow-1">
-                                    {{ $order->customer_name ?? 'Client non spécifié' }}
-                                    @if($order->customer_phone)
-                                    <br><small class="text-muted">{{ $order->customer_phone }}</small>
-                                    @endif
-                                </div>
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold">{{ $order->customer_name ?? 'Client' }}</span>
+                                <small class="text-muted">{{ $order->customer_phone ?? '' }}</small>
                             </div>
                         </td>
                         <td>
-                            @if($order->room_id)
-                            <span class="badge bg-info">Ch. {{ $order->room_number }}</span>
+                            @if($order->room_number)
+                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25">
+                                    <i class="fas fa-door-open me-1"></i> {{ $order->room_number }}
+                                </span>
                             @else
-                            <span class="text-muted">-</span>
+                                <span class="text-muted">-</span>
                             @endif
                         </td>
-                        <td>
-                            @if($order->transaction_id)
-                            <span class="badge bg-success">Trans. #{{ $order->transaction_id }}</span>
-                            @else
-                            <span class="text-muted">-</span>
-                            @endif
-                        </td>
-                        <td>
-                            <button class="btn btn-sm btn-outline-info view-items" 
+                        <td class="text-center">
+                            <button class="btn btn-sm btn-light border px-2 py-1 view-items" 
                                     data-order-id="{{ $order->id }}"
                                     data-bs-toggle="modal" 
                                     data-bs-target="#orderDetailsModal">
-                                {{ $order->items_count ?? 0 }} article(s)
+                                <i class="fas fa-shopping-basket me-1"></i> {{ $order->items_count ?? 0 }}
                             </button>
                         </td>
-                        <td>
-                            <strong class="text-primary">{{ number_format($order->total, 0, ',', ' ') }} CFA</strong>
+                        <td class="text-end fw-bold text-primary">
+                            {{ number_format($order->total, 0, ',', ' ') }} CFA
                         </td>
                         <td>
                             @php
                                 $statusColors = [
-                                    'pending' => 'warning',
-                                    'preparing' => 'info',
-                                    'delivered' => 'success',
-                                    'paid' => 'primary',
-                                    'cancelled' => 'danger'
+                                    'pending' => 'bg-warning',
+                                    'preparing' => 'bg-info',
+                                    'delivered' => 'bg-success',
+                                    'paid' => 'bg-primary',
+                                    'cancelled' => 'bg-danger'
                                 ];
                                 $statusLabels = [
                                     'pending' => 'En attente',
-                                    'preparing' => 'En préparation',
+                                    'preparing' => 'Préparation',
                                     'delivered' => 'Livré',
                                     'paid' => 'Payé',
                                     'cancelled' => 'Annulé'
                                 ];
                             @endphp
-                            <span class="badge bg-{{ $statusColors[$order->status] ?? 'secondary' }}">
+                            <span class="badge {{ $statusColors[$order->status] ?? 'bg-secondary' }} px-2 py-1">
                                 {{ $statusLabels[$order->status] ?? $order->status }}
                             </span>
                         </td>
                         <td>
-                            {{ $order->created_at->format('d/m/Y H:i') }}
+                            <div class="d-flex flex-column" style="font-size: 0.75rem;">
+                                <span>{{ $order->created_at->format('d/m/Y') }}</span>
+                                <span class="text-muted">{{ $order->created_at->format('H:i') }}</span>
+                            </div>
                         </td>
                         <td>
-                            <div class="d-flex gap-1 flex-nowrap">
+                            <div class="d-flex justify-content-end gap-2">
                                 {{-- Détails --}}
-                                <button class="btn btn-sm btn-outline-secondary"
-                                        title="Voir les détails"
+                                <button class="btn btn-sm btn-light border p-2"
+                                        title="Voir"
                                         data-order-id="{{ $order->id }}"
                                         data-bs-toggle="modal"
                                         data-bs-target="#orderDetailsModal">
@@ -275,8 +158,8 @@
 
                                 {{-- Préparer (pending → preparing) --}}
                                 @if($order->status == 'pending')
-                                <button class="btn btn-sm btn-info change-status"
-                                        title="Mettre en préparation"
+                                <button class="btn btn-sm btn-info text-white p-2 change-status"
+                                        title="Lancer la préparation"
                                         data-order-id="{{ $order->id }}"
                                         data-status="preparing">
                                     <i class="fas fa-play"></i>
@@ -285,55 +168,37 @@
 
                                 {{-- Livrer (preparing → delivered) --}}
                                 @if($order->status == 'preparing')
-                                <button class="btn btn-sm btn-success change-status"
+                                <button class="btn btn-sm btn-success text-white p-2 change-status"
                                         title="Marquer comme livré"
                                         data-order-id="{{ $order->id }}"
                                         data-status="delivered">
-                                    <i class="fas fa-check"></i>
+                                    <i class="fas fa-truck"></i>
                                 </button>
                                 @endif
 
-                                {{-- Payer (pending ou delivered → paid) -- Uniquement si paiement direct --}}
+                                {{-- Payer (si paiement direct) --}}
                                 @if(in_array($order->status, ['delivered', 'pending']) && $order->payment_method !== 'room_charge')
-                                <button class="btn btn-sm btn-primary change-status"
-                                        title="Marquer comme payé"
+                                <button class="btn btn-sm btn-primary text-white p-2 change-status"
+                                        title="Encaisser la commande"
                                         data-order-id="{{ $order->id }}"
                                         data-status="paid">
-                                    <i class="fas fa-money-bill-wave"></i>
+                                    <i class="fas fa-cash-register"></i>
                                 </button>
-                                @elseif($order->status === 'delivered' && $order->payment_method === 'room_charge')
-                                <span class="badge bg-info" title="Sera payé via la facture chambre">
-                                    <i class="fas fa-hotel"></i> Sur facture
-                                </span>
                                 @endif
-
-                                {{-- Annuler (si pas déjà payé ou annulé) --}}
-                                @if(!in_array($order->status, ['paid', 'cancelled']))
-                                <button class="btn btn-sm btn-outline-danger cancel-order"
-                                        title="Annuler la commande"
-                                        data-order-id="{{ $order->id }}">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                                
+                                @if($order->payment_method === 'room_charge')
+                                <span class="badge bg-light text-primary border border-primary border-opacity-25 d-flex align-items-center" title="Sur facture chambre">
+                                    <i class="fas fa-hotel"></i>
+                                </span>
                                 @endif
                             </div>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="9" class="text-center py-5">
-                            <i class="fas fa-shopping-cart fa-3x text-muted mb-3"></i>
-                            <h4>Aucune commande trouvée</h4>
-                            @if(request()->hasAny(['status','from','to']))
-                            <p class="text-muted">Aucune commande ne correspond aux filtres sélectionnés.</p>
-                            <a href="{{ route('restaurant.orders') }}" class="btn btn-outline-secondary me-2">
-                                <i class="fas fa-times me-1"></i> Réinitialiser les filtres
-                            </a>
-                            @else
-                            <p class="text-muted">Aucune commande n'a été passée pour le moment.</p>
-                            @endif
-                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newOrderModal">
-                                <i class="fas fa-plus me-1"></i> Créer la première commande
-                            </button>
+                        <td colspan="8" class="text-center py-5">
+                            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Aucune commande</h5>
                         </td>
                     </tr>
                     @endforelse
@@ -343,144 +208,81 @@
 
         <!-- Pagination -->
         @if($orders->hasPages())
-        <div class="p-3 border-top">
+        <div class="mt-4 d-flex justify-content-center">
             {{ $orders->links() }}
         </div>
         @endif
     </div>
 </div>
 
-<!-- Modal Détails de la commande -->
+<!-- Modal Détails -->
 <div class="modal fade" id="orderDetailsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Détails de la commande #<span id="orderId"></span></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none; box-shadow: var(--shadow-lg);">
+            <div class="modal-header" style="background: var(--g700); color: white; border: none;">
+                <h5 class="modal-title fw-bold">Détails de la commande #<span id="orderId"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-0">
                 <div id="orderDetailsContent">
-                    <!-- Contenu chargé dynamiquement -->
+                    <!-- Dynamic -->
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                <button type="button" class="btn btn-primary" id="printOrder">
-                    <i class="fas fa-print me-1"></i> Imprimer
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary fw-bold" id="printOrder">
+                    <i class="fas fa-print me-1"></i> Imprimer le ticket
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-@endsection
-
 @include('restaurant.partials.new-order-modal')
+
+@endsection
 
 @push('scripts')
 <script>
 $(document).ready(function() {
-    // Configuration Ajax pour envoyer le tag CSRF
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
+    $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
 
-    // 1. Filtrage au clic sur "Appliquer"
     $('#applyFilters').click(function() {
-        const status = $('#statusFilter').val();
-        const dateFrom = $('#dateFrom').val();
-        const dateTo = $('#dateTo').val();
-        
-        // Simuler un rechargement en redirigeant ou en filtrant côté client pour l'instant
-        // Pour un système complet, il faudrait passer par une requête GET avec ces paramètres
         let url = new URL(window.location.href);
-        if(status) url.searchParams.set('status', status);
-        else url.searchParams.delete('status');
-        
-        if(dateFrom) url.searchParams.set('from', dateFrom);
-        else url.searchParams.delete('from');
-        
+        const status = $('#statusFilter').val();
+        const from = $('#dateFrom').val();
+        const to = $('#dateTo').val();
+        if(status) url.searchParams.set('status', status); else url.searchParams.delete('status');
+        if(from) url.searchParams.set('from', from); else url.searchParams.delete('from');
+        if(to) url.searchParams.set('to', to); else url.searchParams.delete('to');
         window.location.href = url.toString();
     });
 
-    // Changement de statut
     $(document).on('click', '.change-status', function() {
         const orderId = $(this).data('order-id');
         const status = $(this).data('status');
         $.post(`/restaurant/orders/${orderId}/status`, { status }, function() {
             location.reload();
         }).fail(function(xhr) {
-            const msg = xhr.responseJSON?.message || 'Erreur lors du changement de statut.';
-            Swal.fire({ icon: 'warning', title: 'Action impossible', text: msg });
+            Swal.fire({ icon: 'warning', title: 'Erreur', text: xhr.responseJSON?.message || 'Erreur inconnue' });
         });
     });
 
-    // Annulation de commande
-    $(document).on('click', '.cancel-order', function() {
-        const orderId = $(this).data('order-id');
-        Swal.fire({
-            title: 'Êtes-vous sûr ?',
-            text: "Cette commande sera annulée.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Oui, annuler',
-            cancelButtonText: 'Non'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/restaurant/orders/${orderId}/cancel`,
-                    type: 'PUT',
-                    success: function() {
-                        location.reload();
-                    },
-                    error: function(xhr) {
-                        const msg = xhr.responseJSON?.message || 'Erreur lors de l\'annulation.';
-                        Swal.fire('Erreur', msg, 'error');
-                    }
-                });
-            }
-        });
-    });
-
-    // Afficher les détails
     $('#orderDetailsModal').on('show.bs.modal', function(e) {
-        const button = $(e.relatedTarget);
-        const orderId = button.data('order-id');
-        
+        const orderId = $(e.relatedTarget).data('order-id');
         $('#orderId').text(orderId);
-        $('#orderDetailsContent').html('<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>');
-        
-        $.ajax({
-            url: `/restaurant/orders/${orderId}`,
-            type: 'GET',
-            success: function(response) {
-                $('#orderDetailsContent').html(response.html);
-            },
-            error: function() {
-                $('#orderDetailsContent').html('<div class="alert alert-danger">Erreur lors du chargement.</div>');
-            }
+        $('#orderDetailsContent').html('<div class="text-center py-5"><div class="spinner-border text-success"></div></div>');
+        $.get(`/restaurant/orders/${orderId}`, function(res) {
+            $('#orderDetailsContent').html(res.html);
         });
     });
 
-    // 5. Impression
     $('#printOrder').click(function() {
         const content = document.getElementById('orderDetailsContent').innerHTML;
-        const myWindow = window.open('', '', 'width=800,height=600');
-        myWindow.document.write('<html><head><title>Impression Commande</title>');
-        myWindow.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">');
-        myWindow.document.write('<style>body{padding:20px} .modal-body{padding:0}</style>');
-        myWindow.document.write('</head><body>');
-        myWindow.document.write(content);
-        myWindow.document.write('</body></html>');
-        myWindow.document.close();
-        
-        setTimeout(function() {
-            myWindow.print();
-        }, 500);
+        const win = window.open('', '', 'width=800,height=600');
+        win.document.write('<html><head><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"></head><body>'+content+'</body></html>');
+        win.document.close();
+        setTimeout(() => { win.print(); win.close(); }, 500);
     });
 });
 </script>

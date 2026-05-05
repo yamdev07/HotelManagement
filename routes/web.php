@@ -55,6 +55,10 @@ Route::post('/reservation/submit', [FrontendController::class, 'submitReservatio
 // Commande restaurant depuis la vitrine (public)
 Route::post('/restaurant/orders', [RestaurantController::class, 'storeOrder'])->name('restaurant.orders.store');
 
+// Vérifier si une chambre a un client actif (public)
+Route::get('/api/restaurant/check-room', [RestaurantController::class, 'checkRoomGuest'])->name('restaurant.api.check-room');
+
+
 Route::get('/api/available-rooms', [FrontendController::class, 'availableRooms'])->name('api.available-rooms');
 
 // ==================== ROUTES D'AUTHENTIFICATION ====================
