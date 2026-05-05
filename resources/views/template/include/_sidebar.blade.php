@@ -48,7 +48,7 @@
                 @endphp
 
                 <!-- TABLEAU DE BORD -->
-                @if (auth()->user()->role !== 'Customer')
+                @if (!in_array(auth()->user()->role, ['Customer', 'Servant']))
                 <div class="nav-section">
                     <div class="nav-section-title">Tableau de Bord</div>
 

@@ -137,7 +137,7 @@ class User extends Authenticatable
     public function canStartSession(): bool
     {
         return ! $this->activeCashierSession &&
-            in_array($this->role, ['Receptionist', 'Admin', 'Super', 'Cashier']);
+            in_array($this->role, ['Receptionist', 'Admin', 'Super', 'Cashier', 'Servant']);
     }
 
     /**

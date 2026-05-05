@@ -389,7 +389,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
 
             // ✅ CORRIGÉ : Ajout du middleware checkrole pour les réceptionnistes
             Route::delete('/', [CashierSessionController::class, 'destroy'])->name('sessions.destroy')
-                ->middleware('checkrole:Super,Admin,Receptionist');
+                ->middleware('checkrole:Super,Admin,Receptionist,Servant');
 
             Route::get('/report', [CashierSessionController::class, 'report'])->name('sessions.report');
         });
@@ -403,7 +403,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
 });
 
     // ==================== DASHBOARD (RESTEINT) ====================
-    Route::prefix('dashboard')->name('dashboard.')->middleware('checkrole:Super,Admin,Housekeeping,Receptionist,Servant')->group(function () {
+    Route::prefix('dashboard')->name('dashboard.')->middleware('checkrole:Super,Admin,Housekeeping,Receptionist')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('index');
         Route::get('/data', [DashboardController::class, 'getDashboardData'])->name('data');
         Route::get('/stats', [DashboardController::class, 'updateStats'])->name('stats');
@@ -414,8 +414,12 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
 Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant']], function () {
 
     Route::get('/home', function () {
-        if (auth()->user()->role === 'Customer') {
+        $user = auth()->user();
+        if ($user->role === 'Customer') {
             return redirect()->route('transaction.myReservations');
+        }
+        if ($user->role === 'Servant') {
+            return redirect()->route('cashier.dashboard');
         }
         return redirect()->route('dashboard.index');
     })->name('home');
@@ -490,8 +494,8 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
         Route::get('/api/customers', [RestaurantController::class, 'getCustomers'])->name('api.customers');
         Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
 
-        // Gestion des menus et catégories seulement pour admins
-        Route::middleware('checkrole:Super,Admin,Receptionist')->group(function () {
+        // Gestion des menus et catégories seulement pour admins et servants
+        Route::middleware('checkrole:Super,Admin,Receptionist,Servant')->group(function () {
             Route::get('/create', [RestaurantController::class, 'create'])->name('create');
             Route::post('/store', [RestaurantController::class, 'store'])->name('store');
             Route::get('/menus/{id}/edit', [RestaurantController::class, 'edit'])->name('menus.edit');
