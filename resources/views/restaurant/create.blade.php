@@ -26,15 +26,14 @@
 
                 <div class="col-md-6 mb-3">
                     <label for="category" class="form-label">Catégorie <span class="text-danger">*</span></label>
-                    <select class="form-select @error('category') is-invalid @enderror" 
-                            id="category" name="category" required>
+                    <select class="form-select @error('category_id') is-invalid @enderror" 
+                            id="category" name="category_id" required>
                         <option value="">Sélectionner une catégorie</option>
-                        <option value="plat" {{ old('category') == 'plat' ? 'selected' : '' }}>Plat principal</option>
-                        <option value="entree" {{ old('category') == 'entree' ? 'selected' : '' }}>Entrée</option>
-                        <option value="dessert" {{ old('category') == 'dessert' ? 'selected' : '' }}>Dessert</option>
-                        <option value="boisson" {{ old('category') == 'boisson' ? 'selected' : '' }}>Boisson</option>
-                        <option value="aperitif" {{ old('category') == 'aperitif' ? 'selected' : '' }}>Apéritif</option>
-                        <option value="salade" {{ old('category') == 'salade' ? 'selected' : '' }}>Salade</option>
+                        @foreach($categories as $category)
+                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
                     </select>
                     @error('category')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -67,25 +66,48 @@
             </div>
 
             <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
+                <label for="description" class="form-label av-label">Description</label>
                 <textarea class="form-control @error('description') is-invalid @enderror" 
-                          id="description" name="description" rows="4">{{ old('description') }}</textarea>
-                <small class="text-muted">Décrivez les ingrédients, la préparation, etc.</small>
+                          id="description" name="description" rows="3" style="font-size: 0.85rem;">{{ old('description') }}</textarea>
+                <small class="text-muted" style="font-size: 0.7rem;">Décrivez les ingrédients, la préparation, etc.</small>
                 @error('description')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
-            <!-- Prévisualisation de l'image -->
-            <div class="mb-3" id="imagePreviewContainer" style="display: none;">
-                <label class="form-label">Prévisualisation</label>
-                <div class="border rounded p-3 text-center">
-                    <img id="imagePreview" src="#" alt="Prévisualisation" style="max-width: 200px; max-height: 200px;" class="img-fluid mb-2">
-                    <button type="button" class="btn btn-sm btn-danger" onclick="removeImagePreview()">
-                        <i class="fas fa-trash me-1"></i> Supprimer l'image
-                    </button>
+            <div class="row align-items-center">
+                <div class="col-md-8 mb-3">
+                    <label class="form-label d-block av-label">Jours de disponibilité</label>
+                    <div class="btn-group w-100" role="group">
+                        @foreach(['mon' => 'Lun', 'tue' => 'Mar', 'wed' => 'Mer', 'thu' => 'Jeu', 'fri' => 'Ven', 'sat' => 'Sam', 'sun' => 'Dim'] as $key => $label)
+                            <input type="checkbox" class="btn-check" id="day-{{ $key }}" name="available_days[]" value="{{ $key }}" checked autocomplete="off">
+                            <label class="btn btn-outline-secondary btn-day" for="day-{{ $key }}">{{ $label }}</label>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="col-md-4 mb-3 d-flex align-items-end">
+                    <div class="form-check form-switch mb-1 p-2 px-3 rounded border bg-light d-flex align-items-center" style="height: 38px;">
+                        <input class="form-check-input ms-0" type="checkbox" id="is_available" name="is_available" value="1" checked>
+                        <label class="form-check-label ms-2 fw-bold av-switch-label" for="is_available">Dispo immédiatement</label>
+                    </div>
                 </div>
             </div>
+
+
+            <!-- Prévisualisation de l'image -->
+            <div class="mb-3" id="imagePreviewContainer" style="display: none;">
+                <label class="form-label preview-title">Prévisualisation</label>
+                <div class="border rounded p-2 text-center bg-light">
+                    <img id="imagePreview" src="#" alt="Prévisualisation" style="max-height: 120px;" class="img-fluid mb-2 border">
+                    <div class="mt-1">
+                        <button type="button" class="btn btn-xs btn-danger" onclick="removeImagePreview()" style="font-size: 0.65rem; padding: 2px 8px;">
+                            <i class="fas fa-trash me-1"></i> Retirer
+                        </button>
+                    </div>
+                </div>
+            </div>
+
 
             <div class="d-flex justify-content-between mt-4">
                 <a href="{{ route('restaurant.index') }}" class="btn btn-secondary">
@@ -135,13 +157,50 @@ document.getElementById('price').addEventListener('input', function(e) {
     font-weight: 500;
 }
 
+.av-label {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-weight: 700 !important;
+}
+
+.btn-day {
+    font-size: 0.68rem;
+    padding: 6px 4px;
+    border-color: #e2e8f0;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.btn-check:checked + .btn-day {
+    background-color: #334155 !important; /* var(--g800) equivalent */
+    border-color: #334155 !important;
+    color: white !important;
+}
+
+.av-switch-label {
+    font-size: 0.75rem;
+    color: #334155;
+    margin-top: 1px;
+}
+
+.preview-title {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: 700;
+}
+
 .input-group-text {
     background-color: #f8f9fa;
 }
 
 #imagePreview {
     border-radius: 0.375rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
+
 </style>
 @endsection

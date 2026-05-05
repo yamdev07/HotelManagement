@@ -25,6 +25,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransactionRoomReservationController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RestaurantCategoryController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -42,7 +43,6 @@ Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
 Route::get('/chambres', [FrontendController::class, 'rooms'])->name('frontend.rooms');
 Route::get('/chambre/{id}', [FrontendController::class, 'roomDetails'])->name('frontend.room.details');
 Route::get('/restaurant-vitrine', [FrontendController::class, 'restaurant'])->name('frontend.restaurant');
-Route::get('/specialites-africaines', [FrontendController::class, 'africanSpecialties'])->name('frontend.african');
 Route::get('/services', [FrontendController::class, 'services'])->name('frontend.services');
 Route::get('/contact', [FrontendController::class, 'contact'])->name('frontend.contact');
 Route::post('/contact/submit', [FrontendController::class, 'contactSubmit'])->name('frontend.contact.submit');
@@ -56,7 +56,9 @@ Route::post('/reservation/submit', [FrontendController::class, 'submitReservatio
 Route::post('/restaurant/orders', [RestaurantController::class, 'storeOrder'])->name('restaurant.orders.store');
 
 // Vérifier si une chambre a un client actif (public)
-Route::get('/api/restaurant/check-room', [RestaurantController::class, 'checkRoomGuest'])->name('restaurant.api.check-room');
+    Route::get('/api/restaurant/check-room', [RestaurantController::class, 'checkRoomGuest'])->name('restaurant.check-room');
+    Route::post('/restaurant/menus/{id}/toggle-status', [RestaurantController::class, 'toggleStatus'])->name('restaurant.menus.toggle-status');
+
 
 
 Route::get('/api/available-rooms', [FrontendController::class, 'availableRooms'])->name('api.available-rooms');
@@ -488,13 +490,19 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
         Route::get('/api/customers', [RestaurantController::class, 'getCustomers'])->name('api.customers');
         Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
 
-        // Gestion des menus seulement pour admins
+        // Gestion des menus et catégories seulement pour admins
         Route::middleware('checkrole:Super,Admin,Receptionist')->group(function () {
             Route::get('/create', [RestaurantController::class, 'create'])->name('create');
             Route::post('/store', [RestaurantController::class, 'store'])->name('store');
             Route::get('/menus/{id}/edit', [RestaurantController::class, 'edit'])->name('menus.edit');
             Route::put('/menus/{id}', [RestaurantController::class, 'update'])->name('menus.update');
             Route::delete('/menus/{id}', [RestaurantController::class, 'destroy'])->name('menus.destroy');
+
+            // Catégories (Singulier comme demandé)
+            Route::get('/categorie', [RestaurantCategoryController::class, 'index'])->name('categories.index');
+            Route::post('/categorie', [RestaurantCategoryController::class, 'store'])->name('categories.store');
+            Route::put('/categorie/{id}', [RestaurantCategoryController::class, 'update'])->name('categories.update');
+            Route::delete('/categorie/{id}', [RestaurantCategoryController::class, 'destroy'])->name('categories.destroy');
         });
 
         // Suivi des ventes — Super, Admin

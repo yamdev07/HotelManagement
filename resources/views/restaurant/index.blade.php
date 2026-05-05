@@ -65,10 +65,9 @@
         <div class="filter-row">
             <select class="db-input" id="categoryFilter" style="width: 200px;">
                 <option value="">Toutes les catégories</option>
-                <option value="plat">Plats</option>
-                <option value="boisson">Boissons</option>
-                <option value="dessert">Desserts</option>
-                <option value="entree">Entrées</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->slug }}">{{ $category->name }}</option>
+                @endforeach
             </select>
             <div style="flex: 1; position: relative;">
                 <i class="fas fa-search" style="position: absolute; left: 14px; top: 14px; color: var(--s400);"></i>
@@ -82,7 +81,7 @@
 
         <div class="menu-grid" id="menuList">
             @forelse($menus as $menu)
-            <div class="menu-item anim-3" data-category="{{ $menu->category }}">
+            <div class="menu-item anim-3" data-category="{{ $menu->category?->slug }}">
                 <div class="db-item-card">
                     <div class="db-item-img">
                         @if($menu->image)
@@ -94,14 +93,35 @@
                                 <i class="fas fa-utensils fa-3x text-muted"></i>
                             </div>
                         @endif
-                        <span class="category-tag">{{ $menu->category }}</span>
+                        <span class="category-tag">{{ $menu->category?->name ?? 'Sans catégorie' }}</span>
                         <div class="db-price-tag">{{ number_format($menu->price, 0, ',', ' ') }} CFA</div>
                     </div>
                     <div class="db-item-content">
-                        <h3 class="menu-title">{{ $menu->name }}</h3>
-                        <p class="menu-desc">{{ Str::limit($menu->description, 70) }}</p>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h3 class="menu-title mb-0">{{ $menu->name }}</h3>
+                            <div class="form-check form-switch" title="Disponibilité du plat">
+                                <input class="form-check-input toggle-availability" type="checkbox" role="switch"
+                                       data-id="{{ $menu->id }}" {{ $menu->is_available ? 'checked' : '' }}>
+                            </div>
+                        </div>
+
+                        <p class="menu-desc mb-2">{{ Str::limit($menu->description, 70) }}</p>
+
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            @php
+                                $daysMap = ['mon'=>'L','tue'=>'M','wed'=>'M','thu'=>'J','fri'=>'V','sat'=>'S','sun'=>'D'];
+                                $menuDays = $menu->available_days ?? [];
+                            @endphp
+                            @foreach($daysMap as $code => $lbl)
+                                <span class="badge {{ in_array($code, $menuDays) ? 'bg-success' : 'bg-secondary opacity-25' }}" 
+                                      style="font-size: 0.6rem; min-width: 18px; padding: 3px;">
+                                    {{ $lbl }}
+                                </span>
+                            @endforeach
+                        </div>
                         
                         <div class="menu-actions">
+
                             <div class="flex-grow-1" data-id="{{ $menu->id }}">
                                 <button class="btn-add-menu add-to-order" 
                                         id="main-add-btn-{{ $menu->id }}"
@@ -255,7 +275,33 @@
                 $(el).modal('show');
             }
         }
+
+        // --- 4. Basculer la disponibilité ---
+        const switchToggle = e.target.closest('.toggle-availability');
+        if (switchToggle) {
+            const menuId = switchToggle.dataset.id;
+            const isChecked = switchToggle.checked;
+            
+            fetch(`/restaurant/menus/${menuId}/toggle-status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    switchToggle.checked = !isChecked; // Revert if failed
+                }
+            })
+            .catch(err => {
+                console.error('Erreur toggle:', err);
+                switchToggle.checked = !isChecked; // Revert
+            });
+        }
     });
+
 
     // Observer pour mettre à jour les compteurs de la page en fonction du modal
     setInterval(() => {

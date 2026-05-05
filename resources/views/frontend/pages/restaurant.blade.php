@@ -405,6 +405,12 @@
             color: var(--text-gray);
             line-height: 1.6;
             flex: 1;
+            /* Troncature à 3 lignes */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .menu-card-footer {
@@ -879,7 +885,7 @@
                     Une sélection de plats raffinés préparés avec des produits frais et locaux.
                 </p>
                 <div class="mt-4" data-aos="fade-up" data-aos-delay="40">
-                    <a href="{{ route('frontend.african') }}"
+                    <a href="#"
                         style="display:inline-flex;align-items:center;gap:10px;padding:13px 30px;
                               background:linear-gradient(135deg,#5C3317,#8B5A2B);color:#fff;
                               border-radius:50px;font-size:0.92rem;font-weight:700;text-decoration:none;
@@ -897,27 +903,37 @@
             {{-- Onglets de catégorie --}}
             <div class="d-flex justify-content-center flex-wrap mb-5" data-aos="fade-up" data-aos-delay="60">
                 <button class="category-filter active" data-category="all"><i class="fas fa-th me-1"></i>Tout voir</button>
-                <button class="category-filter" data-category="entree"><i class="fas fa-leaf me-1"></i>Entrées</button>
-                <button class="category-filter" data-category="plat"><i class="fas fa-utensils me-1"></i>Plats</button>
-                <button class="category-filter" data-category="dessert"><i
-                        class="fas fa-birthday-cake me-1"></i>Desserts</button>
-                <button class="category-filter" data-category="boisson"><i
-                        class="fas fa-glass-martini-alt me-1"></i>Boissons</button>
+                @foreach($categories as $category)
+                    <button class="category-filter" data-category="{{ $category->slug }}">
+                        <i class="fas fa-utensils me-1"></i>{{ $category->name }}
+                    </button>
+                @endforeach
             </div>
 
             {{-- Grille menu (une catégorie à la fois par défaut) --}}
             <div class="row g-3" id="menuList">
+                <div id="noItemsMessage" class="col-12 text-center py-5 d-none">
+                    <div style="width:80px;height:80px;border-radius:50%;background:rgba(26,71,42,0.06);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:2rem;color:var(--cactus-green);">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h4 style="font-family:'Playfair Display',serif;color:var(--text-dark);">Aucun plat disponible</h4>
+                    <p style="color:var(--text-gray);">Il n'y a pas de plats dans cette catégorie aujourd'hui.</p>
+                </div>
                 @forelse($menus as $menu)
-                    <div class="col-xl-3 col-lg-3 col-md-6 menu-item" data-category="{{ $menu->category }}" data-aos="fade-up"
+                    <div class="col-xl-3 col-lg-3 col-md-6 menu-item" data-category="{{ $menu->category?->slug }}" data-aos="fade-up"
                         data-aos-delay="{{ ($loop->index % 4) * 60 }}">
                         <div class="menu-card">
                             @if ($menu->image)
-                                <div class="menu-card-img">
+                                <div class="menu-card-img" style="cursor: pointer;" 
+                                     onclick="showDishDetail('{{ addslashes($menu->name) }}', '{{ addslashes($menu->description) }}', '{{ $menu->image_url }}', '{{ number_format($menu->price, 0, ',', ' ') }}', '{{ $menu->category?->name }}')">
                                     <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}"
                                         onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
                                 </div>
                             @else
-                                <div class="menu-card-noimg"><i class="fas fa-utensils"></i></div>
+                                <div class="menu-card-noimg" style="cursor: pointer;"
+                                     onclick="showDishDetail('{{ addslashes($menu->name) }}', '{{ addslashes($menu->description) }}', null, '{{ number_format($menu->price, 0, ',', ' ') }}', '{{ $menu->category?->name }}')">
+                                    <i class="fas fa-utensils"></i>
+                                </div>
                             @endif
                             <div class="menu-card-body">
                                 <div class="menu-card-header">
@@ -927,17 +943,7 @@
                                 <p class="menu-card-desc">{{ $menu->description }}</p>
                                 <div class="menu-card-footer">
                                     <span class="cat-badge">
-                                        @if ($menu->category == 'plat')
-                                            Plat
-                                        @elseif($menu->category == 'entree')
-                                            Entrée
-                                        @elseif($menu->category == 'dessert')
-                                            Dessert
-                                        @elseif($menu->category == 'boisson')
-                                            Boisson
-                                        @else
-                                            {{ ucfirst($menu->category) }}
-                                        @endif
+                                        {{ $menu->category?->name ?? 'Sans catégorie' }}
                                     </span>
                                     <div class="v-qty-controls" data-id="{{ $menu->id }}">
                                         <button class="btn-order add-to-order" id="v-addbtn-{{ $menu->id }}"
@@ -1302,6 +1308,48 @@
             </div>
         </div>
     </section>
+
+    {{-- Modal Détail Plat --}}
+    <div class="modal fade" id="dishDetailModal" tabindex="-1" aria-hidden="true" style="z-index: 9999;">
+        <div class="modal-dialog modal-xl modal-dialog-centered"> {{-- Changé lg en xl --}}
+            <div class="modal-content border-0 overflow-hidden shadow-lg" style="border-radius: 20px;">
+                <div class="modal-body p-0">
+                    <div class="row g-0">
+                        <div class="col-lg-7" id="modalDishImgSide"> {{-- Plus de place pour l'image (7/12) --}}
+                            <div id="modalDishImgWrap" style="height: 100%; min-height: 500px; background: #f8f9fa; display: flex; align-items: center; justify-content: center;">
+                                <img id="modalDishImg" src="" alt="" class="w-100 h-100" style="object-fit: cover;">
+                                <i id="modalDishNoImg" class="fas fa-utensils fa-5x text-muted d-none"></i>
+                            </div>
+                        </div>
+                        <div class="col-lg-5"> {{-- Reste pour le texte (5/12) --}}
+                            <div class="p-4 p-lg-5 h-100 d-flex flex-column" style="min-height: 500px;">
+                                <div class="d-flex justify-content-between align-items-start mb-4">
+                                    <span id="modalDishCategory" class="cat-badge px-3 py-2"></span>
+                                    <button type="button" class="btn-close bg-light rounded-circle p-2" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <h1 id="modalDishName" class="section-title mb-4" style="font-size: 2.8rem; color: var(--cactus-green); line-height: 1.1;"></h1>
+                                <div class="description-scroll pe-2" style="max-height: 250px; overflow-y: auto;">
+                                    <p id="modalDishDesc" class="text-muted mb-0" style="line-height: 1.8; font-size: 1.1rem; text-align: justify;"></p>
+                                </div>
+                                <div class="mt-auto pt-5 border-top">
+                                    <div class="d-flex justify-content-between align-items-end">
+                                        <div class="price-wrap">
+                                            <span class="text-muted small d-block mb-1 text-uppercase fw-bold" style="letter-spacing: 1px;">Prix Gastronomique</span>
+                                            <span class="h2 fw-bold text-success mb-0" style="color: var(--cactus-green) !important;"><span id="modalDishPrice"></span> <small style="font-size: 14px; font-weight: 600;">FCFA</small></span>
+                                        </div>
+                                        <button type="button" class="btn btn-outline-success py-2 px-4 shadow-sm fw-bold" data-bs-dismiss="modal" style="border-radius: 12px; border-width: 2px; transition: all 0.3s ease; font-size: 0.9rem;">
+                                            RETOUR AU MENU
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Panier flottant --}}
     <button id="floating-cart">
         <i class="fas fa-shopping-basket fa-lg"></i>
@@ -2158,11 +2206,22 @@
                 $('.category-filter').removeClass('active');
                 $(this).addClass('active');
                 const cat = $(this).data('category');
+                
+                let visibleCount = 0;
                 if (cat === 'all') {
                     $('.menu-item').removeClass('d-none');
+                    visibleCount = $('.menu-item').length;
                 } else {
                     $('.menu-item').addClass('d-none');
-                    $(`.menu-item[data-category="${cat}"]`).removeClass('d-none');
+                    const items = $(`.menu-item[data-category="${cat}"]`);
+                    items.removeClass('d-none');
+                    visibleCount = items.length;
+                }
+
+                if (visibleCount === 0) {
+                    $('#noItemsMessage').removeClass('d-none');
+                } else {
+                    $('#noItemsMessage').addClass('d-none');
                 }
             });
 
@@ -2607,6 +2666,23 @@
                     }
                 });
             });
+
+            window.showDishDetail = function(name, description, image, price, category) {
+                $('#modalDishName').text(name);
+                $('#modalDishDesc').text(description || 'Aucune description disponible.');
+                $('#modalDishPrice').text(price);
+                $('#modalDishCategory').text(category || 'Plat');
+
+                if (image) {
+                    $('#modalDishImg').attr('src', image).removeClass('d-none');
+                    $('#modalDishNoImg').addClass('d-none');
+                } else {
+                    $('#modalDishImg').addClass('d-none');
+                    $('#modalDishNoImg').removeClass('d-none');
+                }
+
+                new bootstrap.Modal(document.getElementById('dishDetailModal')).show();
+            };
 
             loadCart();
         });

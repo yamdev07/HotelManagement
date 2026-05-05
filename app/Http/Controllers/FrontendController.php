@@ -912,20 +912,21 @@ public function rooms(Request $request)
     // Restaurant vitrine
     public function restaurant()
     {
-        $menus = Menu::all();
-        return view('frontend.pages.restaurant', compact('menus'));
+        $currentDay = strtolower(now()->format('D')); // mon, tue, wed, thu, fri, sat, sun
+        
+        $menus = Menu::with('category')->where('is_available', true)
+            ->where(function($q) use ($currentDay) {
+                $q->whereJsonContains('available_days', $currentDay)
+                  ->orWhereNull('available_days');
+            })
+            ->latest()
+            ->get();
+
+        $categories = \App\Models\Category::all();
+
+        return view('frontend.pages.restaurant', compact('menus', 'categories'));
     }
 
-    // Page spécialités africaines
-    public function africanSpecialties()
-    {
-        $menus = Menu::where('is_african', true)->get();
-        $entrees  = $menus->where('category', 'entree')->values();
-        $plats    = $menus->where('category', 'plat')->values();
-        $desserts = $menus->where('category', 'dessert')->values();
-        $boissons = $menus->where('category', 'boisson')->values();
-        return view('frontend.pages.african-specialties', compact('menus', 'entrees', 'plats', 'desserts', 'boissons'));
-    }
 
     // Services
     public function services()

@@ -74,18 +74,20 @@
                 <div style="display:none" aria-hidden="true">
                     @php $modalMenus = $allMenus ?? $menus ?? []; @endphp
                     @foreach($modalMenus as $menu)
-                    <div class="nom-dish" data-cat="{{ $menu->category }}"
-                         data-id="{{ $menu->id }}" data-name="{{ $menu->name }}" data-price="{{ $menu->price }}"
-                         data-image="{{ $menu->image_url }}">
-                        <div class="nom-qty" id="nqty-{{ $menu->id }}">
-                            <button type="button" class="nom-qty-btn nom-qminus" data-id="{{ $menu->id }}">−</button>
-                            <span class="nom-qval" id="nqval-{{ $menu->id }}">0</span>
-                            <button type="button" class="nom-qty-btn nom-qplus" data-id="{{ $menu->id }}">+</button>
+                    @if(is_object($menu))
+                    <div class="nom-dish" data-cat="{{ $menu->category ?? '' }}"
+                         data-id="{{ $menu->id ?? 0 }}" data-name="{{ $menu->name ?? '' }}" data-price="{{ $menu->price ?? 0 }}"
+                         data-image="{{ $menu->image_url ?? '' }}">
+                        <div class="nom-qty" id="nqty-{{ $menu->id ?? 0 }}">
+                            <button type="button" class="nom-qty-btn nom-qminus" data-id="{{ $menu->id ?? 0 }}">>−</button>
+                            <span class="nom-qval" id="nqval-{{ $menu->id ?? 0 }}">0</span>
+                            <button type="button" class="nom-qty-btn nom-qplus" data-id="{{ $menu->id ?? 0 }}">+</button>
                         </div>
-                        <button type="button" class="nom-add-btn" id="naddbtn-{{ $menu->id }}" data-id="{{ $menu->id }}">
+                        <button type="button" class="nom-add-btn" id="naddbtn-{{ $menu->id ?? 0 }}" data-id="{{ $menu->id ?? 0 }}">
                             <i class="fas fa-plus"></i>
                         </button>
                     </div>
+                    @endif
                     @endforeach
                 </div>
 
@@ -112,24 +114,26 @@
 
                                 <div class="nom-customer-list-box mt-3" id="customer-list-box">
                                     @foreach($customers ?? [] as $customer)
+                                    @if(is_object($customer))
                                     <div class="nom-customer-item" 
-                                         data-id="{{ $customer->id }}"
-                                         data-name="{{ $customer->name }}"
+                                         data-id="{{ $customer->id ?? 0 }}"
+                                         data-name="{{ $customer->name ?? '' }}"
                                          data-room="{{ $customer->room_number ?? '' }}"
                                          data-phone="{{ $customer->phone ?? '' }}"
                                          data-email="{{ $customer->email ?? '' }}"
-                                         data-search="{{ strtolower($customer->name . ' ' . ($customer->phone ?? '') . ' ' . ($customer->room_number ?? '')) }}">
-                                        <img src="{{ $customer->avatar_url }}" 
+                                         data-search="{{ strtolower(($customer->name ?? '') . ' ' . ($customer->phone ?? '') . ' ' . ($customer->room_number ?? '')) }}">
+                                        <img src="{{ $customer->avatar_url ?? '' }}" 
                                              onerror="this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg'"
                                              class="nom-c-avatar">
                                         <div class="nom-c-info">
-                                            <div class="nom-c-name">{{ $customer->name }}</div>
+                                            <div class="nom-c-name">{{ $customer->name ?? '' }}</div>
                                             <div class="nom-c-sub">
-                                                @if($customer->room_number)<span class="badge bg-info p-1" style="font-size:0.6rem">🔑 {{ $customer->room_number }}</span>@endif
-                                                @if($customer->phone)<span><i class="fas fa-phone fa-xs"></i> {{ $customer->phone }}</span>@endif
+                                                @if($customer->room_number ?? null)<span class="badge bg-info p-1" style="font-size:0.6rem">🔑 {{ $customer->room_number }}</span>@endif
+                                                @if($customer->phone ?? null)<span><i class="fas fa-phone fa-xs"></i> {{ $customer->phone }}</span>@endif
                                             </div>
                                         </div>
                                     </div>
+                                    @endif
                                     @endforeach
                                 </div>
                             </div>
@@ -152,13 +156,15 @@
                             <select id="n-customer-select" style="display:none">
                                 <option value="">— Sélectionner —</option>
                                 @foreach($customers ?? [] as $customer)
-                                <option value="{{ $customer->id }}"
-                                        data-name="{{ $customer->name }}"
+                                @if(is_object($customer))
+                                <option value="{{ $customer->id ?? 0 }}"
+                                        data-name="{{ $customer->name ?? '' }}"
                                         data-room="{{ $customer->room_number ?? '' }}"
                                         data-phone="{{ $customer->phone ?? '' }}"
                                         data-email="{{ $customer->email ?? '' }}">
-                                    {{ $customer->name }}
+                                    {{ $customer->name ?? '' }}
                                 </option>
+                                @endif
                                 @endforeach
                             </select>
                         </div>

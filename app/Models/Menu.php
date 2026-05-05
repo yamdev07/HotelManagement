@@ -6,9 +6,19 @@ use Illuminate\Database\Eloquent\Model;
 
 class Menu extends Model
 {
-    protected $fillable = ['name', 'category', 'price', 'description', 'image', 'is_african'];
+    protected $fillable = ['name', 'category_id', 'price', 'description', 'image', 'available_days', 'is_available'];
 
-    protected $casts = ['is_african' => 'boolean'];
+    protected $casts = [
+        'is_available' => 'boolean',
+        'available_days' => 'array',
+        'category_id' => 'integer'
+    ];
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
 
     public function getImageUrlAttribute(): string
     {

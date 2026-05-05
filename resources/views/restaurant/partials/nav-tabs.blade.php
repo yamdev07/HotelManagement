@@ -40,6 +40,11 @@
             <span class="badge-pending">{{ $pending }}</span>
         @endif
     </a>
+
+    <a href="{{ route('restaurant.categories.index') }}"
+       class="db-tab-link {{ request()->routeIs('restaurant.categories.*') ? 'active' : '' }}">
+        <i class="fas fa-tags"></i> Catégories
+    </a>
     
     @if(in_array(auth()->user()->role, ['Super','Admin']))
         <a href="{{ route('restaurant.sales') }}"

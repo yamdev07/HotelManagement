@@ -16,8 +16,8 @@ class RestaurantController extends Controller
     // Afficher tous les menus
     public function index()
     {
-        $menus = Menu::paginate(12);
-        $allMenus = Menu::all(); // Pour le modal (panier)
+        $menus = Menu::with('category')->latest()->paginate(12);
+        $allMenus = Menu::with('category')->latest()->get(); // Pour le modal (panier)
         
         $customers = Customer::with(['transactions' => function ($q) {
             $q->whereIn('status', ['active', 'reservation'])
@@ -30,7 +30,9 @@ class RestaurantController extends Controller
             return $customer;
         });
 
-        return view('restaurant.index', compact('menus', 'allMenus', 'customers'));
+        $categories = \App\Models\Category::all();
+
+        return view('restaurant.index', compact('menus', 'allMenus', 'customers', 'categories'));
     }
 
     // Afficher le formulaire de création
@@ -38,8 +40,9 @@ class RestaurantController extends Controller
     {
         $totalMenus = Menu::count();
         $lastAdded = Menu::latest()->first();
+        $categories = \App\Models\Category::all();
 
-        return view('restaurant.create', compact('totalMenus', 'lastAdded'));
+        return view('restaurant.create', compact('totalMenus', 'lastAdded', 'categories'));
     }
 
     // Enregistrer un nouveau menu
@@ -47,16 +50,25 @@ class RestaurantController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:2048',
+            'available_days' => 'nullable|array',
+            'is_available' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('menus', 'public');
             $validated['image'] = $path;
         }
+
+        // Par défaut, tous les jours si non spécifié
+        if (!$request->has('available_days')) {
+            $validated['available_days'] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+        }
+
+        $validated['is_available'] = $request->has('is_available');
 
         Menu::create($validated);
 
@@ -68,7 +80,8 @@ class RestaurantController extends Controller
     public function edit($id)
     {
         $menu = Menu::findOrFail($id);
-        return view('restaurant.edit', compact('menu'));
+        $categories = \App\Models\Category::all();
+        return view('restaurant.edit', compact('menu', 'categories'));
     }
 
     // Mettre à jour un menu existant
@@ -77,10 +90,11 @@ class RestaurantController extends Controller
         $menu = Menu::findOrFail($id);
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
             'price' => 'required|numeric|min:0',
             'description' => 'nullable|string',
             'image' => 'nullable|image|max:2048',
+            'available_days' => 'nullable|array',
         ]);
 
         if ($request->hasFile('image')) {
@@ -88,11 +102,15 @@ class RestaurantController extends Controller
             $validated['image'] = $path;
         }
 
+        $validated['available_days'] = $request->input('available_days', []);
+        $validated['is_available'] = $request->has('is_available');
+
         $menu->update($validated);
 
         return redirect()->route('restaurant.index')
             ->with('success', 'Menu modifié avec succès!');
     }
+
 
     // Afficher toutes les commandes
     public function orders(Request $request)
@@ -543,4 +561,17 @@ class RestaurantController extends Controller
             'user_id' => auth()->id() ?? 1,
         ]);
     }
+
+    public function toggleStatus($id)
+    {
+        $menu = Menu::findOrFail($id);
+        $menu->is_available = !$menu->is_available;
+        $menu->save();
+
+        return response()->json([
+            'success' => true,
+            'is_available' => $menu->is_available
+        ]);
+    }
 }
+
