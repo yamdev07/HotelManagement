@@ -46,18 +46,10 @@
                     <div class="col-xl-3 col-lg-3 col-md-6 menu-item" data-category="{{ $menu->category?->slug }}" data-aos="fade-up"
                         data-aos-delay="{{ ($loop->index % 4) * 60 }}">
                         <div class="menu-card">
-                            @if ($menu->image)
-                                <div class="menu-card-img" style="cursor: pointer;" 
-                                     onclick="showDishDetail('{{ addslashes($menu->name) }}', '{{ addslashes($menu->description) }}', '{{ $menu->image_url }}', '{{ number_format($menu->price, 0, ',', ' ') }}', '{{ $menu->category?->name }}')">
-                                    <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}"
-                                        onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
-                                </div>
-                            @else
-                                <div class="menu-card-noimg" style="cursor: pointer;"
-                                     onclick="showDishDetail('{{ addslashes($menu->name) }}', '{{ addslashes($menu->description) }}', null, '{{ number_format($menu->price, 0, ',', ' ') }}', '{{ $menu->category?->name }}')">
-                                    <i class="fas fa-utensils"></i>
-                                </div>
-                            @endif
+                        <div class="menu-card-img" style="cursor: pointer;" 
+                             onclick="showDishDetail('{{ addslashes($menu->name) }}', '{{ addslashes($menu->description) }}', '{{ $menu->image_url }}', '{{ number_format($menu->price, 0, ',', ' ') }}', '{{ $menu->category?->name }}')">
+                                <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}" onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
+                        </div>
                             <div class="menu-card-body">
                                 <div class="menu-card-header">
                                     <div class="menu-card-name">{{ $menu->name }}</div>
@@ -152,36 +144,88 @@
                         {{-- ── ÉTAPE 1 : Informations ── --}}
                         <div class="om-panel active" id="panel-1">
                             <div class="om-panel-title">
-                                <i class="fas fa-user-circle me-1 om-panel-icon"></i> Informations personnelles
+                                <i class="fas fa-user-circle me-1 om-panel-icon"></i> Localisation & Identification
                             </div>
-                            <p class="om-panel-desc">Pour personnaliser votre expérience et vous contacter si besoin.</p>
-                            <div class="om-grid-2">
-                                <div class="om-field" style="grid-column: span 2;">
-                                    <label class="om-label">Nom complet <span class="om-req">*</span></label>
+                            <p class="om-panel-desc mb-3">Où souhaitez-vous être servi ?</p>
+                            
+                            <!-- Choix du lieu de service -->
+                            <div class="mb-4 d-flex gap-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="order_location" id="locRoom" value="room" checked>
+                                    <label class="form-check-label text-light fw-bold" for="locRoom" style="font-size: 0.85rem;">
+                                        <i class="fas fa-bed me-1 text-gold"></i> En Chambre
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="order_location" id="locTable" value="table">
+                                    <label class="form-check-label text-light fw-bold" for="locTable" style="font-size: 0.85rem;">
+                                        <i class="fas fa-utensils me-1 text-gold"></i> Au Restaurant
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Champs specifiques Chambre -->
+                            <div class="om-grid-2" id="room_service_fields">
+                                <div class="om-field">
+                                    <label class="om-label" for="f-room">N° de chambre <span class="om-req">*</span></label>
                                     <div class="om-input-icon">
-                                        <span class="om-icon"><i class="fas fa-user"></i></span>
-                                        <input type="text" class="om-input has-icon" id="f-fullname" placeholder="Ex: Jean Dupont" autocomplete="name">
+                                        <span class="om-icon"><i class="fas fa-door-closed"></i></span>
+                                        <input type="text" class="om-input has-icon" id="f-room" placeholder="Ex : 214">
                                     </div>
-                                    <div class="om-err" id="err-fullname"></div>
+                                    <div class="om-err" id="err-room"></div>
                                 </div>
                                 <div class="om-field">
-                                    <label class="om-label">Numéro de chambre</label>
+                                    <label class="om-label" for="f-email">Email enregistré <span class="om-req">*</span></label>
                                     <div class="om-input-icon">
-                                        <span class="om-icon"><i class="fas fa-key"></i></span>
-                                        <input type="text" class="om-input has-icon" id="f-room"
-                                            placeholder="Ex : 214">
+                                        <span class="om-icon"><i class="fas fa-envelope"></i></span>
+                                        <input type="email" class="om-input has-icon" id="f-email" placeholder="Email de réservation">
                                     </div>
-                                    <div class="om-hint">Laissez vide si vous n'êtes pas résident</div>
-                                    <div id="err-room" class="small mt-1"></div>
+                                    <div class="om-err" id="err-email"></div>
+                                </div>
+                            </div>
+
+                            <!-- Champs specifiques Table -->
+                            <div class="d-none" id="table_service_fields">
+                                <div class="om-grid-2 mb-3">
+                                    <div class="om-field" style="grid-column: span 2;">
+                                        <label class="om-label" for="f-table">N° de Table <span class="om-req">*</span></label>
+                                        <div class="om-input-icon">
+                                            <span class="om-icon"><i class="fas fa-hashtag"></i></span>
+                                            <input type="text" class="om-input has-icon" id="f-table" placeholder="Votre numéro de table">
+                                        </div>
+                                        <div class="om-err" id="err-table"></div>
+                                    </div>
                                 </div>
 
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="is_resident">
+                                    <label class="form-check-label text-gold-light" for="is_resident" style="font-size: 0.8rem; cursor:pointer;">
+                                        Je suis résident à l'hôtel (Facturer sur ma chambre)
+                                    </label>
+                                </div>
 
-                                <div class="om-field col-span-2" style="grid-column: span 2;">
-                                    <label class="om-label">Notes spéciales</label>
-                                    <textarea class="om-input" id="f-notes" rows="2" placeholder="Allergies, cuisson..."></textarea>
+                                <div class="om-grid-2 d-none" id="resident_extra_fields">
+                                    <div class="om-field">
+                                        <label class="om-label" for="f-room-alt">N° de chambre <span class="om-req">*</span></label>
+                                        <input type="text" class="om-input" id="f-room-alt" placeholder="Ex : 214">
+                                        <div class="om-err" id="err-room-alt"></div>
+                                    </div>
+                                    <div class="om-field">
+                                        <label class="om-label" for="f-email-alt">Email enregistré <span class="om-req">*</span></label>
+                                        <input type="email" class="om-input" id="f-email-alt" placeholder="Email de réservation">
+                                        <div class="om-err" id="err-email-alt"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="om-grid-2 mt-2">
+                                <div class="om-field" style="grid-column: span 2;">
+                                    <label class="om-label" for="f-notes">Notes spéciales</label>
+                                    <textarea class="om-input" id="f-notes" rows="2" placeholder="Allergies, préférences de cuisson..."></textarea>
                                 </div>
                             </div>
                         </div>
+
 
 
 
@@ -305,15 +349,13 @@
                         <button type="button" class="om-btn om-btn-ghost" id="om-prev" style="display:none">
                             ← Précédent
                         </button>
-                        <div class="om-footer-right">
-                            <button type="button" class="om-btn om-btn-outline" data-bs-dismiss="modal">Annuler</button>
-                            <button type="button" class="om-btn om-btn-gold" id="om-next">
-                                Suivant →
-                            </button>
-                            <button type="submit" class="om-btn om-btn-gold" id="om-submit" style="display:none">
-                                <i class="fas fa-check me-1"></i> Confirmer la commande
-                            </button>
-                        </div>
+                        <button type="button" class="om-btn om-btn-outline" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="om-btn om-btn-gold" id="om-next">
+                            Suivant →
+                        </button>
+                        <button type="submit" class="om-btn om-btn-gold" id="om-submit" style="display:none">
+                            <i class="fas fa-check me-1"></i> Confirmer
+                        </button>
                     </div>
 
                 </form>
@@ -329,7 +371,7 @@
                     <div class="row g-0">
                         <div class="col-lg-7" id="modalDishImgSide"> {{-- Plus de place pour l'image (7/12) --}}
                             <div id="modalDishImgWrap" class="position-relative w-100 h-100" style="min-height: 350px; background: #f8f9fa;">
-                                <img id="modalDishImg" src="" alt="" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover;" onerror="this.classList.add('d-none'); document.getElementById('modalDishNoImg').classList.remove('d-none');">
+                                <img id="modalDishImg" src="" alt="" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover;">
                                 <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="pointer-events: none;">
                                     <i id="modalDishNoImg" class="fas fa-utensils fa-5x text-muted d-none"></i>
                                 </div>
@@ -583,6 +625,24 @@
             text-align: center;
         }
 
+        /* Responsive Dish Detail Modal */
+        @media (max-width: 991px) {
+            #modalDishImgWrap, 
+            #modalDishImgSide + .col-lg-5 > div {
+                min-height: auto !important;
+            }
+            #modalDishImgWrap {
+                height: 250px !important;
+            }
+            #modalDishName {
+                font-size: 1.8rem !important;
+                margin-bottom: 1rem !important;
+            }
+            #modalDishImgSide + .col-lg-5 > div {
+                padding: 1.5rem !important;
+            }
+        }
+
         /* ══════════════════════════════════════════════════════
            OFFCANVAS LUXURY — SIDE ORDER PANEL
         ══════════════════════════════════════════════════════ */
@@ -762,19 +822,21 @@
         .om-recap-price { font-size: 0.9rem; color: #d4af37; font-weight: 700; }
 
         .om-footer {
-            display: flex; align-items: center; justify-content: flex-end; gap: 15px;
-            padding: 16px 30px; background: #0e0e0e; border-top: 1px solid #1e1e1e;
+            display: flex; align-items: center; justify-content: flex-end; gap: 10px;
+            padding: 16px 20px; background: #0e0e0e; border-top: 1px solid #1e1e1e;
         }
-        #om-prev { margin-right: auto; }
+        #om-prev { margin-right: auto; padding-left: 0; padding-right: 10px; }
         .om-btn {
-            padding: 10px 22px; border-radius: 9px; font-size: .82rem; font-weight: 700;
+            padding: 10px 18px; border-radius: 9px; font-size: .8rem; font-weight: 700;
             cursor: pointer; border: none; transition: all .18s;
-            display: inline-flex; align-items: center; gap: 6px;
+            display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
         }
         .om-btn-gold { background: var(--gold-accent); color: var(--cactus-dark); }
         .om-btn-gold:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(212,175,55,0.2); }
         .om-btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.1); color: #777; }
         .om-btn-outline:hover { border-color: #d4af37; color: #d4af37; }
+        .om-btn-ghost { background: transparent; color: #aaa; padding: 10px 10px; }
+        .om-btn-ghost:hover { color: #fff; }
 
         #floating-cart {
             position: fixed; bottom: 30px; right: 30px; width: 64px; height: 64px;
@@ -935,25 +997,47 @@
             $('#om-next').click(function() { validateAndNext(); });
             $('#om-prev').click(function() { goToStep(currentStep - 1); });
 
+            $('input[name="order_location"]').change(function() {
+                if ($(this).val() === 'room') {
+                    $('#room_service_fields').removeClass('d-none');
+                    $('#table_service_fields').addClass('d-none');
+                } else {
+                    $('#room_service_fields').addClass('d-none');
+                    $('#table_service_fields').removeClass('d-none');
+                }
+                $('#err-email, #err-room, #err-table, #err-email-alt, #err-room-alt').text('');
+            });
+
+            $('#is_resident').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#resident_extra_fields').removeClass('d-none');
+                } else {
+                    $('#resident_extra_fields').addClass('d-none');
+                }
+            });
+
             function validateAndNext() {
                 if (currentStep !== 1) { goToStep(currentStep + 1); return; }
 
                 let ok = true;
-                if (!$('#f-fullname').val().trim()) {
-                    $('#err-fullname').text('Le nom complet est requis.');
-                    ok = false;
-                } else {
-                    $('#err-fullname').text('');
-                }
-                if (!ok) return;
+                const location = $('input[name="order_location"]:checked').val();
+                $('#err-email, #err-room, #err-table, #err-email-alt, #err-room-alt').text('');
 
-                const roomVal = $('#f-room').val().trim();
-                if (!roomVal) { goToStep(2); return; }
+                if (location === 'room') {
+                    const emailVal = $('#f-email').val().trim();
+                    const roomVal = $('#f-room').val().trim();
+                    
+                    if (!emailVal) { $('#err-email').text("L'email est requis."); ok = false; }
+                    if (!roomVal) { $('#err-room').text('Le n° de chambre est requis.'); ok = false; }
+                    if (!ok) return;
 
-                const $btn = $('#om-next').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Vérification…');
-                $.get('/api/restaurant/check-room', { room_number: roomVal })
+                    const $btn = $('#om-next').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Vérification…');
+                    $.get('/api/restaurant/check-room', { 
+                        room_number: roomVal,
+                        email: emailVal
+                    })
                     .done(function(res) {
-                        if (res.valid) { goToStep(3); }
+                        if (res.valid) { goToStep(3); } // Skip payment step for room service (always on bill)
                         else { $('#err-room').html(`<span class="text-danger">${res.message}</span>`); }
                     })
                     .fail(function() {
@@ -962,18 +1046,52 @@
                     .always(function() {
                         $btn.prop('disabled', false).html('Suivant →');
                     });
+                } else {
+                    const tableVal = $('#f-table').val().trim();
+                    if (!tableVal) { $('#err-table').text('Le n° de table est requis.'); ok = false; }
+                    
+                    if ($('#is_resident').is(':checked')) {
+                        const emailAlt = $('#f-email-alt').val().trim();
+                        const roomAlt = $('#f-room-alt').val().trim();
+                        if (!emailAlt) { $('#err-email-alt').text("L'email est requis."); ok = false; }
+                        if (!roomAlt) { $('#err-room-alt').text('Le n° de chambre est requis.'); ok = false; }
+                        
+                        if (!ok) return;
+
+                        const $btn = $('#om-next').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Vérification…');
+                        $.get('/api/restaurant/check-room', { 
+                            room_number: roomAlt,
+                            email: emailAlt
+                        })
+                        .done(function(res) {
+                            if (res.valid) { goToStep(3); } // Link to room, skip payment
+                            else { $('#err-room-alt').html(`<span class="text-danger">${res.message}</span>`); }
+                        })
+                        .fail(function() {
+                            $('#err-room-alt').html('<span class="text-danger">Erreur de vérification.</span>');
+                        })
+                        .always(function() {
+                            $btn.prop('disabled', false).html('Suivant →');
+                        });
+                    } else {
+                        if (!ok) return;
+                        goToStep(2); // Regular table client, choose payment
+                    }
+                }
             }
 
             function goToStep(n) {
                 if (n < 1 || n > TOTAL_STEPS) return;
-                const isGuest = $('#f-room').val().trim() !== '';
+                const location = $('input[name="order_location"]:checked').val();
+                const isResident = $('#is_resident').is(':checked');
+                const isGuestForBill = (location === 'room' || isResident);
 
-                if (isGuest && n === 2 && currentStep === 1) n = 3;
-                if (isGuest && n === 2 && currentStep === 3) n = 1;
+                if (isGuestForBill && n === 2 && currentStep === 1) n = 3;
+                if (isGuestForBill && n === 2 && currentStep === 3) n = 1;
 
                 if (n === TOTAL_STEPS) buildRecap();
 
-                if (isGuest) {
+                if (isGuestForBill) {
                     $('#panel-2 label.om-payment-card').addClass('d-none');
                     $('#room-payment-notice, #payment-room-hint').removeClass('d-none');
                     $('#payment-normal-hint').addClass('d-none');
@@ -1001,11 +1119,38 @@
             }
 
             function buildRecap() {
-                const fullname = $('#f-fullname').val().trim();
-                const room = $('#f-room').val().trim();
+                const location = $('input[name="order_location"]:checked').val();
+                const isResident = $('#is_resident').is(':checked');
                 const notes = $('#f-notes').val().trim();
-                let idHtml = `<div class="om-recap-line"><span>Client</span>${fullname}</div>`;
-                if (room) idHtml += `<div class="om-recap-line"><span>Chambre</span>${room}</div>`;
+                let idHtml = '';
+
+                if (location === 'room') {
+                    const room = $('#f-room').val().trim();
+                    const email = $('#f-email').val().trim();
+                    idHtml += `<div class="om-recap-line"><span>Service</span>En Chambre (Room Service)</div>`;
+                    idHtml += `<div class="om-recap-line"><span>Chambre</span>${room}</div>`;
+                    $('#hCustomerName').val("Room Service - " + room);
+                    $('#hEmail').val(email); 
+                    $('#hRoom').val(room);
+                } else {
+                    const table = $('#f-table').val().trim();
+                    idHtml += `<div class="om-recap-line"><span>Service</span>Au Restaurant (Table ${table})</div>`;
+                    
+                    if (isResident) {
+                        const roomAlt = $('#f-room-alt').val().trim();
+                        const emailAlt = $('#f-email-alt').val().trim();
+                        idHtml += `<div class="om-recap-line"><span>Facture</span>Chambre ${roomAlt}</div>`;
+                        $('#hCustomerName').val("Table " + table + " (Resident " + roomAlt + ")");
+                        $('#hEmail').val(emailAlt);
+                        $('#hRoom').val(roomAlt);
+                    } else {
+                        idHtml += `<div class="om-recap-line"><span>Type</span>Client extérieur</div>`;
+                        $('#hCustomerName').val("Client Table " + table);
+                        $('#hEmail').val("");
+                        $('#hRoom').val('');
+                    }
+                }
+
                 if (notes) idHtml += `<div class="om-recap-line"><span>Notes</span>${notes}</div>`;
                 $('#recap-identity').html(idHtml);
 
@@ -1016,7 +1161,7 @@
                     total += sub;
                     itemsHtml += `
                         <div class="om-recap-item">
-                            <img src="${it.image}" class="om-recap-img" onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
+                            <img src="${it.image}" class="om-recap-img">
                             <div class="om-recap-info">
                                 <div class="om-recap-name">${it.name}</div>
                                 <div class="om-recap-controls">
@@ -1031,10 +1176,8 @@
                 $('#recap-items').html(itemsHtml);
                 $('#recap-total').text(Math.round(total).toLocaleString('fr-FR') + ' FCFA');
 
-                $('#hCustomerName').val(fullname);
-                $('#hRoom').val(room);
                 $('#hNotes').val(notes);
-                const paymentMode = room !== '' ? 'room_charge' : $('input[name="payment_choice"]:checked').val();
+                const paymentMode = (location === 'room' || isResident) ? 'room_charge' : $('input[name="payment_choice"]:checked').val();
                 $('#hPayment').val(paymentMode);
                 $('#itemsInput').val(JSON.stringify(items.map(i => ({ menu_id: i.menu_id, quantity: i.quantity }))));
                 $('#totalInput').val(total.toFixed(2));

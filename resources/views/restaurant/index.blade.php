@@ -63,15 +63,17 @@
 
     <div class="db-card anim-2">
         <div class="filter-row">
-            <select class="db-input" id="categoryFilter" style="width: 200px;">
-                <option value="">Toutes les catégories</option>
-                @foreach($categories as $category)
-                    <option value="{{ $category->slug }}">{{ $category->name }}</option>
-                @endforeach
-            </select>
-            <div style="flex: 1; position: relative;">
-                <i class="fas fa-search" style="position: absolute; left: 14px; top: 14px; color: var(--s400);"></i>
-                <input type="text" class="db-input w-100" id="searchMenu" placeholder="Rechercher une spécialité..." style="padding-left: 40px;">
+            <div class="filter-group">
+                <select class="db-input" id="categoryFilter">
+                    <option value="">Toutes les catégories</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->slug }}">{{ $category->name }}</option>
+                    @endforeach
+                </select>
+                <div class="search-box-wrap">
+                    <i class="fas fa-search search-box-icon"></i>
+                    <input type="text" class="db-input w-100" id="searchMenu" placeholder="Rechercher une spécialité..." style="padding-left: 40px;">
+                </div>
             </div>
             <button class="btn-cart-pill open-cart-modal" type="button">
                 <i class="fas fa-shopping-basket"></i> Panier
@@ -84,15 +86,7 @@
             <div class="menu-item anim-3" data-category="{{ $menu->category?->slug }}">
                 <div class="db-item-card">
                     <div class="db-item-img">
-                        @if($menu->image)
-                            <img src="{{ $menu->image_url }}" 
-                                 alt="{{ $menu->name }}"
-                                 onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'w-100 h-100 bg-light d-flex align-items-center justify-content-center\'><i class=\'fas fa-utensils fa-3x text-muted\'></i></div>';">
-                        @else
-                            <div class="w-100 h-100 bg-light d-flex align-items-center justify-content-center">
-                                <i class="fas fa-utensils fa-3x text-muted"></i>
-                            </div>
-                        @endif
+                        <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}" onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
                         <span class="category-tag">{{ $menu->category?->name ?? 'Sans catégorie' }}</span>
                         <div class="db-price-tag">{{ number_format($menu->price, 0, ',', ' ') }} CFA</div>
                     </div>
@@ -172,32 +166,24 @@
 
 @push('scripts')
 <script>
-    // Filtres en Vanilla JS
-    document.addEventListener('change', function(e) {
-        if (e.target.id === 'categoryFilter') {
-            const cat = e.target.value;
-            document.querySelectorAll('.menu-item').forEach(item => {
-                if (cat) {
-                    item.style.display = item.dataset.category === cat ? '' : 'none';
-                } else {
-                    item.style.display = '';
-                }
-            });
-        }
-    });
+    // Filtres unifiés (Recherche + Catégorie)
+    function applyFilters() {
+        const cat = document.getElementById('categoryFilter').value.toLowerCase();
+        const query = document.getElementById('searchMenu').value.toLowerCase();
+        
+        document.querySelectorAll('.menu-item').forEach(item => {
+            const itemCat = (item.dataset.category || '').toLowerCase();
+            const itemTitle = (item.querySelector('.menu-title')?.textContent || '').toLowerCase();
+            
+            const matchCat = !cat || itemCat === cat;
+            const matchQuery = !query || itemTitle.includes(query);
+            
+            item.style.display = (matchCat && matchQuery) ? '' : 'none';
+        });
+    }
 
-    document.addEventListener('input', function(e) {
-        if (e.target.id === 'searchMenu') {
-            const q = e.target.value.toLowerCase();
-            document.querySelectorAll('.menu-item').forEach(item => {
-                const titleEl = item.querySelector('.menu-title');
-                if (titleEl) {
-                    const title = titleEl.textContent.toLowerCase();
-                    item.style.display = title.includes(q) ? '' : 'none';
-                }
-            });
-        }
-    });
+    document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+    document.getElementById('searchMenu').addEventListener('input', applyFilters);
 
     // Écouteurs de clics (Délégation globale Vanilla)
     document.addEventListener('click', function(e) {
@@ -232,23 +218,31 @@
             });
         }
 
-        // --- 2. Ajouter au Panier Silencieusement ---
-        const btnOrder = e.target.closest('.add-to-order');
-        if (btnOrder) {
-            e.preventDefault();
-            const id = btnOrder.dataset.menuId;
-            try {
-                // Clic silencieux sur le bouton d'ajout interne au modal (gardé en mémoire)
-                const addBtn = document.getElementById('naddbtn-' + id);
-                if (addBtn) {
-                    addBtn.click();
+            // --- 2. Ajouter au Panier Silencieusement ---
+            const btnOrder = e.target.closest('.add-to-order');
+            if (btnOrder) {
+                e.preventDefault();
+                const id = btnOrder.dataset.menuId;
+                
+                // Utiliser jQuery pour simuler le clic sur le bouton caché du modal
+                const $addBtn = $(`#naddbtn-${id}`);
+                if ($addBtn.length) {
+                    $addBtn.trigger('click');
+                    
+                    // Optionnel : un petit effet visuel sur le bouton pour confirmer l'action
+                    const $icon = $(btnOrder).find('i');
+                    const originalClass = $icon.attr('class');
+                    $icon.attr('class', 'fas fa-check-circle');
+                    setTimeout(() => $icon.attr('class', originalClass), 1000);
                 } else {
-                    console.warn("Lien addBtn introuvable. JS du modal pas prêt?");
+                    console.error("Bouton modal introuvable pour ID:", id);
+                    // Fallback : au moins ouvrir le modal
+                    const modalEl = document.getElementById('newOrderModal');
+                    if (modalEl && window.bootstrap) {
+                        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    }
                 }
-            } catch(e) {
-                console.error("Action commander échouée :", e);
             }
-        }
 
         // --- 2.1 Incrementation / Decrementation depuis la page principale ---
         const btnPlus = e.target.closest('.main-qplus');

@@ -184,6 +184,16 @@
         window.onbeforeunload = null;
         @endif
     })();
+    
+    // Sécurité globale pour les images de plats (404 Fallback)
+    document.addEventListener('error', function(e) {
+        if (e.target.tagName.toLowerCase() === 'img' && !e.target.classList.contains('no-fallback')) {
+            const fallback = 'https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';
+            if (e.target.src !== fallback) {
+                e.target.src = fallback;
+            }
+        }
+    }, true);
     </script>
 
     @yield('footer')

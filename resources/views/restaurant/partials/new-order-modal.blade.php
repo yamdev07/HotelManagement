@@ -36,7 +36,9 @@
             <input type="hidden" name="room_number"     id="h-room">
             <input type="hidden" name="items"           id="h-items">
             <input type="hidden" name="total"           id="h-total">
-            <input type="hidden" name="notes"           id="h-notes">
+            <input type="hidden" name="notes"           id="h-total-notes">
+            <input type="hidden" name="order_location"  id="h-location" value="room">
+            <input type="hidden" name="table_number"    id="h-table">
             <input type="hidden" name="payment_method"  id="h-payment" value="cash">
 
             <div class="nom-body">
@@ -90,16 +92,31 @@
                     @endif
                     @endforeach
                 </div>
-
-                {{-- ── ÉTAPE 2 : Identification du client ── --}}
+                {{-- ── ÉTAPE 2 : Identification & Lieu ── --}}
                 <div class="nom-panel" id="nom-panel-2">
-                    <div class="nom-panel-title"><i class="fas fa-user me-2"></i>Identification du client</div>
-                    <p class="nom-desc">Sélectionnez un client existant ou saisissez ses informations manuellement.</p>
+                    <div class="nom-panel-title"><i class="fas fa-user-tag me-2"></i>Identification & Lieu de service</div>
+                    <p class="nom-desc">Précisez où le client sera servi et identifiez-le.</p>
 
-                    {{-- Toggle client existant / nouveau --}}
+                    {{-- Choix Lieu de Service --}}
+                    <div class="nom-section-lbl mb-2">Lieu de service</div>
                     <div class="nom-toggle-row mb-4">
-                        <button type="button" class="nom-toggle active" id="tog-existing">Client existant</button>
-                        <button type="button" class="nom-toggle" id="tog-new">Saisie manuelle</button>
+                        <button type="button" class="nom-toggle active" id="loc-room"><i class="fas fa-bed me-1"></i> En Chambre</button>
+                        <button type="button" class="nom-toggle" id="loc-table"><i class="fas fa-utensils me-1"></i> Au Restaurant</button>
+                    </div>
+
+                    <div id="section-table-only" style="display:none">
+                        <div class="nom-field mb-3">
+                            <label class="nom-label">N° de Table <span class="nom-req">*</span></label>
+                            <input type="text" class="nom-input" id="n-table-number" placeholder="Ex: 5, 12, Terrasse 2">
+                            <div class="nom-err" id="n-err-table"></div>
+                        </div>
+                    </div>
+
+                    {{-- Type de client --}}
+                    <div class="nom-section-lbl mb-2">Type de client</div>
+                    <div class="nom-toggle-row mb-4">
+                        <button type="button" class="nom-toggle active" id="tog-existing">Client Résident</button>
+                        <button type="button" class="nom-toggle" id="tog-new">Client Extérieur / Nouveau</button>
                     </div>
 
                     {{-- Client existant --}}
@@ -113,7 +130,7 @@
                                 </div>
 
                                 <div class="nom-customer-list-box mt-3" id="customer-list-box">
-                                    @foreach($customers ?? [] as $customer)
+                                    @forelse($customers ?? [] as $customer)
                                     @if(is_object($customer))
                                     <div class="nom-customer-item" 
                                          data-id="{{ $customer->id ?? 0 }}"
@@ -134,7 +151,13 @@
                                         </div>
                                     </div>
                                     @endif
-                                    @endforeach
+                                    @empty
+                                    <div class="p-5 text-center">
+                                        <div class="mb-3"><i class="fas fa-user-slash fa-3x text-muted opacity-25"></i></div>
+                                        <div class="fw-bold text-muted">Aucun client résident actif</div>
+                                        <p class="small text-muted px-4">Tous les clients enregistrés sont actuellement libérés ou n'ont pas de séjour actif.</p>
+                                    </div>
+                                    @endforelse
                                 </div>
                             </div>
 
@@ -174,14 +197,11 @@
                         </div>
                     </div>
 
-                    {{-- Nouveau client --}}
                     <div id="block-new" style="display:none">
-                        <div class="nom-grid-1">
-                            <div class="nom-field">
-                                <label class="nom-label">Nom complet <span class="nom-req">*</span></label>
-                                <input type="text" class="nom-input" id="n-fullname" placeholder="Ex : Jean Dupont">
-                                <div class="nom-err" id="n-err-fullname"></div>
-                            </div>
+                        <div class="nom-field">
+                            <label class="nom-label">Nom ou Référence (Optionnel)</label>
+                            <input type="text" class="nom-input" id="n-fullname" placeholder="Ex: Client terrasse, Mr. X, etc.">
+                            <div class="nom-err" id="n-err-fullname"></div>
                         </div>
                     </div>
                 </div>
@@ -193,26 +213,27 @@
 
                     <div class="row gx-4">
                         <div class="col-md-6 mb-4 mb-md-0">
-                            <div id="room-payment-notice" class="p-3 mb-3 rounded" style="display:none; background: var(--g50); border: 1px dashed var(--g300);">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-hotel fa-2x text-primary me-3"></i>
+                            {{-- Info Facturation Simple --}}
+                            <div class="nom-field mb-3" id="room-payment-notice" style="display:none">
+                                <div class="d-flex align-items-center p-3 rounded" style="background:#f0f9ff; border:1px solid #bae6fd;">
+                                    <i class="fas fa-hotel text-primary me-3" style="font-size:1.2rem"></i>
                                     <div>
-                                        <div class="fw-bold text-dark">Facturation sur chambre</div>
-                                        <div class="small text-muted" id="room-payment-text">Le montant sera ajouté à la note de la chambre.</div>
+                                        <div class="fw-bold" style="font-size:0.85rem; color:#0369a1;">Facturation chambre active</div>
+                                        <div class="small" id="room-payment-text" style="color:#0ea5e9;"></div>
                                     </div>
                                 </div>
                             </div>
 
                             {{-- Bloc paiement direct --}}
                             <div id="block-direct-billing" style="display:none">
-                                <div class="nom-section-lbl mb-2">Mode de règlement</div>
+                                <div class="nom-section-lbl mb-2">Choisir le règlement</div>
                                 <div class="nom-pay-grid">
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="cash" checked>
                                         <div class="nom-pay-body"><i class="fas fa-money-bill-wave fa-lg mb-1 text-success"></i><span>Espèces</span></div></label>
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="card">
                                         <div class="nom-pay-body"><i class="fas fa-credit-card fa-lg mb-1 text-primary"></i><span>Carte</span></div></label>
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="mobile_money">
-                                        <div class="nom-pay-body"><i class="fas fa-mobile-alt fa-lg mb-1 text-warning"></i><span>Mobile M.</span></div></label>
+                                        <div class="nom-pay-body"><i class="fas fa-mobile-alt fa-lg mb-1" style="color: #f59e0b;"></i><span>Mobile M.</span></div></label>
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="transfer">
                                         <div class="nom-pay-body"><i class="fas fa-university fa-lg mb-1 text-info"></i><span>Virement</span></div></label>
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="fedapay">
@@ -228,21 +249,22 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6 border-start ps-md-4">
-                            <div class="nom-section-lbl">Aperçu de la commande</div>
-                            <div class="nom-recap-block mb-3 p-3 bg-light rounded border">
-                                <div class="nom-recap-title mb-2"><i class="fas fa-user me-1 text-primary"></i> Client</div>
-                                <div id="nrecap-client" class="small"></div>
+                        <div class="col-md-6 ps-md-4">
+                            <div class="nom-section-lbl">Aperçu & Détails</div>
+                            
+                            <div class="nom-recap-block mb-3">
+                                <div class="nom-recap-title"><i class="fas fa-info-circle me-1"></i> Infos Client & Lieu</div>
+                                <div id="nrecap-client" class="nom-recap-content"></div>
                             </div>
                             
-                            <div class="nom-recap-block mb-3 p-3 bg-light rounded border d-none" id="nrecap-notes-block">
-                                <div class="nom-recap-title mb-2"><i class="fas fa-sticky-note me-1 text-warning"></i> Notes pour le chef</div>
-                                <div id="nrecap-notes-content" class="small text-muted fst-italic"></div>
+                            <div class="nom-recap-block mb-3 d-none" id="nrecap-notes-block">
+                                <div class="nom-recap-title"><i class="fas fa-sticky-note me-1"></i> Préférences Chef</div>
+                                <div id="nrecap-notes-content" class="nom-recap-content fst-italic"></div>
                             </div>
 
-                            <div class="nom-recap-block p-3 bg-light rounded border">
-                                <div class="nom-recap-title mb-2"><i class="fas fa-utensils me-1 text-primary"></i> Plats (Total: <span id="nrecap-total"></span>)</div>
-                                <div id="nrecap-items" style="max-height: 180px; overflow-y: auto;"></div>
+                            <div class="nom-recap-block">
+                                <div class="nom-recap-title"><i class="fas fa-shopping-cart me-1"></i> Plats sélectionnés (<span id="nrecap-total"></span>)</div>
+                                <div id="nrecap-items" style="max-height: 200px; overflow-y: auto;"></div>
                             </div>
                         </div>
                     </div>
@@ -469,13 +491,15 @@
 /* Récap */
 .nom-recap-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 @media(max-width:600px){ .nom-recap-grid{grid-template-columns:1fr;} }
-.nom-recap-block { background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:14px 16px; }
-.nom-recap-title { font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:#94a3b8; font-weight:700; margin-bottom:8px; }
-.nom-recap-line { display:flex; justify-content:space-between; font-size:.8rem; color:#475569; padding:3px 0; }
-.nom-recap-line span { color:#94a3b8; }
-.nom-recap-item { display:flex; justify-content:space-between; font-size:.8rem; color:#475569; padding:5px 0; border-bottom:1px solid #e2e8f0; }
+.nom-recap-block { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:12px 14px; }
+.nom-recap-title { font-size:.68rem; text-transform:uppercase; letter-spacing:.05em; color:#64748b; font-weight:700; margin-bottom:8px; display:flex; align-items:center; }
+.nom-recap-content { font-size:.8rem; color:#1e293b; }
+.nom-recap-line { display:flex; justify-content:space-between; font-size:.78rem; color:#475569; padding:2px 0; }
+.nom-recap-line span { color:#94a3b8; margin-right:8px; }
+.nom-recap-item { display:flex; justify-content:space-between; font-size:.8rem; color:#475569; padding:5px 0; border-bottom:1px solid #f1f5f9; }
 .nom-recap-item:last-child { border-bottom:none; }
-.nom-recap-total { text-align:right; margin-top:10px; font-size:.88rem; color:var(--g600); font-weight:700; }
+.nom-recap-total { text-align:right; margin-top:10px; font-size:.88rem; color:var(--g700); font-weight:800; }
+
 
 /* Pied */
 .nom-footer {
@@ -593,6 +617,66 @@
     cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 5px;
 }
 .nom-btn-change:hover { background: #f1f5f9; color: #1e293b; border-color: #cbd5e1; }
+
+@media (max-width: 768px) {
+    .nom-header { padding: 12px 16px; }
+    .nom-icon-wrap { width: 32px; height: 32px; font-size: 0.8rem; }
+    .nom-title { font-size: 0.85rem; }
+    .nom-subtitle { display: none; }
+    .nom-steps { padding: 8px 16px; }
+    .nom-dot { width: 22px; height: 22px; font-size: 0.65rem; }
+    .nom-step span { font-size: 0.6rem; }
+    .nom-body { padding: 15px; }
+    .nom-panel-title { font-size: 0.85rem; }
+    .nom-footer { padding: 10px 16px; }
+    .nom-btn { padding: 7px 14px; font-size: 0.75rem; }
+
+    /* Fix horiz overflow on cart rows & grids */
+    .nom-menu-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 8px;
+    }
+    .nom-dish-img { height: 75px; }
+    .nom-dish-body { padding: 7px 9px; }
+    .nom-dish-footer { gap: 2px; }
+    .nom-qty-btn { width: 20px; height: 20px; font-size: 0.75rem; }
+
+    .nom-cart-row {
+        flex-wrap: wrap;
+        padding: 8px;
+        gap: 8px;
+        position: relative;
+    }
+    .nom-cart-row-img { width: 35px; height: 35px; }
+    .nom-cart-row-info {
+        flex: 1 1 150px;
+        order: 1;
+    }
+    .nom-cart-row-controls {
+        order: 2;
+        padding: 2px 6px;
+        gap: 4px;
+    }
+    .nom-cart-row-sub {
+        order: 3;
+        min-width: unset;
+        flex: 1;
+        text-align: right;
+        font-size: 0.75rem;
+    }
+    .nom-cr-remove {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        padding: 2px;
+    }
+    .nom-recap-item {
+        flex-wrap: wrap;
+    }
+    .nom-recap-item img {
+        margin-bottom: 8px;
+    }
+}
 </style>
 @endpush
 
@@ -688,9 +772,32 @@ function initNomModal() {
         });
     } catch(e) { nomItems = {}; }
     let nomMode  = 'existing'; // 'existing' | 'new'
+    let nomLocation = 'room'; // 'room' | 'table'
     let selectedCustomerRoom = ''; // Numéro de chambre du client sélectionné
 
-    /* Toggle client existant / nouveau */
+    /* Toggle Lieu */
+    $('#loc-room').click(function(){
+        nomLocation = 'room';
+        $(this).addClass('active'); $('#loc-table').removeClass('active');
+        $('#section-table-only').hide();
+        $('#h-location').val('room');
+        
+        // Cacher le toggle "Client Extérieur" car en chambre c'est forcément un résident
+        $('#tog-new').hide();
+        $('#tog-existing').click(); // Revenir sur résident par défaut
+    });
+    $('#loc-table').click(function(){
+        nomLocation = 'table';
+        $(this).addClass('active'); $('#loc-room').removeClass('active');
+        $('#section-table-only').show();
+        $('#h-location').val('table');
+        
+        // Réafficher le choix pour restaurant
+        $('#tog-new').show();
+        setTimeout(() => $('#n-table-number').focus(), 100);
+    });
+
+    /* Toggle client résident / nouveau */
     $('#tog-existing').click(function(){
         nomMode = 'existing';
         $(this).addClass('active'); $('#tog-new').removeClass('active');
@@ -798,17 +905,25 @@ function initNomModal() {
             $('#n-err-items').text('');
         }
         if (step === 2) {
-            // Étape 2 : identification client
+            // Étape 2 : identification client & lieu
             $('#n-err-client').text('');
+            $('#n-err-table').text('');
+            
+            if (nomLocation === 'table') {
+                if (!$('#n-table-number').val().trim()) {
+                    $('#n-err-table').text('Veuillez indiquer le numéro de table.');
+                    return false;
+                }
+            }
+
             if (nomMode === 'existing') {
                 if (!$('#n-customer-select').val()) {
                     $('#n-err-client').text('Veuillez sélectionner un client.');
                     return false;
                 }
             } else {
-                let ok = true;
-                if (!$('#n-fullname').val().trim()) { $('#n-err-fullname').text('Requis.'); ok = false; } else { $('#n-err-fullname').text(''); }
-                return ok;
+                // Pour nouveau client/extérieur, tout est optionnel (le nom peut être vide)
+                return true;
             }
         }
         return true;
@@ -1023,6 +1138,13 @@ function initNomModal() {
         }
         $('#nrecap-client').html(clientHtml || '—');
         
+        // Affichage du lieu
+        let locHtml = `<div class="nom-recap-line"><span>Lieu</span>${nomLocation === 'room' ? 'En Chambre' : 'À Table'}</div>`;
+        if (nomLocation === 'table' && $('#n-table-number').val()) {
+            locHtml += `<div class="nom-recap-line"><span>Table</span>${$('#n-table-number').val()}</div>`;
+        }
+        $('#nrecap-client').append(locHtml);
+        
         const notesVal = $('#n-notes').val().trim();
         if (notesVal) {
             $('#nrecap-notes-block').removeClass('d-none');
@@ -1074,24 +1196,29 @@ function initNomModal() {
         $('#nrecap-total').text(total.toLocaleString('fr-FR') + ' CFA');
 
         // Remplir les champs hidden
+        const loc = $('#h-location').val() || 'room';
+        const tNum = $('#n-table-number').val() || '';
+        $('#h-table').val(tNum);
+
         if (nomMode === 'existing') {
             const sel = $('#n-customer-select').find(':selected');
             $('#h-customer-id').val($('#n-customer-select').val());
             $('#h-customer-name').val(sel.data('name'));
             $('#h-phone').val('');
             $('#h-email').val('');
+            
             // Si client existant AVEC chambre → facturation chambre
             const isRoom = (selectedCustomerRoom !== '');
             $('#h-room').val(isRoom ? selectedCustomerRoom : '');
         } else {
             $('#h-customer-id').val('');
-            $('#h-customer-name').val($('#n-fullname').val().trim());
+            $('#h-customer-name').val($('#n-fullname').val().trim() || 'Client Passant');
             $('#h-phone').val('');
             $('#h-email').val('');
-            $('#h-room').val(''); // Un nouveau client n'a pas de chambre
+            $('#h-room').val(''); 
         }
 
-        $('#h-notes').val($('#n-notes').val().trim());
+        $('#h-total-notes').val($('#n-notes').val().trim());
         $('#h-payment').val(payment);
         $('#h-items').val(JSON.stringify(items.map(i => ({ menu_id: i.menu_id, quantity: i.quantity }))));
         $('#h-total').val(total.toFixed(2));
@@ -1154,9 +1281,15 @@ function initNomModal() {
         nomRenderBasket();
     });
 
-    // ── Initialiser le compteur du panier dès le chargement de la page ──
+    // ── Initialiser le compteur et l'UI dès le chargement ──
     nomRenderBasket();
-
+    
+    // Appliquer les règles de visibilité initiales
+    if (nomLocation === 'room') {
+        $('#tog-new').hide();
+    } else {
+        $('#tog-new').show();
+    }
     }); // fin $(document).ready
 }
 initNomModal();

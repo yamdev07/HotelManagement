@@ -109,11 +109,11 @@
             </div>
 
 
-            <div class="d-flex justify-content-between mt-4">
-                <a href="{{ route('restaurant.index') }}" class="btn btn-secondary">
+            <div class="d-flex justify-content-between mt-4 db-form-footer">
+                <a href="{{ route('restaurant.index') }}" class="btn btn-secondary btn-responsive">
                     <i class="fas fa-arrow-left me-1"></i> Retour
                 </a>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary btn-responsive">
                     <i class="fas fa-save me-1"></i> Enregistrer le menu
                 </button>
             </div>
@@ -202,5 +202,16 @@ document.getElementById('price').addEventListener('input', function(e) {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+@media (max-width: 576px) {
+    .db-form-footer {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+    .btn-responsive {
+        width: 100%;
+        padding: 10px 15px !important;
+        font-size: 0.85rem !important;
+    }
+}
 </style>
 @endsection

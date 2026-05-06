@@ -115,12 +115,11 @@
                         <tr>
                             <td>
                                 <div class="d-flex align-items-center">
-                                    @if($item->menu->image)
                                     <img src="{{ $item->menu->image_url }}"
                                          alt="{{ $item->menu->name }}"
                                          class="rounded me-3"
-                                         style="width: 50px; height: 50px; object-fit: cover;">
-                                    @endif
+                                         style="width: 50px; height: 50px; object-fit: cover;"
+                                         onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
                                     <div>
                                         <strong>{{ $item->menu->name }}</strong>
                                         @if($item->menu->description)

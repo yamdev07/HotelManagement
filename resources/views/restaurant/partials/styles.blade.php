@@ -58,6 +58,11 @@
     color: var(--s900); letter-spacing: -.5px;
     margin: 0;
 }
+@media (max-width: 576px) {
+    .db-page { padding: 15px 15px; }
+    .db-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .db-title-h1 { font-size: 1.2rem; }
+}
 
 .db-card {
     background: var(--white); border-radius: var(--rxl);
@@ -141,8 +146,31 @@
 }
 
 .filter-row {
-    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    display: flex; gap: 15px; align-items: center; justify-content: space-between;
     margin-bottom: 24px;
+}
+
+.filter-group {
+    display: flex; gap: 12px; flex: 1;
+}
+
+.filter-group .db-input {
+    width: 200px;
+}
+
+.search-box-wrap {
+    position: relative; flex: 1;
+}
+
+.search-box-icon {
+    position: absolute; left: 14px; top: 13px; color: var(--s400); font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .filter-row { flex-direction: column; align-items: flex-start; }
+    .filter-group { flex-direction: column; width: 100%; }
+    .filter-group .db-input { width: 100%; }
+    .btn-cart-pill { width: auto; padding: 6px 14px; font-size: 0.85rem; }
 }
 
 .btn-cart-pill {

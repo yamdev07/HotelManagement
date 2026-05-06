@@ -102,24 +102,32 @@
 
 
             <!-- Prévisualisation de l'image -->
-            <div class="mb-3" id="imagePreviewContainer" style="{{ $menu->image ? 'display: block;' : 'display: none;' }}">
-                <label class="form-label preview-title">Prévisualisation</label>
+            @php
+                $hasRealImage = $menu->image && !empty($menu->image);
+                $previewSrc = '#';
+                if ($hasRealImage) {
+                    $previewSrc = str_starts_with($menu->image, 'http') ? $menu->image : asset('storage/' . $menu->image);
+                }
+            @endphp
+            <div class="mb-3" id="imagePreviewContainer" style="{{ $hasRealImage ? 'display: block;' : 'display: none;' }}">
+                <label class="form-label preview-title">Prévisualisation d'origine</label>
                 <div class="border rounded p-2 text-center bg-light">
-                    <img id="imagePreview" src="{{ $menu->image ? $menu->image_url : '#' }}" alt="Prévisualisation" style="max-height: 120px;" class="img-fluid mb-2 border">
+                    <img id="imagePreview" src="{{ $previewSrc }}" alt="Prévisualisation" style="max-height: 120px;" class="img-fluid mb-2 border no-fallback" 
+                         onerror="if(this.src !== '#') { document.getElementById('imagePreviewContainer').style.display = 'none'; }">
                     <div class="mt-1">
                         <button type="button" class="btn btn-xs btn-danger" onclick="removeImagePreview()" style="font-size: 0.65rem; padding: 2px 8px;">
-                            <i class="fas fa-trash me-1"></i> Retirer
+                            <i class="fas fa-trash me-1"></i> Supprimer l'image actuelle
                         </button>
                     </div>
                 </div>
             </div>
 
 
-            <div class="d-flex justify-content-between mt-4">
-                <a href="{{ route('restaurant.index') }}" class="btn btn-secondary">
+            <div class="d-flex justify-content-between mt-4 db-form-footer">
+                <a href="{{ route('restaurant.index') }}" class="btn btn-secondary btn-responsive">
                     <i class="fas fa-arrow-left me-1"></i> Annuler
                 </a>
-                <button type="submit" class="btn btn-primary">
+                <button type="submit" class="btn btn-primary btn-responsive">
                     <i class="fas fa-save me-1"></i> Enregistrer les modifications
                 </button>
             </div>
@@ -208,5 +216,16 @@ document.getElementById('price').addEventListener('input', function(e) {
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+@media (max-width: 576px) {
+    .db-form-footer {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+    .btn-responsive {
+        width: 100%;
+        padding: 10px 15px !important;
+        font-size: 0.85rem !important;
+    }
+}
 </style>
 @endsection

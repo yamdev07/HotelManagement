@@ -22,8 +22,15 @@ class Menu extends Model
 
     public function getImageUrlAttribute(): string
     {
-        if (!$this->image) return '';
+        $default = 'https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';
+        
+        if (!$this->image) return $default;
+        
         if (str_starts_with($this->image, 'http')) return $this->image;
+        
+        $path = storage_path('app/public/' . $this->image);
+        if (!file_exists($path)) return $default;
+
         return asset('storage/' . $this->image);
     }
 }

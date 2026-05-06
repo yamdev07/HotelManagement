@@ -3,15 +3,31 @@
 <style>
 .db-tabs-card {
     background: var(--white); border-radius: var(--rl);
-    padding: 8px; border: 1.5px solid var(--s100);
+    padding: 6px; border: 1.5px solid var(--s100);
     margin-bottom: 24px; box-shadow: var(--shadow-xs);
     display: flex; align-items: center; gap: 4px;
+    width: fit-content;
 }
+
 .db-tab-link {
-    padding: 10px 20px; border-radius: 10px;
-    font-size: .88rem; font-weight: 600; color: var(--s500);
+    padding: 8px 16px; border-radius: 8px;
+    font-size: .85rem; font-weight: 600; color: var(--s500);
     text-decoration: none; transition: var(--transition);
     display: flex; align-items: center; gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .db-tabs-card {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .db-tab-link {
+        justify-content: center;
+        padding: 12px 8px;
+        font-size: 0.8rem;
+    }
 }
 .db-tab-link:hover { background: var(--s50); color: var(--s900); text-decoration: none; }
 .db-tab-link.active { background: var(--g50); color: var(--g700); }

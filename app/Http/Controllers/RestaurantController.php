@@ -17,15 +17,20 @@ class RestaurantController extends Controller
     public function index()
     {
         $menus = Menu::with('category')->latest()->paginate(12);
-        $allMenus = Menu::with('category')->latest()->get(); // Pour le modal (panier)
+        $allMenus = Menu::with('category')->latest()->get()->map(function($m) {
+            $m->image = $m->image_url;
+            return $m;
+        }); 
         
-        $customers = Customer::with(['transactions' => function ($q) {
-            $q->whereIn('status', ['active', 'reservation'])
-              ->where('check_out', '>=', now())
+        $customers = Customer::whereHas('transactions', function ($q) {
+            $q->whereIn('status', ['active', 'reservation', 'pending_checkout', 'reserved_waiting']);
+        })->with(['transactions' => function ($q) {
+            $q->whereIn('status', ['active', 'reservation', 'pending_checkout', 'reserved_waiting'])
               ->with('room')
               ->latest();
         }])->get()->map(function ($customer) {
-            $activeTransaction = $customer->transactions->first();
+            $activeTransaction = $customer->transactions->whereIn('status', ['active', 'pending_checkout'])->first() 
+                                ?: $customer->transactions->first();
             $customer->room_number = $activeTransaction?->room?->number ?? null;
             return $customer;
         });
@@ -135,13 +140,15 @@ class RestaurantController extends Controller
 
         $orders = $query->paginate(15)->withQueryString();
 
-        $customers = Customer::with(['transactions' => function ($q) {
-            $q->whereIn('status', ['active', 'reservation'])
-              ->where('check_out', '>=', now())
+        $customers = Customer::whereHas('transactions', function ($q) {
+            $q->whereIn('status', ['active', 'reservation', 'pending_checkout', 'reserved_waiting']);
+        })->with(['transactions' => function ($q) {
+            $q->whereIn('status', ['active', 'reservation', 'pending_checkout', 'reserved_waiting'])
               ->with('room')
               ->latest();
         }])->get()->map(function ($customer) {
-            $activeTransaction = $customer->transactions->first();
+            $activeTransaction = $customer->transactions->whereIn('status', ['active', 'pending_checkout'])->first() 
+                                ?: $customer->transactions->first();
             $customer->room_number = $activeTransaction?->room?->number ?? null;
             return $customer;
         });
@@ -213,10 +220,12 @@ class RestaurantController extends Controller
         try {
             $customerId = $validated['customer_id'] ?? null;
 
-            // Si pas de customer_id fourni, essayer de trouver ou créer un client temporaire
-            if (!$customerId && ($validated['customer_name'] || $validated['phone'])) {
-                $customer = $this->findOrCreateCustomer($validated);
-                $customerId = $customer->id;
+            // Si pas de customer_id fourni, essayer de trouver un client existant (sans le créer)
+            if (!$customerId && (!empty($validated['phone']) || !empty($validated['email']))) {
+                $customer = $this->findCustomer($validated);
+                if ($customer) {
+                    $customerId = $customer->id;
+                }
             }
 
             $transactionId = $this->resolveRestaurantOrderTransaction(
@@ -224,12 +233,48 @@ class RestaurantController extends Controller
                 $validated['room_number'] ?? null
             );
 
-            // Si on a trouvé une transaction mais pas encore de customer, lier au client de la transaction
-            if (!$customerId && $transactionId) {
+            // Vérification de sécurité pour éviter les fausses commandes sur chambre d'autrui
+            if ($transactionId && !empty($validated['room_number'])) {
+                $transaction = Transaction::find($transactionId);
+                if ($transaction && $transaction->customer) {
+                    // Bypass sécurité email pour les admins/staff
+                    $isAdmin = auth()->check() && in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist', 'Servant', 'Cashier']);
+                    
+                    if (!$isAdmin && (empty($realEmail) || strtolower($realEmail) !== strtolower($inputEmail))) {
+                        DB::rollBack();
+                        return response()->json([
+                            'success' => false,
+                            'message' => "Sécurité : L'email indiqué ne correspond pas au titulaire de la chambre."
+                        ], 403);
+                    }
+                    // Associer la commande à ce client
+                    $customerId = $transaction->customer_id;
+                }
+            } elseif (!$customerId && $transactionId) {
+                // Secours
                 $transaction = Transaction::find($transactionId);
                 if ($transaction) {
                     $customerId = $transaction->customer_id;
                 }
+            }
+            
+            $notes = $validated['notes'] ?? null;
+            
+            // Gestion du lieu de service et numéro de table (comme vitrine)
+            $location = $request->input('order_location');
+            $tableNumber = $request->input('table_number');
+            if ($location === 'table' && !empty($tableNumber)) {
+                $tableInfo = "📍 TABLE: " . $tableNumber;
+                $notes = $notes ? $tableInfo . " | " . $notes : $tableInfo;
+            } elseif ($location === 'room' && !empty($validated['room_number'])) {
+                 $roomInfo = "🔑 CHAMBRE: " . $validated['room_number'];
+                 $notes = $notes ? $roomInfo . " | " . $notes : $roomInfo;
+            }
+
+            // Si toujours pas de client (client extérieur de passage), on garde son nom dans les notes
+            if (!$customerId && !empty($validated['customer_name'])) {
+                $guestInfo = "👤 Client Extérieur: " . $validated['customer_name'] . (!empty($validated['phone']) ? ' (' . $validated['phone'] . ')' : '');
+                $notes = $notes ? $notes . "\n" . $guestInfo : $guestInfo;
             }
 
             $items = json_decode($validated['items'], true);
@@ -250,7 +295,7 @@ class RestaurantController extends Controller
                 'room_id' => $this->getRoomIdFromNumber($validated['room_number'] ?? null),
                 'transaction_id' => $transactionId,
                 'total' => $calculatedTotal,
-                'notes' => $validated['notes'] ?? null,
+                'notes' => $notes,
                 'payment_method' => $validated['payment_method'] ?? 'cash',
                 'status' => 'pending',
             ]);
@@ -374,7 +419,15 @@ class RestaurantController extends Controller
     // API - Obtenir les menus
     public function getMenus()
     {
-        $menus = Menu::select('id', 'name', 'price', 'image', 'category')->get();
+        $menus = Menu::with('category')->get()->map(function($m) {
+            return [
+                'id' => $m->id,
+                'name' => $m->name,
+                'price' => $m->price,
+                'image' => $m->image_url,
+                'category' => $m->category->name ?? 'Menu',
+            ];
+        });
 
         return response()->json($menus);
     }
@@ -402,6 +455,19 @@ class RestaurantController extends Controller
                 'valid' => false,
                 'message' => "Aucun client actif dans la chambre {$roomNumber}. Veuillez vérifier le numéro ou laisser ce champ vide."
             ]);
+        }
+
+        $inputEmail = trim($request->get('email', ''));
+        if ($inputEmail) {
+            $realEmail = trim($transaction->customer->email ?? '');
+            
+            // Vérification de sécurité stricte : l'email saisi doit correspondre
+            if (empty($realEmail) || strtolower($realEmail) !== strtolower($inputEmail)) {
+                 return response()->json([
+                    'valid' => false,
+                    'message' => "Sécurité : L'email saisi ne correspond pas à la personne occupant la chambre {$roomNumber}."
+                 ]);
+            }
         }
 
         return response()->json([
@@ -531,7 +597,7 @@ class RestaurantController extends Controller
         ));
     }
 
-    private function findOrCreateCustomer($data)
+    private function findCustomer($data)
     {
         // Essayer de trouver un client existant par téléphone
         if (!empty($data['phone'])) {
@@ -549,17 +615,8 @@ class RestaurantController extends Controller
             }
         }
 
-        // Créer un nouveau client temporaire
-        return Customer::create([
-            'name' => $data['customer_name'] ?? 'Client Restaurant',
-            'phone' => $data['phone'] ?? null,
-            'email' => $data['email'] ?? null,
-            'address' => 'Non renseignée',
-            'gender' => 'male',
-            'job' => 'Non spécifié',
-            'birthdate' => now()->subYears(30)->format('Y-m-d'),
-            'user_id' => auth()->id() ?? 1,
-        ]);
+        // Retourner null au lieu de créer un nouveau client
+        return null;
     }
 
     public function toggleStatus($id)

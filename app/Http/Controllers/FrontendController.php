@@ -915,12 +915,16 @@ public function rooms(Request $request)
         $currentDay = strtolower(now()->format('D')); // mon, tue, wed, thu, fri, sat, sun
         
         $menus = Menu::with('category')->where('is_available', true)
-            ->where(function($q) use ($currentDay) {
+            ->where(function ($q) use ($currentDay) {
                 $q->whereJsonContains('available_days', $currentDay)
-                  ->orWhereNull('available_days');
+                    ->orWhereNull('available_days');
             })
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($m) {
+                $m->image = $m->image_url;
+                return $m;
+            });
 
         $categories = \App\Models\Category::all();
 
