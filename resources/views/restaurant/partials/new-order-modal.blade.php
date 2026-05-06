@@ -756,7 +756,7 @@ function initNomModal() {
         });
     });
 
-    $('#printOrder').click(()=>window.print());
+    // L'impression est gérée dans orders.blade.php (ouvre /restaurant/orders/{id}/invoice dans un nouvel onglet)
 
     /* ══════════════════════════════════════════
        NOUVELLE COMMANDE — MULTI-ÉTAPES

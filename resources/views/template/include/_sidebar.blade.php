@@ -149,15 +149,23 @@
                         @endif
 
                         @if (Route::has('restaurant.index'))
+                            @php $pendingOrdersCount = \App\Models\RestaurantOrder::where('status', 'pending')->count(); @endphp
                             <a href="{{ route('restaurant.index') }}"
                                 class="nav-item {{ $activeClass('restaurant.', false) }}" data-tooltip="Restaurant">
                                 <div class="nav-icon"><i class="fas fa-utensils"></i></div>
                                 <div class="nav-content">
                                     <div class="nav-title">Restaurant</div>
-                                    <div class="nav-subtitle">Menus, Commandes & Ventes</div>
+                                    <div class="nav-subtitle">
+                                        {{ $pendingOrdersCount }} commande{{ $pendingOrdersCount > 1 ? 's' : '' }} en attente
+                                    </div>
                                 </div>
+                                @if ($pendingOrdersCount > 0)
+                                    <span class="nav-badge">{{ $pendingOrdersCount }}</span>
+                                @endif
                             </a>
                         @endif
+
+
                     </div>
                 @endif
 

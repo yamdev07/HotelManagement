@@ -251,6 +251,14 @@
                                     <i class="fas fa-hotel"></i>
                                 </span>
                                 @endif
+
+                                {{-- Imprimer la facture --}}
+                                <a href="{{ route('restaurant.orders.invoice', $order->id) }}"
+                                   target="_blank"
+                                   class="btn btn-sm btn-outline-secondary p-2"
+                                   title="Imprimer la facture">
+                                    <i class="fas fa-print"></i>
+                                </a>
                             </div>
                         </td>
                     </tr>
@@ -298,29 +306,49 @@
     </div>
 </div>
 
+{{-- Zone d'impression facture (masquée à l'écran) --}}
+<div id="invoice-print-area" style="display:none;"></div>
+
 @include('restaurant.partials.new-order-modal')
 
 @endsection
 
 @push('scripts')
 <script>
-$(document).ready(function() {
+// ── Bouton Imprimer en Vanilla JS pur (indépendant de jQuery) ──
+document.addEventListener('DOMContentLoaded', function () {
+    var printBtn = document.getElementById('printOrder');
+    if (printBtn) {
+        printBtn.addEventListener('click', function () {
+            var orderIdEl = document.getElementById('orderId');
+            var orderId = orderIdEl ? orderIdEl.textContent.trim() : '';
+            if (orderId) {
+                window.open('/restaurant/orders/' + orderId + '/invoice', '_blank', 'width=820,height=950');
+            }
+        });
+    }
+});
+
+// ── Reste du script (attend jQuery comme le partial) ──
+function initOrdersPage() {
+    if (!window.$) { setTimeout(initOrdersPage, 50); return; }
+
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
 
     $('#applyFilters').click(function() {
         let url = new URL(window.location.href);
         const status = $('#statusFilter').val();
-        const from = $('#dateFrom').val();
-        const to = $('#dateTo').val();
-        if(status) url.searchParams.set('status', status); else url.searchParams.delete('status');
-        if(from) url.searchParams.set('from', from); else url.searchParams.delete('from');
-        if(to) url.searchParams.set('to', to); else url.searchParams.delete('to');
+        const from   = $('#dateFrom').val();
+        const to     = $('#dateTo').val();
+        if (status) url.searchParams.set('status', status); else url.searchParams.delete('status');
+        if (from)   url.searchParams.set('from', from);     else url.searchParams.delete('from');
+        if (to)     url.searchParams.set('to', to);         else url.searchParams.delete('to');
         window.location.href = url.toString();
     });
 
     $(document).on('click', '.change-status', function() {
         const orderId = $(this).data('order-id');
-        const status = $(this).data('status');
+        const status  = $(this).data('status');
         $.post(`/restaurant/orders/${orderId}/status`, { status }, function() {
             location.reload();
         }).fail(function(xhr) {
@@ -336,14 +364,9 @@ $(document).ready(function() {
             $('#orderDetailsContent').html(res.html);
         });
     });
-
-    $('#printOrder').click(function() {
-        const content = document.getElementById('orderDetailsContent').innerHTML;
-        const win = window.open('', '', 'width=800,height=600');
-        win.document.write('<html><head><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"></head><body>'+content+'</body></html>');
-        win.document.close();
-        setTimeout(() => { win.print(); win.close(); }, 500);
-    });
-});
+}
+initOrdersPage();
 </script>
 @endpush
+
+

@@ -486,6 +486,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
         // Routes avec paramètre {id}
         Route::prefix('orders/{id}')->group(function () {
             Route::get('/', [RestaurantController::class, 'showOrder'])->name('orders.show');
+            Route::get('/invoice', [RestaurantController::class, 'printInvoice'])->name('orders.invoice');
             Route::put('/', [RestaurantController::class, 'updateOrder'])->name('orders.update');
             Route::post('/status', [RestaurantController::class, 'updateOrder'])->name('orders.status');
             Route::put('/cancel', [RestaurantController::class, 'cancelOrder'])->name('orders.cancel');

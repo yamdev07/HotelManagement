@@ -190,14 +190,21 @@ class RestaurantController extends Controller
         ));
     }
 
-    // Afficher les détails d'une commande
     public function showOrder($id)
     {
-        $order = RestaurantOrder::with(['items.menu', 'customer'])->findOrFail($id);
+        $order = RestaurantOrder::with(['items.menu', 'customer', 'room'])->findOrFail($id);
 
         return response()->json([
-            'html' => view('restaurant.partials.order-details', compact('order'))->render(),
+            'html'  => view('restaurant.partials.order-details', compact('order'))->render(),
+            'order' => $order->append(['customer_name', 'customer_phone', 'room_number'])->toArray(),
         ]);
+    }
+
+    // Page facture imprimable (standalone, sans layout)
+    public function printInvoice($id)
+    {
+        $order = RestaurantOrder::with(['items.menu', 'customer', 'room'])->findOrFail($id);
+        return view('restaurant.invoice', compact('order'));
     }
 
     // Enregistrer une nouvelle commande
