@@ -24,18 +24,18 @@
             </div>
 
             {{-- Onglets de catégorie --}}
-            <div class="d-flex justify-content-center flex-wrap mb-5" data-aos="fade-up" data-aos-delay="60">
+            <div class="category-tabs-grid mb-5" data-aos="fade-up" data-aos-delay="60">
                 <button class="category-filter active" data-category="all"><i class="fas fa-th me-1"></i>Tout voir</button>
                 @foreach($categories as $category)
                     <button class="category-filter" data-category="{{ $category->slug }}">
-                        <i class="fas fa-utensils me-1"></i>{{ $category->name }}
+                        <i class="fas fa-utensils me-1"></i> {{ $category->name }}
                     </button>
                 @endforeach
             </div>
 
             {{-- Grille menu (une catégorie à la fois par défaut) --}}
             <div class="row g-3" id="menuList">
-                <div id="noItemsMessage" class="col-12 text-center py-5 d-none">
+                <div id="noItemsMessage" class="col-12 text-center py-5 d-none no-items-empty-state">
                     <div style="width:80px;height:80px;border-radius:50%;background:rgba(26,71,42,0.06);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:2rem;color:var(--cactus-green);">
                         <i class="fas fa-search"></i>
                     </div>
@@ -43,7 +43,7 @@
                     <p style="color:var(--text-gray);">Il n'y a pas de plats dans cette catégorie aujourd'hui.</p>
                 </div>
                 @forelse($menus as $menu)
-                    <div class="col-xl-3 col-lg-3 col-md-6 menu-item" data-category="{{ $menu->category?->slug }}" data-aos="fade-up"
+                    <div class="col-6 col-md-4 col-lg-3 menu-item" data-category="{{ $menu->category?->slug }}" data-aos="fade-up"
                         data-aos-delay="{{ ($loop->index % 4) * 60 }}">
                         <div class="menu-card">
                         <div class="menu-card-img" style="cursor: pointer;" 
@@ -220,7 +220,7 @@
 
                             <div class="om-grid-2 mt-2">
                                 <div class="om-field" style="grid-column: span 2;">
-                                    <label class="om-label" for="f-notes">Notes spéciales</label>
+                                    <label class="om-label" for="f-notes">Notes spéciales (optionnel)</label>
                                     <textarea class="om-input" id="f-notes" rows="2" placeholder="Allergies, préférences de cuisson..."></textarea>
                                 </div>
                             </div>
@@ -240,8 +240,7 @@
                             <div class="om-payment-grid"
                                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px;">
                                 <label class="om-payment-card active" id="pay-card-cash">
-                                    <input type="radio" name="payment_choice" value="cash" checked
-                                        style="display:none">
+                                    <input type="radio" name="payment_choice" value="cash" checked style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-money-bill-wave"></i></div>
                                     <div class="om-pc-label">Espèces</div>
                                     <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
@@ -250,31 +249,31 @@
                                     <input type="radio" name="payment_choice" value="mobile_money" style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-mobile-alt"></i></div>
                                     <div class="om-pc-label">Mobile Money</div>
-                                    <div class="om-pc-status"><i class="fas fa-check-circle d-none"></i></div>
+                                    <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                 </label>
                                 <label class="om-payment-card" id="pay-card-card">
                                     <input type="radio" name="payment_choice" value="card" style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-credit-card"></i></div>
                                     <div class="om-pc-label">Carte Bancaire</div>
-                                    <div class="om-pc-status"><i class="fas fa-check-circle d-none"></i></div>
+                                    <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                 </label>
                                 <label class="om-payment-card" id="pay-card-fedapay">
                                     <input type="radio" name="payment_choice" value="fedapay" style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-wallet"></i></div>
                                     <div class="om-pc-label">Fedapay</div>
-                                    <div class="om-pc-status"><i class="fas fa-check-circle d-none"></i></div>
+                                    <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                 </label>
                                 <label class="om-payment-card" id="pay-card-transfer">
                                     <input type="radio" name="payment_choice" value="transfer" style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-university"></i></div>
                                     <div class="om-pc-label">Virement</div>
-                                    <div class="om-pc-status"><i class="fas fa-check-circle d-none"></i></div>
+                                    <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                 </label>
                                 <label class="om-payment-card" id="pay-card-check">
                                     <input type="radio" name="payment_choice" value="check" style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-file-invoice-dollar"></i></div>
                                     <div class="om-pc-label">Chèque</div>
-                                    <div class="om-pc-status"><i class="fas fa-check-circle d-none"></i></div>
+                                    <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                 </label>
                                 <div id="room-payment-notice" class="col-span-2 d-none" style="grid-column: span 2;">
                                     <div class="om-payment-card active w-100" style="cursor: default;">
@@ -285,13 +284,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="payment-normal-hint" class="mt-4 p-3 rounded"
-                                style="background: rgba(212,175,55,0.05); border: 1px dashed var(--gold-accent);">
-                                <p class="mb-0" style="color: var(--gold-accent); font-size: 0.85rem;">
-                                    <i class="fas fa-info-circle me-2"></i> Le règlement s'effectuera directement lors de
-                                    la réception de votre commande.
-                                </p>
-                            </div>
+                            {{-- Hint removed at user request --}}
+                            <div id="payment-normal-hint" class="d-none"></div>
                             <div id="payment-room-hint" class="mt-4 p-3 rounded d-none"
                                 style="background: rgba(46, 125, 50, 0.1); border: 1px dashed #4caf50;">
                                 <p class="mb-0" style="color: #81c784; font-size: 0.85rem;">
@@ -310,33 +304,35 @@
                                     <div class="om-panel-title">
                                         <i class="fas fa-id-card me-1 om-panel-icon"></i> Vos Informations
                                     </div>
-                                    <div class="om-recap-block mb-4" id="recap-identity">
-                                        {{-- Injecté par JS --}}
+                                    <div class="om-section-label">Identification</div>
+                                    <div id="recap-identity" class="om-recap-block">
+                                        {{-- Rempli via JS --}}
                                     </div>
 
-                                    <div class="om-panel-title">
-                                        <i class="fas fa-wallet me-2 om-panel-icon"></i> Règlement choisi
+                                    <div class="om-section-label mt-4">Paiement</div>
+                                    <div id="recap-payment" class="om-recap-block">
+                                        {{-- Rempli via JS --}}
                                     </div>
-                                    <div id="recap-payment-method" class="mt-2"
-                                        style="color: var(--gold-accent); font-weight: 600; font-size: 0.9rem;">
-                                        {{-- Injecté par JS --}}
+                                    
+                                    <div class="mt-4 p-3 rounded" style="background: rgba(212,175,55,0.03); border: 1px solid rgba(212,175,55,0.1);">
+                                        <div style="color: #c0b080; font-size: 0.75rem; line-height: 1.5;">
+                                            <i class="fas fa-leaf me-2"></i> Votre commande sera préparée avec soin et livrée dans les plus brefs délais par notre équipe.
+                                        </div>
                                     </div>
                                 </div>
-
-                                {{-- Droite: Panier --}}
+                                
+                                {{-- Droite: Contenu du Panier --}}
                                 <div class="om-checkout-right">
-                                    <div class="om-panel-title">
-                                        <i class="fas fa-shopping-cart me-1 om-panel-icon"></i> Votre sélection
-                                    </div>
-                                    <div id="recap-items" class="mt-3">
-                                        {{-- Injecté par JS --}}
-                                    </div>
-                                    <div class="om-recap-total mt-4 pt-3" style="border-top:2px solid var(--gold-accent)">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <span style="color:#a09060; font-size:0.8rem">Total à régler :</span>
-                                            <strong id="recap-total"
-                                                style="font-size:1.2rem; color:var(--gold-accent)"></strong>
+                                    <div class="om-section-label">Plats sélectionnés</div>
+                                    <div class="om-recap-items-container">
+                                        <div id="recap-items" style="max-height: 300px; overflow-y: auto;">
+                                            {{-- Rempli via JS --}}
                                         </div>
+                                    </div>
+
+                                    <div class="om-recap-total-box mt-4">
+                                        <div class="om-total-subtitle">À régler</div>
+                                        <div id="recap-total" class="om-total-amount">0 FCFA</div>
                                     </div>
                                 </div>
                             </div>
@@ -440,7 +436,38 @@
             background: var(--white);
             color: var(--text-gray);
             transition: var(--transition);
-            margin: 4px;
+            margin: 0;
+            width: 100%;
+            justify-content: center;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .category-tabs-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin: 0 auto;
+            max-width: 1000px;
+        }
+
+        @media (max-width: 991px) {
+            .category-tabs-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        @media (max-width: 576px) {
+            .category-tabs-grid { 
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+            .category-filter {
+                padding: 8px 4px;
+                font-size: 0.65rem;
+                gap: 4px;
+            }
+            .category-filter i { font-size: 0.7rem; }
         }
 
         .category-filter:hover {
@@ -643,6 +670,28 @@
             }
         }
 
+        /* Responsive Grid for 2-cols mobile and 3-cols tablet */
+        @media (max-width: 991px) {
+            .menu-card-img { height: 160px; }
+            .menu-card-name { font-size: 0.95rem; }
+            .menu-card-price { font-size: 1rem; }
+        }
+
+        @media (max-width: 576px) {
+            .menu-section .container { padding-left: 10px; padding-right: 10px; }
+            .row.g-3 { --bs-gutter-x: 0.75rem; --bs-gutter-y: 0.75rem; }
+            .menu-card-body { padding: 12px; }
+            .menu-card-img { height: 130px; }
+            .menu-card-name { font-size: 0.85rem; line-height: 1.3; }
+            .menu-card-price { font-size: 0.9rem; }
+            .menu-card-desc { display: none; }
+            .cat-badge { display: none; }
+            .btn-order { padding: 8px 10px; font-size: 0.7rem; width: 100%; justify-content: center; }
+            .v-qty-wrapper { padding: 5px 8px; gap: 8px; border-radius: 8px; }
+            .v-qty-btn { width: 24px; height: 24px; font-size: 0.8rem; }
+            .v-qval { font-size: 0.8rem; min-width: 15px; }
+        }
+
         /* ══════════════════════════════════════════════════════
            OFFCANVAS LUXURY — SIDE ORDER PANEL
         ══════════════════════════════════════════════════════ */
@@ -658,6 +707,12 @@
             .v-offcanvas {
                 width: 100% !important;
             }
+            .om-header { padding: 15px 20px; }
+            .om-steps { padding: 12px 15px; }
+            .om-step-lbl { display: none; }
+            .om-body { padding: 20px 18px; }
+            .om-footer { padding: 12px 18px; }
+            .om-btn { padding: 10px 14px; font-size: 0.75rem; }
         }
 
         .v-offcanvas-content {
@@ -754,6 +809,9 @@
             color: #f0e8d0; padding: 11px 14px; font-size: .88rem; width: 100%;
             outline: none; transition: all .2s;
         }
+        @media (max-width: 768px) {
+            .om-input { font-size: 16px !important; }
+        }
 
         .om-input:focus { border-color: #d4af37; box-shadow: 0 0 0 3px rgba(212,175,55,.12); }
         .om-input-icon { position: relative; }
@@ -798,11 +856,51 @@
             right: 10px;
             color: var(--gold-accent);
             font-size: 1.1rem;
+            display: none;
         }
 
-        .om-recap-block { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px 18px; }
-        .om-recap-line { font-size: .82rem; color: #c0b080; padding: 4px 0; display: flex; justify-content: space-between; }
-        .om-recap-line span { color: #888; }
+        .om-payment-card.active .om-pc-status {
+            display: block;
+        }
+
+        .om-checkout-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 25px;
+        }
+        @media (max-width: 768px) {
+            .om-checkout-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            .om-payment-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+
+        .om-recap-block { 
+            background: #141414; border: 1px solid #1e1e1e; border-radius: 12px; padding: 10px 18px; 
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+        }
+        .om-recap-line { 
+            font-size: .85rem; color: #fff; padding: 12px 0; display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05); 
+        }
+        .om-recap-line:last-child { border-bottom: none; }
+        .om-recap-line span { color: #888; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; }
+        .om-recap-line strong { color: var(--gold-accent); }
+
+        .om-recap-items-container {
+            background: #1a1a1a; border-radius: 12px; padding: 5px 15px; border: 1px solid #2a2a2a;
+        }
+
+        .om-recap-total-box {
+            background: linear-gradient(135deg, var(--cactus-dark) 0%, #0f2918 100%);
+            border: 2px solid var(--gold-accent); border-radius: 15px; padding: 22px; text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .om-total-subtitle { font-size: 0.75rem; color: var(--gold-accent); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; opacity: 0.8; }
+        .om-total-amount { font-size: 2rem; font-weight: 800; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,0.3); }
 
         .om-recap-item {
             display: flex; align-items: center; gap: 12px; padding: 12px 0;
@@ -861,25 +959,45 @@
                FILTRAGE DE LA CARTE
             ═══════════════════════════════ */
             $('.category-filter').click(function() {
+                const $btn = $(this);
+                if($btn.hasClass('active')) return;
+
                 $('.category-filter').removeClass('active');
-                $(this).addClass('active');
-                const cat = $(this).data('category');
+                $btn.addClass('active');
+                const cat = $btn.data('category');
+                
+                // On cache tout immédiatement
+                $('.menu-item').addClass('d-none').css('opacity', '0');
                 
                 let visibleCount = 0;
+                let $items;
+                
                 if (cat === 'all') {
-                    $('.menu-item').removeClass('d-none');
-                    visibleCount = $('.menu-item').length;
+                    $items = $('.menu-item');
                 } else {
-                    $('.menu-item').addClass('d-none');
-                    const items = $(`.menu-item[data-category="${cat}"]`);
-                    items.removeClass('d-none');
-                    visibleCount = items.length;
+                    $items = $(`.menu-item[data-category="${cat}"]`);
                 }
 
+                visibleCount = $items.length;
+                
                 if (visibleCount === 0) {
                     $('#noItemsMessage').removeClass('d-none');
                 } else {
                     $('#noItemsMessage').addClass('d-none');
+                    // On affiche immédiatement sans délai AOS ni transition
+                    $items.removeClass('d-none').css({
+                        'opacity': '1',
+                        'transition': 'none'
+                    }).addClass('aos-animate');
+                    
+                    // On restaure la transition pour les futurs hovers
+                    setTimeout(() => {
+                        $items.css('transition', '');
+                    }, 100);
+                }
+
+                if (typeof AOS !== 'undefined') {
+                    AOS.refresh();
                 }
             });
 
@@ -1088,6 +1206,10 @@
 
                 if (isGuestForBill && n === 2 && currentStep === 1) n = 3;
                 if (isGuestForBill && n === 2 && currentStep === 3) n = 1;
+                
+                if (n === 2) {
+                    // We'll sync UI after the potential room_charge check below
+                }
 
                 if (n === TOTAL_STEPS) buildRecap();
 
@@ -1103,6 +1225,13 @@
                     if ($('input[name="payment_choice"]:checked').val() === 'room_charge') {
                         $('input[name="payment_choice"][value="cash"]').prop('checked', true);
                     }
+                }
+
+                // IMPORTANT: Final sync of active class for payment grid
+                if (n === 2) {
+                    $('.om-payment-card').removeClass('active');
+                    const currentVal = $('input[name="payment_choice"]:checked').val() || 'cash';
+                    $(`input[name="payment_choice"][value="${currentVal}"]`).prop('checked', true).closest('.om-payment-card').addClass('active');
                 }
 
                 $('.om-step').each(function() {
@@ -1124,36 +1253,48 @@
                 const notes = $('#f-notes').val().trim();
                 let idHtml = '';
 
+                // Identification
                 if (location === 'room') {
                     const room = $('#f-room').val().trim();
                     const email = $('#f-email').val().trim();
-                    idHtml += `<div class="om-recap-line"><span>Service</span>En Chambre (Room Service)</div>`;
-                    idHtml += `<div class="om-recap-line"><span>Chambre</span>${room}</div>`;
+                    idHtml += `<div class="om-recap-line"><span>Service</span><strong>Room Service</strong></div>`;
+                    idHtml += `<div class="om-recap-line"><span>Chambre</span><strong>${room}</strong></div>`;
                     $('#hCustomerName').val("Room Service - " + room);
                     $('#hEmail').val(email); 
                     $('#hRoom').val(room);
                 } else {
                     const table = $('#f-table').val().trim();
-                    idHtml += `<div class="om-recap-line"><span>Service</span>Au Restaurant (Table ${table})</div>`;
-                    
+                    idHtml += `<div class="om-recap-line"><span>Service</span><strong>Table ${table}</strong></div>`;
                     if (isResident) {
                         const roomAlt = $('#f-room-alt').val().trim();
                         const emailAlt = $('#f-email-alt').val().trim();
-                        idHtml += `<div class="om-recap-line"><span>Facture</span>Chambre ${roomAlt}</div>`;
+                        idHtml += `<div class="om-recap-line"><span>Client</span><strong>Résident (Ch. ${roomAlt})</strong></div>`;
                         $('#hCustomerName').val("Table " + table + " (Resident " + roomAlt + ")");
-                        $('#hEmail').val(emailAlt);
-                        $('#hRoom').val(roomAlt);
+                        $('#hEmail').val(emailAlt); $('#hRoom').val(roomAlt);
                     } else {
-                        idHtml += `<div class="om-recap-line"><span>Type</span>Client extérieur</div>`;
+                        idHtml += `<div class="om-recap-line"><span>Client</span><strong>Extérieur</strong></div>`;
                         $('#hCustomerName').val("Client Table " + table);
-                        $('#hEmail').val("");
-                        $('#hRoom').val('');
+                        $('#hEmail').val(""); $('#hRoom').val('');
                     }
                 }
-
-                if (notes) idHtml += `<div class="om-recap-line"><span>Notes</span>${notes}</div>`;
+                if (notes) idHtml += `<div class="om-recap-line"><span>Notes</span><strong>${notes}</strong></div>`;
                 $('#recap-identity').html(idHtml);
 
+                // Paiement
+                let payHtml = '';
+                const pMode = (location === 'room' || isResident) ? 'room_charge' : $('input[name="payment_choice"]:checked').val();
+                let pLabel = "Espèces";
+                if(pMode === 'mobile_money') pLabel = "Mobile Money";
+                else if(pMode === 'card') pLabel = "Carte Bancaire";
+                else if(pMode === 'fedapay') pLabel = "Fedapay";
+                else if(pMode === 'transfer') pLabel = "Virement";
+                else if(pMode === 'check') pLabel = "Chèque";
+                else if(pMode === 'room_charge') pLabel = "Facture de la chambre";
+
+                payHtml += `<div class="om-recap-line"><span>Méthode</span><strong>${pLabel}</strong></div>`;
+                $('#recap-payment').html(payHtml);
+
+                // Items
                 const items = Object.values(orderItems);
                 let itemsHtml = '', total = 0;
                 items.forEach(it => {
@@ -1170,15 +1311,14 @@
                                     <button type="button" class="om-recap-qty-btn m-qplus" data-id="${it.menu_id}">+</button>
                                 </div>
                             </div>
-                            <div class="om-recap-price">${Math.round(sub).toLocaleString('fr-FR')} FCFA</div>
+                            <div class="om-recap-price"><span>${Math.round(sub).toLocaleString('fr-FR')}</span></div>
                         </div>`;
                 });
                 $('#recap-items').html(itemsHtml);
                 $('#recap-total').text(Math.round(total).toLocaleString('fr-FR') + ' FCFA');
 
                 $('#hNotes').val(notes);
-                const paymentMode = (location === 'room' || isResident) ? 'room_charge' : $('input[name="payment_choice"]:checked').val();
-                $('#hPayment').val(paymentMode);
+                $('#hPayment').val(pMode);
                 $('#itemsInput').val(JSON.stringify(items.map(i => ({ menu_id: i.menu_id, quantity: i.quantity }))));
                 $('#totalInput').val(total.toFixed(2));
             }

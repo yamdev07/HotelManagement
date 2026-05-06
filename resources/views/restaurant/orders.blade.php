@@ -14,6 +14,66 @@
             <i class="fas fa-plus"></i> Nouvelle Commande
         </button>
     </div>
+    <style>
+    .qr-menu-card {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border-radius: 16px;
+        padding: 20px 24px;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+    }
+    .qr-menu-card::before {
+        content: ''; position: absolute; top: -50%; right: -10%;
+        width: 300px; height: 300px;
+        background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
+        z-index: 0;
+    }
+    .qr-info { position: relative; z-index: 1; flex: 1; }
+    .qr-info h3 { font-size: 1.15rem; margin-bottom: 8px; font-weight: 700; color: #fff; }
+    .qr-info p { font-size: 0.8rem; color: #94a3b8; margin-bottom: 12px; line-height: 1.4; }
+    .qr-url { 
+        font-family: monospace; font-size: 0.7rem; background: rgba(255,255,255,0.05); 
+        padding: 6px 12px; border-radius: 6px; color: #10b981; width: fit-content;
+        border: 1px solid rgba(16,185,129,0.2);
+    }
+    .badge-qr {
+        background: #10b981; color: #fff; font-size: 0.65rem; padding: 2px 8px;
+        border-radius: 50px; font-weight: 700; margin-left: 8px; vertical-align: middle;
+    }
+    .qr-image-wrap {
+        background: #fff; padding: 10px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        position: relative; z-index: 1;
+    }
+    .qr-image-wrap img { width: 100px; height: 100px; }
+    
+    @media (max-width: 600px) {
+        .qr-menu-card { flex-direction: column; text-align: center; }
+        .qr-url { margin: 0 auto; }
+    }
+    </style>
+
+    <div class="qr-menu-card anim-1">
+        <div class="qr-info">
+            <h3>Menu Digital Restaurant <span class="badge-qr">FLASH ORDER</span></h3>
+            <p>Ce QR Code permet aux clients de scanner et commander directement via leur mobile ou une tablette de table.</p>
+            <div class="qr-url">{{ rtrim(config('app.url'), '/') . '/menu' }}</div>
+        </div>
+        <div class="qr-image-wrap">
+            @php
+                $qrUrl = rtrim(config('app.url'), '/') . '/menu';
+            @endphp
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode($qrUrl) }}" alt="QR Code Menu">
+        </div>
+    </div>
 
     <!-- Statistiques du Jour -->
     <div class="kpi-grid anim-2">

@@ -1025,4 +1025,14 @@ public function rooms(Request $request)
             ], 500);
         }
     }
+    /**
+     * Vue simplifiée du menu pour scan QR Code (Tablette Restaurant)
+     */
+    public function menuQr()
+    {
+        $categories = \App\Models\Category::all();
+        $menus = Menu::with('category')->latest()->get();
+
+        return view('frontend.pages.menu-qr', compact('categories', 'menus'));
+    }
 }
