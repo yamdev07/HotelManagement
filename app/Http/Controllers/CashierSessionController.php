@@ -21,7 +21,7 @@ class CashierSessionController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('checkrole:Receptionist,Admin,Super,Cashier,Servant');
+        $this->middleware('checkrole:Receptionist,Admin,Super,Cashier,Servant,Cuisiner');
     }
 
     /**
@@ -90,9 +90,9 @@ class CashierSessionController extends Controller
                 : [],
             'canStartSession' => $this->canUserStartSession($user, $activeSession),
             'currentTime' => now()->format('d/m/Y H:i:s'),
-            'isReceptionist' => $user->role === 'Receptionist' || $user->role === 'Servant',
+            'isReceptionist' => $user->role === 'Receptionist' || in_array($user->role, ['Servant', 'Cuisiner']),
             'isAdmin' => $user->role === 'Admin' || $user->role === 'Super',
-            'isCashier' => in_array($user->role, ['Receptionist', 'Admin', 'Super', 'Cashier', 'Servant']),
+            'isCashier' => in_array($user->role, ['Receptionist', 'Admin', 'Super', 'Cashier', 'Servant', 'Cuisiner']),
             'allReceptionists' => $allReceptionists,
             'allSessions' => $allSessions,
             'allSessionsCount' => $allSessionsCount,
@@ -311,7 +311,7 @@ class CashierSessionController extends Controller
             return false;
         }
 
-        $allowedRoles = ['Receptionist', 'Admin', 'Super', 'Cashier', 'Servant'];
+        $allowedRoles = ['Receptionist', 'Admin', 'Super', 'Cashier', 'Servant', 'Cuisiner'];
         
         return in_array($user->role, $allowedRoles);
     }

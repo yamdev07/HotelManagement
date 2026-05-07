@@ -48,7 +48,7 @@
                 @endphp
 
                 <!-- TABLEAU DE BORD -->
-                @if (!in_array(auth()->user()->role, ['Customer', 'Servant']))
+                @if (!in_array(auth()->user()->role, ['Customer', 'Servant', 'Cuisiner']))
                 <div class="nav-section">
                     <div class="nav-section-title">Tableau de Bord</div>
 
@@ -121,7 +121,7 @@
                 @endif
 
                 <!-- OPÉRATIONS -->
-                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist', 'Servant']))
+                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist', 'Servant', 'Cuisiner']))
                     <div class="nav-section">
                         <div class="nav-section-title">Opérations</div>
 
@@ -466,6 +466,10 @@
 
                             @case('Servant')
                                 <span class="role-pill role-recep">Serveur</span>
+                            @break
+
+                            @case('Cuisiner')
+                                <span class="role-pill role-house">Cuisinier</span>
                             @break
 
                             @case('Customer')

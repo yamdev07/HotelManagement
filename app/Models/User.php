@@ -137,7 +137,7 @@ class User extends Authenticatable
     public function canStartSession(): bool
     {
         return ! $this->activeCashierSession &&
-            in_array($this->role, ['Receptionist', 'Admin', 'Super', 'Cashier', 'Servant']);
+            in_array($this->role, ['Receptionist', 'Admin', 'Super', 'Cashier', 'Servant', 'Cuisiner']);
     }
 
     /**
@@ -161,7 +161,7 @@ class User extends Authenticatable
      */
     public function isServant(): bool
     {
-        return $this->role === 'Servant';
+        return in_array($this->role, ['Servant', 'Cuisiner']);
     }
 
     /**
@@ -310,6 +310,7 @@ class User extends Authenticatable
             'Cashier' => 'Caissier',
             'Housekeeping' => 'Housekeeping',
             'Servant' => 'Serveur',
+            'Cuisiner' => 'Cuisinier',
             'Customer' => 'Client',
         ];
 
@@ -327,7 +328,8 @@ class User extends Authenticatable
             'Receptionist' => 'fas fa-concierge-bell',
             'Cashier' => 'fas fa-cash-register',
             'Housekeeping' => 'fas fa-broom',
-            'Servant' => 'fas fa-utensils',
+            'Servant'  => 'fas fa-utensils',
+            'Cuisiner' => 'fas fa-fire-burner',
             'Customer' => 'fas fa-user',
         ];
 
@@ -345,7 +347,8 @@ class User extends Authenticatable
             'Receptionist' => 'info',
             'Cashier' => 'success',
             'Housekeeping' => 'warning',
-            'Servant' => 'info',
+            'Servant'  => 'info',
+            'Cuisiner' => 'warning',
             'Customer' => 'secondary',
         ];
 

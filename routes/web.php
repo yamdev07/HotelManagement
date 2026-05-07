@@ -136,7 +136,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super']], function () {
 });
 
 // ==================== ROUTES ADMIN + RÉCEPTIONNISTES (AVEC RESTRICTIONS) ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Servant', 'admin.restrict', 'receptionist.restrict']], function () {
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Servant,Cuisiner', 'admin.restrict', 'receptionist.restrict']], function () {
 
     // ==================== IMAGES ====================
     Route::post('/room/{room}/image/upload', [ImageController::class, 'store'])->name('image.store')
@@ -390,7 +390,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
 
             // ✅ CORRIGÉ : Ajout du middleware checkrole pour les réceptionnistes
             Route::delete('/', [CashierSessionController::class, 'destroy'])->name('sessions.destroy')
-                ->middleware('checkrole:Super,Admin,Receptionist,Servant');
+                ->middleware('checkrole:Super,Admin,Receptionist,Servant,Cuisiner');
 
             Route::get('/report', [CashierSessionController::class, 'report'])->name('sessions.report');
         });
@@ -412,14 +412,14 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
     });
 
 // ==================== ROUTES POUR TOUS LES UTILISATEURS AUTHENTIFIÉS ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant']], function () {
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant,Cuisiner']], function () {
 
     Route::get('/home', function () {
         $user = auth()->user();
         if ($user->role === 'Customer') {
             return redirect()->route('transaction.myReservations');
         }
-        if ($user->role === 'Servant') {
+        if ($user->role === 'Servant' || $user->role === 'Cuisiner') {
             return redirect()->route('cashier.dashboard');
         }
         return redirect()->route('dashboard.index');
@@ -498,7 +498,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
         Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
 
         // Gestion des menus et catégories seulement pour admins et servants
-        Route::middleware('checkrole:Super,Admin,Receptionist,Servant')->group(function () {
+        Route::middleware('checkrole:Super,Admin,Receptionist,Servant,Cuisiner')->group(function () {
             Route::get('/create', [RestaurantController::class, 'create'])->name('create');
             Route::post('/store', [RestaurantController::class, 'store'])->name('store');
             Route::get('/menus/{id}/edit', [RestaurantController::class, 'edit'])->name('menus.edit');
@@ -520,7 +520,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
 });
 
 // ==================== DISPONIBILITÉ DES CHAMBRES ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant']], function () {
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant,Cuisiner']], function () {
     Route::prefix('availability')->name('availability.')->group(function () {
         // Routes sans paramètres d'abord
         Route::get('/dashboard', [AvailabilityController::class, 'dashboard'])->name('dashboard');

@@ -245,7 +245,7 @@ class RestaurantController extends Controller
                 $transaction = Transaction::find($transactionId);
                 if ($transaction && $transaction->customer) {
                     // Bypass sécurité email pour les admins/staff
-                    $isAdmin = auth()->check() && in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist', 'Servant', 'Cashier']);
+                    $isAdmin = auth()->check() && in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist', 'Servant', 'Cuisiner', 'Cashier']);
                     $inputEmail = $validated['email'] ?? null;
                     $realEmail = $transaction->customer->email ?? null;
 
