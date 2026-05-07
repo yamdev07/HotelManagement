@@ -36,7 +36,16 @@ class RestaurantOrder extends Model
 
     public function getCustomerNameAttribute()
     {
-        return $this->customer ? $this->customer->name : 'Client non spécifié';
+        // Tenter d'extraire le nom depuis les notes en priorité (marker 👤 Client:)
+        if (preg_match('/👤\s*Client\s*:\s*([^\|\n\r]+)/u', $this->notes, $matches)) {
+            return trim($matches[1]);
+        }
+
+        if ($this->customer) {
+            return $this->customer->name;
+        }
+
+        return null;
     }
 
     public function getCustomerPhoneAttribute()

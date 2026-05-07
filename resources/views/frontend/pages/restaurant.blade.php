@@ -522,7 +522,7 @@
         </div>
     </section>
 
-    @include('frontend.pages.partials.restaurant_dishes')
+    @include('frontend.pages.partials.restaurant_dishes', ['showOrderControls' => false])
 
 
 

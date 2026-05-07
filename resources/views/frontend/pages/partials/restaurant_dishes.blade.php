@@ -60,6 +60,7 @@
                                     <span class="cat-badge">
                                         {{ $menu->category?->name ?? 'Sans catégorie' }}
                                     </span>
+                                    @if($showOrderControls ?? true)
                                     <div class="v-qty-controls" data-id="{{ $menu->id }}">
                                         <button class="btn-order add-to-order" id="v-addbtn-{{ $menu->id }}"
                                             data-menu-id="{{ $menu->id }}" data-menu-name="{{ $menu->name }}"
@@ -75,6 +76,7 @@
                                                 data-id="{{ $menu->id }}">+</button>
                                         </div>
                                     </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -96,6 +98,7 @@
     <!-- ═══════════════════════════════════════════
              OFFCANVAS COMMANDE — LUXURY SIDE PANEL
         ════════════════════════════════════════════ -->
+    @if($showOrderControls ?? true)
     <div class="offcanvas offcanvas-end v-offcanvas" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" data-bs-backdrop="static">
         <div class="v-offcanvas-content">
             {{-- En-tête --}}
@@ -143,8 +146,12 @@
 
                         {{-- ── ÉTAPE 1 : Informations ── --}}
                         <div class="om-panel active" id="panel-1">
-                            <div class="om-panel-title">
-                                <i class="fas fa-user-circle me-1 om-panel-icon"></i> Localisation & Identification
+                            <div class="om-field mb-3">
+                                <label class="om-label" for="f-customer-name">Votre Nom <span class="text-white-50">(Optionnel)</span></label>
+                                <div class="om-input-icon">
+                                    <span class="om-icon"><i class="fas fa-user"></i></span>
+                                    <input type="text" class="om-input has-icon" id="f-customer-name" placeholder="Ex: Jean Dupont">
+                                </div>
                             </div>
                             <p class="om-panel-desc mb-3">Où souhaitez-vous être servi ?</p>
                             
@@ -358,6 +365,7 @@
             </div>{{-- /v-offcanvas-content --}}
         </div>
     </div>
+    @endif
 
     {{-- Modal Détail Plat --}}
     <div class="modal fade" id="dishDetailModal" tabindex="-1" aria-hidden="true" style="z-index: 9999;">
@@ -367,7 +375,8 @@
                     <div class="row g-0">
                         <div class="col-lg-7" id="modalDishImgSide"> {{-- Plus de place pour l'image (7/12) --}}
                             <div id="modalDishImgWrap" class="position-relative w-100 h-100" style="min-height: 350px; background: #f8f9fa;">
-                                <img id="modalDishImg" src="" alt="" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover;">
+                                <img id="modalDishImg" src="" alt="" class="position-absolute top-0 start-0 w-100 h-100" style="object-fit: cover;"
+                                     onerror="this.classList.add('d-none'); document.getElementById('modalDishNoImg').classList.remove('d-none');">
                                 <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="pointer-events: none;">
                                     <i id="modalDishNoImg" class="fas fa-utensils fa-5x text-muted d-none"></i>
                                 </div>
@@ -402,11 +411,13 @@
         </div>
     </div>
 
+    @if($showOrderControls ?? true)
     {{-- Panier flottant --}}
     <button id="floating-cart">
         <i class="fas fa-shopping-basket fa-lg"></i>
         <span id="cart-badge">0</span>
     </button>
+    @endif
 
 
 @push('styles')
@@ -1253,13 +1264,17 @@
                 const notes = $('#f-notes').val().trim();
                 let idHtml = '';
 
+                const custName = $('#f-customer-name').val().trim();
+
                 // Identification
                 if (location === 'room') {
                     const room = $('#f-room').val().trim();
                     const email = $('#f-email').val().trim();
                     idHtml += `<div class="om-recap-line"><span>Service</span><strong>Room Service</strong></div>`;
                     idHtml += `<div class="om-recap-line"><span>Chambre</span><strong>${room}</strong></div>`;
-                    $('#hCustomerName').val("Room Service - " + room);
+                    if (custName) idHtml += `<div class="om-recap-line"><span>Nom</span><strong>${custName}</strong></div>`;
+                    
+                    $('#hCustomerName').val(custName || ("Room Service - " + room));
                     $('#hEmail').val(email); 
                     $('#hRoom').val(room);
                 } else {
@@ -1269,11 +1284,15 @@
                         const roomAlt = $('#f-room-alt').val().trim();
                         const emailAlt = $('#f-email-alt').val().trim();
                         idHtml += `<div class="om-recap-line"><span>Client</span><strong>Résident (Ch. ${roomAlt})</strong></div>`;
-                        $('#hCustomerName').val("Table " + table + " (Resident " + roomAlt + ")");
+                        if (custName) idHtml += `<div class="om-recap-line"><span>Nom</span><strong>${custName}</strong></div>`;
+                        
+                        $('#hCustomerName').val(custName || ("Table " + table + " (Resident " + roomAlt + ")"));
                         $('#hEmail').val(emailAlt); $('#hRoom').val(roomAlt);
                     } else {
                         idHtml += `<div class="om-recap-line"><span>Client</span><strong>Extérieur</strong></div>`;
-                        $('#hCustomerName').val("Client Table " + table);
+                        if (custName) idHtml += `<div class="om-recap-line"><span>Nom</span><strong>${custName}</strong></div>`;
+                        
+                        $('#hCustomerName').val(custName || ("Client Table " + table));
                         $('#hEmail').val(""); $('#hRoom').val('');
                     }
                 }
@@ -1377,11 +1396,13 @@
                 $('#modalDishDesc').text(description || '...');
                 $('#modalDishPrice').text(price);
                 $('#modalDishCategory').text(category || 'Plat');
+                // Toujours réinitialiser l'état avant d'affecter la nouvelle image
+                $('#modalDishNoImg').addClass('d-none');
                 if (image) {
-                    $('#modalDishImg').attr('src', image).removeClass('d-none');
-                    $('#modalDishNoImg').addClass('d-none');
+                    $('#modalDishImg').removeClass('d-none').attr('src', image);
+                    // onerror sur le tag img gère le cas 404
                 } else {
-                    $('#modalDishImg').addClass('d-none');
+                    $('#modalDishImg').addClass('d-none').attr('src', '');
                     $('#modalDishNoImg').removeClass('d-none');
                 }
                 new bootstrap.Modal(document.getElementById('dishDetailModal')).show();

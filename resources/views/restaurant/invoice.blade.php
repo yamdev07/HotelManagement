@@ -143,7 +143,7 @@
             <table>
                 <tr>
                     <td>Nom</td>
-                    <td><strong>{{ $order->customer_name ?? 'Client' }}</strong></td>
+                    <td><strong id="customer-name-display">{{ $order->customer_name ?? 'Client' }}</strong></td>
                 </tr>
                 @if($order->room_number)
                 <tr>
@@ -234,10 +234,40 @@
 
     <script>
         window.onload = function () {
-            // Délai court pour s'assurer que la page est entièrement rendue
-            setTimeout(function () {
-                document.execCommand('print', false, null) || print();
-            }, 300);
+            // Demander le nom si vide ou générique
+            let currentName = "{{ $order->customer_name }}";
+            let namePrompted = false;
+
+            if (!currentName || currentName === "" || currentName.toLowerCase().includes('client table') || currentName.toLowerCase().includes('room service')) {
+                let name = prompt("Veuillez saisir le nom du client pour cette facture (Laisser vide pour ignorer) :", "");
+                if (name && name.trim() !== "") {
+                    document.getElementById('customer-name-display').innerText = name;
+                    namePrompted = true;
+                    
+                    // Sauvegarder dans la commande via API
+                    fetch("{{ route('restaurant.orders.update-customer-name', $order->id) }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({ customer_name: name })
+                    }).then(() => {
+                         // Déclencher l'impression après la sauvegarde (ou presque)
+                         setTimeout(triggerPrint, 300);
+                    });
+                }
+            }
+
+            if (!namePrompted) {
+                triggerPrint();
+            }
+
+            function triggerPrint() {
+                setTimeout(function () {
+                    document.execCommand('print', false, null) || print();
+                }, 300);
+            }
         };
     </script>
 

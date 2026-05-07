@@ -246,8 +246,10 @@ class RestaurantController extends Controller
                 if ($transaction && $transaction->customer) {
                     // Bypass sécurité email pour les admins/staff
                     $isAdmin = auth()->check() && in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist', 'Servant', 'Cashier']);
-                    
-                    if (!$isAdmin && (empty($realEmail) || strtolower($realEmail) !== strtolower($inputEmail))) {
+                    $inputEmail = $validated['email'] ?? null;
+                    $realEmail = $transaction->customer->email ?? null;
+
+                    if (!$isAdmin && (!empty($inputEmail) && strtolower($realEmail) !== strtolower($inputEmail))) {
                         DB::rollBack();
                         return response()->json([
                             'success' => false,
@@ -278,10 +280,13 @@ class RestaurantController extends Controller
                  $notes = $notes ? $roomInfo . " | " . $notes : $roomInfo;
             }
 
-            // Si toujours pas de client (client extérieur de passage), on garde son nom dans les notes
-            if (!$customerId && !empty($validated['customer_name'])) {
-                $guestInfo = "👤 Client Extérieur: " . $validated['customer_name'] . (!empty($validated['phone']) ? ' (' . $validated['phone'] . ')' : '');
-                $notes = $notes ? $notes . "\n" . $guestInfo : $guestInfo;
+            // Enregistrer le nom spécifique s'il est fourni (même pour les clients résidents)
+            if (!empty($validated['customer_name'])) {
+                $guestInfo = "👤 Client: " . $validated['customer_name'];
+                $notes = $notes ? $guestInfo . " | " . $notes : $guestInfo;
+                if (!empty($validated['phone']) && empty($customerId)) {
+                    $notes .= " (Tel: " . $validated['phone'] . ")";
+                }
             }
 
             $items = json_decode($validated['items'], true);
@@ -636,6 +641,35 @@ class RestaurantController extends Controller
             'success' => true,
             'is_available' => $menu->is_available
         ]);
+    }
+
+    public function updateCustomerName(Request $request, $id)
+    {
+        $order = RestaurantOrder::findOrFail($id);
+        $name = trim($request->input('customer_name', ''));
+
+        if ($name) {
+            $marker = "👤 Client: " . $name;
+            $notes = $order->notes;
+
+            // Si le marqueur existe déjà, on le remplace
+            if (preg_match('/👤\s*Client\s*:\s*([^\|\n\r]+)/u', $notes)) {
+                $notes = preg_replace('/👤\s*Client\s*:\s*([^\|\n\r]+)/u', $marker, $notes);
+            } else {
+                // Sinon on l'ajoute au début
+                $notes = $marker . ($notes ? " | " . $notes : "");
+            }
+
+            $order->notes = $notes;
+            $order->save();
+
+            return response()->json([
+                'success' => true,
+                'customer_name' => $name
+            ]);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Nom vide']);
     }
 }
 
