@@ -49,13 +49,25 @@
         background: #10b981; color: #fff; font-size: 0.65rem; padding: 2px 8px;
         border-radius: 50px; font-weight: 700; margin-left: 8px; vertical-align: middle;
     }
+    .qr-download-container {
+        display: flex; flex-direction: column; align-items: center; gap: 15px;
+    }
     .qr-image-wrap {
-        background: #fff; padding: 10px; border-radius: 12px;
+        background: #fff; padding: 15px; border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         position: relative; z-index: 1;
     }
     .qr-image-wrap img { width: 100px; height: 100px; }
+    .btn-download-qr {
+        background: #10b981; color: #fff; border: none;
+        padding: 12px 24px; border-radius: 8px; font-size: 0.9rem;
+        font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
+        transition: background 0.2s, transform 0.1s; white-space: nowrap;
+        z-index: 10; position: relative; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+    .btn-download-qr:hover { background: #059669; transform: translateY(-1px); }
+    .btn-download-qr:active { transform: translateY(0); }
     
     @media (max-width: 600px) {
         .qr-menu-card { flex-direction: column; text-align: center; }
@@ -69,11 +81,16 @@
             <p>Ce QR Code permet aux clients de scanner et commander directement via leur mobile ou une tablette de table.</p>
             <div class="qr-url">{{ rtrim(config('app.url'), '/') . '/menu' }}</div>
         </div>
-        <div class="qr-image-wrap">
-            @php
-                $qrUrl = rtrim(config('app.url'), '/') . '/menu';
-            @endphp
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode($qrUrl) }}" alt="QR Code Menu">
+        <div class="qr-download-container">
+            <div class="qr-image-wrap">
+                @php
+                    $qrUrl = rtrim(config('app.url'), '/') . '/menu';
+                @endphp
+                <img id="qrCodeImage" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode($qrUrl) }}" alt="QR Code Menu">
+            </div>
+            <button class="btn-download-qr" onclick="downloadQRCode()">
+                <i class="fas fa-download"></i> Télécharger
+            </button>
         </div>
     </div>
 
@@ -351,6 +368,93 @@
 
 @push('scripts')
 <script>
+// ── Télécharger le QR Code avec logo et nom ──
+function downloadQRCode() {
+    var qrImg = document.getElementById('qrCodeImage');
+    if (!qrImg) return;
+
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+
+    // Dimensions de l'image finale
+    var width = 400;
+    var height = 500;
+    canvas.width = width;
+    canvas.height = height;
+
+    // Fond dégradé vert
+    var gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#0F2918');
+    gradient.addColorStop(1, '#1A472A');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Bordure dorée
+    ctx.strokeStyle = '#C9A961';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(10, 10, width - 20, height - 20);
+
+    // Charger le logo
+    var logoImg = new Image();
+    logoImg.crossOrigin = 'anonymous';
+    logoImg.src = '{{ asset('img/logo_cactus.png') }}';
+
+    logoImg.onload = function() {
+        // Dessiner le logo
+        var logoWidth = 80;
+        var logoHeight = 80;
+        var logoX = (width - logoWidth) / 2;
+        var logoY = 30;
+        ctx.drawImage(logoImg, logoX, logoY, logoWidth, logoHeight);
+
+        // Nom de l'hôtel
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 24px Playfair Display, serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('LE CACTUS HOTEL', width / 2, logoY + logoHeight + 35);
+
+        // Sous-titre
+        ctx.fillStyle = '#C9A961';
+        ctx.font = 'bold 16px sans-serif';
+        ctx.letterSpacing = '2px';
+        ctx.fillText('RESTAURANT', width / 2, logoY + logoHeight + 60);
+
+        // Charger et dessiner le QR code
+        var qrCodeImg = new Image();
+        qrCodeImg.crossOrigin = 'anonymous';
+        qrCodeImg.src = qrImg.src;
+
+        qrCodeImg.onload = function() {
+            var qrSize = 200;
+            var qrX = (width - qrSize) / 2;
+            var qrY = logoY + logoHeight + 80;
+
+            // Fond blanc pour le QR code
+            ctx.fillStyle = '#FFFFFF';
+            ctx.fillRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20);
+
+            // Dessiner le QR code
+            ctx.drawImage(qrCodeImg, qrX, qrY, qrSize, qrSize);
+
+            // Télécharger l'image
+            var link = document.createElement('a');
+            link.download = 'qr-menu-restaurant.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        };
+
+        qrCodeImg.onerror = function() {
+            // Fallback: ouvrir dans un nouvel onglet
+            window.open(qrImg.src, '_blank');
+        };
+    };
+
+    logoImg.onerror = function() {
+        // Fallback: ouvrir dans un nouvel onglet
+        window.open(qrImg.src, '_blank');
+    };
+}
+
 // ── Bouton Imprimer en Vanilla JS pur (indépendant de jQuery) ──
 document.addEventListener('DOMContentLoaded', function () {
     var printBtn = document.getElementById('printOrder');
