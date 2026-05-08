@@ -51,9 +51,9 @@
     <a href="{{ route('restaurant.orders') }}"
        class="db-tab-link {{ (request()->routeIs('restaurant.orders') || request()->is('restaurant/orders*')) ? 'active' : '' }}">
         <i class="fas fa-receipt"></i> Commandes
-        @php $pending = \App\Models\RestaurantOrder::where('status','pending')->count(); @endphp
-        @if($pending > 0)
-            <span class="badge-pending">{{ $pending }}</span>
+        @php $pendingCount = \App\Models\RestaurantOrder::whereIn('status', ['pending', 'validated', 'preparing'])->count(); @endphp
+        @if($pendingCount > 0)
+            <span class="badge-pending">{{ $pendingCount }}</span>
         @endif
     </a>
 

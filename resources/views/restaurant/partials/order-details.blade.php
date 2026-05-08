@@ -49,19 +49,23 @@
                             <th>Statut:</th>
                             <td>
                                 @php
-                                    $statusColors = [
-                                        'pending' => 'warning',
-                                        'preparing' => 'info',
-                                        'delivered' => 'success',
-                                        'paid' => 'primary',
-                                        'cancelled' => 'danger'
-                                    ];
                                     $statusLabels = [
                                         'pending' => 'En attente',
+                                        'validated' => 'Validée',
                                         'preparing' => 'En préparation',
+                                        'ready' => 'Prêt',
                                         'delivered' => 'Livré',
                                         'paid' => 'Payé',
                                         'cancelled' => 'Annulé'
+                                    ];
+                                    $statusColors = [
+                                        'pending' => 'warning',
+                                        'validated' => 'secondary',
+                                        'preparing' => 'info',
+                                        'ready' => 'success',
+                                        'delivered' => 'primary',
+                                        'paid' => 'dark',
+                                        'cancelled' => 'danger'
                                     ];
                                 @endphp
                                 <span class="badge bg-{{ $statusColors[$order->status] ?? 'secondary' }}">

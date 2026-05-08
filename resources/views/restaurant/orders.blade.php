@@ -10,9 +10,11 @@
             <h1 class="db-title-h1">Gestion des Commandes</h1>
             <p class="text-muted small">Suivez et traitez les commandes des clients en temps réel</p>
         </div>
+        @if(!auth()->user()->isCuisiner())
         <button class="btn-db-primary" data-bs-toggle="modal" data-bs-target="#newOrderModal">
             <i class="fas fa-plus"></i> Nouvelle Commande
         </button>
+        @endif
     </div>
     <style>
     .qr-menu-card {
@@ -97,15 +99,23 @@
             <div class="kpi-icon" style="background: #fff1f2; color: #e11d48;"><i class="fas fa-fire"></i></div>
             <div class="kpi-data">
                 <div class="kpi-label">EN ATTENTE / PRÉP.</div>
-                <div class="kpi-value text-danger">{{ ($pendingOrders ?? 0) + ($preparingOrders ?? 0) }}</div>
+                <div class="kpi-value text-danger">{{ ($pendingOrders ?? 0) + ($validatedOrders ?? 0) + ($preparingOrders ?? 0) }}</div>
             </div>
         </div>
 
         <div class="kpi-card">
-            <div class="kpi-icon" style="background: #f0fdf4; color: #10b981;"><i class="fas fa-check-double"></i></div>
+            <div class="kpi-icon" style="background: #f0fdf4; color: #10b981;"><i class="fas fa-hat-chef"></i></div>
+            <div class="kpi-data">
+                <div class="kpi-label">PRÊTES</div>
+                <div class="kpi-value text-success">{{ $readyOrders ?? 0 }}</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background: #fdf4ff; color: #a855f7;"><i class="fas fa-check-double"></i></div>
             <div class="kpi-data">
                 <div class="kpi-label">LIVRÉES / PAYÉES</div>
-                <div class="kpi-value text-success">{{ ($deliveredOrders ?? 0) + ($paidOrders ?? 0) }}</div>
+                <div class="kpi-value text-purple">{{ ($deliveredOrders ?? 0) + ($paidOrders ?? 0) }}</div>
             </div>
         </div>
     </div>
@@ -116,7 +126,9 @@
             <select class="db-input" id="statusFilter" style="width: 200px;">
                 <option value="">Tous les statuts</option>
                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>En attente</option>
+                <option value="validated" {{ request('status') == 'validated' ? 'selected' : '' }}>Validée</option>
                 <option value="preparing" {{ request('status') == 'preparing' ? 'selected' : '' }}>En préparation</option>
+                <option value="ready" {{ request('status') == 'ready' ? 'selected' : '' }}>Prêt</option>
                 <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Livré</option>
                 <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Payé</option>
                 <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Annulé</option>
@@ -180,19 +192,23 @@
                         </td>
                         <td>
                             @php
-                                $statusColors = [
-                                    'pending' => 'bg-warning',
-                                    'preparing' => 'bg-info',
-                                    'delivered' => 'bg-success',
-                                    'paid' => 'bg-primary',
-                                    'cancelled' => 'bg-danger'
-                                ];
                                 $statusLabels = [
                                     'pending' => 'En attente',
+                                    'validated' => 'Validée',
                                     'preparing' => 'Préparation',
+                                    'ready' => 'Prêt',
                                     'delivered' => 'Livré',
                                     'paid' => 'Payé',
                                     'cancelled' => 'Annulé'
+                                ];
+                                $statusColors = [
+                                    'pending' => 'bg-warning',
+                                    'validated' => 'bg-dark',
+                                    'preparing' => 'bg-info',
+                                    'ready' => 'bg-success',
+                                    'delivered' => 'bg-primary',
+                                    'paid' => 'bg-secondary',
+                                    'cancelled' => 'bg-danger'
                                 ];
                             @endphp
                             <span class="badge {{ $statusColors[$order->status] ?? 'bg-secondary' }} px-2 py-1">
@@ -216,8 +232,18 @@
                                     <i class="fas fa-eye"></i>
                                 </button>
 
-                                {{-- Préparer (pending → preparing) --}}
-                                @if($order->status == 'pending')
+                                {{-- Valider (pending → validated) par le Servant ou Admin --}}
+                                @if($order->status == 'pending' && (auth()->user()->isSuper() || auth()->user()->role === 'Servant'))
+                                <button class="btn btn-sm btn-dark text-white p-2 change-status"
+                                        title="Valider la commande"
+                                        data-order-id="{{ $order->id }}"
+                                        data-status="validated">
+                                    <i class="fas fa-check-double"></i>
+                                </button>
+                                @endif
+
+                                {{-- Préparer (validated → preparing) --}}
+                                @if($order->status == 'validated' && (auth()->user()->isSuper() || auth()->user()->isCuisiner()))
                                 <button class="btn btn-sm btn-info text-white p-2 change-status"
                                         title="Lancer la préparation"
                                         data-order-id="{{ $order->id }}"
@@ -226,9 +252,19 @@
                                 </button>
                                 @endif
 
-                                {{-- Livrer (preparing → delivered) --}}
-                                @if($order->status == 'preparing')
+                                {{-- Prêt (preparing → ready) --}}
+                                @if($order->status == 'preparing' && (auth()->user()->isSuper() || auth()->user()->isCuisiner()))
                                 <button class="btn btn-sm btn-success text-white p-2 change-status"
+                                        title="Marquer comme prêt"
+                                        data-order-id="{{ $order->id }}"
+                                        data-status="ready">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                @endif
+
+                                {{-- Livrer (ready → delivered ou preparing → delivered pour compatibilité) --}}
+                                @if(in_array($order->status, ['preparing', 'ready']) && (auth()->user()->isSuper() || auth()->user()->role === 'Servant'))
+                                <button class="btn btn-sm btn-primary text-white p-2 change-status"
                                         title="Marquer comme livré"
                                         data-order-id="{{ $order->id }}"
                                         data-status="delivered">
@@ -236,29 +272,29 @@
                                 </button>
                                 @endif
 
-                                {{-- Payer (si paiement direct) --}}
-                                @if(in_array($order->status, ['delivered', 'pending']) && $order->payment_method !== 'room_charge')
-                                <button class="btn btn-sm btn-primary text-white p-2 change-status"
-                                        title="Encaisser la commande"
+                                {{-- Payer --}}
+                                @if(in_array($order->status, ['delivered', 'pending', 'ready']) && $order->payment_method !== 'room_charge' && (auth()->user()->isSuper() || auth()->user()->role === 'Servant'))
+                                <button class="btn btn-sm btn-dark text-white p-2 change-status"
+                                        title="Encaisser"
                                         data-order-id="{{ $order->id }}"
                                         data-status="paid">
                                     <i class="fas fa-cash-register"></i>
                                 </button>
                                 @endif
-                                
-                                @if($order->payment_method === 'room_charge')
-                                <span class="badge bg-light text-primary border border-primary border-opacity-25 d-flex align-items-center" title="Sur facture chambre">
-                                    <i class="fas fa-hotel"></i>
-                                </span>
-                                @endif
 
-                                {{-- Imprimer la facture --}}
+                                {{-- Impression Facture --}}
                                 <a href="{{ route('restaurant.orders.invoice', $order->id) }}"
                                    target="_blank"
                                    class="btn btn-sm btn-outline-secondary p-2"
                                    title="Imprimer la facture">
                                     <i class="fas fa-print"></i>
                                 </a>
+
+                                @if($order->payment_method === 'room_charge')
+                                <span class="badge bg-light text-primary border border-primary border-opacity-25 d-flex align-items-center" title="Sur facture chambre">
+                                    <i class="fas fa-hotel"></i>
+                                </span>
+                                @endif
                             </div>
                         </td>
                     </tr>

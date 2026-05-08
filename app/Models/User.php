@@ -161,7 +161,12 @@ class User extends Authenticatable
      */
     public function isServant(): bool
     {
-        return in_array($this->role, ['Servant', 'Cuisiner']);
+        return $this->role === 'Servant';
+    }
+
+    public function isCuisiner(): bool
+    {
+        return $this->role === 'Cuisiner';
     }
 
     /**

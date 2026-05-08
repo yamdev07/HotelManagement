@@ -172,7 +172,9 @@ class RestaurantController extends Controller
 
         // Nombres de commandes par statut (seulement du jour ou en cours)
         $pendingOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'pending')->count();
+        $validatedOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'validated')->count();
         $preparingOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'preparing')->count();
+        $readyOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'ready')->count();
         $deliveredOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'delivered')->count();
         $paidOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'paid')->count();
         $cancelledOrders = RestaurantOrder::whereDate('created_at', today())->where('status', 'cancelled')->count();
@@ -185,7 +187,7 @@ class RestaurantController extends Controller
         return view('restaurant.orders', compact(
             'orders', 'customers', 'menus',
             'todayRevenue', 'todayRoomRevenue', 'todayNoRoomRevenue',
-            'pendingOrders', 'preparingOrders', 'deliveredOrders', 'paidOrders', 'cancelledOrders',
+            'pendingOrders', 'validatedOrders', 'preparingOrders', 'readyOrders', 'deliveredOrders', 'paidOrders', 'cancelledOrders',
             'todayOrdersTotal', 'todayOrdersRoom', 'todayOrdersNoRoom'
         ));
     }
@@ -353,10 +355,18 @@ class RestaurantController extends Controller
         $order = RestaurantOrder::findOrFail($id);
 
         $request->validate([
-            'status' => 'required|in:pending,preparing,delivered,paid,cancelled',
+            'status' => 'required|in:pending,validated,preparing,ready,delivered,paid,cancelled',
         ]);
 
         $newStatus = $request->status;
+
+        // Restriction : le cuisinier ne peut pas valider une commande
+        if ($newStatus === 'validated' && auth()->user()->isCuisiner()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'L\'action de validation est réservée au serveur.'
+            ], 403);
+        }
 
         // Règle : les commandes "sur chambre" ne peuvent pas être manuellement marquées "payées"
         if ($newStatus === 'paid' && $order->payment_method === 'room_charge') {
