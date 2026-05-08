@@ -12,11 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('menus', function (Blueprint $table) {
-            // $table->dropForeign(['category_id']); // Déjà supprimé lors de la tentative précédente
-            $table->foreignId('category_id')
-                ->nullable() // Ajout de nullable pour éviter l'erreur de conversion
-                ->change()
-                ->constrained()
+            $table->dropForeign(['category_id']);
+            $table->foreign('category_id')
+                ->references('id')
+                ->on('categories')
                 ->onDelete('cascade');
         });
     }

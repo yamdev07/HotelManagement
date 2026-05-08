@@ -25,7 +25,7 @@ class AuthController extends Controller
                 return redirect()->route('transaction.myReservations')->with('success', 'Bienvenue ' . auth()->user()->name);
             }
 
-            return redirect()->route('dashboard.index')->with('success', 'Welcome ' . auth()->user()->name);
+            return redirect('/home')->with('success', 'Welcome ' . auth()->user()->name);
         }
 
         return redirect('login')->with('failed', 'Incorrect email / password');
