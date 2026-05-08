@@ -1,244 +1,302 @@
-# Hotel Management System
+<div align="center">
 
-A production-oriented **Hotel Management Software** built with **Laravel** to manage real hotel operations: reservations, check-in/check-out, customers, rooms, and payments.
+# 🏨 Hotel Management System
 
-This application simulates the workflow of a real hotel front-desk and internal staff back-office.
+**A production-grade hotel management platform built with Laravel.**
+Reservations, check-in/out, payments, housekeeping, and a public website — all in one system.
 
-It contains:
-- a public hotel website for customers
-- a secured internal management dashboard for hotel staff
+[![Laravel](https://img.shields.io/badge/Laravel-10.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.1+-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1?style=for-the-badge&logo=mysql&logoColor=white)](https://mysql.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docker.com)
+[![License](https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge)](LICENSE)
+[![Lint](https://github.com/yamdev07/HotelManagement/actions/workflows/ci.yml/badge.svg)](https://github.com/yamdev07/HotelManagement/actions/workflows/ci.yml)
+[![Tests](https://github.com/yamdev07/HotelManagement/actions/workflows/tests.yml/badge.svg)](https://github.com/yamdev07/HotelManagement/actions/workflows/tests.yml)
 
-![Lint](https://github.com/yamdev07/HotelManagement/actions/workflows/ci.yml/badge.svg)
-![Tests](https://github.com/yamdev07/HotelManagement/actions/workflows/tests.yml/badge.svg)
----
+[🌐 Live Demo — lecactushotel.bj](https://lecactushotel.bj) · [🐛 Report a Bug](https://github.com/yamdev07/HotelManagement/issues) · [💡 Request Feature](https://github.com/yamdev07/HotelManagement/issues)
 
-## Business Workflow
-
-The system models a real hotel process:
-
-1. A customer searches a room
-2. Staff creates a reservation
-3. Customer checks-in
-4. Stay is tracked
-5. Payment is recorded
-6. Transaction history is stored
-7. Customer checks-out and room becomes available again
-
-This workflow ensures room availability consistency and operational tracking.
+</div>
 
 ---
 
-## Main Modules
+## 📋 Table of Contents
 
-### Authentication & Access
-- Secure login system
-- Staff access control
-- Session protection
-
-### Room Management
-- Room listing
-- Room categories
-- Room status (available / reserved / occupied / maintenance)
-- Pricing management
-
-### Reservation Management
-- Reservation creation
-- Reservation update & cancellation
-- Date-based availability checking
-- Reservation history
-
-### Customer Management
-- Customer registration
-- Customer stay history
-- Customer ↔ reservation linking
-
-### Stay Operations
-- Check-in
-- Check-out
-- Automatic room status updates
-
-### Payments & Transactions
-- Record payments
-- Track unpaid balances
-- Transaction history
-
-### Public Website
-- Hotel homepage
-- Rooms & suites pages
-- Services page
-- Contact page
-- Responsive layout
+- [About](#-about)
+- [Business Workflow](#-business-workflow)
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Architecture](#-architecture)
+- [Getting Started](#-getting-started)
+- [Production Deployment](#-production-deployment)
+- [Roadmap](#-roadmap)
+- [Contributing](#-contributing)
+- [License](#-license)
+- [Author](#-author)
 
 ---
 
-## Technical Stack
+## 🚀 About
+
+**Hotel Management System** is a full-featured, production-oriented platform currently live and used by **Cactus Hotel** ([lecactushotel.bj](https://lecactushotel.bj)).
+
+It covers both the **public-facing hotel website** for customers and a **secured back-office dashboard** for hotel staff — handling the entire operational lifecycle from room search to checkout.
+
+> ✅ Currently running in production. Not a demo project.
+
+---
+
+## 🔄 Business Workflow
+
+The system models a real hotel front-desk process end-to-end:
+
+```
+Customer searches room
+        ↓
+Staff creates reservation
+        ↓
+Customer checks in
+        ↓
+Stay is tracked (housekeeping, restaurant, extras)
+        ↓
+Payment is recorded
+        ↓
+Customer checks out → Room status resets automatically
+```
+
+This workflow guarantees **room availability consistency** and full **operational traceability**.
+
+---
+
+## ✨ Features
+
+### 🔐 Authentication & Access Control
+- Secure login system with session protection
+- Role-based staff access (Admin, Receptionist, Housekeeping)
+- CSRF protection and input validation
+
+### 🛏️ Room Management
+- Room listing with categories and photo gallery
+- Room status tracking: `available` · `reserved` · `occupied` · `maintenance`
+- Dynamic pricing management
+
+### 📅 Reservation Management
+- Reservation creation, update, and cancellation
+- Date-based availability checking with conflict prevention
+- Full reservation history per customer
+
+### 👤 Customer Management
+- Customer registration and profile management
+- Stay history and customer ↔ reservation linking
+- Debt tracking and payment follow-up
+
+### 🏠 Stay Operations
+- Check-in and check-out workflows
+- Automatic room status updates on each operation
+- Housekeeping module for room readiness tracking
+
+### 💳 Payments & Transactions
+- Payment recording per stay
+- Unpaid balance tracking
+- Full transaction history with invoice generation
+
+### 🌐 Public Hotel Website
+- Hotel homepage, rooms & suites pages
+- Services and contact pages
+- Fully responsive layout (mobile-first)
+
+---
+
+## 🧰 Tech Stack
 
 | Layer | Technology |
-|------|------|
-| Backend | Laravel (PHP) |
-| Frontend | Blade + Bootstrap 5 |
-| Database | MySQL |
-| Build Tool | Vite |
-| Authentication | Laravel Auth |
-| Server | Apache / Nginx |
+|---|---|
+| **Backend** | Laravel 10 (PHP 8.1+) |
+| **Frontend** | Blade · Bootstrap 5 · JavaScript · Vite |
+| **Database** | MySQL 8.0 |
+| **Authentication** | Laravel Auth |
+| **Containerization** | Docker + docker-compose |
+| **CI/CD** | GitHub Actions (Lint + Tests) |
+| **Server** | Nginx / Apache |
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
-The application follows a classical MVC pattern:
+The application follows a strict **MVC pattern**:
 
-- Models → database entities (rooms, reservations, customers, payments)
-- Controllers → business operations
-- Views → staff dashboard & public website
+```
+app/
+├── Models/          → Database entities (Room, Reservation, Customer, Payment)
+├── Controllers/     → Business operations (one controller per domain)
+└── Views/ (Blade)   → Staff dashboard + Public website
 
-Critical operations (reservation & payment) should run inside database transactions to avoid inconsistent hotel states.
+database/
+├── migrations/      → Schema versioning
+└── seeders/         → Demo & test data
+```
+
+> ⚠️ **Critical operations** (reservation creation, payment recording, check-in/out) are wrapped in **database transactions** to prevent inconsistent hotel states.
+
+An **ERD diagram** is included in the repository root (`erd.PNG`).
 
 ---
-## Demo Access
 
-After seeding the database:
+## ⚙️ Getting Started
 
-```bash
-php artisan db:seed --class=DemoUserSeeder
+### Prerequisites
 
-````
-
-Login:
-
-Email: admin@hotel.test
-
-Password: password123
-
-## Installation
-
-### Requirements
 - PHP >= 8.1
 - Composer
 - MySQL / MariaDB
 - Node.js & npm
+- Docker *(optional but recommended)*
 
-### Setup
+### Installation
 
+**1. Clone the repository**
 ```bash
 git clone https://github.com/yamdev07/HotelManagement.git
 cd HotelManagement
+```
 
+**2. Install dependencies**
+```bash
 composer install
 npm install
 ```
 
-Configure database in .env:
-````
-DB_DATABASE=hotel_management
-DB_USERNAME=root
-DB_PASSWORD=
-````
+**3. Configure environment**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-Run migrations:
-````
+> Edit `.env` with your database credentials:
+> ```env
+> DB_DATABASE=hotel_management
+> DB_USERNAME=root
+> DB_PASSWORD=your_password
+> ```
+
+**4. Run migrations**
+```bash
 php artisan migrate
-````
+```
 
-Run application:
-````
+**5. Seed demo data** *(optional)*
+```bash
+php artisan db:seed --class=DemoUserSeeder
+```
+
+**6. Start the application**
+```bash
 npm run dev
 php artisan serve
-````
+```
 
-Visit:
-````
-http://localhost:8000
-````
-## Database
+> 🌐 Application available at **http://localhost:8000**
 
-The database is relational and uses foreign keys between:
+### 🐳 Docker Setup
 
-- [ ] rooms
+```bash
+docker-compose up -d
+docker-compose exec app php artisan migrate --seed
+```
 
-- [ ] reservations
+### Demo Credentials
 
-- [ ] customers
+```
+Email:    admin@hotel.test
+Password: password123
+```
 
-- [ ] payments
+> ⚠️ Change these credentials before any production deployment.
 
-- [ ] users
+---
 
-An ERD diagram is included in the repository.
+## 🚀 Production Deployment
 
-Recommended improvements:
+**1. Set the web root to** `public/`
 
-- [ ] indexes on reservation dates
-
-- [ ] transaction usage during check-in / payment
-
-## Production Deployment
-
-For production:
-
-- [ ] Set web root → public/
-
-Disable debug:
-````
+**2. Disable debug mode**
+```env
 APP_ENV=production
 APP_DEBUG=false
-````
+```
 
-Optimize Laravel:
-````
+**3. Optimize Laravel**
+```bash
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
-````
-Security Considerations
+```
 
-The application implements:
+**4. Security checklist**
+- [x] Authentication protection
+- [x] Session management
+- [x] CSRF protection
+- [x] Input validation & SQL injection prevention
+- [ ] Role-based authorization policies
+- [ ] Login rate limiting
+- [ ] Audit logs
 
-- [ ]authentication protection
+---
 
-- [ ] session management
+## 🗺️ Roadmap
 
-- [ ] CSRF protection
+- [x] Room, reservation & customer management
+- [x] Check-in / check-out workflows
+- [x] Payment & transaction tracking
+- [x] Public hotel website
+- [x] Docker containerization
+- [x] CI/CD pipeline (Lint + Tests)
+- [x] Live production deployment (Cactus Hotel)
+- [ ] Role-based permissions (Admin / Receptionist / Housekeeping)
+- [ ] Automated test suite (PHPUnit)
+- [ ] Online booking system
+- [ ] Payment gateway integration (FedaPay / Stripe)
+- [ ] REST API for mobile app
+- [ ] Advanced reporting & analytics
 
-- [ ] input validation
+---
 
-Recommended additions:
+## 🤝 Contributing
 
-- [ ] role-based authorization policies
+Contributions are welcome!
 
-- [ ] rate limiting on login
+1. **Fork** the repository
+2. **Create** your feature branch: `git checkout -b feature/amazing-feature`
+3. **Commit** your changes: `git commit -m 'feat: add amazing feature'`
+4. **Push** to your branch: `git push origin feature/amazing-feature`
+5. **Open** a Pull Request
 
-- [ ] audit logs
+Please follow [conventional commits](https://www.conventionalcommits.org/) for commit messages.
 
-## Roadmap
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
 
-Planned improvements:
+---
 
-- Role-based permissions (Admin / Receptionist / Housekeeping)
+## 📜 License
 
-- Automated tests (PHPUnit)
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
-- Online booking system
+---
 
-- Payment gateway integration
+## 👨‍💻 Author
 
-- REST API for mobile app
+<div align="center">
 
-- Reporting & analytics
+**Yoann ADIGBONON**
+*Full-Stack Developer · SaaS Architecture · Software Security*
 
-## Live Demo
+[![GitHub](https://img.shields.io/badge/GitHub-yamdev07-181717?style=for-the-badge&logo=github)](https://github.com/yamdev07)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-yoann--adigbonon-0A66C2?style=for-the-badge&logo=linkedin)](https://linkedin.com/in/yoann-adigbonon)
+[![Portfolio](https://img.shields.io/badge/Portfolio-yyamd.com-4F46E5?style=for-the-badge&logo=vercel)](https://yyamd.com)
 
-The application is currently used by Cactus Hotel.
+</div>
 
-Demo: https://lecactushotel.bj
+---
 
-## Author
-
-Yoann Adigbonon
-Laravel Developer
-https://github.com/yamdev07
-
-## License
-
-MIT License
-
+<div align="center">
+  <sub>Currently live in production at <a href="https://lecactushotel.bj">lecactushotel.bj</a> 🏨 · Built with ❤️ in Bénin 🇧🇯</sub>
+</div>

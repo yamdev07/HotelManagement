@@ -1894,14 +1894,20 @@ function showToast(type, title, message) {
 
 // Fonction pour vérifier le statut du late checkout
 function checkLateCheckoutStatus(transactionId) {
-    fetch(`/transaction/${transactionId}/late-checkout-status`)
-        .then(response => response.json())
+    fetch(`/transaction/${transactionId}/late-checkout-status`, {
+        headers: { 'Accept': 'application/json' }
+    })
+        .then(response => {
+            if (!response.ok) return null;
+            const ct = response.headers.get('Content-Type') || '';
+            return ct.includes('application/json') ? response.json() : null;
+        })
         .then(data => {
-            if (data.success && data.data.has_late_checkout) {
+            if (data?.success && data.data?.has_late_checkout) {
                 console.log('Statut late checkout:', data.data);
             }
         })
-        .catch(error => console.error('Erreur vérification late checkout:', error));
+        .catch(() => {}); // silence — non-critique
 }
 </script>
 @endsection

@@ -2,99 +2,77 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\HotelException;
+use App\Http\Requests\StorePaymentRequest;
 use App\Models\Payment;
 use App\Models\Transaction;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
-use App\Models\CashierSession; 
-use App\Notifications\PaymentNotification;
-
 
 class PaymentController extends Controller
 {
-    /**
-     * Afficher la liste des paiements avec filtres
-     */
+    public function __construct(
+        private readonly PaymentService $paymentService,
+    ) {}
+
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Payment::class);
+
         $query = Payment::with(['transaction.customer', 'transaction.room.type', 'user', 'cancelledByUser', 'createdBy'])
             ->orderBy('created_at', 'DESC');
 
-        // Filtres
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
-
         if ($request->filled('method')) {
             $query->where('payment_method', $request->input('method'));
         }
-
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('id', 'LIKE', "%{$search}%")
                     ->orWhere('reference', 'LIKE', "%{$search}%")
-                    ->orWhere('description', 'LIKE', "%{$search}%")
-                    ->orWhereHas('transaction.customer', function ($q) use ($search) {
-                        $q->where('name', 'LIKE', "%{$search}%");
-                    })
-                    ->orWhereHas('transaction.room', function ($q) use ($search) {
-                        $q->where('number', 'LIKE', "%{$search}%");
-                    });
+                    ->orWhereHas('transaction.customer', fn ($q) => $q->where('name', 'LIKE', "%{$search}%"))
+                    ->orWhereHas('transaction.room', fn ($q) => $q->where('number', 'LIKE', "%{$search}%"));
             });
         }
-
         if ($request->filled('date_from')) {
             $query->whereDate('created_at', '>=', $request->date_from);
         }
-
         if ($request->filled('date_to')) {
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
         $payments = $query->paginate(20);
 
-        // Statistiques
         $stats = [
-            'total' => Payment::count(),
+            'total'        => Payment::count(),
             'total_amount' => Payment::where('status', Payment::STATUS_COMPLETED)->sum('amount'),
-            'today' => Payment::whereDate('created_at', today())->count(),
+            'today'        => Payment::whereDate('created_at', today())->count(),
             'today_amount' => Payment::whereDate('created_at', today())->where('status', Payment::STATUS_COMPLETED)->sum('amount'),
-            'cash' => Payment::where('payment_method', Payment::METHOD_CASH)->where('status', Payment::STATUS_COMPLETED)->count(),
-            'card' => Payment::where('payment_method', Payment::METHOD_CARD)->where('status', Payment::STATUS_COMPLETED)->count(),
-            'transfer' => Payment::where('payment_method', Payment::METHOD_TRANSFER)->where('status', Payment::STATUS_COMPLETED)->count(),
+            'cash'         => Payment::where('payment_method', Payment::METHOD_CASH)->where('status', Payment::STATUS_COMPLETED)->count(),
+            'card'         => Payment::where('payment_method', Payment::METHOD_CARD)->where('status', Payment::STATUS_COMPLETED)->count(),
+            'transfer'     => Payment::where('payment_method', Payment::METHOD_TRANSFER)->where('status', Payment::STATUS_COMPLETED)->count(),
             'mobile_money' => Payment::where('payment_method', Payment::METHOD_MOBILE_MONEY)->where('status', Payment::STATUS_COMPLETED)->count(),
-            'fedapay' => Payment::where('payment_method', Payment::METHOD_FEDAPAY)->where('status', Payment::STATUS_COMPLETED)->count(),
-            'check' => Payment::where('payment_method', Payment::METHOD_CHECK)->where('status', Payment::STATUS_COMPLETED)->count(),
         ];
 
         return view('payment.index', [
-            'payments' => $payments,
-            'stats' => $stats,
+            'payments'       => $payments,
+            'stats'          => $stats,
             'paymentMethods' => Payment::getPaymentMethods(),
-            'statuses' => [
-                Payment::STATUS_PENDING => 'En attente',
+            'statuses'       => [
+                Payment::STATUS_PENDING   => 'En attente',
                 Payment::STATUS_COMPLETED => 'Complété',
                 Payment::STATUS_CANCELLED => 'Annulé',
-                Payment::STATUS_EXPIRED => 'Expiré',
-                Payment::STATUS_FAILED => 'Échoué',
-                Payment::STATUS_REFUNDED => 'Remboursé',
             ],
         ]);
     }
 
-    /**
-     * Afficher le formulaire de création de paiement
-     */
     public function create(Transaction $transaction)
     {
-        Log::info("Formulaire paiement transaction #{$transaction->id}", [
-            'total_price' => $transaction->total_price,
-            'total_payment' => $transaction->total_payment,
-            'remaining' => $transaction->getRemainingPayment(),
-        ]);
+        $this->authorize('create', Payment::class);
 
         $remaining = $transaction->getRemainingPayment();
 
@@ -109,1181 +87,209 @@ class PaymentController extends Controller
         }
 
         return view('transaction.payment.create', [
-            'transaction' => $transaction,
+            'transaction'    => $transaction,
             'paymentMethods' => Payment::getPaymentMethods(),
-            'debug_info' => [
-                'remaining_calculated' => $remaining,
-                'remaining_formatted' => number_format($remaining, 0, ',', ' ').' CFA',
-                'payment_rate' => $transaction->getPaymentRate(),
-                'total_payments' => $transaction->payments()->where('status', Payment::STATUS_COMPLETED)->count(),
-            ],
         ]);
     }
 
-        /**
-     * Enregistrer un nouveau paiement - AVEC DÉTAILS SPÉCIFIQUES ET NOTIFICATIONS
-     */
-    public function store(Transaction $transaction, Request $request)
+    public function store(StorePaymentRequest $request, Transaction $transaction)
     {
-        Log::info('=== NOUVEAU PAIEMENT ===', [
-            'transaction_id' => $transaction->id,
-            'user_authenticated' => auth()->id(),
-            'remaining_before' => $transaction->getRemainingPayment(),
-        ]);
+        try {
+            $payment = $this->paymentService->store($transaction, $request->validated());
 
-        // =====================================================
-        // ✅ 1. RÉCUPÉRER LA SESSION ACTIVE DU CAISSIER
-        // =====================================================
-        $activeSession = CashierSession::where('user_id', auth()->id())
-            ->where('status', 'active')
-            ->first();
+            $transaction->refresh();
+            $remaining    = $transaction->getRemainingPayment();
+            $isFullyPaid  = $transaction->isFullyPaid();
+            $amountFmt    = number_format($payment->amount, 0, ',', ' ');
+            $message      = "Paiement de {$amountFmt} CFA enregistré avec succès.";
 
-        if (!$activeSession) {
-            Log::warning('Tentative de paiement sans session active', [
-                'user_id' => auth()->id(),
-                'transaction_id' => $transaction->id
-            ]);
+            if ($isFullyPaid) {
+                $message .= ' Transaction entièrement réglée.';
+            } elseif ($remaining > 0) {
+                $message .= ' Solde restant : ' . number_format($remaining, 0, ',', ' ') . ' CFA.';
+            }
 
             if ($request->ajax() || $request->expectsJson()) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Vous devez avoir une session de caisse active pour effectuer un paiement.',
-                    'redirect' => route('cashier.sessions.create')
-                ], 403);
-            }
-
-            return redirect()->back()
-                ->with('error', 'Vous devez avoir une session de caisse active pour effectuer un paiement.')
-                ->with('warning', 'Veuillez démarrer une session depuis le module Caisse.');
-        }
-
-        Log::info('Session active trouvée', [
-            'session_id' => $activeSession->id,
-            'session_balance_before' => $activeSession->current_balance
-        ]);
-
-        // =====================================================
-        // 2. VALIDATION
-        // =====================================================
-        $validator = Validator::make($request->all(), [
-            'amount' => [
-                'required',
-                'numeric',
-                'min:100',
-                'max:'.$transaction->getRemainingPayment(),
-                function ($attribute, $value, $fail) use ($transaction) {
-                    if ($value > $transaction->getRemainingPayment() + 100) {
-                        $fail('Le montant ne peut pas dépasser '.number_format($transaction->getRemainingPayment(), 0, ',', ' ').' CFA');
-                    }
-                },
-            ],
-            'payment_method' => 'required|in:'.implode(',', array_keys(Payment::getPaymentMethods())),
-            'description' => 'nullable|string|max:500',
-            
-            // Nouveaux champs optionnels
-            'mobile_operator' => 'nullable|string|max:50',
-            'mobile_number' => 'nullable|string|max:20',
-            'account_name' => 'nullable|string|max:100',
-            'transaction_id' => 'nullable|string|max:100',
-            'card_number' => 'nullable|string|max:19',
-            'card_expiry' => 'nullable|string|max:7',
-            'card_cvv' => 'nullable|string|max:4',
-            'card_type' => 'nullable|string|max:50',
-            'card_holder' => 'nullable|string|max:100',
-            'bank_name' => 'nullable|string|max:100',
-            'account_number' => 'nullable|string|max:50',
-            'iban' => 'nullable|string|max:50',
-            'bic' => 'nullable|string|max:20',
-            'beneficiary' => 'nullable|string|max:100',
-            'transfer_date' => 'nullable|date',
-            'fedapay_token' => 'nullable|string|max:100',
-            'fedapay_transaction_id' => 'nullable|string|max:100',
-            'fedapay_method' => 'nullable|string|max:50',
-            'fedapay_status' => 'nullable|string|max:50',
-            'check_number' => 'nullable|string|max:50',
-            'issuing_bank' => 'nullable|string|max:100',
-            'issuer_name' => 'nullable|string|max:100',
-            'issue_date' => 'nullable|date',
-            'received_by' => 'nullable|string|max:100',
-        ], [
-            'amount.max' => 'Le montant ne peut pas dépasser le solde restant de :max CFA',
-            'amount.min' => 'Le montant minimum est de :min CFA',
-        ]);
-
-        if ($validator->fails()) {
-            Log::warning('Validation échouée', $validator->errors()->toArray());
-
-            if ($request->ajax()) {
-                return response()->json([
-                    'success' => false,
-                    'errors' => $validator->errors(),
-                    'message' => 'Veuillez corriger les erreurs',
-                ], 422);
-            }
-
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput()
-                ->with('error', 'Erreur de validation');
-        }
-
-        $validated = $validator->validated();
-
-        DB::beginTransaction();
-
-        try {
-            // =====================================================
-            // 3. DÉTERMINER LE USER_ID VALIDE
-            // =====================================================
-            $userId = $this->getValidUserId();
-
-            Log::info('Identifiant utilisateur déterminé', [
-                'user_id' => $userId,
-                'auth_user' => auth()->id(),
-                'cashier_session_id' => $activeSession->id,
-            ]);
-
-            // =====================================================
-            // 4. GÉNÉRER UNE RÉFÉRENCE UNIQUE
-            // =====================================================
-            $reference = $this->generateUniqueReference($validated['payment_method'], $transaction);
-
-            // =====================================================
-            // 5. CONSTRUIRE LA DESCRIPTION AVEC LES DÉTAILS
-            // =====================================================
-            $baseDescription = $validated['description'] ?? '';
-            $details = [];
-
-            switch ($validated['payment_method']) {
-                case 'mobile_money':
-                    if ($request->filled('mobile_operator')) $details[] = "📱 Opérateur: " . $request->mobile_operator;
-                    if ($request->filled('mobile_number')) $details[] = "📞 Tél: " . $request->mobile_number;
-                    if ($request->filled('account_name')) $details[] = "👤 Compte: " . $request->account_name;
-                    if ($request->filled('transaction_id')) $details[] = "🔢 ID Transaction: " . $request->transaction_id;
-                    break;
-                    
-                case 'card':
-                    if ($request->filled('card_number')) $details[] = "💳 Carte: **** " . substr($request->card_number, -4);
-                    if ($request->filled('card_type')) $details[] = "🏦 Type: " . $request->card_type;
-                    if ($request->filled('card_holder')) $details[] = "👤 Titulaire: " . $request->card_holder;
-                    if ($request->filled('card_expiry')) $details[] = "📅 Exp: " . $request->card_expiry;
-                    break;
-                    
-                case 'transfer':
-                    if ($request->filled('bank_name')) $details[] = "🏦 Banque: " . $request->bank_name;
-                    if ($request->filled('account_number')) $details[] = "🔢 Compte: " . $request->account_number;
-                    if ($request->filled('iban')) $details[] = "🌍 IBAN: " . $request->iban;
-                    if ($request->filled('bic')) $details[] = "🔑 BIC: " . $request->bic;
-                    if ($request->filled('beneficiary')) $details[] = "👤 Bénéficiaire: " . $request->beneficiary;
-                    if ($request->filled('transfer_date')) $details[] = "📅 Date virement: " . \Carbon\Carbon::parse($request->transfer_date)->format('d/m/Y');
-                    break;
-                    
-                case 'fedapay':
-                    if ($request->filled('fedapay_token')) $details[] = "🎫 Token: " . $request->fedapay_token;
-                    if ($request->filled('fedapay_transaction_id')) $details[] = "🔢 ID Fedapay: " . $request->fedapay_transaction_id;
-                    if ($request->filled('fedapay_method')) $details[] = "💳 Méthode: " . $request->fedapay_method;
-                    if ($request->filled('fedapay_status')) $details[] = "📊 Statut: " . $request->fedapay_status;
-                    break;
-                    
-                case 'check':
-                    if ($request->filled('check_number')) $details[] = "🔢 Chèque N°: " . $request->check_number;
-                    if ($request->filled('issuing_bank')) $details[] = "🏦 Banque: " . $request->issuing_bank;
-                    if ($request->filled('issuer_name')) $details[] = "👤 Émetteur: " . $request->issuer_name;
-                    if ($request->filled('issue_date')) $details[] = "📅 Date: " . \Carbon\Carbon::parse($request->issue_date)->format('d/m/Y');
-                    break;
-                    
-                case 'cash':
-                    if ($request->filled('received_by')) $details[] = "👤 Reçu par: " . $request->received_by;
-                    break;
-            }
-
-            $sessionInfo = "🆔 Session #{$activeSession->id} - " . $activeSession->shift_label;
-            if (!empty($details)) {
-                array_unshift($details, $sessionInfo);
-            } else {
-                $details[] = $sessionInfo;
-            }
-
-            $finalDescription = $baseDescription;
-            if (!empty($details)) {
-                $finalDescription .= "\n\n━━━━━━━━━━━━━━━━━━━━━━\n";
-                $finalDescription .= "📋 DÉTAILS PAIEMENT\n";
-                $finalDescription .= "━━━━━━━━━━━━━━━━━━━━━━\n";
-                $finalDescription .= implode("\n", $details);
-                $finalDescription .= "\n━━━━━━━━━━━━━━━━━━━━━━";
-            }
-
-            // =====================================================
-            // 6. CRÉER LE PAIEMENT AVEC LIEN VERS LA SESSION
-            // =====================================================
-            $paymentData = [
-                'user_id' => $userId,
-                'created_by' => auth()->id(),
-                'transaction_id' => $transaction->id,
-                'cashier_session_id' => $activeSession->id, // 👈 LIEN CRUCIAL
-                'amount' => (float) $validated['amount'],
-                'payment_method' => $validated['payment_method'],
-                'status' => Payment::STATUS_COMPLETED,
-                'reference' => $reference,
-                'description' => $finalDescription,
-            ];
-
-            $payment = Payment::create($paymentData);
-
-            Log::info('Paiement créé avec lien vers session', [
-                'payment_id' => $payment->id,
-                'cashier_session_id' => $activeSession->id,
-                'amount' => $payment->amount,
-                'reference' => $payment->reference,
-                'method' => $payment->payment_method,
-            ]);
-
-            // =====================================================
-            // 7. METTRE À JOUR LE SOLDE DE LA SESSION
-            // =====================================================
-            $activeSession->current_balance += $payment->amount;
-            $activeSession->save();
-
-            Log::info('Solde de session mis à jour', [
-                'session_id' => $activeSession->id,
-                'old_balance' => $activeSession->current_balance - $payment->amount,
-                'new_balance' => $activeSession->current_balance,
-                'added_amount' => $payment->amount
-            ]);
-
-            // =====================================================
-            // 8. METTRE À JOUR LA TRANSACTION
-            // =====================================================
-            $this->forceUpdateTransactionTotals($transaction);
-
-            DB::commit();
-
-            // =====================================================
-            // ✅ 9. ENVOYER LES NOTIFICATIONS
-            // =====================================================
-            $this->sendPaymentNotifications($payment, $transaction);
-
-            Log::info('=== PAIEMENT TERMINÉ AVEC SUCCÈS ===', [
-                'payment_id' => $payment->id,
-                'transaction_id' => $transaction->id,
-                'cashier_session_id' => $activeSession->id,
-                'session_balance' => $activeSession->current_balance,
-                'new_remaining' => $transaction->getRemainingPayment(),
-                'is_fully_paid' => $transaction->isFullyPaid(),
-            ]);
-
-            return $this->handlePaymentResponse($payment, $transaction, $request, false);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('=== ERREUR CRITIQUE PAIEMENT ===', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'transaction_id' => $transaction->id,
-                'user_trying' => auth()->id(),
-                'session_id' => $activeSession->id ?? null,
-            ]);
-
-            return $this->handlePaymentError($e, $request);
-        }
-    }
-
-    /**
-     * ✅ NOUVELLE MÉTHODE : Envoyer les notifications après un paiement
-     */
-    private function sendPaymentNotifications(Payment $payment, Transaction $transaction)
-    {
-        try {
-            // Récupérer tous les utilisateurs à notifier (réceptionnistes, admins, super)
-            $users = \App\Models\User::whereIn('role', ['Receptionist', 'Admin', 'Super'])->get();
-            
-            $notificationCount = 0;
-            foreach ($users as $user) {
-                try {
-                    $user->notify(new PaymentNotification($payment, $transaction));
-                    $notificationCount++;
-                } catch (\Exception $e) {
-                    Log::warning('Erreur envoi notification à ' . $user->email, [
-                        'error' => $e->getMessage()
-                    ]);
-                }
-            }
-
-            // Notifier le client s'il a un compte
-            if ($transaction->customer && $transaction->customer->user) {
-                try {
-                    $transaction->customer->user->notify(new PaymentNotification($payment, $transaction));
-                    $notificationCount++;
-                } catch (\Exception $e) {
-                    Log::warning('Erreur envoi notification client', [
-                        'customer_id' => $transaction->customer->id,
-                        'error' => $e->getMessage()
-                    ]);
-                }
-            }
-
-            Log::info("✅ {$notificationCount} notifications envoyées pour le paiement #{$payment->id}");
-
-        } catch (\Exception $e) {
-            Log::error('❌ Erreur lors de l\'envoi des notifications', [
-                'payment_id' => $payment->id,
-                'error' => $e->getMessage()
-            ]);
-            // Ne pas bloquer le processus principal
-        }
-    }
-    /**
-     * Méthode intelligente pour obtenir un user_id valide - OPTION 2
-     */
-    private function getValidUserId()
-    {
-        // OPTION 2A : Utiliser l'utilisateur connecté (premier choix)
-        if (auth()->check()) {
-            $authUser = auth()->user();
-            if ($authUser && \App\Models\User::find($authUser->id)) {
-                Log::debug('Utilisation de l\'utilisateur connecté', ['user_id' => $authUser->id]);
-
-                return $authUser->id;
-            }
-        }
-
-        // OPTION 2B : Chercher un administrateur ou super admin
-        $admin = \App\Models\User::whereIn('role', ['Super', 'Admin', 'Receptionist'])
-            ->orderBy('id')
-            ->first();
-
-        if ($admin) {
-            Log::debug('Utilisation d\'un admin trouvé', ['user_id' => $admin->id, 'role' => $admin->role]);
-
-            return $admin->id;
-        }
-
-        // OPTION 2C : Utiliser le premier utilisateur disponible
-        $firstUser = \App\Models\User::orderBy('id')->first();
-        if ($firstUser) {
-            Log::debug('Utilisation du premier utilisateur', ['user_id' => $firstUser->id]);
-
-            return $firstUser->id;
-        }
-
-        // OPTION 2D : En dernier recours, créer un utilisateur système
-        Log::warning('Aucun utilisateur trouvé, création d\'un utilisateur système');
-        $systemUser = $this->createSystemUser();
-
-        return $systemUser->id;
-    }
-
-    /**
-     * Créer un utilisateur système en cas d'urgence
-     */
-    private function createSystemUser()
-    {
-        try {
-            $user = \App\Models\User::create([
-                'name' => 'Système Paiement',
-                'email' => 'payment.system@'.request()->getHost(),
-                'password' => bcrypt(uniqid('sys_', true)),
-                'role' => 'System',
-                'email_verified_at' => now(),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            Log::info('Utilisateur système créé', ['user_id' => $user->id]);
-
-            return $user;
-
-        } catch (\Exception $e) {
-            Log::emergency('Impossible de créer un utilisateur système', [
-                'error' => $e->getMessage(),
-            ]);
-
-            // Dernier recours : utiliser ID 1 (très risqué)
-            return (object) ['id' => 1];
-        }
-    }
-
-    /**
-     * Générer une référence unique
-     */
-    private function generateUniqueReference($method, $transaction)
-    {
-        $prefixes = [
-            'cash' => 'CASH',
-            'card' => 'CARD',
-            'transfer' => 'VIR',
-            'mobile_money' => 'MOMO',
-            'fedapay' => 'FDP',
-            'check' => 'CHQ',
-            'refund' => 'REF',
-        ];
-
-        $prefix = $prefixes[$method] ?? 'PAY';
-        $timestamp = time();
-        $random = mt_rand(1000, 9999);
-
-        return sprintf('%s-%d-%d-%d', $prefix, $transaction->id, $timestamp, $random);
-    }
-
-    /**
-     * Forcer la mise à jour des totaux de la transaction
-     */
-    private function forceUpdateTransactionTotals(Transaction $transaction)
-    {
-        try {
-            // 1. Recalculer le total des paiements COMPLÉTÉS
-            $totalPayment = Payment::where('transaction_id', $transaction->id)
-                ->where('status', Payment::STATUS_COMPLETED)
-                ->sum('amount');
-
-            // 2. Recalculer le prix total (au cas où les dates ont changé)
-            $totalPrice = $transaction->getTotalPrice();
-
-            // 3. Mettre à jour la transaction
-            $transaction->update([
-                'total_price' => $totalPrice,
-                'total_payment' => $totalPayment,
-            ]);
-
-            // 4. Rafraîchir
-            $transaction->refresh();
-
-            Log::debug('Transaction mise à jour', [
-                'transaction_id' => $transaction->id,
-                'total_price' => $totalPrice,
-                'total_payment' => $totalPayment,
-                'remaining' => $transaction->getRemainingPayment(),
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Erreur mise à jour transaction', [
-                'transaction_id' => $transaction->id,
-                'error' => $e->getMessage(),
-            ]);
-        }
-    }
-
-    /**
-     * Gérer la réponse après un paiement réussi
-     */
-    private function handlePaymentResponse(Payment $payment, Transaction $transaction, Request $request, $isRefund = false)
-    {
-        $isFullyPaid = $transaction->isFullyPaid();
-        $remaining = $transaction->getRemainingPayment();
-
-        // Préparer le message de succès
-        $action = $isRefund ? 'Remboursement' : 'Paiement';
-        $amountFormatted = number_format(abs($payment->amount), 0, ',', ' ').' CFA';
-        $methodLabel = $payment->payment_method_label;
-
-        $successMessage = "✅ {$action} de {$amountFormatted} par {$methodLabel} enregistré avec succès !";
-
-        if ($isFullyPaid) {
-            $successMessage .= ' Transaction entièrement réglée.';
-        } elseif ($remaining > 0) {
-            $successMessage .= ' Solde restant : '.number_format($remaining, 0, ',', ' ').' CFA';
-        }
-
-        // Réponse AJAX
-        if ($request->ajax() || $request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => $successMessage,
-                'data' => [
-                    'payment' => [
-                        'id' => $payment->id,
-                        'amount' => $payment->amount,
-                        'reference' => $payment->reference,
-                        'method' => $payment->payment_method,
-                        'method_label' => $payment->payment_method_label,
-                        'created_at' => $payment->created_at->format('d/m/Y H:i'),
+                    'success'      => true,
+                    'message'      => $message,
+                    'data'         => [
+                        'payment'     => ['id' => $payment->id, 'reference' => $payment->reference, 'amount' => $payment->amount],
+                        'transaction' => [
+                            'id'           => $transaction->id,
+                            'total_price'  => (float) $transaction->total_price,
+                            'remaining'    => $remaining,
+                            'is_fully_paid' => $isFullyPaid,
+                        ],
                     ],
-                    'transaction' => [
-                        'id' => $transaction->id,
-                        'total_price' => (float) $transaction->total_price,
-                        'total_payment' => (float) $transaction->total_payment,
-                        'remaining' => $remaining,
-                        'payment_rate' => $transaction->getPaymentRate(),
-                        'is_fully_paid' => $isFullyPaid,
-                        'status' => $transaction->status,
-                    ],
-                    'calculations' => [
-                        'amount' => abs($payment->amount),
-                        'newRemaining' => $remaining,
-                        'paymentRate' => $transaction->getPaymentRate(),
-                    ],
-                ],
-                'redirect_url' => route('transaction.show', $transaction),
-                'toast' => [
-                    'title' => 'Succès',
-                    'message' => $successMessage,
-                    'type' => 'success',
-                    'duration' => 5000,
-                ],
-            ], 200);
-        }
+                    'redirect_url' => route('transaction.show', $transaction),
+                ]);
+            }
 
-        // Redirection normale
-        return redirect()->route('transaction.show', $transaction)
-            ->with('success', $successMessage)
-            ->with('payment_details', [
-                'id' => $payment->id,
-                'amount' => $payment->amount,
-                'reference' => $payment->reference,
-                'method' => $payment->payment_method,
-            ]);
+            return redirect()->route('transaction.show', $transaction)->with('success', $message);
+
+        } catch (HotelException $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], $e->httpStatusCode());
+            }
+            return redirect()->back()->with('error', $e->getMessage())->withInput();
+
+        } catch (\Exception $e) {
+            Log::error('Erreur paiement', ['transaction_id' => $transaction->id, 'error' => $e->getMessage()]);
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => 'Erreur interne lors du paiement.'], 500);
+            }
+            return redirect()->back()->with('error', 'Erreur interne lors du paiement.')->withInput();
+        }
     }
 
-    /**
-     * Gérer les erreurs de paiement
-     */
-    private function handlePaymentError(\Exception $e, Request $request)
-    {
-        $errorMessage = env('APP_DEBUG')
-            ? $e->getMessage()
-            : 'Une erreur est survenue lors de l\'enregistrement du paiement. Veuillez réessayer.';
-
-        Log::error('Erreur paiement utilisateur', [
-            'error' => $e->getMessage(),
-            'user_agent' => $request->userAgent(),
-            'ip' => $request->ip(),
-        ]);
-
-        if ($request->ajax() || $request->expectsJson()) {
-            return response()->json([
-                'success' => false,
-                'message' => $errorMessage,
-                'error' => env('APP_DEBUG') ? $e->getTraceAsString() : null,
-                'toast' => [
-                    'title' => 'Erreur',
-                    'message' => $errorMessage,
-                    'type' => 'error',
-                    'duration' => 7000,
-                ],
-            ], 500);
-        }
-
-        return redirect()->back()
-            ->with('error', $errorMessage)
-            ->withInput();
-    }
-
-    /**
-     * Afficher les détails d'un paiement
-     */
     public function show(Payment $payment)
     {
-        $payment->load(['transaction.customer', 'transaction.room.type', 'user', 'createdBy', 'cancelledByUser']);
+        $this->authorize('view', $payment);
 
-        if ($payment->transaction) {
-            $payment->transaction->updatePaymentStatus();
-            $payment->transaction->refresh();
-        }
+        $payment->load(['transaction.customer', 'transaction.room.type', 'user', 'createdBy', 'cancelledByUser']);
+        $payment->transaction?->updatePaymentStatus();
 
         return view('payment.show', [
-            'payment' => $payment,
+            'payment'        => $payment,
             'paymentMethods' => Payment::getPaymentMethods(),
-            'debug_info' => $payment->transaction ? [
-                'transaction_totals' => [
-                    'price' => $payment->transaction->total_price,
-                    'payment' => $payment->transaction->total_payment,
-                    'remaining' => $payment->transaction->getRemainingPayment(),
-                ],
-                'payment_count' => $payment->transaction->payments()->count(),
-                'completed_payment_count' => $payment->transaction->payments()->where('status', Payment::STATUS_COMPLETED)->count(),
-            ] : null,
         ]);
     }
 
-    /**
-     * Annuler un paiement
-     */
     public function cancel(Request $request, Payment $payment)
     {
-        $request->validate([
-            'cancel_reason' => 'required|string|max:500',
-        ]);
+        $this->authorize('cancel', $payment);
 
-        Log::info("Annulation paiement #{$payment->id}", [
-            'payment_status' => $payment->status,
-            'transaction_id' => $payment->transaction_id,
-            'user_id' => auth()->id(),
-        ]);
+        $request->validate(['cancel_reason' => ['required', 'string', 'max:500']]);
 
         if (! $payment->canBeCancelled()) {
             return redirect()->back()->with('error', 'Ce paiement ne peut pas être annulé.');
         }
 
-        DB::beginTransaction();
-
         try {
-            $transaction = $payment->transaction;
+            $this->paymentService->cancel($payment, $request->cancel_reason);
 
-            // Annuler le paiement
-            $payment->update([
-                'status' => Payment::STATUS_CANCELLED,
-                'cancelled_at' => now(),
-                'cancelled_by' => auth()->id(),
-                'cancel_reason' => $request->cancel_reason,
-            ]);
+            return redirect()->route('payments.index')->with('success', 'Paiement annulé avec succès.');
 
-            // Recalculer le total de la transaction
-            if ($transaction) {
-                $this->forceUpdateTransactionTotals($transaction);
-            }
-
-            // Journalisation
-            if (class_exists('App\Models\Activity')) {
-                activity()
-                    ->performedOn($payment)
-                    ->causedBy(auth()->user())
-                    ->withProperties([
-                        'cancel_reason' => $request->cancel_reason,
-                    ])
-                    ->log('Paiement annulé');
-            }
-
-            DB::commit();
-
-            Log::info("Paiement #{$payment->id} annulé avec succès");
-
-            return redirect()->route('payments.index')
-                ->with('success', 'Paiement annulé avec succès.');
-
+        } catch (HotelException $e) {
+            return redirect()->back()->with('error', $e->getMessage());
         } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('Erreur annulation paiement: '.$e->getMessage(), [
-                'payment_id' => $payment->id,
-                'user_id' => auth()->id(),
-            ]);
-
-            return redirect()->back()
-                ->with('error', 'Erreur lors de l\'annulation: '.$e->getMessage());
+            Log::error('Erreur annulation paiement', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Erreur lors de l\'annulation.');
         }
     }
 
-    /**
-     * Rembourser un paiement
-     */
     public function refund(Request $request, Payment $payment)
     {
-        $request->validate([
-            'cancel_reason' => 'required|string|max:500',
-        ]);
+        $this->authorize('refund', Payment::class);
+
+        $request->validate(['cancel_reason' => ['required', 'string', 'max:500']]);
 
         if (! $payment->canBeRefunded()) {
             return redirect()->back()->with('error', 'Ce paiement ne peut pas être remboursé.');
         }
 
         try {
-            DB::beginTransaction();
+            \DB::transaction(function () use ($payment, $request) {
+                $refund = Payment::create([
+                    'user_id'        => $payment->user_id,
+                    'created_by'     => auth()->id(),
+                    'transaction_id' => $payment->transaction_id,
+                    'amount'         => -$payment->amount,
+                    'payment_method' => Payment::METHOD_REFUND,
+                    'status'         => Payment::STATUS_COMPLETED,
+                    'reference'      => 'REFUND-' . ($payment->reference ?? 'PAY-' . $payment->id),
+                    'description'    => 'Remboursement : ' . $request->cancel_reason,
+                ]);
 
-            // Créer un paiement de remboursement
-            $refundPayment = Payment::create([
-                'user_id' => $payment->user_id,
-                'created_by' => auth()->id(),
-                'transaction_id' => $payment->transaction_id,
-                'amount' => -$payment->amount,
-                'payment_method' => Payment::METHOD_REFUND,
-                'status' => Payment::STATUS_COMPLETED,
-                'reference' => 'REFUND-'.($payment->reference ?? 'PAY-'.$payment->id),
-                'description' => 'Remboursement: '.$request->cancel_reason,
-            ]);
+                $payment->markAsRefunded(auth()->id(), $request->cancel_reason);
+                $payment->transaction?->updatePaymentStatus();
 
-            // Marquer le paiement original comme remboursé
-            $payment->markAsRefunded(auth()->id(), $request->cancel_reason);
-
-            // Recalculer le total de la transaction
-            if ($payment->transaction) {
-                $this->forceUpdateTransactionTotals($payment->transaction);
-            }
-
-            // Journalisation
-            if (class_exists('App\Models\Activity')) {
-                activity()
-                    ->performedOn($payment)
-                    ->causedBy(auth()->user())
-                    ->withProperties([
-                        'cancel_reason' => $request->cancel_reason,
-                        'refund_payment_id' => $refundPayment->id,
-                    ])
+                activity()->performedOn($payment)->causedBy(auth()->user())
+                    ->withProperties(['refund_payment_id' => $refund->id, 'reason' => $request->cancel_reason])
                     ->log('Paiement remboursé');
-            }
+            });
 
-            DB::commit();
-
-            return redirect()->route('payments.index')
-                ->with('success', 'Paiement remboursé avec succès.');
+            return redirect()->route('payments.index')->with('success', 'Paiement remboursé avec succès.');
 
         } catch (\Exception $e) {
-            DB::rollBack();
-
-            Log::error('Erreur remboursement paiement: '.$e->getMessage(), [
-                'payment_id' => $payment->id,
-                'user_id' => auth()->id(),
-            ]);
-
-            return redirect()->back()
-                ->with('error', 'Erreur lors du remboursement: '.$e->getMessage());
+            Log::error('Erreur remboursement', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Erreur lors du remboursement.');
         }
     }
 
-    /**
-     * Générer une facture/reçu pour un paiement
-     */
     public function invoice(Payment $payment)
     {
-        try {
-            $payment->load([
-                'transaction' => function ($query) {
-                    $query->with([
-                        'customer',
-                        'room.type',
-                        'restaurantOrders.items.menu',
-                        'extras.user',
-                        'payments' => function ($q) {
-                            $q->where('status', Payment::STATUS_COMPLETED)->orderBy('created_at', 'asc');
-                        },
-                    ]);
-                },
-                'user',
-                'createdBy',
-                'cancelledByUser',
-            ]);
+        $this->authorize('view', $payment);
 
-            if (! $payment->transaction) {
-                return redirect()->back()->with('error', 'Transaction non trouvée pour ce paiement.');
-            }
+        $payment->load(['transaction.customer', 'transaction.room.type', 'transaction.payments', 'user', 'createdBy']);
 
-            $payment->transaction->updatePaymentStatus();
-            $payment->transaction->refresh();
-
-            $totalPrice = $payment->transaction->getTotalPrice();
-            $totalPayment = Payment::getTotalForTransaction($payment->transaction_id);
-            $remaining = max(0, $totalPrice - $totalPayment);
-
-            Log::info("Génération facture paiement #{$payment->id}", [
-                'total_price' => $totalPrice,
-                'total_payment' => $totalPayment,
-                'remaining' => $remaining,
-            ]);
-
-            return view('payment.invoice', [
-                'payment' => $payment,
-                'totalPrice' => $totalPrice,
-                'totalPayment' => $totalPayment,
-                'remaining' => $remaining,
-                'transaction' => $payment->transaction,
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('Erreur génération facture: '.$e->getMessage(), [
-                'payment_id' => $payment->id,
-                'error' => $e->getTraceAsString(),
-            ]);
-
-            return redirect()->back()->with('error', 'Erreur lors de la génération de la facture : '.$e->getMessage());
+        if (! $payment->transaction) {
+            return redirect()->back()->with('error', 'Transaction non trouvée pour ce paiement.');
         }
+
+        $payment->transaction->updatePaymentStatus();
+        $transaction  = $payment->transaction;
+        $totalPrice   = $transaction->getTotalPrice();
+        $totalPayment = Payment::getTotalForTransaction($payment->transaction_id);
+        $remaining    = max(0, $totalPrice - $totalPayment);
+
+        return view('payment.invoice', compact('payment', 'totalPrice', 'totalPayment', 'remaining', 'transaction'));
     }
 
-    /**
-     * Exporter les paiements
-     */
     public function export(Request $request)
     {
+        $this->authorize('viewAny', Payment::class);
+
         $query = Payment::with(['transaction.customer', 'user', 'createdBy'])
             ->orderBy('created_at', 'DESC');
 
-        if ($request->filled('method')) {
-            $query->where('payment_method', $request->input('method'));
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
+        if ($request->filled('method'))    $query->where('payment_method', $request->method);
+        if ($request->filled('status'))    $query->where('status', $request->status);
+        if ($request->filled('date_from')) $query->whereDate('created_at', '>=', $request->date_from);
+        if ($request->filled('date_to'))   $query->whereDate('created_at', '<=', $request->date_to);
 
         $payments = $query->get();
+        $csv      = fopen('php://temp', 'w');
 
-        $csv = fopen('php://temp', 'w');
+        fputcsv($csv, ['ID', 'Date', 'Référence', 'Client', 'Transaction', 'Montant (CFA)', 'Méthode', 'Statut', 'Description', 'Créé par']);
 
-        fputcsv($csv, [
-            'ID',
-            'Date',
-            'Référence',
-            'Client',
-            'Transaction ID',
-            'Montant (CFA)',
-            'Méthode',
-            'Statut',
-            'Description',
-            'Créé par',
-            'Annulé par',
-            'Motif annulation',
-        ]);
-
-        foreach ($payments as $payment) {
+        foreach ($payments as $p) {
             fputcsv($csv, [
-                $payment->id,
-                $payment->created_at->format('d/m/Y H:i'),
-                $payment->reference,
-                $payment->transaction->customer->name ?? 'N/A',
-                $payment->transaction_id,
-                number_format($payment->amount, 0, ',', ' '),
-                $payment->payment_method_label,
-                $payment->status_text,
-                $payment->description ?? '',
-                $payment->createdBy->name ?? 'N/A',
-                $payment->cancelledByUser->name ?? 'N/A',
-                $payment->cancel_reason ?? '',
+                $p->id,
+                $p->created_at->format('d/m/Y H:i'),
+                $p->reference,
+                optional(optional($p->transaction)->customer)->name ?? 'N/A',
+                $p->transaction_id,
+                number_format($p->amount, 0, ',', ' '),
+                $p->payment_method_label,
+                $p->status_text,
+                $p->description ?? '',
+                optional($p->createdBy)->name ?? 'N/A',
             ]);
         }
 
         rewind($csv);
-        $csvData = stream_get_contents($csv);
+        $data = stream_get_contents($csv);
         fclose($csv);
 
-        return response($csvData)
+        return response($data)
             ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="paiements_'.date('Y-m-d_H-i').'.csv"');
+            ->header('Content-Disposition', 'attachment; filename="paiements_' . date('Y-m-d_H-i') . '.csv"');
     }
 
-    /**
-     * API pour vérifier l'état d'une transaction
-     */
     public function checkTransactionStatus(Transaction $transaction)
     {
-        try {
-            $transaction->updatePaymentStatus();
-            $transaction->refresh();
+        $transaction->updatePaymentStatus();
+        $transaction->refresh();
 
-            $completedPayments = $transaction->payments()->where('status', Payment::STATUS_COMPLETED)->get();
-
-            $data = [
-                'success' => true,
-                'transaction' => [
-                    'id' => $transaction->id,
-                    'total_price' => (float) $transaction->total_price,
-                    'total_payment' => (float) $transaction->total_payment,
-                    'remaining' => $transaction->getRemainingPayment(),
-                    'is_fully_paid' => $transaction->isFullyPaid(),
-                    'payment_rate' => $transaction->getPaymentRate(),
-                    'status' => $transaction->status,
-                ],
-                'payments' => [
-                    'total_count' => $transaction->payments()->count(),
-                    'completed_count' => $completedPayments->count(),
-                    'completed_sum' => $completedPayments->sum('amount'),
-                    'list' => $completedPayments
-                        ->map(function ($payment) {
-                            return [
-                                'id' => $payment->id,
-                                'amount' => (float) $payment->amount,
-                                'payment_method' => $payment->payment_method,
-                                'reference' => $payment->reference,
-                                'description' => $payment->description,
-                                'created_at' => $payment->created_at->format('Y-m-d H:i:s'),
-                            ];
-                        })->take(5)->toArray(),
-                ],
-                'debug' => [
-                    'calculated_at' => now()->format('Y-m-d H:i:s'),
-                    'transaction_updated_at' => $transaction->updated_at->format('Y-m-d H:i:s'),
-                ],
-            ];
-
-            Log::debug("Vérification statut transaction #{$transaction->id}", $data);
-
-            return response()->json($data);
-
-        } catch (\Exception $e) {
-            Log::error("Erreur vérification transaction #{$transaction->id}: ".$e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'transaction_id' => $transaction->id,
-            ], 500);
-        }
-    }
-
-    /**
-     * API pour forcer la synchronisation
-     */
-    public function forceSync(Transaction $transaction)
-    {
-        try {
-            // Recalculer le total des paiements
-            $totalPayment = Payment::where('transaction_id', $transaction->id)
-                ->where('status', Payment::STATUS_COMPLETED)
-                ->sum('amount');
-
-            $oldTotal = $transaction->total_payment;
-
-            $transaction->update([
-                'total_payment' => $totalPayment,
-            ]);
-            $transaction->refresh();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Synchronisation réussie',
-                'data' => [
-                    'old_total_payment' => $oldTotal,
-                    'new_total_payment' => $totalPayment,
-                    'remaining' => $transaction->getRemainingPayment(),
-                    'is_fully_paid' => $transaction->isFullyPaid(),
-                ],
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error("Erreur synchronisation transaction #{$transaction->id}: ".$e->getMessage());
-
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage(),
-                'transaction_id' => $transaction->id,
-            ], 500);
-        }
-    }
-
-    /**
-     * ✅ Récupérer les détails d'un paiement au format JSON
-     * Utilisé par la modale AJAX
-     * 
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function getDetails($id)
-    {
-        try {
-            // Vérifier les permissions
-            if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Accès non autorisé'
-                ], 403);
-            }
-
-            // Charger le paiement avec ses relations
-            $payment = Payment::with([
-                'transaction.customer',
-                'transaction.room',
-                'user',
-                'createdBy',
-                'cancelledByUser'
-            ])->find($id);
-
-            if (!$payment) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Paiement non trouvé'
-                ], 404);
-            }
-
-            // ✅ CORRECTION : Vérifier chaque relation avant d'accéder aux propriétés
-            $userName = $payment->user ? $payment->user->name : 'Système';
-            $createdByName = $payment->createdBy ? $payment->createdBy->name : 'N/A';
-            $cancelledByName = $payment->cancelledByUser ? $payment->cancelledByUser->name : null;
-            
-            $guestName = 'N/A';
-            $roomNumber = 'N/A';
-            $transactionData = null;
-            
-            if ($payment->transaction) {
-                $guestName = $payment->transaction->customer->name ?? 'N/A';
-                $roomNumber = $payment->transaction->room->number ?? 'N/A';
-                
-                // Recalculer les totaux si nécessaire
-                if (method_exists($payment->transaction, 'updatePaymentStatus')) {
-                    $payment->transaction->updatePaymentStatus();
-                }
-                $payment->transaction->refresh();
-                
-                // Préparer les données de transaction
-                $transactionData = [
-                    'id' => $payment->transaction->id,
-                    'total_price' => $payment->transaction->total_price,
-                    'total_payment' => $payment->transaction->total_payment,
-                    'remaining' => method_exists($payment->transaction, 'getRemainingPayment') 
-                        ? $payment->transaction->getRemainingPayment() 
-                        : 0,
-                    'is_fully_paid' => method_exists($payment->transaction, 'isFullyPaid') 
-                        ? $payment->transaction->isFullyPaid() 
-                        : false,
-                    'status' => $payment->transaction->status,
-                    'check_in' => $payment->transaction->check_in 
-                        ? $payment->transaction->check_in->format('d/m/Y') 
-                        : 'N/A',
-                    'check_out' => $payment->transaction->check_out 
-                        ? $payment->transaction->check_out->format('d/m/Y') 
-                        : 'N/A',
-                ];
-            }
-
-            // Formater les données pour la modale
-            $data = [
-                'success' => true,
-                'payment' => [
-                    'id' => $payment->id,
-                    'amount' => $payment->amount,
-                    'amount_formatted' => number_format($payment->amount, 0, ',', ' ') . ' CFA',
-                    'reference' => $payment->reference ?? 'N/A',
-                    'status' => $this->getStatusLabel($payment->status),
-                    'status_color' => $this->getStatusColor($payment->status),
-                    'method' => $payment->payment_method_label ?? $payment->payment_method ?? 'Non spécifié',
-                    'transaction_id' => $payment->transaction_id,
-                    'guest_name' => $guestName,
-                    'room_number' => $roomNumber,
-                    'processed_by' => $userName,
-                    'created_by' => $createdByName,
-                    'cancelled_by' => $cancelledByName,
-                    'cancelled_at' => $payment->cancelled_at ? $payment->cancelled_at->format('d/m/Y H:i') : null,
-                    'cancel_reason' => $payment->cancel_reason,
-                    'date_formatted' => $payment->created_at ? $payment->created_at->format('d/m/Y H:i') : now()->format('d/m/Y H:i'),
-                    'created_at' => $payment->created_at ? $payment->created_at->format('d/m/Y H:i:s') : now()->format('d/m/Y H:i:s'),
-                    'verified_at' => $payment->verified_at ? $payment->verified_at->format('d/m/Y H:i') : null,
-                    'notes' => $payment->description ?? $payment->notes,
-                    'is_refund' => $payment->amount < 0,
-                    'is_cancellable' => method_exists($payment, 'canBeCancelled') ? $payment->canBeCancelled() : false,
-                    'is_refundable' => method_exists($payment, 'canBeRefunded') ? $payment->canBeRefunded() : false,
-                    'transaction' => $transactionData,
-                ]
-            ];
-
-            Log::info("✅ Détails paiement #{$id} chargés avec succès", [
-                'user' => auth()->user()->name ?? 'inconnu',
-                'role' => auth()->user()->role ?? 'inconnu'
-            ]);
-
-            return response()->json($data);
-
-        } catch (\Exception $e) {
-            Log::error('❌ Erreur getDetails paiement:', [
-                'payment_id' => $id,
-                'error' => $e->getMessage(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'message' => 'Erreur serveur: ' . $e->getMessage(),
-                'error_details' => config('app.debug') ? [
-                    'message' => $e->getMessage(),
-                    'line' => $e->getLine(),
-                    'file' => $e->getFile()
-                ] : null
-            ], 500);
-        }
-    }
-
-    /**
-     * Helper pour le libellé du statut
-     */
-    private function getStatusLabel($status)
-    {
-        $labels = [
-            'pending' => 'En attente',
-            'completed' => 'Complété',
-            'cancelled' => 'Annulé',
-            'expired' => 'Expiré',
-            'failed' => 'Échoué',
-            'refunded' => 'Remboursé'
-        ];
-        
-        return $labels[$status] ?? ucfirst($status);
-    }
-
-    /**
-     * Helper pour la couleur du statut
-     */
-    private function getStatusColor($status)
-    {
-        $colors = [
-            'pending' => 'warning',
-            'completed' => 'success',
-            'cancelled' => 'secondary',
-            'expired' => 'danger',
-            'failed' => 'danger',
-            'refunded' => 'info'
-        ];
-        
-        return $colors[$status] ?? 'secondary';
-    }
-
-   /**
-     * Marquer un paiement comme payé (simplifié sans les colonnes manquantes)
-     */
-    public function markAsPaid(Payment $payment)
-    {
-        try {
-            // Vérifier les permissions
-            if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist'])) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Accès non autorisé'
-                ], 403);
-            }
-
-            // Vérifier que le paiement est en attente
-            if ($payment->status !== Payment::STATUS_PENDING) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Ce paiement ne peut pas être marqué comme payé (statut: ' . $payment->status . ')'
-                ], 400);
-            }
-
-            DB::beginTransaction();
-
-            try {
-                // ✅ Mettre à jour seulement le statut (pas de colonnes manquantes)
-                $payment->status = Payment::STATUS_COMPLETED;
-                $payment->save();
-
-                // ✅ Mettre à jour la transaction
-                if ($payment->transaction) {
-                    $payment->transaction->updatePaymentStatus();
-                    $payment->transaction->refresh();
-                }
-
-                Log::info("✅ Paiement #{$payment->id} marqué comme payé", [
-                    'transaction_id' => $payment->transaction_id,
-                    'amount' => $payment->amount
-                ]);
-
-                DB::commit();
-
-                return response()->json([
-                    'success' => true,
-                    'message' => 'Paiement marqué comme payé avec succès'
-                ]);
-
-            } catch (\Exception $e) {
-                DB::rollBack();
-                throw $e;
-            }
-
-        } catch (\Exception $e) {
-            Log::error('❌ Erreur markAsPaid:', [
-                'payment_id' => $payment->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'success' => false,
-                'error' => 'Erreur: ' . $e->getMessage()
-            ], 500);
-        }
+        return response()->json([
+            'total_price'   => $transaction->total_price,
+            'total_payment' => $transaction->total_payment,
+            'remaining'     => $transaction->getRemainingPayment(),
+            'payment_rate'  => $transaction->getPaymentRate(),
+            'is_fully_paid' => $transaction->isFullyPaid(),
+            'status'        => $transaction->status,
+        ]);
     }
 }

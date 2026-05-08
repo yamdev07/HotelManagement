@@ -7,9 +7,7 @@ return new class extends Migration
 {
     public function up()
     {
-        // ENUM final: Super, Admin, Customer, Receptionist, Housekeeping
-        // Supprime Cashier et Manager
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Housekeeping')");
+        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Cashier','Housekeeping')");
     }
 
     public function down()

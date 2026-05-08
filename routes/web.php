@@ -293,6 +293,8 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
                 ->middleware('checkrole:Super,Admin,Receptionist');
             Route::get('/details', [TransactionController::class, 'showDetails'])->name('showDetails')
                 ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::get('/late-checkout-status', [TransactionController::class, 'lateCheckoutStatus'])->name('late-checkout-status')
+                ->middleware('checkrole:Super,Admin,Receptionist');
 
             // RESTful routes
             Route::put('/', [TransactionController::class, 'update'])->name('update')

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\RoomStatus as RoomStatusEnum;
+use App\Http\Requests\StoreRoomRequest;
+use App\Http\Requests\UpdateRoomRequest;
 use App\Models\Room;
 use App\Models\RoomStatus;
 use App\Models\Transaction;
@@ -13,8 +16,7 @@ use App\Repositories\Interfaces\TypeRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Log;
 
 class RoomController extends Controller
 {
@@ -59,52 +61,15 @@ class RoomController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreRoomRequest $request)
     {
-        // Validation
-        $validator = Validator::make($request->all(), [
-            'type_id' => 'required|exists:types,id',
-            'room_status_id' => 'required|exists:room_statuses,id',
-            'number' => 'required|string|max:10|unique:rooms,number',
-            'name' => 'nullable|string|max:255',
-            'capacity' => 'required|integer|min:1|max:10',
-            'price' => 'required|numeric|min:0',
-            'view' => 'nullable|string|max:500',
-        ], [
-            'type_id.required' => 'Please select a room type',
-            'room_status_id.required' => 'Please select a room status',
-            'number.required' => 'Room number is required',
-            'number.unique' => 'This room number already exists',
-            'capacity.required' => 'Capacity is required',
-            'price.required' => 'Price is required',
-        ]);
+        $data         = $request->validated();
+        $data['view'] = $data['view'] ?? '';
+        $data['name'] = $data['name'] ?: null;
 
-        // Si validation échoue
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // Préparer les données
-        $data = $validator->validated();
-
-        // S'assurer que view n'est pas null
-        if (empty($data['view'])) {
-            $data['view'] = '';
-        }
-
-        // S'assurer que name est null si vide
-        if (empty($data['name'])) {
-            $data['name'] = null;
-        }
-
-        // Créer la chambre
         $room = Room::create($data);
 
-        // Redirection vers la liste avec message de succès
-        return redirect()->route('room.index')
-            ->with('success', 'Room '.$room->number.' created successfully!');
+        return redirect()->route('room.index')->with('success', 'Room '.$room->number.' created successfully!');
     }
 
     public function show(Room $room)
@@ -149,70 +114,15 @@ class RoomController extends Controller
         ]);
     }
 
-    public function update(Request $request, Room $room)
+    public function update(UpdateRoomRequest $request, Room $room)
     {
-        // DÉBUT : Validation personnalisée pour le statut
-        // Récupérer l'utilisateur actuel
-        $user = auth()->user();
-        $isSystemUpdate = $request->has('_system_update');
+        $data         = $request->validated();
+        $data['view'] = $data['view'] ?? '';
+        $data['name'] = $data['name'] ?: null;
 
-        // Si ce n'est pas une mise à jour système et que l'utilisateur n'est pas Super Admin,
-        // on empêche la modification manuelle du room_status_id
-        if (! $isSystemUpdate && ! in_array($user->role, ['Super']) && $room->isDirty('room_status_id')) {
-            // Rétablir la valeur originale
-            $room->room_status_id = $room->getOriginal('room_status_id');
-
-            // Ajouter un message d'information
-            session()->flash('info',
-                'Room status is automatically managed by the system. '.
-                'It changes based on reservations and stays. '.
-                'Only Super Administrators can manually set maintenance mode.');
-        }
-        // FIN : Validation personnalisée
-
-        // Validation standard pour l'update
-        $validator = Validator::make($request->all(), [
-            'type_id' => 'required|exists:types,id',
-            'room_status_id' => 'required|exists:room_statuses,id',
-            'number' => 'required|string|max:10|unique:rooms,number,'.$room->id,
-            'name' => 'nullable|string|max:255',
-            'capacity' => 'required|integer|min:1|max:10',
-            'price' => 'required|numeric|min:0',
-            'view' => 'nullable|string|max:500',
-        ], [
-            'type_id.required' => 'Please select a room type',
-            'room_status_id.required' => 'Please select a room status',
-            'number.required' => 'Room number is required',
-            'number.unique' => 'This room number already exists',
-            'capacity.required' => 'Capacity is required',
-            'price.required' => 'Price is required',
-        ]);
-
-        // Si validation échoue
-        if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // Préparer les données
-        $data = $validator->validated();
-
-        // S'assurer que view n'est pas null
-        if (empty($data['view'])) {
-            $data['view'] = '';
-        }
-
-        // S'assurer que name est null si vide
-        if (empty($data['name'])) {
-            $data['name'] = null;
-        }
-
-        // Mettre à jour la chambre
         $room->update($data);
 
-        return redirect()->route('room.index')
-            ->with('success', 'Room '.$room->number.' updated successfully!');
+        return redirect()->route('room.index')->with('success', 'Room '.$room->number.' updated successfully!');
     }
 
     public function destroy(Room $room, ImageRepositoryInterface $imageRepository)
@@ -244,7 +154,7 @@ class RoomController extends Controller
     public function toggleMaintenance(Request $request, Room $room)
     {
         // Vérifier les permissions
-        if (! in_array(auth()->user()->role, ['Super'])) {
+        if (! auth()->user()->isSuper()) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized: Only Super Administrators can modify room status',
@@ -280,12 +190,11 @@ class RoomController extends Controller
                     ]);
                 }
 
-                // Mettre la chambre en maintenance
                 $room->update([
-                    'room_status_id' => 4, // ID pour maintenance
-                    'maintenance_reason' => $reason,
-                    'maintenance_started_at' => now(),
-                    'maintenance_ended_at' => null,
+                    'room_status_id'          => RoomStatusEnum::Maintenance->value,
+                    'maintenance_reason'      => $reason,
+                    'maintenance_started_at'  => now(),
+                    'maintenance_ended_at'    => null,
                     'maintenance_requested_by' => auth()->id(),
                 ]);
 
@@ -311,7 +220,7 @@ class RoomController extends Controller
                     ->where('check_in', '>', now())
                     ->exists();
 
-                $newStatusId = $hasActiveReservation ? 2 : ($hasFutureReservation ? 3 : 1);
+                $newStatusId = $hasActiveReservation ? RoomStatusEnum::Occupied->value : ($hasFutureReservation ? RoomStatusEnum::Reserved->value : RoomStatusEnum::Available->value);
 
                 $room->update([
                     'room_status_id' => $newStatusId,
@@ -370,9 +279,8 @@ class RoomController extends Controller
      */
     public function syncStatuses()
     {
-        if (! in_array(auth()->user()->role, ['Super', 'Admin'])) {
-            return redirect()->back()
-                ->with('error', 'Unauthorized');
+        if (! auth()->user()->isSuper() && ! auth()->user()->isAdmin()) {
+            return redirect()->back()->with('error', 'Unauthorized');
         }
 
         $rooms = Room::all();
