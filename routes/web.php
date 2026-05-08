@@ -147,10 +147,11 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
     // ==================== ROUTE RACCOURCIE ====================
     Route::get('/createIdentity', function () {
         return redirect()->route('transaction.reservation.createIdentity');
-    })->name('quick.createIdentity');
+    })->name('quick.createIdentity')
+        ->middleware('checkrole:Super,Admin,Receptionist');
 
     // ==================== RÉSERVATIONS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
-    Route::prefix('transaction/reservation')->name('transaction.reservation.')->group(function () {
+    Route::prefix('transaction/reservation')->name('transaction.reservation.')->middleware('checkrole:Super,Admin,Receptionist')->group(function () {
         Route::get('/createIdentity', [TransactionRoomReservationController::class, 'createIdentity'])->name('createIdentity');
         Route::get('/pickFromCustomer', [TransactionRoomReservationController::class, 'pickFromCustomer'])->name('pickFromCustomer');
         Route::post('/search-by-email', [TransactionRoomReservationController::class, 'searchByEmail'])->name('searchByEmail');
@@ -236,7 +237,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
     Route::resource('roomstatus', RoomStatusController::class)->middleware('checkrole:Super,Admin');
 
     // ==================== TRANSACTIONS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
-    Route::prefix('transaction')->name('transaction.')->group(function () {
+    Route::prefix('transaction')->name('transaction.')->middleware('checkrole:Super,Admin,Receptionist')->group(function () {
         // Routes CRUD complètes SANS paramètres d'abord
         Route::get('/', [TransactionController::class, 'index'])->name('index');
         Route::get('/create', [TransactionController::class, 'create'])->name('create');
@@ -360,7 +361,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
     });
 
     // ==================== PAIEMENTS POUR TRANSACTIONS ====================
-    Route::prefix('transaction/{transaction}/payment')->name('transaction.payment.')->group(function () {
+    Route::prefix('transaction/{transaction}/payment')->name('transaction.payment.')->middleware('checkrole:Super,Admin,Receptionist')->group(function () {
         Route::get('/create', [PaymentController::class, 'create'])->name('create');
         Route::post('/store', [PaymentController::class, 'store'])->name('store');
         Route::get('/check-status', [PaymentController::class, 'checkTransactionStatus'])->name('check-status');
@@ -368,8 +369,10 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
     });
 
     // ==================== ALIAS PAIEMENTS ====================
-    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
-    Route::get('/payment/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payment.invoice');
+    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index')
+        ->middleware('checkrole:Super,Admin,Receptionist');
+    Route::get('/payment/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payment.invoice')
+        ->middleware('checkrole:Super,Admin,Receptionist');
 
     // ==================== CHARTS ====================
     Route::get('/get-dialy-guest-chart-data', [ChartController::class, 'dailyGuestPerMonth']);
@@ -397,7 +400,9 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
 
         // Autres routes
         Route::get('/daily-report', [CashierSessionController::class, 'dailyReport'])->name('daily-report');
-        Route::get('/dashboard', [CashierSessionController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboard', [CashierSessionController::class, 'dashboard'])
+            ->name('dashboard')
+            ->middleware('checkrole:Receptionist,Admin,Super,Cashier');
         Route::get('/current-session', [CashierSessionController::class, 'getCurrentSession'])->name('current-session');
         Route::get('/session-summary', [CashierSessionController::class, 'sessionSummary'])->name('session-summary');
     });

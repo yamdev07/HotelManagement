@@ -125,7 +125,7 @@
                     <div class="nav-section">
                         <div class="nav-section-title">Opérations</div>
 
-                        @if (Route::has('transaction.index') && !auth()->user()->isServant())
+                        @if (Route::has('transaction.index') && !in_array(auth()->user()->role, ['Servant', 'Cuisiner']))
                             <a href="{{ route('transaction.index') }}"
                                 class="nav-item {{ $activeClass('transaction.', false) && !str_contains($currentRoute, 'transaction.reservation.') ? 'active' : '' }}"
                                 data-tooltip="Liste Clients">
@@ -137,7 +137,7 @@
                             </a>
                         @endif
 
-                        @if (Route::has('cashier.dashboard'))
+                        @if (Route::has('cashier.dashboard') && !in_array(auth()->user()->role, ['Servant', 'Cuisiner']))
                             <a href="{{ route('cashier.dashboard') }}"
                                 class="nav-item {{ $activeClass('cashier.', false) }}" data-tooltip="Caisse">
                                 <div class="nav-icon"><i class="fas fa-cash-register"></i></div>

@@ -25,6 +25,10 @@ class AuthController extends Controller
                 return redirect()->route('transaction.myReservations')->with('success', 'Bienvenue ' . auth()->user()->name);
             }
 
+            if (in_array(auth()->user()->role, ['Servant', 'Cuisiner'])) {
+                return redirect()->route('restaurant.orders')->with('success', 'Bienvenue ' . auth()->user()->name);
+            }
+
             return redirect('/home')->with('success', 'Welcome ' . auth()->user()->name);
         }
 
