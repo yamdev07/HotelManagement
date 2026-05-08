@@ -153,6 +153,13 @@
                                     <input type="text" class="om-input has-icon" id="f-customer-name" placeholder="Ex: Jean Dupont">
                                 </div>
                             </div>
+                            <div class="om-field mb-3">
+                                <label class="om-label" for="f-phone">Numéro de Téléphone <span class="text-white-50">(Optionnel)</span></label>
+                                <div class="om-input-icon">
+                                    <span class="om-icon"><i class="fas fa-phone"></i></span>
+                                    <input type="tel" class="om-input has-icon" id="f-phone" placeholder="Ex: +229 01 02 03 04">
+                                </div>
+                            </div>
                             <p class="om-panel-desc mb-3">Où souhaitez-vous être servi ?</p>
                             
                             <!-- Choix du lieu de service -->
@@ -1262,9 +1269,13 @@
                 const location = $('input[name="order_location"]:checked').val();
                 const isResident = $('#is_resident').is(':checked');
                 const notes = $('#f-notes').val().trim();
+                const custName = $('#f-customer-name').val().trim();
+                const phone = $('#f-phone').val().trim();
                 let idHtml = '';
 
-                const custName = $('#f-customer-name').val().trim();
+                // Maintien du scroll pour le récapitulatif
+                const $container = $('#recap-items');
+                const scrollPos = $container.scrollTop();
 
                 // Identification
                 if (location === 'room') {
@@ -1274,7 +1285,7 @@
                     idHtml += `<div class="om-recap-line"><span>Chambre</span><strong>${room}</strong></div>`;
                     if (custName) idHtml += `<div class="om-recap-line"><span>Nom</span><strong>${custName}</strong></div>`;
                     
-                    $('#hCustomerName').val(custName || ("Room Service - " + room));
+                    $('#hCustomerName').val(custName ? `${custName} (Ch. ${room})` : `Room Service - ${room}`);
                     $('#hEmail').val(email); 
                     $('#hRoom').val(room);
                 } else {
@@ -1286,16 +1297,23 @@
                         idHtml += `<div class="om-recap-line"><span>Client</span><strong>Résident (Ch. ${roomAlt})</strong></div>`;
                         if (custName) idHtml += `<div class="om-recap-line"><span>Nom</span><strong>${custName}</strong></div>`;
                         
-                        $('#hCustomerName').val(custName || ("Table " + table + " (Resident " + roomAlt + ")"));
+                        $('#hCustomerName').val(custName ? `${custName} (Table ${table} / Ch. ${roomAlt})` : `Table ${table} (Résident Ch. ${roomAlt})`);
                         $('#hEmail').val(emailAlt); $('#hRoom').val(roomAlt);
                     } else {
                         idHtml += `<div class="om-recap-line"><span>Client</span><strong>Extérieur</strong></div>`;
                         if (custName) idHtml += `<div class="om-recap-line"><span>Nom</span><strong>${custName}</strong></div>`;
                         
-                        $('#hCustomerName').val(custName || ("Client Table " + table));
+                        $('#hCustomerName').val(custName ? `${custName} (Table ${table})` : `Client Table ${table}`);
                         $('#hEmail').val(""); $('#hRoom').val('');
                     }
                 }
+
+                if (phone) {
+                    idHtml += `<div class="om-recap-line"><span>Tél</span><strong>${phone}</strong></div>`;
+                    $('#hPhone').val(phone);
+                }
+
+
                 if (notes) idHtml += `<div class="om-recap-line"><span>Notes</span><strong>${notes}</strong></div>`;
                 $('#recap-identity').html(idHtml);
 
@@ -1330,10 +1348,10 @@
                                     <button type="button" class="om-recap-qty-btn m-qplus" data-id="${it.menu_id}">+</button>
                                 </div>
                             </div>
-                            <div class="om-recap-price"><span>${Math.round(sub).toLocaleString('fr-FR')}</span></div>
+                            <div class="om-recap-price"><span>${Math.round(sub).toLocaleString('fr-FR')} FCFA</span></div>
                         </div>`;
                 });
-                $('#recap-items').html(itemsHtml);
+                $('#recap-items').html(itemsHtml).scrollTop(scrollPos);
                 $('#recap-total').text(Math.round(total).toLocaleString('fr-FR') + ' FCFA');
 
                 $('#hNotes').val(notes);
@@ -1347,35 +1365,77 @@
                 $(this).addClass('active').find('input').prop('checked', true);
             });
 
+            // Empêcher la soumission par "Entrée" (sauf à la dernière étape)
+            $('#orderForm input, #orderForm textarea').on('keydown', function(e) {
+                if (e.key === 'Enter' || e.keyCode === 13) {
+                    if (e.target.tagName === 'TEXTAREA') return; // Laisser l'entrée dans les notes
+                    e.preventDefault();
+                    if (currentStep < TOTAL_STEPS) {
+                        validateAndNext();
+                    } else {
+                        $('#orderForm').submit();
+                    }
+                    return false;
+                }
+            });
+
             $('#orderForm').submit(function(e) {
                 e.preventDefault();
+                
+                // Sécurité : s'assurer qu'on est à la fin et qu'il y a des articles
+                if (currentStep < TOTAL_STEPS || Object.keys(orderItems).length === 0) return;
+
                 const btn = $('#om-submit');
-                btn.prop('disabled', true).text('Envoi…');
+                const originalText = btn.html();
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Traitement…');
 
                 $.ajax({
                     url: $(this).attr('action'),
                     type: 'POST',
                     data: new FormData(this),
-                    processData: false, contentType: false,
-                    success: function() {
-                        Swal.fire({ icon: 'success', title: 'Commande confirmée', confirmButtonColor: '#d4af37' }).then(() => {
-                            bootstrap.Offcanvas.getInstance(document.getElementById('orderModal'))?.hide();
+                    processData: false, 
+                    contentType: false,
+                    success: function(res) {
+                        Swal.fire({ 
+                            icon: 'success', 
+                            title: 'Commande confirmée', 
+                            text: 'Votre commande a été transmise avec succès !',
+                            confirmButtonColor: '#d4af37' 
+                        }).then(() => {
+                            const offcanvasElement = document.getElementById('orderModal');
+                            const instance = bootstrap.Offcanvas.getInstance(offcanvasElement);
+                            if (instance) instance.hide();
                             resetModal();
+                            btn.prop('disabled', false).html(originalText);
                         });
                     },
-                    error: function() {
-                        Swal.fire({ icon: 'error', title: 'Erreur' });
-                        btn.prop('disabled', false).text('Confirmer');
+                    error: function(xhr) {
+                        let msg = "Une erreur est survenue lors de l'envoi.";
+                        if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                        
+                        Swal.fire({ 
+                            icon: 'error', 
+                            title: 'Échec de l\'envoi', 
+                            text: msg,
+                            confirmButtonColor: '#d4af37'
+                        });
+                        btn.prop('disabled', false).html(originalText);
                     }
                 });
             });
 
             function resetModal() {
-                orderItems = {}; currentStep = 1; updateFloatingCart();
+                orderItems = {}; 
+                currentStep = 1; 
+                updateFloatingCart();
                 const saved = JSON.parse(localStorage.getItem('cactus_cart') || '{}');
-                saved.items = {}; localStorage.setItem('cactus_cart', JSON.stringify(saved));
-                $('.v-qty-wrapper').addClass('d-none'); $('.add-to-order').removeClass('d-none');
+                saved.items = {}; 
+                localStorage.setItem('cactus_cart', JSON.stringify(saved));
+                $('.v-qty-wrapper').addClass('d-none'); 
+                $('.add-to-order').removeClass('d-none');
+                goToStep(1);
             }
+
 
             $(document).on('click', '.m-qplus', function() {
                 const id = $(this).data('id');

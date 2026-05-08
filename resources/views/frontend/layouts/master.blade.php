@@ -223,8 +223,15 @@
                     </li>
 
                     @auth
+                    @php
+                        $staffDashboardUrl = match(auth()->user()->role) {
+                            'Servant', 'Cuisiner' => route('restaurant.orders'),
+                            'Customer'            => route('transaction.myReservations'),
+                            default               => route('dashboard.index'),
+                        };
+                    @endphp
                     <li class="nav-item ms-lg-2">
-                        <a href="{{ route('dashboard.index') }}" class="btn btn-outline-primary-custom">
+                        <a href="{{ $staffDashboardUrl }}" class="btn btn-outline-primary-custom">
                             <i class="fas fa-tachometer-alt me-1"></i> Dashboard
                         </a>
                     </li>

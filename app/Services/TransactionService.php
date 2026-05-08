@@ -10,7 +10,7 @@ use App\Models\History;
 use App\Models\Payment;
 use App\Models\Room;
 use App\Models\Transaction;
-use App\Repositories\Interface\TransactionRepositoryInterface;
+use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;

@@ -77,13 +77,23 @@
 
             <div class="row align-items-center">
                 <div class="col-md-8 mb-3">
-                    <label class="form-label d-block av-label">Jours de disponibilité</label>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label av-label mb-0">Jours de disponibilité</label>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-outline-secondary btn-xs py-0" onclick="selectAllDays(true)" style="font-size: 0.6rem; border-radius: 4px 0 0 4px;">Tous</button>
+                            <button type="button" class="btn btn-outline-secondary btn-xs py-0" onclick="selectAllDays(false)" style="font-size: 0.6rem; border-radius: 0 4px 4px 0;">Aucun</button>
+                        </div>
+                    </div>
                     <div class="btn-group w-100" role="group">
                         @foreach(['mon' => 'Lun', 'tue' => 'Mar', 'wed' => 'Mer', 'thu' => 'Jeu', 'fri' => 'Ven', 'sat' => 'Sam', 'sun' => 'Dim'] as $key => $label)
-                            <input type="checkbox" class="btn-check" id="day-{{ $key }}" name="available_days[]" value="{{ $key }}" checked autocomplete="off">
+                            <input type="checkbox" class="btn-check day-checkbox" id="day-{{ $key }}" name="available_days[]" value="{{ $key }}" {{ $key !== 'fri' ? 'checked' : '' }} autocomplete="off">
                             <label class="btn btn-outline-secondary btn-day" for="day-{{ $key }}">{{ $label }}</label>
                         @endforeach
                     </div>
+                    <small class="text-muted d-block mt-2" style="font-size: 0.7rem; line-height: 1.4;">
+                        <i class="fas fa-info-circle text-info me-1"></i> 
+                        Sélectionnez les jours où ce menu est disponible. Les jours décochés (comme <strong>Vendredi</strong> par défaut ici) ne seront pas affichés aux clients pour la commande ce jour-là.
+                    </small>
                 </div>
 
                 <div class="col-md-4 mb-3 d-flex align-items-end">
@@ -150,6 +160,13 @@ document.getElementById('price').addEventListener('input', function(e) {
     if (value < 0 || isNaN(value)) e.target.value = 0;
     if (value > 9999999) e.target.value = 9999999;
 });
+
+// Sélection rapide des jours
+function selectAllDays(status) {
+    document.querySelectorAll('.day-checkbox').forEach(cb => {
+        cb.checked = status;
+    });
+}
 </script>
 
 <style>
