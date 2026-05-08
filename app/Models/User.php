@@ -300,7 +300,7 @@ class User extends Authenticatable
      */
     public function scopeStaff($query)
     {
-        return $query->whereIn('role', ['Admin', 'Super', 'Receptionist', 'Cashier', 'Housekeeping']);
+        return $query->whereIn('role', ['Admin', 'Super', 'Receptionist', 'Cashier', 'Housekeeping', 'Servant', 'Cuisiner']);
     }
 
     /**
