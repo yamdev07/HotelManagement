@@ -504,6 +504,11 @@ function initOrdersPage() {
             $('#orderDetailsContent').html(res.html);
         });
     });
+
+    // Auto-refresh every 30 seconds for real-time updates
+    setInterval(function() {
+        location.reload();
+    }, 30000);
 }
 initOrdersPage();
 </script>
