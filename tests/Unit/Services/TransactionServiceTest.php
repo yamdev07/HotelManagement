@@ -5,7 +5,7 @@ namespace Tests\Unit\Services;
 use App\Enums\TransactionStatus;
 use App\Exceptions\TransactionException;
 use App\Models\Transaction;
-use App\Repositories\Interface\TransactionRepositoryInterface;
+use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use App\Services\TransactionService;
 use Carbon\Carbon;
 use Mockery;
