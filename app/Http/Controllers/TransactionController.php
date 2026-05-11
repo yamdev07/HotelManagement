@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exceptions\HotelException;
 use App\Http\Requests\UpdateTransactionRequest;
 use App\Http\Requests\UpdateTransactionStatusRequest;
+use App\Models\Payment;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use App\Services\CheckInService;
@@ -379,20 +380,39 @@ class TransactionController extends Controller
         $request->validate([
             'expected_checkout_time' => ['required', 'string'],
             'late_checkout_fee'      => ['required', 'numeric', 'min:0'],
+            'payment_method'         => ['required', 'string', 'in:cash,card,transfer,mobile_money'],
         ]);
+
+        $fee = (float) $request->late_checkout_fee;
 
         $transaction->update([
-            'late_checkout'           => true,
-            'late_checkout_fee'       => $request->late_checkout_fee,
-            'expected_checkout_time'  => $request->expected_checkout_time,
-            'total_price'             => (float) $transaction->total_price + (float) $request->late_checkout_fee,
+            'late_checkout'          => true,
+            'late_checkout_fee'      => $fee,
+            'expected_checkout_time' => $request->expected_checkout_time,
+            'total_price'            => (float) $transaction->total_price + $fee,
         ]);
 
-        if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'message' => 'Late checkout enregistré.']);
+        if ($fee > 0) {
+            Payment::create([
+                'transaction_id' => $transaction->id,
+                'created_by'     => auth()->id(),
+                'user_id'        => auth()->id(),
+                'amount'         => $fee,
+                'status'         => Payment::STATUS_COMPLETED,
+                'payment_method' => $request->payment_method,
+                'payment_date'   => now(),
+                'verified_by'    => auth()->id(),
+                'verified_at'    => now(),
+                'reference'      => 'LATE-' . $transaction->id . '-' . now()->format('YmdHis'),
+                'description'    => 'Supplément late checkout — départ à ' . $request->expected_checkout_time,
+            ]);
         }
 
-        return redirect()->back()->with('success', 'Late checkout enregistré.');
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Late checkout enregistré et paiement créé.']);
+        }
+
+        return redirect()->back()->with('success', 'Late checkout enregistré et paiement encaissé.');
     }
 
     // -----------------------------------------------------------------------

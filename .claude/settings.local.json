@@ -8,7 +8,10 @@
       "WebFetch(domain:api.github.com)",
       "Bash(grep -n \"{{ \\\\$\\\\|@foreach.*\\\\$\\\\|@if.*\\\\$\" resources/views/housekeeping/reports.blade.php)",
       "Bash(findstr -i \"categor\")",
-      "Bash(findstr \"Pending\")"
+      "Bash(findstr \"Pending\")",
+      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\HP ELITEBOOK\\\\Desktop\\\\dev\\\\Laravel-Hotel-main\" -Directory)",
+      "Bash(Select-Object Name)",
+      "Bash(xargs grep -l \"index\\\\|unique\")"
     ]
   }
 }

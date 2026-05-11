@@ -1662,7 +1662,7 @@ if (document.getElementById('refundPolicy')?.value !== 'partial') {
                                     <i class="fas fa-clock text-warning me-1"></i>
                                     Nouvelle heure de départ
                                 </label>
-                                <select name="late_checkout_time" class="form-select form-select-lg" id="lateTimeSelect" required>
+                                <select name="expected_checkout_time" class="form-select form-select-lg" id="lateTimeSelect" required>
                                     <option value="">Choisir une heure</option>
                                     <option value="15:00">15h00</option>
                                     <option value="16:00">16h00</option>
@@ -1722,7 +1722,7 @@ if (document.getElementById('refundPolicy')?.value !== 'partial') {
                         </label>
                         <div class="input-group input-group-lg">
                             <span class="input-group-text bg-light">FCFA</span>
-                            <input type="number" name="late_fee" id="lateFee" class="form-control" 
+                            <input type="number" name="late_checkout_fee" id="lateFee" class="form-control"
                                    value="{{ round($prixNuit * 0.5) }}" min="0" step="100" 
                                    style="font-size: 1.2rem; font-weight: 600;" required>
                         </div>
