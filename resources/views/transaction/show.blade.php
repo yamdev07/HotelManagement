@@ -1774,6 +1774,17 @@ document.querySelectorAll('.suggestion-btn').forEach(btn => {
     });
 });
 </script>
+
+@if($errors->any())
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var cancelModal = document.getElementById('cancelModal');
+    if (cancelModal) {
+        new bootstrap.Modal(cancelModal).show();
+    }
+});
+</script>
+@endif
 @endif
 
 <!-- Modal d'annulation -->
@@ -1792,10 +1803,13 @@ document.querySelectorAll('.suggestion-btn').forEach(btn => {
                 @csrf
                 @method('DELETE')
                 <div class="modal-body">
+                    @if($errors->any())
+                    <div class="alert alert-danger">{{ $errors->first() }}</div>
+                    @endif
                     <p class="mb-3">Êtes-vous sûr de vouloir annuler cette réservation ?</p>
                     <div class="mb-3">
                         <label class="form-label">Raison (optionnelle)</label>
-                        <textarea name="cancel_reason" class="form-control" rows="3" placeholder="Pourquoi annuler ?"></textarea>
+                        <textarea name="cancel_reason" class="form-control" rows="3" placeholder="Pourquoi annuler ?">{{ old('cancel_reason') }}</textarea>
                     </div>
                 </div>
                 <div class="modal-footer">

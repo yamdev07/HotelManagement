@@ -499,10 +499,10 @@
 
     {{-- Calculs --}}
     @php
-        $encaissements = $payments->where('status', 'completed')->where('amount', '>', 0)->sum('amount');
-        $remboursements = abs($payments->where('status', 'completed')->where('amount', '<', 0)->sum('amount'));
+        $remboursements = $payments->where('status', 'completed')->where('payment_method', 'refund')->sum('amount');
+        $encaissements = $payments->where('status', 'completed')->where('payment_method', '!=', 'refund')->sum('amount');
         $netTotal = $encaissements - $remboursements;
-        $paymentCount = $payments->where('status', 'completed')->count();
+        $paymentCount = $payments->where('status', 'completed')->where('payment_method', '!=', 'refund')->count();
         $difference = $cashierSession->balance_difference ?? ($netTotal - $cashierSession->initial_balance);
     @endphp
 
@@ -532,7 +532,7 @@
         <div class="stat-card">
             <div class="stat-label">Remboursements</div>
             <div class="stat-value red">{{ number_format($remboursements, 0, ',', ' ') }}</div>
-            <div class="stat-sub">{{ $payments->where('status', 'completed')->where('amount', '<', 0)->count() }} tx</div>
+            <div class="stat-sub">{{ $payments->where('status', 'completed')->where('payment_method', 'refund')->count() }} tx</div>
         </div>
 
         <div class="stat-card">
@@ -582,7 +582,7 @@
                 <tbody>
                     @foreach($payments as $payment)
                     @php
-                        $isPositive = $payment->amount > 0;
+                        $isPositive = $payment->payment_method !== 'refund';
                         $methodIcon = 'fa-money-bill-wave';
                         if($payment->payment_method == 'card' || $payment->payment_method == 'fedapay') {
                             $methodIcon = 'fa-credit-card';

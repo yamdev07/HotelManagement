@@ -145,7 +145,7 @@ class CashierSessionController extends Controller
                 'totalPayments'   => Payment::where('cashier_session_id', $cashierSession->id)->where('status', Payment::STATUS_COMPLETED)->count(),
                 'totalAmount'     => Payment::where('cashier_session_id', $cashierSession->id)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
                 'pendingPayments' => Payment::where('cashier_session_id', $cashierSession->id)->where('status', Payment::STATUS_PENDING)->count(),
-                'refundedAmount'  => Payment::where('cashier_session_id', $cashierSession->id)->where('status', Payment::STATUS_REFUNDED)->sum('amount') ?? 0,
+                'refundedAmount'  => Payment::where('cashier_session_id', $cashierSession->id)->where('payment_method', Payment::METHOD_REFUND)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
             ];
 
             $cashierSession->formatted_duration = $this->sessionService->formatDuration($cashierSession);
