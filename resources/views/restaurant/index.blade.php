@@ -2,69 +2,140 @@
 @section('title', 'Restaurant - Menus')
 @section('content')
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="mb-0">Gestion des Menus</h3>
-    <a href="{{ route('restaurant.create') }}" class="btn btn-success">
-        <i class="fas fa-plus me-2"></i>Ajouter un Menu
-    </a>
-</div>
+@include('restaurant.partials.nav-tabs')
 
-<div class="card shadow-sm border-0">
-    <div class="card-body">
-        <!-- Filtres par catégorie -->
-        <div class="row mb-4">
-            <div class="col-md-3">
-                <select class="form-select" id="categoryFilter">
+<style>
+/* Page Specific Styles */
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.category-tag {
+    position: absolute; top: 12px; left: 12px;
+    background: var(--g100); color: var(--g800);
+    padding: 3px 10px; border-radius: 6px;
+    font-size: .65rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px; z-index: 2;
+}
+
+.menu-actions {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px; padding-top: 15px; border-top: 1px solid var(--s100);
+}
+
+.btn-add-menu {
+    flex: 1; height: 36px; border: none;
+    background: var(--g600); color: white;
+    border-radius: 8px; font-weight: 600; font-size: .82rem;
+    cursor: pointer; transition: var(--transition);
+}
+.btn-add-menu:hover { background: var(--g700); transform: translateY(-1px); }
+
+.btn-icon-sm {
+    width: 34px; height: 34px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--white); border: 1.5px solid var(--s200);
+    color: var(--s500); transition: var(--transition); text-decoration: none;
+}
+.btn-icon-sm:hover { border-color: var(--g300); color: var(--g600); background: var(--g50); }
+.btn-icon-danger:hover { border-color: #fca5a5; color: #dc2626; background: #fef2f2; }
+
+#cart-counter-pill {
+    background: #dc3545; color: white;
+    font-size: .65rem; padding: 2px 6px;
+    border-radius: 100px; font-weight: 700;
+    margin-left: 4px; border: 1.5px solid white;
+}
+</style>
+
+<div class="db-page">
+    <div class="db-header anim-1">
+        <div>
+            <h1 class="db-title-h1">Gestion de la Carte</h1>
+            <p class="text-muted small">Configurez et gérez les menus de votre restaurant</p>
+        </div>
+        <a href="{{ route('restaurant.create') }}" class="btn-db-primary">
+            <i class="fas fa-plus"></i> Nouveau Menu
+        </a>
+    </div>
+
+    <div class="db-card anim-2">
+        <div class="filter-row">
+            <div class="filter-group">
+                <select class="db-input" id="categoryFilter">
                     <option value="">Toutes les catégories</option>
-                    <option value="plat">Plats</option>
-                    <option value="boisson">Boissons</option>
-                    <option value="dessert">Desserts</option>
-                    <option value="entree">Entrées</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->slug }}">{{ $category->name }}</option>
+                    @endforeach
                 </select>
+                <div class="search-box-wrap">
+                    <i class="fas fa-search search-box-icon"></i>
+                    <input type="text" class="db-input w-100" id="searchMenu" placeholder="Rechercher une spécialité..." style="padding-left: 40px;">
+                </div>
             </div>
-            <div class="col-md-6">
-                <input type="text" class="form-control" id="searchMenu" placeholder="Rechercher un menu...">
-            </div>
+            <button class="btn-cart-pill open-cart-modal" type="button">
+                <i class="fas fa-shopping-basket"></i> Panier
+                <span id="cart-counter-pill" style="display: none;">0</span>
+            </button>
         </div>
 
-        <!-- Liste des menus -->
-        <div class="row" id="menuList">
+        <div class="menu-grid" id="menuList">
             @forelse($menus as $menu)
-            <div class="col-xl-3 col-lg-4 col-md-6 menu-item" data-category="{{ $menu->category }}">
-                <div class="card menu-card mb-4 border">
-                    <div class="position-relative">
-                        @if($menu->image)
-                        <img src="{{ asset('storage/' . $menu->image) }}" class="card-img-top" alt="{{ $menu->name }}" style="height: 200px; object-fit: cover;">
-                        @else
-                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                            <i class="fas fa-utensils fa-3x text-muted"></i>
-                        </div>
-                        @endif
-                        <span class="badge bg-primary position-absolute top-0 end-0 m-2">
-                            {{ number_format($menu->price, 2) }} €
-                        </span>
+            <div class="menu-item anim-3" data-category="{{ $menu->category?->slug }}">
+                <div class="db-item-card">
+                    <div class="db-item-img">
+                        <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}" onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
+                        <span class="category-tag">{{ $menu->category?->name ?? 'Sans catégorie' }}</span>
+                        <div class="db-price-tag">{{ number_format($menu->price, 0, ',', ' ') }} CFA</div>
                     </div>
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title mb-0">{{ $menu->name }}</h5>
-                            <span class="badge bg-info">{{ ucfirst($menu->category) }}</span>
+                    <div class="db-item-content">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h3 class="menu-title mb-0">{{ $menu->name }}</h3>
+                            <div class="form-check form-switch" title="Disponibilité du plat">
+                                <input class="form-check-input toggle-availability" type="checkbox" role="switch"
+                                       data-id="{{ $menu->id }}" {{ $menu->is_available ? 'checked' : '' }}>
+                            </div>
                         </div>
-                        <p class="card-text text-muted mb-3">
-                            {{ Str::limit($menu->description, 100) }}
-                        </p>
-                        <div class="d-flex justify-content-between">
-                            <button class="btn btn-sm btn-outline-primary add-to-order" 
-                                    data-menu-id="{{ $menu->id }}" 
-                                    data-menu-name="{{ $menu->name }}" 
-                                    data-menu-price="{{ $menu->price }}">
-                                <i class="fas fa-cart-plus me-1"></i> Commander
-                            </button>
-                            <div>
-                                <a href="#" class="btn btn-sm btn-outline-warning">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <button class="btn btn-sm btn-outline-danger delete-menu" data-id="{{ $menu->id }}">
-                                    <i class="fas fa-trash"></i>
+
+                        <p class="menu-desc mb-2">{{ Str::limit($menu->description, 70) }}</p>
+
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            @php
+                                $daysMap = ['mon'=>'L','tue'=>'M','wed'=>'M','thu'=>'J','fri'=>'V','sat'=>'S','sun'=>'D'];
+                                $menuDays = $menu->available_days ?? [];
+                            @endphp
+                            @foreach($daysMap as $code => $lbl)
+                                <span class="badge {{ in_array($code, $menuDays) ? 'bg-success' : 'bg-secondary opacity-25' }}" 
+                                      style="font-size: 0.6rem; min-width: 18px; padding: 3px;">
+                                    {{ $lbl }}
+                                </span>
+                            @endforeach
+                        </div>
+                        
+                        <div class="menu-actions">
+
+                            <div class="flex-grow-1" data-id="{{ $menu->id }}">
+                                <button class="btn-add-menu add-to-order" 
+                                        id="main-add-btn-{{ $menu->id }}"
+                                        data-menu-id="{{ $menu->id }}" 
+                                        data-menu-name="{{ $menu->name }}" 
+                                        data-menu-price="{{ $menu->price }}">
+                                    <i class="fas fa-plus-circle"></i> Ajouter
+                                </button>
+                                
+                                <div class="db-qty-pill d-none" id="main-qty-wrapper-{{ $menu->id }}">
+                                    <button class="db-qty-btn main-qminus" data-id="{{ $menu->id }}"><i class="fas fa-minus"></i></button>
+                                    <span class="db-qty-val" id="main-qval-{{ $menu->id }}">0</span>
+                                    <button class="db-qty-btn main-qplus" data-id="{{ $menu->id }}"><i class="fas fa-plus"></i></button>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <a href="{{ route('restaurant.menus.edit', $menu->id) }}" class="btn-icon-sm" title="Modifier"><i class="fas fa-pen"></i></a>
+                                <button class="btn-icon-sm btn-icon-danger delete-menu" data-id="{{ $menu->id }}" title="Supprimer">
+                                    <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </div>
@@ -72,184 +143,188 @@
                 </div>
             </div>
             @empty
-            <div class="col-12">
-                <div class="text-center py-5">
-                    <i class="fas fa-utensils fa-4x text-muted mb-3"></i>
-                    <h4>Aucun menu disponible</h4>
-                    <p class="text-muted">Commencez par ajouter des menus à votre restaurant.</p>
-                    <a href="{{ route('restaurant.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus me-1"></i> Ajouter le premier menu
-                    </a>
-                </div>
+            <div class="col-12 text-center py-5">
+                <div style="font-size: 4rem; color: var(--s200); margin-bottom: 20px;"><i class="fas fa-scroll"></i></div>
+                <h4 class="fw-bold">Carte vide</h4>
+                <p class="text-muted">Aucun menu n'a encore été ajouté.</p>
+                <a href="{{ route('restaurant.create') }}" class="btn-db-primary mt-3">Ajouter le premier menu</a>
             </div>
             @endforelse
         </div>
 
-        <!-- Pagination -->
         @if($menus->hasPages())
-        <div class="row mt-4">
-            <div class="col-12">
-                {{ $menus->links() }}
-            </div>
+        <div class="mt-4 d-flex justify-content-center">
+            {{ $menus->links("pagination::bootstrap-5") }}
         </div>
         @endif
     </div>
 </div>
 
-<!-- Modal pour la commande -->
-<div class="modal fade" id="orderModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Nouvelle Commande</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="orderForm" action="{{ route('restaurant.orders.store') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Client</label>
-                        <select class="form-select" name="customer_id" id="customerSelect" required>
-                            <option value="">Sélectionner un client</option>
-                            @foreach($customers ?? [] as $customer)
-                            <option value="{{ $customer->id }}">{{ $customer->name }} - Chambre {{ $customer->room_number ?? 'N/A' }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Menu sélectionné</label>
-                        <div class="alert alert-info" id="selectedMenuInfo">
-                            Aucun menu sélectionné
-                        </div>
-                        <input type="hidden" name="menu_id" id="selectedMenuId">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Quantité</label>
-                        <input type="number" class="form-control" name="quantity" value="1" min="1" max="10">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Notes supplémentaires</label>
-                        <textarea class="form-control" name="notes" rows="3" placeholder="Ex: Sans gluten, épicé..."></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Enregistrer la commande</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+@include('restaurant.partials.new-order-modal')
 @endsection
 
-@section('footer')
+
+@push('scripts')
 <script>
-$(document).ready(function() {
-    // Filtrage par catégorie
-    $('#categoryFilter').change(function() {
-        const category = $(this).val();
-        if (category) {
-            $('.menu-item').hide();
-            $(`.menu-item[data-category="${category}"]`).show();
-        } else {
-            $('.menu-item').show();
+    // Filtres unifiés (Recherche + Catégorie)
+    function applyFilters() {
+        const cat = document.getElementById('categoryFilter').value.toLowerCase();
+        const query = document.getElementById('searchMenu').value.toLowerCase();
+        
+        document.querySelectorAll('.menu-item').forEach(item => {
+            const itemCat = (item.dataset.category || '').toLowerCase();
+            const itemTitle = (item.querySelector('.menu-title')?.textContent || '').toLowerCase();
+            
+            const matchCat = !cat || itemCat === cat;
+            const matchQuery = !query || itemTitle.includes(query);
+            
+            item.style.display = (matchCat && matchQuery) ? '' : 'none';
+        });
+    }
+
+    document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+    document.getElementById('searchMenu').addEventListener('input', applyFilters);
+
+    // Écouteurs de clics (Délégation globale Vanilla)
+    document.addEventListener('click', function(e) {
+        // --- 1. Suppression ---
+        const btnDelete = e.target.closest('.delete-menu');
+        if (btnDelete) {
+            e.preventDefault();
+            const menuId = btnDelete.dataset.id;
+            Swal.fire({
+                title: 'Êtes-vous sûr ?',
+                text: 'Ce menu sera supprimé !',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Oui, supprimer !',
+                cancelButtonText: 'Annuler'
+            }).then(r => {
+                if (r.isConfirmed) {
+                    fetch('/restaurant/menus/' + menuId, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        },
+                        body: '_method=DELETE&_token=' + (document.querySelector('meta[name="csrf-token"]')?.content || '')
+                    })
+                    .then(res => res.json())
+                    .then(() => location.reload())
+                    .catch(() => alert('Erreur lors de la suppression'));
+                }
+            });
+        }
+
+            // --- 2. Ajouter au Panier Silencieusement ---
+            const btnOrder = e.target.closest('.add-to-order');
+            if (btnOrder) {
+                e.preventDefault();
+                const id = btnOrder.dataset.menuId;
+                
+                // Utiliser jQuery pour simuler le clic sur le bouton caché du modal
+                const $addBtn = $(`#naddbtn-${id}`);
+                if ($addBtn.length) {
+                    $addBtn.trigger('click');
+                    
+                    // Optionnel : un petit effet visuel sur le bouton pour confirmer l'action
+                    const $icon = $(btnOrder).find('i');
+                    const originalClass = $icon.attr('class');
+                    $icon.attr('class', 'fas fa-check-circle');
+                    setTimeout(() => $icon.attr('class', originalClass), 1000);
+                } else {
+                    console.error("Bouton modal introuvable pour ID:", id);
+                    // Fallback : au moins ouvrir le modal
+                    const modalEl = document.getElementById('newOrderModal');
+                    if (modalEl && window.bootstrap) {
+                        bootstrap.Modal.getOrCreateInstance(modalEl).show();
+                    }
+                }
+            }
+
+        // --- 2.1 Incrementation / Decrementation depuis la page principale ---
+        const btnPlus = e.target.closest('.main-qplus');
+        if (btnPlus) {
+            const id = btnPlus.dataset.id;
+            const target = document.querySelector(`#nqval-${id}`)?.nextElementSibling; // the .nom-qplus button
+            if (target) target.click();
+        }
+
+        const btnMinus = e.target.closest('.main-qminus');
+        if (btnMinus) {
+            const id = btnMinus.dataset.id;
+            const target = document.querySelector(`#nqty-${id} .nom-qminus`);
+            if (target) target.click();
+        }
+        // --- 3. Panier Global ---
+        const btnCart = e.target.closest('.open-cart-modal');
+        if (btnCart) {
+            e.preventDefault();
+            const el = document.getElementById('newOrderModal');
+            if (window.bootstrap && bootstrap.Modal) {
+                bootstrap.Modal.getOrCreateInstance(el).show();
+            } else if (window.$) {
+                $(el).modal('show');
+            }
+        }
+
+        // --- 4. Basculer la disponibilité ---
+        const switchToggle = e.target.closest('.toggle-availability');
+        if (switchToggle) {
+            const menuId = switchToggle.dataset.id;
+            const isChecked = switchToggle.checked;
+            
+            fetch(`/restaurant/menus/${menuId}/toggle-status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    switchToggle.checked = !isChecked; // Revert if failed
+                }
+            })
+            .catch(err => {
+                console.error('Erreur toggle:', err);
+                switchToggle.checked = !isChecked; // Revert
+            });
         }
     });
 
-    // Recherche de menu
-    $('#searchMenu').on('input', function() {
-        const searchTerm = $(this).val().toLowerCase();
-        $('.menu-item').each(function() {
-            const menuName = $(this).find('.card-title').text().toLowerCase();
-            $(this).toggle(menuName.includes(searchTerm));
-        });
-    });
 
-    // Ajouter au panier
-    $('.add-to-order').click(function() {
-        const menuId = $(this).data('menu-id');
-        const menuName = $(this).data('menu-name');
-        const menuPrice = $(this).data('menu-price');
+    // Observer pour mettre à jour les compteurs de la page en fonction du modal
+    setInterval(() => {
+        const modalCounter = document.getElementById('cart-counter-pill');
         
-        $('#selectedMenuId').val(menuId);
-        $('#selectedMenuInfo').html(`
-            <strong>${menuName}</strong><br>
-            Prix unitaire: ${menuPrice} €
-        `);
-        
-        $('#orderModal').modal('show');
-    });
-
-    // Supprimer un menu
-    $('.delete-menu').click(function() {
-        const menuId = $(this).data('id');
-        const swalWithBootstrapButtons = Swal.mixin({
-            customClass: {
-                confirmButton: 'btn btn-success',
-                cancelButton: 'btn btn-danger'
-            },
-            buttonsStyling: false
-        });
-
-        swalWithBootstrapButtons.fire({
-            title: 'Êtes-vous sûr ?',
-            text: "Ce menu sera supprimé définitivement !",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Oui, supprimer !',
-            cancelButtonText: 'Annuler',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `{{ url('restaurant/menus') }}/${menuId}`,
-                    type: 'DELETE',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        Swal.fire(
-                            'Supprimé !',
-                            'Le menu a été supprimé avec succès.',
-                            'success'
-                        ).then(() => {
-                            location.reload();
-                        });
-                    },
-                    error: function() {
-                        Swal.fire(
-                            'Erreur !',
-                            'Une erreur est survenue lors de la suppression.',
-                            'error'
-                        );
+        if (modalCounter) {
+            const count = parseInt(modalCounter.innerText) || 0;
+            
+            // Sync individual quantities
+            document.querySelectorAll('.qty-pill').forEach(pill => {
+                const id = pill.id.replace('main-qty-wrapper-', '');
+                const modalQty = document.getElementById('nqval-' + id);
+                
+                if (modalQty) {
+                    const qty = parseInt(modalQty.innerText) || 0;
+                    const mainQtyVal = document.getElementById('main-qval-' + id);
+                    if (mainQtyVal) mainQtyVal.innerText = qty;
+                    
+                    const addBtn = document.getElementById('main-add-btn-' + id);
+                    if (qty > 0) {
+                        pill.classList.remove('d-none');
+                        if (addBtn) addBtn.classList.add('d-none');
+                    } else {
+                        pill.classList.add('d-none');
+                        if (addBtn) addBtn.classList.remove('d-none');
                     }
-                });
-            }
-        });
-    });
-});
+                }
+            });
+        }
+    }, 500);
 </script>
-
-<style>
-.menu-card {
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.menu-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.menu-card .card-img-top {
-    border-top-left-radius: 0.375rem;
-    border-top-right-radius: 0.375rem;
-}
-
-.badge.bg-info {
-    background-color: #17a2b8 !important;
-}
-</style>
-@endsection
+@endpush

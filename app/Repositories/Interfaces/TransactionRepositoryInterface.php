@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories\Interface;
+namespace App\Repositories\Interfaces;
 
 use App\Models\Customer;
 use App\Models\Room;

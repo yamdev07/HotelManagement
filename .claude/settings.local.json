@@ -6,7 +6,9 @@
       "Bash(php -l app/Policies/TransactionPolicy.php app/Policies/PaymentPolicy.php app/Policies/RoomPolicy.php app/Policies/UserPolicy.php database/factories/TransactionFactory.php database/migrations/2026_01_27_181205_finalize_role_enum.php app/Services/CashierSessionService.php)",
       "Bash(php -l database/factories/TransactionFactory.php)",
       "WebFetch(domain:api.github.com)",
-      "Bash(grep -n \"{{ \\\\$\\\\|@foreach.*\\\\$\\\\|@if.*\\\\$\" resources/views/housekeeping/reports.blade.php)"
+      "Bash(grep -n \"{{ \\\\$\\\\|@foreach.*\\\\$\\\\|@if.*\\\\$\" resources/views/housekeeping/reports.blade.php)",
+      "Bash(findstr -i \"categor\")",
+      "Bash(findstr \"Pending\")"
     ]
   }
 }

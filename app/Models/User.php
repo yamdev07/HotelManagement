@@ -74,6 +74,11 @@ class User extends Authenticatable
             return asset('img/default/default-user.jpg');
         }
 
+        // Si c'est une URL externe
+        if (str_starts_with($this->avatar, 'http')) {
+            return $this->avatar;
+        }
+
         // Le fichier est directement dans /public/img/user/
         $fullPath = 'img/user/'.trim($this->avatar, '/');
 
@@ -141,11 +146,16 @@ class User extends Authenticatable
     }
 
     /**
-     * Vérifie si l'utilisateur a une session active
+     * Vérifie si l'utilisateur est un serveur (Servant)
      */
-    public function hasActiveSession(): bool
+    public function isServant(): bool
     {
-        return $this->activeCashierSession !== null;
+        return $this->role === 'Servant';
+    }
+
+    public function isCuisiner(): bool
+    {
+        return $this->role === 'Cuisiner';
     }
 
     public function getPermissionsAttribute(): array
@@ -154,6 +164,7 @@ class User extends Authenticatable
             $this->isSuper()                        => ['all'],
             $this->isAdmin()                        => ['manage_users', 'view_reports', 'manage_settings'],
             $this->isReceptionist() || $this->isCashier() => ['manage_bookings', 'process_payments', 'view_cashier_dashboard'],
+            $this->isServant()                      => ['manage_restaurant', 'view_cashier_dashboard', 'process_payments'],
             $this->isCustomer()                     => ['view_bookings', 'make_payments'],
             default                                 => [],
         };

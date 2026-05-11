@@ -29,6 +29,22 @@ class LoginController extends Controller
     protected $redirectTo = RouteServiceProvider::HOME;
 
     /**
+     * Redirect users after login based on their role.
+     *
+     * @return string
+     */
+    protected function redirectTo()
+    {
+        $user = auth()->user();
+
+        if (in_array($user->role, ['Servant', 'Cuisiner'])) {
+            return route('restaurant.orders');
+        }
+
+        return RouteServiceProvider::HOME;
+    }
+
+    /**
      * Create a new controller instance.
      *
      * @return void

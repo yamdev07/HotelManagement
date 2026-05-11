@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{-- OBLIGATOIRE pour la sauvegarde AJAX --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>{{ config('app.name', 'Laravel') }} - Administration</title>
@@ -26,6 +27,7 @@
     <!-- Fallback CSS personnalisé (si Vite ne charge pas) -->
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 
+    {{-- OBLIGATOIRE pour charger les styles de la vue --}}
     @stack('styles')
 </head>
 <body>
@@ -131,6 +133,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Scripts spécifiques à la page -->
+    {{-- OBLIGATOIRE pour charger les scripts de la vue --}}
     @stack('scripts')
 
     <!-- Initialisation Bootstrap -->

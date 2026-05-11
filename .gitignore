@@ -1,61 +1,32 @@
-# Dependencies
 /node_modules
+/public/img/room/*
+/public/img/user/*
+/storage/*.key
 /vendor
-
-# Environment
 .env
 .env.backup
-.env.*.local
-
-# Laravel generated / cache
-/bootstrap/cache/*
-!/bootstrap/cache/.gitkeep
-/storage/*.key
-/storage/app/public
-/storage/framework/cache/data/*
-!/storage/framework/cache/data/.gitkeep
-/storage/framework/sessions/*
-!/storage/framework/sessions/.gitkeep
-/storage/framework/testing/*
-!/storage/framework/testing/.gitkeep
-/storage/framework/views/*
-!/storage/framework/views/.gitkeep
-/storage/logs/*.log
-
-# Test cache
 .phpunit.result.cache
-.phpunit.cache/
-
-# Build / compiled assets
-/public/hot
-/public/storage
-/public/build
+docker-compose.override.yml
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
 /public/fonts
 /public/css/app.css
 /public/js/app.js
 /public/js/app.js.LICENSE.txt
-/public/assets/
+/public/hot
+/public/storage
 
-# Uploaded media (runtime)
-/public/img/room/*
-/public/img/user/*
-
-# Docker / Vagrant
-docker-compose.override.yml
-Homestead.json
-Homestead.yaml
-
-# Logs
-npm-debug.log
-yarn-error.log
-
-# IDEs
+/public/build
 .idea/
-.vscode/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-Desktop.ini
+# Ignore cache, views and sessions in framework
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+/public/assets/

@@ -11,15 +11,15 @@ use App\Repositories\Implementation\RoomStatusRepository;
 use App\Repositories\Implementation\TransactionRepository;
 use App\Repositories\Implementation\TypeRepository;
 use App\Repositories\Implementation\UserRepository;
-use App\Repositories\Interface\CustomerRepositoryInterface;
-use App\Repositories\Interface\ImageRepositoryInterface;
-use App\Repositories\Interface\PaymentRepositoryInterface;
-use App\Repositories\Interface\ReservationRepositoryInterface;
-use App\Repositories\Interface\RoomRepositoryInterface;
-use App\Repositories\Interface\RoomStatusRepositoryInterface;
-use App\Repositories\Interface\TransactionRepositoryInterface;
-use App\Repositories\Interface\TypeRepositoryInterface;
-use App\Repositories\Interface\UserRepositoryInterface;
+use App\Repositories\Interfaces\CustomerRepositoryInterface;
+use App\Repositories\Interfaces\ImageRepositoryInterface;
+use App\Repositories\Interfaces\PaymentRepositoryInterface;
+use App\Repositories\Interfaces\ReservationRepositoryInterface;
+use App\Repositories\Interfaces\RoomRepositoryInterface;
+use App\Repositories\Interfaces\RoomStatusRepositoryInterface;
+use App\Repositories\Interfaces\TransactionRepositoryInterface;
+use App\Repositories\Interfaces\TypeRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use App\Services\CashierSessionService;
 use App\Services\CheckInService;
 use App\Services\DashboardService;
@@ -28,6 +28,8 @@ use App\Services\PaymentService;
 use App\Services\SessionActivityService;
 use App\Services\TransactionService;
 use Illuminate\Support\ServiceProvider;
+
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -54,5 +56,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(SessionActivityService::class);
     }
 
-    public function boot(): void {}
+    public function boot(): void
+    {
+        Paginator::useBootstrapFive();
+    }
 }

@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Hôtel Luxury Palace - L\'excellence au service du luxe')
+@section('title', 'Cactus Palace — Hôtel 5 Étoiles, Cotonou, Bénin')
 
 @section('content')
     <!-- Hero Section modernisé -->
@@ -10,13 +10,13 @@
                 <div class="row min-vh-100 align-items-center justify-content-center">
                     <div class="col-lg-10 text-center">
                         <div class="hero-badge mb-4" data-aos="fade-down">
-                            <span class="badge-text">Luxury Collection</span>
+                            <span class="badge-text">Hôtel 5 Étoiles · Cotonou, Bénin</span>
                         </div>
                         <h1 class="hero-title mb-4" data-aos="fade-up" data-aos-delay="100">
-                            Cactus Hotel
+                            Cactus Palace
                         </h1>
                         <p class="hero-subtitle mb-5" data-aos="fade-up" data-aos-delay="200">
-                            L'expérience ultime du luxe et de l'élégance en plein cœur de la ville
+                            L'art de l'hospitalité au cœur de Cotonou — une expérience de luxe authentiquement béninoise
                         </p>
                         <div class="hero-cta" data-aos="fade-up" data-aos-delay="300">
                             <a href="{{ route('frontend.rooms') }}" class="btn-modern btn-primary me-3">
@@ -81,8 +81,8 @@
                         </div>
                         <div class="floating-badge">
                             <div class="badge-content">
-                                <h3>30+</h3>
-                                <p>Années d'excellence</p>
+                                <h3>5★</h3>
+                                <p>Hôtel de luxe</p>
                             </div>
                         </div>
                         <div class="decoration-element"></div>
@@ -200,9 +200,7 @@
                                 </span>
                             </div>
                             
-                            @if($room->view)
-                            <p class="room-description">{{ Str::limit($room->view, 100) }}</p>
-                            @endif
+                            <p class="room-description">{{ Str::limit($room->type->description_fr, 100) }}</p>
                             
                             <div class="room-specs">
                                 <div class="spec-item">
@@ -219,7 +217,7 @@
                             
                             <div class="room-footer">
                                 <div class="price-info">
-                                    <span class="price">{{ number_format($room->price, 0, ',', ' ') }} FCFA</span>
+                                    <span class="price">{{ $room->type->formatted_price ?? 'N/A' }}</span>
                                     <span class="price-label">par nuit</span>
                                 </div>
                                 <a href="{{ route('frontend.room.details', $room->id) }}" class="btn-view">

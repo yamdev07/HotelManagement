@@ -263,9 +263,9 @@
                                 <i class="fas fa-download me-1"></i> Exporter
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-file-pdf me-2"></i> PDF</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-file-excel me-2"></i> Excel</a></li>
-                                <li><a class="dropdown-item" href="#"><i class="fas fa-file-csv me-2"></i> CSV</a></li>
+                                <li><a class="dropdown-item" href="{{ route('transaction.export', ['type' => 'pdf']) }}?transaction_id={{ $transaction->id }}"><i class="fas fa-file-pdf me-2"></i> PDF</a></li>
+                                <li><a class="dropdown-item" href="{{ route('transaction.export', ['type' => 'excel']) }}?transaction_id={{ $transaction->id }}"><i class="fas fa-file-excel me-2"></i> Excel</a></li>
+                                <li><a class="dropdown-item" href="{{ route('transaction.export', ['type' => 'csv']) }}?transaction_id={{ $transaction->id }}"><i class="fas fa-file-csv me-2"></i> CSV</a></li>
                             </ul>
                         </div>
                     </div>

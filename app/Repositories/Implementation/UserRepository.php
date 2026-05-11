@@ -3,7 +3,7 @@
 namespace App\Repositories\Implementation;
 
 use App\Models\User;
-use App\Repositories\Interface\UserRepositoryInterface;
+use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Support\Str;
 
 class UserRepository implements UserRepositoryInterface
@@ -23,7 +23,7 @@ class UserRepository implements UserRepositoryInterface
 
     public function showUser($request)
     {
-        return User::whereIn('role', ['Super', 'Admin', 'Receptionist', 'Housekeeping']) // ✅ TOUS les rôles sauf Customer
+        return User::whereIn('role', ['Super', 'Admin', 'Receptionist', 'Housekeeping', 'Servant', 'Cuisiner']) // ✅ TOUS les rôles sauf Customer
             ->orderBy('id', 'DESC')
             ->when($request->qu, function ($query) use ($request) {
                 $query->where(function ($q) use ($request) {

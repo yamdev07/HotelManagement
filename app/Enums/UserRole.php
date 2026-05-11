@@ -4,12 +4,14 @@ namespace App\Enums;
 
 enum UserRole: string
 {
-    case Super       = 'Super';
-    case Admin       = 'Admin';
+    case Super        = 'Super';
+    case Admin        = 'Admin';
     case Receptionist = 'Receptionist';
-    case Cashier     = 'Cashier';
+    case Cashier      = 'Cashier';
     case Housekeeping = 'Housekeeping';
-    case Customer    = 'Customer';
+    case Servant      = 'Servant';
+    case Cuisiner     = 'Cuisiner';
+    case Customer     = 'Customer';
 
     public function label(): string
     {
@@ -19,6 +21,8 @@ enum UserRole: string
             self::Receptionist => 'Réceptionniste',
             self::Cashier      => 'Caissier',
             self::Housekeeping => 'Housekeeping',
+            self::Servant      => 'Serveur',
+            self::Cuisiner     => 'Cuisinier',
             self::Customer     => 'Client',
         };
     }
@@ -31,6 +35,8 @@ enum UserRole: string
             self::Receptionist => 'fas fa-concierge-bell',
             self::Cashier      => 'fas fa-cash-register',
             self::Housekeeping => 'fas fa-broom',
+            self::Servant      => 'fas fa-utensils',
+            self::Cuisiner     => 'fas fa-fire-burner',
             self::Customer     => 'fas fa-user',
         };
     }
@@ -43,6 +49,8 @@ enum UserRole: string
             self::Receptionist => 'info',
             self::Cashier      => 'success',
             self::Housekeeping => 'warning',
+            self::Servant      => 'info',
+            self::Cuisiner     => 'warning',
             self::Customer     => 'secondary',
         };
     }
@@ -55,6 +63,8 @@ enum UserRole: string
             self::Receptionist,
             self::Cashier,
             self::Housekeeping,
+            self::Servant,
+            self::Cuisiner,
         ]);
     }
 
@@ -65,7 +75,14 @@ enum UserRole: string
 
     public function canProcessPayments(): bool
     {
-        return in_array($this, [self::Super, self::Admin, self::Receptionist, self::Cashier]);
+        return in_array($this, [
+            self::Super,
+            self::Admin,
+            self::Receptionist,
+            self::Cashier,
+            self::Servant,
+            self::Cuisiner,
+        ]);
     }
 
     public function canManageRooms(): bool
@@ -81,7 +98,15 @@ enum UserRole: string
     /** @return self[] */
     public static function staffRoles(): array
     {
-        return [self::Super, self::Admin, self::Receptionist, self::Cashier, self::Housekeeping];
+        return [
+            self::Super,
+            self::Admin,
+            self::Receptionist,
+            self::Cashier,
+            self::Housekeeping,
+            self::Servant,
+            self::Cuisiner,
+        ];
     }
 
     /** @return string[] */

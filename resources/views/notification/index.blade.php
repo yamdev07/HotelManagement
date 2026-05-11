@@ -524,9 +524,8 @@
 
 @endsection
 
-@section('footer')
+@push('scripts')
 <script>
-// Fonction pour marquer comme lu et rediriger
 function markAsReadAndRedirect(notificationId, url) {
     fetch(`/notification-to/${notificationId}`, {
         method: 'GET',
@@ -535,23 +534,8 @@ function markAsReadAndRedirect(notificationId, url) {
             'Accept': 'application/json'
         }
     })
-    .then(response => {
-        if (response.ok) {
-            window.location.href = url;
-        } else {
-            console.error('Erreur lors du marquage de la notification');
-            window.location.href = url;
-        }
-    })
-    .catch(error => {
-        console.error('Erreur:', error);
-        window.location.href = url;
-    });
+    .then(() => { window.location.href = url; })
+    .catch(() => { window.location.href = url; });
 }
-
-// Marquer toutes comme lues (optionnel)
-document.addEventListener('DOMContentLoaded', function() {
-    // Vous pouvez ajouter un bouton "Tout marquer comme lu" ici
-});
 </script>
-@endsection
+@endpush

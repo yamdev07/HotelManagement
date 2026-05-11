@@ -505,6 +505,12 @@
                                         <option value="Customer" @if(old('role') == 'Customer') selected @endif>
                                             👤 Client
                                         </option>
+                                        <option value="Servant" @if(old('role') == 'Servant') selected @endif>
+                                            🍳 Serveur
+                                        </option>
+                                        <option value="Cuisiner" @if(old('role') == 'Cuisiner') selected @endif>
+                                            👨‍🍳 Cuisinier
+                                        </option>
                                     </select>
                                 </div>
                                 @error('role')
@@ -564,7 +570,9 @@ document.addEventListener('DOMContentLoaded', function() {
         'Admin': 'Accès complet au système avec tous les privilèges administratifs. Peut gérer les utilisateurs, les réservations, et configurer le système.',
         'Receptionist': 'Gère les réservations, l\'accueil des clients, et les opérations quotidiennes de la réception.',
         'Housekeeping': 'Responsable de l\'entretien des chambres et du nettoyage de l\'établissement.',
-        'Customer': 'Accès limité pour effectuer des réservations et consulter son historique.'
+        'Customer': 'Accès limité pour effectuer des réservations et consulter son historique.',
+        'Servant': 'Accès dédié aux modules Restaurant et Caisse pour la prise de commande et les encaissements.',
+        'Cuisiner': 'Accès identique au Serveur : modules Restaurant et Caisse pour la préparation et le suivi des commandes.'
     };
     
     // Afficher la description du rôle

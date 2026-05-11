@@ -752,9 +752,6 @@
                                 <div>
                                     <div class="room-price">{{ number_format($room->price, 0, ',', ' ') }} FCFA</div>
                                     @if($room->price > 0)
-                                    <div class="room-price__eur">
-                                        ≈ €{{ number_format($room->price / 655, 2, ',', ' ') }}
-                                    </div>
                                     @if($room->type && $room->type->base_price && $room->price != $room->type->base_price)
                                     <div class="room-price__custom">
                                         <i class="fas fa-exclamation-circle"></i>

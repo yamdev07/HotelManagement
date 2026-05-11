@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Menu;
+use App\Models\RestaurantReservation;
 use App\Models\Room;
 use App\Models\Type;
 use App\Models\Transaction;
 use App\Models\Customer;
 use App\Models\User;
+use App\Notifications\ReservationNotification;
+use App\Notifications\RestaurantReservationNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +19,13 @@ use Illuminate\Support\Str;
 
 class FrontendController extends Controller
 {
+    public function __construct()
+    {
+        if (class_exists(\Debugbar::class)) {
+            \Debugbar::disable();
+        }
+    }
+
     // Page d'accueil du site vitrine
     public function home()
     {
@@ -774,7 +784,18 @@ public function rooms(Request $request)
                 ->log('réservation en ligne');
 
             DB::commit();
-            
+
+            // Notifier tout le personnel (sauf les clients)
+            try {
+                $transaction->load(['customer', 'room']);
+                $staffUsers = User::staff()->get();
+                foreach ($staffUsers as $staffUser) {
+                    $staffUser->notify(new ReservationNotification($transaction));
+                }
+            } catch (\Exception $notifException) {
+                Log::warning('Erreur envoi notification réservation: ' . $notifException->getMessage());
+            }
+
             Log::info('=== RÉSERVATION RÉUSSIE ===');
             Log::info('Résumé:', [
                 'client_id' => $customer->id,
@@ -891,9 +912,25 @@ public function rooms(Request $request)
     // Restaurant vitrine
     public function restaurant()
     {
-        $menus = Menu::all();
-        return view('frontend.pages.restaurant', compact('menus'));
+        $currentDay = strtolower(now()->format('D')); // mon, tue, wed, thu, fri, sat, sun
+        
+        $menus = Menu::with('category')->where('is_available', true)
+            ->where(function ($q) use ($currentDay) {
+                $q->whereJsonContains('available_days', $currentDay)
+                    ->orWhereNull('available_days');
+            })
+            ->latest()
+            ->get()
+            ->map(function ($m) {
+                $m->image = $m->image_url;
+                return $m;
+            });
+
+        $categories = \App\Models\Category::all();
+
+        return view('frontend.pages.restaurant', compact('menus', 'categories'));
     }
+
 
     // Services
     public function services()
@@ -954,19 +991,48 @@ public function rooms(Request $request)
         ]);
 
         try {
-            Log::info('Réservation restaurant reçue:', $validated);
-            
+            $reservation = RestaurantReservation::create([
+                'name'             => $validated['name'],
+                'phone'            => $validated['phone'],
+                'reservation_date' => $validated['date'],
+                'reservation_time' => $validated['time'],
+                'persons'          => $validated['persons'],
+                'table_type'       => $validated['table_type'] ?? null,
+                'notes'            => $validated['notes'] ?? null,
+                'status'           => 'pending',
+            ]);
+
+            // Notifier tout le personnel
+            try {
+                $staffUsers = User::staff()->get();
+                foreach ($staffUsers as $staffUser) {
+                    $staffUser->notify(new RestaurantReservationNotification($reservation));
+                }
+            } catch (\Exception $notifException) {
+                Log::warning('Erreur envoi notification réservation restaurant: ' . $notifException->getMessage());
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Réservation envoyée avec succès ! Nous vous contacterons pour confirmer.',
             ]);
         } catch (\Exception $e) {
             Log::error('Erreur réservation restaurant: ' . $e->getMessage());
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Une erreur est survenue. Veuillez réessayer.',
             ], 500);
         }
+    }
+    /**
+     * Vue simplifiée du menu pour scan QR Code (Tablette Restaurant)
+     */
+    public function menuQr()
+    {
+        $categories = \App\Models\Category::all();
+        $menus = Menu::with('category')->latest()->get();
+
+        return view('frontend.pages.menu-qr', compact('categories', 'menus'));
     }
 }

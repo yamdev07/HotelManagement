@@ -179,6 +179,9 @@
     gap: 16px;
     margin-bottom: 24px;
 }
+@media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 768px)  { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px)  { .stats-grid { grid-template-columns: 1fr; } }
 .stat-card {
     background: var(--white);
     border: 1.5px solid var(--gray-200);
@@ -776,12 +779,29 @@
 <script>
 document.querySelectorAll('.clean-btn.red').forEach(btn => {
     btn.addEventListener('click', function(e) {
-        if (!confirm('Marquer cette chambre comme nettoyée ?')) e.preventDefault();
+        e.preventDefault();
+        const form = this.closest('form');
+        const roomNum = form.closest('.room-card').querySelector('.room-number').textContent.trim();
+        Swal.fire({
+            title: 'Chambre ' + roomNum,
+            text: 'Marquer cette chambre comme nettoyée et prête ?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Oui, nettoyée !',
+            cancelButtonText: 'Annuler',
+            confirmButtonColor: '#1e6b2e',
+            cancelButtonColor: '#6c757d',
+            reverseButtons: true
+        }).then(r => { if (r.isConfirmed) form.submit(); });
     });
 });
 setTimeout(() => {
-    document.querySelectorAll('.alert').forEach(a => a.remove());
-}, 3000);
+    document.querySelectorAll('.alert').forEach(a => {
+        a.style.transition = 'opacity .5s';
+        a.style.opacity = '0';
+        setTimeout(() => a.remove(), 500);
+    });
+}, 4000);
 </script>
 
 @endsection

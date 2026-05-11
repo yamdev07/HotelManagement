@@ -18,7 +18,7 @@ class CashierSessionController extends Controller
     public function __construct(private CashierSessionService $sessionService)
     {
         $this->middleware('auth');
-        $this->middleware('checkrole:Receptionist,Admin,Super,Cashier');
+        $this->middleware('checkrole:Receptionist,Admin,Super,Cashier,Servant,Cuisiner');
     }
 
     public function dashboard()

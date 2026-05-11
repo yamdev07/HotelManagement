@@ -136,7 +136,7 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item d-flex align-items-center" href="#">
+                            <a class="dropdown-item d-flex align-items-center" href="{{ route('profile.edit') }}">
                                 <i class="fas fa-cog me-3 text-secondary"></i>
                                 Settings
                             </a>

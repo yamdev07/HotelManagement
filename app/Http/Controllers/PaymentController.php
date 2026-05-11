@@ -27,7 +27,7 @@ class PaymentController extends Controller
             $query->where('status', $request->status);
         }
         if ($request->filled('method')) {
-            $query->where('payment_method', $request->method);
+            $query->where('payment_method', $request->input('method'));
         }
         if ($request->filled('search')) {
             $search = $request->search;
@@ -244,7 +244,7 @@ class PaymentController extends Controller
         $query = Payment::with(['transaction.customer', 'user', 'createdBy'])
             ->orderBy('created_at', 'DESC');
 
-        if ($request->filled('method'))    $query->where('payment_method', $request->method);
+        if ($request->filled('method'))    $query->where('payment_method', $request->input('method'));
         if ($request->filled('status'))    $query->where('status', $request->status);
         if ($request->filled('date_from')) $query->whereDate('created_at', '>=', $request->date_from);
         if ($request->filled('date_to'))   $query->whereDate('created_at', '<=', $request->date_to);

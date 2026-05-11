@@ -34,7 +34,7 @@ class UpdateCustomerRequest extends FormRequest
         return [
             'name' => 'required',
             'email' => 'required|unique:users,email,'.$this->user->id,
-            'role' => 'required|in:Super,Admin',
+            'role' => 'required|in:Super,Admin,Receptionist,Housekeeping,Servant,Cuisiner',
         ];
     }
 }

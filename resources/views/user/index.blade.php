@@ -585,7 +585,11 @@
                                             <td>
                                                 <div class="user-avatar-cell">
                                                     <div class="user-avatar {{ $userType }}">
-                                                        <i class="fas fa-{{ $avatarIcon }}"></i>
+                                                        @if($user->avatar)
+                                                            <img src="{{ $user->getAvatar() }}" alt="{{ $user->name }}" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+                                                        @else
+                                                            <i class="fas fa-{{ $avatarIcon }}"></i>
+                                                        @endif
                                                     </div>
                                                     <span style="font-weight: 500; color:var(--s800);">{{ $user->name }}</span>
                                                 </div>
@@ -714,7 +718,11 @@
                                             <td>
                                                 <div class="user-avatar-cell">
                                                     <div class="user-avatar customer">
-                                                        <i class="fas fa-user"></i>
+                                                        @if($user->avatar)
+                                                            <img src="{{ $user->getAvatar() }}" alt="{{ $user->name }}" style="width:100%; height:100%; object-fit:cover; border-radius:8px;">
+                                                        @else
+                                                            <i class="fas fa-user"></i>
+                                                        @endif
                                                     </div>
                                                     <span style="font-weight: 500; color:var(--s800);">{{ $user->name }}</span>
                                                 </div>

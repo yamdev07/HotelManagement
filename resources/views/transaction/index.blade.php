@@ -1070,13 +1070,12 @@
                             <div class="db-dropdown">
                                 <button class="badge-statut {{ $isLateCheckout ? 'badge-late' : ($status == 'reservation' ? 'badge-reservation' : ($status == 'active' ? 'badge-active' : ($status == 'completed' ? 'badge-completed' : ($status == 'cancelled' ? 'badge-cancelled' : 'badge-no_show')))) }}" 
                                         onclick="toggleDropdown('status-dd-{{ $transaction->id }}')" style="border: none;">
-                                    @if($isLateCheckout)
-                                        <i class="fas fa-clock"></i>
-                                    @elseif($status == 'reservation') 📅
-                                    @elseif($status == 'active') 🏨
-                                    @elseif($status == 'completed') ✅
-                                    @elseif($status == 'cancelled') ❌
-                                    @else 👤
+                                    @if($isLateCheckout) <i class="fas fa-clock"></i>
+                                    @elseif($status == 'reservation') <i class="fas fa-calendar-alt"></i>
+                                    @elseif($status == 'active') <i class="fas fa-hotel"></i>
+                                    @elseif($status == 'completed') <i class="fas fa-check-circle"></i>
+                                    @elseif($status == 'cancelled') <i class="fas fa-times-circle"></i>
+                                    @else <i class="fas fa-user-times"></i>
                                     @endif
                                     {{ $isLateCheckout ? 'Late checkout' : ($status == 'reservation' ? 'Réservation' : ($status == 'active' ? 'Dans hôtel' : ($status == 'completed' ? 'Terminé' : ($status == 'cancelled' ? 'Annulée' : 'No Show')))) }}
                                 </button>
@@ -1085,21 +1084,21 @@
                                         @csrf @method('PUT')
                                         <input type="hidden" name="status" value="reservation">
                                         <button type="submit" class="db-dropdown-item" {{ $status == 'reservation' ? 'disabled' : '' }}>
-                                            📅 Réservation
+                                            <i class="fas fa-calendar-alt me-1"></i> Réservation
                                         </button>
                                     </form>
                                     <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST">
                                         @csrf @method('PUT')
                                         <input type="hidden" name="status" value="active">
                                         <button type="submit" class="db-dropdown-item" {{ $status == 'active' ? 'disabled' : '' }}>
-                                            🏨 Dans l'hôtel
+                                            <i class="fas fa-hotel me-1"></i> Dans l'hôtel
                                         </button>
                                     </form>
                                     <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST">
                                         @csrf @method('PUT')
                                         <input type="hidden" name="status" value="completed">
                                         <button type="submit" class="db-dropdown-item" {{ !$isFullyPaid ? 'disabled' : '' }} {{ $status == 'completed' ? 'disabled' : '' }}>
-                                            ✅ Terminé {{ !$isFullyPaid ? '(impayé)' : '' }}
+                                            <i class="fas fa-check-circle me-1"></i> Terminé {{ !$isFullyPaid ? '(impayé)' : '' }}
                                         </button>
                                     </form>
                                     <div class="db-dropdown-divider"></div>
@@ -1107,14 +1106,14 @@
                                         @csrf @method('PUT')
                                         <input type="hidden" name="status" value="cancelled">
                                         <button type="submit" class="db-dropdown-item" {{ $status == 'cancelled' ? 'disabled' : '' }}>
-                                            ❌ Annulée
+                                            <i class="fas fa-times-circle me-1"></i> Annulée
                                         </button>
                                     </form>
                                     <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST">
                                         @csrf @method('PUT')
                                         <input type="hidden" name="status" value="no_show">
                                         <button type="submit" class="db-dropdown-item" {{ $status == 'no_show' ? 'disabled' : '' }}>
-                                            👤 No Show
+                                            <i class="fas fa-user-times me-1"></i> No Show
                                         </button>
                                     </form>
                                 </div>
@@ -1122,11 +1121,11 @@
                             @else
                             <span class="badge-statut {{ $isLateCheckout ? 'badge-late' : ($status == 'reservation' ? 'badge-reservation' : ($status == 'active' ? 'badge-active' : ($status == 'completed' ? 'badge-completed' : ($status == 'cancelled' ? 'badge-cancelled' : 'badge-no_show')))) }}">
                                 @if($isLateCheckout) <i class="fas fa-clock"></i>
-                                @elseif($status == 'reservation') 📅
-                                @elseif($status == 'active') 🏨
-                                @elseif($status == 'completed') ✅
-                                @elseif($status == 'cancelled') ❌
-                                @else 👤
+                                @elseif($status == 'reservation') <i class="fas fa-calendar-alt"></i>
+                                @elseif($status == 'active') <i class="fas fa-hotel"></i>
+                                @elseif($status == 'completed') <i class="fas fa-check-circle"></i>
+                                @elseif($status == 'cancelled') <i class="fas fa-times-circle"></i>
+                                @else <i class="fas fa-user-times"></i>
                                 @endif
                                 {{ $isLateCheckout ? 'Late checkout' : ($status == 'reservation' ? 'Réservation' : ($status == 'active' ? 'Dans hôtel' : ($status == 'completed' ? 'Terminé' : ($status == 'cancelled' ? 'Annulée' : 'No Show')))) }}
                             </span>
@@ -1193,6 +1192,11 @@
                                 <a href="{{ route('transaction.show', $transaction) }}" class="btn-action btn-view" data-bs-toggle="tooltip" title="Voir détails">
                                     <i class="fas fa-eye"></i>
                                 </a>
+                                @if(in_array($status, ['active', 'pending_checkout']))
+                                <a href="{{ route('transaction.compte-sejour', $transaction) }}" class="btn-action" style="background:#10b981; color:#fff;" data-bs-toggle="tooltip" title="Compte séjour">
+                                    <i class="fas fa-receipt"></i>
+                                </a>
+                                @endif
                             </div>
                         </td>
                     </tr>

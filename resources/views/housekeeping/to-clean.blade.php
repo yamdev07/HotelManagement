@@ -581,7 +581,7 @@
                                         <div class="dropdown">
                                             <button class="btn btn-gray btn-sm" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
                                             <ul class="dropdown-menu dropdown-menu-end">
-                                                <li><a class="dropdown-item" href="#"><i class="fas fa-eye"></i> Détails</a></li>
+                                                <li><a class="dropdown-item" href="{{ route('room.show', $room->id) }}"><i class="fas fa-eye"></i> Détails</a></li>
                                                 <li><a class="dropdown-item" href="{{ route('housekeeping.maintenance-form', $room->id) }}"><i class="fas fa-tools"></i> Maintenance</a></li>
                                                 <li>
                                                     <form action="{{ route('housekeeping.mark-inspection', $room->id) }}" method="POST">
@@ -660,7 +660,18 @@
 <script>
 document.querySelectorAll('form[action*="start-cleaning"]').forEach(f => {
     f.addEventListener('submit', e => {
-        if (!confirm('Démarrer le nettoyage ?')) e.preventDefault();
+        e.preventDefault();
+        const form = f;
+        Swal.fire({
+            title: 'Démarrer le nettoyage ?',
+            text: 'Confirmer la prise en charge de cette chambre.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-broom me-1"></i> Oui, démarrer',
+            cancelButtonText: 'Annuler',
+            confirmButtonColor: '#1e6b2e',
+            reverseButtons: true
+        }).then(r => { if (r.isConfirmed) form.submit(); });
     });
 });
 setTimeout(() => location.reload(), 60000);

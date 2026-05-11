@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreCustomerRequest;
 use App\Models\Customer;
 use App\Models\User;
-use App\Repositories\Interface\CustomerRepositoryInterface;
-use App\Repositories\Interface\ImageRepositoryInterface;
+use App\Repositories\Interfaces\CustomerRepositoryInterface;
+use App\Repositories\Interfaces\ImageRepositoryInterface;
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller

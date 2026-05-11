@@ -807,7 +807,8 @@
             <div class="customer-header">
                 <span class="customer-badge"><i class="fas fa-star"></i> Client #{{ $index }}</span>
                 <span class="customer-number">{{ $index }}</span>
-                <img src="https://ui-avatars.com/api/?name={{ urlencode($customer->name) }}&background=1e6b2e&color=fff&size=80" 
+                <img src="{{ $customer->avatar_url }}" 
+                     onerror="this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg'"
                      alt="{{ $customer->name }}" 
                      class="customer-avatar">
             </div>

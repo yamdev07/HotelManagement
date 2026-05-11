@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\TransactionExtraController;
 use App\Http\Controllers\AuthorizationController;
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\CashierSessionController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransactionRoomReservationController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\RestaurantCategoryController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -36,20 +38,12 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-Route::get('/debug-test', function () {
-    dd([
-        'route_name' => 'debug-test',
-        'time' => now(),
-        'server' => $_SERVER['SERVER_SOFTWARE'] ?? 'unknown',
-        'url' => url()->current(),
-    ]);
-});
-
 // ==================== ROUTES FRONTEND (Site Vitrine) ====================
 Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
 Route::get('/chambres', [FrontendController::class, 'rooms'])->name('frontend.rooms');
 Route::get('/chambre/{id}', [FrontendController::class, 'roomDetails'])->name('frontend.room.details');
 Route::get('/restaurant-vitrine', [FrontendController::class, 'restaurant'])->name('frontend.restaurant');
+Route::get('/menu', [FrontendController::class, 'menuQr'])->name('frontend.menu.qr');
 Route::get('/services', [FrontendController::class, 'services'])->name('frontend.services');
 Route::get('/contact', [FrontendController::class, 'contact'])->name('frontend.contact');
 Route::post('/contact/submit', [FrontendController::class, 'contactSubmit'])->name('frontend.contact.submit');
@@ -59,11 +53,22 @@ Route::post('/reservation/request', [FrontendController::class, 'reservationRequ
 Route::get('/reservation', [FrontendController::class, 'reservationForm'])->name('frontend.reservation');
 Route::post('/reservation/submit', [FrontendController::class, 'submitReservation'])->name('frontend.reservation.submit');
 
+// Commande restaurant depuis la vitrine (public)
+Route::post('/restaurant/orders', [RestaurantController::class, 'storeOrder'])->name('restaurant.orders.store');
+
+// Vérifier si une chambre a un client actif (public)
+    Route::get('/api/restaurant/check-room', [RestaurantController::class, 'checkRoomGuest'])->name('restaurant.check-room');
+    Route::post('/restaurant/menus/{id}/toggle-status', [RestaurantController::class, 'toggleStatus'])->name('restaurant.menus.toggle-status');
+
+
+
 Route::get('/api/available-rooms', [FrontendController::class, 'availableRooms'])->name('api.available-rooms');
 
 // ==================== ROUTES D'AUTHENTIFICATION ====================
 Route::view('/login', 'auth.login')->name('login.index');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::view('/register', 'auth.register')->name('register.index');
+Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 // ==================== ROUTE LOGOUT GLOBALE ====================
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -131,7 +136,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super']], function () {
 });
 
 // ==================== ROUTES ADMIN + RÉCEPTIONNISTES (AVEC RESTRICTIONS) ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'admin.restrict', 'receptionist.restrict']], function () {
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Servant,Cuisiner', 'admin.restrict', 'receptionist.restrict']], function () {
 
     // ==================== IMAGES ====================
     Route::post('/room/{room}/image/upload', [ImageController::class, 'store'])->name('image.store')
@@ -142,10 +147,11 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
     // ==================== ROUTE RACCOURCIE ====================
     Route::get('/createIdentity', function () {
         return redirect()->route('transaction.reservation.createIdentity');
-    })->name('quick.createIdentity');
+    })->name('quick.createIdentity')
+        ->middleware('checkrole:Super,Admin,Receptionist');
 
     // ==================== RÉSERVATIONS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
-    Route::prefix('transaction/reservation')->name('transaction.reservation.')->group(function () {
+    Route::prefix('transaction/reservation')->name('transaction.reservation.')->middleware('checkrole:Super,Admin,Receptionist')->group(function () {
         Route::get('/createIdentity', [TransactionRoomReservationController::class, 'createIdentity'])->name('createIdentity');
         Route::get('/pickFromCustomer', [TransactionRoomReservationController::class, 'pickFromCustomer'])->name('pickFromCustomer');
         Route::post('/search-by-email', [TransactionRoomReservationController::class, 'searchByEmail'])->name('searchByEmail');
@@ -231,7 +237,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
     Route::resource('roomstatus', RoomStatusController::class)->middleware('checkrole:Super,Admin');
 
     // ==================== TRANSACTIONS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
-    Route::prefix('transaction')->name('transaction.')->group(function () {
+    Route::prefix('transaction')->name('transaction.')->middleware('checkrole:Super,Admin,Receptionist')->group(function () {
         // Routes CRUD complètes SANS paramètres d'abord
         Route::get('/', [TransactionController::class, 'index'])->name('index');
         Route::get('/create', [TransactionController::class, 'create'])->name('create');
@@ -307,6 +313,19 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
             // IMPORTANT: La route show DOIT ÊTRE ICI, DANS LE GROUPE
             Route::get('/', [TransactionController::class, 'show'])->name('show')
                 ->middleware('checkrole:Super,Admin,Receptionist');
+
+            // ── COMPTE SÉJOUR (facture temps réel) ──
+            Route::get('/compte-sejour', [TransactionController::class, 'compteSejour'])
+                ->name('compte-sejour')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+
+            // ── EXTRAS (minibar, lessive, services) ──
+            Route::post('/extras', [TransactionExtraController::class, 'store'])
+                ->name('extras.store')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+            Route::delete('/extras/{extra}', [TransactionExtraController::class, 'destroy'])
+                ->name('extras.destroy')
+                ->middleware('checkrole:Super,Admin,Receptionist');
         });
     });
     // ==================== ÉQUIPEMENTS ====================
@@ -344,7 +363,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
     });
 
     // ==================== PAIEMENTS POUR TRANSACTIONS ====================
-    Route::prefix('transaction/{transaction}/payment')->name('transaction.payment.')->group(function () {
+    Route::prefix('transaction/{transaction}/payment')->name('transaction.payment.')->middleware('checkrole:Super,Admin,Receptionist')->group(function () {
         Route::get('/create', [PaymentController::class, 'create'])->name('create');
         Route::post('/store', [PaymentController::class, 'store'])->name('store');
         Route::get('/check-status', [PaymentController::class, 'checkTransactionStatus'])->name('check-status');
@@ -352,8 +371,10 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
     });
 
     // ==================== ALIAS PAIEMENTS ====================
-    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index');
-    Route::get('/payment/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payment.invoice');
+    Route::get('/payment', [PaymentController::class, 'index'])->name('payment.index')
+        ->middleware('checkrole:Super,Admin,Receptionist');
+    Route::get('/payment/{payment}/invoice', [PaymentController::class, 'invoice'])->name('payment.invoice')
+        ->middleware('checkrole:Super,Admin,Receptionist');
 
     // ==================== CHARTS ====================
     Route::get('/get-dialy-guest-chart-data', [ChartController::class, 'dailyGuestPerMonth']);
@@ -374,32 +395,43 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist', 'ad
 
             // ✅ CORRIGÉ : Ajout du middleware checkrole pour les réceptionnistes
             Route::delete('/', [CashierSessionController::class, 'destroy'])->name('sessions.destroy')
-                ->middleware('checkrole:Super,Admin,Receptionist');
+                ->middleware('checkrole:Super,Admin,Receptionist,Servant,Cuisiner');
 
             Route::get('/report', [CashierSessionController::class, 'report'])->name('sessions.report');
         });
 
         // Autres routes
         Route::get('/daily-report', [CashierSessionController::class, 'dailyReport'])->name('daily-report');
-        Route::get('/dashboard', [CashierSessionController::class, 'dashboard'])->name('dashboard');
+        Route::get('/dashboard', [CashierSessionController::class, 'dashboard'])
+            ->name('dashboard')
+            ->middleware('checkrole:Receptionist,Admin,Super,Cashier');
         Route::get('/current-session', [CashierSessionController::class, 'getCurrentSession'])->name('current-session');
         Route::get('/session-summary', [CashierSessionController::class, 'sessionSummary'])->name('session-summary');
     });
 });
 
-// ==================== ROUTES POUR TOUS LES UTILISATEURS AUTHENTIFIÉS ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist']], function () {
-    // ==================== DASHBOARD ====================
-    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+    // ==================== DASHBOARD (RESTEINT) ====================
+    Route::prefix('dashboard')->name('dashboard.')->middleware('checkrole:Super,Admin,Housekeeping,Receptionist')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('index');
         Route::get('/data', [DashboardController::class, 'getDashboardData'])->name('data');
         Route::get('/stats', [DashboardController::class, 'updateStats'])->name('stats');
         Route::get('/debug', [DashboardController::class, 'debug'])->name('debug');
     });
 
+// ==================== ROUTES POUR TOUS LES UTILISATEURS AUTHENTIFIÉS ====================
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant,Cuisiner']], function () {
+
     Route::get('/home', function () {
+        $user = auth()->user();
+        if ($user->role === 'Customer') {
+            return redirect()->route('transaction.myReservations');
+        }
+        if ($user->role === 'Servant' || $user->role === 'Cuisiner') {
+            return redirect()->route('cashier.dashboard');
+        }
         return redirect()->route('dashboard.index');
     })->name('home');
+
 
     // ==================== ACTIVITY LOG ====================
     Route::prefix('activity')->name('activity.')->group(function () {
@@ -456,31 +488,46 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
         // Routes sans paramètres d'abord
         Route::get('/', [RestaurantController::class, 'index'])->name('index');
         Route::get('/orders', [RestaurantController::class, 'orders'])->name('orders');
-        Route::post('/orders', [RestaurantController::class, 'storeOrder'])->name('orders.store');
+        // Route::post('/orders', [RestaurantController::class, 'storeOrder'])->name('orders.store'); // Déplacée en public
 
         // Routes avec paramètre {id}
         Route::prefix('orders/{id}')->group(function () {
             Route::get('/', [RestaurantController::class, 'showOrder'])->name('orders.show');
+            Route::get('/invoice', [RestaurantController::class, 'printInvoice'])->name('orders.invoice');
             Route::put('/', [RestaurantController::class, 'updateOrder'])->name('orders.update');
-            Route::put('/cancel', [RestaurantController::class, 'cancelOrder'])->name('orders.cancel')
-                ->middleware('require.authorization');
+            Route::post('/status', [RestaurantController::class, 'updateOrder'])->name('orders.status');
+            Route::put('/cancel', [RestaurantController::class, 'cancelOrder'])->name('orders.cancel');
+            Route::post('/update-customer-name', [RestaurantController::class, 'updateCustomerName'])->name('orders.update-customer-name');
         });
 
         // API AJAX
         Route::get('/api/customers', [RestaurantController::class, 'getCustomers'])->name('api.customers');
         Route::get('/api/menus', [RestaurantController::class, 'getMenus'])->name('api.menus');
 
-        // Gestion des menus seulement pour admins
-        Route::middleware('checkrole:Super,Admin,Receptionist')->group(function () {
+        // Gestion des menus et catégories seulement pour admins et servants
+        Route::middleware('checkrole:Super,Admin,Receptionist,Servant,Cuisiner')->group(function () {
             Route::get('/create', [RestaurantController::class, 'create'])->name('create');
             Route::post('/store', [RestaurantController::class, 'store'])->name('store');
+            Route::get('/menus/{id}/edit', [RestaurantController::class, 'edit'])->name('menus.edit');
+            Route::put('/menus/{id}', [RestaurantController::class, 'update'])->name('menus.update');
             Route::delete('/menus/{id}', [RestaurantController::class, 'destroy'])->name('menus.destroy');
+
+            // Catégories (Singulier comme demandé)
+            Route::get('/categorie', [RestaurantCategoryController::class, 'index'])->name('categories.index');
+            Route::post('/categorie', [RestaurantCategoryController::class, 'store'])->name('categories.store');
+            Route::put('/categorie/{id}', [RestaurantCategoryController::class, 'update'])->name('categories.update');
+            Route::delete('/categorie/{id}', [RestaurantCategoryController::class, 'destroy'])->name('categories.destroy');
+        });
+
+        // Suivi des ventes — Super, Admin
+        Route::middleware('checkrole:Super,Admin')->group(function () {
+            Route::get('/sales', [RestaurantController::class, 'sales'])->name('sales');
         });
     });
 });
 
 // ==================== DISPONIBILITÉ DES CHAMBRES ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist']], function () {
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant,Cuisiner']], function () {
     Route::prefix('availability')->name('availability.')->group(function () {
         // Routes sans paramètres d'abord
         Route::get('/dashboard', [AvailabilityController::class, 'dashboard'])->name('dashboard');
@@ -662,6 +709,9 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Housekeeping']], f
 
 // ==================== ROUTE ADMIN ====================
 Route::get('/admin', function () {
+    if (auth()->user()->role === 'Customer') {
+        return redirect()->route('transaction.myReservations');
+    }
     return redirect()->route('dashboard.index');
 })->name('admin');
 
@@ -915,6 +965,9 @@ Route::middleware(['auth', 'checkrole:Super,Admin,Receptionist'])->group(functio
 // ==================== ROUTE FALLBACK ====================
 Route::fallback(function () {
     if (auth()->check()) {
+        if (auth()->user()->role === 'Customer') {
+            return redirect()->route('transaction.myReservations')->with('error', 'Page non trouvée.');
+        }
         return redirect()->route('dashboard.index')->with('error', 'Page non trouvée.');
     }
 

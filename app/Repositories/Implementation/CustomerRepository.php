@@ -4,7 +4,7 @@ namespace App\Repositories\Implementation;
 
 use App\Models\Customer;
 use App\Models\User;
-use App\Repositories\Interface\CustomerRepositoryInterface;
+use App\Repositories\Interfaces\CustomerRepositoryInterface;
 use Illuminate\Support\Str;
 
 class CustomerRepository implements CustomerRepositoryInterface

@@ -332,7 +332,12 @@
 <div class="profile-page">
     <!-- Breadcrumb -->
     <div class="profile-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        @php
+            $dashboardRoute = in_array($user->role, ['Servant', 'Cuisiner'])
+                ? route('cashier.dashboard')
+                : route('dashboard.index');
+        @endphp
+        <a href="{{ $dashboardRoute }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Mon Profil</span>
     </div>

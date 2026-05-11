@@ -3,7 +3,7 @@
 namespace App\Repositories\Implementation;
 
 use App\Models\Payment;
-use App\Repositories\Interface\PaymentRepositoryInterface;
+use App\Repositories\Interfaces\PaymentRepositoryInterface;
 use Illuminate\Support\Facades\Log;
 
 class PaymentRepository implements PaymentRepositoryInterface
@@ -13,15 +13,6 @@ class PaymentRepository implements PaymentRepositoryInterface
      */
     public function store($request, $transaction, string $status)
     {
-        Log::info('PaymentRepository::store appelé', [
-            'transaction_id' => $transaction->id,
-            'status' => $status,
-            'request_keys' => array_keys($request->all()),
-            'amount_in_request' => $request->amount ?? 'non défini',
-            'payment_method' => $request->payment_method ?? 'cash',
-        ]);
-
-        // Préparer les données avec les champs corrects
         $paymentData = [
             'user_id' => $transaction->customer_id ?? (auth()->id() ?? 1),
             'created_by' => auth()->id() ?? 1,
@@ -33,8 +24,6 @@ class PaymentRepository implements PaymentRepositoryInterface
             'description' => ($request->description ?? $request->notes ?? '').($status ? ' - '.$status : ''),
         ];
 
-        Log::info('Données de création du paiement', $paymentData);
-
         return Payment::create($paymentData);
     }
 
@@ -43,8 +32,6 @@ class PaymentRepository implements PaymentRepositoryInterface
      */
     public function create(array $data)
     {
-        Log::info('PaymentRepository::create appelé', $data);
-
         return Payment::create([
             'user_id' => $data['user_id'] ?? (auth()->id() ?? 1),
             'created_by' => $data['created_by'] ?? (auth()->id() ?? 1),
@@ -62,12 +49,6 @@ class PaymentRepository implements PaymentRepositoryInterface
      */
     public function createPayment($transactionId, $amount, $method = Payment::METHOD_CASH, $description = null)
     {
-        Log::info('PaymentRepository::createPayment appelé', [
-            'transaction_id' => $transactionId,
-            'amount' => $amount,
-            'method' => $method,
-        ]);
-
         return Payment::create([
             'user_id' => auth()->id() ?? 1,
             'created_by' => auth()->id() ?? 1,
@@ -117,12 +98,6 @@ class PaymentRepository implements PaymentRepositoryInterface
      */
     public function createRefund($transactionId, $amount, $reason = null)
     {
-        Log::info('PaymentRepository::createRefund appelé', [
-            'transaction_id' => $transactionId,
-            'amount' => $amount,
-            'reason' => $reason,
-        ]);
-
         return Payment::create([
             'user_id' => auth()->id() ?? 1,
             'created_by' => auth()->id() ?? 1,

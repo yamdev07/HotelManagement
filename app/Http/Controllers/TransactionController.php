@@ -6,7 +6,7 @@ use App\Exceptions\HotelException;
 use App\Http\Requests\UpdateTransactionRequest;
 use App\Http\Requests\UpdateTransactionStatusRequest;
 use App\Models\Transaction;
-use App\Repositories\Interface\TransactionRepositoryInterface;
+use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use App\Services\CheckInService;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
@@ -496,6 +496,31 @@ class TransactionController extends Controller
             'is_fully_paid' => $transaction->isFullyPaid(),
             'remaining'    => $transaction->getRemainingPayment(),
         ]);
+    }
+
+    public function compteSejour(Transaction $transaction)
+    {
+        $transaction->load(['customer', 'room.type', 'extras.user', 'restaurantOrders.items.menu', 'payments']);
+
+        $roomSubtotal      = $transaction->room->price * $transaction->nights;
+        $restaurantTotal   = $transaction->restaurantOrders->whereNotIn('status', ['paid', 'cancelled'])->sum('total');
+        $extrasTotal       = $transaction->extras->sum(fn($e) => $e->amount * $e->quantity);
+        $grandTotal        = $transaction->getTotalPrice();
+        $totalPaid         = $transaction->getTotalPayment();
+        $remaining         = max(0, $grandTotal - $totalPaid);
+
+        $extraCategories   = \App\Models\TransactionExtra::getCategories();
+
+        return view('transaction.compte-sejour', compact(
+            'transaction',
+            'roomSubtotal',
+            'restaurantTotal',
+            'extrasTotal',
+            'grandTotal',
+            'totalPaid',
+            'remaining',
+            'extraCategories'
+        ));
     }
 
     public function checkAvailability(\Illuminate\Http\Request $request, Transaction $transaction)

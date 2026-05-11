@@ -8,9 +8,9 @@ use App\Models\Customer;
 use App\Models\Room;
 use App\Models\Transaction;
 use App\Models\User; 
-use App\Repositories\Interface\PaymentRepositoryInterface;
-use App\Repositories\Interface\ReservationRepositoryInterface;
-use App\Repositories\Interface\TransactionRepositoryInterface;
+use App\Repositories\Interfaces\PaymentRepositoryInterface;
+use App\Repositories\Interfaces\ReservationRepositoryInterface;
+use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -184,88 +184,34 @@ class TransactionRoomReservationController extends Controller
         ?TransactionRepositoryInterface $transactionRepository = null,
         ?PaymentRepositoryInterface $paymentRepository = null
     ) {
-        \Log::info('🚀 ============ DÉBUT RÉSERVATION ============');
-        \Log::info('📋 Client: '.$customer->id.' - '.$customer->name);
-        \Log::info('🏨 Chambre: '.$room->id.' - '.$room->number);
-        \Log::info('📅 Dates: '.($request->check_in ?? 'N/A').' → '.($request->check_out ?? 'N/A'));
-        \Log::info('💰 Acompte: '.($request->downPayment ?? 0).' FCFA');
-
-        // ============ DEBUG COMPLET UTILISATEUR ============
-        \Log::info('🔍 DEBUG UTILISATEUR CONNECTÉ:');
-        \Log::info('auth()->check(): '.(auth()->check() ? 'true' : 'false'));
-        \Log::info('auth()->id(): '.auth()->id());
-
-        if (auth()->user()) {
-            \Log::info('auth()->user():', [
-                'id' => auth()->user()->id,
-                'name' => auth()->user()->name,
-                'email' => auth()->user()->email,
-                'role' => auth()->user()->role,
-            ]);
-        } else {
-            \Log::warning('⚠️ auth()->user() retourne NULL');
-        }
-
-        \Log::info('Session ID: '.session()->getId());
-
         // ============ GESTION UTILISATEUR CONNECTÉ ============
         $user = auth()->user();
         $userId = null;
 
         if ($user) {
             $userId = $user->id;
-            \Log::info('✅ Utilisateur connecté trouvé:');
-            \Log::info('   ID: '.$userId);
-            \Log::info('   Nom: '.$user->name);
-            \Log::info('   Email: '.$user->email);
-            \Log::info('   Rôle: '.$user->role);
         } else {
-            \Log::warning('⚠️ Aucun utilisateur connecté, recherche d\'un admin...');
-
-            // Rechercher un admin
             $admin = \App\Models\User::whereIn('role', ['Super', 'Admin'])->first();
             if ($admin) {
                 $userId = $admin->id;
                 $user = $admin;
-                \Log::info('✅ Admin trouvé pour substitution:');
-                \Log::info('   ID: '.$userId);
-                \Log::info('   Nom: '.$admin->name);
-                \Log::info('   Email: '.$admin->email);
-                \Log::info('   Rôle: '.$admin->role);
             } else {
-                // Prendre le premier utilisateur
                 $firstUser = \App\Models\User::first();
                 if ($firstUser) {
                     $userId = $firstUser->id;
                     $user = $firstUser;
-                    \Log::info('✅ Premier utilisateur trouvé pour substitution:');
-                    \Log::info('   ID: '.$userId);
-                    \Log::info('   Nom: '.$firstUser->name);
-                    \Log::info('   Email: '.$firstUser->email);
-                    \Log::info('   Rôle: '.$firstUser->role);
                 } else {
-                    \Log::error('❌ AUCUN UTILISATEUR DANS LA BASE DE DONNÉES');
-
                     return redirect()->route('login')
                         ->with('error', 'Erreur système: Aucun utilisateur trouvé dans la base de données. Veuillez contacter l\'administrateur.');
                 }
             }
         }
 
-        // S'assurer que userId n'est jamais null
         if (! $userId) {
-            \Log::error('❌ userId est NULL après toutes les vérifications');
-            $userId = 1; // Fallback absolu
-            \Log::info('🔧 userId forcé à: '.$userId);
+            $userId = 1;
         }
 
-        \Log::info('🔑 User ID final qui sera utilisé: '.$userId);
-        \Log::info('👤 Nom utilisateur final: '.($user->name ?? 'Inconnu'));
-
         try {
-            // ============ VALIDATION ============
-            \Log::info('🔵 Validation des données...');
-
             $validator = \Validator::make($request->all(), [
                 'check_in' => 'required|date',
                 'check_out' => 'required|date|after:check_in',
@@ -280,17 +226,12 @@ class TransactionRoomReservationController extends Controller
             ]);
 
             if ($validator->fails()) {
-                \Log::error('❌ Validation échouée:', $validator->errors()->toArray());
-
                 return redirect()->back()
                     ->withErrors($validator)
                     ->withInput();
             }
 
             $validated = $validator->validated();
-
-            // ============ CALCULS ============
-            \Log::info('🔵 Calcul des durées et prix...');
 
             $checkIn = Carbon::parse($validated['check_in']);
             $checkOut = Carbon::parse($validated['check_out']);
@@ -304,59 +245,25 @@ class TransactionRoomReservationController extends Controller
             $personCount = $validated['person_count'] ?? 1;
             $paymentMethod = $validated['payment_method'] ?? 'cash';
 
-            \Log::info('📊 Détails calculés:');
-            \Log::info("   - Nuits: {$days} jour(s)");
-            \Log::info("   - Personnes: {$personCount}");
-            \Log::info('   - Prix total: '.number_format($totalPrice, 0, ',', ' ').' FCFA');
-            \Log::info('   - Acompte: '.number_format($downPayment, 0, ',', ' ').' FCFA');
-            \Log::info("   - Méthode de paiement: {$paymentMethod}");
-
             // Vérifier l'acompte
             if ($downPayment > $totalPrice) {
-                \Log::warning("❌ Acompte trop élevé: {$downPayment} > {$totalPrice}");
-
                 return redirect()->back()
                     ->with('error', 'L\'acompte ne peut pas dépasser le prix total')
                     ->withInput();
             }
 
-            // ============ VÉRIFIER DISPONIBILITÉ ============
-            \Log::info('🔵 Vérification disponibilité chambre...');
             $isOccupied = $this->isRoomOccupied($room->id, $checkIn, $checkOut);
 
             if ($isOccupied) {
-                \Log::error('❌ Chambre déjà occupée pour ces dates');
-
                 return redirect()->back()
                     ->with('error', 'Cette chambre n\'est plus disponible pour les dates sélectionnées. Veuillez choisir d\'autres dates ou une autre chambre.')
                     ->withInput();
             }
 
-            // ============ CRÉATION DE LA TRANSACTION ============
-            \Log::info('🔵 Création de la réservation...');
-
             DB::beginTransaction();
 
             try {
-                // ============ VÉRIFIER/AJOUTER COLONNE NOTES ============
-                \Log::info('🔧 Vérification colonne notes dans transactions...');
-                try {
-                    // Vérifier si la colonne notes existe
-                    $columns = DB::select("SHOW COLUMNS FROM transactions LIKE 'notes'");
-                    if (empty($columns)) {
-                        DB::statement('ALTER TABLE transactions ADD COLUMN notes TEXT NULL');
-                        \Log::info('✅ Colonne notes ajoutée à la table transactions');
-                    } else {
-                        \Log::info('✅ Colonne notes existe déjà');
-                    }
-                } catch (\Exception $e) {
-                    \Log::warning('⚠️ Erreur vérification colonne notes: '.$e->getMessage());
-                }
-
-                // ============ CRÉATION TRANSACTION ============
-                \Log::info('🔵 Création de la transaction avec colonnes existantes...');
-
-                // Données avec SEULEMENT les colonnes qui existent dans votre table transactions
+                // Données de la transaction
                 $transactionData = [
                     'user_id' => $userId,
                     'customer_id' => $customer->id,
@@ -387,22 +294,16 @@ class TransactionRoomReservationController extends Controller
                     ]),
                 ];
 
-                \Log::info('📋 Données transaction (colonnes existantes):', $transactionData);
-
-                // Créer la transaction
                 $transaction = null;
                 if ($transactionRepository && method_exists($transactionRepository, 'store')) {
                     try {
                         $transaction = $transactionRepository->store($request, $customer, $room);
-                        \Log::info('✅ Transaction créée via Repository - ID: '.$transaction->id);
                     } catch (\Exception $e) {
-                        \Log::warning('⚠️ Erreur avec repository, création directe: '.$e->getMessage());
+                        \Log::warning('Fallback création transaction: ' . $e->getMessage());
                         $transaction = Transaction::create($transactionData);
-                        \Log::info('✅ Transaction créée directement (fallback) - ID: '.$transaction->id);
                     }
                 } else {
                     $transaction = Transaction::create($transactionData);
-                    \Log::info('✅ Transaction créée directement - ID: '.$transaction->id);
                 }
 
                 // Vérifier que la transaction a bien été créée
@@ -413,8 +314,6 @@ class TransactionRoomReservationController extends Controller
                 // ============ CRÉATION DU PAIEMENT (si acompte) ============
                 $payment = null;
                 if ($downPayment > 0) {
-                    \Log::info('💰 Création du paiement: '.number_format($downPayment, 0, ',', ' ').' FCFA');
-
                     try {
                         $paymentData = [
                             'user_id' => $userId,
@@ -432,68 +331,44 @@ class TransactionRoomReservationController extends Controller
                             ),
                         ];
 
-                        \Log::info('📋 Données paiement (colonnes existantes):', $paymentData);
-
-                        // Essayer avec le repository
                         if ($paymentRepository) {
                             try {
                                 if (method_exists($paymentRepository, 'create')) {
                                     $payment = $paymentRepository->create($paymentData);
-                                    \Log::info('✅ Paiement créé via create() - ID: '.($payment->id ?? 'N/A'));
                                 } elseif (method_exists($paymentRepository, 'store')) {
                                     $mockRequest = new \Illuminate\Http\Request;
                                     $mockRequest->merge([
-                                        'amount' => $downPayment,
+                                        'amount'         => $downPayment,
                                         'payment_method' => $paymentMethod,
-                                        'notes' => 'Acompte réservation',
-                                        'reference' => $paymentData['reference'],
+                                        'notes'          => 'Acompte réservation',
+                                        'reference'      => $paymentData['reference'],
                                     ]);
                                     $payment = $paymentRepository->store($mockRequest, $transaction, 'Acompte');
-                                    \Log::info('✅ Paiement créé via store() - ID: '.($payment->id ?? 'N/A'));
                                 } else {
                                     $payment = \App\Models\Payment::create($paymentData);
-                                    \Log::info('✅ Paiement créé directement (repository non fonctionnel) - ID: '.$payment->id);
                                 }
                             } catch (\Exception $repoError) {
-                                \Log::warning('⚠️ Erreur avec repository, création directe: '.$repoError->getMessage());
+                                \Log::warning('Fallback création paiement: ' . $repoError->getMessage());
                                 $payment = \App\Models\Payment::create($paymentData);
-                                \Log::info('✅ Paiement créé directement (fallback) - ID: '.$payment->id);
                             }
                         } else {
                             $payment = \App\Models\Payment::create($paymentData);
-                            \Log::info('✅ Paiement créé directement (sans repo) - ID: '.$payment->id);
                         }
 
                     } catch (\Exception $e) {
-                        \Log::warning('⚠️ Erreur création paiement: '.$e->getMessage());
-                        \Log::warning('⚠️ Détail: '.$e->getFile().':'.$e->getLine());
+                        \Log::warning('Erreur création paiement (non bloquant): ' . $e->getMessage());
                         // Continuer même si le paiement échoue - la réservation est déjà créée
                     }
                 }
 
                 // ============ MISE À JOUR STATUT CHAMBRE ============
                 try {
-                    // Vérifier si la colonne existe
-                    $roomColumns = DB::select("SHOW COLUMNS FROM rooms LIKE 'room_status_id'");
-                    if (! empty($roomColumns)) {
-                        // Déterminer le bon statut
-                        $now = Carbon::now();
-                        $checkIn = Carbon::parse($validated['check_in']);
-
-                        if ($checkIn->isPast()) {
-                            // Date d'arrivée passée mais client pas encore arrivé
-                            $room->update(['room_status_id' => 2]); // Occupée
-                            \Log::info('✅ Statut chambre: Occupée (arrivée prévue passée)');
-                        } else {
-                            // Réservation future
-                            $room->update(['room_status_id' => 3]); // Réservée
-                            \Log::info('✅ Statut chambre: Réservée (future)');
-                        }
-                    } else {
-                        \Log::info('ℹ️ Colonne room_status_id non trouvée dans la table rooms');
-                    }
+                    $checkInDate = Carbon::parse($validated['check_in']);
+                    $room->update([
+                        'room_status_id' => $checkInDate->isPast() ? 2 : 3,
+                    ]);
                 } catch (\Exception $e) {
-                    \Log::warning('⚠️ Erreur mise à jour statut chambre: '.$e->getMessage());
+                    \Log::warning('Erreur mise à jour statut chambre: ' . $e->getMessage());
                 }
 
                 // ============ ENVOI DES NOTIFICATIONS ============
@@ -501,9 +376,7 @@ class TransactionRoomReservationController extends Controller
 
                 // ============ CONFIRMATION ============
                 DB::commit();
-                \Log::info('✅ Transaction BDD confirmée avec succès');
 
-                // ============ MESSAGE DE SUCCÈS PERSONNALISÉ ============
                 $successMessage = $this->buildSuccessMessageWithUser(
                     $transaction,
                     $customer,
@@ -516,10 +389,6 @@ class TransactionRoomReservationController extends Controller
                     $user
                 );
 
-                \Log::info('🎊 RÉSERVATION RÉUSSIE par '.($user->name ?? 'Système').' - ID: '.$transaction->id);
-                \Log::info('🚀 ============ FIN PROCESSUS RÉSERVATION ============');
-
-                // ============ REDIRECTION ============
                 return redirect()->route('transaction.show', $transaction)
                     ->with('success', $successMessage)
                     ->with('transaction_id', $transaction->id)
@@ -527,32 +396,21 @@ class TransactionRoomReservationController extends Controller
 
             } catch (\Exception $e) {
                 DB::rollBack();
-                \Log::error('❌ Erreur pendant la transaction BDD: '.$e->getMessage());
-                \Log::error('❌ Stack trace: '.$e->getTraceAsString());
-
-                if ($e instanceof \Illuminate\Database\QueryException) {
-                    \Log::error('❌ SQL Error Code: '.$e->getCode());
-                    \Log::error('❌ SQL Error Message: '.$e->getMessage());
-                    \Log::error('❌ SQL Query: '.$e->getSql());
-                    \Log::error('❌ SQL Bindings: '.json_encode($e->getBindings()));
-
-                    if (strpos($e->getMessage(), 'Column not found') !== false) {
-                        preg_match("/Column not found.*'([^']+)'/", $e->getMessage(), $matches);
-                        $column = $matches[1] ?? 'inconnue';
-                        \Log::error('❌ Colonne manquante: '.$column);
-                    }
-                }
+                \Log::error('Erreur création réservation: ' . $e->getMessage(), [
+                    'customer_id' => $customer->id,
+                    'room_id'     => $room->id,
+                ]);
 
                 return redirect()->back()
-                    ->with('error', 'Erreur lors de la création de la réservation: '.$e->getMessage())
+                    ->with('error', 'Erreur lors de la création de la réservation: ' . $e->getMessage())
                     ->withInput();
             }
 
         } catch (\Illuminate\Database\QueryException $e) {
-            \Log::error('❌ Erreur base de données: '.$e->getMessage());
-            \Log::error('❌ SQL Error Code: '.$e->getCode());
-            \Log::error('❌ SQL Query: '.$e->getSql());
-            \Log::error('❌ SQL Bindings: '.json_encode($e->getBindings()));
+            \Log::error('QueryException réservation: ' . $e->getMessage(), [
+                'sql'      => $e->getSql(),
+                'bindings' => $e->getBindings(),
+            ]);
 
             $errorMessage = 'Erreur de base de données lors de la réservation.';
 
@@ -570,11 +428,10 @@ class TransactionRoomReservationController extends Controller
                 ->withInput();
 
         } catch (\Exception $e) {
-            \Log::error('❌ Erreur générale réservation: '.$e->getMessage());
-            \Log::error('❌ Stack trace: '.$e->getTraceAsString());
+            \Log::error('Erreur générale réservation: ' . $e->getMessage());
 
             return redirect()->back()
-                ->with('error', 'Erreur lors de la réservation: '.$e->getMessage())
+                ->with('error', 'Erreur lors de la réservation: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -596,7 +453,7 @@ class TransactionRoomReservationController extends Controller
                     $staffUser->notify(new \App\Notifications\NewRoomReservationDownPayment($transaction, $payment));
                     $notificationCount++;
                 } catch (\Exception $e) {
-                    \Log::warning('⚠️ Erreur envoi notification staff: ' . $e->getMessage());
+                    \Log::warning('Erreur envoi notification staff: ' . $e->getMessage());
                 }
             }
 
@@ -606,14 +463,13 @@ class TransactionRoomReservationController extends Controller
                     $customer->user->notify(new \App\Notifications\NewRoomReservationDownPayment($transaction, $payment));
                     $notificationCount++;
                 } catch (\Exception $e) {
-                    \Log::warning('⚠️ Erreur envoi notification client: ' . $e->getMessage());
+                    \Log::warning('Erreur envoi notification client: ' . $e->getMessage());
                 }
             }
 
-            \Log::info("✅ {$notificationCount} notifications envoyées pour la réservation #{$transaction->id}");
 
         } catch (\Exception $e) {
-            \Log::error('❌ Erreur lors de l\'envoi des notifications', [
+            \Log::error('Erreur lors de l\'envoi des notifications', [
                 'transaction_id' => $transaction->id ?? 'N/A',
                 'error' => $e->getMessage()
             ]);
@@ -707,56 +563,13 @@ class TransactionRoomReservationController extends Controller
      */
     private function getOccupiedRoomID($stayFrom, $stayUntil)
     {
-        \Log::info('🔍 === DEBUG getOccupiedRoomID SIMPLIFIÉ ===');
-        \Log::info('📅 Période:', ['from' => $stayFrom, 'until' => $stayUntil]);
-
-        // LOGIQUE CORRECTE ET SIMPLE :
-        // Une chambre est occupée si sa réservation chevauche notre période
-        $occupied = Transaction::where('status', '!=', 'cancelled')
+        return Transaction::where('status', '!=', 'cancelled')
             ->where(function ($query) use ($stayFrom, $stayUntil) {
-                // La condition unique et correcte :
-                // Réservation commence avant notre départ ET termine après notre arrivée
                 $query->where('check_in', '<', $stayUntil)
                     ->where('check_out', '>', $stayFrom);
             })
             ->pluck('room_id')
             ->unique();
-
-        \Log::info('📊 Résultat:', [
-            'occupied_count' => $occupied->count(),
-            'occupied_ids' => $occupied->toArray(),
-        ]);
-
-        // DEBUG spécifique chambre 101
-        $room101 = Room::where('number', '101')->first();
-        if ($room101) {
-            $is101Occupied = $occupied->contains($room101->id);
-            \Log::info('🔍 Chambre 101 analyse:', [
-                'room_id' => $room101->id,
-                'is_occupied' => $is101Occupied ? 'OUI' : 'NON',
-                'why' => $is101Occupied ? 'check_in < stayUntil ET check_out > stayFrom' : 'Pas de chevauchement',
-            ]);
-
-            // Calcul manuel pour comprendre
-            $reservation = Transaction::where('room_id', $room101->id)
-                ->where('status', '!=', 'cancelled')
-                ->where('check_out', '>', now())
-                ->first();
-
-            if ($reservation) {
-                \Log::info('🔍 Calcul manuel:', [
-                    'reservation' => $reservation->check_in.' → '.$reservation->check_out,
-                    'condition1' => $reservation->check_in.' < '.$stayUntil.'? '.
-                                ($reservation->check_in < $stayUntil ? 'OUI' : 'NON'),
-                    'condition2' => $reservation->check_out.' > '.$stayFrom.'? '.
-                                ($reservation->check_out > $stayFrom ? 'OUI' : 'NON'),
-                    'result' => ($reservation->check_in < $stayUntil && $reservation->check_out > $stayFrom) ?
-                            'OCCUPÉE' : 'LIBRE',
-                ]);
-            }
-        }
-
-        return $occupied;
     }
 
     /**
@@ -1004,13 +817,7 @@ class TransactionRoomReservationController extends Controller
             }
             
             DB::commit();
-            
-            \Log::info('✅ Réservation en attente créée', [
-                'transaction_id' => $transaction->id,
-                'room' => $room->number,
-                'customer_id' => $validated['customer_id']
-            ]);
-            
+
             return response()->json([
                 'success' => true,
                 'message' => 'Réservation en attente créée. Vous serez notifié quand la chambre sera disponible.',
