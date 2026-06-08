@@ -1538,18 +1538,15 @@ class Room extends Model
      */
     public function canCheckIn(): bool
     {
-        // ✅ Chambre propre et non occupée
-        if ($this->room_status_id == self::STATUS_AVAILABLE && !$this->isOccupied()) {
-            return true;
+        if ($this->isOccupied()) {
+            return false;
         }
-        
-        // ✅ Réservée MAIS propre (statut réservé)
-        if ($this->room_status_id == self::STATUS_RESERVED && !$this->isOccupied()) {
-            return true;
-        }
-        
-        // ❌ Sale, en nettoyage, occupée, maintenance
-        return false;
+
+        return in_array($this->room_status_id, [
+            self::STATUS_AVAILABLE,
+            self::STATUS_RESERVED,
+            self::STATUS_DIRTY,
+        ]);
     }
 
     /**
@@ -1570,8 +1567,8 @@ class Room extends Model
      */
     public function getCheckInErrorMessage(): string
     {
-        if ($this->room_status_id == self::STATUS_DIRTY) {
-            return "⚠️ Cette chambre est réservée mais doit être nettoyée par l'équipe housekeeping avant l'arrivée du client.";
+        if ($this->room_status_id == self::STATUS_DIRTY && $this->isOccupied()) {
+            return "❌ Cette chambre est actuellement occupée par un autre client.";
         }
         
         if ($this->room_status_id == self::STATUS_CLEANING) {

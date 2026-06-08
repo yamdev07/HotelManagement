@@ -166,12 +166,12 @@ class TransactionController extends Controller
         $this->authorize('cancel', $transaction);
 
         $request->validate([
-            'cancel_reason' => ['required', 'string', 'max:500'],
+            'cancel_reason' => ['nullable', 'string', 'max:500'],
         ]);
 
         try {
             $force = auth()->user()->isSuper();
-            $this->transactionService->cancel($transaction, $request->cancel_reason, $force);
+            $this->transactionService->cancel($transaction, $request->cancel_reason ?? '', $force);
 
             return redirect()->route('transaction.show', $transaction)
                 ->with('success', 'Réservation annulée avec succès.');

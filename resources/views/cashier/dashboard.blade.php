@@ -696,8 +696,8 @@
         <div class="table-card">
             @if($activeSession && $activeSession->payments && $activeSession->payments->count() > 0)
                 @php
-                    $totalEncaissements = $activeSession->payments->where('amount', '>', 0)->sum('amount');
-                    $totalRemboursements = abs($activeSession->payments->where('amount', '<', 0)->sum('amount'));
+                    $totalRemboursements = $activeSession->payments->where('payment_method', 'refund')->where('status', 'completed')->sum('amount');
+                    $totalEncaissements = $activeSession->payments->where('status', 'completed')->where('payment_method', '!=', 'refund')->sum('amount');
                     $netTotal = $totalEncaissements - $totalRemboursements;
                 @endphp
             <div class="table-responsive">
@@ -717,9 +717,9 @@
                         <tr>
                             <td><strong>#{{ $payment->reference }}</strong></td>
                             <td>
-                                @if($payment->amount < 0)
+                                @if($payment->payment_method === 'refund')
                                     <span class="badge badge-red">
-                                        - {{ number_format(abs($payment->amount), 0, ',', ' ') }} FCFA
+                                        - {{ number_format($payment->amount, 0, ',', ' ') }} FCFA
                                     </span>
                                 @else
                                     <span class="badge badge-green">
@@ -957,11 +957,11 @@
                         </div>
                         <div class="summary-item">
                             <span>Encaissements</span>
-                            <span class="badge badge-green">{{ number_format($activeSession->payments->where('amount', '>', 0)->sum('amount'), 0, ',', ' ') }} FCFA</span>
+                            <span class="badge badge-green">{{ number_format($activeSession->payments->where('status', 'completed')->where('payment_method', '!=', 'refund')->sum('amount'), 0, ',', ' ') }} FCFA</span>
                         </div>
                         <div class="summary-item">
                             <span>Remboursements</span>
-                            <span class="badge badge-red">{{ number_format(abs($activeSession->payments->where('amount', '<', 0)->sum('amount')), 0, ',', ' ') }} FCFA</span>
+                            <span class="badge badge-red">{{ number_format($activeSession->payments->where('payment_method', 'refund')->where('status', 'completed')->sum('amount'), 0, ',', ' ') }} FCFA</span>
                         </div>
                     </div>
                     <div class="mb-4">

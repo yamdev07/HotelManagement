@@ -684,9 +684,9 @@ tr:last-child td {
 @section('content')
 @php
     // Calcul des totaux
-    $totalCompleted = $payments->where('status', 'completed')->where('amount', '>', 0)->sum('amount');
-    $totalRefunded = abs($payments->where('status', 'completed')->where('amount', '<', 0)->sum('amount'));
-    $paymentCount = $payments->where('status', 'completed')->count();
+    $totalRefunded = $payments->where('status', 'completed')->where('payment_method', 'refund')->sum('amount');
+    $totalCompleted = $payments->where('status', 'completed')->where('payment_method', '!=', 'refund')->sum('amount');
+    $paymentCount = $payments->where('status', 'completed')->where('payment_method', '!=', 'refund')->count();
     $netTotal = $totalCompleted - $totalRefunded;
     
     // Répartition par méthode

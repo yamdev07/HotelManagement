@@ -46,6 +46,9 @@ class Transaction extends Model
         'early_checkout_refund',
         'early_checkout_reason',
         'expected_checkout_time',
+        'checked_in_by',
+        'checked_out_by',
+        'created_by',
     ];
 
     protected $casts = [

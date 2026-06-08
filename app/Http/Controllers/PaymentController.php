@@ -192,14 +192,18 @@ class PaymentController extends Controller
         try {
             \DB::transaction(function () use ($payment, $request) {
                 $refund = Payment::create([
-                    'user_id'        => $payment->user_id,
-                    'created_by'     => auth()->id(),
-                    'transaction_id' => $payment->transaction_id,
-                    'amount'         => -$payment->amount,
-                    'payment_method' => Payment::METHOD_REFUND,
-                    'status'         => Payment::STATUS_COMPLETED,
-                    'reference'      => 'REFUND-' . ($payment->reference ?? 'PAY-' . $payment->id),
-                    'description'    => 'Remboursement : ' . $request->cancel_reason,
+                    'user_id'            => $payment->user_id,
+                    'created_by'         => auth()->id(),
+                    'transaction_id'     => $payment->transaction_id,
+                    'cashier_session_id' => $payment->cashier_session_id,
+                    'amount'             => $payment->amount,
+                    'payment_method'     => Payment::METHOD_REFUND,
+                    'status'             => Payment::STATUS_COMPLETED,
+                    'payment_date'       => now(),
+                    'verified_by'        => auth()->id(),
+                    'verified_at'        => now(),
+                    'reference'          => 'REFUND-' . ($payment->reference ?? 'PAY-' . $payment->id),
+                    'description'        => 'Remboursement : ' . $request->cancel_reason,
                 ]);
 
                 $payment->markAsRefunded(auth()->id(), $request->cancel_reason);

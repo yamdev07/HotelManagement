@@ -114,7 +114,7 @@ class TransactionService
      *
      * @throws TransactionException
      */
-    public function cancel(Transaction $transaction, string $reason, bool $force = false): Transaction
+    public function cancel(Transaction $transaction, ?string $reason, bool $force = false): Transaction
     {
         if (! $force && ! $transaction->canBeCancelled()) {
             $msg = $transaction->getCannotCancelReason() ?? 'Annulation non autorisée.';
@@ -325,14 +325,25 @@ class TransactionService
             return;
         }
 
+        $lastPayment = $transaction->payments()
+            ->where('status', 'completed')
+            ->where('payment_method', '!=', 'refund')
+            ->latest()
+            ->first();
+
         Payment::create([
-            'transaction_id' => $transaction->id,
-            'amount'         => -$totalPaid,
-            'payment_method' => 'refund',
-            'reference'      => 'REFUND-' . $transaction->id . '-' . time(),
-            'status'         => 'completed',
-            'notes'          => 'Remboursement annulation' . ($reason ? ": {$reason}" : ''),
-            'created_by'     => Auth::id(),
+            'transaction_id'     => $transaction->id,
+            'cashier_session_id' => $lastPayment?->cashier_session_id,
+            'user_id'            => $lastPayment?->user_id ?? Auth::id(),
+            'created_by'         => Auth::id(),
+            'amount'             => $totalPaid,
+            'payment_method'     => 'refund',
+            'reference'          => 'REFUND-' . $transaction->id . '-' . time(),
+            'status'             => 'completed',
+            'payment_date'       => now(),
+            'verified_by'        => Auth::id(),
+            'verified_at'        => now(),
+            'notes'              => 'Remboursement annulation' . ($reason ? ": {$reason}" : ''),
         ]);
     }
 

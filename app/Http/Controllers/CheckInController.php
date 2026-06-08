@@ -534,8 +534,6 @@ public function processDirectCheckIn(Request $request)
             'actual_check_in' => now(),
             'checked_in_by' => auth()->id(),
             'notes' => $request->notes,
-            'adults' => $request->person_count,
-            'children' => 0,
         ]);
 
         // Mettre à jour le statut de la chambre
