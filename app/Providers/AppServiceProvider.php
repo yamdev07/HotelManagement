@@ -27,6 +27,7 @@ use App\Services\HousekeepingService;
 use App\Services\PaymentService;
 use App\Services\SessionActivityService;
 use App\Services\TransactionService;
+use App\Support\TenantManager;
 use Illuminate\Support\ServiceProvider;
 
 use Illuminate\Pagination\Paginator;
@@ -35,6 +36,9 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // Multi-tenant : hôtel courant
+        $this->app->singleton(TenantManager::class);
+
         // Repositories
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
