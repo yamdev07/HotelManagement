@@ -18,6 +18,8 @@ class TenantManager
 
     protected bool $resolved = false;
 
+    protected ?Hotel $hotelModel = null;
+
     /**
      * Force l'hôtel courant (et marque comme résolu).
      */
@@ -25,6 +27,7 @@ class TenantManager
     {
         $this->hotelId = $hotelId;
         $this->resolved = true;
+        $this->hotelModel = null;
     }
 
     /**
@@ -51,7 +54,15 @@ class TenantManager
     {
         $id = $this->getHotelId();
 
-        return $id ? Hotel::find($id) : null;
+        if ($id === null) {
+            return null;
+        }
+
+        if ($this->hotelModel === null || $this->hotelModel->id !== $id) {
+            $this->hotelModel = Hotel::find($id);
+        }
+
+        return $this->hotelModel;
     }
 
     /**
@@ -79,5 +90,6 @@ class TenantManager
     {
         $this->hotelId = null;
         $this->resolved = false;
+        $this->hotelModel = null;
     }
 }

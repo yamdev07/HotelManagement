@@ -20,6 +20,11 @@ class AuthController extends Controller
         if (Auth::attempt($request->only('email', 'password'))) {
             activity()->causedBy(auth()->user())->log('User logged into the portal');
 
+            // Super-Admin plateforme (sans hôtel) -> dashboard de gestion des hôtels
+            if (auth()->user()->hotel_id === null && auth()->user()->role === 'Super') {
+                return redirect()->route('platform.hotels.index')->with('success', 'Bienvenue ' . auth()->user()->name);
+            }
+
             // Redirection intelligente selon le rôle
             if (auth()->user()->role === 'Customer') {
                 return redirect()->route('transaction.myReservations')->with('success', 'Bienvenue ' . auth()->user()->name);

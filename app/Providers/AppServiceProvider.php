@@ -31,6 +31,7 @@ use App\Support\TenantManager;
 use Illuminate\Support\ServiceProvider;
 
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -63,5 +64,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrapFive();
+
+        // Branding multi-tenant : l'hôtel courant est disponible dans toutes les vues
+        View::composer('*', function ($view) {
+            $view->with('currentHotel', app(TenantManager::class)->hotel());
+        });
     }
 }
