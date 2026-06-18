@@ -73,6 +73,11 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 // ==================== ROUTE LOGOUT GLOBALE ====================
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// ==================== HÔTEL SUSPENDU (abonnement) ====================
+Route::view('/compte-suspendu', 'errors.hotel-suspended')
+    ->middleware('auth')
+    ->name('hotel.suspended');
+
 // ==================== ROUTE LOGOUT URGENCE ====================
 Route::get('/logout-now', function () {
     try {
