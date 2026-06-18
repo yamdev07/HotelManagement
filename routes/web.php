@@ -16,6 +16,7 @@ use App\Http\Controllers\HousekeepingController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Platform\HotelController as PlatformHotelController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestaurantController;
@@ -77,6 +78,16 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::view('/compte-suspendu', 'errors.hotel-suspended')
     ->middleware('auth')
     ->name('hotel.suspended');
+
+// ==================== DASHBOARD SUPER-ADMIN PLATEFORME ====================
+Route::middleware(['auth', 'checkrole:Super'])->prefix('platform')->name('platform.')->group(function () {
+    Route::get('/hotels', [PlatformHotelController::class, 'index'])->name('hotels.index');
+    Route::get('/hotels/create', [PlatformHotelController::class, 'create'])->name('hotels.create');
+    Route::post('/hotels', [PlatformHotelController::class, 'store'])->name('hotels.store');
+    Route::get('/hotels/{hotel}/edit', [PlatformHotelController::class, 'edit'])->name('hotels.edit');
+    Route::put('/hotels/{hotel}', [PlatformHotelController::class, 'update'])->name('hotels.update');
+    Route::patch('/hotels/{hotel}/toggle', [PlatformHotelController::class, 'toggleActive'])->name('hotels.toggle');
+});
 
 // ==================== ROUTE LOGOUT URGENCE ====================
 Route::get('/logout-now', function () {
