@@ -11,7 +11,7 @@ use App\Models\Image;
 
 class Room extends Model
 {
-    use HasFactory, LogsActivity;
+    use HasFactory, LogsActivity, \App\Models\Concerns\BelongsToHotel;
 
     protected static $recordEvents = [];
 

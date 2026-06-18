@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TransactionExtra extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Models\Concerns\BelongsToHotel;
 
     protected $fillable = [
         'transaction_id',

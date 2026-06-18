@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class RestaurantOrder extends Model
 {
+    use \App\Models\Concerns\BelongsToHotel;
     protected $fillable = ['customer_id', 'room_id', 'transaction_id', 'total', 'status', 'notes', 'payment_method'];
 
     protected $casts = [

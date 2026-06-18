@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
  
 class FloorPlan extends Model
 {
+    use \App\Models\Concerns\BelongsToHotel;
     protected $fillable = ['room_id', 'layout', 'updated_by'];
  
     protected $casts = ['layout' => 'array'];

@@ -10,7 +10,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class CashierTransaction extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes;
+    use HasFactory, LogsActivity, SoftDeletes, \App\Models\Concerns\BelongsToHotel;
 
     protected static $recordEvents = [];
 

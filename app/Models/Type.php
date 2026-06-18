@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Type extends Model
 {
-    use HasFactory;
+    use HasFactory, \App\Models\Concerns\BelongsToHotel;
 
     // PROTECTION CONTRE L'ASSIGNATION EN MASSE
     protected $fillable = [
