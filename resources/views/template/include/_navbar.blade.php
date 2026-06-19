@@ -135,6 +135,15 @@
                                 Activity Log
                             </a>
                         </li>
+                        @if (in_array(auth()->user()->role, ['Super', 'Admin']))
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center"
+                               href="{{ route('hotel.settings.edit') }}">
+                                <i class="fas fa-palette me-3 text-primary"></i>
+                                Mon établissement
+                            </a>
+                        </li>
+                        @endif
                         <li>
                             <a class="dropdown-item d-flex align-items-center" href="{{ route('profile.edit') }}">
                                 <i class="fas fa-cog me-3 text-secondary"></i>

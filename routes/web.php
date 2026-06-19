@@ -82,6 +82,12 @@ Route::view('/compte-suspendu', 'errors.hotel-suspended')
     ->middleware('auth')
     ->name('hotel.suspended');
 
+// ==================== RÉGLAGES DE L'ÉTABLISSEMENT (white-label) ====================
+Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
+    Route::get('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'edit'])->name('hotel.settings.edit');
+    Route::put('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'update'])->name('hotel.settings.update');
+});
+
 // ==================== DASHBOARD SUPER-ADMIN PLATEFORME ====================
 Route::middleware(['auth', 'checkrole:Super'])->prefix('platform')->name('platform.')->group(function () {
     Route::get('/hotels', [PlatformHotelController::class, 'index'])->name('hotels.index');
