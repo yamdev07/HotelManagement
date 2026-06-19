@@ -17,6 +17,8 @@ class Hotel extends Model
         'currency',
         'timezone',
         'logo',
+        'primary_color',
+        'secondary_color',
         'contact_email',
         'contact_phone',
         'address',
@@ -68,5 +70,26 @@ class Hotel extends Model
     public function isSubscriptionExpired(): bool
     {
         return $this->subscription_ends_at !== null && $this->subscription_ends_at->isPast();
+    }
+
+    /**
+     * Couleur principale (fallback sur la couleur par défaut de la plateforme).
+     */
+    public function primaryColor(): string
+    {
+        return $this->primary_color ?: '#4f46e5';
+    }
+
+    public function secondaryColor(): string
+    {
+        return $this->secondary_color ?: '#0f172a';
+    }
+
+    /**
+     * URL du logo de l'hôtel, ou null si aucun logo n'est défini.
+     */
+    public function logoUrl(): ?string
+    {
+        return $this->logo ? asset('storage/'.$this->logo) : null;
     }
 }

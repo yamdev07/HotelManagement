@@ -8,11 +8,12 @@
     <a href="{{ route('dashboard.index') }}" class="sidebar-logo">
         <div class="d-flex align-items-center">
             <div>
-                <img src="{{ asset('img/logo_cactus1.jpeg') }}" alt="Hotel Cactus"
+                <img src="{{ ($currentHotel ?? null)?->logoUrl() ?? asset('img/logo_cactus1.jpeg') }}"
+                    alt="{{ $currentHotel->name ?? 'Hotel' }}"
                     style="height: 38px; border-radius: 8px; flex-shrink:0;">
             </div>
             <div class="brand-text ms-2">
-                <span class="brand-name">Hotel Management</span>
+                <span class="brand-name">{{ $currentHotel->name ?? 'Hotel Management' }}</span>
                 <small class="brand-subtitle d-block">Gestion Hôtelière</small>
             </div>
         </div>
