@@ -18,6 +18,11 @@ class PublicSiteController extends Controller
     {
         $hotel = Hotel::where('slug', $slug)->firstOrFail();
 
+        // Hôtel suspendu ou abonnement expiré : vitrine indisponible
+        if (! $hotel->hasActiveAccess()) {
+            return response()->view('public.unavailable', ['hotel' => $hotel], 503);
+        }
+
         // Contexte tenant : tout ce qui est scopé renverra les données de cet hôtel
         app(TenantManager::class)->setHotelId($hotel->id);
 
