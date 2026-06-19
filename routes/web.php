@@ -42,6 +42,12 @@ use Illuminate\Support\Facades\Route;
 // ==================== LANDING PAGE SAAS (page d'accueil plateforme) ====================
 Route::view('/', 'landing')->name('landing');
 
+// ==================== INSCRIPTION SELF-SERVICE (essai gratuit) ====================
+Route::middleware('guest')->group(function () {
+    Route::get('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'create'])->name('hotel.register');
+    Route::post('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'store'])->name('hotel.register.store');
+});
+
 // ==================== ROUTES FRONTEND (Site Vitrine de l'hôtel) ====================
 Route::get('/vitrine', [FrontendController::class, 'home'])->name('frontend.home');
 Route::get('/chambres', [FrontendController::class, 'rooms'])->name('frontend.rooms');

@@ -78,7 +78,7 @@
             </ul>
             <div class="d-flex gap-2">
                 <a href="{{ route('login.index') }}" class="btn btn-outline-brand">Se connecter</a>
-                <a href="#pricing" class="btn btn-brand">Essai gratuit</a>
+                <a href="{{ route('hotel.register') }}" class="btn btn-brand">Essai gratuit</a>
             </div>
         </div>
     </div>
@@ -96,7 +96,7 @@
                     le tout dans une seule plateforme, pour un hôtel comme pour tout un groupe.
                 </p>
                 <div class="d-flex flex-wrap gap-2 mb-4">
-                    <a href="#pricing" class="btn btn-brand btn-lg px-4"><i class="fas fa-rocket me-2"></i>Commencer gratuitement</a>
+                    <a href="{{ route('hotel.register') }}" class="btn btn-brand btn-lg px-4"><i class="fas fa-rocket me-2"></i>Commencer gratuitement</a>
                     <a href="{{ route('frontend.home') }}" class="btn btn-outline-brand btn-lg px-4"><i class="fas fa-play me-2"></i>Voir une démo</a>
                 </div>
                 <div class="d-flex gap-4 text-secondary small">
@@ -225,7 +225,7 @@
                                 <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{{ $item }}</li>
                             @endforeach
                         </ul>
-                        <a href="{{ route('login.index') }}" class="btn {{ $popular ? 'btn-brand' : 'btn-outline-brand' }} w-100">
+                        <a href="{{ route('hotel.register') }}" class="btn {{ $popular ? 'btn-brand' : 'btn-outline-brand' }} w-100">
                             Choisir {{ $name }}
                         </a>
                     </div>
@@ -241,7 +241,7 @@
         <div class="cta-band p-5 text-center">
             <h2 class="fw-bold mb-2">Prêt à digitaliser votre hôtel ?</h2>
             <p class="mb-4 opacity-75">Rejoignez les établissements qui pilotent leur activité avec {{ config('app.name', 'MyHotel') }}.</p>
-            <a href="{{ route('login.index') }}" class="btn btn-light btn-lg px-4 text-brand fw-semibold">
+            <a href="{{ route('hotel.register') }}" class="btn btn-light btn-lg px-4 text-brand fw-semibold">
                 <i class="fas fa-rocket me-2"></i>Démarrer maintenant
             </a>
         </div>
@@ -261,6 +261,7 @@
                 <ul class="list-unstyled small">
                     <li class="mb-2"><a href="#features">Fonctionnalités</a></li>
                     <li class="mb-2"><a href="#pricing">Tarifs</a></li>
+                    <li class="mb-2"><a href="{{ route('hotel.register') }}">Essai gratuit</a></li>
                     <li class="mb-2"><a href="{{ route('frontend.home') }}">Démo</a></li>
                 </ul>
             </div>
