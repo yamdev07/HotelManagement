@@ -103,6 +103,35 @@
             </div>
         </div>
 
+        {{-- Contenu de la vitrine publique --}}
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-white fw-semibold"><i class="fas fa-globe me-2"></i>Contenu de la vitrine</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label">Slogan</label>
+                        <input type="text" name="tagline" class="form-control" value="{{ old('tagline', $hotel->tagline) }}"
+                               placeholder="Ex : Votre confort, notre priorité">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Description</label>
+                        <textarea name="description" class="form-control" rows="3"
+                                  placeholder="Présentez votre établissement…">{{ old('description', $hotel->description) }}</textarea>
+                    </div>
+                    <div class="col-md-7">
+                        <label class="form-label">Image de couverture</label>
+                        <input type="file" name="cover_image" class="form-control" accept="image/*">
+                        <small class="text-muted">Affichée en bandeau de la vitrine — max 4 Mo.</small>
+                    </div>
+                    <div class="col-md-5">
+                        @if ($hotel->coverUrl())
+                            <img src="{{ $hotel->coverUrl() }}" alt="Couverture" class="img-fluid rounded-3" style="max-height:90px;">
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="mt-4">
             <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Enregistrer</button>
         </div>

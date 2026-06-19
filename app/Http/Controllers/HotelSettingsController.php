@@ -31,7 +31,10 @@ class HotelSettingsController extends Controller
             'contact_email'   => ['nullable', 'email', 'max:255'],
             'contact_phone'   => ['nullable', 'string', 'max:50'],
             'address'         => ['nullable', 'string', 'max:255'],
+            'tagline'         => ['nullable', 'string', 'max:255'],
+            'description'     => ['nullable', 'string', 'max:2000'],
             'logo'            => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg,webp', 'max:2048'],
+            'cover_image'     => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
 
         if ($request->hasFile('logo')) {
@@ -39,6 +42,13 @@ class HotelSettingsController extends Controller
                 Storage::disk('public')->delete($hotel->logo);
             }
             $data['logo'] = $request->file('logo')->store('hotel-logos', 'public');
+        }
+
+        if ($request->hasFile('cover_image')) {
+            if ($hotel->cover_image) {
+                Storage::disk('public')->delete($hotel->cover_image);
+            }
+            $data['cover_image'] = $request->file('cover_image')->store('hotel-covers', 'public');
         }
 
         $hotel->update($data);
