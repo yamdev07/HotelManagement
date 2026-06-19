@@ -19,6 +19,13 @@ class Hotel extends Model
         'logo',
         'primary_color',
         'secondary_color',
+        'tagline',
+        'description',
+        'cover_image',
+        'show_rooms',
+        'show_restaurant',
+        'show_services',
+        'show_contact',
         'contact_email',
         'contact_phone',
         'address',
@@ -30,6 +37,10 @@ class Hotel extends Model
 
     protected $casts = [
         'is_active'            => 'boolean',
+        'show_rooms'           => 'boolean',
+        'show_restaurant'      => 'boolean',
+        'show_services'        => 'boolean',
+        'show_contact'         => 'boolean',
         'subscription_ends_at' => 'datetime',
         'metadata'             => 'array',
     ];
@@ -91,5 +102,21 @@ class Hotel extends Model
     public function logoUrl(): ?string
     {
         return $this->logo ? asset('storage/'.$this->logo) : null;
+    }
+
+    /**
+     * URL de l'image de couverture de la vitrine, ou null.
+     */
+    public function coverUrl(): ?string
+    {
+        return $this->cover_image ? asset('storage/'.$this->cover_image) : null;
+    }
+
+    /**
+     * URL publique de la vitrine de l'hôtel.
+     */
+    public function publicUrl(): string
+    {
+        return route('public.hotel', $this->slug);
     }
 }
