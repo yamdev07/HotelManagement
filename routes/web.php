@@ -39,8 +39,11 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-// ==================== ROUTES FRONTEND (Site Vitrine) ====================
-Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
+// ==================== LANDING PAGE SAAS (page d'accueil plateforme) ====================
+Route::view('/', 'landing')->name('landing');
+
+// ==================== ROUTES FRONTEND (Site Vitrine de l'hôtel) ====================
+Route::get('/vitrine', [FrontendController::class, 'home'])->name('frontend.home');
 Route::get('/chambres', [FrontendController::class, 'rooms'])->name('frontend.rooms');
 Route::get('/chambre/{id}', [FrontendController::class, 'roomDetails'])->name('frontend.room.details');
 Route::get('/restaurant-vitrine', [FrontendController::class, 'restaurant'])->name('frontend.restaurant');
