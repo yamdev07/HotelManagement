@@ -61,11 +61,12 @@ class HotelController extends Controller
             ]);
 
             $admin = User::create([
-                'hotel_id' => $hotel->id,
-                'name'     => $data['admin_name'],
-                'email'    => $data['admin_email'],
-                'role'     => 'Admin',
-                'password' => Hash::make($data['admin_password']),
+                'hotel_id'   => $hotel->id,
+                'name'       => $data['admin_name'],
+                'email'      => $data['admin_email'],
+                'role'       => 'Admin',
+                'password'   => Hash::make($data['admin_password']),
+                'random_key' => Str::random(60),
             ]);
 
             $hotel->update(['owner_user_id' => $admin->id]);
