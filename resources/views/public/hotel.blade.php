@@ -46,6 +46,10 @@
 <main>
     {{-- Les sections (hero, chambres, restaurant, services, contact) sont ajoutées ici --}}
     @include('public.sections.hero')
+
+    @if ($hotel->show_rooms)
+        @include('public.sections.rooms')
+    @endif
 </main>
 
 <!-- FOOTER -->
