@@ -51,6 +51,11 @@ class HotelSettingsController extends Controller
             $data['cover_image'] = $request->file('cover_image')->store('hotel-covers', 'public');
         }
 
+        // Cases à cocher : absentes du payload = false
+        foreach (['show_rooms', 'show_restaurant', 'show_services', 'show_contact'] as $toggle) {
+            $data[$toggle] = $request->boolean($toggle);
+        }
+
         $hotel->update($data);
 
         return redirect()->route('hotel.settings.edit')

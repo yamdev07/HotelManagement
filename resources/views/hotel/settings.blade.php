@@ -4,8 +4,11 @@
 
 @section('content')
 <div class="container-fluid py-4">
-    <div class="d-flex align-items-center mb-4">
+    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
         <h3 class="mb-0"><i class="fas fa-palette me-2"></i> Personnalisation de l'établissement</h3>
+        <a href="{{ $hotel->publicUrl() }}" target="_blank" class="btn btn-outline-primary">
+            <i class="fas fa-up-right-from-square me-1"></i> Voir mon site
+        </a>
     </div>
 
     @if (session('success'))
@@ -128,6 +131,34 @@
                             <img src="{{ $hotel->coverUrl() }}" alt="Couverture" class="img-fluid rounded-3" style="max-height:90px;">
                         @endif
                     </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Sections affichées sur la vitrine --}}
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-white fw-semibold"><i class="fas fa-toggle-on me-2"></i>Sections de la vitrine</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    @php
+                        $sections = [
+                            'show_rooms'      => 'Chambres',
+                            'show_restaurant' => 'Restaurant',
+                            'show_services'   => 'Services',
+                            'show_contact'    => 'Contact',
+                        ];
+                    @endphp
+                    @foreach ($sections as $field => $label)
+                        <div class="col-md-3 col-6">
+                            <div class="form-check form-switch">
+                                <input type="hidden" name="{{ $field }}" value="0">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       id="{{ $field }}" name="{{ $field }}" value="1"
+                                       {{ old($field, $hotel->$field) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="{{ $field }}">{{ $label }}</label>
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>
