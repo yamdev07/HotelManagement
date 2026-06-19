@@ -58,6 +58,10 @@
     @if ($hotel->show_services)
         @include('public.sections.services')
     @endif
+
+    @if ($hotel->show_contact)
+        @include('public.sections.contact')
+    @endif
 </main>
 
 <!-- FOOTER -->
