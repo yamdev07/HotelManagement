@@ -54,6 +54,10 @@
     @if ($hotel->show_restaurant)
         @include('public.sections.restaurant')
     @endif
+
+    @if ($hotel->show_services)
+        @include('public.sections.services')
+    @endif
 </main>
 
 <!-- FOOTER -->
