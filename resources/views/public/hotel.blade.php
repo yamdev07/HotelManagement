@@ -50,6 +50,10 @@
     @if ($hotel->show_rooms)
         @include('public.sections.rooms')
     @endif
+
+    @if ($hotel->show_restaurant)
+        @include('public.sections.restaurant')
+    @endif
 </main>
 
 <!-- FOOTER -->

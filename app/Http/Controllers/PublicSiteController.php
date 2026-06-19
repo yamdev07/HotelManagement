@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Hotel;
+use App\Models\Menu;
 use App\Models\Room;
 use App\Support\TenantManager;
 
@@ -24,6 +25,10 @@ class PublicSiteController extends Controller
             ->where('room_status_id', Room::STATUS_AVAILABLE)
             ->get();
 
-        return view('public.hotel', compact('hotel', 'rooms'));
+        $menus = $hotel->show_restaurant
+            ? Menu::limit(8)->get()
+            : collect();
+
+        return view('public.hotel', compact('hotel', 'rooms', 'menus'));
     }
 }
