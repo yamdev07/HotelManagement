@@ -18,6 +18,12 @@ class HousekeepingController extends Controller
 {
     public function __construct(private HousekeepingService $housekeeping) {}
 
+    /** Hôtel courant (null pour le Super-Admin plateforme). */
+    private function tenantId(): ?int
+    {
+        return app(\App\Support\TenantManager::class)->getHotelId();
+    }
+
     public function index()
     {
         try {
@@ -471,7 +477,7 @@ class HousekeepingController extends Controller
 
             $cleanedByUser = [];
             if (Schema::hasColumn('rooms', 'cleaned_by')) {
-                $cleanedByUser = DB::table('rooms')
+                $cleanedByUser = DB::table('rooms')->when($this->tenantId(), fn ($q) => $q->where('rooms.hotel_id', $this->tenantId()))
                     ->select('cleaned_by', DB::raw('count(*) as count'))
                     ->whereDate('last_cleaned_at', $today)
                     ->whereNotNull('cleaned_by')
@@ -504,7 +510,7 @@ class HousekeepingController extends Controller
 
             $cleanedByUser = collect();
             if (Schema::hasColumn('rooms', 'cleaned_by')) {
-                $cleanedByUser = DB::table('rooms')
+                $cleanedByUser = DB::table('rooms')->when($this->tenantId(), fn ($q) => $q->where('rooms.hotel_id', $this->tenantId()))
                     ->join('users', 'rooms.cleaned_by', '=', 'users.id')
                     ->select('users.name', DB::raw('count(*) as cleaned_count'))
                     ->whereDate('rooms.last_cleaned_at', $date)
@@ -516,7 +522,7 @@ class HousekeepingController extends Controller
             $staff = User::whereIn('role', ['Housekeeping', 'Admin', 'Super'])->orderBy('name')->get();
             $types = \App\Models\Type::orderBy('name')->get();
 
-            $availableDates = DB::table('rooms')
+            $availableDates = DB::table('rooms')->when($this->tenantId(), fn ($q) => $q->where('rooms.hotel_id', $this->tenantId()))
                 ->selectRaw('DATE(last_cleaned_at) as date')
                 ->whereNotNull('last_cleaned_at')
                 ->groupByRaw('DATE(last_cleaned_at)')
@@ -540,7 +546,7 @@ class HousekeepingController extends Controller
 
             $topCleaners = collect();
             if (Schema::hasColumn('rooms', 'cleaned_by')) {
-                $topCleaners = DB::table('rooms')
+                $topCleaners = DB::table('rooms')->when($this->tenantId(), fn ($q) => $q->where('rooms.hotel_id', $this->tenantId()))
                     ->join('users', 'rooms.cleaned_by', '=', 'users.id')
                     ->select('users.id', 'users.name', DB::raw('count(*) as cleaned_count'))
                     ->whereYear('rooms.last_cleaned_at', $selectedMonth->year)
@@ -552,7 +558,7 @@ class HousekeepingController extends Controller
                     ->get();
             }
 
-            $mostCleanedRooms = DB::table('rooms')
+            $mostCleanedRooms = DB::table('rooms')->when($this->tenantId(), fn ($q) => $q->where('rooms.hotel_id', $this->tenantId()))
                 ->select('rooms.id', 'rooms.number', DB::raw('count(*) as cleaned_count'))
                 ->whereYear('last_cleaned_at', $selectedMonth->year)
                 ->whereMonth('last_cleaned_at', $selectedMonth->month)
@@ -561,7 +567,7 @@ class HousekeepingController extends Controller
                 ->limit(10)
                 ->get();
 
-            $availableMonths = DB::table('rooms')
+            $availableMonths = DB::table('rooms')->when($this->tenantId(), fn ($q) => $q->where('rooms.hotel_id', $this->tenantId()))
                 ->selectRaw("DATE_FORMAT(last_cleaned_at, '%Y-%m') as month")
                 ->whereNotNull('last_cleaned_at')
                 ->groupByRaw("DATE_FORMAT(last_cleaned_at, '%Y-%m')")
@@ -569,7 +575,7 @@ class HousekeepingController extends Controller
                 ->limit(24)
                 ->pluck('month');
 
-            $monthlyStats = DB::table('rooms')
+            $monthlyStats = DB::table('rooms')->when($this->tenantId(), fn ($q) => $q->where('rooms.hotel_id', $this->tenantId()))
                 ->selectRaw("DATE(last_cleaned_at) as date, count(*) as cleaned_count")
                 ->whereYear('last_cleaned_at', $selectedMonth->year)
                 ->whereMonth('last_cleaned_at', $selectedMonth->month)
