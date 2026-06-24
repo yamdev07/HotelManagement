@@ -32,7 +32,7 @@ class HotelRegistrationTest extends TestCase
             'admin_email'  => 'patron@nouvel.test',
         ]);
 
-        $response->assertRedirectToRoute('hotel.settings.edit');
+        $response->assertRedirectToRoute('onboarding.show');
 
         $hotel = Hotel::where('name', 'Nouvel Hotel')->first();
         $this->assertNotNull($hotel);
