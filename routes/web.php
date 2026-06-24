@@ -91,6 +91,12 @@ Route::view('/compte-suspendu', 'errors.hotel-suspended')
     ->middleware('auth')
     ->name('hotel.suspended');
 
+// ==================== ONBOARDING (personnalisation initiale) ====================
+Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
+    Route::get('/bienvenue', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding.show');
+    Route::post('/bienvenue', [\App\Http\Controllers\OnboardingController::class, 'store'])->name('onboarding.store');
+});
+
 // ==================== RÉGLAGES DE L'ÉTABLISSEMENT (white-label) ====================
 Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::get('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'edit'])->name('hotel.settings.edit');

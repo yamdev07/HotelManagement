@@ -33,6 +33,7 @@ class Hotel extends Model
         'subscription_ends_at',
         'plan',
         'room_limit',
+        'onboarding_completed_at',
         'owner_user_id',
         'metadata',
     ];
@@ -43,10 +44,17 @@ class Hotel extends Model
         'show_restaurant'      => 'boolean',
         'show_services'        => 'boolean',
         'show_contact'         => 'boolean',
-        'subscription_ends_at' => 'datetime',
-        'room_limit'           => 'integer',
-        'metadata'             => 'array',
+        'subscription_ends_at'    => 'datetime',
+        'onboarding_completed_at' => 'datetime',
+        'room_limit'              => 'integer',
+        'metadata'                => 'array',
     ];
+
+    /** L'hôtel doit-il encore passer par l'onboarding (personnalisation initiale) ? */
+    public function needsOnboarding(): bool
+    {
+        return $this->onboarding_completed_at === null;
+    }
 
     /**
      * Détermine le palier d'abonnement adapté à un nombre de chambres.
