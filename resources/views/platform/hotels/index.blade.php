@@ -17,6 +17,7 @@
                     <tr>
                         <th>Hôtel</th>
                         <th class="text-center">Statut</th>
+                        <th>Formule</th>
                         <th>Abonnement</th>
                         <th class="text-center">Users</th>
                         <th class="text-center">Chambres</th>
@@ -39,6 +40,10 @@
                                 @else
                                     <span class="badge bg-warning text-dark">Expiré</span>
                                 @endif
+                            </td>
+                            <td>
+                                <span class="badge bg-light text-dark border">{{ $hotel->planName() }}</span>
+                                <div class="small text-muted">{{ number_format($hotel->monthlyPrice(), 0, ',', ' ') }} CFA/mois</div>
                             </td>
                             <td>
                                 @if ($hotel->subscription_ends_at)
@@ -72,7 +77,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">Aucun hôtel pour le moment.</td>
+                            <td colspan="8" class="text-center text-muted py-4">Aucun hôtel pour le moment.</td>
                         </tr>
                     @endforelse
                 </tbody>
