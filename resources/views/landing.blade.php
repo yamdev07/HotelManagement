@@ -198,35 +198,27 @@
             <p class="text-secondary">Sans frais cachés. Changez d'offre à tout moment.</p>
         </div>
         <div class="row g-4 justify-content-center">
-            @php
-                $plans = [
-                    ['Starter', '25 000', 'Pour un hôtel qui démarre', ['1 établissement', 'Jusqu\'à 20 chambres', 'Réservations & caisse', 'Support par email'], false],
-                    ['Pro', '60 000', 'Pour les hôtels en croissance', ['1 établissement', 'Chambres illimitées', 'Restaurant & housekeeping', 'Rapports avancés', 'Support prioritaire'], true],
-                    ['Enterprise', 'Sur devis', 'Pour les groupes hôteliers', ['Établissements illimités', 'Dashboard multi-hôtels', 'Rôles & permissions avancés', 'Accompagnement dédié'], false],
-                ];
-            @endphp
-            @foreach ($plans as [$name, $price, $tagline, $items, $popular])
+            @foreach (config('plans.tiers') as $key => $tier)
+                @php $popular = ! empty($tier['popular']); @endphp
                 <div class="col-md-6 col-lg-4">
                     <div class="price-card p-4 {{ $popular ? 'popular' : '' }}">
                         @if ($popular)
-                            <span class="badge bg-brand text-white mb-2" style="background:var(--brand)">Le plus populaire</span>
+                            <span class="badge text-white mb-2" style="background:var(--brand)">Le plus populaire</span>
                         @endif
-                        <h4 class="fw-bold">{{ $name }}</h4>
-                        <p class="text-secondary small">{{ $tagline }}</p>
+                        <h4 class="fw-bold">{{ $tier['name'] }}</h4>
+                        <p class="text-secondary small">{{ $tier['tagline'] }}</p>
                         <div class="price-amount mb-1">
-                            {{ $price }}
-                            @if (is_numeric(str_replace(' ', '', $price)))
-                                <span class="fs-6 text-secondary fw-normal">CFA / mois</span>
-                            @endif
+                            {{ number_format($tier['price'], 0, ',', ' ') }}
+                            <span class="fs-6 text-secondary fw-normal">CFA / mois</span>
                         </div>
                         <hr>
                         <ul class="list-unstyled mb-4">
-                            @foreach ($items as $item)
+                            @foreach ($tier['features'] as $item)
                                 <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{{ $item }}</li>
                             @endforeach
                         </ul>
-                        <a href="{{ route('hotel.register') }}" class="btn {{ $popular ? 'btn-brand' : 'btn-outline-brand' }} w-100">
-                            Choisir {{ $name }}
+                        <a href="{{ route('hotel.register', ['plan' => $key]) }}" class="btn {{ $popular ? 'btn-brand' : 'btn-outline-brand' }} w-100">
+                            Choisir {{ $tier['name'] }}
                         </a>
                     </div>
                 </div>
