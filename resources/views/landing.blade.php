@@ -248,9 +248,12 @@
                 ];
             @endphp
             @foreach ($steps as $i => [$title, $desc])
-                <div class="col-md-4">
-                    <div class="d-flex align-items-start gap-3">
-                        <div class="step-num flex-shrink-0">{{ $i + 1 }}</div>
+                <div class="col-md-4 position-relative" data-aos="fade-up" data-aos-delay="{{ $i * 150 }}">
+                    @if ($i < count($steps) - 1)
+                        <div class="d-none d-md-block position-absolute" style="top:22px;left:60%;right:-40%;height:2px;background:repeating-linear-gradient(90deg,var(--brand) 0 8px,transparent 8px 16px);opacity:.4;"></div>
+                    @endif
+                    <div class="d-flex align-items-start gap-3 position-relative">
+                        <div class="step-num flex-shrink-0 btn-pulse">{{ $i + 1 }}</div>
                         <div>
                             <h5 class="fw-bold mb-1">{{ $title }}</h5>
                             <p class="text-secondary mb-0">{{ $desc }}</p>
