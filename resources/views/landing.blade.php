@@ -74,7 +74,7 @@
                 <li class="nav-item"><a class="nav-link" href="#features">Fonctionnalités</a></li>
                 <li class="nav-item"><a class="nav-link" href="#how">Comment ça marche</a></li>
                 <li class="nav-item"><a class="nav-link" href="#pricing">Tarifs</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('frontend.home') }}">Démo vitrine</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('/h/cactus-hotel') }}">Démo vitrine</a></li>
             </ul>
             <div class="d-flex gap-2">
                 <a href="{{ route('login.index') }}" class="btn btn-outline-brand">Se connecter</a>
@@ -97,7 +97,7 @@
                 </p>
                 <div class="d-flex flex-wrap gap-2 mb-4">
                     <a href="{{ route('hotel.register') }}" class="btn btn-brand btn-lg px-4"><i class="fas fa-rocket me-2"></i>Commencer gratuitement</a>
-                    <a href="{{ route('frontend.home') }}" class="btn btn-outline-brand btn-lg px-4"><i class="fas fa-play me-2"></i>Voir une démo</a>
+                    <a href="{{ url('/h/cactus-hotel') }}" class="btn btn-outline-brand btn-lg px-4"><i class="fas fa-play me-2"></i>Voir une démo</a>
                 </div>
                 <div class="d-flex gap-4 text-secondary small">
                     <span><i class="fas fa-check text-success me-1"></i> Sans engagement</span>
@@ -262,7 +262,7 @@
                     <li class="mb-2"><a href="#features">Fonctionnalités</a></li>
                     <li class="mb-2"><a href="#pricing">Tarifs</a></li>
                     <li class="mb-2"><a href="{{ route('hotel.register') }}">Essai gratuit</a></li>
-                    <li class="mb-2"><a href="{{ route('frontend.home') }}">Démo</a></li>
+                    <li class="mb-2"><a href="{{ url('/h/cactus-hotel') }}">Démo</a></li>
                 </ul>
             </div>
             <div class="col-6 col-lg-2">

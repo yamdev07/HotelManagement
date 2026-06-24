@@ -26,9 +26,27 @@ class FrontendController extends Controller
         }
     }
 
+    /**
+     * Évite la fuite multi-tenant : sans hôtel courant résolu (visiteur anonyme),
+     * ces pages publiques globales afficheraient les données de TOUS les hôtels.
+     * On renvoie alors vers l'accueil — la vitrine publique d'un hôtel est sur /h/{slug}.
+     */
+    private function requireTenant()
+    {
+        if (! app(\App\Support\TenantManager::class)->hasTenant()) {
+            return redirect()->route('landing');
+        }
+
+        return null;
+    }
+
     // Page d'accueil du site vitrine
     public function home()
     {
+        if ($redirect = $this->requireTenant()) {
+            return $redirect;
+        }
+
         // Pour la page d'accueil, on garde seulement les chambres disponibles (belles photos)
         $featuredRooms = Room::with(['type', 'roomStatus', 'images', 'facilities'])
             ->where('room_status_id', Room::STATUS_AVAILABLE) // Disponible uniquement
@@ -44,6 +62,10 @@ class FrontendController extends Controller
  */
 public function rooms(Request $request)
 {
+    if ($redirect = $this->requireTenant()) {
+        return $redirect;
+    }
+
     // ==================== DÉBOGAGE CHAMBRE 101 ====================
     $this->debugRoom101($request);
     // =============================================================
@@ -487,6 +509,10 @@ public function rooms(Request $request)
     // Détails d'une chambre
     public function roomDetails($id)
     {
+        if ($redirect = $this->requireTenant()) {
+            return $redirect;
+        }
+
         $room = Room::with(['type', 'roomStatus', 'images', 'facilities'])
             ->findOrFail($id);
 
@@ -912,6 +938,10 @@ public function rooms(Request $request)
     // Restaurant vitrine
     public function restaurant()
     {
+        if ($redirect = $this->requireTenant()) {
+            return $redirect;
+        }
+
         $currentDay = strtolower(now()->format('D')); // mon, tue, wed, thu, fri, sat, sun
         
         $menus = Menu::with('category')->where('is_available', true)
@@ -1030,6 +1060,10 @@ public function rooms(Request $request)
      */
     public function menuQr()
     {
+        if ($redirect = $this->requireTenant()) {
+            return $redirect;
+        }
+
         $categories = \App\Models\Category::all();
         $menus = Menu::with('category')->latest()->get();
 
