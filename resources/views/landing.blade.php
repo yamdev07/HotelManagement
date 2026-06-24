@@ -118,28 +118,33 @@
 </nav>
 
 <!-- HERO -->
-<header class="hero">
-    <div class="container">
+<header class="hero position-relative overflow-hidden">
+    <!-- Blobs décoratifs animés -->
+    <div class="blob" style="width:280px;height:280px;background:#c7d2fe;top:-60px;left:-40px;"></div>
+    <div class="blob" style="width:220px;height:220px;background:#ddd6fe;bottom:-40px;right:8%;animation-delay:-4s;"></div>
+    <div class="blob" style="width:120px;height:120px;background:#a5b4fc;top:40%;right:38%;animation-delay:-8s;"></div>
+
+    <div class="container position-relative" style="z-index:1;">
         <div class="row align-items-center g-5">
             <div class="col-lg-6">
-                <span class="badge-soft mb-3 d-inline-block"><i class="fas fa-bolt me-1"></i> Plateforme SaaS multi-établissements</span>
-                <h1 class="mb-3">Gérez vos hôtels,<br>sans la complexité.</h1>
-                <p class="fs-5 text-secondary mb-4">
+                <span class="badge-soft mb-3 d-inline-block" data-aos="fade-up"><i class="fas fa-bolt me-1"></i> Plateforme SaaS multi-établissements</span>
+                <h1 class="mb-3" data-aos="fade-up" data-aos-delay="80">Gérez vos hôtels,<br><span class="text-brand">sans la complexité.</span></h1>
+                <p class="fs-5 text-secondary mb-4" data-aos="fade-up" data-aos-delay="160">
                     Réservations, check-in, caisse, restaurant, housekeeping et rapports —
                     le tout dans une seule plateforme, pour un hôtel comme pour tout un groupe.
                 </p>
-                <div class="d-flex flex-wrap gap-2 mb-4">
-                    <a href="{{ route('hotel.register') }}" class="btn btn-brand btn-lg px-4"><i class="fas fa-rocket me-2"></i>Commencer gratuitement</a>
+                <div class="d-flex flex-wrap gap-2 mb-4" data-aos="fade-up" data-aos-delay="240">
+                    <a href="{{ route('hotel.register') }}" class="btn btn-brand btn-lg px-4 btn-pulse"><i class="fas fa-rocket me-2"></i>Commencer gratuitement</a>
                     <a href="{{ url('/h/cactus-hotel') }}" class="btn btn-outline-brand btn-lg px-4"><i class="fas fa-play me-2"></i>Voir une démo</a>
                 </div>
-                <div class="d-flex gap-4 text-secondary small">
+                <div class="d-flex flex-wrap gap-4 text-secondary small" data-aos="fade-up" data-aos-delay="320">
                     <span><i class="fas fa-check text-success me-1"></i> Sans engagement</span>
                     <span><i class="fas fa-check text-success me-1"></i> Mise en route en 5 min</span>
                     <span><i class="fas fa-check text-success me-1"></i> Support inclus</span>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <div class="hero-mock">
+            <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="200">
+                <div class="hero-mock" style="animation: float 6s ease-in-out infinite;">
                     <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
                     <div class="p-3">
                         <div class="row g-3">
