@@ -7,6 +7,7 @@
     <meta name="description" content="Gérez réservations, caisse, restaurant, housekeeping et rapports pour un ou plusieurs hôtels, depuis une seule plateforme.">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -52,10 +53,42 @@
         .price-card.popular { border: 2px solid var(--brand); box-shadow: 0 24px 50px -28px rgba(79,70,229,.5); }
         .price-amount { font-size: 2.4rem; font-weight: 800; letter-spacing: -1px; }
 
-        .cta-band { background: linear-gradient(120deg, var(--brand) 0%, #7c3aed 100%); color: #fff; border-radius: 24px; }
+        .cta-band { background: linear-gradient(120deg, var(--brand) 0%, #7c3aed 100%); color: #fff; border-radius: 24px; background-size: 200% 200%; animation: gradientShift 8s ease infinite; }
         footer a { color: #cbd5e1; text-decoration: none; }
         footer a:hover { color: #fff; }
         .section { padding: 5rem 0; }
+
+        /* ===== Animations ===== */
+        @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        @keyframes float { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-18px) } }
+        @keyframes floatSlow { 0%,100%{ transform: translateY(0) rotate(0) } 50%{ transform: translateY(-26px) rotate(8deg) } }
+        @keyframes pulseGlow { 0%,100%{ box-shadow: 0 0 0 0 rgba(79,70,229,.45) } 50%{ box-shadow: 0 0 0 16px rgba(79,70,229,0) } }
+        @keyframes fadeUp { from{ opacity:0; transform: translateY(24px) } to{ opacity:1; transform: none } }
+        @keyframes shimmer { 0%{ background-position: -400px 0 } 100%{ background-position: 400px 0 } }
+        @keyframes marquee { from{ transform: translateX(0) } to{ transform: translateX(-50%) } }
+        @keyframes blob { 0%,100%{ border-radius: 42% 58% 63% 37% / 42% 45% 55% 58% } 50%{ border-radius: 58% 42% 38% 62% / 60% 38% 62% 40% } }
+
+        /* Navbar dynamique au scroll */
+        .navbar.scrolled { box-shadow: 0 8px 30px -18px rgba(15,23,42,.35); backdrop-filter: blur(8px); background: rgba(255,255,255,.92) !important; }
+        .navbar { transition: box-shadow .25s, background .25s; }
+
+        /* Blobs décoratifs */
+        .blob { position: absolute; filter: blur(14px); opacity: .5; animation: blob 14s ease-in-out infinite, floatSlow 12s ease-in-out infinite; z-index: 0; }
+
+        /* Boutons animés */
+        .btn-brand { transition: transform .15s, box-shadow .2s, background .2s; }
+        .btn-brand:hover { transform: translateY(-2px); }
+        .btn-pulse { animation: pulseGlow 2.4s infinite; }
+
+        /* Cartes feature : hover plus riche */
+        .card-feature:hover .feature-icon { transform: scale(1.12) rotate(-6deg); }
+        .feature-icon { transition: transform .25s; }
+
+        /* Réduction d'animation si l'utilisateur le demande */
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+            [data-aos] { opacity: 1 !important; transform: none !important; }
+        }
     </style>
 </head>
 <body>
@@ -278,5 +311,16 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+    // Animations au scroll
+    AOS.init({ duration: 700, once: true, easing: 'ease-out-cubic', offset: 80 });
+
+    // Navbar dynamique
+    const nav = document.querySelector('.navbar');
+    const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 40);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+</script>
 </body>
 </html>
