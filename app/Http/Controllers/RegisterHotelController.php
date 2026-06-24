@@ -2,50 +2,66 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\HotelCredentialsMail;
 use App\Models\Hotel;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 /**
- * Inscription self-service (essai gratuit) : un nouvel hôtelier crée son
- * établissement et son compte administrateur, puis est connecté automatiquement.
+ * Inscription self-service (essai gratuit) : l'hôtelier choisit son plan et
+ * renseigne ses infos. Un mot de passe est généré et envoyé par email
+ * (ses identifiants administrateur). Il est connecté automatiquement puis
+ * dirigé vers la personnalisation de son site.
  */
 class RegisterHotelController extends Controller
 {
-    /** Durée de l'essai gratuit, en jours. */
-    private const TRIAL_DAYS = 14;
-
-    public function create()
+    public function create(Request $request)
     {
-        return view('auth.register-hotel');
+        $plan = $request->query('plan');
+        if (! array_key_exists($plan, config('plans.tiers'))) {
+            $plan = config('plans.default', 'starter');
+        }
+
+        return view('auth.register-hotel', [
+            'plans'        => config('plans.tiers'),
+            'selectedPlan' => $plan,
+        ]);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'company_name'   => ['required', 'string', 'max:255'],
-            'primary_color'  => ['nullable', 'regex:/^#([0-9a-fA-F]{6})$/'],
-            'contact_phone'  => ['nullable', 'string', 'max:50'],
-            'logo'           => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg,webp', 'max:2048'],
-            'admin_name'     => ['required', 'string', 'max:255'],
-            'admin_email'    => ['required', 'email', 'max:255', 'unique:users,email'],
-            'admin_password' => ['required', 'string', 'min:6', 'confirmed'],
+            'company_name'  => ['required', 'string', 'max:255'],
+            'plan'          => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
+            'contact_phone' => ['nullable', 'string', 'max:50'],
+            'logo'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg,webp', 'max:2048'],
+            'admin_name'    => ['required', 'string', 'max:255'],
+            'admin_email'   => ['required', 'email', 'max:255', 'unique:users,email'],
         ]);
 
-        $admin = DB::transaction(function () use ($data, $request) {
+        $plan = $data['plan'] ?? config('plans.default', 'starter');
+        $tier = config('plans.tiers')[$plan];
+
+        // Mot de passe généré : ce sont les identifiants envoyés par email
+        $plainPassword = Str::password(10, true, true, false);
+
+        [$hotel, $admin] = DB::transaction(function () use ($data, $request, $plan, $tier, $plainPassword) {
             $hotel = Hotel::create([
                 'name'                 => $data['company_name'],
                 'slug'                 => $this->uniqueSlug($data['company_name']),
-                'currency'             => 'CFA',
-                'primary_color'        => $data['primary_color'] ?? '#4f46e5',
+                'currency'             => $tier['currency'] ?? 'CFA',
                 'contact_phone'        => $data['contact_phone'] ?? null,
                 'contact_email'        => $data['admin_email'],
+                'plan'                 => $plan,
+                'room_limit'           => $tier['room_limit'],
                 'is_active'            => true,
-                'subscription_ends_at' => now()->addDays(self::TRIAL_DAYS),
+                'subscription_ends_at' => now()->addDays(config('plans.trial_days', 14)),
             ]);
 
             if ($request->hasFile('logo')) {
@@ -57,19 +73,26 @@ class RegisterHotelController extends Controller
                 'name'       => $data['admin_name'],
                 'email'      => $data['admin_email'],
                 'role'       => 'Admin',
-                'password'   => Hash::make($data['admin_password']),
+                'password'   => Hash::make($plainPassword),
                 'random_key' => Str::random(60),
             ]);
 
             $hotel->update(['owner_user_id' => $admin->id]);
 
-            return $admin;
+            return [$hotel, $admin];
         });
+
+        // Envoi des identifiants (tolérant aux pannes SMTP : ne casse pas l'inscription)
+        try {
+            Mail::to($admin->email)->send(new HotelCredentialsMail($hotel, $admin, $plainPassword));
+        } catch (\Throwable $e) {
+            Log::warning('Envoi email identifiants échoué: '.$e->getMessage());
+        }
 
         Auth::login($admin);
 
         return redirect()->route('hotel.settings.edit')
-            ->with('success', 'Bienvenue ! Votre essai gratuit de '.self::TRIAL_DAYS.' jours a démarré. Personnalisez votre établissement ci-dessous.');
+            ->with('success', 'Bienvenue ! Votre essai gratuit de '.config('plans.trial_days', 14).' jours a démarré. Vos identifiants vous ont été envoyés par email.');
     }
 
     private function uniqueSlug(string $name): string
