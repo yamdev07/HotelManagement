@@ -16,9 +16,10 @@ class HotelBrandingTest extends TestCase
     private function hotelWithAdmin(): array
     {
         $hotel = Hotel::create([
-            'name'      => 'Hotel Cactus',
-            'slug'      => 'hotel-cactus',
-            'is_active' => true,
+            'name'                    => 'Hotel Cactus',
+            'slug'                    => 'hotel-cactus',
+            'is_active'               => true,
+            'onboarding_completed_at' => now(),
         ]);
 
         $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);

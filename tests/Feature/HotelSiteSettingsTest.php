@@ -15,9 +15,10 @@ class HotelSiteSettingsTest extends TestCase
     private function makeHotel(array $attrs = []): Hotel
     {
         return Hotel::create(array_merge([
-            'name'      => 'Hotel Test',
-            'slug'      => Str::slug('Hotel Test '.Str::random(4)),
-            'is_active' => true,
+            'name'                    => 'Hotel Test',
+            'slug'                    => Str::slug('Hotel Test '.Str::random(4)),
+            'is_active'               => true,
+            'onboarding_completed_at' => now(),
         ], $attrs));
     }
 
