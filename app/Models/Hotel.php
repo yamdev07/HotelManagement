@@ -31,6 +31,8 @@ class Hotel extends Model
         'address',
         'is_active',
         'subscription_ends_at',
+        'plan',
+        'room_limit',
         'owner_user_id',
         'metadata',
     ];
@@ -42,8 +44,48 @@ class Hotel extends Model
         'show_services'        => 'boolean',
         'show_contact'         => 'boolean',
         'subscription_ends_at' => 'datetime',
+        'room_limit'           => 'integer',
         'metadata'             => 'array',
     ];
+
+    /**
+     * Détermine le palier d'abonnement adapté à un nombre de chambres.
+     */
+    public static function planForRoomCount(int $rooms): string
+    {
+        foreach (config('plans.tiers') as $key => $tier) {
+            $max = $tier['room_max'];
+            if ($rooms >= $tier['room_min'] && ($max === null || $rooms <= $max)) {
+                return $key;
+            }
+        }
+
+        return config('plans.default', 'starter');
+    }
+
+    /** Configuration du palier courant. */
+    public function planConfig(): array
+    {
+        $tiers = config('plans.tiers');
+
+        return $tiers[$this->plan] ?? $tiers[config('plans.default', 'starter')];
+    }
+
+    public function planName(): string
+    {
+        return $this->planConfig()['name'];
+    }
+
+    public function monthlyPrice(): int
+    {
+        return $this->planConfig()['price'];
+    }
+
+    /** Limite de chambres du plan (null = illimité). */
+    public function roomLimit(): ?int
+    {
+        return $this->room_limit ?? $this->planConfig()['room_limit'];
+    }
 
     /**
      * Utilisateurs (staff) rattachés à cet hôtel.
