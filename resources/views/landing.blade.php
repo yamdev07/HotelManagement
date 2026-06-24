@@ -219,8 +219,8 @@
                     ['fa-chart-line', 'Rapports & analytics', 'Tableaux de bord, revenus, taux d\'occupation et exports en un clic.'],
                 ];
             @endphp
-            @foreach ($features as [$icon, $title, $desc])
-                <div class="col-md-6 col-lg-4">
+            @foreach ($features as $i => [$icon, $title, $desc])
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ ($i % 3) * 120 }}">
                     <div class="card-feature p-4">
                         <div class="feature-icon mb-3"><i class="fas {{ $icon }}"></i></div>
                         <h5 class="fw-bold">{{ $title }}</h5>
