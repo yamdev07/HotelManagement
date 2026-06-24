@@ -305,13 +305,49 @@
     </div>
 </section>
 
+<!-- TÉMOIGNAGES -->
+<section class="section bg-light">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="badge-soft mb-2 d-inline-block">Ils nous font confiance</span>
+            <h2 class="fw-bold">Ce qu'en disent les hôteliers</h2>
+        </div>
+        @php
+            $testimonials = [
+                ['Awa D.', 'Directrice, Hôtel Lagune', 'On a remplacé 3 outils par un seul. La caisse et le housekeeping enfin synchronisés.'],
+                ['Koffi M.', 'Gérant, Résidence Palmier', 'Mise en route en une après-midi. Mes réceptionnistes ont adoré le check-in direct.'],
+                ['Sarah B.', 'Groupe hôtelier', 'Gérer 4 établissements depuis un seul tableau de bord a changé notre quotidien.'],
+            ];
+        @endphp
+        <div class="row g-4">
+            @foreach ($testimonials as $i => [$name, $role, $quote])
+                <div class="col-md-4" data-aos="zoom-in" data-aos-delay="{{ $i * 120 }}">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="text-warning mb-2">@for($s=0;$s<5;$s++)<i class="fas fa-star"></i>@endfor</div>
+                            <p class="mb-3">“{{ $quote }}”</p>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="feature-icon" style="width:42px;height:42px;">{{ substr($name, 0, 1) }}</div>
+                                <div>
+                                    <div class="fw-semibold">{{ $name }}</div>
+                                    <div class="small text-secondary">{{ $role }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+
 <!-- CTA BAND -->
 <section class="pb-5">
     <div class="container">
-        <div class="cta-band p-5 text-center">
+        <div class="cta-band p-5 text-center" data-aos="zoom-in">
             <h2 class="fw-bold mb-2">Prêt à digitaliser votre hôtel ?</h2>
             <p class="mb-4 opacity-75">Rejoignez les établissements qui pilotent leur activité avec {{ config('app.name', 'MyHotel') }}.</p>
-            <a href="{{ route('hotel.register') }}" class="btn btn-light btn-lg px-4 text-brand fw-semibold">
+            <a href="{{ route('hotel.register') }}" class="btn btn-light btn-lg px-4 text-brand fw-semibold btn-pulse">
                 <i class="fas fa-rocket me-2"></i>Démarrer maintenant
             </a>
         </div>
@@ -355,6 +391,12 @@
     </div>
 </footer>
 
+<!-- Bouton retour en haut -->
+<button id="scrollTop" aria-label="Haut de page"
+        style="position:fixed;right:22px;bottom:22px;width:46px;height:46px;border:none;border-radius:50%;background:var(--brand);color:#fff;box-shadow:0 10px 24px -8px rgba(79,70,229,.7);opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:1000;">
+    <i class="fas fa-arrow-up"></i>
+</button>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
 <script>
@@ -363,9 +405,17 @@
 
     // Navbar dynamique
     const nav = document.querySelector('.navbar');
-    const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 40);
+    const scrollTopBtn = document.getElementById('scrollTop');
+    const onScroll = () => {
+        nav.classList.toggle('scrolled', window.scrollY > 40);
+        const show = window.scrollY > 400;
+        scrollTopBtn.style.opacity = show ? '1' : '0';
+        scrollTopBtn.style.pointerEvents = show ? 'auto' : 'none';
+        scrollTopBtn.style.transform = show ? 'translateY(0)' : 'translateY(10px)';
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+    scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
     // Compteurs animés (count-up au scroll)
     const counters = document.querySelectorAll('.counter');
