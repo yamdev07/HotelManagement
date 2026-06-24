@@ -165,6 +165,41 @@
     </div>
 </header>
 
+<!-- STATS animées -->
+<section class="py-5 border-bottom">
+    <div class="container">
+        <div class="row text-center g-4">
+            @php
+                $stats = [
+                    ['value' => 320, 'suffix' => '+', 'label' => 'Chambres gérées'],
+                    ['value' => 18,  'suffix' => '', 'label' => 'Hôtels actifs'],
+                    ['value' => 99,  'suffix' => '%', 'label' => 'Disponibilité'],
+                    ['value' => 24,  'suffix' => '/7', 'label' => 'Support'],
+                ];
+            @endphp
+            @foreach ($stats as $i => $s)
+                <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="{{ $i * 100 }}">
+                    <div class="display-5 fw-bold text-brand">
+                        <span class="counter" data-target="{{ $s['value'] }}">0</span>{{ $s['suffix'] }}
+                    </div>
+                    <div class="text-secondary">{{ $s['label'] }}</div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+
+<!-- BARRE DE CONFIANCE (marquee) -->
+<div class="py-4 bg-light overflow-hidden">
+    <div style="display:flex; width:max-content; animation: marquee 22s linear infinite; gap:3rem;">
+        @for ($k = 0; $k < 2; $k++)
+            @foreach (['Réception', 'Caisse', 'Restaurant', 'Housekeeping', 'Réservations', 'Rapports', 'Multi-hôtels', 'Check-in express'] as $word)
+                <span class="text-secondary fw-semibold text-uppercase" style="letter-spacing:1px;"><i class="fas fa-circle-check text-brand me-2"></i>{{ $word }}</span>
+            @endforeach
+        @endfor
+    </div>
+</div>
+
 <!-- FEATURES -->
 <section class="section" id="features">
     <div class="container">
@@ -326,6 +361,29 @@
     const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 40);
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+
+    // Compteurs animés (count-up au scroll)
+    const counters = document.querySelectorAll('.counter');
+    const animateCounter = (el) => {
+        const target = +el.dataset.target;
+        const duration = 1400;
+        const start = performance.now();
+        const tick = (now) => {
+            const p = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.round(target * eased);
+            if (p < 1) requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+    };
+    if ('IntersectionObserver' in window) {
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { animateCounter(e.target); obs.unobserve(e.target); } });
+        }, { threshold: .6 });
+        counters.forEach(c => obs.observe(c));
+    } else {
+        counters.forEach(c => c.textContent = c.dataset.target);
+    }
 </script>
 </body>
 </html>
