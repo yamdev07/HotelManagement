@@ -49,8 +49,10 @@
 
         .step-num { width: 44px; height: 44px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; font-weight: 700; }
 
-        .price-card { border: 1px solid #e8eaf0; border-radius: 18px; height: 100%; }
-        .price-card.popular { border: 2px solid var(--brand); box-shadow: 0 24px 50px -28px rgba(79,70,229,.5); }
+        .price-card { border: 1px solid #e8eaf0; border-radius: 18px; height: 100%; transition: transform .25s, box-shadow .25s, border-color .25s; }
+        .price-card:hover { transform: translateY(-8px); box-shadow: 0 30px 55px -30px rgba(15,23,42,.4); border-color: #c7d2fe; }
+        .price-card.popular { border: 2px solid var(--brand); box-shadow: 0 24px 50px -28px rgba(79,70,229,.5); transform: scale(1.04); animation: pulseGlow 3s infinite; }
+        .price-card.popular:hover { transform: scale(1.04) translateY(-8px); }
         .price-amount { font-size: 2.4rem; font-weight: 800; letter-spacing: -1px; }
 
         .cta-band { background: linear-gradient(120deg, var(--brand) 0%, #7c3aed 100%); color: #fff; border-radius: 24px; background-size: 200% 200%; animation: gradientShift 8s ease infinite; }
@@ -276,8 +278,8 @@
         <div class="row g-4 justify-content-center">
             @foreach (config('plans.tiers') as $key => $tier)
                 @php $popular = ! empty($tier['popular']); @endphp
-                <div class="col-md-6 col-lg-4">
-                    <div class="price-card p-4 {{ $popular ? 'popular' : '' }}">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index * 130 }}">
+                    <div class="price-card p-4 h-100 {{ $popular ? 'popular' : '' }}">
                         @if ($popular)
                             <span class="badge text-white mb-2" style="background:var(--brand)">Le plus populaire</span>
                         @endif
