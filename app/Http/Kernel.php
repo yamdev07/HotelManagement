@@ -7,6 +7,7 @@ use App\Http\Middleware\CheckHousekeepingReadOnly;
 use App\Http\Middleware\CheckReceptionistRestriction;
 use App\Http\Middleware\CheckRole;
 use App\Http\Middleware\EnsureHotelActive;
+use App\Http\Middleware\EnsureOnboarded;
 use App\Http\Middleware\TrackUserActivity;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
@@ -44,6 +45,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\EnsureHotelActive::class,
+            \App\Http\Middleware\EnsureOnboarded::class,
 
             // SUPPRIMEZ CETTE LIGNE TEMPORAIREMENT POUR DÉBOGUER
             // \App\Http\Middleware\TrackUserActivity::class,
@@ -76,6 +78,7 @@ class Kernel extends HttpKernel
         // ==================== MIDDLEWARES PERSONNALISÉS ====================
         'checkrole' => CheckRole::class,
         'hotel.active' => EnsureHotelActive::class,
+        'onboarded' => EnsureOnboarded::class,
         'admin.restrict' => CheckAdminRestriction::class,
         'receptionist.restrict' => CheckReceptionistRestriction::class,
         'housekeeping.readonly' => CheckHousekeepingReadOnly::class,
