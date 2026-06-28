@@ -604,7 +604,7 @@
                 <span class="db-clock-time" id="db-clock">{{ now()->format('H:i') }}</span>
                 <span class="db-clock-date">{{ now()->translatedFormat('d M') }}</span>
             </div>
-            <a href="{{ route('frontend.home') }}" target="_blank" class="btn-site">
+            <a href="{{ isset($currentHotel) && $currentHotel ? $currentHotel->publicUrl() : route('frontend.home') }}" target="_blank" class="btn-site">
                 <i class="fas fa-external-link-alt fa-xs"></i> Site web
             </a>
         </div>
@@ -1001,7 +1001,7 @@
                             Caisse
                         </a>
                         @endif
-                        <a href="{{ route('frontend.home') }}" target="_blank" class="qa-item">
+                        <a href="{{ isset($currentHotel) && $currentHotel ? $currentHotel->publicUrl() : route('frontend.home') }}" target="_blank" class="qa-item">
                             <span class="qa-item-icon"><i class="fas fa-external-link-alt fa-xs"></i></span>
                             Visiter le site
                         </a>
