@@ -1,39 +1,35 @@
-{{-- Section chambres : chambres disponibles de l'hôtel (données scopées) --}}
-<section class="section bg-light" id="chambres">
+<section class="section" id="chambres" style="background:#faf9f7;">
     <div class="container">
-        <div class="text-center mb-5">
-            <h2 class="fw-bold">Nos chambres</h2>
-            <p class="text-secondary">Découvrez nos {{ $rooms->count() }} chambres disponibles.</p>
+        <div class="text-center mb-5" data-aos="fade-up">
+            <div class="eyebrow mb-2">Hébergement</div>
+            <h2 class="display-serif" style="font-size:clamp(2rem,4vw,3.2rem);">Nos chambres</h2>
+            <div class="hero-divider" style="background:var(--c);opacity:.5;"></div>
         </div>
 
         @if ($rooms->isEmpty())
-            <p class="text-center text-secondary">Aucune chambre disponible pour le moment.</p>
+            <p class="text-center text-secondary">Nos chambres seront bientôt disponibles à la réservation.</p>
         @else
             <div class="row g-4">
                 @foreach ($rooms as $room)
-                    <div class="col-md-6 col-lg-4">
-                        <div class="card h-100 border-0 shadow-sm">
-                            <div class="d-flex align-items-center justify-content-center text-white"
-                                 style="height:170px; background: linear-gradient(135deg, var(--hotel-primary), var(--hotel-secondary));">
-                                <i class="fas fa-bed fa-3x opacity-75"></i>
+                    @php $img = optional($room->images->first())->getRoomImage(); @endphp
+                    <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ ($loop->index % 3) * 120 }}">
+                        <div class="room-card lift h-100">
+                            <div class="room-media">
+                                <div class="img" style="background-image: {{ $img ? "url('{$img}')" : 'linear-gradient(135deg, var(--c), var(--d))' }};">
+                                    @unless($img)<div class="d-flex h-100 align-items-center justify-content-center text-white opacity-50"><i class="fas fa-bed fa-3x"></i></div>@endunless
+                                </div>
+                                <span class="room-price">{{ number_format($room->price, 0, ',', ' ') }} {{ $hotel->currency }}<small style="font-weight:400;opacity:.85;"> /nuit</small></span>
                             </div>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-1">
-                                    <h5 class="fw-bold mb-0">{{ $room->name ?: 'Chambre '.$room->number }}</h5>
-                                    @if ($room->type)
-                                        <span class="badge bg-hotel">{{ $room->type->name }}</span>
-                                    @endif
-                                </div>
+                            <div class="p-4">
+                                @if ($room->type)<div class="eyebrow mb-1">{{ $room->type->name }}</div>@endif
+                                <h4 class="serif mb-2" style="font-size:1.5rem;">{{ $room->name ?: 'Chambre '.$room->number }}</h4>
                                 <p class="text-secondary small mb-3">
-                                    <i class="fas fa-user-group me-1"></i> {{ $room->capacity }} pers.
-                                    @if ($room->number) · Chambre {{ $room->number }} @endif
+                                    <i class="fas fa-user-group me-1 text-c"></i> {{ $room->capacity }} personnes
+                                    @if ($room->number) &nbsp;·&nbsp; <i class="fas fa-door-closed me-1 text-c"></i> Chambre {{ $room->number }}@endif
                                 </p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="fw-bold text-hotel fs-5">{{ number_format($room->price, 0, ',', ' ') }} {{ $hotel->currency }}</span>
-                                    @if ($hotel->show_contact)
-                                        <a href="#contact" class="btn btn-sm btn-hotel">Réserver</a>
-                                    @endif
-                                </div>
+                                @if ($hotel->show_contact)
+                                    <a href="#contact" class="text-c fw-semibold" style="letter-spacing:.03em;">Réserver <i class="fas fa-arrow-right-long ms-1"></i></a>
+                                @endif
                             </div>
                         </div>
                     </div>
