@@ -226,6 +226,17 @@
                                 </div>
                             </a>
                         @endif
+
+                        @if (Route::has('hotel.settings.edit') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                            <a href="{{ route('hotel.settings.edit') }}"
+                                class="nav-item {{ $activeClass('hotel.settings.') }}" data-tooltip="Mon établissement">
+                                <div class="nav-icon"><i class="fas fa-palette"></i></div>
+                                <div class="nav-content">
+                                    <div class="nav-title">Mon établissement</div>
+                                    <div class="nav-subtitle">Couleurs, logo & site</div>
+                                </div>
+                            </a>
+                        @endif
                     </div>
                 @endif
 
