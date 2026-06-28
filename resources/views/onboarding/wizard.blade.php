@@ -70,7 +70,8 @@
                                 <div class="preview">
                                     <div class="preview-hero" id="pv-hero" style="background: linear-gradient(135deg, {{ $hotel->primaryColor() }}, {{ $hotel->secondaryColor() }});">
                                         <div class="text-center">
-                                            <img id="pv-logo" src="{{ $hotel->logoUrl() ?? '' }}" style="max-height:40px; {{ $hotel->logoUrl() ? '' : 'display:none;' }} background:#fff; border-radius:6px; padding:3px;">
+                                            <img id="pv-logo" alt="" @if($hotel->logoUrl()) src="{{ $hotel->logoUrl() }}" @else style="display:none;" @endif data-base="max-height:40px;background:#fff;border-radius:6px;padding:3px;"
+                                                 style="max-height:40px;background:#fff;border-radius:6px;padding:3px;{{ $hotel->logoUrl() ? '' : 'display:none;' }}">
                                             <h5 class="fw-bold mb-0 mt-2" id="pv-name">{{ $hotel->name }}</h5>
                                             <small id="pv-tagline">{{ $hotel->tagline }}</small>
                                         </div>
