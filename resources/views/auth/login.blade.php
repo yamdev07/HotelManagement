@@ -1,5 +1,5 @@
 @extends('template.auth')
-@section('title', 'Login - Cactus Hotel')
+@section('title', 'Connexion · ' . config('app.name', 'MyHotel'))
 @section('content')
 
 <style>
@@ -557,11 +557,9 @@ body {
         <!-- Côté gauche avec présentation -->
         <div class="login-left">
             <div class="hotel-icon">
-                <img src="{{ asset('img/logo_cactus1.jpeg') }}"
-                     alt="Cactus Hotel"
-                     class="mb-2">
-                <div class="hotel-name">CACTUS HOTEL</div>
-                <div class="hotel-slogan">Luxury & Comfort in Every Stay</div>
+                <div class="mb-2" style="font-size:3rem;line-height:1;"><i class="fas fa-hotel"></i></div>
+                <div class="hotel-name">{{ config('app.name', 'MyHotel') }}</div>
+                <div class="hotel-slogan">La plateforme de gestion hôtelière tout-en-un</div>
             </div>
 
             <ul class="features-list">
