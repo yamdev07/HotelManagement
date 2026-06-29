@@ -45,6 +45,16 @@
         .nav-lux .nav-link2:hover::after, .nav-lux .nav-link2.active::after { width:100%; }
         .nav-lux .nav-link2:hover, .nav-lux .nav-link2.active { color:var(--c); }
 
+        /* Hero (page d'accueil) */
+        .hero-lux { height:100vh; min-height:640px; position:relative; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; overflow:hidden; }
+        .hero-bg { position:absolute; inset:0; background-size:cover; background-position:center; transform:scale(1.08); animation:zoomSlow 18s ease-out forwards; }
+        @keyframes zoomSlow { to { transform:scale(1); } }
+        .hero-overlay { position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,.45) 0%, rgba(0,0,0,.25) 40%, rgba(0,0,0,.65) 100%); }
+        .hero-content { position:relative; z-index:2; max-width:900px; padding:0 1.5rem; }
+        .hero-content h1 { font-size:clamp(3rem,8vw,6rem); margin:.5rem 0 1.2rem; text-shadow:0 4px 30px rgba(0,0,0,.3); }
+        .scroll-ind { position:absolute; bottom:28px; left:50%; transform:translateX(-50%); z-index:2; color:#fff; animation:bob 2s infinite; }
+        @keyframes bob { 0%,100%{ transform:translate(-50%,0) } 50%{ transform:translate(-50%,10px) } }
+
         .page-head { padding:11rem 0 5rem; text-align:center; color:#fff; position:relative; background:linear-gradient(135deg,var(--c),var(--d)); }
         .page-head.has-img { background-size:cover; background-position:center; }
         .page-head .ov { position:absolute; inset:0; background:rgba(0,0,0,.45); }
