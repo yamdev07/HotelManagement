@@ -13,7 +13,7 @@
                     {{ $hotel->aboutText() }}
                 </p>
                 @if ($hotel->show_rooms)
-                    <a href="#chambres" class="btn-c mt-3">Voir nos chambres</a>
+                    <a href="{{ route('public.hotel.rooms', $hotel->slug) }}" class="btn-c mt-3">Voir nos chambres</a>
                 @endif
             </div>
             <div class="col-lg-6" data-aos="fade-left" data-aos-delay="150">

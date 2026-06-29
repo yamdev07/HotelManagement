@@ -62,12 +62,12 @@ class PublicSiteTest extends TestCase
         $response->assertSee('Votre confort');
     }
 
-    public function test_public_site_shows_only_its_own_rooms(): void
+    public function test_rooms_page_shows_only_its_own_rooms(): void
     {
         $this->makeHotelWithRoom('Hotel A', 'Chambre Alpha');
         $this->makeHotelWithRoom('Hotel B', 'Chambre Beta');
 
-        $response = $this->get('/h/hotel-a');
+        $response = $this->get('/h/hotel-a/chambres');
 
         $response->assertOk();
         $response->assertSee('Chambre Alpha');

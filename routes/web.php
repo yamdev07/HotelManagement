@@ -42,8 +42,14 @@ use Illuminate\Support\Facades\Route;
 // ==================== LANDING PAGE SAAS (page d'accueil plateforme) ====================
 Route::view('/', 'landing')->name('landing');
 
-// ==================== VITRINE PUBLIQUE PAR HÔTEL ====================
-Route::get('/h/{slug}', [\App\Http\Controllers\PublicSiteController::class, 'show'])->name('public.hotel');
+// ==================== VITRINE PUBLIQUE PAR HÔTEL (multi-pages) ====================
+Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(function () {
+    Route::get('/h/{slug}', 'show')->name('public.hotel');
+    Route::get('/h/{slug}/chambres', 'rooms')->name('public.hotel.rooms');
+    Route::get('/h/{slug}/restaurant', 'restaurant')->name('public.hotel.restaurant');
+    Route::get('/h/{slug}/services', 'services')->name('public.hotel.services');
+    Route::get('/h/{slug}/contact', 'contact')->name('public.hotel.contact');
+});
 
 // ==================== INSCRIPTION SELF-SERVICE (essai gratuit) ====================
 Route::middleware('guest')->group(function () {
