@@ -22,7 +22,7 @@ class HotelSiteSettingsTest extends TestCase
         ], $attrs));
     }
 
-    public function test_disabled_sections_are_not_rendered_on_public_site(): void
+    public function test_disabled_section_pages_return_404_and_enabled_ones_work(): void
     {
         $hotel = $this->makeHotel([
             'slug'            => 'hotel-toggle',
@@ -32,13 +32,16 @@ class HotelSiteSettingsTest extends TestCase
             'show_contact'    => false,
         ]);
 
-        $response = $this->get('/h/hotel-toggle');
+        // L'accueil reste accessible
+        $this->get('/h/hotel-toggle')->assertOk();
 
-        $response->assertOk();
-        $response->assertSee('Nos services');       // activée
-        $response->assertDontSee('Nos chambres');    // désactivée
-        $response->assertDontSee('Notre restaurant');// désactivée
-        $response->assertDontSee('Nous contacter');  // désactivée
+        // Les pages désactivées renvoient 404
+        $this->get('/h/hotel-toggle/chambres')->assertNotFound();
+        $this->get('/h/hotel-toggle/restaurant')->assertNotFound();
+        $this->get('/h/hotel-toggle/contact')->assertNotFound();
+
+        // La page activée fonctionne
+        $this->get('/h/hotel-toggle/services')->assertOk()->assertSee('Nos services');
     }
 
     public function test_admin_can_define_custom_services_and_socials(): void
