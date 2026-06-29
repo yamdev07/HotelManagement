@@ -21,6 +21,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
+        'hotel_id',
         'name',
         'email',
         'role',
@@ -55,6 +56,14 @@ class User extends Authenticatable
     public function getRoleEnumAttribute(): ?UserRole
     {
         return UserRole::tryFrom($this->attributes['role'] ?? '');
+    }
+
+    /**
+     * Hôtel auquel appartient cet utilisateur (null pour le Super-Admin plateforme).
+     */
+    public function hotel()
+    {
+        return $this->belongsTo(Hotel::class);
     }
 
     /**

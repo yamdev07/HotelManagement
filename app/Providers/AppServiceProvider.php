@@ -27,14 +27,19 @@ use App\Services\HousekeepingService;
 use App\Services\PaymentService;
 use App\Services\SessionActivityService;
 use App\Services\TransactionService;
+use App\Support\TenantManager;
 use Illuminate\Support\ServiceProvider;
 
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
+        // Multi-tenant : hôtel courant
+        $this->app->singleton(TenantManager::class);
+
         // Repositories
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(ImageRepositoryInterface::class, ImageRepository::class);
@@ -59,5 +64,10 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Paginator::useBootstrapFive();
+
+        // Branding multi-tenant : l'hôtel courant est disponible dans toutes les vues
+        View::composer('*', function ($view) {
+            $view->with('currentHotel', app(TenantManager::class)->hotel());
+        });
     }
 }

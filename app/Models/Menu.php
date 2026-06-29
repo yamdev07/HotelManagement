@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Menu extends Model
 {
+    use \App\Models\Concerns\BelongsToHotel;
     protected $fillable = ['name', 'category_id', 'price', 'description', 'image', 'available_days', 'is_available'];
 
     protected $casts = [

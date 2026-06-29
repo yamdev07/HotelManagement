@@ -1,709 +1,199 @@
-@extends('template.auth')
-@section('title', 'Login - Cactus Hotel')
-@section('content')
-
-<style>
-/* ═══════════════════════════════════════════════════════════════
-   STYLES LOGIN - Design moderne cohérent
-═══════════════════════════════════════════════════════════════════ */
-:root {
-    --primary: #2E7D32;
-    --primary-light: #4CAF50;
-    --primary-soft: rgba(46, 125, 50, 0.08);
-    --success: #10b981;
-    --success-light: rgba(16, 185, 129, 0.08);
-    --warning: #f59e0b;
-    --warning-light: rgba(245, 158, 11, 0.08);
-    --danger: #ef4444;
-    --danger-light: rgba(239, 68, 68, 0.08);
-    --info: #3b82f6;
-    --info-light: rgba(59, 130, 246, 0.08);
-    --gray-50: #f8fafc;
-    --gray-100: #f1f5f9;
-    --gray-200: #e2e8f0;
-    --gray-300: #cbd5e1;
-    --gray-400: #94a3b8;
-    --gray-500: #64748b;
-    --gray-600: #475569;
-    --gray-700: #334155;
-    --gray-800: #1e293b;
-    --white: #ffffff;
-    --radius: 12px;
-    --shadow: 0 4px 20px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.05);
-    --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1);
-    --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-body {
-    background: var(--gray-50);
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-}
-
-.login-container {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem 1rem;
-    background: linear-gradient(135deg, rgba(46, 125, 50, 0.05) 0%, rgba(76, 175, 80, 0.05) 100%);
-}
-
-.login-card {
-    background: var(--white);
-    border-radius: 24px;
-    box-shadow: var(--shadow-hover);
-    overflow: hidden;
-    width: 100%;
-    max-width: 1000px;
-    display: flex;
-    min-height: 600px;
-    border: 1px solid var(--gray-200);
-    transition: var(--transition);
-}
-
-.login-card:hover {
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08), 0 6px 12px rgba(0, 0, 0, 0.05);
-}
-
-/* Côté gauche avec l'icône et présentation */
-.login-left {
-    background: linear-gradient(135deg, var(--primary) 0%, #1B5E20 100%);
-    color: white;
-    padding: 3rem;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-}
-
-.login-left::before {
-    content: '';
-    position: absolute;
-    top: -100px;
-    right: -100px;
-    width: 300px;
-    height: 300px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    animation: float 6s ease-in-out infinite;
-}
-
-.login-left::after {
-    content: '';
-    position: absolute;
-    bottom: -50px;
-    left: -50px;
-    width: 200px;
-    height: 200px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 50%;
-    animation: float 8s ease-in-out infinite reverse;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0) scale(1); }
-    50% { transform: translateY(-20px) scale(1.05); }
-}
-
-.hotel-icon {
-    margin-bottom: 2rem;
-    position: relative;
-    z-index: 2;
-    text-align: center;
-}
-
-.hotel-icon img {
-    height: 80px;
-    width: auto;
-    border-radius: 16px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-    transition: var(--transition);
-}
-
-.hotel-icon img:hover {
-    transform: scale(1.05) rotate(2deg);
-}
-
-.hotel-name {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    letter-spacing: 1px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.hotel-slogan {
-    font-size: 1rem;
-    opacity: 0.9;
-    margin-bottom: 3rem;
-    font-weight: 400;
-    letter-spacing: 0.5px;
-}
-
-.features-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    position: relative;
-    z-index: 2;
-}
-
-.features-list li {
-    margin-bottom: 1.8rem;
-    display: flex;
-    align-items: center;
-    transition: var(--transition);
-}
-
-.features-list li:hover {
-    transform: translateX(10px);
-}
-
-.features-list i {
-    background: rgba(255, 255, 255, 0.15);
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 1rem;
-    font-size: 1.2rem;
-    backdrop-filter: blur(4px);
-    transition: var(--transition);
-}
-
-.features-list li:hover i {
-    background: rgba(255, 255, 255, 0.25);
-    transform: scale(1.1);
-}
-
-.features-list strong {
-    display: block;
-    font-size: 1.1rem;
-    margin-bottom: 0.25rem;
-}
-
-.features-list small {
-    font-size: 0.85rem;
-    opacity: 0.8;
-}
-
-/* Côté droit avec le formulaire */
-.login-right {
-    flex: 1;
-    padding: 3rem;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background: var(--white);
-}
-
-.login-header {
-    text-align: center;
-    margin-bottom: 2.5rem;
-}
-
-.login-header h3 {
-    color: var(--primary);
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    font-size: 1.8rem;
-}
-
-.login-header p {
-    color: var(--gray-500);
-    font-size: 0.95rem;
-}
-
-.form-group {
-    margin-bottom: 1.8rem;
-    position: relative;
-}
-
-.form-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--gray-700);
-    font-weight: 500;
-    font-size: 0.9rem;
-    letter-spacing: 0.3px;
-}
-
-.form-control {
-    width: 100%;
-    padding: 1rem 1rem 1rem 3rem;
-    border: 1px solid var(--gray-200);
-    border-radius: 10px;
-    font-size: 0.95rem;
-    transition: var(--transition);
-    background: var(--gray-50);
-    color: var(--gray-800);
-}
-
-.form-control:focus {
-    outline: none;
-    border-color: var(--primary);
-    background: var(--white);
-    box-shadow: 0 0 0 3px var(--primary-soft);
-}
-
-.form-control::placeholder {
-    color: var(--gray-400);
-    font-size: 0.9rem;
-}
-
-.input-icon {
-    position: absolute;
-    left: 1rem;
-    top: 2.7rem;
-    color: var(--gray-400);
-    font-size: 1.1rem;
-    transition: var(--transition);
-    pointer-events: none;
-}
-
-.form-control:focus + .input-icon {
-    color: var(--primary);
-}
-
-.remember-forgot {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
-.form-check {
-    display: flex;
-    align-items: center;
-}
-
-.form-check-input {
-    margin-right: 0.5rem;
-    width: 18px;
-    height: 18px;
-    border: 2px solid var(--gray-300);
-    border-radius: 4px;
-    transition: var(--transition);
-    cursor: pointer;
-}
-
-.form-check-input:checked {
-    background-color: var(--primary);
-    border-color: var(--primary);
-}
-
-.form-check-label {
-    color: var(--gray-600);
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-
-.forgot-link {
-    color: var(--primary);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: var(--transition);
-    position: relative;
-}
-
-.forgot-link::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 0;
-    height: 1px;
-    background: var(--primary);
-    transition: var(--transition);
-}
-
-.forgot-link:hover {
-    color: #1B5E20;
-}
-
-.forgot-link:hover::after {
-    width: 100%;
-}
-
-.btn-login {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    padding: 1rem 2rem;
-    font-size: 1rem;
-    font-weight: 600;
-    width: 100%;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.btn-login::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translate(-50%, -50%);
-    transition: width 0.6s, height 0.6s;
-}
-
-.btn-login:hover {
-    background: linear-gradient(135deg, #1B5E20 0%, var(--primary) 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(46, 125, 50, 0.3);
-}
-
-.btn-login:hover::before {
-    width: 300px;
-    height: 300px;
-}
-
-.btn-login:active {
-    transform: translateY(0);
-}
-
-.btn-login i {
-    font-size: 1rem;
-    transition: var(--transition);
-}
-
-.btn-login:hover i {
-    transform: translateX(5px);
-}
-
-.login-divider {
-    text-align: center;
-    margin: 2rem 0;
-    position: relative;
-}
-
-.login-divider::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: var(--gray-200);
-}
-
-.login-divider span {
-    background: var(--white);
-    padding: 0 1rem;
-    color: var(--gray-500);
-    font-size: 0.85rem;
-    position: relative;
-    z-index: 1;
-}
-
-.demo-credentials {
-    background: var(--primary-soft);
-    border: 1px solid rgba(46, 125, 50, 0.2);
-    border-radius: 12px;
-    padding: 1.2rem;
-    margin-top: 1.5rem;
-    transition: var(--transition);
-}
-
-.demo-credentials:hover {
-    background: rgba(46, 125, 50, 0.12);
-    transform: translateY(-2px);
-}
-
-.demo-credentials h6 {
-    color: var(--primary);
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.demo-credentials h6 i {
-    font-size: 1rem;
-}
-
-.demo-credentials p {
-    margin: 0.5rem 0;
-    color: var(--gray-700);
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.demo-credentials strong {
-    color: var(--primary);
-    min-width: 80px;
-    display: inline-block;
-    font-weight: 600;
-}
-
-.demo-credentials i {
-    color: var(--primary);
-    width: 20px;
-}
-
-.text-danger {
-    color: var(--danger);
-    font-size: 0.8rem;
-    margin-top: 0.3rem;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-}
-
-/* Animations */
-@keyframes slideIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.login-left {
-    animation: slideIn 0.6s ease both;
-}
-
-.login-right {
-    animation: slideIn 0.6s 0.1s ease both;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-    .login-card {
-        flex-direction: column;
-        max-width: 450px;
-        margin: 1rem;
-    }
-
-    .login-left {
-        padding: 2rem;
-        animation: slideIn 0.6s ease both;
-    }
-
-    .login-right {
-        padding: 2rem;
-        animation: slideIn 0.6s 0.1s ease both;
-    }
-
-    .hotel-name {
-        font-size: 1.8rem;
-    }
-
-    .features-list li {
-        margin-bottom: 1.2rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .login-card {
-        border-radius: 16px;
-    }
-
-    .login-left {
-        padding: 1.5rem;
-    }
-
-    .login-right {
-        padding: 1.5rem;
-    }
-
-    .hotel-name {
-        font-size: 1.5rem;
-    }
-
-    .hotel-slogan {
-        font-size: 0.9rem;
-        margin-bottom: 2rem;
-    }
-
-    .features-list i {
-        width: 36px;
-        height: 36px;
-        font-size: 1rem;
-    }
-
-    .btn-login {
-        padding: 0.875rem 1.5rem;
-    }
-}
-</style>
-
-<div class="login-container">
-    <div class="login-card">
-        <!-- Côté gauche avec présentation -->
-        <div class="login-left">
-            <div class="hotel-icon">
-                <img src="{{ asset('img/logo_cactus1.jpeg') }}"
-                     alt="Cactus Hotel"
-                     class="mb-2">
-                <div class="hotel-name">CACTUS HOTEL</div>
-                <div class="hotel-slogan">Luxury & Comfort in Every Stay</div>
-            </div>
-
-            <ul class="features-list">
-                <li>
-                    <i class="fas fa-shield-alt"></i>
-                    <div>
-                        <strong>Sécurité garantie</strong>
-                        <small>Vos données sont protégées</small>
-                    </div>
-                </li>
-                <li>
-                    <i class="fas fa-bolt"></i>
-                    <div>
-                        <strong>Accès rapide</strong>
-                        <small>Gérez votre hôtel en un clic</small>
-                    </div>
-                </li>
-                <li>
-                    <i class="fas fa-headset"></i>
-                    <div>
-                        <strong>Support 24/7</strong>
-                        <small>Assistance technique disponible</small>
-                    </div>
-                </li>
-            </ul>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Connexion · {{ config('app.name', 'MyHotel') }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root { --brand:#4f46e5; --brand2:#7c3aed; --ink:#0f172a; }
+        * { font-family:'Inter',system-ui,sans-serif; box-sizing:border-box; }
+        html,body { height:100%; }
+        body { margin:0; color:var(--ink); overflow:hidden; }
+
+        .split { display:grid; grid-template-columns:1.05fr 1fr; height:100vh; }
+
+        /* ---------- Panneau marque (plein écran) ---------- */
+        .side {
+            position:relative; padding:4rem; color:#fff; overflow:hidden;
+            background:linear-gradient(135deg,var(--brand),var(--brand2),#6d28d9);
+            background-size:200% 200%; animation:grad 12s ease infinite;
+            display:flex; flex-direction:column; justify-content:center;
+        }
+        @keyframes grad { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        .blob { position:absolute; border-radius:50%; filter:blur(2px); background:rgba(255,255,255,.10); animation:float 9s ease-in-out infinite; }
+        @keyframes float { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-26px) } }
+        .grid-deco { position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.12) 1px,transparent 1px); background-size:26px 26px; opacity:.4; mask-image:linear-gradient(180deg,transparent,#000 40%,transparent); }
+        .side-inner { position:relative; z-index:2; max-width:460px; }
+        .brand { font-size:2rem; font-weight:800; display:flex; align-items:center; gap:.7rem; }
+        .side h1 { font-size:clamp(2rem,3.2vw,3rem); font-weight:800; line-height:1.1; letter-spacing:-.02em; margin:2rem 0 1rem; }
+        .feat { display:flex; gap:1rem; align-items:flex-start; margin-top:1.4rem; }
+        .feat-ico { width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.16);display:grid;place-items:center;flex-shrink:0;backdrop-filter:blur(4px); }
+
+        /* ---------- Formulaire (plein écran) ---------- */
+        .panel { display:flex; align-items:center; justify-content:center; padding:2rem; background:#fff; }
+        .form-wrap { width:100%; max-width:420px; }
+        .form-control { border-radius:14px; padding:.9rem 1rem .9rem 2.8rem; border:1px solid #e5e7eb; background:#f8fafc; transition:.25s; }
+        .form-control:focus { border-color:var(--brand); box-shadow:0 0 0 .25rem rgba(79,70,229,.15); background:#fff; }
+        .input-ico { position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:#94a3b8; transition:.25s; }
+        .position-relative:focus-within .input-ico { color:var(--brand); }
+        .btn-brand { background:linear-gradient(135deg,var(--brand),var(--brand2)); border:none; color:#fff; border-radius:14px; padding:.95rem; font-weight:600; width:100%; transition:.25s; }
+        .btn-brand:hover { transform:translateY(-2px); box-shadow:0 16px 34px -12px var(--brand); color:#fff; filter:brightness(1.05); }
+        .link-brand { color:var(--brand); font-weight:600; text-decoration:none; }
+
+        /* ---------- Animations d'entrée ---------- */
+        @keyframes up { from{ opacity:0; transform:translateY(22px) } to{ opacity:1; transform:none } }
+        @keyframes inLeft { from{ opacity:0; transform:translateX(-26px) } to{ opacity:1; transform:none } }
+        .anim { opacity:0; animation:up .7s cubic-bezier(.2,.7,.2,1) forwards; }
+        .anim-l { opacity:0; animation:inLeft .8s cubic-bezier(.2,.7,.2,1) forwards; }
+        .d1{animation-delay:.05s} .d2{animation-delay:.15s} .d3{animation-delay:.25s} .d4{animation-delay:.35s} .d5{animation-delay:.45s} .d6{animation-delay:.55s}
+
+        /* ---------- Animations renforcées ---------- */
+        /* Halo conique rotatif derrière la marque */
+        .glow { position:absolute; width:140%; aspect-ratio:1; left:-20%; top:-20%; z-index:1;
+            background:conic-gradient(from 0deg, transparent, rgba(255,255,255,.18), transparent 30%);
+            animation:spin 14s linear infinite; mix-blend-mode:overlay; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* Icônes flottantes qui dérivent */
+        .float-ico { position:absolute; color:rgba(255,255,255,.16); z-index:1; animation:drift 12s ease-in-out infinite; }
+        @keyframes drift { 0%,100%{ transform:translateY(0) rotate(0); } 50%{ transform:translateY(-30px) rotate(12deg); } }
+
+        /* Titre à dégradé animé */
+        .shine { background:linear-gradient(90deg,#fff,#e0d7ff,#fff,#c4b5fd,#fff); background-size:250% 100%;
+            -webkit-background-clip:text; background-clip:text; color:transparent; animation:shine 5s linear infinite; }
+        @keyframes shine { to { background-position:250% 0; } }
+
+        /* Logo : anneau pulsant */
+        .brand i { position:relative; }
+        .brand i::after { content:''; position:absolute; inset:-8px; border-radius:50%; border:2px solid rgba(255,255,255,.5); animation:ring 2.4s ease-out infinite; }
+        @keyframes ring { 0%{ transform:scale(.7); opacity:.8 } 100%{ transform:scale(1.6); opacity:0 } }
+
+        /* Bouton : reflet qui balaie + halo */
+        .btn-brand { position:relative; overflow:hidden; }
+        .btn-brand::before { content:''; position:absolute; top:0; left:-120%; width:60%; height:100%;
+            background:linear-gradient(120deg,transparent,rgba(255,255,255,.45),transparent); transform:skewX(-20deg); animation:sweep 3.2s ease-in-out infinite; }
+        @keyframes sweep { 0%{ left:-120% } 55%,100%{ left:140% } }
+
+        /* Blobs : parallax fluide */
+        .blob { transition:transform .4s cubic-bezier(.2,.7,.2,1); will-change:transform; }
+        .feat { transition:transform .25s; }
+        .feat:hover { transform:translateX(6px); }
+        .feat:hover .feat-ico { background:rgba(255,255,255,.32); }
+        .feat-ico { transition:.25s; }
+
+        @media (max-width:860px){
+            body{ overflow:auto; }
+            .split{ grid-template-columns:1fr; height:auto; min-height:100vh; }
+            .side{ min-height:38vh; padding:2.5rem; }
+        }
+        @media (prefers-reduced-motion: reduce){ *{ animation:none!important; } .anim,.anim-l{ opacity:1!important; } }
+    </style>
+</head>
+<body>
+<div class="split">
+    <!-- MARQUE -->
+    <aside class="side" id="side">
+        <div class="glow"></div>
+        <div class="grid-deco"></div>
+        <span class="blob" data-depth="22" style="width:260px;height:260px;top:-40px;right:-60px;"></span>
+        <span class="blob" data-depth="-18" style="width:170px;height:170px;bottom:6%;left:-50px;animation-delay:-3s;"></span>
+        <span class="blob" data-depth="30" style="width:90px;height:90px;top:30%;right:22%;animation-delay:-6s;"></span>
+
+        <!-- Icônes flottantes -->
+        <i class="fas fa-bed float-ico"   style="font-size:2.2rem;top:18%;left:12%;"></i>
+        <i class="fas fa-key float-ico"   style="font-size:1.6rem;top:70%;left:18%;animation-delay:-2s;"></i>
+        <i class="fas fa-bell-concierge float-ico" style="font-size:2rem;top:24%;right:14%;animation-delay:-4s;"></i>
+        <i class="fas fa-star float-ico"  style="font-size:1.3rem;bottom:18%;right:24%;animation-delay:-5s;"></i>
+        <i class="fas fa-martini-glass float-ico" style="font-size:1.6rem;bottom:30%;left:42%;animation-delay:-7s;"></i>
+
+        <div class="side-inner">
+            <div class="brand anim-l d1"><i class="fas fa-hotel"></i> {{ config('app.name', 'MyHotel') }}</div>
+            <h1 class="anim-l d2">Gérez votre hôtel,<br><span class="shine">sans la complexité.</span></h1>
+            <p class="anim-l d3" style="opacity:.9;font-size:1.05rem;">Réservations, caisse, restaurant, housekeeping et rapports — réunis sur une seule plateforme.</p>
+
+            <div class="anim-l d4 feat"><div class="feat-ico"><i class="fas fa-shield-halved"></i></div>
+                <div><div class="fw-semibold">Sécurité garantie</div><div class="small" style="opacity:.8;">Données isolées par établissement</div></div></div>
+            <div class="anim-l d5 feat"><div class="feat-ico"><i class="fas fa-bolt"></i></div>
+                <div><div class="fw-semibold">Tout-en-un</div><div class="small" style="opacity:.8;">Tous vos outils au même endroit</div></div></div>
+            <div class="anim-l d6 feat"><div class="feat-ico"><i class="fas fa-headset"></i></div>
+                <div><div class="fw-semibold">Support 24/7</div><div class="small" style="opacity:.8;">Une équipe à votre écoute</div></div></div>
         </div>
+    </aside>
 
-        <!-- Côté droit avec formulaire -->
-        <div class="login-right">
-            <div class="login-header">
-                <h3>Welcome Back</h3>
-                <p>Please sign in to access your dashboard</p>
+    <!-- FORMULAIRE -->
+    <section class="panel">
+        <div class="form-wrap">
+            <div class="anim d1">
+                <h2 class="fw-bold mb-1">Bon retour 👋</h2>
+                <p class="text-secondary mb-4">Connectez-vous à votre espace.</p>
             </div>
 
-            <form id="form-login" action="/login" method="POST">
+            @if (session('failed') || session('error'))
+                <div class="alert alert-danger py-2 anim">{{ session('failed') ?? session('error') }}</div>
+            @endif
+            @if (session('success'))
+                <div class="alert alert-success py-2 anim">{{ session('success') }}</div>
+            @endif
+
+            <form action="{{ route('login') }}" method="POST">
                 @csrf
-
-                <div class="form-group">
-                    <label for="email" class="form-label">Email Address</label>
+                <div class="mb-3 anim d2">
+                    <label class="form-label fw-semibold">Adresse email</label>
                     <div class="position-relative">
-                        <i class="fas fa-envelope input-icon"></i>
-                        <input type="email" id="email" name="email"
-                               class="form-control @error('email') is-invalid @enderror"
-                               placeholder="Enter your email"
-                               value="{{ old('email') }}" required autofocus>
+                        <i class="fas fa-envelope input-ico"></i>
+                        <input type="email" name="email" value="{{ old('email') }}" required autofocus
+                               class="form-control @error('email') is-invalid @enderror" placeholder="vous@exemple.com">
                     </div>
-                    @error('email')
-                        <div class="text-danger">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
-                        </div>
-                    @enderror
+                    @error('email')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                 </div>
 
-                <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
+                <div class="mb-3 anim d3">
+                    <label class="form-label fw-semibold">Mot de passe</label>
                     <div class="position-relative">
-                        <i class="fas fa-lock input-icon"></i>
-                        <input type="password" id="password" name="password"
-                               class="form-control @error('password') is-invalid @enderror"
-                               placeholder="Enter your password" required>
+                        <i class="fas fa-lock input-ico"></i>
+                        <input type="password" name="password" required
+                               class="form-control @error('password') is-invalid @enderror" placeholder="••••••••">
                     </div>
-                    @error('password')
-                        <div class="text-danger">
-                            <i class="fas fa-exclamation-circle"></i>
-                            {{ $message }}
-                        </div>
-                    @enderror
+                    @error('password')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                 </div>
 
-                <div class="remember-forgot">
+                <div class="d-flex justify-content-between align-items-center mb-4 anim d4">
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                        <label class="form-check-label" for="remember">
-                            Remember me
-                        </label>
+                        <label class="form-check-label small" for="remember">Se souvenir de moi</label>
                     </div>
-                    <a href="/forgot-password" class="forgot-link">
-                        Forgot Password?
-                    </a>
+                    <a href="/forgot-password" class="link-brand small">Mot de passe oublié ?</a>
                 </div>
 
-                <button type="submit" class="btn-login">
-                    <i class="fas fa-sign-in-alt"></i>
-                    Sign In
-                </button>
-
-                
+                <button type="submit" class="btn-brand anim d5"><i class="fas fa-arrow-right-to-bracket me-2"></i>Se connecter</button>
             </form>
+
+            <p class="text-center text-secondary small mt-4 mb-0 anim d6">
+                Pas encore de compte ? <a href="{{ route('hotel.register') }}" class="link-brand">Démarrer l'essai gratuit</a>
+            </p>
         </div>
-    </div>
+    </section>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('form-login');
-    const submitBtn = form.querySelector('button[type="submit"]');
-    
-    // Animation des icônes au focus
-    const inputs = document.querySelectorAll('.form-control');
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            this.parentElement.querySelector('.input-icon').style.color = 'var(--primary)';
+    // Parallax doux des blobs selon la souris
+    const side = document.getElementById('side');
+    const blobs = side ? side.querySelectorAll('.blob') : [];
+    if (side && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        side.addEventListener('mousemove', (e) => {
+            const r = side.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - .5;
+            const y = (e.clientY - r.top) / r.height - .5;
+            blobs.forEach(b => {
+                const d = parseFloat(b.dataset.depth || 16);
+                b.style.transform = `translate(${x * d}px, ${y * d}px)`;
+            });
         });
-        
-        input.addEventListener('blur', function() {
-            if (!this.value) {
-                this.parentElement.querySelector('.input-icon').style.color = 'var(--gray-400)';
-            }
-        });
-    });
-    
-    // Soumission du formulaire
-    form.addEventListener('submit', function(e) {
-        // Validation basique
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-        
-        if (!email || !password) {
-            e.preventDefault();
-            alert('Veuillez remplir tous les champs');
-            return;
-        }
-        
-        // Désactiver le bouton pendant la soumission
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing in...';
-        
-        // Réactiver après 3 secondes au cas où
-        setTimeout(() => {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
-        }, 3000);
-    });
-    
-    // Raccourci clavier : Entrée pour soumettre
-    const passwordInput = document.getElementById('password');
-    passwordInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            form.requestSubmit();
-        }
-    });
-});
+        side.addEventListener('mouseleave', () => blobs.forEach(b => b.style.transform = ''));
+    }
 </script>
-@endsection
+</body>
+</html>

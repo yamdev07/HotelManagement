@@ -16,8 +16,11 @@
     @vite('resources/sass/app.scss')
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     @stack('styles')
-    <title>@yield('title') - Hotel Admin</title>
+    <title>@yield('title') - {{ $currentHotel->name ?? 'Hotel Admin' }}</title>
     @yield('head')
+
+    {{-- White-label : couleurs de l'hôtel courant --}}
+    @include('partials.hotel-branding')
 
     <style>
         *, *::before, *::after { box-sizing: border-box; }

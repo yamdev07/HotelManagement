@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class RestaurantOrderItem extends Model
 {
+    use \App\Models\Concerns\BelongsToHotel;
     protected $fillable = ['order_id', 'menu_id', 'quantity', 'price'];
 
     public function menu()

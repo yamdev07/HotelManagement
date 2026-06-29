@@ -41,6 +41,7 @@ jobs:
           cp .env.example .env
           php artisan key:generate
           php artisan config:clear
+          mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions bootstrap/cache
 
       # ---------- Node / Vite ----------
       - name: Setup Node

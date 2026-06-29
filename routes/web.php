@@ -16,6 +16,7 @@ use App\Http\Controllers\HousekeepingController;
 use App\Http\Controllers\ImageController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Platform\HotelController as PlatformHotelController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RestaurantController;
@@ -38,8 +39,26 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-// ==================== ROUTES FRONTEND (Site Vitrine) ====================
-Route::get('/', [FrontendController::class, 'home'])->name('frontend.home');
+// ==================== LANDING PAGE SAAS (page d'accueil plateforme) ====================
+Route::view('/', 'landing')->name('landing');
+
+// ==================== VITRINE PUBLIQUE PAR HÔTEL (multi-pages) ====================
+Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(function () {
+    Route::get('/h/{slug}', 'show')->name('public.hotel');
+    Route::get('/h/{slug}/chambres', 'rooms')->name('public.hotel.rooms');
+    Route::get('/h/{slug}/restaurant', 'restaurant')->name('public.hotel.restaurant');
+    Route::get('/h/{slug}/services', 'services')->name('public.hotel.services');
+    Route::get('/h/{slug}/contact', 'contact')->name('public.hotel.contact');
+});
+
+// ==================== INSCRIPTION SELF-SERVICE (essai gratuit) ====================
+Route::middleware('guest')->group(function () {
+    Route::get('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'create'])->name('hotel.register');
+    Route::post('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'store'])->name('hotel.register.store');
+});
+
+// ==================== ROUTES FRONTEND (Site Vitrine de l'hôtel) ====================
+Route::get('/vitrine', [FrontendController::class, 'home'])->name('frontend.home');
 Route::get('/chambres', [FrontendController::class, 'rooms'])->name('frontend.rooms');
 Route::get('/chambre/{id}', [FrontendController::class, 'roomDetails'])->name('frontend.room.details');
 Route::get('/restaurant-vitrine', [FrontendController::class, 'restaurant'])->name('frontend.restaurant');
@@ -72,6 +91,33 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 // ==================== ROUTE LOGOUT GLOBALE ====================
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// ==================== HÔTEL SUSPENDU (abonnement) ====================
+Route::view('/compte-suspendu', 'errors.hotel-suspended')
+    ->middleware('auth')
+    ->name('hotel.suspended');
+
+// ==================== ONBOARDING (personnalisation initiale) ====================
+Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
+    Route::get('/bienvenue', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding.show');
+    Route::post('/bienvenue', [\App\Http\Controllers\OnboardingController::class, 'store'])->name('onboarding.store');
+});
+
+// ==================== RÉGLAGES DE L'ÉTABLISSEMENT (white-label) ====================
+Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
+    Route::get('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'edit'])->name('hotel.settings.edit');
+    Route::put('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'update'])->name('hotel.settings.update');
+});
+
+// ==================== DASHBOARD SUPER-ADMIN PLATEFORME ====================
+Route::middleware(['auth', 'checkrole:Super'])->prefix('platform')->name('platform.')->group(function () {
+    Route::get('/hotels', [PlatformHotelController::class, 'index'])->name('hotels.index');
+    Route::get('/hotels/create', [PlatformHotelController::class, 'create'])->name('hotels.create');
+    Route::post('/hotels', [PlatformHotelController::class, 'store'])->name('hotels.store');
+    Route::get('/hotels/{hotel}/edit', [PlatformHotelController::class, 'edit'])->name('hotels.edit');
+    Route::put('/hotels/{hotel}', [PlatformHotelController::class, 'update'])->name('hotels.update');
+    Route::patch('/hotels/{hotel}/toggle', [PlatformHotelController::class, 'toggleActive'])->name('hotels.toggle');
+});
 
 // ==================== ROUTE LOGOUT URGENCE ====================
 Route::get('/logout-now', function () {

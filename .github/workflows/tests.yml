@@ -52,6 +52,9 @@ jobs:
       - name: Generate key
         run: php artisan key:generate
 
+      - name: Prepare storage directories
+        run: mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions bootstrap/cache
+
       - name: Create database
         run: |
           mysql -h 127.0.0.1 -u root -e "CREATE DATABASE IF NOT EXISTS hotel_cactus_test;"

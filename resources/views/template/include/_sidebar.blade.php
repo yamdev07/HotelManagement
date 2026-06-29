@@ -8,11 +8,12 @@
     <a href="{{ route('dashboard.index') }}" class="sidebar-logo">
         <div class="d-flex align-items-center">
             <div>
-                <img src="{{ asset('img/logo_cactus1.jpeg') }}" alt="Hotel Cactus"
+                <img src="{{ ($currentHotel ?? null)?->logoUrl() ?? asset('img/logo_cactus1.jpeg') }}"
+                    alt="{{ $currentHotel->name ?? 'Hotel' }}"
                     style="height: 38px; border-radius: 8px; flex-shrink:0;">
             </div>
             <div class="brand-text ms-2">
-                <span class="brand-name">Hotel Management</span>
+                <span class="brand-name">{{ $currentHotel->name ?? 'Hotel Management' }}</span>
                 <small class="brand-subtitle d-block">Gestion Hôtelière</small>
             </div>
         </div>
@@ -222,6 +223,17 @@
                                 <div class="nav-content">
                                     <div class="nav-title">Paiements</div>
                                     <div class="nav-subtitle">Transactions financières</div>
+                                </div>
+                            </a>
+                        @endif
+
+                        @if (Route::has('hotel.settings.edit') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                            <a href="{{ route('hotel.settings.edit') }}"
+                                class="nav-item {{ $activeClass('hotel.settings.') }}" data-tooltip="Mon établissement">
+                                <div class="nav-icon"><i class="fas fa-palette"></i></div>
+                                <div class="nav-content">
+                                    <div class="nav-title">Mon établissement</div>
+                                    <div class="nav-subtitle">Couleurs, logo & site</div>
                                 </div>
                             </a>
                         @endif
