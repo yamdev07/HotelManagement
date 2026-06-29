@@ -41,6 +41,29 @@ class HotelSiteSettingsTest extends TestCase
         $response->assertDontSee('Nous contacter');  // désactivée
     }
 
+    public function test_admin_can_define_custom_services_and_socials(): void
+    {
+        $hotel = $this->makeHotel();
+        $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
+
+        $this->actingAs($admin)->put('/mon-etablissement', [
+            'name'     => $hotel->name,
+            'services' => [
+                ['icon' => 'fa-spa', 'title' => 'Spa & Massage', 'description' => 'Détente absolue'],
+                ['icon' => 'fa-water', 'title' => '', 'description' => 'ligne vide ignorée'],
+            ],
+            'socials'  => ['facebook' => 'https://facebook.com/monhotel', 'instagram' => ''],
+            'about_title' => 'Notre maison',
+        ])->assertRedirectToRoute('hotel.settings.edit');
+
+        $hotel->refresh();
+        $this->assertCount(1, $hotel->services); // la ligne vide est filtrée
+        $this->assertEquals('Spa & Massage', $hotel->services[0]['title']);
+        $this->assertEquals(['facebook' => 'https://facebook.com/monhotel'], $hotel->socials);
+        $this->assertEquals('Notre maison', $hotel->about_title);
+        $this->assertEquals('Spa & Massage', $hotel->siteServices()[0]['title']);
+    }
+
     public function test_admin_can_update_site_content_and_toggles(): void
     {
         $hotel = $this->makeHotel();

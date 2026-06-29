@@ -33,9 +33,36 @@ class HotelSettingsController extends Controller
             'address'         => ['nullable', 'string', 'max:255'],
             'tagline'         => ['nullable', 'string', 'max:255'],
             'description'     => ['nullable', 'string', 'max:2000'],
+            'about_title'     => ['nullable', 'string', 'max:255'],
+            'about_text'      => ['nullable', 'string', 'max:2000'],
             'logo'            => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg,webp', 'max:2048'],
             'cover_image'     => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
+            'services'              => ['nullable', 'array'],
+            'services.*.icon'       => ['nullable', 'string', 'max:50'],
+            'services.*.title'      => ['nullable', 'string', 'max:100'],
+            'services.*.description' => ['nullable', 'string', 'max:255'],
+            'socials'         => ['nullable', 'array'],
+            'socials.facebook'  => ['nullable', 'string', 'max:255'],
+            'socials.instagram' => ['nullable', 'string', 'max:255'],
+            'socials.whatsapp'  => ['nullable', 'string', 'max:255'],
+            'socials.website'   => ['nullable', 'string', 'max:255'],
         ]);
+
+        // Services : on ne garde que les lignes avec un titre
+        $data['services'] = collect($request->input('services', []))
+            ->filter(fn ($s) => ! empty($s['title']))
+            ->map(fn ($s) => [
+                'icon'        => $s['icon'] ?? 'fa-star',
+                'title'       => $s['title'],
+                'description' => $s['description'] ?? '',
+            ])
+            ->values()
+            ->all();
+
+        // Réseaux sociaux : on ne garde que les non vides
+        $data['socials'] = collect($request->input('socials', []))
+            ->filter(fn ($url) => ! empty($url))
+            ->all();
 
         if ($request->hasFile('logo')) {
             if ($hotel->logo) {

@@ -116,6 +116,18 @@
             <div class="col-lg-5">
                 <div class="serif h3 text-white mb-2">{{ $hotel->name }}</div>
                 <p class="small" style="max-width:320px;opacity:.8;">{{ $hotel->tagline ?? 'Votre séjour, notre passion.' }}</p>
+                @php $icons = ['facebook'=>'fab fa-facebook-f','instagram'=>'fab fa-instagram','whatsapp'=>'fab fa-whatsapp','website'=>'fas fa-globe']; @endphp
+                @if ($hotel->socialLinks())
+                    <div class="d-flex gap-2 mt-3">
+                        @foreach ($hotel->socialLinks() as $key => $url)
+                            <a href="{{ $url }}" target="_blank" rel="noopener" aria-label="{{ $key }}"
+                               style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);transition:.3s;"
+                               onmouseover="this.style.background='var(--c)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
+                                <i class="{{ $icons[$key] ?? 'fas fa-link' }}"></i>
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
             </div>
             <div class="col-lg-4">
                 @if ($hotel->address)<p class="small mb-2"><i class="fas fa-location-dot me-2 text-c"></i>{{ $hotel->address }}</p>@endif

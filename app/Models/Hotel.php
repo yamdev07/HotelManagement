@@ -26,6 +26,10 @@ class Hotel extends Model
         'show_restaurant',
         'show_services',
         'show_contact',
+        'services',
+        'socials',
+        'about_title',
+        'about_text',
         'contact_email',
         'contact_phone',
         'address',
@@ -47,8 +51,50 @@ class Hotel extends Model
         'subscription_ends_at'    => 'datetime',
         'onboarding_completed_at' => 'datetime',
         'room_limit'              => 'integer',
+        'services'                => 'array',
+        'socials'                 => 'array',
         'metadata'                => 'array',
     ];
+
+    /** Services par défaut si l'hôtelier n'en a pas défini. */
+    public const DEFAULT_SERVICES = [
+        ['icon' => 'fa-wifi', 'title' => 'Wi-Fi gratuit', 'description' => "Connexion haut débit partout dans l'établissement."],
+        ['icon' => 'fa-bell-concierge', 'title' => 'Conciergerie 24/7', 'description' => 'Une équipe dévouée à votre service jour et nuit.'],
+        ['icon' => 'fa-mug-saucer', 'title' => 'Petit-déjeuner', 'description' => 'Une table généreuse pour bien commencer la journée.'],
+        ['icon' => 'fa-car', 'title' => 'Voiturier & parking', 'description' => 'Stationnement sécurisé et service voiturier.'],
+        ['icon' => 'fa-spa', 'title' => 'Bien-être', 'description' => 'Des moments de détente pensés pour vous.'],
+        ['icon' => 'fa-location-dot', 'title' => 'Emplacement', "description" => "Au cœur des points d'intérêt incontournables."],
+    ];
+
+    /** Liste des services de la vitrine (personnalisés ou défaut). */
+    public function siteServices(): array
+    {
+        $custom = collect($this->services ?? [])
+            ->filter(fn ($s) => ! empty($s['title']))
+            ->values()
+            ->all();
+
+        return $custom ?: self::DEFAULT_SERVICES;
+    }
+
+    /** Réseaux sociaux renseignés (clé => url), vides exclus. */
+    public function socialLinks(): array
+    {
+        return collect($this->socials ?? [])
+            ->filter(fn ($url) => ! empty($url))
+            ->all();
+    }
+
+    public function aboutTitle(): string
+    {
+        return $this->about_title ?: "Une expérience d'exception";
+    }
+
+    public function aboutText(): string
+    {
+        return $this->about_text
+            ?: ($this->description ?: 'Niché dans un cadre raffiné, '.$this->name.' vous accueille pour un séjour inoubliable.');
+    }
 
     /** L'hôtel doit-il encore passer par l'onboarding (personnalisation initiale) ? */
     public function needsOnboarding(): bool

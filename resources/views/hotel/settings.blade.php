@@ -135,6 +135,72 @@
             </div>
         </div>
 
+        {{-- Bloc "À propos" --}}
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-white fw-semibold"><i class="fas fa-circle-info me-2"></i>Bloc « À propos »</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label class="form-label">Titre</label>
+                        <input type="text" name="about_title" class="form-control" value="{{ old('about_title', $hotel->about_title) }}" placeholder="Une expérience d'exception">
+                    </div>
+                    <div class="col-md-7">
+                        <label class="form-label">Texte de présentation</label>
+                        <textarea name="about_text" class="form-control" rows="2" placeholder="Décrivez votre établissement…">{{ old('about_text', $hotel->about_text) }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Services personnalisés (répéteur dynamique) --}}
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
+                <span><i class="fas fa-concierge-bell me-2"></i>Services de la vitrine</span>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="add-service"><i class="fas fa-plus me-1"></i>Ajouter</button>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Laissez vide pour afficher les services par défaut. Icône = nom Font Awesome (ex. <code>fa-wifi</code>, <code>fa-spa</code>).</p>
+                <div id="services-list">
+                    @php $svcRows = old('services', $hotel->services ?: []); @endphp
+                    @forelse ($svcRows as $i => $svc)
+                        <div class="row g-2 mb-2 align-items-center service-row">
+                            <div class="col-md-3"><input type="text" name="services[{{ $i }}][icon]" class="form-control" value="{{ $svc['icon'] ?? '' }}" placeholder="fa-star"></div>
+                            <div class="col-md-3"><input type="text" name="services[{{ $i }}][title]" class="form-control" value="{{ $svc['title'] ?? '' }}" placeholder="Titre"></div>
+                            <div class="col-md-5"><input type="text" name="services[{{ $i }}][description]" class="form-control" value="{{ $svc['description'] ?? '' }}" placeholder="Description"></div>
+                            <div class="col-md-1 text-end"><button type="button" class="btn btn-sm btn-outline-danger remove-service"><i class="fas fa-trash"></i></button></div>
+                        </div>
+                    @empty
+                    @endforelse
+                </div>
+            </div>
+        </div>
+
+        {{-- Réseaux sociaux --}}
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-white fw-semibold"><i class="fas fa-share-nodes me-2"></i>Réseaux sociaux</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    @php $soc = old('socials', $hotel->socials ?: []); @endphp
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fab fa-facebook-f me-2 text-primary"></i>Facebook</label>
+                        <input type="text" name="socials[facebook]" class="form-control" value="{{ $soc['facebook'] ?? '' }}" placeholder="https://facebook.com/…">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fab fa-instagram me-2 text-danger"></i>Instagram</label>
+                        <input type="text" name="socials[instagram]" class="form-control" value="{{ $soc['instagram'] ?? '' }}" placeholder="https://instagram.com/…">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fab fa-whatsapp me-2 text-success"></i>WhatsApp</label>
+                        <input type="text" name="socials[whatsapp]" class="form-control" value="{{ $soc['whatsapp'] ?? '' }}" placeholder="https://wa.me/229…">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label"><i class="fas fa-globe me-2 text-secondary"></i>Site web</label>
+                        <input type="text" name="socials[website]" class="form-control" value="{{ $soc['website'] ?? '' }}" placeholder="https://…">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- Sections affichées sur la vitrine --}}
         <div class="card shadow-sm border-0 mt-4">
             <div class="card-header bg-white fw-semibold"><i class="fas fa-toggle-on me-2"></i>Sections de la vitrine</div>
@@ -168,4 +234,26 @@
         </div>
     </form>
 </div>
+
+<script>
+    (function () {
+        const list = document.getElementById('services-list');
+        let idx = list.querySelectorAll('.service-row').length;
+
+        const rowHtml = (i) => `
+            <div class="row g-2 mb-2 align-items-center service-row">
+                <div class="col-md-3"><input type="text" name="services[${i}][icon]" class="form-control" placeholder="fa-star"></div>
+                <div class="col-md-3"><input type="text" name="services[${i}][title]" class="form-control" placeholder="Titre"></div>
+                <div class="col-md-5"><input type="text" name="services[${i}][description]" class="form-control" placeholder="Description"></div>
+                <div class="col-md-1 text-end"><button type="button" class="btn btn-sm btn-outline-danger remove-service"><i class="fas fa-trash"></i></button></div>
+            </div>`;
+
+        document.getElementById('add-service').addEventListener('click', () => {
+            list.insertAdjacentHTML('beforeend', rowHtml(idx++));
+        });
+        list.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-service')) e.target.closest('.service-row').remove();
+        });
+    })();
+</script>
 @endsection

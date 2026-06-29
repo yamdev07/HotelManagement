@@ -7,10 +7,10 @@
             <div class="col-lg-6" data-aos="fade-right">
                 <div class="eyebrow mb-3">Bienvenue</div>
                 <h2 class="display-serif mb-4" style="font-size:clamp(2rem,4vw,3.2rem);">
-                    Une expérience<br>d'exception
+                    {{ $hotel->aboutTitle() }}
                 </h2>
                 <p class="text-secondary" style="font-size:1.08rem;line-height:1.9;">
-                    {{ $hotel->description ?: 'Niché dans un cadre raffiné, '.$hotel->name.' vous accueille pour un séjour inoubliable. Chaque détail est pensé pour votre confort : des chambres élégantes, un service attentionné et une atmosphère unique.' }}
+                    {{ $hotel->aboutText() }}
                 </p>
                 @if ($hotel->show_rooms)
                     <a href="#chambres" class="btn-c mt-3">Voir nos chambres</a>
