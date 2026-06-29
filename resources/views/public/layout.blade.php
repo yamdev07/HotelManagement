@@ -74,6 +74,25 @@
         .dark-sec { background:var(--d); color:#fff; }
         .dark-sec .eyebrow { color:#fff; opacity:.8; }
 
+        /* Galerie */
+        .gallery-grid { display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:200px; gap:14px; }
+        .gallery-item { position:relative; border-radius:6px; overflow:hidden; background-size:cover; background-position:center; display:block; transition:transform .5s; }
+        .gallery-item::after { content:''; position:absolute; inset:0; background:rgba(0,0,0,0); transition:.4s; }
+        .gallery-item:hover { transform:scale(.98); } .gallery-item:hover::after { background:rgba(0,0,0,.25); }
+        .gallery-item.tall { grid-row:span 2; } .gallery-item.wide { grid-column:span 2; }
+        .gallery-ov { position:absolute; inset:0; display:grid; place-items:center; color:#fff; opacity:0; transition:.4s; z-index:2; font-size:1.4rem; }
+        .gallery-item:hover .gallery-ov { opacity:1; }
+        @media (max-width:768px){ .gallery-grid{ grid-template-columns:repeat(2,1fr); grid-auto-rows:150px; } .gallery-item.wide{ grid-column:span 1 } }
+
+        /* Témoignages */
+        .review { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); border-radius:8px; padding:2.2rem; backdrop-filter:blur(6px); transition:.35s; }
+        .review:hover { transform:translateY(-6px); background:rgba(255,255,255,.10); }
+        .rev-ava { width:42px; height:42px; border-radius:50%; background:var(--c); color:#fff; display:grid; place-items:center; font-weight:700; }
+
+        /* FAQ */
+        .accordion-button:not(.collapsed){ color:var(--c) !important; }
+        .accordion-button::after{ filter:grayscale(1); }
+
         footer.foot { background:#0f0f0f; color:#cfcfcf; padding:5rem 0 2rem; }
         footer.foot a { color:#cfcfcf; } footer.foot a:hover { color:#fff; }
         #toTop { position:fixed; right:24px; bottom:24px; width:48px; height:48px; border:none; border-radius:50%; background:var(--c); color:#fff; opacity:0; pointer-events:none; transition:.3s; z-index:60; }

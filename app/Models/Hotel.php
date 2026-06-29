@@ -215,4 +215,12 @@ class Hotel extends Model
     {
         return route('public.hotel', $this->slug);
     }
+
+    /**
+     * Image d'en-tête : celle de l'hôtel, ou une image premium par défaut.
+     */
+    public function coverOrDefault(): string
+    {
+        return $this->coverUrl() ?: config('vitrine.default_cover');
+    }
 }

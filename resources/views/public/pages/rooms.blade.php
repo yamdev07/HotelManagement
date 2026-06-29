@@ -16,13 +16,14 @@
             @if ($rooms->isEmpty())
                 <p class="text-center text-secondary">Nos chambres seront bientôt disponibles à la réservation.</p>
             @else
+                @php $fallbacks = config('vitrine.rooms'); @endphp
                 <div class="row g-4">
                     @foreach ($rooms as $room)
-                        @php $img = optional($room->images->first())->getRoomImage(); @endphp
+                        @php $img = optional($room->images->first())->getRoomImage() ?: $fallbacks[$loop->index % count($fallbacks)]; @endphp
                         <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ ($loop->index % 3) * 120 }}">
                             <div class="room-card lift h-100">
                                 <div class="room-media">
-                                    <div class="img" style="background-image: {{ $img ? "url('{$img}')" : 'linear-gradient(135deg, var(--c), var(--d))' }};"></div>
+                                    <div class="img" style="background-image: url('{{ $img }}');"></div>
                                     <span class="room-price">{{ number_format($room->price, 0, ',', ' ') }} {{ $hotel->currency }}<small style="font-weight:400;opacity:.85;"> /nuit</small></span>
                                 </div>
                                 <div class="p-4">

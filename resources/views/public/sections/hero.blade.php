@@ -1,7 +1,7 @@
-@php $cover = $hotel->coverUrl(); @endphp
+@php $cover = $hotel->coverOrDefault(); @endphp
 <section class="hero-lux" id="accueil">
-    <div class="hero-bg" style="background-image: {{ $cover ? "url('{$cover}')" : 'linear-gradient(135deg, var(--c), var(--d))' }};"></div>
-    <div class="hero-overlay"></div>
+    <div class="hero-bg" style="background-image: url('{{ $cover }}');"></div>
+    <div class="hero-overlay" style="background:linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,.2) 35%, color-mix(in srgb, var(--d) 80%, rgba(0,0,0,.7)) 100%);"></div>
 
     <div class="hero-content">
         <div class="eyebrow" data-aos="fade-down" style="color:#fff;opacity:.85;">
