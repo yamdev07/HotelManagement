@@ -50,6 +50,40 @@
         .anim-l { opacity:0; animation:inLeft .8s cubic-bezier(.2,.7,.2,1) forwards; }
         .d1{animation-delay:.05s} .d2{animation-delay:.15s} .d3{animation-delay:.25s} .d4{animation-delay:.35s} .d5{animation-delay:.45s} .d6{animation-delay:.55s}
 
+        /* ---------- Animations renforcées ---------- */
+        /* Halo conique rotatif derrière la marque */
+        .glow { position:absolute; width:140%; aspect-ratio:1; left:-20%; top:-20%; z-index:1;
+            background:conic-gradient(from 0deg, transparent, rgba(255,255,255,.18), transparent 30%);
+            animation:spin 14s linear infinite; mix-blend-mode:overlay; }
+        @keyframes spin { to { transform:rotate(360deg); } }
+
+        /* Icônes flottantes qui dérivent */
+        .float-ico { position:absolute; color:rgba(255,255,255,.16); z-index:1; animation:drift 12s ease-in-out infinite; }
+        @keyframes drift { 0%,100%{ transform:translateY(0) rotate(0); } 50%{ transform:translateY(-30px) rotate(12deg); } }
+
+        /* Titre à dégradé animé */
+        .shine { background:linear-gradient(90deg,#fff,#e0d7ff,#fff,#c4b5fd,#fff); background-size:250% 100%;
+            -webkit-background-clip:text; background-clip:text; color:transparent; animation:shine 5s linear infinite; }
+        @keyframes shine { to { background-position:250% 0; } }
+
+        /* Logo : anneau pulsant */
+        .brand i { position:relative; }
+        .brand i::after { content:''; position:absolute; inset:-8px; border-radius:50%; border:2px solid rgba(255,255,255,.5); animation:ring 2.4s ease-out infinite; }
+        @keyframes ring { 0%{ transform:scale(.7); opacity:.8 } 100%{ transform:scale(1.6); opacity:0 } }
+
+        /* Bouton : reflet qui balaie + halo */
+        .btn-brand { position:relative; overflow:hidden; }
+        .btn-brand::before { content:''; position:absolute; top:0; left:-120%; width:60%; height:100%;
+            background:linear-gradient(120deg,transparent,rgba(255,255,255,.45),transparent); transform:skewX(-20deg); animation:sweep 3.2s ease-in-out infinite; }
+        @keyframes sweep { 0%{ left:-120% } 55%,100%{ left:140% } }
+
+        /* Blobs : parallax fluide */
+        .blob { transition:transform .4s cubic-bezier(.2,.7,.2,1); will-change:transform; }
+        .feat { transition:transform .25s; }
+        .feat:hover { transform:translateX(6px); }
+        .feat:hover .feat-ico { background:rgba(255,255,255,.32); }
+        .feat-ico { transition:.25s; }
+
         @media (max-width:860px){
             body{ overflow:auto; }
             .split{ grid-template-columns:1fr; height:auto; min-height:100vh; }
@@ -61,15 +95,23 @@
 <body>
 <div class="split">
     <!-- MARQUE -->
-    <aside class="side">
+    <aside class="side" id="side">
+        <div class="glow"></div>
         <div class="grid-deco"></div>
-        <span class="blob" style="width:260px;height:260px;top:-40px;right:-60px;"></span>
-        <span class="blob" style="width:170px;height:170px;bottom:6%;left:-50px;animation-delay:-3s;"></span>
-        <span class="blob" style="width:90px;height:90px;top:30%;right:22%;animation-delay:-6s;"></span>
+        <span class="blob" data-depth="22" style="width:260px;height:260px;top:-40px;right:-60px;"></span>
+        <span class="blob" data-depth="-18" style="width:170px;height:170px;bottom:6%;left:-50px;animation-delay:-3s;"></span>
+        <span class="blob" data-depth="30" style="width:90px;height:90px;top:30%;right:22%;animation-delay:-6s;"></span>
+
+        <!-- Icônes flottantes -->
+        <i class="fas fa-bed float-ico"   style="font-size:2.2rem;top:18%;left:12%;"></i>
+        <i class="fas fa-key float-ico"   style="font-size:1.6rem;top:70%;left:18%;animation-delay:-2s;"></i>
+        <i class="fas fa-bell-concierge float-ico" style="font-size:2rem;top:24%;right:14%;animation-delay:-4s;"></i>
+        <i class="fas fa-star float-ico"  style="font-size:1.3rem;bottom:18%;right:24%;animation-delay:-5s;"></i>
+        <i class="fas fa-martini-glass float-ico" style="font-size:1.6rem;bottom:30%;left:42%;animation-delay:-7s;"></i>
 
         <div class="side-inner">
             <div class="brand anim-l d1"><i class="fas fa-hotel"></i> {{ config('app.name', 'MyHotel') }}</div>
-            <h1 class="anim-l d2">Gérez votre hôtel,<br>sans la complexité.</h1>
+            <h1 class="anim-l d2">Gérez votre hôtel,<br><span class="shine">sans la complexité.</span></h1>
             <p class="anim-l d3" style="opacity:.9;font-size:1.05rem;">Réservations, caisse, restaurant, housekeeping et rapports — réunis sur une seule plateforme.</p>
 
             <div class="anim-l d4 feat"><div class="feat-ico"><i class="fas fa-shield-halved"></i></div>
@@ -135,5 +177,23 @@
         </div>
     </section>
 </div>
+
+<script>
+    // Parallax doux des blobs selon la souris
+    const side = document.getElementById('side');
+    const blobs = side ? side.querySelectorAll('.blob') : [];
+    if (side && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        side.addEventListener('mousemove', (e) => {
+            const r = side.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - .5;
+            const y = (e.clientY - r.top) / r.height - .5;
+            blobs.forEach(b => {
+                const d = parseFloat(b.dataset.depth || 16);
+                b.style.transform = `translate(${x * d}px, ${y * d}px)`;
+            });
+        });
+        side.addEventListener('mouseleave', () => blobs.forEach(b => b.style.transform = ''));
+    }
+</script>
 </body>
 </html>
