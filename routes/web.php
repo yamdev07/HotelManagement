@@ -1019,6 +1019,21 @@ Route::middleware(['auth', 'checkrole:Super,Admin,Receptionist'])->group(functio
 
 });
 
+// ==================== FALLBACK FICHIERS STORAGE (logos, images) ====================
+// Sur hébergement mutualisé (FTP), le lien symbolique public/storage casse souvent :
+// les images tombent alors sur le Route::fallback (redirection login) au lieu d'être servies.
+// Cette route sert directement le fichier depuis le disque "public" si le symlink est absent.
+// Quand le symlink existe, le serveur web sert l'image et cette route n'est jamais atteinte.
+Route::get('/storage/{path}', function (string $path) {
+    $disk = \Illuminate\Support\Facades\Storage::disk('public');
+
+    abort_if(str_contains($path, '..') || ! $disk->exists($path), 404);
+
+    return response()->file($disk->path($path), [
+        'Cache-Control' => 'public, max-age=604800',
+    ]);
+})->where('path', '.*')->name('storage.file');
+
 // ==================== ROUTE FALLBACK ====================
 Route::fallback(function () {
     if (auth()->check()) {
