@@ -47,17 +47,27 @@
                     <form action="{{ route('hotel.register.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        <h6 class="fw-semibold text-uppercase text-secondary small mb-3">1. Votre formule</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <h6 class="fw-semibold text-uppercase text-secondary small mb-0">1. Votre pays & formule</h6>
+                            <div class="d-flex align-items-center gap-2">
+                                <label class="small text-secondary mb-0"><i class="fas fa-earth-africa me-1"></i>Pays</label>
+                                <select name="country" id="country-select" class="form-select form-select-sm" style="width:auto;">
+                                    @foreach ($countries as $code => $c)
+                                        <option value="{{ $code }}" {{ old('country', $defaultCountry) === $code ? 'selected' : '' }}>{{ $c['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                         <div class="row g-3 mb-4">
                             @foreach ($plans as $key => $tier)
                                 <div class="col-md-4">
-                                    <label class="plan-card d-block p-3 {{ $selectedPlan === $key ? 'selected' : '' }}" data-plan="{{ $key }}">
+                                    <label class="plan-card d-block p-3 {{ $selectedPlan === $key ? 'selected' : '' }}" data-plan="{{ $key }}" data-base="{{ $tier['price'] }}">
                                         <input type="radio" name="plan" value="{{ $key }}" {{ $selectedPlan === $key ? 'checked' : '' }}>
                                         <div class="d-flex justify-content-between align-items-center mb-1">
                                             <span class="fw-bold">{{ $tier['name'] }}</span>
                                             @if (! empty($tier['popular']))<span class="badge bg-primary">Populaire</span>@endif
                                         </div>
-                                        <div class="plan-price">{{ number_format($tier['price'], 0, ',', ' ') }} <small class="text-secondary fw-normal" style="font-size:.8rem">CFA/mois</small></div>
+                                        <div class="plan-price"><span class="price-amount">{{ number_format($tier['price'], 0, ',', ' ') }}</span> <small class="text-secondary fw-normal price-cur" style="font-size:.8rem">XOF/mois</small></div>
                                         <div class="small text-secondary">{{ $tier['tagline'] }}</div>
                                     </label>
                                 </div>
@@ -117,6 +127,22 @@
             card.querySelector('input').checked = true;
         });
     });
+
+    // Prix ajustés selon le pays (coût de la vie)
+    const countries = @json($countries);
+    const countrySel = document.getElementById('country-select');
+    const fmt = n => n.toLocaleString('fr-FR');
+    function updatePrices() {
+        const c = countries[countrySel.value]; if (!c) return;
+        document.querySelectorAll('.plan-card').forEach(card => {
+            const base = +card.dataset.base;
+            const price = Math.round(base * c.coef / c.round) * c.round;
+            card.querySelector('.price-amount').textContent = fmt(price);
+            card.querySelector('.price-cur').textContent = c.currency + '/mois';
+        });
+    }
+    countrySel.addEventListener('change', updatePrices);
+    updatePrices();
 </script>
 </body>
 </html>

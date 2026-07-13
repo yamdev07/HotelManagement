@@ -53,6 +53,27 @@ class HotelRegistrationTest extends TestCase
         Mail::assertSent(HotelCredentialsMail::class, fn ($mail) => $mail->hasTo('patron@nouvel.test'));
     }
 
+    public function test_country_sets_currency_and_adjusts_price(): void
+    {
+        Mail::fake();
+
+        $this->post('/inscription', [
+            'company_name' => 'Hotel Abidjan',
+            'plan'         => 'pro',
+            'country'      => 'CI',
+            'admin_name'   => 'X',
+            'admin_email'  => 'x@ci.test',
+        ]);
+
+        $hotel = \App\Models\Hotel::where('name', 'Hotel Abidjan')->first();
+        $this->assertEquals('CI', $hotel->country);
+        $this->assertEquals('XOF', $hotel->currency);
+        // pro = 45000 base × 1.20 (Côte d'Ivoire)
+        $this->assertEquals(54000, $hotel->monthlyPrice());
+        // Bénin reste à 45000
+        $this->assertEquals(45000, \App\Models\Hotel::priceFor('pro', 'BJ'));
+    }
+
     public function test_plan_defaults_to_starter_when_absent(): void
     {
         Mail::fake();

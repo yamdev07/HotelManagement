@@ -29,8 +29,10 @@ class RegisterHotelController extends Controller
         }
 
         return view('auth.register-hotel', [
-            'plans'        => config('plans.tiers'),
-            'selectedPlan' => $plan,
+            'plans'          => config('plans.tiers'),
+            'selectedPlan'   => $plan,
+            'countries'      => config('plans.countries'),
+            'defaultCountry' => config('plans.default_country', 'BJ'),
         ]);
     }
 
@@ -39,23 +41,27 @@ class RegisterHotelController extends Controller
         $data = $request->validate([
             'company_name'  => ['required', 'string', 'max:255'],
             'plan'          => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
+            'country'       => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.countries')))],
             'contact_phone' => ['nullable', 'string', 'max:50'],
             'logo'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg,webp', 'max:2048'],
             'admin_name'    => ['required', 'string', 'max:255'],
             'admin_email'   => ['required', 'email', 'max:255', 'unique:users,email'],
         ]);
 
-        $plan = $data['plan'] ?? config('plans.default', 'starter');
-        $tier = config('plans.tiers')[$plan];
+        $plan    = $data['plan'] ?? config('plans.default', 'starter');
+        $tier    = config('plans.tiers')[$plan];
+        $country = $data['country'] ?? config('plans.default_country', 'BJ');
+        $currency = config('plans.countries.'.$country.'.currency', 'XOF');
 
         // Mot de passe généré : ce sont les identifiants envoyés par email
         $plainPassword = Str::password(10, true, true, false);
 
-        [$hotel, $admin] = DB::transaction(function () use ($data, $request, $plan, $tier, $plainPassword) {
+        [$hotel, $admin] = DB::transaction(function () use ($data, $request, $plan, $tier, $country, $currency, $plainPassword) {
             $hotel = Hotel::create([
                 'name'                 => $data['company_name'],
                 'slug'                 => $this->uniqueSlug($data['company_name']),
-                'currency'             => $tier['currency'] ?? 'CFA',
+                'country'              => $country,
+                'currency'             => $currency,
                 'contact_phone'        => $data['contact_phone'] ?? null,
                 'contact_email'        => $data['admin_email'],
                 'plan'                 => $plan,

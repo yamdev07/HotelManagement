@@ -20,6 +20,30 @@ return [
 
     'default' => 'starter',
 
+    /*
+    | Pays desservis. Les prix des paliers (ci-dessous) sont la RÉFÉRENCE (Bénin).
+    | Chaque pays applique un "coef" (coût de la vie relatif) à ces prix de base
+    | et sa propre devise. Prix final = prix de base × coef, arrondi à la centaine.
+    */
+    'default_country' => 'BJ',
+
+    // coef = multiplicateur appliqué au prix de base (Bénin) — intègre coût de la vie + devise.
+    // round = pas d'arrondi dans la devise du pays. Ajuste ces valeurs à ta convenance.
+    'countries' => [
+        'BJ' => ['name' => 'Bénin',           'currency' => 'XOF', 'coef' => 1.00,   'round' => 100],
+        'TG' => ['name' => 'Togo',            'currency' => 'XOF', 'coef' => 0.95,   'round' => 100],
+        'CI' => ['name' => "Côte d'Ivoire",   'currency' => 'XOF', 'coef' => 1.20,   'round' => 100],
+        'SN' => ['name' => 'Sénégal',         'currency' => 'XOF', 'coef' => 1.15,   'round' => 100],
+        'BF' => ['name' => 'Burkina Faso',    'currency' => 'XOF', 'coef' => 0.90,   'round' => 100],
+        'ML' => ['name' => 'Mali',            'currency' => 'XOF', 'coef' => 0.90,   'round' => 100],
+        'NE' => ['name' => 'Niger',           'currency' => 'XOF', 'coef' => 0.85,   'round' => 100],
+        'CM' => ['name' => 'Cameroun',        'currency' => 'XAF', 'coef' => 1.05,   'round' => 100],
+        'GA' => ['name' => 'Gabon',           'currency' => 'XAF', 'coef' => 1.60,   'round' => 100],
+        'NG' => ['name' => 'Nigeria',         'currency' => 'NGN', 'coef' => 1.80,   'round' => 500],
+        'GH' => ['name' => 'Ghana',           'currency' => 'GHS', 'coef' => 0.025,  'round' => 10],
+        'FR' => ['name' => 'France',          'currency' => 'EUR', 'coef' => 0.0018, 'round' => 1],
+    ],
+
     'tiers' => [
         'starter' => [
             'key'         => 'starter',

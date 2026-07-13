@@ -15,6 +15,7 @@ class Hotel extends Model
         'name',
         'slug',
         'currency',
+        'country',
         'timezone',
         'logo',
         'primary_color',
@@ -131,9 +132,49 @@ class Hotel extends Model
         return $this->planConfig()['name'];
     }
 
+    /**
+     * Prix mensuel d'un plan pour un pays donné (coût de la vie appliqué),
+     * arrondi à la centaine.
+     */
+    public static function priceFor(string $plan, ?string $country = null): int
+    {
+        $tiers = config('plans.tiers');
+        $base  = $tiers[$plan]['price'] ?? $tiers[config('plans.default', 'starter')]['price'];
+
+        $code  = $country ?: config('plans.default_country', 'BJ');
+        $conf  = config('plans.countries.'.$code, config('plans.countries.'.config('plans.default_country', 'BJ')));
+        $coef  = $conf['coef'] ?? 1.0;
+        $round = $conf['round'] ?? 100;
+
+        return (int) (round(($base * $coef) / $round) * $round);
+    }
+
+    /** Configuration du pays de l'hôtel. */
+    public function countryConfig(): array
+    {
+        $c = config('plans.countries');
+
+        return $c[$this->country] ?? $c[config('plans.default_country', 'BJ')];
+    }
+
+    public function countryName(): string
+    {
+        return $this->countryConfig()['name'];
+    }
+
+    /** Devise d'affichage (celle du pays). */
+    public function displayCurrency(): string
+    {
+        return $this->currency ?: $this->countryConfig()['currency'];
+    }
+
+    /** Prix mensuel du plan courant, ajusté au pays. */
     public function monthlyPrice(): int
     {
-        return $this->planConfig()['price'];
+        return self::priceFor(
+            $this->plan ?: config('plans.default', 'starter'),
+            $this->country ?: config('plans.default_country', 'BJ')
+        );
     }
 
     /** Limite de chambres du plan (null = illimité). */
