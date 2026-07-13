@@ -118,6 +118,36 @@ class PlatformHttpTest extends TestCase
         $response->assertRedirect(route('hotel.suspended'));
     }
 
+    public function test_super_admin_can_delete_hotel_and_its_users(): void
+    {
+        $hotel = $this->makeHotel('Hotel A Supprimer');
+        $admin = $this->hotelAdmin($hotel);
+
+        $this->actingAs($this->superAdmin())
+            ->delete("/platform/hotels/{$hotel->id}")
+            ->assertRedirectToRoute('platform.hotels.index');
+
+        $this->assertDatabaseMissing('hotels', ['id' => $hotel->id]);
+        $this->assertDatabaseMissing('users', ['id' => $admin->id]);
+    }
+
+    public function test_suspension_stores_reason_and_shows_it_to_the_hotelier(): void
+    {
+        $hotel = $this->makeHotel('Hotel Motif');
+        $admin = $this->hotelAdmin($hotel);
+
+        $this->actingAs($this->superAdmin())
+            ->patch("/platform/hotels/{$hotel->id}/toggle", ['reason' => 'Facture impayée']);
+
+        $hotel->refresh();
+        $this->assertFalse($hotel->is_active);
+        $this->assertEquals('Facture impayée', $hotel->suspension_reason);
+
+        // L'admin de l'hôtel est bloqué et voit le motif
+        $this->actingAs($admin)->get('/')->assertRedirect(route('hotel.suspended'));
+        $this->actingAs($admin)->get('/compte-suspendu')->assertOk()->assertSee('Facture impayée');
+    }
+
     public function test_toggle_suspends_and_reactivates_hotel(): void
     {
         $hotel = $this->makeHotel('Hotel Toggle');

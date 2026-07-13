@@ -15,19 +15,25 @@
                     <i class="fas fa-lock fa-3x text-danger"></i>
                 </div>
                 <h3 class="mb-3">Accès suspendu</h3>
-                <p class="text-muted mb-4">
+                @php $hotel = auth()->user()?->hotel; @endphp
+                <p class="text-muted mb-3">
                     @auth
-                        L'accès de <strong>{{ auth()->user()->hotel?->name ?? 'votre établissement' }}</strong>
+                        L'accès de <strong>{{ $hotel?->name ?? 'votre établissement' }}</strong>
                         est actuellement suspendu.
                     @endauth
-                    @php $hotel = auth()->user()?->hotel; @endphp
                     @if ($hotel && $hotel->isSubscriptionExpired())
-                        Votre abonnement a expiré le
+                        <br>Votre abonnement a expiré le
                         <strong>{{ $hotel->subscription_ends_at->format('d/m/Y') }}</strong>.
                     @endif
-                    <br>
-                    Merci de régulariser votre abonnement pour réactiver votre espace.
                 </p>
+
+                @if ($hotel && $hotel->suspension_reason)
+                    <div class="alert alert-warning text-start small">
+                        <i class="fas fa-circle-info me-1"></i> <strong>Motif :</strong> {{ $hotel->suspension_reason }}
+                    </div>
+                @endif
+
+                <p class="text-muted mb-4">Merci de régulariser votre situation pour réactiver votre espace.</p>
                 <p class="small text-muted">
                     Contactez l'administrateur de la plateforme pour toute question.
                 </p>

@@ -23,7 +23,8 @@ class HotelController extends Controller
 {
     public function index()
     {
-        $hotels = Hotel::orderBy('name')->get()->map(function (Hotel $hotel) {
+        // Les plus récemment inscrits en premier
+        $hotels = Hotel::with('owner')->orderByDesc('created_at')->get()->map(function (Hotel $hotel) {
             $hotel->users_count = User::where('hotel_id', $hotel->id)->count();
             $hotel->rooms_count = Room::forHotel($hotel->id)->count();
             $hotel->transactions_count = Transaction::forHotel($hotel->id)->count();
@@ -34,15 +35,26 @@ class HotelController extends Controller
         $active = $hotels->filter->hasActiveAccess();
 
         $summary = [
-            'total'     => $hotels->count(),
-            'active'    => $active->count(),
-            'expired'   => $hotels->count() - $active->count(),
-            'revenue'   => (float) \App\Models\Subscription::sum('amount'),
-            'renewals'  => (int) \App\Models\Subscription::where('is_renewal', true)->count(),
-            'mrr'       => (float) $active->sum(fn (Hotel $h) => $h->monthlyPrice()),
+            'total'      => $hotels->count(),
+            'active'     => $active->count(),
+            'expired'    => $hotels->count() - $active->count(),
+            'this_month' => Hotel::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count(),
+            'revenue'    => (float) \App\Models\Subscription::sum('amount'),
+            'renewals'   => (int) \App\Models\Subscription::where('is_renewal', true)->count(),
+            'mrr'        => (float) $active->sum(fn (Hotel $h) => $h->monthlyPrice()),
         ];
 
-        return view('platform.hotels.index', compact('hotels', 'summary'));
+        // Inscriptions des 6 derniers mois (pour le graphe)
+        $chart = collect(range(5, 0))->map(function ($i) {
+            $d = now()->startOfMonth()->subMonths($i);
+
+            return [
+                'label' => ucfirst($d->translatedFormat('M Y')),
+                'count' => Hotel::whereYear('created_at', $d->year)->whereMonth('created_at', $d->month)->count(),
+            ];
+        })->values();
+
+        return view('platform.hotels.index', compact('hotels', 'summary', 'chart'));
     }
 
     public function create()
@@ -143,13 +155,19 @@ class HotelController extends Controller
             ->with('success', "Hôtel « {$hotel->name} » mis à jour.");
     }
 
-    public function toggleActive(Hotel $hotel)
+    public function toggleActive(Request $request, Hotel $hotel)
     {
-        $hotel->update(['is_active' => ! $hotel->is_active]);
+        $nowActive = ! $hotel->is_active;
 
-        $state = $hotel->is_active ? 'réactivé' : 'suspendu';
+        $hotel->update([
+            'is_active'         => $nowActive,
+            // On mémorise la raison à la suspension, on l'efface à la réactivation
+            'suspension_reason' => $nowActive ? null : ($request->input('reason') ?: 'Suspension par l\'administrateur de la plateforme'),
+        ]);
 
-        return redirect()->route('platform.hotels.index')
+        $state = $nowActive ? 'réactivé' : 'suspendu';
+
+        return redirect()->back()
             ->with('success', "Hôtel « {$hotel->name} » {$state}.");
     }
 
@@ -179,6 +197,23 @@ class HotelController extends Controller
 
         return redirect()->route('platform.hotels.show', $hotel)
             ->with('success', "Abonnement de « {$hotel->name} » renouvelé jusqu'au ".$newEnd->format('d/m/Y').'.');
+    }
+
+    /**
+     * Supprime définitivement un hôtel et ses utilisateurs.
+     */
+    public function destroy(Hotel $hotel)
+    {
+        $name = $hotel->name;
+
+        DB::transaction(function () use ($hotel) {
+            User::where('hotel_id', $hotel->id)->delete();
+            $hotel->subscriptions()->delete();
+            $hotel->forceDelete();
+        });
+
+        return redirect()->route('platform.hotels.index')
+            ->with('success', "Hôtel « {$name} » supprimé.");
     }
 
     private function uniqueSlug(string $name): string

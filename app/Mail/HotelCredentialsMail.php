@@ -26,6 +26,7 @@ class HotelCredentialsMail extends Mailable
     {
         return $this->subject('Vos accès administrateur — '.$this->hotel->name)
             ->view('emails.hotel-credentials')
+            ->text('emails.hotel-credentials-text')
             ->with([
                 'hotelName' => $this->hotel->name,
                 'email'     => $this->admin->email,
