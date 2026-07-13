@@ -314,6 +314,31 @@
     </div>
 </section>
 
+<!-- PRÉSENCE / GLOBE 3D -->
+<section class="section" id="presence">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-5" data-aos="fade-right">
+                <span class="badge-soft mb-2 d-inline-block">Couverture</span>
+                <h2 class="fw-bold">Déjà pensé pour <span class="text-brand">votre pays</span></h2>
+                <p class="text-secondary">
+                    checkinHub est disponible dans <strong>{{ count(config('plans.countries')) }} pays</strong>,
+                    avec des tarifs adaptés au coût de la vie et à la devise locale.
+                    Faites tourner le globe 🌍
+                </p>
+                <div class="d-flex flex-wrap gap-2 mt-3" id="country-badges">
+                    @foreach (config('plans.countries') as $code => $c)
+                        <span class="badge rounded-pill" style="background:#eef2ff;color:var(--brand);font-weight:600;padding:.5rem .9rem;">{{ $c['name'] }}</span>
+                    @endforeach
+                </div>
+            </div>
+            <div class="col-lg-7" data-aos="fade-left">
+                <div id="globe" style="width:100%;height:460px;max-width:560px;margin:0 auto;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- TÉMOIGNAGES -->
 <section class="section bg-light">
     <div class="container">
@@ -408,6 +433,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<!-- amCharts 5 : globe 3D des pays desservis -->
+<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
 <script>
     // Animations au scroll
     AOS.init({ duration: 700, once: true, easing: 'ease-out-cubic', offset: 80 });
@@ -469,6 +499,88 @@
         pricingSel.addEventListener('change', updatePricing);
         updatePricing();
     }
+
+    // ===== Globe 3D des pays desservis (amCharts 5) =====
+    (function initGlobe() {
+        const el = document.getElementById('globe');
+        if (!el || typeof am5 === 'undefined') return;
+
+        const servedData = @json(config('plans.countries'));
+        // Coordonnées (lat/long) pour placer les marqueurs pulsants.
+        const coords = {
+            BJ:[9.3,2.3], TG:[8.6,0.8], CI:[7.5,-5.5], SN:[14.5,-14.5], BF:[12.2,-1.5],
+            ML:[17.0,-4.0], NE:[17.6,8.0], CM:[5.7,12.5], GA:[-0.8,11.6], NG:[9.1,8.7],
+            GH:[7.9,-1.0], FR:[46.6,2.2]
+        };
+        const servedIds = Object.keys(servedData);
+        const BRAND = am5.color(0x4f46e5);
+
+        const root = am5.Root.new('globe');
+        root.setThemes([am5themes_Animated.new(root)]);
+
+        const chart = root.container.children.push(am5map.MapChart.new(root, {
+            panX: 'rotateX',
+            panY: 'rotateY',
+            projection: am5map.geoOrthographic(),
+            paddingBottom: 10, paddingTop: 10, paddingLeft: 10, paddingRight: 10
+        }));
+
+        // Fond du globe (océan)
+        chart.series.unshift(am5map.GraticuleSeries.new(root, { step: 20 }));
+        const bg = chart.series.unshift(am5map.MapPolygonSeries.new(root, {}));
+        bg.mapPolygons.template.setAll({ fill: am5.color(0xdbeafe), fillOpacity: 0.35, strokeOpacity: 0 });
+        bg.data.push({ geometry: am5.getGeoRectangle(90, 180, -90, -180) });
+
+        // Tous les pays (gris clair)
+        const world = chart.series.push(am5map.MapPolygonSeries.new(root, {
+            geoJSON: am5geodata_worldLow, exclude: ['AQ']
+        }));
+        world.mapPolygons.template.setAll({
+            fill: am5.color(0xe2e8f0), stroke: am5.color(0xffffff), strokeWidth: 0.4
+        });
+
+        // Pays desservis (couleur marque)
+        const served = chart.series.push(am5map.MapPolygonSeries.new(root, {
+            geoJSON: am5geodata_worldLow, include: servedIds
+        }));
+        served.mapPolygons.template.setAll({
+            fill: BRAND, stroke: am5.color(0xffffff), strokeWidth: 0.5,
+            tooltipText: '{name}', interactive: true, cursorOverStyle: 'pointer'
+        });
+        served.mapPolygons.template.states.create('hover', { fill: am5.color(0x7c3aed) });
+
+        // Marqueurs pulsants
+        const points = chart.series.push(am5map.MapPointSeries.new(root, {}));
+        points.bullets.push(function () {
+            const c = am5.Container.new(root, {});
+            const circle = c.children.push(am5.Circle.new(root, { radius: 5, fill: BRAND, stroke: am5.color(0xffffff), strokeWidth: 1.5 }));
+            const pulse = c.children.push(am5.Circle.new(root, { radius: 5, fill: BRAND, fillOpacity: 0.35 }));
+            pulse.animate({ key: 'radius', to: 16, duration: 1400, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+            pulse.animate({ key: 'fillOpacity', to: 0, duration: 1400, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+            return am5.Bullet.new(root, { sprite: c });
+        });
+        servedIds.forEach(code => {
+            const ll = coords[code]; if (!ll) return;
+            points.data.push({
+                geometry: { type: 'Point', coordinates: [ll[1], ll[0]] },
+                name: servedData[code].name
+            });
+        });
+        points.bullets.push(function (r, s, dataItem) {
+            return am5.Bullet.new(root, { sprite: am5.Label.new(root, {
+                text: dataItem.dataContext.name, fill: am5.color(0x0f172a), fontSize: 11, fontWeight: '600',
+                centerX: am5.p50, centerY: am5.p100, dy: -14, populateText: false
+            }) });
+        });
+
+        // Rotation automatique + vue centrée sur l'Afrique de l'Ouest
+        chart.animate({ key: 'rotationX', from: 0, to: 360, duration: 40000, loops: Infinity });
+        chart.set('rotationY', -5);
+        chart.set('rotationX', 5);
+        world.events.once('datavalidated', () => chart.zoomToGeoPoint({ longitude: 5, latitude: 8 }, 1.05));
+
+        chart.appear(800, 100);
+    })();
 </script>
 </body>
 </html>
