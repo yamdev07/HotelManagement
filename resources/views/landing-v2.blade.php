@@ -72,6 +72,11 @@
         .step-dot { width:44px;height:44px;border-radius:50%; display:grid;place-items:center; font-family:'Space Grotesk'; font-weight:700;
             background: linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; }
         footer { border-top:1px solid var(--border); }
+        .accordion-button { background: transparent !important; color:#fff !important; padding:1.1rem 1.25rem; }
+        .accordion-button:not(.collapsed) { color:#fff !important; box-shadow:none; }
+        .accordion-button:focus { box-shadow:none; border-color: transparent; }
+        .accordion-button::after { filter: invert(1) brightness(2); }
+        .accordion-body { padding:0 1.25rem 1.2rem; }
         .footer-preview { position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:1000;
             background: rgba(12,18,36,.9); border:1px solid var(--border); border-radius:999px; padding:.5rem 1rem; font-size:.85rem; backdrop-filter:blur(8px); }
         .footer-preview a { color: var(--brand); }
@@ -90,7 +95,9 @@
             <ul class="navbar-nav mx-auto gap-lg-3">
                 <li class="nav-item"><a class="nav-link" href="#features">Fonctionnalités</a></li>
                 <li class="nav-item"><a class="nav-link" href="#how">Comment ça marche</a></li>
+                <li class="nav-item"><a class="nav-link" href="#temoignages">Avis</a></li>
                 <li class="nav-item"><a class="nav-link" href="#pricing">Tarifs</a></li>
+                <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
             </ul>
             <div class="d-flex gap-2">
                 <a href="{{ route('login.index') }}" class="btn-ghost">Connexion</a>
@@ -136,6 +143,29 @@
         @endforeach
     </div>
 </div>
+
+<!-- STATS (chiffres animés) -->
+<section class="py-5">
+    <div class="container">
+        <div class="row g-4 text-center">
+            @php $stats = [
+                ['target'=>count(config('plans.countries')),'suffix'=>'','label'=>'pays desservis','icon'=>'fa-earth-africa'],
+                ['target'=>6,'suffix'=>'','label'=>'modules tout-en-un','icon'=>'fa-layer-group'],
+                ['target'=>5,'suffix'=>' min','label'=>'pour être opérationnel','icon'=>'fa-bolt'],
+                ['target'=>config('plans.trial_days',14),'suffix'=>' j','label'=>"d'essai gratuit",'icon'=>'fa-gift'],
+            ]; @endphp
+            @foreach ($stats as $i => $s)
+                <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="{{ $i*100 }}">
+                    <div class="glass p-4 h-100">
+                        <div class="ico mx-auto mb-3"><i class="fas {{ $s['icon'] }}"></i></div>
+                        <div class="display-5 fw-bold grad-text"><span class="counter" data-target="{{ $s['target'] }}">0</span>{{ $s['suffix'] }}</div>
+                        <div class="text-muted2">{{ $s['label'] }}</div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
 
 <!-- FEATURES (bento) -->
 <section class="section" id="features">
@@ -190,6 +220,40 @@
     </div>
 </section>
 
+<!-- TÉMOIGNAGES -->
+<section class="section" id="temoignages">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="chip mb-2">Témoignages</span>
+            <h2 class="fw-bold">Ils gèrent leur hôtel avec <span class="grad-text">checkinHub</span></h2>
+        </div>
+        <div class="row g-4">
+            @php $temoins = [
+                ['A','Aïcha D.','Directrice, Résidence Les Palmiers','checkinHub a remplacé nos cahiers et nos fichiers Excel. Le check-in prend deux minutes et la caisse est enfin claire.'],
+                ['K','Koffi M.','Gérant, Hôtel Baobab','Mise en route en une après-midi. Mes réceptionnistes ont adopté l’outil tout de suite, sans formation compliquée.'],
+                ['F','Fatou S.','Propriétaire, Villa Océane','Le prix adapté à mon pays a fait la différence. Et la vitrine web m’apporte des réservations directes.'],
+            ]; @endphp
+            @foreach ($temoins as $i => $t)
+                <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ $i*120 }}">
+                    <div class="glass p-4 h-100">
+                        <div class="mb-2" style="color:var(--accent)">
+                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                        </div>
+                        <p class="mb-4">“{{ $t[3] }}”</p>
+                        <div class="d-flex align-items-center gap-3 mt-auto">
+                            <div class="ico" style="width:44px;height:44px;font-family:'Space Grotesk';font-weight:700">{{ $t[0] }}</div>
+                            <div>
+                                <div class="fw-semibold">{{ $t[1] }}</div>
+                                <div class="text-muted2 small">{{ $t[2] }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+
 <!-- PRICING -->
 <section class="section" id="pricing">
     <div class="container">
@@ -230,6 +294,42 @@
     </div>
 </section>
 
+<!-- FAQ -->
+<section class="section" id="faq">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="chip mb-2">FAQ</span>
+            <h2 class="fw-bold">Les questions <span class="grad-text">fréquentes</span></h2>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8" data-aos="fade-up">
+                @php $faqs = [
+                    ["L'essai gratuit nécessite-t-il une carte bancaire ?","Non. Vous démarrez votre essai de ".config('plans.trial_days',14)." jours immédiatement, sans aucune carte. Vous ne payez que si vous décidez de continuer."],
+                    ["Comment sont fixés les prix ?","Le tarif dépend de votre pays : nous ajustons les prix au coût de la vie local et affichons votre devise. Sélectionnez votre pays dans la section Tarifs pour voir vos prix."],
+                    ["Mes données sont-elles isolées des autres hôtels ?","Oui. Chaque établissement dispose de son espace cloisonné : vos réservations, clients et transactions ne sont jamais mélangés avec ceux d'un autre hôtel."],
+                    ["Puis-je changer de formule plus tard ?","Bien sûr. Vous pouvez passer à une formule supérieure ou inférieure à tout moment depuis votre espace, selon le nombre de chambres."],
+                    ["Comment se passe le paiement de l'abonnement ?","Le paiement se fait en ligne (Mobile Money & carte). Votre accès est prolongé automatiquement dès la confirmation du paiement."],
+                ]; @endphp
+                <div class="accordion accordion-flush" id="faqAcc">
+                    @foreach ($faqs as $i => $q)
+                        <div class="glass mb-3" style="overflow:hidden">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed bg-transparent text-white fw-semibold {{ $i===0?'':'' }}" style="box-shadow:none"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#faq{{ $i }}">
+                                    {{ $q[0] }}
+                                </button>
+                            </h2>
+                            <div id="faq{{ $i }}" class="accordion-collapse collapse" data-bs-parent="#faqAcc">
+                                <div class="accordion-body text-muted2">{{ $q[1] }}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- CTA -->
 <section class="section">
     <div class="container">
@@ -255,6 +355,25 @@
 <script src="https://unpkg.com/globe.gl"></script>
 <script>
     try { AOS.init({ duration: 700, once: true, offset: 60 }); } catch(e){}
+
+    // Compteurs animés (count-up au scroll)
+    (function () {
+        const counters = document.querySelectorAll('.counter');
+        if (!counters.length) return;
+        const run = (el) => {
+            const target = +el.dataset.target, dur = 1300, t0 = performance.now();
+            const tick = (now) => {
+                const p = Math.min((now - t0) / dur, 1);
+                el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+                if (p < 1) requestAnimationFrame(tick);
+            };
+            requestAnimationFrame(tick);
+        };
+        if ('IntersectionObserver' in window) {
+            const obs = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { run(e.target); obs.unobserve(e.target); } }), { threshold: .6 });
+            counters.forEach(c => obs.observe(c));
+        } else { counters.forEach(c => c.textContent = c.dataset.target); }
+    })();
 
     // Prix par pays
     (function () {
