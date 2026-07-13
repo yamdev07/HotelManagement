@@ -271,24 +271,32 @@
 <!-- PRICING -->
 <section class="section" id="pricing">
     <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-4">
             <span class="badge-soft mb-2 d-inline-block">Tarifs</span>
             <h2 class="fw-bold">Des offres simples et transparentes</h2>
-            <p class="text-secondary">Sans frais cachés. Changez d'offre à tout moment.</p>
+            <p class="text-secondary">Prix adaptés à votre pays. Sans frais cachés.</p>
+            <div class="d-inline-flex align-items-center gap-2 mt-2">
+                <i class="fas fa-earth-africa text-brand"></i>
+                <select id="pricing-country" class="form-select" style="width:auto;">
+                    @foreach (config('plans.countries') as $code => $c)
+                        <option value="{{ $code }}" {{ $code === config('plans.default_country') ? 'selected' : '' }}>{{ $c['name'] }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
         <div class="row g-4 justify-content-center">
             @foreach (config('plans.tiers') as $key => $tier)
                 @php $popular = ! empty($tier['popular']); @endphp
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index * 130 }}">
-                    <div class="price-card p-4 h-100 {{ $popular ? 'popular' : '' }}">
+                    <div class="price-card p-4 h-100 {{ $popular ? 'popular' : '' }}" data-base="{{ $tier['price'] }}">
                         @if ($popular)
                             <span class="badge text-white mb-2" style="background:var(--brand)">Le plus populaire</span>
                         @endif
                         <h4 class="fw-bold">{{ $tier['name'] }}</h4>
                         <p class="text-secondary small">{{ $tier['tagline'] }}</p>
                         <div class="price-amount mb-1">
-                            {{ number_format($tier['price'], 0, ',', ' ') }}
-                            <span class="fs-6 text-secondary fw-normal">CFA / mois</span>
+                            <span class="pr-amount">{{ number_format($tier['price'], 0, ',', ' ') }}</span>
+                            <span class="fs-6 text-secondary fw-normal"><span class="pr-cur">XOF</span> / mois</span>
                         </div>
                         <hr>
                         <ul class="list-unstyled mb-4">
@@ -439,6 +447,27 @@
         counters.forEach(c => obs.observe(c));
     } else {
         counters.forEach(c => c.textContent = c.dataset.target);
+    }
+
+    // Prix ajustés selon le pays (coût de la vie)
+    const plansCountries = @json(config('plans.countries'));
+    const pricingSel = document.getElementById('pricing-country');
+    if (pricingSel) {
+        const fmt = n => n.toLocaleString('fr-FR');
+        const updatePricing = () => {
+            const c = plansCountries[pricingSel.value];
+            if (!c) return;
+            document.querySelectorAll('.price-card[data-base]').forEach(card => {
+                const base = +card.dataset.base;
+                const price = Math.round(base * c.coef / c.round) * c.round;
+                const amt = card.querySelector('.pr-amount');
+                const cur = card.querySelector('.pr-cur');
+                if (amt) amt.textContent = fmt(price);
+                if (cur) cur.textContent = c.currency;
+            });
+        };
+        pricingSel.addEventListener('change', updatePricing);
+        updatePricing();
     }
 </script>
 </body>
