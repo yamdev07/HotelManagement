@@ -68,19 +68,16 @@ if (Schema::hasColumn('users', 'hotel_id')) {
 }
 echo "\n";
 
-echo "4) Compte Super-Admin plateforme...\n";
+echo "4) Compte Super-Admin plateforme (création OU réinitialisation)...\n";
 $u = User::firstOrNew(['email' => $SU_EMAIL]);
-if (! $u->exists) {
-    $u->name       = $SU_NAME;
-    $u->role       = 'Super';
-    $u->hotel_id   = null;
-    $u->password   = Hash::make($SU_PASS);
-    $u->random_key = Str::random(60);
-    $u->save();
-    echo "   Créé -> $SU_EMAIL / $SU_PASS\n\n";
-} else {
-    echo "   Existe déjà ($SU_EMAIL).\n\n";
-}
+$u->name       = $SU_NAME;
+$u->role       = 'Super';
+$u->hotel_id   = null;                 // plateforme = sans hôtel
+$u->password   = Hash::make($SU_PASS); // (ré)initialise le mot de passe à chaque exécution
+$u->random_key = $u->random_key ?: Str::random(60);
+$u->save();
+$check = Hash::check($SU_PASS, $u->fresh()->password) ? 'OK' : 'ECHEC';
+echo "   Identifiants -> $SU_EMAIL / $SU_PASS   (vérif mot de passe: $check)\n\n";
 
 echo "5) Lien web/storage...\n";
 $target = realpath(__DIR__.'/../private/storage/app/public');
