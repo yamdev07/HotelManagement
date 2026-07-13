@@ -333,7 +333,7 @@
                 </div>
             </div>
             <div class="col-lg-7" data-aos="fade-left">
-                <div id="globe" style="width:100%;height:460px;max-width:560px;margin:0 auto;"></div>
+                <div id="globe" style="width:100%;height:560px;max-width:680px;margin:0 auto;"></div>
             </div>
         </div>
     </div>
@@ -558,7 +558,7 @@
             window.addEventListener('resize', resize);
 
             // Vue centrée sur l'Afrique de l'Ouest + rotation automatique
-            globe.pointOfView({ lat: 8, lng: 4, altitude: 1.9 }, 0);
+            globe.pointOfView({ lat: 8, lng: 4, altitude: 1.65 }, 0);
             const controls = globe.controls();
             controls.autoRotate = true;
             controls.autoRotateSpeed = 0.7;
