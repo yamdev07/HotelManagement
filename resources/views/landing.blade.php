@@ -109,7 +109,7 @@
                 <li class="nav-item"><a class="nav-link" href="#features">Fonctionnalités</a></li>
                 <li class="nav-item"><a class="nav-link" href="#how">Comment ça marche</a></li>
                 <li class="nav-item"><a class="nav-link" href="#pricing">Tarifs</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url('/h/cactus-hotel') }}">Démo vitrine</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('/h/cactus-hotel') }}" target="_blank" rel="noopener noreferrer">Démo vitrine</a></li>
             </ul>
             <div class="d-flex gap-2">
                 <a href="{{ route('login.index') }}" class="btn btn-outline-brand">Se connecter</a>
@@ -137,7 +137,7 @@
                 </p>
                 <div class="d-flex flex-wrap gap-2 mb-4" data-aos="fade-up" data-aos-delay="240">
                     <a href="{{ route('hotel.register') }}" class="btn btn-brand btn-lg px-4 btn-pulse"><i class="fas fa-rocket me-2"></i>Commencer gratuitement</a>
-                    <a href="{{ url('/h/cactus-hotel') }}" class="btn btn-outline-brand btn-lg px-4"><i class="fas fa-play me-2"></i>Voir une démo</a>
+                    <a href="{{ url('/h/cactus-hotel') }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-brand btn-lg px-4"><i class="fas fa-play me-2"></i>Voir une démo</a>
                 </div>
                 <div class="d-flex flex-wrap gap-4 text-secondary small" data-aos="fade-up" data-aos-delay="320">
                     <span><i class="fas fa-check text-success me-1"></i> Sans engagement</span>
@@ -368,7 +368,7 @@
                     <li class="mb-2"><a href="#features">Fonctionnalités</a></li>
                     <li class="mb-2"><a href="#pricing">Tarifs</a></li>
                     <li class="mb-2"><a href="{{ route('hotel.register') }}">Essai gratuit</a></li>
-                    <li class="mb-2"><a href="{{ url('/h/cactus-hotel') }}">Démo</a></li>
+                    <li class="mb-2"><a href="{{ url('/h/cactus-hotel') }}" target="_blank" rel="noopener noreferrer">Démo</a></li>
                 </ul>
             </div>
             <div class="col-6 col-lg-2">
@@ -380,7 +380,7 @@
             </div>
             <div class="col-lg-4">
                 <h6 class="fw-semibold mb-3">Contact</h6>
-                <p class="text-secondary small mb-1"><i class="fas fa-envelope me-2"></i>contact@{{ \Illuminate\Support\Str::slug(config('app.name', 'myhotel')) }}.com</p>
+                <p class="text-secondary small mb-1"><i class="fas fa-envelope me-2"></i>contact@{{ strtolower(config('app.name', 'myhotel')) }}.com</p>
                 <p class="text-secondary small"><i class="fas fa-phone me-2"></i>+229 00 00 00 00</p>
             </div>
         </div>
