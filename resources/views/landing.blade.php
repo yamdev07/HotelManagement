@@ -499,88 +499,99 @@
         pricingSel.addEventListener('change', updatePricing);
         updatePricing();
     }
+</script>
 
-    // ===== Globe 3D des pays desservis (amCharts 5) =====
-    (function initGlobe() {
+<!-- Globe 3D des pays desservis — bloc isolé (indépendant du reste du JS) -->
+<script>
+(function () {
+    const servedData = @json(config('plans.countries'));
+    // Coordonnées (lat/long) pour les marqueurs pulsants.
+    const coords = {
+        BJ:[9.3,2.3], TG:[8.6,0.8], CI:[7.5,-5.5], SN:[14.5,-14.5], BF:[12.2,-1.5],
+        ML:[17.0,-4.0], NE:[17.6,8.0], CM:[5.7,12.5], GA:[-0.8,11.6], NG:[9.1,8.7],
+        GH:[7.9,-1.0], FR:[46.6,2.2]
+    };
+
+    function build() {
         const el = document.getElementById('globe');
-        if (!el || typeof am5 === 'undefined') return;
+        if (!el) return;
 
-        const servedData = @json(config('plans.countries'));
-        // Coordonnées (lat/long) pour placer les marqueurs pulsants.
-        const coords = {
-            BJ:[9.3,2.3], TG:[8.6,0.8], CI:[7.5,-5.5], SN:[14.5,-14.5], BF:[12.2,-1.5],
-            ML:[17.0,-4.0], NE:[17.6,8.0], CM:[5.7,12.5], GA:[-0.8,11.6], NG:[9.1,8.7],
-            GH:[7.9,-1.0], FR:[46.6,2.2]
-        };
-        const servedIds = Object.keys(servedData);
-        const BRAND = am5.color(0x4f46e5);
+        if (typeof am5 === 'undefined' || typeof am5map === 'undefined' || typeof am5geodata_worldLow === 'undefined') {
+            // amCharts non chargé (CDN bloqué) : on laisse la liste de pays visible, sans globe.
+            el.style.display = 'none';
+            console.warn('Globe: amCharts non disponible (CDN bloqué ?).');
+            return;
+        }
 
-        const root = am5.Root.new('globe');
-        root.setThemes([am5themes_Animated.new(root)]);
+        try {
+            const servedIds = Object.keys(servedData);
+            const BRAND = am5.color(0x4f46e5);
 
-        const chart = root.container.children.push(am5map.MapChart.new(root, {
-            panX: 'rotateX',
-            panY: 'rotateY',
-            projection: am5map.geoOrthographic(),
-            paddingBottom: 10, paddingTop: 10, paddingLeft: 10, paddingRight: 10
-        }));
+            const root = am5.Root.new('globe');
+            root.setThemes([am5themes_Animated.new(root)]);
 
-        // Fond du globe (océan)
-        chart.series.unshift(am5map.GraticuleSeries.new(root, { step: 20 }));
-        const bg = chart.series.unshift(am5map.MapPolygonSeries.new(root, {}));
-        bg.mapPolygons.template.setAll({ fill: am5.color(0xdbeafe), fillOpacity: 0.35, strokeOpacity: 0 });
-        bg.data.push({ geometry: am5.getGeoRectangle(90, 180, -90, -180) });
+            const chart = root.container.children.push(am5map.MapChart.new(root, {
+                panX: 'rotateX',
+                panY: 'rotateY',
+                projection: am5map.geoOrthographic(),
+                paddingBottom: 10, paddingTop: 10, paddingLeft: 10, paddingRight: 10
+            }));
 
-        // Tous les pays (gris clair)
-        const world = chart.series.push(am5map.MapPolygonSeries.new(root, {
-            geoJSON: am5geodata_worldLow, exclude: ['AQ']
-        }));
-        world.mapPolygons.template.setAll({
-            fill: am5.color(0xe2e8f0), stroke: am5.color(0xffffff), strokeWidth: 0.4
-        });
+            // Fond du globe (océan) + graticule
+            chart.series.push(am5map.GraticuleSeries.new(root, { step: 20 }));
+            const bg = chart.series.unshift(am5map.MapPolygonSeries.new(root, {}));
+            bg.mapPolygons.template.setAll({ fill: am5.color(0xbfdbfe), fillOpacity: 0.5, strokeOpacity: 0 });
+            bg.data.push({ geometry: am5map.getGeoRectangle(90, 180, -90, -180) });
 
-        // Pays desservis (couleur marque)
-        const served = chart.series.push(am5map.MapPolygonSeries.new(root, {
-            geoJSON: am5geodata_worldLow, include: servedIds
-        }));
-        served.mapPolygons.template.setAll({
-            fill: BRAND, stroke: am5.color(0xffffff), strokeWidth: 0.5,
-            tooltipText: '{name}', interactive: true, cursorOverStyle: 'pointer'
-        });
-        served.mapPolygons.template.states.create('hover', { fill: am5.color(0x7c3aed) });
-
-        // Marqueurs pulsants
-        const points = chart.series.push(am5map.MapPointSeries.new(root, {}));
-        points.bullets.push(function () {
-            const c = am5.Container.new(root, {});
-            const circle = c.children.push(am5.Circle.new(root, { radius: 5, fill: BRAND, stroke: am5.color(0xffffff), strokeWidth: 1.5 }));
-            const pulse = c.children.push(am5.Circle.new(root, { radius: 5, fill: BRAND, fillOpacity: 0.35 }));
-            pulse.animate({ key: 'radius', to: 16, duration: 1400, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
-            pulse.animate({ key: 'fillOpacity', to: 0, duration: 1400, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
-            return am5.Bullet.new(root, { sprite: c });
-        });
-        servedIds.forEach(code => {
-            const ll = coords[code]; if (!ll) return;
-            points.data.push({
-                geometry: { type: 'Point', coordinates: [ll[1], ll[0]] },
-                name: servedData[code].name
+            // Tous les pays (gris clair)
+            const world = chart.series.push(am5map.MapPolygonSeries.new(root, {
+                geoJSON: am5geodata_worldLow, exclude: ['AQ']
+            }));
+            world.mapPolygons.template.setAll({
+                fill: am5.color(0xe2e8f0), stroke: am5.color(0xffffff), strokeWidth: 0.4
             });
-        });
-        points.bullets.push(function (r, s, dataItem) {
-            return am5.Bullet.new(root, { sprite: am5.Label.new(root, {
-                text: dataItem.dataContext.name, fill: am5.color(0x0f172a), fontSize: 11, fontWeight: '600',
-                centerX: am5.p50, centerY: am5.p100, dy: -14, populateText: false
-            }) });
-        });
 
-        // Rotation automatique + vue centrée sur l'Afrique de l'Ouest
-        chart.animate({ key: 'rotationX', from: 0, to: 360, duration: 40000, loops: Infinity });
-        chart.set('rotationY', -5);
-        chart.set('rotationX', 5);
-        world.events.once('datavalidated', () => chart.zoomToGeoPoint({ longitude: 5, latitude: 8 }, 1.05));
+            // Pays desservis (couleur marque)
+            const served = chart.series.push(am5map.MapPolygonSeries.new(root, {
+                geoJSON: am5geodata_worldLow, include: servedIds
+            }));
+            served.mapPolygons.template.setAll({
+                fill: BRAND, stroke: am5.color(0xffffff), strokeWidth: 0.5,
+                tooltipText: '{name}', interactive: true, cursorOverStyle: 'pointer'
+            });
+            served.mapPolygons.template.states.create('hover', { fill: am5.color(0x7c3aed) });
 
-        chart.appear(800, 100);
-    })();
+            // Marqueurs pulsants
+            const points = chart.series.push(am5map.MapPointSeries.new(root, {}));
+            points.bullets.push(function () {
+                const c = am5.Container.new(root, {});
+                c.children.push(am5.Circle.new(root, { radius: 5, fill: BRAND, stroke: am5.color(0xffffff), strokeWidth: 1.5 }));
+                const pulse = c.children.push(am5.Circle.new(root, { radius: 5, fill: BRAND, fillOpacity: 0.35 }));
+                pulse.animate({ key: 'radius', to: 16, duration: 1400, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+                pulse.animate({ key: 'fillOpacity', to: 0, duration: 1400, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
+                return am5.Bullet.new(root, { sprite: c });
+            });
+            servedIds.forEach(code => {
+                const ll = coords[code]; if (!ll) return;
+                points.data.push({ geometry: { type: 'Point', coordinates: [ll[1], ll[0]] }, name: servedData[code].name });
+            });
+
+            // Rotation automatique
+            chart.animate({ key: 'rotationX', from: 0, to: 360, duration: 40000, loops: Infinity });
+            chart.set('rotationY', -8);
+            chart.appear(800, 100);
+        } catch (e) {
+            console.error('Globe 3D:', e);
+            el.style.display = 'none';
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', build);
+    } else {
+        build();
+    }
+})();
 </script>
 </body>
 </html>
