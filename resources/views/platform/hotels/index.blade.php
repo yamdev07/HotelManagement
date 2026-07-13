@@ -10,6 +10,27 @@
         </a>
     </div>
 
+    {{-- Synthèse plateforme --}}
+    <div class="row g-3 mb-4">
+        @php
+            $cards = [
+                ['Revenus totaux', number_format($summary['revenue'], 0, ',', ' ').' CFA', 'fa-sack-dollar', 'text-success'],
+                ['Revenu mensuel (actifs)', number_format($summary['mrr'], 0, ',', ' ').' CFA', 'fa-arrow-trend-up', 'text-primary'],
+                ['Hôtels actifs', $summary['active'].' / '.$summary['total'], 'fa-hotel', 'text-dark'],
+                ['Réabonnements', $summary['renewals'], 'fa-rotate', 'text-info'],
+                ['Expirés / suspendus', $summary['expired'], 'fa-triangle-exclamation', 'text-danger'],
+            ];
+        @endphp
+        @foreach ($cards as [$label, $value, $icon, $color])
+            <div class="col-6 col-md">
+                <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                    <div class="text-muted small"><i class="fas {{ $icon }} me-1 {{ $color }}"></i>{{ $label }}</div>
+                    <div class="fs-4 fw-bold">{{ $value }}</div>
+                </div></div>
+            </div>
+        @endforeach
+    </div>
+
     <div class="card shadow-sm border-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">

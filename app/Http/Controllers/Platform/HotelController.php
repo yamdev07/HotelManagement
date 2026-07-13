@@ -31,7 +31,18 @@ class HotelController extends Controller
             return $hotel;
         });
 
-        return view('platform.hotels.index', compact('hotels'));
+        $active = $hotels->filter->hasActiveAccess();
+
+        $summary = [
+            'total'     => $hotels->count(),
+            'active'    => $active->count(),
+            'expired'   => $hotels->count() - $active->count(),
+            'revenue'   => (float) \App\Models\Subscription::sum('amount'),
+            'renewals'  => (int) \App\Models\Subscription::where('is_renewal', true)->count(),
+            'mrr'       => (float) $active->sum(fn (Hotel $h) => $h->monthlyPrice()),
+        ];
+
+        return view('platform.hotels.index', compact('hotels', 'summary'));
     }
 
     public function create()
