@@ -118,6 +118,19 @@ class PlatformHttpTest extends TestCase
         $response->assertRedirect(route('hotel.suspended'));
     }
 
+    public function test_super_admin_can_delete_hotel_and_its_users(): void
+    {
+        $hotel = $this->makeHotel('Hotel A Supprimer');
+        $admin = $this->hotelAdmin($hotel);
+
+        $this->actingAs($this->superAdmin())
+            ->delete("/platform/hotels/{$hotel->id}")
+            ->assertRedirectToRoute('platform.hotels.index');
+
+        $this->assertDatabaseMissing('hotels', ['id' => $hotel->id]);
+        $this->assertDatabaseMissing('users', ['id' => $admin->id]);
+    }
+
     public function test_toggle_suspends_and_reactivates_hotel(): void
     {
         $hotel = $this->makeHotel('Hotel Toggle');

@@ -119,6 +119,7 @@ Route::middleware(['auth', 'checkrole:Super'])->prefix('platform')->name('platfo
     Route::put('/hotels/{hotel}', [PlatformHotelController::class, 'update'])->name('hotels.update');
     Route::patch('/hotels/{hotel}/toggle', [PlatformHotelController::class, 'toggleActive'])->name('hotels.toggle');
     Route::post('/hotels/{hotel}/renew', [PlatformHotelController::class, 'renew'])->name('hotels.renew');
+    Route::delete('/hotels/{hotel}', [PlatformHotelController::class, 'destroy'])->name('hotels.destroy');
 });
 
 // ==================== ROUTE LOGOUT URGENCE ====================
