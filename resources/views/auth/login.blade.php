@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Connexion · {{ config('app.name', 'MyHotel') }}</title>
+    <title>Connexion · {{ config('app.name', 'checkinHub') }}</title>
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -111,7 +111,7 @@
         <i class="fas fa-martini-glass float-ico" style="font-size:1.6rem;bottom:30%;left:42%;animation-delay:-7s;"></i>
 
         <div class="side-inner">
-            <div class="brand anim-l d1"><i class="fas fa-hotel"></i> {{ config('app.name', 'MyHotel') }}</div>
+            <div class="brand anim-l d1"><i class="fas fa-hotel"></i> {{ config('app.name', 'checkinHub') }}</div>
             <h1 class="anim-l d2">Gérez votre hôtel,<br><span class="shine">sans la complexité.</span></h1>
             <p class="anim-l d3" style="opacity:.9;font-size:1.05rem;">Réservations, caisse, restaurant, housekeeping et rapports — réunis sur une seule plateforme.</p>
 

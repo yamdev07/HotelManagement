@@ -155,7 +155,7 @@
                 @if ($hotel->contact_phone)<p class="small mb-2"><i class="fas fa-phone me-2 text-c"></i>{{ $hotel->contact_phone }}</p>@endif
                 @if ($hotel->contact_email)<p class="small mb-2"><i class="fas fa-envelope me-2 text-c"></i>{{ $hotel->contact_email }}</p>@endif
                 <p class="small mb-0 mt-3" style="opacity:.5;">© {{ date('Y') }} {{ $hotel->name }}</p>
-                <p class="small" style="opacity:.35;">Propulsé par {{ config('app.name', 'MyHotel') }}</p>
+                <p class="small" style="opacity:.35;">Propulsé par {{ config('app.name', 'checkinHub') }}</p>
             </div>
         </div>
     </div>
