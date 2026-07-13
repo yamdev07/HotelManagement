@@ -50,8 +50,9 @@
                         <input type="email" name="admin_email" class="form-control" value="{{ old('admin_email') }}" required>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label">Mot de passe *</label>
-                        <input type="text" name="admin_password" class="form-control" required>
+                        <label class="form-label">Mot de passe</label>
+                        <input type="text" name="admin_password" class="form-control" placeholder="Laisser vide = généré">
+                        <small class="text-muted">Les identifiants sont envoyés par email à l'admin.</small>
                     </div>
                 </div>
 

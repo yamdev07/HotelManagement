@@ -3,8 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'MyHotel') }} — La plateforme de gestion hôtelière tout-en-un</title>
+    <title>{{ config('app.name', 'checkinHub') }} — La plateforme de gestion hôtelière tout-en-un</title>
     <meta name="description" content="Gérez réservations, caisse, restaurant, housekeeping et rapports pour un ou plusieurs hôtels, depuis une seule plateforme.">
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
@@ -99,7 +100,7 @@
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
     <div class="container">
         <a class="navbar-brand" href="{{ route('landing') }}">
-            <i class="fas fa-hotel text-brand me-1"></i> {{ config('app.name', 'MyHotel') }}
+            <i class="fas fa-hotel text-brand me-1"></i> {{ config('app.name', 'checkinHub') }}
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
             <span class="navbar-toggler-icon"></span>
@@ -346,7 +347,7 @@
     <div class="container">
         <div class="cta-band p-5 text-center" data-aos="zoom-in">
             <h2 class="fw-bold mb-2">Prêt à digitaliser votre hôtel ?</h2>
-            <p class="mb-4 opacity-75">Rejoignez les établissements qui pilotent leur activité avec {{ config('app.name', 'MyHotel') }}.</p>
+            <p class="mb-4 opacity-75">Rejoignez les établissements qui pilotent leur activité avec {{ config('app.name', 'checkinHub') }}.</p>
             <a href="{{ route('hotel.register') }}" class="btn btn-light btn-lg px-4 text-brand fw-semibold btn-pulse">
                 <i class="fas fa-rocket me-2"></i>Démarrer maintenant
             </a>
@@ -359,7 +360,7 @@
     <div class="container">
         <div class="row g-4">
             <div class="col-lg-4">
-                <h5 class="fw-bold mb-3"><i class="fas fa-hotel text-brand me-1"></i> {{ config('app.name', 'MyHotel') }}</h5>
+                <h5 class="fw-bold mb-3"><i class="fas fa-hotel text-brand me-1"></i> {{ config('app.name', 'checkinHub') }}</h5>
                 <p class="text-secondary small">La plateforme de gestion hôtelière tout-en-un pour les hôtels et les groupes.</p>
             </div>
             <div class="col-6 col-lg-2">
@@ -380,13 +381,13 @@
             </div>
             <div class="col-lg-4">
                 <h6 class="fw-semibold mb-3">Contact</h6>
-                <p class="text-secondary small mb-1"><i class="fas fa-envelope me-2"></i>contact@{{ \Illuminate\Support\Str::slug(config('app.name', 'myhotel')) }}.com</p>
+                <p class="text-secondary small mb-1"><i class="fas fa-envelope me-2"></i>contact@{{ \Illuminate\Support\Str::slug(config('app.name', 'checkinhub')) }}.com</p>
                 <p class="text-secondary small"><i class="fas fa-phone me-2"></i>+229 00 00 00 00</p>
             </div>
         </div>
         <hr class="border-secondary">
         <div class="text-center text-secondary small">
-            © {{ date('Y') }} {{ config('app.name', 'MyHotel') }}. Tous droits réservés.
+            © {{ date('Y') }} {{ config('app.name', 'checkinHub') }}. Tous droits réservés.
         </div>
     </div>
 </footer>

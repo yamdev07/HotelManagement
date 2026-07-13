@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', $hotel->name)@hasSection('title') — {{ $hotel->name }}@endif</title>
     <meta name="description" content="{{ $hotel->tagline ?? $hotel->name }}">
+    <link rel="icon" href="{{ $hotel->logoUrl() ?? asset('favicon.svg') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
@@ -154,7 +155,7 @@
                 @if ($hotel->contact_phone)<p class="small mb-2"><i class="fas fa-phone me-2 text-c"></i>{{ $hotel->contact_phone }}</p>@endif
                 @if ($hotel->contact_email)<p class="small mb-2"><i class="fas fa-envelope me-2 text-c"></i>{{ $hotel->contact_email }}</p>@endif
                 <p class="small mb-0 mt-3" style="opacity:.5;">© {{ date('Y') }} {{ $hotel->name }}</p>
-                <p class="small" style="opacity:.35;">Propulsé par {{ config('app.name', 'MyHotel') }}</p>
+                <p class="small" style="opacity:.35;">Propulsé par {{ config('app.name', 'checkinHub') }}</p>
             </div>
         </div>
     </div>

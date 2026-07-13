@@ -158,6 +158,49 @@ class Hotel extends Model
     }
 
     /**
+     * Historique des abonnements souscrits par l'hôtel.
+     */
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class)->latest('starts_at');
+    }
+
+    /** Total réellement encaissé (hors périodes d'essai gratuit). */
+    public function totalPaid(): float
+    {
+        return (float) $this->subscriptions()->sum('amount');
+    }
+
+    /** Nombre de renouvellements (réabonnements). */
+    public function renewalsCount(): int
+    {
+        return $this->subscriptions()->where('is_renewal', true)->count();
+    }
+
+    /** L'hôtel s'est-il déjà réabonné ? */
+    public function hasRenewed(): bool
+    {
+        return $this->renewalsCount() > 0;
+    }
+
+    /**
+     * Enregistre une période d'abonnement dans l'historique.
+     */
+    public function recordSubscription(array $attrs = []): Subscription
+    {
+        return $this->subscriptions()->create(array_merge([
+            'plan'       => $this->plan ?: config('plans.default', 'starter'),
+            'amount'     => 0,
+            'currency'   => $this->currency ?: 'CFA',
+            'status'     => 'active',
+            'is_renewal' => false,
+            'starts_at'  => now(),
+            'ends_at'    => $this->subscription_ends_at,
+            'created_by' => auth()->id(),
+        ], $attrs));
+    }
+
+    /**
      * L'hôtel a-t-il actuellement accès à la plateforme ?
      * (actif ET abonnement non expiré)
      */
