@@ -530,7 +530,9 @@ class HousekeepingController extends Controller
                 ->limit(30)
                 ->get();
 
-            return view('housekeeping.reports', compact('cleanedRooms', 'cleanedByUser', 'staff', 'types', 'availableDates', 'date'));
+            $selectedDate = $date;
+
+            return view('housekeeping.reports', compact('cleanedRooms', 'cleanedByUser', 'staff', 'types', 'availableDates', 'date', 'selectedDate'));
         } catch (\Throwable $e) {
             Log::error('reports: '.$e->getMessage());
             return back()->with('error', 'Erreur: '.$e->getMessage());

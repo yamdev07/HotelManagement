@@ -34,10 +34,19 @@
                 @endif
 
                 <p class="text-muted mb-4">Merci de régulariser votre situation pour réactiver votre espace.</p>
-                <p class="small text-muted">
-                    Contactez l'administrateur de la plateforme pour toute question.
-                </p>
-                <form action="{{ route('logout') }}" method="POST" class="mt-4">
+
+                @if ($hotel && $hotel->is_active && $hotel->isSubscriptionExpired())
+                    {{-- Abonnement expiré : l'hôtelier peut payer en ligne pour réactiver --}}
+                    <a href="{{ route('billing.show') }}" class="btn btn-primary btn-lg w-100 mb-3">
+                        <i class="fas fa-credit-card me-1"></i> Renouveler mon abonnement
+                    </a>
+                @else
+                    <p class="small text-muted">
+                        Contactez l'administrateur de la plateforme pour toute question.
+                    </p>
+                @endif
+
+                <form action="{{ route('logout') }}" method="POST" class="mt-2">
                     @csrf
                     <button type="submit" class="btn btn-outline-secondary">
                         <i class="fas fa-sign-out-alt me-1"></i> Se déconnecter

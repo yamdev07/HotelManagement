@@ -109,6 +109,14 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::put('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'update'])->name('hotel.settings.update');
 });
 
+// ==================== ABONNEMENT / PAIEMENT EN LIGNE (FedaPay) ====================
+// Accessible même si l'abonnement a expiré (régularisation) — cf. EnsureHotelActive.
+Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
+    Route::get('/abonnement', [\App\Http\Controllers\BillingController::class, 'show'])->name('billing.show');
+    Route::post('/abonnement/payer', [\App\Http\Controllers\BillingController::class, 'checkout'])->name('billing.checkout');
+    Route::get('/abonnement/retour', [\App\Http\Controllers\BillingController::class, 'callback'])->name('billing.callback');
+});
+
 // ==================== DASHBOARD SUPER-ADMIN PLATEFORME ====================
 Route::middleware(['auth', 'checkrole:Super'])->prefix('platform')->name('platform.')->group(function () {
     Route::get('/hotels', [PlatformHotelController::class, 'index'])->name('hotels.index');

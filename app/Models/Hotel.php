@@ -243,6 +243,41 @@ class Hotel extends Model
     }
 
     /**
+     * Prolonge l'abonnement de N mois et enregistre la période dans l'historique.
+     * Repart de la date de fin si elle est future, sinon d'aujourd'hui.
+     * Réactive l'accès (is_active) et met éventuellement à jour le palier.
+     */
+    public function applyRenewal(int $months, float $amount, ?string $plan = null, array $extra = []): Subscription
+    {
+        $months = max(1, $months);
+
+        $start = ($this->subscription_ends_at && $this->subscription_ends_at->isFuture())
+            ? $this->subscription_ends_at->copy()
+            : now();
+        $newEnd = $start->copy()->addMonths($months);
+
+        $updates = [
+            'subscription_ends_at' => $newEnd,
+            'is_active'            => true,
+            'suspension_reason'    => null,
+        ];
+        if ($plan && array_key_exists($plan, config('plans.tiers'))) {
+            $updates['plan'] = $plan;
+            $updates['room_limit'] = config('plans.tiers.'.$plan.'.room_limit');
+        }
+        $this->update($updates);
+
+        return $this->recordSubscription(array_merge([
+            'plan'       => $plan ?: $this->plan,
+            'status'     => 'active',
+            'is_renewal' => true,
+            'amount'     => $amount,
+            'starts_at'  => $start,
+            'ends_at'    => $newEnd,
+        ], $extra));
+    }
+
+    /**
      * L'hôtel a-t-il actuellement accès à la plateforme ?
      * (actif ET abonnement non expiré)
      */

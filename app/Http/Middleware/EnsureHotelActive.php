@@ -24,8 +24,9 @@ class EnsureHotelActive
             return $next($request);
         }
 
-        // Ne jamais bloquer la sortie ni la page d'information
-        if ($request->routeIs('hotel.suspended', 'logout', 'logout.now') || $request->is('logout*', 'force-logout-all')) {
+        // Ne jamais bloquer la sortie, la page d'information, ni le paiement
+        // (l'hôtelier doit pouvoir régulariser son abonnement même expiré).
+        if ($request->routeIs('hotel.suspended', 'logout', 'logout.now', 'billing.*') || $request->is('logout*', 'force-logout-all')) {
             return $next($request);
         }
 

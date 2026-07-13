@@ -30,4 +30,15 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    /*
+    | FedaPay — paiement des abonnements SaaS (Afrique de l'Ouest).
+    | env : 'sandbox' (test) ou 'live' (production).
+    | On appelle l'API REST via le client HTTP de Laravel (pas de SDK à installer).
+    */
+    'fedapay' => [
+        'secret' => env('FEDAPAY_SECRET'),
+        'public' => env('FEDAPAY_PUBLIC'),
+        'env'    => env('FEDAPAY_ENV', 'sandbox'),
+    ],
+
 ];

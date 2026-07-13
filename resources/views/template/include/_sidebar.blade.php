@@ -237,6 +237,17 @@
                                 </div>
                             </a>
                         @endif
+
+                        @if (Route::has('billing.show') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                            <a href="{{ route('billing.show') }}"
+                                class="nav-item {{ $activeClass('billing.') }}" data-tooltip="Mon abonnement">
+                                <div class="nav-icon"><i class="fas fa-credit-card"></i></div>
+                                <div class="nav-content">
+                                    <div class="nav-title">Mon abonnement</div>
+                                    <div class="nav-subtitle">Paiement & renouvellement</div>
+                                </div>
+                            </a>
+                        @endif
                     </div>
                 @endif
 
