@@ -3,16 +3,6 @@
 @section('title', 'Hôtels')
 
 @section('content')
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <div>
-            <h3 class="fw-bold mb-0"><i class="fas fa-hotel me-2 text-primary"></i>Hôtels de la plateforme</h3>
-            <div class="text-muted small">Vue d'ensemble et abonnements</div>
-        </div>
-        <a href="{{ route('platform.hotels.create') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-1"></i> Nouvel hôtel
-        </a>
-    </div>
-
     {{-- ===== Synthèse ===== --}}
     <div class="row g-3 mb-4">
         @php
