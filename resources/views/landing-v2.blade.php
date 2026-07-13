@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'checkinHub') }} — La gestion hôtelière, réinventée</title>
+    <title>{{ config('app.name', 'checkinHub') }} : La gestion hôtelière réinventée</title>
     <link rel="icon" href="{{ asset('favicon.svg') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -81,11 +81,6 @@
 <div class="cosmos"></div>
 <div class="stars"></div>
 
-<!-- Bandeau aperçu -->
-<div class="footer-preview">
-    <i class="fas fa-flask me-1"></i> Maquette alternative (v2) · <a href="{{ route('landing') }}">revenir à la version actuelle</a>
-</div>
-
 <!-- NAV -->
 <nav class="navbar navbar-expand-lg fixed-top py-3">
     <div class="container">
@@ -113,8 +108,8 @@
                 <span class="chip mb-3"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent)"></span> Nouveau · Essai {{ config('plans.trial_days', 14) }} jours sans carte</span>
                 <h1 class="display-4 fw-bold mb-3">La gestion hôtelière,<br><span class="grad-text">réinventée pour l'Afrique.</span></h1>
                 <p class="fs-5 text-muted2 mb-4" style="max-width:520px;">
-                    Réservations, check-in, caisse, housekeeping et vitrine web — une seule plateforme,
-                    des tarifs adaptés au coût de la vie de <strong class="text-white">{{ count(config('plans.countries')) }} pays</strong>.
+                    Réservations, check-in, caisse, housekeeping et vitrine web réunis dans une seule plateforme,
+                    avec des tarifs adaptés au coût de la vie de <strong class="text-white">{{ count(config('plans.countries')) }} pays</strong>.
                 </p>
                 <div class="d-flex flex-wrap gap-3 mb-4">
                     <a href="{{ route('hotel.register') }}" class="btn-glow btn-lg"><i class="fas fa-rocket me-2"></i>Démarrer gratuitement</a>
@@ -155,7 +150,7 @@
                 ['fa-cash-register','Caisse & paiements','Encaissements, ouverture/fermeture de caisse, suivi des transactions.'],
                 ['fa-broom','Housekeeping','Statuts des chambres, tâches du personnel, suivi du ménage.'],
                 ['fa-utensils','Restaurant','Commandes, service en chambre, gestion des points de vente.'],
-                ['fa-chart-line','Rapports','Occupation, revenus, performance — des tableaux de bord clairs.'],
+                ['fa-chart-line','Rapports','Occupation, revenus et performance sur des tableaux de bord clairs.'],
                 ['fa-globe','Vitrine web','Un mini-site à vos couleurs pour vos réservations en ligne.'],
             ]; @endphp
             @foreach ($feats as $i => $f)
@@ -240,7 +235,7 @@
     <div class="container">
         <div class="glass p-5 text-center" data-aos="zoom-in" style="background:linear-gradient(135deg, rgba(124,131,255,.18), rgba(176,107,255,.12));">
             <h2 class="fw-bold mb-2">Prêt à moderniser votre hôtel ?</h2>
-            <p class="text-muted2 mb-4">Démarrez votre essai gratuit de {{ config('plans.trial_days',14) }} jours — aucune carte requise.</p>
+            <p class="text-muted2 mb-4">Démarrez votre essai gratuit de {{ config('plans.trial_days',14) }} jours, aucune carte requise.</p>
             <a href="{{ route('hotel.register') }}" class="btn-glow btn-lg"><i class="fas fa-rocket me-2"></i>Créer mon établissement</a>
         </div>
     </div>
@@ -250,7 +245,7 @@
 <footer class="py-5">
     <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
         <span class="brand-logo">check<span>inHub</span></span>
-        <span class="text-muted2 small">© {{ now()->year }} checkinHub — La gestion hôtelière, réinventée.</span>
+        <span class="text-muted2 small">© {{ now()->year }} checkinHub. La gestion hôtelière réinventée.</span>
         <a href="{{ route('login.index') }}" class="btn-ghost">Connexion</a>
     </div>
 </footer>
