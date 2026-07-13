@@ -30,3 +30,6 @@ yarn-error.log
 /storage/framework/testing/*
 !/storage/framework/testing/.gitignore
 /public/assets/
+
+# Claude Code
+/.claude
