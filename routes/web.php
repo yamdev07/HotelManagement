@@ -41,6 +41,8 @@ use Illuminate\Support\Facades\Route;
 */
 // ==================== LANDING PAGE SAAS (page d'accueil plateforme) ====================
 Route::view('/', 'landing')->name('landing');
+// Maquette alternative (aperçu, ne remplace pas l'actuelle)
+Route::view('/v2', 'landing-v2')->name('landing.v2');
 
 // ==================== VITRINE PUBLIQUE PAR HÔTEL (multi-pages) ====================
 Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(function () {
