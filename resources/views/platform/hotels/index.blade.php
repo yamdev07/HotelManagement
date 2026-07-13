@@ -29,7 +29,7 @@
                     @forelse ($hotels as $hotel)
                         <tr>
                             <td>
-                                <strong>{{ $hotel->name }}</strong>
+                                <a href="{{ route('platform.hotels.show', $hotel) }}" class="fw-bold text-decoration-none">{{ $hotel->name }}</a>
                                 <div class="small text-muted">{{ $hotel->slug }} · {{ $hotel->currency }}</div>
                             </td>
                             <td class="text-center">
@@ -58,7 +58,10 @@
                             <td class="text-center">{{ $hotel->rooms_count }}</td>
                             <td class="text-center">{{ $hotel->transactions_count }}</td>
                             <td class="text-end">
-                                <a href="{{ route('platform.hotels.edit', $hotel) }}" class="btn btn-sm btn-outline-secondary">
+                                <a href="{{ route('platform.hotels.show', $hotel) }}" class="btn btn-sm btn-outline-primary" title="Détails">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ route('platform.hotels.edit', $hotel) }}" class="btn btn-sm btn-outline-secondary" title="Modifier">
                                     <i class="fas fa-pen"></i>
                                 </a>
                                 <form action="{{ route('platform.hotels.toggle', $hotel) }}" method="POST" class="d-inline">
