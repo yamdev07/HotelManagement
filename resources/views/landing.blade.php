@@ -433,11 +433,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
-<!-- amCharts 5 : globe 3D des pays desservis -->
-<script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/map.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
-<script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+<!-- globe.gl (Three.js) : globe 3D photoréaliste des pays desservis -->
+<script src="https://unpkg.com/globe.gl"></script>
 <script>
     // Animations au scroll
     AOS.init({ duration: 700, once: true, easing: 'ease-out-cubic', offset: 80 });
@@ -501,11 +498,11 @@
     }
 </script>
 
-<!-- Globe 3D des pays desservis — bloc isolé (indépendant du reste du JS) -->
+<!-- Globe 3D photoréaliste — bloc isolé (indépendant du reste du JS) -->
 <script>
 (function () {
     const servedData = @json(config('plans.countries'));
-    // Coordonnées (lat/long) pour les marqueurs pulsants.
+    // Coordonnées (lat/long) des pays desservis.
     const coords = {
         BJ:[9.3,2.3], TG:[8.6,0.8], CI:[7.5,-5.5], SN:[14.5,-14.5], BF:[12.2,-1.5],
         ML:[17.0,-4.0], NE:[17.6,8.0], CM:[5.7,12.5], GA:[-0.8,11.6], NG:[9.1,8.7],
@@ -516,70 +513,56 @@
         const el = document.getElementById('globe');
         if (!el) return;
 
-        if (typeof am5 === 'undefined' || typeof am5map === 'undefined' || typeof am5geodata_worldLow === 'undefined') {
-            // amCharts non chargé (CDN bloqué) : on laisse la liste de pays visible, sans globe.
+        if (typeof Globe === 'undefined') {
+            // globe.gl non chargé (CDN bloqué) : la liste des pays reste visible.
             el.style.display = 'none';
-            console.warn('Globe: amCharts non disponible (CDN bloqué ?).');
+            console.warn('Globe: globe.gl non disponible (CDN bloqué ?).');
             return;
         }
 
         try {
-            const servedIds = Object.keys(servedData);
-            const BRAND = am5.color(0x4f46e5);
+            const points = Object.keys(servedData)
+                .filter(c => coords[c])
+                .map(c => ({ code: c, name: servedData[c].name, lat: coords[c][0], lng: coords[c][1] }));
 
-            const root = am5.Root.new('globe');
-            root.setThemes([am5themes_Animated.new(root)]);
+            const TEX = 'https://unpkg.com/three-globe/example/img/';
 
-            const chart = root.container.children.push(am5map.MapChart.new(root, {
-                panX: 'rotateX',
-                panY: 'rotateY',
-                projection: am5map.geoOrthographic(),
-                paddingBottom: 10, paddingTop: 10, paddingLeft: 10, paddingRight: 10
-            }));
+            const globe = Globe()(el)
+                .backgroundColor('rgba(0,0,0,0)')
+                .globeImageUrl(TEX + 'earth-blue-marble.jpg')
+                .bumpImageUrl(TEX + 'earth-topology.png')
+                .showAtmosphere(true)
+                .atmosphereColor('#6366f1')
+                .atmosphereAltitude(0.2)
+                // Halos pulsants sur chaque pays
+                .ringsData(points)
+                .ringColor(() => (t) => `rgba(129,140,248,${Math.sqrt(1 - t)})`)
+                .ringMaxRadius(4)
+                .ringPropagationSpeed(2.2)
+                .ringRepeatPeriod(900)
+                // Points brillants
+                .pointsData(points)
+                .pointColor(() => '#c7d2fe')
+                .pointAltitude(0.02)
+                .pointRadius(0.35)
+                // Étiquettes des pays
+                .labelsData(points)
+                .labelText('name')
+                .labelSize(1.1)
+                .labelDotRadius(0.4)
+                .labelColor(() => '#ffffff')
+                .labelResolution(2);
 
-            // Fond du globe (océan) + graticule
-            chart.series.push(am5map.GraticuleSeries.new(root, { step: 20 }));
-            const bg = chart.series.unshift(am5map.MapPolygonSeries.new(root, {}));
-            bg.mapPolygons.template.setAll({ fill: am5.color(0xbfdbfe), fillOpacity: 0.5, strokeOpacity: 0 });
-            bg.data.push({ geometry: am5map.getGeoRectangle(90, 180, -90, -180) });
+            const resize = () => { globe.width(el.clientWidth).height(el.clientHeight); };
+            resize();
+            window.addEventListener('resize', resize);
 
-            // Tous les pays (gris clair)
-            const world = chart.series.push(am5map.MapPolygonSeries.new(root, {
-                geoJSON: am5geodata_worldLow, exclude: ['AQ']
-            }));
-            world.mapPolygons.template.setAll({
-                fill: am5.color(0xe2e8f0), stroke: am5.color(0xffffff), strokeWidth: 0.4
-            });
-
-            // Pays desservis (couleur marque)
-            const served = chart.series.push(am5map.MapPolygonSeries.new(root, {
-                geoJSON: am5geodata_worldLow, include: servedIds
-            }));
-            served.mapPolygons.template.setAll({
-                fill: BRAND, stroke: am5.color(0xffffff), strokeWidth: 0.5,
-                tooltipText: '{name}', interactive: true, cursorOverStyle: 'pointer'
-            });
-            served.mapPolygons.template.states.create('hover', { fill: am5.color(0x7c3aed) });
-
-            // Marqueurs pulsants
-            const points = chart.series.push(am5map.MapPointSeries.new(root, {}));
-            points.bullets.push(function () {
-                const c = am5.Container.new(root, {});
-                c.children.push(am5.Circle.new(root, { radius: 5, fill: BRAND, stroke: am5.color(0xffffff), strokeWidth: 1.5 }));
-                const pulse = c.children.push(am5.Circle.new(root, { radius: 5, fill: BRAND, fillOpacity: 0.35 }));
-                pulse.animate({ key: 'radius', to: 16, duration: 1400, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
-                pulse.animate({ key: 'fillOpacity', to: 0, duration: 1400, loops: Infinity, easing: am5.ease.out(am5.ease.cubic) });
-                return am5.Bullet.new(root, { sprite: c });
-            });
-            servedIds.forEach(code => {
-                const ll = coords[code]; if (!ll) return;
-                points.data.push({ geometry: { type: 'Point', coordinates: [ll[1], ll[0]] }, name: servedData[code].name });
-            });
-
-            // Rotation automatique
-            chart.animate({ key: 'rotationX', from: 0, to: 360, duration: 40000, loops: Infinity });
-            chart.set('rotationY', -8);
-            chart.appear(800, 100);
+            // Vue centrée sur l'Afrique de l'Ouest + rotation automatique
+            globe.pointOfView({ lat: 8, lng: 4, altitude: 1.9 }, 0);
+            const controls = globe.controls();
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.7;
+            controls.enableZoom = false;
         } catch (e) {
             console.error('Globe 3D:', e);
             el.style.display = 'none';
