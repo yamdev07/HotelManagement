@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Platform;
 
 use App\Http\Controllers\Controller;
+use App\Mail\HotelCredentialsMail;
 use App\Models\Hotel;
 use App\Models\Room;
 use App\Models\Transaction;
@@ -10,6 +11,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 /**
@@ -46,15 +49,20 @@ class HotelController extends Controller
             'subscription_ends_at' => ['nullable', 'date'],
             'admin_name'     => ['required', 'string', 'max:255'],
             'admin_email'    => ['required', 'email', 'max:255', 'unique:users,email'],
-            'admin_password' => ['required', 'string', 'min:6'],
+            'admin_password' => ['nullable', 'string', 'min:6'],
         ]);
 
-        DB::transaction(function () use ($data) {
+        // Mot de passe saisi, ou généré s'il est laissé vide
+        $plainPassword = ! empty($data['admin_password'])
+            ? $data['admin_password']
+            : Str::password(10, true, true, false);
+
+        [$hotel, $admin] = DB::transaction(function () use ($data, $plainPassword) {
             $hotel = Hotel::create([
                 'name'                 => $data['name'],
                 'slug'                 => $this->uniqueSlug($data['name']),
                 'currency'             => $data['currency'] ?? 'CFA',
-                'contact_email'        => $data['contact_email'] ?? null,
+                'contact_email'        => $data['contact_email'] ?? $data['admin_email'],
                 'contact_phone'        => $data['contact_phone'] ?? null,
                 'subscription_ends_at' => $data['subscription_ends_at'] ?? null,
                 'is_active'            => true,
@@ -65,15 +73,24 @@ class HotelController extends Controller
                 'name'       => $data['admin_name'],
                 'email'      => $data['admin_email'],
                 'role'       => 'Admin',
-                'password'   => Hash::make($data['admin_password']),
+                'password'   => Hash::make($plainPassword),
                 'random_key' => Str::random(60),
             ]);
 
             $hotel->update(['owner_user_id' => $admin->id]);
+
+            return [$hotel, $admin];
         });
 
+        // Envoi des identifiants à l'email de l'administrateur (tolérant aux pannes SMTP)
+        try {
+            Mail::to($admin->email)->send(new HotelCredentialsMail($hotel, $admin, $plainPassword));
+        } catch (\Throwable $e) {
+            Log::warning('Envoi email identifiants (plateforme) échoué: '.$e->getMessage());
+        }
+
         return redirect()->route('platform.hotels.index')
-            ->with('success', "Hôtel « {$data['name']} » créé avec son administrateur.");
+            ->with('success', "Hôtel « {$data['name']} » créé. Les identifiants ont été envoyés à {$admin->email}.");
     }
 
     public function edit(Hotel $hotel)

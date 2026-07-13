@@ -2,11 +2,13 @@
 
 namespace Tests\Feature;
 
+use App\Mail\HotelCredentialsMail;
 use App\Models\Hotel;
 use App\Models\User;
 use App\Support\TenantManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class PlatformHttpTest extends TestCase
@@ -50,6 +52,8 @@ class PlatformHttpTest extends TestCase
 
     public function test_super_admin_can_create_hotel_with_its_admin(): void
     {
+        Mail::fake();
+
         $response = $this->actingAs($this->superAdmin())->post('/platform/hotels', [
             'name'           => 'Hotel Ibis',
             'currency'       => 'CFA',
@@ -67,6 +71,23 @@ class PlatformHttpTest extends TestCase
         $admin = User::where('email', 'admin@ibis.test')->first();
         $this->assertEquals($hotel->id, $admin->hotel_id);
         $this->assertEquals($admin->id, $hotel->owner_user_id);
+
+        // Les identifiants sont envoyés à l'email de l'admin
+        Mail::assertSent(HotelCredentialsMail::class, fn ($mail) => $mail->hasTo('admin@ibis.test'));
+    }
+
+    public function test_password_is_generated_and_emailed_when_left_blank(): void
+    {
+        Mail::fake();
+
+        $this->actingAs($this->superAdmin())->post('/platform/hotels', [
+            'name'        => 'Hotel Sans MDP',
+            'admin_name'  => 'Boss',
+            'admin_email' => 'boss@sansmdp.test',
+        ])->assertRedirectToRoute('platform.hotels.index');
+
+        $this->assertDatabaseHas('users', ['email' => 'boss@sansmdp.test', 'role' => 'Admin']);
+        Mail::assertSent(HotelCredentialsMail::class, fn ($mail) => $mail->hasTo('boss@sansmdp.test'));
     }
 
     public function test_non_super_cannot_access_platform(): void
