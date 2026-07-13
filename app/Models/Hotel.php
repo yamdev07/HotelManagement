@@ -34,6 +34,7 @@ class Hotel extends Model
         'contact_phone',
         'address',
         'is_active',
+        'suspension_reason',
         'subscription_ends_at',
         'plan',
         'room_limit',

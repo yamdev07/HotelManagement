@@ -111,8 +111,12 @@
                                 <a href="{{ route('platform.hotels.show', $hotel) }}" class="btn btn-sm btn-outline-primary" title="Détails"><i class="fas fa-eye"></i></a>
                                 <form action="{{ route('platform.hotels.toggle', $hotel) }}" method="POST" class="d-inline">
                                     @csrf @method('PATCH')
+                                    <input type="hidden" name="reason" value="">
                                     @if ($hotel->is_active)
-                                        <button class="btn btn-sm btn-outline-warning" title="Suspendre" onclick="return confirm('Suspendre {{ $hotel->name }} ? Ses utilisateurs perdront l\'accès.')"><i class="fas fa-ban"></i></button>
+                                        <button class="btn btn-sm btn-outline-warning" title="Suspendre"
+                                                onclick="var r=prompt('Raison de la suspension de « {{ $hotel->name }} » (visible par l\'hôtelier) :','Non-paiement de l\'abonnement'); if(r===null)return false; this.form.reason.value=r; return true;">
+                                            <i class="fas fa-ban"></i>
+                                        </button>
                                     @else
                                         <button class="btn btn-sm btn-outline-success" title="Réactiver"><i class="fas fa-check"></i></button>
                                     @endif

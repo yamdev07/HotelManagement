@@ -155,13 +155,19 @@ class HotelController extends Controller
             ->with('success', "Hôtel « {$hotel->name} » mis à jour.");
     }
 
-    public function toggleActive(Hotel $hotel)
+    public function toggleActive(Request $request, Hotel $hotel)
     {
-        $hotel->update(['is_active' => ! $hotel->is_active]);
+        $nowActive = ! $hotel->is_active;
 
-        $state = $hotel->is_active ? 'réactivé' : 'suspendu';
+        $hotel->update([
+            'is_active'         => $nowActive,
+            // On mémorise la raison à la suspension, on l'efface à la réactivation
+            'suspension_reason' => $nowActive ? null : ($request->input('reason') ?: 'Suspension par l\'administrateur de la plateforme'),
+        ]);
 
-        return redirect()->route('platform.hotels.index')
+        $state = $nowActive ? 'réactivé' : 'suspendu';
+
+        return redirect()->back()
             ->with('success', "Hôtel « {$hotel->name} » {$state}.");
     }
 
