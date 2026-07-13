@@ -272,12 +272,17 @@
         </div>
         <div class="row g-4 justify-content-center">
             @foreach (config('plans.tiers') as $key => $tier)
-                @php $pop = !empty($tier['popular']); @endphp
+                @php
+                    $pop = !empty($tier['popular']);
+                    $min = $tier['room_min']; $max = $tier['room_max'];
+                    $rooms = $max === null ? 'Plus de '.($min-1).' chambres' : ($min <= 0 ? "Jusqu'à $max chambres" : "$min à $max chambres");
+                @endphp
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index*120 }}">
                     <div class="price-card {{ $pop ? 'pop' : '' }} p-4 h-100" data-base="{{ $tier['price'] }}">
                         @if ($pop)<span class="chip mb-2" style="border-color:var(--brand);color:#fff"><i class="fas fa-star" style="color:var(--accent)"></i> Populaire</span>@endif
                         <h4 class="fw-bold">{{ $tier['name'] }}</h4>
                         <p class="text-muted2 small">{{ $tier['tagline'] }}</p>
+                        <div class="chip mb-2" style="color:#fff"><i class="fas fa-bed" style="color:var(--brand)"></i> {{ $rooms }}@if ($max === null) · illimité @endif</div>
                         <div class="my-2"><span class="price-amount pr-amount">{{ number_format($tier['price'],0,',',' ') }}</span>
                             <span class="text-muted2"><span class="pr-cur">XOF</span> / mois</span></div>
                         <hr style="border-color:var(--border)">
