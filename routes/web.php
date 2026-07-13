@@ -114,9 +114,11 @@ Route::middleware(['auth', 'checkrole:Super'])->prefix('platform')->name('platfo
     Route::get('/hotels', [PlatformHotelController::class, 'index'])->name('hotels.index');
     Route::get('/hotels/create', [PlatformHotelController::class, 'create'])->name('hotels.create');
     Route::post('/hotels', [PlatformHotelController::class, 'store'])->name('hotels.store');
+    Route::get('/hotels/{hotel}', [PlatformHotelController::class, 'show'])->name('hotels.show');
     Route::get('/hotels/{hotel}/edit', [PlatformHotelController::class, 'edit'])->name('hotels.edit');
     Route::put('/hotels/{hotel}', [PlatformHotelController::class, 'update'])->name('hotels.update');
     Route::patch('/hotels/{hotel}/toggle', [PlatformHotelController::class, 'toggleActive'])->name('hotels.toggle');
+    Route::post('/hotels/{hotel}/renew', [PlatformHotelController::class, 'renew'])->name('hotels.renew');
 });
 
 // ==================== ROUTE LOGOUT URGENCE ====================

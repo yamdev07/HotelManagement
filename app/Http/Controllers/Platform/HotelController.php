@@ -39,6 +39,16 @@ class HotelController extends Controller
         return view('platform.hotels.create');
     }
 
+    public function show(Hotel $hotel)
+    {
+        $hotel->load(['owner', 'subscriptions.createdBy']);
+        $hotel->users_count = User::where('hotel_id', $hotel->id)->count();
+        $hotel->rooms_count = Room::forHotel($hotel->id)->count();
+        $hotel->transactions_count = Transaction::forHotel($hotel->id)->count();
+
+        return view('platform.hotels.show', compact('hotel'));
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -78,6 +88,14 @@ class HotelController extends Controller
             ]);
 
             $hotel->update(['owner_user_id' => $admin->id]);
+
+            // Historique : abonnement initial
+            $hotel->recordSubscription([
+                'status'    => $hotel->subscription_ends_at ? 'active' : 'trial',
+                'amount'    => $hotel->subscription_ends_at ? $hotel->monthlyPrice() : 0,
+                'starts_at' => now(),
+                'ends_at'   => $hotel->subscription_ends_at,
+            ]);
 
             return [$hotel, $admin];
         });
@@ -122,6 +140,34 @@ class HotelController extends Controller
 
         return redirect()->route('platform.hotels.index')
             ->with('success', "Hôtel « {$hotel->name} » {$state}.");
+    }
+
+    /**
+     * Renouvellement : prolonge l'abonnement d'un mois, réactive l'hôtel
+     * et enregistre la période dans l'historique (réabonnement).
+     */
+    public function renew(Request $request, Hotel $hotel)
+    {
+        $months = (int) $request->input('months', 1) ?: 1;
+
+        // On repart de la date de fin si elle est future, sinon d'aujourd'hui
+        $start = ($hotel->subscription_ends_at && $hotel->subscription_ends_at->isFuture())
+            ? $hotel->subscription_ends_at->copy()
+            : now();
+        $newEnd = $start->copy()->addMonths($months);
+
+        $hotel->update(['subscription_ends_at' => $newEnd, 'is_active' => true]);
+
+        $hotel->recordSubscription([
+            'status'     => 'active',
+            'is_renewal' => true,
+            'amount'     => $hotel->monthlyPrice() * $months,
+            'starts_at'  => $start,
+            'ends_at'    => $newEnd,
+        ]);
+
+        return redirect()->route('platform.hotels.show', $hotel)
+            ->with('success', "Abonnement de « {$hotel->name} » renouvelé jusqu'au ".$newEnd->format('d/m/Y').'.');
     }
 
     private function uniqueSlug(string $name): string

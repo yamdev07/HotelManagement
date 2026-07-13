@@ -79,6 +79,14 @@ class RegisterHotelController extends Controller
 
             $hotel->update(['owner_user_id' => $admin->id]);
 
+            // Historique : période d'essai gratuit
+            $hotel->recordSubscription([
+                'status'    => 'trial',
+                'amount'    => 0,
+                'starts_at' => now(),
+                'ends_at'   => $hotel->subscription_ends_at,
+            ]);
+
             return [$hotel, $admin];
         });
 

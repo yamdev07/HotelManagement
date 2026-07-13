@@ -184,6 +184,23 @@ class Hotel extends Model
     }
 
     /**
+     * Enregistre une période d'abonnement dans l'historique.
+     */
+    public function recordSubscription(array $attrs = []): Subscription
+    {
+        return $this->subscriptions()->create(array_merge([
+            'plan'       => $this->plan ?: config('plans.default', 'starter'),
+            'amount'     => 0,
+            'currency'   => $this->currency ?: 'CFA',
+            'status'     => 'active',
+            'is_renewal' => false,
+            'starts_at'  => now(),
+            'ends_at'    => $this->subscription_ends_at,
+            'created_by' => auth()->id(),
+        ], $attrs));
+    }
+
+    /**
      * L'hôtel a-t-il actuellement accès à la plateforme ?
      * (actif ET abonnement non expiré)
      */
