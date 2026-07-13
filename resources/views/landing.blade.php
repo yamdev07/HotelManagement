@@ -562,7 +562,10 @@
             const controls = globe.controls();
             controls.autoRotate = true;
             controls.autoRotateSpeed = 0.7;
-            controls.enableZoom = false;
+            controls.enableZoom = true;      // molette / pinch pour zoomer
+            controls.minDistance = 160;      // zoom avant max (proche)
+            controls.maxDistance = 450;      // zoom arrière max (loin)
+            controls.zoomSpeed = 0.8;
         } catch (e) {
             console.error('Globe 3D:', e);
             el.style.display = 'none';
