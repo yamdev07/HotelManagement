@@ -149,7 +149,7 @@
                             </a>
                         @endif
 
-                        @if (Route::has('restaurant.index'))
+                        @if (Route::has('restaurant.index') && (($currentHotel ?? null)?->hasModule('restaurant') ?? true))
                             @php $pendingOrdersCount = \App\Models\RestaurantOrder::where('status', 'pending')->count(); @endphp
                             <a href="{{ route('restaurant.index') }}"
                                 class="nav-item {{ $activeClass('restaurant.', false) }}" data-tooltip="Restaurant">
@@ -252,7 +252,7 @@
                 @endif
 
                 <!-- NETTOYAGE -->
-                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']))
+                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']) && (($currentHotel ?? null)?->hasModule('housekeeping') ?? true))
                     <div class="nav-section">
                         <div class="nav-section-title">Nettoyage</div>
 
@@ -333,7 +333,7 @@
                             </a>
                         @endif
 
-                        @if (Route::has('reports.index'))
+                        @if (Route::has('reports.index') && (($currentHotel ?? null)?->hasModule('reports') ?? true))
                             <a href="{{ route('reports.index') }}"
                                 class="nav-item {{ $activeClass('reports.index') }}" data-tooltip="Rapports">
                                 <div class="nav-icon"><i class="fas fa-file-alt"></i></div>

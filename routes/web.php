@@ -532,8 +532,9 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
         })->name('profile.show');
     });
 
-    // ==================== RAPPORTS ====================
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    // ==================== RAPPORTS (module premium : Pro & Business) ====================
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index')
+        ->middleware('plan.module:reports');
 
     // ==================== RÉSERVATIONS CLIENTS ====================
     Route::get('/my-reservations', [TransactionController::class, 'myReservations'])->name('transaction.myReservations')
@@ -542,8 +543,8 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
     Route::get('/my-transaction/{transaction}', [TransactionController::class, 'show'])->name('transaction.show.customer')
         ->middleware('checkrole:Customer');
 
-    // ==================== RESTAURANT (ACCESSIBLE À TOUS) ====================
-    Route::prefix('restaurant')->name('restaurant.')->group(function () {
+    // ==================== RESTAURANT (module premium : Pro & Business) ====================
+    Route::prefix('restaurant')->name('restaurant.')->middleware('plan.module:restaurant')->group(function () {
         // Routes sans paramètres d'abord
         Route::get('/', [RestaurantController::class, 'index'])->name('index');
         Route::get('/orders', [RestaurantController::class, 'orders'])->name('orders');
@@ -656,7 +657,7 @@ Route::get('/checkin-dashboard', [DashboardController::class, 'checkinDashboard'
     ->middleware(['auth', 'checkrole:Super,Admin,Receptionist']);
 
 // ==================== HOUSEKEEPING POUR RÉCEPTION ====================
-Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'checkrole:Super,Admin,Housekeeping,Receptionist'])->group(function () {
+Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'checkrole:Super,Admin,Housekeeping,Receptionist', 'plan.module:housekeeping'])->group(function () {
     // Dashboard et listes
     Route::get('/', [HousekeepingController::class, 'index'])->name('index');
     Route::get('/dashboard', [HousekeepingController::class, 'index'])->name('dashboard');

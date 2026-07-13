@@ -132,6 +132,29 @@ class Hotel extends Model
         return $this->planConfig()['name'];
     }
 
+    /** Libellés des modules premium (pour les messages d'upgrade). */
+    public const MODULE_LABELS = [
+        'restaurant'   => 'Restaurant',
+        'housekeeping' => 'Housekeeping',
+        'reports'      => 'Rapports avancés',
+    ];
+
+    /**
+     * L'offre de l'hôtel inclut-elle ce module premium ?
+     * (le socle réservations/check-in/caisse est toujours disponible)
+     */
+    public function hasModule(string $key): bool
+    {
+        $plan = $this->plan ?: config('plans.default', 'starter');
+
+        return in_array($key, config('plans.tiers.'.$plan.'.modules', []), true);
+    }
+
+    public static function moduleLabel(string $key): string
+    {
+        return self::MODULE_LABELS[$key] ?? ucfirst($key);
+    }
+
     /**
      * Prix mensuel d'un plan pour un pays donné (coût de la vie appliqué),
      * arrondi à la centaine.

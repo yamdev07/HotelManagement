@@ -53,6 +53,8 @@ return [
             'room_min'    => 0,
             'room_max'    => 10,
             'room_limit'  => 10,
+            // Modules premium inclus (le socle réservations/caisse est toujours disponible).
+            'modules'     => [],
             'tagline'     => 'Pour un hôtel qui démarre',
             'features'    => [
                 'Jusqu\'à 10 chambres',
@@ -69,6 +71,7 @@ return [
             'room_min'    => 11,
             'room_max'    => 20,
             'room_limit'  => 20,
+            'modules'     => ['restaurant', 'housekeeping', 'reports'],
             'tagline'     => 'Pour les hôtels en croissance',
             'popular'     => true,
             'features'    => [
@@ -86,6 +89,7 @@ return [
             'room_min'    => 21,
             'room_max'    => null,
             'room_limit'  => null,
+            'modules'     => ['restaurant', 'housekeeping', 'reports'],
             'tagline'     => 'Pour les grands établissements',
             'features'    => [
                 'Plus de 20 chambres',
