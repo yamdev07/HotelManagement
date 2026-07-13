@@ -268,6 +268,31 @@
     </div>
 </section>
 
+<!-- PRÉSENCE / GLOBE 3D -->
+<section class="section" id="presence" style="background:radial-gradient(700px 400px at 75% 40%, #e0e7ff 0%, rgba(224,231,255,0) 65%), linear-gradient(180deg,#f7f8ff 0%,#eef2ff 100%);">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-5" data-aos="fade-right">
+                <span class="badge-soft mb-2 d-inline-block">Couverture</span>
+                <h2 class="fw-bold">Déjà pensé pour <span class="text-brand">votre pays</span></h2>
+                <p class="text-secondary">
+                    checkinHub est disponible dans <strong>{{ count(config('plans.countries')) }} pays</strong>,
+                    avec des tarifs adaptés au coût de la vie et à la devise locale.
+                    Faites tourner le globe 🌍
+                </p>
+                <div class="d-flex flex-wrap gap-2 mt-3" id="country-badges">
+                    @foreach (config('plans.countries') as $code => $c)
+                        <span class="badge rounded-pill" style="background:#eef2ff;color:var(--brand);font-weight:600;padding:.5rem .9rem;">{{ $c['name'] }}</span>
+                    @endforeach
+                </div>
+            </div>
+            <div class="col-lg-7" data-aos="fade-left">
+                <div id="globe" style="width:100%;height:560px;max-width:680px;margin:0 auto;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- PRICING -->
 <section class="section" id="pricing">
     <div class="container">
@@ -310,31 +335,6 @@
                     </div>
                 </div>
             @endforeach
-        </div>
-    </div>
-</section>
-
-<!-- PRÉSENCE / GLOBE 3D -->
-<section class="section" id="presence">
-    <div class="container">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-5" data-aos="fade-right">
-                <span class="badge-soft mb-2 d-inline-block">Couverture</span>
-                <h2 class="fw-bold">Déjà pensé pour <span class="text-brand">votre pays</span></h2>
-                <p class="text-secondary">
-                    checkinHub est disponible dans <strong>{{ count(config('plans.countries')) }} pays</strong>,
-                    avec des tarifs adaptés au coût de la vie et à la devise locale.
-                    Faites tourner le globe 🌍
-                </p>
-                <div class="d-flex flex-wrap gap-2 mt-3" id="country-badges">
-                    @foreach (config('plans.countries') as $code => $c)
-                        <span class="badge rounded-pill" style="background:#eef2ff;color:var(--brand);font-weight:600;padding:.5rem .9rem;">{{ $c['name'] }}</span>
-                    @endforeach
-                </div>
-            </div>
-            <div class="col-lg-7" data-aos="fade-left">
-                <div id="globe" style="width:100%;height:560px;max-width:680px;margin:0 auto;"></div>
-            </div>
         </div>
     </div>
 </section>
