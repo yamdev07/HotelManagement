@@ -68,6 +68,16 @@ if (Schema::hasColumn('users', 'hotel_id')) {
 }
 echo "\n";
 
+echo "3b) Offre complète (Business) pour l'hôtel démo et Cactus...\n";
+// Ces hôtels de démonstration doivent garder tous les modules (restaurant, housekeeping, rapports).
+// On ne touche PAS aux vrais hôtels clients (Starter/Pro restent gérés par leur plan).
+$nBiz = DB::table('hotels')
+    ->where(function ($q) {
+        $q->where('slug', 'hotel-par-defaut')->orWhere('name', 'like', '%Cactus%');
+    })
+    ->update(['plan' => 'business']);
+echo "   $nBiz hôtel(s) démo passé(s) en Business\n\n";
+
 echo "4) Compte Super-Admin plateforme (création OU réinitialisation)...\n";
 $u = User::firstOrNew(['email' => $SU_EMAIL]);
 $u->name       = $SU_NAME;
