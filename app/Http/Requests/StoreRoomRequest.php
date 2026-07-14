@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Support\TenantManager;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreRoomRequest extends FormRequest
 {
@@ -13,10 +15,15 @@ class StoreRoomRequest extends FormRequest
 
     public function rules(): array
     {
+        // Numéro de chambre unique PAR hôtel (deux hôtels peuvent avoir une chambre "101").
+        $hotelId = app(TenantManager::class)->getHotelId();
+        $uniqueNumber = Rule::unique('rooms', 'number')
+            ->where(fn ($q) => $hotelId ? $q->where('hotel_id', $hotelId) : $q);
+
         return [
             'type_id'        => 'required|exists:types,id',
             'room_status_id' => 'required|exists:room_statuses,id',
-            'number'         => 'required|string|max:10|unique:rooms,number',
+            'number'         => ['required', 'string', 'max:10', $uniqueNumber],
             'name'           => 'nullable|string|max:255',
             'capacity'       => 'required|integer|min:1|max:10',
             'price'          => 'required|numeric|min:0',
