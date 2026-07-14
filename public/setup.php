@@ -37,6 +37,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Str;
 
 echo "===== checkinHub — installation =====\n\n";
@@ -44,6 +45,50 @@ echo "===== checkinHub — installation =====\n\n";
 echo "1) Migrations...\n";
 Artisan::call('migrate', ['--force' => true]);
 echo Artisan::output()."\n";
+
+echo "1b) Vérification / réparation du schéma SaaS...\n";
+
+// -- Table des abonnements (peut être marquée « migrée » sans exister réellement) --
+if (! Schema::hasTable('subscriptions')) {
+    Schema::create('subscriptions', function (Blueprint $table) {
+        $table->id();
+        $table->unsignedBigInteger('hotel_id');
+        $table->string('plan')->default('starter');
+        $table->decimal('amount', 15, 2)->default(0);
+        $table->string('currency', 10)->default('CFA');
+        $table->string('status')->default('active');
+        $table->boolean('is_renewal')->default(false);
+        $table->timestamp('starts_at')->nullable();
+        $table->timestamp('ends_at')->nullable();
+        $table->unsignedBigInteger('created_by')->nullable();
+        $table->timestamps();
+        $table->index(['hotel_id', 'ends_at']);
+    });
+    echo "   table 'subscriptions' CRÉÉE\n";
+} else {
+    echo "   table 'subscriptions' OK\n";
+}
+
+// -- Colonnes de 'hotels' ajoutées à l'ère SaaS (créées si absentes) --
+$hotelCols = [
+    'plan'              => fn (Blueprint $t) => $t->string('plan')->nullable(),
+    'room_limit'        => fn (Blueprint $t) => $t->integer('room_limit')->nullable(),
+    'country'           => fn (Blueprint $t) => $t->string('country', 2)->default('BJ'),
+    'currency'          => fn (Blueprint $t) => $t->string('currency', 10)->nullable(),
+    'suspension_reason' => fn (Blueprint $t) => $t->string('suspension_reason')->nullable(),
+    'subscription_ends_at' => fn (Blueprint $t) => $t->timestamp('subscription_ends_at')->nullable(),
+    'owner_user_id'     => fn (Blueprint $t) => $t->unsignedBigInteger('owner_user_id')->nullable(),
+    'onboarding_completed_at' => fn (Blueprint $t) => $t->timestamp('onboarding_completed_at')->nullable(),
+];
+if (Schema::hasTable('hotels')) {
+    foreach ($hotelCols as $col => $definition) {
+        if (! Schema::hasColumn('hotels', $col)) {
+            Schema::table('hotels', function (Blueprint $t) use ($definition) { $definition($t); });
+            echo "   hotels.$col AJOUTÉE\n";
+        }
+    }
+}
+echo "\n";
 
 echo "2) Hôtel par défaut...\n";
 Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\HotelSeeder', '--force' => true]);
