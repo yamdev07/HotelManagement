@@ -17,11 +17,13 @@ class StoreRoomRequest extends FormRequest
     {
         // Numéro de chambre unique PAR hôtel (deux hôtels peuvent avoir une chambre "101").
         $hotelId = app(TenantManager::class)->getHotelId();
-        $uniqueNumber = Rule::unique('rooms', 'number')
-            ->where(fn ($q) => $hotelId ? $q->where('hotel_id', $hotelId) : $q);
+        $scope = fn ($q) => $hotelId ? $q->where('hotel_id', $hotelId) : $q;
+        $uniqueNumber = Rule::unique('rooms', 'number')->where($scope);
+        // Le type référencé doit appartenir à CET hôtel.
+        $typeExists = Rule::exists('types', 'id')->where($scope);
 
         return [
-            'type_id'        => 'required|exists:types,id',
+            'type_id'        => ['required', $typeExists],
             'room_status_id' => 'required|exists:room_statuses,id',
             'number'         => ['required', 'string', 'max:10', $uniqueNumber],
             'name'           => 'nullable|string|max:255',

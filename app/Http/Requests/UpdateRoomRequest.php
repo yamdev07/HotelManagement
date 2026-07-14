@@ -19,12 +19,12 @@ class UpdateRoomRequest extends FormRequest
 
         // Numéro unique PAR hôtel (hors la chambre en cours d'édition).
         $hotelId = app(TenantManager::class)->getHotelId();
-        $uniqueNumber = Rule::unique('rooms', 'number')
-            ->ignore($roomId)
-            ->where(fn ($q) => $hotelId ? $q->where('hotel_id', $hotelId) : $q);
+        $scope = fn ($q) => $hotelId ? $q->where('hotel_id', $hotelId) : $q;
+        $uniqueNumber = Rule::unique('rooms', 'number')->ignore($roomId)->where($scope);
+        $typeExists = Rule::exists('types', 'id')->where($scope);
 
         return [
-            'type_id'        => 'required|exists:types,id',
+            'type_id'        => ['required', $typeExists],
             'room_status_id' => 'required|exists:room_statuses,id',
             'number'         => ['required', 'string', 'max:10', $uniqueNumber],
             'name'           => 'nullable|string|max:255',
