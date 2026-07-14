@@ -42,6 +42,12 @@ use Illuminate\Support\Str;
 
 echo "===== checkinHub — installation =====\n\n";
 
+echo "0) Rafraîchissement des caches (config/routes/vues)...\n";
+foreach (['config:clear', 'route:clear', 'view:clear'] as $cmd) {
+    try { Artisan::call($cmd); } catch (\Throwable $e) {}
+}
+echo "   OK (les changements du .env sont pris en compte)\n\n";
+
 echo "1) Migrations...\n";
 Artisan::call('migrate', ['--force' => true]);
 echo Artisan::output()."\n";
@@ -97,6 +103,16 @@ if (Schema::hasTable('rooms') && Schema::hasColumn('rooms', 'view')) {
         echo "   rooms.view rendue nullable\n";
     } catch (\Throwable $e) {
         echo "   rooms.view: ".$e->getMessage()."\n";
+    }
+}
+
+// -- customers.user_id nullable : une fiche client peut exister sans compte de connexion --
+if (Schema::hasTable('customers') && Schema::hasColumn('customers', 'user_id')) {
+    try {
+        DB::statement('ALTER TABLE `customers` MODIFY `user_id` BIGINT UNSIGNED NULL');
+        echo "   customers.user_id rendue nullable\n";
+    } catch (\Throwable $e) {
+        echo "   customers.user_id: ".$e->getMessage()."\n";
     }
 }
 echo "\n";
