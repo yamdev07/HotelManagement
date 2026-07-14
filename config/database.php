@@ -56,7 +56,9 @@ return [
             'collation' => 'utf8mb4_unicode_ci',
             'prefix' => '',
             'prefix_indexes' => true,
-            'strict' => true,
+            // Strict par défaut (dev/CI). En prod MySQL 8, mettre DB_STRICT=false pour
+            // retrouver le comportement tolérant du dev (MariaDB) sur cette app legacy.
+            'strict' => env('DB_STRICT', true),
             'engine' => null,
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
