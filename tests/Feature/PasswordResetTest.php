@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
@@ -22,7 +22,7 @@ class PasswordResetTest extends TestCase
         $this->post('/forgot-password', ['email' => 'reset@test.test'])
             ->assertSessionHas('status');
 
-        Notification::assertSentTo($user, ResetPassword::class);
+        Notification::assertSentTo($user, ResetPasswordNotification::class);
     }
 
     public function test_user_can_reset_password_with_valid_token(): void
@@ -38,6 +38,22 @@ class PasswordResetTest extends TestCase
         ])->assertRedirect(route('login.index'));
 
         $this->assertTrue(Hash::check('nouveauMotDePasse1', $user->fresh()->password));
+    }
+
+    public function test_reset_email_is_branded_in_french(): void
+    {
+        $user = User::factory()->create(['email' => 'brand@test.test']);
+
+        $mail = (new ResetPasswordNotification('tok123'))->toMail($user);
+        $this->assertStringContainsString('Réinitialisation', $mail->subject);
+        $this->assertStringContainsString(config('app.name'), $mail->subject);
+        $this->assertStringContainsString('tok123', $mail->viewData['resetUrl']);
+
+        // Les vues se rendent sans variable manquante et sont en français
+        $html = view('emails.reset-password', ['resetUrl' => 'http://x/reset', 'email' => 'a@b.c', 'expire' => 60])->render();
+        $this->assertStringContainsString('Réinitialiser mon mot de passe', $html);
+        $text = view('emails.reset-password-text', ['resetUrl' => 'http://x/reset', 'expire' => 60])->render();
+        $this->assertStringContainsString('Réinitialisation du mot de passe', $text);
     }
 
     public function test_unknown_email_does_not_reveal_and_fails_gracefully(): void

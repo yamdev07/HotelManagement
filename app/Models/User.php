@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -14,6 +15,14 @@ class User extends Authenticatable
     use HasFactory, LogsActivity, Notifiable;
 
     protected static $recordEvents = [];
+
+    /**
+     * Envoie l'email de réinitialisation personnalisé (FR, aux couleurs checkinHub).
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
 
     /**
      * Les attributs assignables en masse.
