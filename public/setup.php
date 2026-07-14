@@ -88,6 +88,17 @@ if (Schema::hasTable('hotels')) {
         }
     }
 }
+
+// -- Colonne legacy 'rooms.view' (longText NOT NULL sans défaut) : la rendre nullable --
+// Évite l'erreur "Field 'view' doesn't have a default value" en mode SQL strict.
+if (Schema::hasTable('rooms') && Schema::hasColumn('rooms', 'view')) {
+    try {
+        DB::statement('ALTER TABLE `rooms` MODIFY `view` LONGTEXT NULL');
+        echo "   rooms.view rendue nullable\n";
+    } catch (\Throwable $e) {
+        echo "   rooms.view: ".$e->getMessage()."\n";
+    }
+}
 echo "\n";
 
 echo "2) Hôtel par défaut...\n";
