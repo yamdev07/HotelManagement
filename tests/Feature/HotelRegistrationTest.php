@@ -151,6 +151,53 @@ class HotelRegistrationTest extends TestCase
         Storage::disk('public')->assertExists($hotel->logo);
     }
 
+    public function test_signup_accepts_large_logo_up_to_4mb(): void
+    {
+        Mail::fake();
+        Storage::fake('public');
+
+        // ~3 Mo : refusé avant (limite 2 Mo), accepté maintenant (4 Mo)
+        $this->post('/inscription', [
+            'company_name' => 'Hotel Gros Logo',
+            'admin_name'   => 'Boss',
+            'admin_email'  => 'boss@gros.test',
+            'logo'         => UploadedFile::fake()->image('logo.png')->size(3000),
+        ])->assertSessionDoesntHaveErrors('logo');
+
+        $this->assertNotNull(Hotel::where('name', 'Hotel Gros Logo')->first()?->logo);
+    }
+
+    public function test_signup_accepts_svg_logo(): void
+    {
+        Mail::fake();
+        Storage::fake('public');
+
+        // SVG : refusé avant par la règle 'image' (getimagesize), accepté maintenant
+        $this->post('/inscription', [
+            'company_name' => 'Hotel SVG',
+            'admin_name'   => 'Boss',
+            'admin_email'  => 'boss@svg.test',
+            'logo'         => UploadedFile::fake()->create('logo.svg', 40, 'image/svg+xml'),
+        ])->assertSessionDoesntHaveErrors('logo');
+
+        $this->assertNotNull(Hotel::where('name', 'Hotel SVG')->first());
+    }
+
+    public function test_signup_rejects_non_image_logo(): void
+    {
+        Mail::fake();
+        Storage::fake('public');
+
+        $this->post('/inscription', [
+            'company_name' => 'Hotel Bad Logo',
+            'admin_name'   => 'X',
+            'admin_email'  => 'bad@logo.test',
+            'logo'         => UploadedFile::fake()->create('doc.pdf', 20, 'application/pdf'),
+        ])->assertSessionHasErrors('logo');
+
+        $this->assertDatabaseMissing('hotels', ['name' => 'Hotel Bad Logo']);
+    }
+
     public function test_email_must_be_unique(): void
     {
         Mail::fake();

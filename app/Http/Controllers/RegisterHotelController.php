@@ -43,10 +43,15 @@ class RegisterHotelController extends Controller
             'plan'          => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
             'country'       => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.countries')))],
             'contact_phone' => ['nullable', 'string', 'max:50'],
-            'logo'          => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg,webp', 'max:2048'],
+            // 'file' plutôt que 'image' : 'image' (getimagesize) rejette les SVG.
+            'logo'          => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:4096'],
             'admin_name'    => ['required', 'string', 'max:255', new \App\Rules\NoEmoji],
             'admin_email'   => ['required', 'email', 'max:255', 'unique:users,email'],
-        ], [], [
+        ], [
+            'logo.mimes' => 'Le logo doit être une image JPG, PNG, WEBP ou SVG.',
+            'logo.max'   => 'Le logo est trop lourd (4 Mo maximum). Réduisez sa taille et réessayez.',
+            'logo.file'  => "Le logo n'a pas pu être lu. Réessayez avec une image JPG ou PNG.",
+        ], [
             'company_name' => "nom de l'établissement",
             'admin_name'   => 'nom complet',
         ]);
