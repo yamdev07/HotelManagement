@@ -106,6 +106,14 @@ if (Schema::hasTable('rooms') && Schema::hasColumn('rooms', 'view')) {
     }
 }
 
+// -- users.phone (issue #145) : le profil enregistre un téléphone mais la colonne manquait --
+if (Schema::hasTable('users') && ! Schema::hasColumn('users', 'phone')) {
+    try {
+        Schema::table('users', function (Blueprint $t) { $t->string('phone', 30)->nullable()->after('email'); });
+        echo "   users.phone AJOUTÉE\n";
+    } catch (\Throwable $e) { echo "   users.phone: ".$e->getMessage()."\n"; }
+}
+
 // -- Champs client facultatifs à l'accueil (issue #146) : NOT NULL sans défaut -> crash --
 if (Schema::hasTable('customers')) {
     foreach (['address' => 'VARCHAR(255)', 'job' => 'VARCHAR(255)', 'birthdate' => 'DATE'] as $col => $type) {

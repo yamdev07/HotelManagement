@@ -78,6 +78,7 @@ class RegisterHotelController extends Controller
                 'hotel_id'   => $hotel->id,
                 'name'       => $data['admin_name'],
                 'email'      => $data['admin_email'],
+                'phone'      => $data['contact_phone'] ?? null,
                 'role'       => 'Admin',
                 'password'   => Hash::make($plainPassword),
                 'random_key' => Str::random(60),

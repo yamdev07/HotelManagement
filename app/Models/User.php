@@ -33,6 +33,7 @@ class User extends Authenticatable
         'hotel_id',
         'name',
         'email',
+        'phone',
         'role',
         'avatar',
         'password',
