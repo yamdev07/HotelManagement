@@ -264,12 +264,27 @@
 <section class="py-5">
     <div class="container">
         <div class="row g-4 text-center">
-            @php $stats = [
-                ['target'=>420,'suffix'=>'+','label'=>'Hôtels équipés','icon'=>'fa-hotel'],
-                ['target'=>count(config('plans.countries')),'suffix'=>'','label'=>'Pays couverts','icon'=>'fa-earth-africa'],
-                ['target'=>99.98,'suffix'=>'%','label'=>'Disponibilité','icon'=>'fa-shield-halved','decimals'=>2],
-                ['target'=>50000,'suffix'=>'+','label'=>'Réservations / mois','icon'=>'fa-calendar-check'],
-            ]; @endphp
+            @php
+                // Vrais chiffres de la plateforme (route publique = aucun tenant → comptage global).
+                // Mis en cache 10 min pour ne pas requêter à chaque visite.
+                try {
+                    $kpi = \Illuminate\Support\Facades\Cache::remember('landing_kpis', 600, function () {
+                        return [
+                            'hotels'   => \App\Models\Hotel::count(),
+                            'rooms'    => \App\Models\Room::count(),
+                            'bookings' => \App\Models\Transaction::count(),
+                        ];
+                    });
+                } catch (\Throwable $e) {
+                    $kpi = ['hotels' => 0, 'rooms' => 0, 'bookings' => 0];
+                }
+                $stats = [
+                    ['target'=>$kpi['hotels'],                    'suffix'=>'', 'label'=>'Établissements actifs', 'icon'=>'fa-hotel'],
+                    ['target'=>count(config('plans.countries')),  'suffix'=>'', 'label'=>'Pays disponibles',      'icon'=>'fa-earth-africa'],
+                    ['target'=>$kpi['rooms'],                     'suffix'=>'', 'label'=>'Chambres gérées',       'icon'=>'fa-bed'],
+                    ['target'=>$kpi['bookings'],                  'suffix'=>'', 'label'=>'Réservations traitées', 'icon'=>'fa-calendar-check'],
+                ];
+            @endphp
             @foreach ($stats as $i => $s)
                 <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="{{ $i*100 }}">
                     <div class="glass p-4 h-100">
