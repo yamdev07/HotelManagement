@@ -128,6 +128,7 @@
         ['Pilotage', [
             ['fa-chart-line','Rapports','reports.index',false],
             ['fa-gear','Paramètres','hotel.settings.edit',false],
+            ['fa-book-open','Guide / Aide','guide',false],
         ]],
     ];
     $fmt = fn ($n) => number_format((float) $n, 0, ',', ' ');

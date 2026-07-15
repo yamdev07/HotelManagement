@@ -43,6 +43,8 @@ use Illuminate\Support\Facades\Route;
 // Accueil : nouvelle maquette (dark). L'ancienne version claire reste sur /v1.
 Route::view('/', 'landing-v2')->name('landing');
 Route::view('/v1', 'landing')->name('landing.v1');
+// Guide d'utilisation / documentation (accessible à tous)
+Route::view('/guide', 'guide')->name('guide');
 
 // ==================== VITRINE PUBLIQUE PAR HÔTEL (multi-pages) ====================
 Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(function () {

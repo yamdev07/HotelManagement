@@ -251,6 +251,20 @@
                     </div>
                 @endif
 
+                <!-- AIDE / GUIDE (tous les rôles) -->
+                @if (Route::has('guide'))
+                    <div class="nav-section">
+                        <a href="{{ route('guide') }}" target="_blank" rel="noopener"
+                            class="nav-item" data-tooltip="Guide d'utilisation">
+                            <div class="nav-icon"><i class="fas fa-book-open"></i></div>
+                            <div class="nav-content">
+                                <div class="nav-title">Guide / Aide</div>
+                                <div class="nav-subtitle">Documentation d'utilisation</div>
+                            </div>
+                        </a>
+                    </div>
+                @endif
+
                 <!-- NETTOYAGE -->
                 @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']) && (($currentHotel ?? null)?->hasModule('housekeeping') ?? true))
                     <div class="nav-section">

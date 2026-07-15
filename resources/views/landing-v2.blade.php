@@ -146,7 +146,7 @@
             <ul class="navbar-nav mx-auto gap-lg-3">
                 <li class="nav-item"><a class="nav-link" href="#features">Fonctionnalités</a></li>
                 <li class="nav-item"><a class="nav-link" href="#how">Comment ça marche</a></li>
-                <li class="nav-item"><a class="nav-link" href="#temoignages">Avis</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('guide') }}">Guide</a></li>
                 <li class="nav-item"><a class="nav-link" href="#pricing">Tarifs</a></li>
                 <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
             </ul>
