@@ -106,6 +106,24 @@ if (Schema::hasTable('rooms') && Schema::hasColumn('rooms', 'view')) {
     }
 }
 
+// -- Champs client facultatifs à l'accueil (issue #146) : NOT NULL sans défaut -> crash --
+if (Schema::hasTable('customers')) {
+    foreach (['address' => 'VARCHAR(255)', 'job' => 'VARCHAR(255)', 'birthdate' => 'DATE'] as $col => $type) {
+        if (Schema::hasColumn('customers', $col)) {
+            try {
+                DB::statement("ALTER TABLE `customers` MODIFY `{$col}` {$type} NULL");
+                echo "   customers.$col rendue nullable\n";
+            } catch (\Throwable $e) { /* déjà nullable */ }
+        }
+    }
+    if (Schema::hasColumn('customers', 'gender')) {
+        try {
+            DB::statement("ALTER TABLE `customers` MODIFY `gender` ENUM('Male','Female','Other') NOT NULL DEFAULT 'Other'");
+            echo "   customers.gender accepte 'Other'\n";
+        } catch (\Throwable $e) { /* déjà à jour */ }
+    }
+}
+
 // -- customers.user_id nullable : une fiche client peut exister sans compte de connexion --
 if (Schema::hasTable('customers') && Schema::hasColumn('customers', 'user_id')) {
     try {
