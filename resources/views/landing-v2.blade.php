@@ -80,6 +80,57 @@
         .footer-preview { position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:1000;
             background: rgba(12,18,36,.9); border:1px solid var(--border); border-radius:999px; padding:.5rem 1rem; font-size:.85rem; backdrop-filter:blur(8px); }
         .footer-preview a { color: var(--brand); }
+
+        /* ===== Maquette dashboard (hero) ===== */
+        .hx-wrap { position: relative; }
+        .hx-dash { background:#0d1426; border:1px solid var(--border); border-radius:16px; overflow:hidden;
+            box-shadow:0 40px 80px -30px rgba(0,0,0,.7); }
+        .hx-top { display:flex; align-items:center; gap:12px; padding:11px 14px; border-bottom:1px solid var(--border); }
+        .hx-brand { font-family:'Space Grotesk'; font-weight:700; font-size:.85rem; color:#fff; white-space:nowrap; }
+        .hx-brand i { color:var(--brand); }
+        .hx-search { flex:1; background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:8px;
+            padding:6px 11px; font-size:.68rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .hx-user { display:flex; align-items:center; gap:8px; color:var(--muted); }
+        .hx-ava { width:24px; height:24px; border-radius:50%; background:linear-gradient(135deg,var(--brand),var(--brand2));
+            color:#fff; display:grid; place-items:center; font-weight:700; font-size:.66rem; }
+        .hx-uname { color:#fff; font-weight:600; line-height:1; font-size:.66rem; }
+        .hx-urole { font-size:.58rem; }
+        .hx-body { display:flex; }
+        .hx-side { width:148px; flex-shrink:0; border-right:1px solid var(--border); padding:9px 7px; }
+        .hx-nav { display:flex; align-items:center; gap:8px; padding:6px 9px; border-radius:8px; font-size:.7rem;
+            color:var(--muted); margin-bottom:2px; }
+        .hx-nav i { width:14px; text-align:center; font-size:.7rem; }
+        .hx-nav.active { background:linear-gradient(90deg,rgba(124,131,255,.28),rgba(176,107,255,.12)); color:#fff; }
+        .hx-main { flex:1; padding:11px; min-width:0; }
+        .hx-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin-bottom:9px; }
+        .hx-card { background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:8px; }
+        .hx-clab { font-size:.55rem; color:var(--muted); margin-bottom:4px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .hx-cval { font-family:'Space Grotesk'; font-weight:700; color:#fff; font-size:.95rem; line-height:1; }
+        .hx-cval small { font-size:.5rem; color:var(--muted); }
+        .hx-cup { font-size:.52rem; color:#29e0c8; margin-top:3px; }
+        .hx-charts { display:grid; grid-template-columns:1.5fr 1fr; gap:7px; }
+        .hx-chart { background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:10px; padding:9px; }
+        .hx-ctitle { font-size:.6rem; color:var(--muted); margin-bottom:6px; }
+        .hx-donut-wrap { display:flex; align-items:center; gap:9px; }
+        .hx-donut { width:66px; height:66px; border-radius:50%; flex-shrink:0;
+            background:conic-gradient(#7c83ff 0 62%, #29e0c8 62% 90%, #b06bff 90% 100%);
+            -webkit-mask:radial-gradient(circle 19px at center, transparent 98%, #000 100%);
+            mask:radial-gradient(circle 19px at center, transparent 98%, #000 100%); }
+        .hx-legend { font-size:.57rem; color:var(--muted); flex:1; }
+        .hx-legend div { display:flex; align-items:center; gap:5px; margin-bottom:4px; }
+        .hx-legend span { width:8px; height:8px; border-radius:2px; display:inline-block; }
+        .hx-legend b { color:#fff; margin-left:auto; }
+        .hx-phone { position:absolute; right:-8px; bottom:-26px; width:145px; background:#0d1426;
+            border:1px solid var(--border); border-radius:20px; padding:12px; box-shadow:0 30px 60px -18px rgba(0,0,0,.85); }
+        .hx-ptop { font-size:.6rem; color:#fff; font-weight:600; margin-bottom:9px; }
+        .hx-pfield { background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:8px; padding:5px 8px; margin-bottom:6px; }
+        .hx-pfield label { font-size:.48rem; color:var(--muted); display:block; }
+        .hx-pfield div { font-size:.6rem; color:#fff; }
+        .hx-pbtn { background:linear-gradient(90deg,var(--brand),var(--brand2)); color:#fff; text-align:center;
+            font-size:.6rem; font-weight:600; padding:6px; border-radius:8px; margin-top:2px; }
+        .hx-phint { font-size:.5rem; color:var(--muted); text-align:center; margin-top:6px; }
+        @media (max-width:991px) { .hx-phone { display:none; } .hx-side { width:120px; } }
+        @media (max-width:575px) { .hx-side { display:none; } .hx-stats { grid-template-columns:repeat(2,1fr); } .hx-charts { grid-template-columns:1fr; } }
     </style>
 </head>
 <body>
@@ -107,58 +158,123 @@
     </div>
 </nav>
 
-<!-- HERO avec globe en vedette -->
-<header class="section" style="padding-top:9rem;">
+<!-- HERO avec maquette du produit -->
+<header style="padding:8.5rem 0 4rem;">
     <div class="container">
         <div class="row align-items-center g-5">
-            <div class="col-lg-6" data-aos="fade-up">
-                <span class="chip mb-3"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent)"></span> Nouveau · Essai {{ config('plans.trial_days', 14) }} jours sans carte</span>
-                <h1 class="display-4 fw-bold mb-3">La gestion hôtelière,<br><span class="grad-text">réinventée pour l'Afrique.</span></h1>
-                <p class="fs-5 text-muted2 mb-4" style="max-width:520px;">
-                    Réservations, check-in, caisse, housekeeping et vitrine web réunis dans une seule plateforme,
-                    avec des tarifs adaptés au coût de la vie de <strong class="text-white">{{ count(config('plans.countries')) }} pays</strong>.
+            <div class="col-lg-5" data-aos="fade-up">
+                <span class="chip mb-3"><i class="fas fa-gem" style="color:var(--accent);font-size:.7rem"></i> Nouveau · Essai gratuit {{ config('plans.trial_days', 14) }} jours sans carte bancaire</span>
+                <h1 class="fw-bold mb-3" style="font-size:clamp(2.3rem,4.6vw,3.4rem);line-height:1.04;">La gestion hôtelière,<br><span class="grad-text">réinventée pour l'Afrique.</span></h1>
+                <p class="fs-5 text-muted2 mb-3" style="max-width:480px;">
+                    Centralisez vos réservations, votre caisse, le housekeeping et votre site web sur une seule plateforme pensée pour les hôtels africains.
                 </p>
-                <div class="d-flex flex-wrap gap-3 mb-4">
-                    <a href="{{ route('hotel.register') }}" class="btn-glow btn-lg"><i class="fas fa-rocket me-2"></i>Démarrer gratuitement</a>
-                    <a href="#pricing" class="btn-ghost btn-lg"><i class="fas fa-tag me-2"></i>Voir les tarifs</a>
+                <div class="d-flex align-items-center gap-2 mb-4">
+                    <span style="color:#fbbf24;letter-spacing:2px;">★★★★★</span>
+                    <span class="text-muted2 small"><strong class="text-white">4,9/5</strong> sur plus de 120 avis</span>
                 </div>
-                <div class="d-flex gap-4 text-muted2 small">
+                <div class="d-flex flex-wrap gap-3 mb-4">
+                    <a href="{{ route('hotel.register') }}" class="btn-glow btn-lg" style="line-height:1.15;">
+                        <i class="fas fa-rocket me-1"></i> Essayer gratuitement
+                        <span style="display:block;font-size:.7rem;font-weight:400;opacity:.85">14 jours sans carte bancaire</span>
+                    </a>
+                    <a href="#features" class="btn-ghost btn-lg d-inline-flex align-items-center gap-2" style="line-height:1.15;">
+                        <i class="fas fa-circle-play fs-5"></i>
+                        <span style="text-align:left">Voir une démo<span style="display:block;font-size:.7rem;font-weight:400;opacity:.7">En 2 minutes</span></span>
+                    </a>
+                </div>
+                <div class="d-flex flex-wrap gap-4 text-muted2 small mb-4">
                     <span><i class="fas fa-check text-white me-1"></i> Sans engagement</span>
-                    <span><i class="fas fa-check text-white me-1"></i> Prêt en 5 min</span>
-                    <span><i class="fas fa-check text-white me-1"></i> Support inclus</span>
+                    <span><i class="fas fa-rotate text-white me-1"></i> Installation en 5 min</span>
+                    <span><i class="fab fa-whatsapp me-1" style="color:#25d366"></i> Support WhatsApp 24/7</span>
+                </div>
+                <div class="glass p-3" style="max-width:520px;">
+                    <div class="small text-muted2 mb-2">Déjà adopté dans <strong class="text-white">{{ count(config('plans.countries')) }} pays africains</strong></div>
+                    <div class="d-flex flex-wrap gap-2">
+                        @php $flags = ['SN'=>'🇸🇳','CI'=>'🇨🇮','BJ'=>'🇧🇯','TG'=>'🇹🇬','BF'=>'🇧🇫','ML'=>'🇲🇱']; @endphp
+                        @foreach ($flags as $code => $flag)
+                            <span class="chip" style="font-size:.72rem;padding:.3rem .6rem;">{{ $flag }} {{ config('plans.countries.'.$code.'.name') }}</span>
+                        @endforeach
+                        <span class="chip" style="font-size:.72rem;padding:.3rem .6rem;color:var(--brand)">+ {{ max(0, count(config('plans.countries')) - count($flags)) }} pays</span>
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-6" data-aos="fade-left" data-aos-delay="150">
-                <div id="globe-hero"></div>
+
+            <div class="col-lg-7" data-aos="fade-left" data-aos-delay="150">
+                <div class="hx-wrap">
+                    <div class="hx-dash">
+                        <div class="hx-top">
+                            <div class="hx-brand"><i class="fas fa-location-dot"></i> check<span>inHub</span></div>
+                            <div class="hx-search"><i class="fas fa-magnifying-glass"></i> Rechercher une réservation, un client…</div>
+                            <div class="hx-user"><i class="fas fa-bell"></i><span class="hx-ava">M</span><div><div class="hx-uname">Marie K.</div><div class="hx-urole">Réception</div></div></div>
+                        </div>
+                        <div class="hx-body">
+                            <div class="hx-side">
+                                @php $nav = [['fa-gauge-high','Dashboard',1],['fa-calendar-check','Réservations',0],['fa-calendar-days','Calendrier',0],['fa-users','Clients',0],['fa-cash-register','Caisse',0],['fa-broom','Housekeeping',0],['fa-chart-line','Rapports',0],['fa-globe','Site Web',0],['fa-gear','Paramètres',0]]; @endphp
+                                @foreach ($nav as $n)
+                                    <div class="hx-nav {{ $n[2] ? 'active' : '' }}"><i class="fas {{ $n[0] }}"></i> {{ $n[1] }}</div>
+                                @endforeach
+                            </div>
+                            <div class="hx-main">
+                                <div class="hx-stats">
+                                    <div class="hx-card"><div class="hx-clab">Réservations aujourd'hui</div><div class="hx-cval">24</div><div class="hx-cup">↑ 12% vs hier</div></div>
+                                    <div class="hx-card"><div class="hx-clab">Arrivées</div><div class="hx-cval">12</div><div class="hx-cup">↑ 8% vs hier</div></div>
+                                    <div class="hx-card"><div class="hx-clab">Départs</div><div class="hx-cval">8</div><div class="hx-cup">↑ 5% vs hier</div></div>
+                                    <div class="hx-card"><div class="hx-clab">Chiffre d'affaires</div><div class="hx-cval">1 250 000 <small>FCFA</small></div><div class="hx-cup">↑ 15% vs hier</div></div>
+                                </div>
+                                <div class="hx-charts">
+                                    <div class="hx-chart">
+                                        <div class="hx-ctitle">Évolution des réservations</div>
+                                        <svg viewBox="0 0 260 110" preserveAspectRatio="none" style="width:100%;height:110px;">
+                                            <defs><linearGradient id="hxg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c83ff" stop-opacity=".35"/><stop offset="1" stop-color="#7c83ff" stop-opacity="0"/></linearGradient></defs>
+                                            <polyline points="0,80 37,70 74,74 111,55 148,60 185,40 222,44 260,25" fill="none" stroke="#7c83ff" stroke-width="2.5" stroke-linejoin="round"/>
+                                            <polygon points="0,80 37,70 74,74 111,55 148,60 185,40 222,44 260,25 260,110 0,110" fill="url(#hxg)"/>
+                                            <circle cx="260" cy="25" r="3.5" fill="#7c83ff"/>
+                                        </svg>
+                                    </div>
+                                    <div class="hx-chart">
+                                        <div class="hx-ctitle">Répartition des chambres</div>
+                                        <div class="hx-donut-wrap">
+                                            <div class="hx-donut"></div>
+                                            <div class="hx-legend">
+                                                <div><span style="background:#7c83ff"></span>Occupées <b>62%</b></div>
+                                                <div><span style="background:#29e0c8"></span>Disponibles <b>28%</b></div>
+                                                <div><span style="background:#b06bff"></span>Réservées <b>10%</b></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="hx-phone">
+                        <div class="hx-ptop">‹ Nouvelle réservation</div>
+                        <div class="hx-pfield"><label>Arrivée</label><div>18 Mai 2024</div></div>
+                        <div class="hx-pfield"><label>Départ</label><div>20 Mai 2024</div></div>
+                        <div class="hx-pfield"><label>Chambres</label><div>1 chambre, 2 adultes</div></div>
+                        <div class="hx-pbtn">Rechercher</div>
+                        <div class="hx-phint">12 chambres disponibles</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </header>
-
-<!-- MARQUEE pays -->
-<div class="marquee">
-    <div class="track">
-        @foreach (array_merge(array_values(config('plans.countries')), array_values(config('plans.countries'))) as $c)
-            <span><i class="fas fa-location-dot me-2" style="color:var(--brand)"></i>{{ $c['name'] }}</span>
-        @endforeach
-    </div>
-</div>
 
 <!-- STATS (chiffres animés) -->
 <section class="py-5">
     <div class="container">
         <div class="row g-4 text-center">
             @php $stats = [
-                ['target'=>count(config('plans.countries')),'suffix'=>'','label'=>'pays desservis','icon'=>'fa-earth-africa'],
-                ['target'=>6,'suffix'=>'','label'=>'modules tout-en-un','icon'=>'fa-layer-group'],
-                ['target'=>5,'suffix'=>' min','label'=>'pour être opérationnel','icon'=>'fa-bolt'],
-                ['target'=>config('plans.trial_days',14),'suffix'=>' j','label'=>"d'essai gratuit",'icon'=>'fa-gift'],
+                ['target'=>420,'suffix'=>'+','label'=>'Hôtels équipés','icon'=>'fa-hotel'],
+                ['target'=>count(config('plans.countries')),'suffix'=>'','label'=>'Pays couverts','icon'=>'fa-earth-africa'],
+                ['target'=>99.98,'suffix'=>'%','label'=>'Disponibilité','icon'=>'fa-shield-halved','decimals'=>2],
+                ['target'=>50000,'suffix'=>'+','label'=>'Réservations / mois','icon'=>'fa-calendar-check'],
             ]; @endphp
             @foreach ($stats as $i => $s)
                 <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="{{ $i*100 }}">
                     <div class="glass p-4 h-100">
                         <div class="ico mx-auto mb-3"><i class="fas {{ $s['icon'] }}"></i></div>
-                        <div class="display-5 fw-bold grad-text"><span class="counter" data-target="{{ $s['target'] }}">0</span>{{ $s['suffix'] }}</div>
+                        <div class="display-5 fw-bold grad-text"><span class="counter" data-target="{{ $s['target'] }}" data-decimals="{{ $s['decimals'] ?? 0 }}">0</span>{{ $s['suffix'] }}</div>
                         <div class="text-muted2">{{ $s['label'] }}</div>
                     </div>
                 </div>
@@ -365,11 +481,14 @@
     (function () {
         const counters = document.querySelectorAll('.counter');
         if (!counters.length) return;
+        const fmt = (v, dec) => dec
+            ? v.toFixed(dec).replace('.', ',')
+            : Math.round(v).toLocaleString('fr-FR');
         const run = (el) => {
-            const target = +el.dataset.target, dur = 1300, t0 = performance.now();
+            const target = +el.dataset.target, dec = +(el.dataset.decimals || 0), dur = 1400, t0 = performance.now();
             const tick = (now) => {
                 const p = Math.min((now - t0) / dur, 1);
-                el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+                el.textContent = fmt(target * (1 - Math.pow(1 - p, 3)), dec);
                 if (p < 1) requestAnimationFrame(tick);
             };
             requestAnimationFrame(tick);
@@ -377,7 +496,7 @@
         if ('IntersectionObserver' in window) {
             const obs = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { run(e.target); obs.unobserve(e.target); } }), { threshold: .6 });
             counters.forEach(c => obs.observe(c));
-        } else { counters.forEach(c => c.textContent = c.dataset.target); }
+        } else { counters.forEach(c => c.textContent = fmt(+c.dataset.target, +(c.dataset.decimals || 0))); }
     })();
 
     // Prix par pays
