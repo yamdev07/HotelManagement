@@ -33,6 +33,10 @@ jobs:
           extensions: mbstring, pdo, pdo_mysql
           coverage: none
 
+      # Évite les erreurs HTTP 429 (rate limit) en authentifiant Composer auprès de GitHub
+      - name: Configure Composer GitHub token
+        run: composer config --global github-oauth.github.com "${{ secrets.GITHUB_TOKEN }}"
+
       - name: Install PHP dependencies
         run: composer install --no-interaction --no-progress --prefer-dist
 

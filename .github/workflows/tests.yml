@@ -32,6 +32,10 @@ jobs:
           extensions: mbstring, dom, fileinfo, mysql, pdo_mysql
           coverage: xdebug
 
+      # Évite les erreurs HTTP 429 (rate limit) en authentifiant Composer auprès de GitHub
+      - name: Configure Composer GitHub token
+        run: composer config --global github-oauth.github.com "${{ secrets.GITHUB_TOKEN }}"
+
       - name: Get composer cache directory
         id: composer-cache
         run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
