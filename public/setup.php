@@ -106,6 +106,19 @@ if (Schema::hasTable('rooms') && Schema::hasColumn('rooms', 'view')) {
     }
 }
 
+// -- activity_log.hotel_id (issue #144) : le journal d'activité fuyait entre hôtels --
+if (Schema::hasTable('activity_log') && ! Schema::hasColumn('activity_log', 'hotel_id')) {
+    try {
+        Schema::table('activity_log', function (Blueprint $t) { $t->unsignedBigInteger('hotel_id')->nullable()->after('id')->index(); });
+        DB::table('activity_log')
+            ->join('users', 'activity_log.causer_id', '=', 'users.id')
+            ->where('activity_log.causer_type', 'App\\Models\\User')
+            ->whereNull('activity_log.hotel_id')
+            ->update(['activity_log.hotel_id' => DB::raw('users.hotel_id')]);
+        echo "   activity_log.hotel_id AJOUTÉE + historique rattaché\n";
+    } catch (\Throwable $e) { echo "   activity_log.hotel_id: ".$e->getMessage()."\n"; }
+}
+
 // -- users.phone (issue #145) : le profil enregistre un téléphone mais la colonne manquait --
 if (Schema::hasTable('users') && ! Schema::hasColumn('users', 'phone')) {
     try {
