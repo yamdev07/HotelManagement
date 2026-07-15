@@ -108,7 +108,8 @@ class RegisterHotelController extends Controller
 
         // Direction l'onboarding : choix des couleurs, du nom du site et du logo
         return redirect()->route('onboarding.show')
-            ->with('success', 'Bienvenue ! Votre essai gratuit de '.config('plans.trial_days', 14).' jours a démarré. Vos identifiants vous ont été envoyés par email.');
+            ->with('success', 'Bienvenue ! Votre essai gratuit de '.config('plans.trial_days', 14).' jours a démarré.')
+            ->with('credentials_email', $admin->email);
     }
 
     private function uniqueSlug(string $name): string

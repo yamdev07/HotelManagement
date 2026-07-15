@@ -53,6 +53,24 @@ class HotelRegistrationTest extends TestCase
         Mail::assertSent(HotelCredentialsMail::class, fn ($mail) => $mail->hasTo('patron@nouvel.test'));
     }
 
+    public function test_signup_shows_spam_notice_with_email(): void
+    {
+        Mail::fake();
+
+        $this->post('/inscription', [
+            'company_name' => 'Hotel Spam',
+            'plan'         => 'starter',
+            'admin_name'   => 'X',
+            'admin_email'  => 'spam@notice.test',
+        ])->assertSessionHas('credentials_email', 'spam@notice.test');
+
+        // Le bandeau "vérifiez vos spams" s'affiche sur l'onboarding
+        $this->get(route('onboarding.show'))
+            ->assertOk()
+            ->assertSee('spam@notice.test')
+            ->assertSee('courrier indésirable');
+    }
+
     public function test_country_sets_currency_and_adjusts_price(): void
     {
         Mail::fake();
