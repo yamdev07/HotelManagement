@@ -71,6 +71,32 @@ class HotelRegistrationTest extends TestCase
             ->assertSee('courrier indésirable');
     }
 
+    public function test_signup_rejects_emoji_in_company_name(): void
+    {
+        Mail::fake();
+
+        $this->post('/inscription', [
+            'company_name' => 'Hotel 🏨 Cactus 😀',
+            'admin_name'   => 'X',
+            'admin_email'  => 'emoji@test.test',
+        ])->assertSessionHasErrors('company_name');
+
+        $this->assertDatabaseMissing('hotels', ['name' => 'Hotel 🏨 Cactus 😀']);
+    }
+
+    public function test_signup_accepts_accented_and_punctuated_name(): void
+    {
+        Mail::fake();
+
+        $this->post('/inscription', [
+            'company_name' => "Résidence l'Océan & Fils (2024)",
+            'admin_name'   => 'André Éboué',
+            'admin_email'  => 'accent@test.test',
+        ]);
+
+        $this->assertDatabaseHas('hotels', ['name' => "Résidence l'Océan & Fils (2024)"]);
+    }
+
     public function test_country_sets_currency_and_adjusts_price(): void
     {
         Mail::fake();
