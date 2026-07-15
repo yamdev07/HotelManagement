@@ -41,7 +41,9 @@ class StoreCustomerRequest extends FormRequest
             'job' => 'required',
             'birthdate' => 'required|date',
             'gender' => 'required|in:Male,Female',
-            'email' => 'required|unique:users,email',
+            // Email non unique globalement : le même client peut exister dans
+            // plusieurs hôtels (la fiche est propre à chaque établissement).
+            'email' => 'required|email',
             'avatar' => 'mimes:png,jpg',
         ];
     }

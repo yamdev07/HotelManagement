@@ -149,7 +149,7 @@
                             </a>
                         @endif
 
-                        @if (Route::has('restaurant.index'))
+                        @if (Route::has('restaurant.index') && (($currentHotel ?? null)?->hasModule('restaurant') ?? true))
                             @php $pendingOrdersCount = \App\Models\RestaurantOrder::where('status', 'pending')->count(); @endphp
                             <a href="{{ route('restaurant.index') }}"
                                 class="nav-item {{ $activeClass('restaurant.', false) }}" data-tooltip="Restaurant">
@@ -237,11 +237,22 @@
                                 </div>
                             </a>
                         @endif
+
+                        @if (Route::has('billing.show') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                            <a href="{{ route('billing.show') }}"
+                                class="nav-item {{ $activeClass('billing.') }}" data-tooltip="Mon abonnement">
+                                <div class="nav-icon"><i class="fas fa-credit-card"></i></div>
+                                <div class="nav-content">
+                                    <div class="nav-title">Mon abonnement</div>
+                                    <div class="nav-subtitle">Paiement & renouvellement</div>
+                                </div>
+                            </a>
+                        @endif
                     </div>
                 @endif
 
                 <!-- NETTOYAGE -->
-                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']))
+                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']) && (($currentHotel ?? null)?->hasModule('housekeeping') ?? true))
                     <div class="nav-section">
                         <div class="nav-section-title">Nettoyage</div>
 
@@ -322,7 +333,7 @@
                             </a>
                         @endif
 
-                        @if (Route::has('reports.index'))
+                        @if (Route::has('reports.index') && (($currentHotel ?? null)?->hasModule('reports') ?? true))
                             <a href="{{ route('reports.index') }}"
                                 class="nav-item {{ $activeClass('reports.index') }}" data-tooltip="Rapports">
                                 <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
@@ -434,21 +445,7 @@
         <div class="sidebar-footer">
             <div class="user-profile">
                 <div class="user-avatar">
-                    @php
-                        $avatarPath = null;
-                        if (auth()->user()->avatar) {
-                            if (str_starts_with(auth()->user()->avatar, '/img/user/')) {
-                                $avatarPath = asset(auth()->user()->avatar);
-                            } elseif (
-                                str_starts_with(auth()->user()->avatar, 'storage/') ||
-                                str_contains(auth()->user()->avatar, 'storage/')
-                            ) {
-                                $avatarPath = asset(auth()->user()->avatar);
-                            } else {
-                                $avatarPath = asset('storage/' . auth()->user()->avatar);
-                            }
-                        }
-                    @endphp
+                    @php $avatarPath = auth()->user()->avatar ? auth()->user()->getAvatar() : null; @endphp
                     @if ($avatarPath)
                         <img src="{{ $avatarPath }}" alt="{{ auth()->user()->name }}"
                             onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=1e6b2e&color=fff&size=40';">

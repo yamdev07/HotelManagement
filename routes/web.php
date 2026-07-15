@@ -40,7 +40,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 // ==================== LANDING PAGE SAAS (page d'accueil plateforme) ====================
-Route::view('/', 'landing')->name('landing');
+// Accueil : nouvelle maquette (dark). L'ancienne version claire reste sur /v1.
+Route::view('/', 'landing-v2')->name('landing');
+Route::view('/v1', 'landing')->name('landing.v1');
 
 // ==================== VITRINE PUBLIQUE PAR HÔTEL (multi-pages) ====================
 Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(function () {
@@ -107,6 +109,14 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
 Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::get('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'edit'])->name('hotel.settings.edit');
     Route::put('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'update'])->name('hotel.settings.update');
+});
+
+// ==================== ABONNEMENT / PAIEMENT EN LIGNE (FedaPay) ====================
+// Accessible même si l'abonnement a expiré (régularisation) — cf. EnsureHotelActive.
+Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
+    Route::get('/abonnement', [\App\Http\Controllers\BillingController::class, 'show'])->name('billing.show');
+    Route::post('/abonnement/payer', [\App\Http\Controllers\BillingController::class, 'checkout'])->name('billing.checkout');
+    Route::get('/abonnement/retour', [\App\Http\Controllers\BillingController::class, 'callback'])->name('billing.callback');
 });
 
 // ==================== DASHBOARD SUPER-ADMIN PLATEFORME ====================
@@ -522,8 +532,9 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
         })->name('profile.show');
     });
 
-    // ==================== RAPPORTS ====================
-    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    // ==================== RAPPORTS (module premium : Pro & Business) ====================
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index')
+        ->middleware('plan.module:reports');
 
     // ==================== RÉSERVATIONS CLIENTS ====================
     Route::get('/my-reservations', [TransactionController::class, 'myReservations'])->name('transaction.myReservations')
@@ -532,8 +543,8 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
     Route::get('/my-transaction/{transaction}', [TransactionController::class, 'show'])->name('transaction.show.customer')
         ->middleware('checkrole:Customer');
 
-    // ==================== RESTAURANT (ACCESSIBLE À TOUS) ====================
-    Route::prefix('restaurant')->name('restaurant.')->group(function () {
+    // ==================== RESTAURANT (module premium : Pro & Business) ====================
+    Route::prefix('restaurant')->name('restaurant.')->middleware('plan.module:restaurant')->group(function () {
         // Routes sans paramètres d'abord
         Route::get('/', [RestaurantController::class, 'index'])->name('index');
         Route::get('/orders', [RestaurantController::class, 'orders'])->name('orders');
@@ -646,7 +657,7 @@ Route::get('/checkin-dashboard', [DashboardController::class, 'checkinDashboard'
     ->middleware(['auth', 'checkrole:Super,Admin,Receptionist']);
 
 // ==================== HOUSEKEEPING POUR RÉCEPTION ====================
-Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'checkrole:Super,Admin,Housekeeping,Receptionist'])->group(function () {
+Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'checkrole:Super,Admin,Housekeeping,Receptionist', 'plan.module:housekeeping'])->group(function () {
     // Dashboard et listes
     Route::get('/', [HousekeepingController::class, 'index'])->name('index');
     Route::get('/dashboard', [HousekeepingController::class, 'index'])->name('dashboard');
@@ -1010,6 +1021,21 @@ Route::middleware(['auth', 'checkrole:Super,Admin,Receptionist'])->group(functio
     Route::get('/api/customers', [CustomerController::class, 'apiSearch'])->name('api.customers.search');
 
 });
+
+// ==================== FALLBACK FICHIERS STORAGE (logos, images) ====================
+// Sur hébergement mutualisé (FTP), le lien symbolique public/storage casse souvent :
+// les images tombent alors sur le Route::fallback (redirection login) au lieu d'être servies.
+// Cette route sert directement le fichier depuis le disque "public" si le symlink est absent.
+// Quand le symlink existe, le serveur web sert l'image et cette route n'est jamais atteinte.
+Route::get('/storage/{path}', function (string $path) {
+    $disk = \Illuminate\Support\Facades\Storage::disk('public');
+
+    abort_if(str_contains($path, '..') || ! $disk->exists($path), 404);
+
+    return response()->file($disk->path($path), [
+        'Cache-Control' => 'public, max-age=604800',
+    ]);
+})->where('path', '.*')->name('storage.file');
 
 // ==================== ROUTE FALLBACK ====================
 Route::fallback(function () {

@@ -20,6 +20,9 @@ class HotelSeeder extends Seeder
                 'currency'    => 'CFA',
                 'timezone'    => config('app.timezone', 'Africa/Lagos'),
                 'is_active'   => true,
+                // Hôtel démo hébergeant les données existantes : offre complète (tous les modules).
+                'plan'        => 'business',
+                'room_limit'  => null,
             ]
         );
     }

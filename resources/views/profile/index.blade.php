@@ -482,39 +482,59 @@
                     </h5>
                 </div>
                 <div class="profile-card-body">
+                    <style>
+                        .pw-wrap { position: relative; }
+                        .pw-wrap .form-control { padding-right: 42px; }
+                        .pw-eye { position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+                            background: none; border: none; color: #94a3b8; cursor: pointer; padding: 6px; line-height: 1; }
+                        .pw-eye:hover { color: #4f46e5; }
+                        .pw-checklist { list-style: none; padding: 0; margin: 10px 0 0; font-size: .72rem; }
+                        .pw-checklist li { color: #94a3b8; margin-bottom: 4px; transition: color .2s; display: flex; align-items: center; }
+                        .pw-checklist li i { font-size: .55rem; width: 14px; margin-right: 6px; text-align: center; }
+                        .pw-checklist li.ok { color: #16a34a; }
+                        .pw-checklist .pw-opt { color: #cbd5e1; margin-left: 4px; }
+                        .pw-checklist li.ok .pw-opt { color: #86efac; }
+                    </style>
                     <form action="{{ route('profile.update.password') }}" method="POST" id="passwordForm">
                         @csrf
-                        
+
                         <div class="form-group">
                             <label class="form-label">Mot de passe actuel</label>
-                            <input type="password" name="current_password" class="form-control" required>
+                            <div class="pw-wrap">
+                                <input type="password" name="current_password" id="currentPassword" class="form-control" required>
+                                <button type="button" class="pw-eye" data-target="currentPassword" tabindex="-1" aria-label="Afficher le mot de passe"><i class="fas fa-eye"></i></button>
+                            </div>
                         </div>
-                        
+
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="form-label">Nouveau mot de passe</label>
-                                    <input type="password" name="password" id="password" class="form-control" required>
-                                    <div class="password-strength">
-                                        <div class="strength-bar" id="strengthBar"></div>
+                                    <div class="pw-wrap">
+                                        <input type="password" name="password" id="password" class="form-control" required>
+                                        <button type="button" class="pw-eye" data-target="password" tabindex="-1" aria-label="Afficher le mot de passe"><i class="fas fa-eye"></i></button>
                                     </div>
+                                    <ul class="pw-checklist" id="pwChecklist">
+                                        <li data-rule="len"><i class="fas fa-circle"></i> Au moins 6 caractères</li>
+                                        <li data-rule="lower"><i class="fas fa-circle"></i> Une lettre minuscule</li>
+                                        <li data-rule="upper"><i class="fas fa-circle"></i> Une lettre majuscule <span class="pw-opt">(conseillé)</span></li>
+                                        <li data-rule="num"><i class="fas fa-circle"></i> Un chiffre <span class="pw-opt">(conseillé)</span></li>
+                                    </ul>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="form-label">Confirmer le mot de passe</label>
-                                    <input type="password" name="password_confirmation" id="passwordConfirm" class="form-control" required>
-                                    <div style="font-size:.7rem; margin-top:4px;" id="passwordMatch"></div>
+                                    <div class="pw-wrap">
+                                        <input type="password" name="password_confirmation" id="passwordConfirm" class="form-control" required>
+                                        <button type="button" class="pw-eye" data-target="passwordConfirm" tabindex="-1" aria-label="Afficher le mot de passe"><i class="fas fa-eye"></i></button>
+                                    </div>
+                                    <div style="font-size:.72rem; margin-top:6px;" id="passwordMatch"></div>
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="alert-db alert-db-success mt-3" style="background:var(--g50); color:var(--g700); padding:10px;">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <small>Le mot de passe doit contenir au moins 6 caractères.</small>
-                        </div>
-                        
+
                         <button type="submit" class="btn-db btn-db-warning mt-3">
                             <i class="fas fa-key me-2"></i> Modifier le mot de passe
                         </button>
@@ -540,26 +560,47 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     });
 
-    // Force du mot de passe
+    // Boutons "œil" : afficher / masquer le mot de passe
+    document.querySelectorAll('.pw-eye').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const input = document.getElementById(btn.dataset.target);
+            const icon = btn.querySelector('i');
+            if (!input) return;
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye');
+            }
+        });
+    });
+
+    // Validation en temps réel des critères du mot de passe
     const password = document.getElementById('password');
-    const strengthBar = document.getElementById('strengthBar');
     const passwordConfirm = document.getElementById('passwordConfirm');
     const matchMessage = document.getElementById('passwordMatch');
+
+    const rules = {
+        len:   function(v) { return v.length >= 6; },
+        lower: function(v) { return /[a-z]/.test(v); },
+        upper: function(v) { return /[A-Z]/.test(v); },
+        num:   function(v) { return /[0-9]/.test(v); },
+    };
 
     if (password) {
         password.addEventListener('input', function() {
             const value = this.value;
-            let strength = 0;
-
-            if (value.length >= 6) strength += 1;
-            if (/[a-z]/.test(value)) strength += 1;
-            if (/[A-Z]/.test(value)) strength += 1;
-            if (/[0-9]/.test(value)) strength += 1;
-
-            strengthBar.className = 'strength-bar';
-            if (strength <= 2) strengthBar.classList.add('strength-weak');
-            else if (strength <= 3) strengthBar.classList.add('strength-medium');
-            else strengthBar.classList.add('strength-strong');
+            document.querySelectorAll('#pwChecklist li').forEach(function(li) {
+                const ok = rules[li.dataset.rule](value);
+                li.classList.toggle('ok', ok);
+                const icon = li.querySelector('i');
+                icon.className = ok ? 'fas fa-check-circle' : 'fas fa-circle';
+            });
+            // Rafraîchit le message de correspondance si la confirmation est remplie
+            if (passwordConfirm && passwordConfirm.value) {
+                passwordConfirm.dispatchEvent(new Event('input'));
+            }
         });
     }
 

@@ -53,15 +53,27 @@ class ProfileController extends Controller
     public function updateAvatar(Request $request)
     {
         $request->validate([
-            'avatar' => 'required|image|max:2048',
+            'avatar' => 'required|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
         ]);
 
         $user = Auth::user();
 
-        $imageName = 'avatar_'.time().'.'.$request->avatar->extension();
-        $request->avatar->move(public_path('img/user'), $imageName);
+        try {
+            // Stockage sur le disque "public" (comme les logos) : fiable sur
+            // hébergement mutualisé, servi via le lien/route /storage.
+            $path = $request->file('avatar')->store('avatars', 'public');
+        } catch (\Throwable $e) {
+            \Log::error('Upload avatar échoué: '.$e->getMessage());
 
-        $user->avatar = '/img/user/'.$imageName;
+            return back()->with('error', "Le téléversement de la photo a échoué. Réessayez avec une image JPG/PNG de moins de 2 Mo.");
+        }
+
+        // Supprime l'ancien avatar s'il était sur le disque public
+        if ($user->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->avatar)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+        }
+
+        $user->avatar = $path;
         $user->save();
 
         return back()->with('success', 'Photo de profil mise à jour.');
@@ -74,7 +86,7 @@ class ProfileController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$user->id,
-            'password' => 'nullable|min(6|confirmed',
+            'password' => 'nullable|min:6|confirmed',
         ]);
 
         $user->name = $request->name;

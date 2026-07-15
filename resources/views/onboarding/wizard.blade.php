@@ -27,6 +27,24 @@
                 <p class="text-secondary">Choisissez vos couleurs, votre nom et votre logo. Tout s'applique immédiatement.</p>
             </div>
 
+            @if (session('success'))
+                <div class="alert alert-success d-flex align-items-start gap-2">
+                    <i class="fas fa-circle-check mt-1"></i>
+                    <div>{{ session('success') }}</div>
+                </div>
+            @endif
+
+            @if (session('credentials_email'))
+                <div class="alert alert-warning d-flex align-items-start gap-2" style="border-radius:14px;">
+                    <i class="fas fa-envelope-circle-check mt-1 fs-5"></i>
+                    <div>
+                        <strong>Vos identifiants de connexion ont été envoyés à {{ session('credentials_email') }}.</strong><br>
+                        <span class="text-muted">⚠️ Pensez à vérifier votre dossier <strong>spam / courrier indésirable</strong> : le message peut s'y trouver.
+                        Marquez-le comme « non spam » pour recevoir nos prochains emails dans votre boîte principale.</span>
+                    </div>
+                </div>
+            @endif
+
             @if ($errors->any())
                 <div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
             @endif

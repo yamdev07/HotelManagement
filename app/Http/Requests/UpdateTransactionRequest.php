@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Support\TenantManager;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateTransactionRequest extends FormRequest
 {
@@ -13,10 +15,15 @@ class UpdateTransactionRequest extends FormRequest
 
     public function rules(): array
     {
+        // La chambre référencée doit appartenir à CET hôtel.
+        $hotelId = app(TenantManager::class)->getHotelId();
+        $roomExists = Rule::exists('rooms', 'id')
+            ->where(fn ($q) => $hotelId ? $q->where('hotel_id', $hotelId) : $q);
+
         return [
             'check_in_date'  => ['required', 'date'],
             'check_out_date' => ['required', 'date', 'after:check_in_date'],
-            'room_id'        => ['required', 'integer', 'exists:rooms,id'],
+            'room_id'        => ['required', 'integer', $roomExists],
             'notes'          => ['nullable', 'string', 'max:500'],
         ];
     }

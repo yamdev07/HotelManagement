@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\UserRole;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -16,6 +17,14 @@ class User extends Authenticatable
     protected static $recordEvents = [];
 
     /**
+     * Envoie l'email de réinitialisation personnalisé (FR, aux couleurs checkinHub).
+     */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordNotification($token));
+    }
+
+    /**
      * Les attributs assignables en masse.
      *
      * @var array
@@ -24,6 +33,7 @@ class User extends Authenticatable
         'hotel_id',
         'name',
         'email',
+        'phone',
         'role',
         'avatar',
         'password',
@@ -78,24 +88,41 @@ class User extends Authenticatable
      */
     public function getAvatar(): string
     {
-        // Si aucun avatar défini, utiliser l'avatar par défaut
+        $default = asset('img/default/default-user.jpg');
+
         if (! $this->avatar) {
-            return asset('img/default/default-user.jpg');
+            return $default;
         }
 
-        // Si c'est une URL externe
+        // URL externe (ui-avatars, gravatar…)
         if (str_starts_with($this->avatar, 'http')) {
             return $this->avatar;
         }
 
-        // Le fichier est directement dans /public/img/user/
-        $fullPath = 'img/user/'.trim($this->avatar, '/');
+        $avatar = ltrim($this->avatar, '/');
 
-        if (file_exists(public_path($fullPath))) {
-            return asset($fullPath);
+        // Déjà préfixé "storage/"
+        if (str_starts_with($avatar, 'storage/')) {
+            return asset($avatar);
         }
 
-        return asset('img/default/default-user.jpg');
+        // Chemin contenant un dossier : soit fichier public direct (img/user/…),
+        // soit fichier sur le disque public (avatars/…).
+        if (str_contains($avatar, '/')) {
+            if (file_exists(public_path($avatar))) {
+                return asset($avatar);
+            }
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($avatar)) {
+                return asset('storage/'.$avatar);
+            }
+
+            return $default;
+        }
+
+        // Nom de fichier seul : historiquement dans public/img/user/
+        return file_exists(public_path('img/user/'.$avatar))
+            ? asset('img/user/'.$avatar)
+            : $default;
     }
 
     /**

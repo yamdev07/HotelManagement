@@ -1,0 +1,45 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use App\Models\Hotel;
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+/**
+ * Verrouille l'accès à un module premium selon l'offre de l'hôtel.
+ * Ex : le module « restaurant » n'est pas inclus dans l'offre Starter.
+ *
+ * Usage : ->middleware('plan.module:restaurant')
+ *
+ * Le Super-Admin plateforme (hotel_id null / rôle Super) passe toujours.
+ */
+class EnsurePlanModule
+{
+    public function handle(Request $request, Closure $next, string $module): Response
+    {
+        $user = $request->user();
+
+        // Invité, Super-Admin plateforme ou rôle Super : accès libre
+        if (! $user || $user->hotel_id === null || (method_exists($user, 'isSuper') && $user->isSuper())) {
+            return $next($request);
+        }
+
+        $hotel = $user->hotel;
+
+        if ($hotel && ! $hotel->hasModule($module)) {
+            $label = Hotel::moduleLabel($module);
+            $message = "Le module « {$label} » n'est pas inclus dans votre offre {$hotel->planName()}. "
+                ."Passez à une formule supérieure pour l'activer.";
+
+            if ($request->expectsJson()) {
+                abort(403, $message);
+            }
+
+            return redirect()->route('billing.show')->with('error', $message);
+        }
+
+        return $next($request);
+    }
+}

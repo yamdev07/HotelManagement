@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToHotel;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Spatie\Activitylog\Models\Activity as BaseActivity;
 
 class Activity extends BaseActivity
 {
+    use BelongsToHotel;
+
     protected $appends = ['subject_url', 'model_icon', 'model_name'];
 
     protected function subjectUrl(): Attribute

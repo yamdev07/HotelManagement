@@ -442,8 +442,10 @@ class TransactionRoomReservationController extends Controller
     private function sendReservationNotifications($transaction, $payment, $user, $customer, $room, $days, $totalPrice, $downPayment, $paymentMethod)
     {
         try {
-            // Notifier les réceptionnistes et admins
-            $staffUsers = User::whereIn('role', ['Receptionist', 'Admin', 'Super'])->get();
+            // Notifier les réceptionnistes et admins DE CET HÔTEL uniquement (isolation multi-tenant)
+            $staffUsers = User::whereIn('role', ['Receptionist', 'Admin'])
+                ->where('hotel_id', $transaction->hotel_id)
+                ->get();
             
             $notificationCount = 0;
 

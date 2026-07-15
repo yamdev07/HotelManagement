@@ -53,6 +53,71 @@ class HotelRegistrationTest extends TestCase
         Mail::assertSent(HotelCredentialsMail::class, fn ($mail) => $mail->hasTo('patron@nouvel.test'));
     }
 
+    public function test_signup_shows_spam_notice_with_email(): void
+    {
+        Mail::fake();
+
+        $this->post('/inscription', [
+            'company_name' => 'Hotel Spam',
+            'plan'         => 'starter',
+            'admin_name'   => 'X',
+            'admin_email'  => 'spam@notice.test',
+        ])->assertSessionHas('credentials_email', 'spam@notice.test');
+
+        // Le bandeau "vérifiez vos spams" s'affiche sur l'onboarding
+        $this->get(route('onboarding.show'))
+            ->assertOk()
+            ->assertSee('spam@notice.test')
+            ->assertSee('courrier indésirable');
+    }
+
+    public function test_signup_rejects_emoji_in_company_name(): void
+    {
+        Mail::fake();
+
+        $this->post('/inscription', [
+            'company_name' => 'Hotel 🏨 Cactus 😀',
+            'admin_name'   => 'X',
+            'admin_email'  => 'emoji@test.test',
+        ])->assertSessionHasErrors('company_name');
+
+        $this->assertDatabaseMissing('hotels', ['name' => 'Hotel 🏨 Cactus 😀']);
+    }
+
+    public function test_signup_accepts_accented_and_punctuated_name(): void
+    {
+        Mail::fake();
+
+        $this->post('/inscription', [
+            'company_name' => "Résidence l'Océan & Fils (2024)",
+            'admin_name'   => 'André Éboué',
+            'admin_email'  => 'accent@test.test',
+        ]);
+
+        $this->assertDatabaseHas('hotels', ['name' => "Résidence l'Océan & Fils (2024)"]);
+    }
+
+    public function test_country_sets_currency_and_adjusts_price(): void
+    {
+        Mail::fake();
+
+        $this->post('/inscription', [
+            'company_name' => 'Hotel Abidjan',
+            'plan'         => 'pro',
+            'country'      => 'CI',
+            'admin_name'   => 'X',
+            'admin_email'  => 'x@ci.test',
+        ]);
+
+        $hotel = \App\Models\Hotel::where('name', 'Hotel Abidjan')->first();
+        $this->assertEquals('CI', $hotel->country);
+        $this->assertEquals('XOF', $hotel->currency);
+        // pro = 45000 base × 1.20 (Côte d'Ivoire)
+        $this->assertEquals(54000, $hotel->monthlyPrice());
+        // Bénin reste à 45000
+        $this->assertEquals(45000, \App\Models\Hotel::priceFor('pro', 'BJ'));
+    }
+
     public function test_plan_defaults_to_starter_when_absent(): void
     {
         Mail::fake();
@@ -84,6 +149,53 @@ class HotelRegistrationTest extends TestCase
         $hotel = Hotel::where('name', 'Hotel Logo')->first();
         $this->assertNotNull($hotel->logo);
         Storage::disk('public')->assertExists($hotel->logo);
+    }
+
+    public function test_signup_accepts_large_logo_up_to_4mb(): void
+    {
+        Mail::fake();
+        Storage::fake('public');
+
+        // ~3 Mo : refusé avant (limite 2 Mo), accepté maintenant (4 Mo)
+        $this->post('/inscription', [
+            'company_name' => 'Hotel Gros Logo',
+            'admin_name'   => 'Boss',
+            'admin_email'  => 'boss@gros.test',
+            'logo'         => UploadedFile::fake()->image('logo.png')->size(3000),
+        ])->assertSessionDoesntHaveErrors('logo');
+
+        $this->assertNotNull(Hotel::where('name', 'Hotel Gros Logo')->first()?->logo);
+    }
+
+    public function test_signup_accepts_svg_logo(): void
+    {
+        Mail::fake();
+        Storage::fake('public');
+
+        // SVG : refusé avant par la règle 'image' (getimagesize), accepté maintenant
+        $this->post('/inscription', [
+            'company_name' => 'Hotel SVG',
+            'admin_name'   => 'Boss',
+            'admin_email'  => 'boss@svg.test',
+            'logo'         => UploadedFile::fake()->create('logo.svg', 40, 'image/svg+xml'),
+        ])->assertSessionDoesntHaveErrors('logo');
+
+        $this->assertNotNull(Hotel::where('name', 'Hotel SVG')->first());
+    }
+
+    public function test_signup_rejects_non_image_logo(): void
+    {
+        Mail::fake();
+        Storage::fake('public');
+
+        $this->post('/inscription', [
+            'company_name' => 'Hotel Bad Logo',
+            'admin_name'   => 'X',
+            'admin_email'  => 'bad@logo.test',
+            'logo'         => UploadedFile::fake()->create('doc.pdf', 20, 'application/pdf'),
+        ])->assertSessionHasErrors('logo');
+
+        $this->assertDatabaseMissing('hotels', ['name' => 'Hotel Bad Logo']);
     }
 
     public function test_email_must_be_unique(): void

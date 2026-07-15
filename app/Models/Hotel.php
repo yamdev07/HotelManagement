@@ -15,6 +15,7 @@ class Hotel extends Model
         'name',
         'slug',
         'currency',
+        'country',
         'timezone',
         'logo',
         'primary_color',
@@ -131,9 +132,72 @@ class Hotel extends Model
         return $this->planConfig()['name'];
     }
 
+    /** Libellés des modules premium (pour les messages d'upgrade). */
+    public const MODULE_LABELS = [
+        'restaurant'   => 'Restaurant',
+        'housekeeping' => 'Housekeeping',
+        'reports'      => 'Rapports avancés',
+    ];
+
+    /**
+     * L'offre de l'hôtel inclut-elle ce module premium ?
+     * (le socle réservations/check-in/caisse est toujours disponible)
+     */
+    public function hasModule(string $key): bool
+    {
+        $plan = $this->plan ?: config('plans.default', 'starter');
+
+        return in_array($key, config('plans.tiers.'.$plan.'.modules', []), true);
+    }
+
+    public static function moduleLabel(string $key): string
+    {
+        return self::MODULE_LABELS[$key] ?? ucfirst($key);
+    }
+
+    /**
+     * Prix mensuel d'un plan pour un pays donné (coût de la vie appliqué),
+     * arrondi à la centaine.
+     */
+    public static function priceFor(string $plan, ?string $country = null): int
+    {
+        $tiers = config('plans.tiers');
+        $base  = $tiers[$plan]['price'] ?? $tiers[config('plans.default', 'starter')]['price'];
+
+        $code  = $country ?: config('plans.default_country', 'BJ');
+        $conf  = config('plans.countries.'.$code, config('plans.countries.'.config('plans.default_country', 'BJ')));
+        $coef  = $conf['coef'] ?? 1.0;
+        $round = $conf['round'] ?? 100;
+
+        return (int) (round(($base * $coef) / $round) * $round);
+    }
+
+    /** Configuration du pays de l'hôtel. */
+    public function countryConfig(): array
+    {
+        $c = config('plans.countries');
+
+        return $c[$this->country] ?? $c[config('plans.default_country', 'BJ')];
+    }
+
+    public function countryName(): string
+    {
+        return $this->countryConfig()['name'];
+    }
+
+    /** Devise d'affichage (celle du pays). */
+    public function displayCurrency(): string
+    {
+        return $this->currency ?: $this->countryConfig()['currency'];
+    }
+
+    /** Prix mensuel du plan courant, ajusté au pays. */
     public function monthlyPrice(): int
     {
-        return $this->planConfig()['price'];
+        return self::priceFor(
+            $this->plan ?: config('plans.default', 'starter'),
+            $this->country ?: config('plans.default_country', 'BJ')
+        );
     }
 
     /** Limite de chambres du plan (null = illimité). */
@@ -199,6 +263,41 @@ class Hotel extends Model
             'ends_at'    => $this->subscription_ends_at,
             'created_by' => auth()->id(),
         ], $attrs));
+    }
+
+    /**
+     * Prolonge l'abonnement de N mois et enregistre la période dans l'historique.
+     * Repart de la date de fin si elle est future, sinon d'aujourd'hui.
+     * Réactive l'accès (is_active) et met éventuellement à jour le palier.
+     */
+    public function applyRenewal(int $months, float $amount, ?string $plan = null, array $extra = []): Subscription
+    {
+        $months = max(1, $months);
+
+        $start = ($this->subscription_ends_at && $this->subscription_ends_at->isFuture())
+            ? $this->subscription_ends_at->copy()
+            : now();
+        $newEnd = $start->copy()->addMonths($months);
+
+        $updates = [
+            'subscription_ends_at' => $newEnd,
+            'is_active'            => true,
+            'suspension_reason'    => null,
+        ];
+        if ($plan && array_key_exists($plan, config('plans.tiers'))) {
+            $updates['plan'] = $plan;
+            $updates['room_limit'] = config('plans.tiers.'.$plan.'.room_limit');
+        }
+        $this->update($updates);
+
+        return $this->recordSubscription(array_merge([
+            'plan'       => $plan ?: $this->plan,
+            'status'     => 'active',
+            'is_renewal' => true,
+            'amount'     => $amount,
+            'starts_at'  => $start,
+            'ends_at'    => $newEnd,
+        ], $extra));
     }
 
     /**

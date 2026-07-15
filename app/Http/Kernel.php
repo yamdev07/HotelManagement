@@ -78,6 +78,7 @@ class Kernel extends HttpKernel
         // ==================== MIDDLEWARES PERSONNALISÉS ====================
         'checkrole' => CheckRole::class,
         'hotel.active' => EnsureHotelActive::class,
+        'plan.module' => \App\Http\Middleware\EnsurePlanModule::class,
         'onboarded' => EnsureOnboarded::class,
         'admin.restrict' => CheckAdminRestriction::class,
         'receptionist.restrict' => CheckReceptionistRestriction::class,

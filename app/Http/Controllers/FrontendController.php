@@ -811,10 +811,10 @@ public function rooms(Request $request)
 
             DB::commit();
 
-            // Notifier tout le personnel (sauf les clients)
+            // Notifier le personnel DE CET HÔTEL uniquement (isolation multi-tenant)
             try {
                 $transaction->load(['customer', 'room']);
-                $staffUsers = User::staff()->get();
+                $staffUsers = User::staff()->where('hotel_id', $transaction->hotel_id)->get();
                 foreach ($staffUsers as $staffUser) {
                     $staffUser->notify(new ReservationNotification($transaction));
                 }
@@ -1032,9 +1032,9 @@ public function rooms(Request $request)
                 'status'           => 'pending',
             ]);
 
-            // Notifier tout le personnel
+            // Notifier le personnel DE CET HÔTEL uniquement (isolation multi-tenant)
             try {
-                $staffUsers = User::staff()->get();
+                $staffUsers = User::staff()->where('hotel_id', $reservation->hotel_id)->get();
                 foreach ($staffUsers as $staffUser) {
                     $staffUser->notify(new RestaurantReservationNotification($reservation));
                 }

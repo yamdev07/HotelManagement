@@ -268,27 +268,60 @@
     </div>
 </section>
 
+<!-- PRÉSENCE / GLOBE 3D -->
+<section class="section" id="presence" style="background:radial-gradient(700px 400px at 75% 40%, #e0e7ff 0%, rgba(224,231,255,0) 65%), linear-gradient(180deg,#f7f8ff 0%,#eef2ff 100%);">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-5" data-aos="fade-right">
+                <span class="badge-soft mb-2 d-inline-block">Couverture</span>
+                <h2 class="fw-bold">Déjà pensé pour <span class="text-brand">votre pays</span></h2>
+                <p class="text-secondary">
+                    checkinHub est disponible dans <strong>{{ count(config('plans.countries')) }} pays</strong>,
+                    avec des tarifs adaptés au coût de la vie et à la devise locale.
+                    Faites tourner le globe 🌍
+                </p>
+                <div class="d-flex flex-wrap gap-2 mt-3" id="country-badges">
+                    @foreach (config('plans.countries') as $code => $c)
+                        <span class="badge rounded-pill" style="background:#eef2ff;color:var(--brand);font-weight:600;padding:.5rem .9rem;">{{ $c['name'] }}</span>
+                    @endforeach
+                </div>
+            </div>
+            <div class="col-lg-7" data-aos="fade-left">
+                <div id="globe" style="width:100%;height:560px;max-width:680px;margin:0 auto;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- PRICING -->
 <section class="section" id="pricing">
     <div class="container">
-        <div class="text-center mb-5">
+        <div class="text-center mb-4">
             <span class="badge-soft mb-2 d-inline-block">Tarifs</span>
             <h2 class="fw-bold">Des offres simples et transparentes</h2>
-            <p class="text-secondary">Sans frais cachés. Changez d'offre à tout moment.</p>
+            <p class="text-secondary">Prix adaptés à votre pays. Sans frais cachés.</p>
+            <div class="d-inline-flex align-items-center gap-2 mt-2">
+                <i class="fas fa-earth-africa text-brand"></i>
+                <select id="pricing-country" class="form-select" style="width:auto;">
+                    @foreach (config('plans.countries') as $code => $c)
+                        <option value="{{ $code }}" {{ $code === config('plans.default_country') ? 'selected' : '' }}>{{ $c['name'] }}</option>
+                    @endforeach
+                </select>
+            </div>
         </div>
         <div class="row g-4 justify-content-center">
             @foreach (config('plans.tiers') as $key => $tier)
                 @php $popular = ! empty($tier['popular']); @endphp
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index * 130 }}">
-                    <div class="price-card p-4 h-100 {{ $popular ? 'popular' : '' }}">
+                    <div class="price-card p-4 h-100 {{ $popular ? 'popular' : '' }}" data-base="{{ $tier['price'] }}">
                         @if ($popular)
                             <span class="badge text-white mb-2" style="background:var(--brand)">Le plus populaire</span>
                         @endif
                         <h4 class="fw-bold">{{ $tier['name'] }}</h4>
                         <p class="text-secondary small">{{ $tier['tagline'] }}</p>
                         <div class="price-amount mb-1">
-                            {{ number_format($tier['price'], 0, ',', ' ') }}
-                            <span class="fs-6 text-secondary fw-normal">CFA / mois</span>
+                            <span class="pr-amount">{{ number_format($tier['price'], 0, ',', ' ') }}</span>
+                            <span class="fs-6 text-secondary fw-normal"><span class="pr-cur">XOF</span> / mois</span>
                         </div>
                         <hr>
                         <ul class="list-unstyled mb-4">
@@ -400,6 +433,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<!-- globe.gl (Three.js) : globe 3D photoréaliste des pays desservis -->
+<script src="https://unpkg.com/globe.gl"></script>
 <script>
     // Animations au scroll
     AOS.init({ duration: 700, once: true, easing: 'ease-out-cubic', offset: 80 });
@@ -440,6 +475,109 @@
     } else {
         counters.forEach(c => c.textContent = c.dataset.target);
     }
+
+    // Prix ajustés selon le pays (coût de la vie)
+    const plansCountries = @json(config('plans.countries'));
+    const pricingSel = document.getElementById('pricing-country');
+    if (pricingSel) {
+        const fmt = n => n.toLocaleString('fr-FR');
+        const updatePricing = () => {
+            const c = plansCountries[pricingSel.value];
+            if (!c) return;
+            document.querySelectorAll('.price-card[data-base]').forEach(card => {
+                const base = +card.dataset.base;
+                const price = Math.round(base * c.coef / c.round) * c.round;
+                const amt = card.querySelector('.pr-amount');
+                const cur = card.querySelector('.pr-cur');
+                if (amt) amt.textContent = fmt(price);
+                if (cur) cur.textContent = c.currency;
+            });
+        };
+        pricingSel.addEventListener('change', updatePricing);
+        updatePricing();
+    }
+</script>
+
+<!-- Globe 3D photoréaliste — bloc isolé (indépendant du reste du JS) -->
+<script>
+(function () {
+    const servedData = @json(config('plans.countries'));
+    // Coordonnées (lat/long) des pays desservis.
+    const coords = {
+        BJ:[9.3,2.3], TG:[8.6,0.8], CI:[7.5,-5.5], SN:[14.5,-14.5], BF:[12.2,-1.5],
+        ML:[17.0,-4.0], NE:[17.6,8.0], CM:[5.7,12.5], GA:[-0.8,11.6], NG:[9.1,8.7],
+        GH:[7.9,-1.0], FR:[46.6,2.2]
+    };
+
+    function build() {
+        const el = document.getElementById('globe');
+        if (!el) return;
+
+        if (typeof Globe === 'undefined') {
+            // globe.gl non chargé (CDN bloqué) : la liste des pays reste visible.
+            el.style.display = 'none';
+            console.warn('Globe: globe.gl non disponible (CDN bloqué ?).');
+            return;
+        }
+
+        try {
+            const points = Object.keys(servedData)
+                .filter(c => coords[c])
+                .map(c => ({ code: c, name: servedData[c].name, lat: coords[c][0], lng: coords[c][1] }));
+
+            const TEX = 'https://unpkg.com/three-globe/example/img/';
+
+            const globe = Globe()(el)
+                .backgroundColor('rgba(0,0,0,0)')
+                .globeImageUrl(TEX + 'earth-blue-marble.jpg')
+                .bumpImageUrl(TEX + 'earth-topology.png')
+                .showAtmosphere(true)
+                .atmosphereColor('#6366f1')
+                .atmosphereAltitude(0.2)
+                // Halos pulsants sur chaque pays
+                .ringsData(points)
+                .ringColor(() => (t) => `rgba(129,140,248,${Math.sqrt(1 - t)})`)
+                .ringMaxRadius(4)
+                .ringPropagationSpeed(2.2)
+                .ringRepeatPeriod(900)
+                // Points brillants
+                .pointsData(points)
+                .pointColor(() => '#c7d2fe')
+                .pointAltitude(0.02)
+                .pointRadius(0.35)
+                // Étiquettes des pays
+                .labelsData(points)
+                .labelText('name')
+                .labelSize(1.1)
+                .labelDotRadius(0.4)
+                .labelColor(() => '#ffffff')
+                .labelResolution(2);
+
+            const resize = () => { globe.width(el.clientWidth).height(el.clientHeight); };
+            resize();
+            window.addEventListener('resize', resize);
+
+            // Vue centrée sur l'Afrique de l'Ouest + rotation automatique
+            globe.pointOfView({ lat: 8, lng: 4, altitude: 1.65 }, 0);
+            const controls = globe.controls();
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.7;
+            controls.enableZoom = true;      // molette / pinch pour zoomer
+            controls.minDistance = 160;      // zoom avant max (proche)
+            controls.maxDistance = 450;      // zoom arrière max (loin)
+            controls.zoomSpeed = 0.8;
+        } catch (e) {
+            console.error('Globe 3D:', e);
+            el.style.display = 'none';
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', build);
+    } else {
+        build();
+    }
+})();
 </script>
 </body>
 </html>
