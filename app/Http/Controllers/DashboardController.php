@@ -27,6 +27,53 @@ class DashboardController extends Controller
         return view('dashboard.index', compact('transactions', 'stats'));
     }
 
+    /**
+     * Aperçu de la nouvelle interface admin (dark premium) — données réelles,
+     * non destructif (le dashboard actuel reste inchangé).
+     */
+    public function preview()
+    {
+        $today = Carbon::today();
+
+        $stats        = $this->dashboard->getStats('today', null);
+        $transactions = $this->dashboard->getTransactions('today', null)->take(6);
+
+        $revenueToday = (float) Payment::whereDate('created_at', $today)->where('status', 'completed')->sum('amount');
+
+        // 7 derniers jours : réservations par jour (par date d'arrivée)
+        $trend = collect(range(6, 0))->map(function ($d) use ($today) {
+            $day = $today->copy()->subDays($d);
+            return [
+                'label' => ucfirst($day->locale('fr')->isoFormat('dd')),
+                'count' => Transaction::whereDate('check_in', $day)->whereIn('status', ['reservation', 'active', 'completed'])->count(),
+            ];
+        })->values();
+
+        // 6 derniers mois : chiffre d'affaires encaissé
+        $revenue = collect(range(5, 0))->map(function ($m) use ($today) {
+            $month = $today->copy()->subMonths($m)->startOfMonth();
+            return [
+                'label' => ucfirst($month->locale('fr')->isoFormat('MMM')),
+                'total' => (float) Payment::whereBetween('created_at', [$month, $month->copy()->endOfMonth()])->where('status', 'completed')->sum('amount'),
+            ];
+        })->values();
+
+        $roomDist = [
+            'occupied'  => (int) $stats['occupiedRooms'],
+            'available' => (int) $stats['availableRooms'],
+            'other'     => max(0, (int) $stats['totalRooms'] - (int) $stats['occupiedRooms'] - (int) $stats['availableRooms']),
+        ];
+
+        $housekeeping = Room::whereIn('room_status_id', [RoomStatus::Dirty->value, RoomStatus::Cleaning->value])
+            ->with('roomStatus')->orderBy('number')->take(6)->get();
+
+        $activities = \App\Models\Activity::with('causer')->latest()->take(7)->get();
+
+        return view('dashboard.preview', compact(
+            'stats', 'transactions', 'revenueToday', 'trend', 'revenue', 'roomDist', 'housekeeping', 'activities'
+        ));
+    }
+
     public function getDashboardData(Request $request)
     {
         try {
