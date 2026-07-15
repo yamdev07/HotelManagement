@@ -474,8 +474,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
     // ==================== DASHBOARD (RESTEINT) ====================
     Route::prefix('dashboard')->name('dashboard.')->middleware('checkrole:Super,Admin,Housekeeping,Receptionist')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('index');
-        // Aperçu de la nouvelle interface admin (dark premium) — non destructif
-        Route::get('/apercu', [DashboardController::class, 'preview'])->name('preview')->middleware('checkrole:Super,Admin');
         Route::get('/data', [DashboardController::class, 'getDashboardData'])->name('data');
         Route::get('/stats', [DashboardController::class, 'updateStats'])->name('stats');
         Route::get('/debug', [DashboardController::class, 'debug'])->name('debug');
