@@ -40,6 +40,9 @@
         .form-control:focus { border-color:var(--brand); box-shadow:0 0 0 .25rem rgba(79,70,229,.15); background:#fff; }
         .input-ico { position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:#94a3b8; transition:.25s; }
         .position-relative:focus-within .input-ico { color:var(--brand); }
+        .pw-eye { position:absolute; right:.85rem; top:50%; transform:translateY(-50%); background:none; border:none;
+            color:#94a3b8; cursor:pointer; padding:4px; line-height:1; z-index:3; }
+        .pw-eye:hover { color:var(--brand); }
         .btn-brand { background:linear-gradient(135deg,var(--brand),var(--brand2)); border:none; color:#fff; border-radius:14px; padding:.95rem; font-weight:600; width:100%; transition:.25s; }
         .btn-brand:hover { transform:translateY(-2px); box-shadow:0 16px 34px -12px var(--brand); color:#fff; filter:brightness(1.05); }
         .link-brand { color:var(--brand); font-weight:600; text-decoration:none; }
@@ -155,8 +158,12 @@
                     <label class="form-label fw-semibold">Mot de passe</label>
                     <div class="position-relative">
                         <i class="fas fa-lock input-ico"></i>
-                        <input type="password" name="password" required
+                        <input type="password" name="password" id="loginPassword" required
+                               style="padding-right:2.7rem;"
                                class="form-control @error('password') is-invalid @enderror" placeholder="••••••••">
+                        <button type="button" class="pw-eye" id="loginPwEye" tabindex="-1" aria-label="Afficher le mot de passe">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                     @error('password')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                 </div>
@@ -194,6 +201,22 @@
             });
         });
         side.addEventListener('mouseleave', () => blobs.forEach(b => b.style.transform = ''));
+    }
+
+    // Bouton "œil" : afficher / masquer le mot de passe
+    const pwEye = document.getElementById('loginPwEye');
+    const pwInput = document.getElementById('loginPassword');
+    if (pwEye && pwInput) {
+        pwEye.addEventListener('click', () => {
+            const icon = pwEye.querySelector('i');
+            if (pwInput.type === 'password') {
+                pwInput.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                pwInput.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        });
     }
 </script>
 </body>
