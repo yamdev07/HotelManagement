@@ -445,21 +445,7 @@
         <div class="sidebar-footer">
             <div class="user-profile">
                 <div class="user-avatar">
-                    @php
-                        $avatarPath = null;
-                        if (auth()->user()->avatar) {
-                            if (str_starts_with(auth()->user()->avatar, '/img/user/')) {
-                                $avatarPath = asset(auth()->user()->avatar);
-                            } elseif (
-                                str_starts_with(auth()->user()->avatar, 'storage/') ||
-                                str_contains(auth()->user()->avatar, 'storage/')
-                            ) {
-                                $avatarPath = asset(auth()->user()->avatar);
-                            } else {
-                                $avatarPath = asset('storage/' . auth()->user()->avatar);
-                            }
-                        }
-                    @endphp
+                    @php $avatarPath = auth()->user()->avatar ? auth()->user()->getAvatar() : null; @endphp
                     @if ($avatarPath)
                         <img src="{{ $avatarPath }}" alt="{{ auth()->user()->name }}"
                             onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name) }}&background=1e6b2e&color=fff&size=40';">
