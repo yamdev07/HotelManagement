@@ -10,14 +10,29 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
     <style>
-        :root {
+        :root { /* Sombre (par défaut) */
             --bg: #070b16; --bg2: #0c1224; --card: rgba(255,255,255,.04);
-            --border: rgba(255,255,255,.09); --txt: #e8ecf6; --muted: #9aa6c2;
+            --border: rgba(255,255,255,.09); --txt: #e8ecf6; --muted: #9aa6c2; --head: #ffffff;
+            --navbar-bg: rgba(7,11,22,.55); --hover: rgba(255,255,255,.06);
             --brand: #7c83ff; --brand2: #b06bff; --accent: #29e0c8;
+        }
+        :root[data-theme="light"] { /* Clair */
+            --bg: #ffffff; --bg2: #f3f5fc; --card: rgba(15,23,42,.03);
+            --border: rgba(15,23,42,.10); --txt: #46536b; --muted: #64748b; --head: #0f172a;
+            --navbar-bg: rgba(255,255,255,.82); --hover: rgba(15,23,42,.05);
+            --brand: #6366f1; --brand2: #8b5cf6; --accent: #0ea5e9;
         }
         * { font-family: 'Inter', system-ui, sans-serif; }
         body { background: var(--bg); color: var(--txt); overflow-x: hidden; }
-        h1,h2,h3,h4,.display-font { font-family: 'Space Grotesk', sans-serif; letter-spacing: -.5px; }
+        h1,h2,h3,h4,.display-font { font-family: 'Space Grotesk', sans-serif; letter-spacing: -.5px; color: var(--head); }
+        /* La maquette du dashboard reste sombre (capture produit) dans les deux thèmes */
+        .hx-wrap { --txt:#e8ecf6; --muted:#9aa6c2; --head:#ffffff; --border:rgba(255,255,255,.10); --card:rgba(255,255,255,.05); }
+        :root[data-theme="light"] .text-white { color: var(--head) !important; }
+        :root[data-theme="light"] .stars { display: none; }
+        :root[data-theme="light"] .cosmos { background:
+            radial-gradient(900px 500px at 80% -5%, rgba(124,131,255,.12), transparent 60%),
+            radial-gradient(800px 500px at 10% 10%, rgba(176,107,255,.10), transparent 55%),
+            linear-gradient(180deg, var(--bg), var(--bg2)); }
 
         /* Fond cosmique animé */
         .cosmos { position: fixed; inset: 0; z-index: -2; background:
@@ -32,17 +47,20 @@
             background-size: 100% 100%; animation: drift 60s linear infinite; }
         @keyframes drift { from{background-position:0 0;} to{background-position:100px 200px;} }
 
-        .navbar { backdrop-filter: blur(14px); background: rgba(7,11,22,.55); border-bottom: 1px solid var(--border); }
-        .brand-logo { font-family:'Space Grotesk'; font-weight:700; font-size:1.4rem; color:#fff; }
+        .navbar { backdrop-filter: blur(14px); background: var(--navbar-bg); border-bottom: 1px solid var(--border); }
+        .brand-logo { font-family:'Space Grotesk'; font-weight:700; font-size:1.4rem; color:var(--head); }
         .brand-logo span { background: linear-gradient(90deg,var(--brand),var(--brand2)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
         .nav-link { color: var(--muted) !important; font-weight:500; }
-        .nav-link:hover { color:#fff !important; }
+        .nav-link:hover { color:var(--head) !important; }
+        .theme-btn { width:42px; height:42px; border-radius:12px; border:1px solid var(--border); background:var(--card);
+            color:var(--txt); cursor:pointer; display:grid; place-items:center; font-size:1rem; }
+        .theme-btn:hover { color:var(--head); }
 
         .btn-glow { background: linear-gradient(90deg,var(--brand),var(--brand2)); color:#fff; border:none; font-weight:600;
             border-radius: 12px; padding:.7rem 1.4rem; box-shadow: 0 12px 34px -10px rgba(124,131,255,.7); transition:.25s; }
         .btn-glow:hover { color:#fff; transform: translateY(-2px); box-shadow: 0 18px 44px -10px rgba(176,107,255,.8); }
-        .btn-ghost { border:1px solid var(--border); color:#fff; border-radius:12px; padding:.7rem 1.3rem; font-weight:600; background:transparent; transition:.25s; }
-        .btn-ghost:hover { background: rgba(255,255,255,.06); color:#fff; border-color: rgba(255,255,255,.25); }
+        .btn-ghost { border:1px solid var(--border); color:var(--head); border-radius:12px; padding:.7rem 1.3rem; font-weight:600; background:transparent; transition:.25s; }
+        .btn-ghost:hover { background: var(--hover); color:var(--head); border-color: var(--brand); }
 
         .chip { display:inline-flex; align-items:center; gap:.5rem; padding:.4rem .9rem; border:1px solid var(--border);
             border-radius:999px; background: var(--card); font-size:.85rem; color: var(--muted); }
@@ -52,7 +70,7 @@
         .glass { background: var(--card); border:1px solid var(--border); border-radius: 20px; backdrop-filter: blur(8px);
             transition: transform .3s, border-color .3s, box-shadow .3s; }
         .glass:hover { transform: translateY(-5px); border-color: rgba(124,131,255,.5); box-shadow: 0 24px 60px -30px rgba(124,131,255,.6); }
-        .ico { width:50px;height:50px;border-radius:14px; display:grid;place-items:center; font-size:1.3rem; color:#fff;
+        .ico { width:50px;height:50px;border-radius:14px; display:grid;place-items:center; font-size:1.3rem; color:var(--head);
             background: linear-gradient(135deg, rgba(124,131,255,.35), rgba(176,107,255,.25)); border:1px solid var(--border); }
 
         .section { padding: 6rem 0; }
@@ -75,14 +93,16 @@
         .price-card.pop { border:1px solid transparent; background:
             linear-gradient(var(--bg2),var(--bg2)) padding-box, linear-gradient(135deg,var(--brand),var(--brand2)) border-box; }
         .price-amount { font-family:'Space Grotesk'; font-weight:700; font-size:2.4rem; }
-        .form-select, .form-select:focus { background:var(--bg2); color:#fff; border:1px solid var(--border); }
+        .form-select, .form-select:focus { background:var(--bg2); color:var(--txt); border:1px solid var(--border); }
+        .form-select option { background:var(--bg2); color:var(--txt); }
         .step-dot { width:44px;height:44px;border-radius:50%; display:grid;place-items:center; font-family:'Space Grotesk'; font-weight:700;
             background: linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; }
         footer { border-top:1px solid var(--border); }
-        .accordion-button { background: transparent !important; color:#fff !important; padding:1.1rem 1.25rem; }
-        .accordion-button:not(.collapsed) { color:#fff !important; box-shadow:none; }
+        .accordion-button { background: transparent !important; color:var(--head) !important; padding:1.1rem 1.25rem; }
+        .accordion-button:not(.collapsed) { color:var(--head) !important; box-shadow:none; }
         .accordion-button:focus { box-shadow:none; border-color: transparent; }
         .accordion-button::after { filter: invert(1) brightness(2); }
+        :root[data-theme="light"] .accordion-button::after { filter: none; }
         .accordion-body { padding:0 1.25rem 1.2rem; }
         .footer-preview { position:fixed; bottom:14px; left:50%; transform:translateX(-50%); z-index:1000;
             background: rgba(12,18,36,.9); border:1px solid var(--border); border-radius:999px; padding:.5rem 1rem; font-size:.85rem; backdrop-filter:blur(8px); }
@@ -139,6 +159,10 @@
         @media (max-width:991px) { .hx-phone { display:none; } .hx-side { width:120px; } }
         @media (max-width:575px) { .hx-side { display:none; } .hx-stats { grid-template-columns:repeat(2,1fr); } .hx-charts { grid-template-columns:1fr; } }
     </style>
+    <script>
+        // Thème appliqué avant le rendu (évite le flash). Défaut : sombre.
+        (function(){ try{ document.documentElement.setAttribute('data-theme', localStorage.getItem('landing-theme') || 'dark'); }catch(e){} })();
+    </script>
 </head>
 <body>
 <div class="cosmos"></div>
@@ -157,7 +181,8 @@
                 <li class="nav-item"><a class="nav-link" href="#pricing">Tarifs</a></li>
                 <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
             </ul>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 align-items-center">
+                <button class="theme-btn" id="themeToggle" type="button" aria-label="Changer de thème"><i class="fas fa-moon"></i></button>
                 <a href="{{ route('login.index') }}" class="btn-ghost">Connexion</a>
                 <a href="{{ route('hotel.register') }}" class="btn-glow">Essai gratuit</a>
             </div>
@@ -417,10 +442,10 @@
                 @endphp
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index*120 }}">
                     <div class="price-card {{ $pop ? 'pop' : '' }} p-4 h-100" data-base="{{ $tier['price'] }}">
-                        @if ($pop)<span class="chip mb-2" style="border-color:var(--brand);color:#fff"><i class="fas fa-star" style="color:var(--accent)"></i> Populaire</span>@endif
+                        @if ($pop)<span class="chip mb-2" style="border-color:var(--brand);color:var(--head)"><i class="fas fa-star" style="color:var(--accent)"></i> Populaire</span>@endif
                         <h4 class="fw-bold">{{ $tier['name'] }}</h4>
                         <p class="text-muted2 small">{{ $tier['tagline'] }}</p>
-                        <div class="chip mb-2" style="color:#fff"><i class="fas fa-bed" style="color:var(--brand)"></i> {{ $rooms }}@if ($max === null) · illimité @endif</div>
+                        <div class="chip mb-2" style="color:var(--head)"><i class="fas fa-bed" style="color:var(--brand)"></i> {{ $rooms }}@if ($max === null) · illimité @endif</div>
                         <div class="my-2"><span class="price-amount pr-amount">{{ number_format($tier['price'],0,',',' ') }}</span>
                             <span class="text-muted2"><span class="pr-cur">XOF</span> / mois</span></div>
                         <hr style="border-color:var(--border)">
@@ -498,6 +523,21 @@
 <script src="https://unpkg.com/globe.gl"></script>
 <script>
     try { AOS.init({ duration: 700, once: true, offset: 60 }); } catch(e){}
+
+    // Bascule clair / sombre
+    (function () {
+        const btn = document.getElementById('themeToggle');
+        if (!btn) return;
+        const icon = () => { btn.querySelector('i').className =
+            document.documentElement.getAttribute('data-theme') === 'light' ? 'fas fa-sun' : 'fas fa-moon'; };
+        icon();
+        btn.addEventListener('click', () => {
+            const next = document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', next);
+            try { localStorage.setItem('landing-theme', next); } catch(e){}
+            icon();
+        });
+    })();
 
     // Compteurs animés (count-up au scroll)
     (function () {
