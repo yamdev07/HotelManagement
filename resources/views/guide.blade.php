@@ -172,6 +172,50 @@
         </ol>
         <div class="tip"><i class="fas fa-lightbulb"></i><div>Chaque encaissement est <b>tracé dans le journal d'activité</b> de votre établissement, avec l'auteur et l'heure.</div></div>
     HTML;
+
+    $details['housekeeping'] = <<<'HTML'
+        <p>Le module suit l'état de chaque chambre et organise le travail de l'équipe de ménage. <i>(Offres Pro & Business)</i></p>
+        <ol class="steps">
+            <li><b>Repérez les chambres à traiter</b> — Menu <b>Housekeeping</b> : après chaque départ, la chambre apparaît « à nettoyer ». Vous voyez d'un coup d'œil ce qu'il reste à faire.</li>
+            <li><b>Démarrez le nettoyage</b> — quand un agent commence, marquez la chambre <b>« en nettoyage »</b>. L'équipe sait ainsi ce qui est en cours.</li>
+            <li><b>Marquez « propre »</b> — une fois terminée, passez la chambre en <b>« propre / disponible »</b> : elle redevient immédiatement réservable.</li>
+            <li><b>Signalez la maintenance</b> — si une chambre nécessite une réparation, mettez-la en <b>« maintenance »</b> pour la rendre indisponible le temps des travaux.</li>
+        </ol>
+        <div class="tip"><i class="fas fa-lightbulb"></i><div>Le <b>tableau de bord</b> affiche en temps réel le nombre de chambres à nettoyer, pour prioriser les arrivées du jour.</div></div>
+    HTML;
+
+    $details['restaurant'] = <<<'HTML'
+        <p>Gérez votre carte, les commandes en salle et le service en chambre. <i>(Offres Pro & Business)</i></p>
+        <ol class="steps">
+            <li><b>Créez votre carte</b> — Menu <b>Restaurant → Menus</b> : ajoutez vos plats (nom, prix) et organisez-les par <b>catégories</b> (entrées, plats, boissons…).</li>
+            <li><b>Prenez une commande</b> — créez une commande et associez-la à une <b>table</b> ou à une <b>chambre</b> (room service).</li>
+            <li><b>Suivez le service</b> — la commande évolue par statuts (en attente, en préparation, servie), visibles par l'équipe.</li>
+            <li><b>Facturez</b> — le montant s'<b>ajoute à la note du client</b> (room service, réglé au départ) ou s'<b>encaisse directement en caisse</b>.</li>
+        </ol>
+        <div class="tip"><i class="fas fa-lightbulb"></i><div>Une commande en <b>room service</b> se rattache au séjour en cours du client : tout est réglé en une fois au check-out.</div></div>
+    HTML;
+
+    $details['site'] = <<<'HTML'
+        <p>Chaque établissement dispose d'un <b>mini-site public</b> à ses couleurs, pour présenter ses chambres et recevoir des réservations en ligne.</p>
+        <ol class="steps">
+            <li><b>Activez les sections</b> — depuis <b>Mon établissement</b>, activez les pages voulues (chambres, restaurant, services, contact).</li>
+            <li><b>Personnalisez</b> — couleurs, logo, image de couverture, textes (à propos, services) et liens vers vos réseaux sociaux.</li>
+            <li><b>Partagez le lien</b> — votre vitrine a une <b>adresse publique</b> ; partagez-la à vos clients (réseaux, WhatsApp, carte de visite).</li>
+            <li><b>Recevez des réservations</b> — les visiteurs consultent vos chambres et réservent en ligne ; la réservation arrive directement dans votre espace.</li>
+        </ol>
+        <div class="tip"><i class="fas fa-lightbulb"></i><div>Le bouton <b>« Voir mon site »</b> ouvre la vitrine telle que la voient vos clients, pour vérifier le rendu.</div></div>
+    HTML;
+
+    $details['reports'] = <<<'HTML'
+        <p>Pilotez la performance de votre établissement avec des chiffres clairs. <i>(Offres Pro & Business)</i></p>
+        <ol class="steps">
+            <li><b>Ouvrez les Rapports</b> — Menu <b>Rapports</b>.</li>
+            <li><b>Choisissez la période</b> — jour, semaine ou mois, selon ce que vous voulez analyser.</li>
+            <li><b>Analysez</b> — <b>taux d'occupation</b>, <b>revenus</b>, nombre de réservations et répartition des moyens de paiement.</li>
+            <li><b>Décidez</b> — ajustez vos tarifs et votre organisation en fonction des tendances observées.</li>
+        </ol>
+        <div class="tip"><i class="fas fa-lightbulb"></i><div>Le <b>tableau de bord</b> donne déjà un aperçu quotidien (occupation, chiffre d'affaires, arrivées/départs) sans ouvrir les rapports.</div></div>
+    HTML;
 @endphp
 
 <!-- SIDEBAR (gauche) -->
