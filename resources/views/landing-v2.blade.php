@@ -57,6 +57,13 @@
 
         .section { padding: 6rem 0; }
         .text-muted2 { color: var(--muted) !important; }
+        /* Le contenu occupe (presque) toute la largeur — marges minimes, plus de "boîte" centrée étroite */
+        @media (min-width: 992px){
+            .container { max-width: none; padding-left: 3.5vw; padding-right: 3.5vw; }
+        }
+        @media (min-width: 1600px){
+            .container { padding-left: 5vw; padding-right: 5vw; }
+        }
         #globe-hero { width:100%; height:520px; }
         .marquee { overflow:hidden; border-block:1px solid var(--border); background: rgba(255,255,255,.02); }
         .marquee .track { display:inline-flex; gap:3rem; white-space:nowrap; padding:1rem 0; animation: scroll 26s linear infinite; }
