@@ -136,6 +136,42 @@
         ['billing','fa-credit-card','Abonnement & paiement','Gérer votre offre',
             "Depuis « Mon abonnement », consultez votre échéance, changez d'offre et renouvelez en ligne (Mobile Money & carte)."],
     ];
+
+    // Contenu pas-à-pas détaillé, par section (ajouté progressivement).
+    $details = [];
+
+    $details['rooms'] = <<<'HTML'
+        <p>L'organisation se fait en deux temps : d'abord les <b>types de chambre</b>, ensuite les <b>chambres</b> elles-mêmes.</p>
+        <ol class="steps">
+            <li><b>Créez vos types de chambre</b> — Menu <b>Chambres → Types</b> → « Nouveau type ». Donnez un nom (Standard, Suite, Deluxe…), une <b>capacité</b> (nombre de personnes) et un <b>prix de base</b>. Répétez pour chaque catégorie.</li>
+            <li><b>Ajoutez vos chambres</b> — Menu <b>Chambres → Nouvelle chambre</b>. Indiquez le <b>numéro</b>, choisissez le <b>type</b>, la capacité et le prix. La chambre est créée avec le statut « disponible ».</li>
+            <li><b>Suivez les statuts</b> — chaque chambre affiche son état (disponible, réservée, occupée, à nettoyer, en nettoyage, maintenance). Ces statuts évoluent <b>automatiquement</b> avec les réservations et le housekeeping.</li>
+        </ol>
+        <div class="tip"><i class="fas fa-lightbulb"></i><div>Le <b>numéro de chambre est unique par établissement</b> : deux hôtels différents peuvent chacun avoir une chambre « 101 » sans conflit.</div></div>
+    HTML;
+
+    $details['bookings'] = <<<'HTML'
+        <p>C'est le cœur de l'activité : enregistrer un séjour, accueillir puis faire partir le client.</p>
+        <ol class="steps">
+            <li><b>Nouvelle réservation</b> — cliquez sur <b>Nouvelle réservation</b>. Sélectionnez ou créez le <b>client</b>, choisissez la <b>chambre</b> et les <b>dates</b> (arrivée / départ). La chambre passe en « réservée ».</li>
+            <li><b>Le client</b> — recherchez une fiche existante, ou créez-la (nom, téléphone, email facultatif). Un même client peut revenir sans créer de doublon.</li>
+            <li><b>Check-in (arrivée)</b> — à l'arrivée, ouvrez la réservation et cliquez sur <b>Check-in</b>. La chambre devient « occupée » et le séjour est actif. Vous pouvez encaisser un acompte ou la totalité.</li>
+            <li><b>Pendant le séjour</b> — ajoutez si besoin des <b>extras</b> (services, consommations) qui s'ajoutent à la note du client.</li>
+            <li><b>Check-out (départ)</b> — au départ, cliquez sur <b>Check-out</b>. La note finale (chambre + extras) est calculée, puis encaissée en caisse. La chambre bascule en « à nettoyer ».</li>
+        </ol>
+        <div class="tip"><i class="fas fa-lightbulb"></i><div>Un client se présente <b>sans réservation</b> ? Utilisez le <b>check-in direct</b> : la réservation et l'arrivée se font en une seule étape.</div></div>
+    HTML;
+
+    $details['cashier'] = <<<'HTML'
+        <p>La caisse suit tout l'argent encaissé pendant un service, avec ouverture et clôture pour le rapprochement.</p>
+        <ol class="steps">
+            <li><b>Ouvrir la caisse</b> — en début de service, Menu <b>Caisse → Ouvrir la caisse</b>. Saisissez le <b>fond de caisse</b> (montant de départ).</li>
+            <li><b>Encaisser</b> — enregistrez chaque paiement (chambre, extras) en indiquant le <b>moyen</b> : espèces, Mobile Money, carte… Un paiement peut être <b>partiel</b> (acompte) puis complété plus tard.</li>
+            <li><b>Suivre en temps réel</b> — la caisse affiche le <b>total encaissé</b> de la session au fur et à mesure.</li>
+            <li><b>Fermer la caisse</b> — en fin de service, cliquez sur <b>Fermer la caisse</b> : comptez votre tiroir, l'application calcule le <b>rapprochement</b> et signale tout écart.</li>
+        </ol>
+        <div class="tip"><i class="fas fa-lightbulb"></i><div>Chaque encaissement est <b>tracé dans le journal d'activité</b> de votre établissement, avec l'auteur et l'heure.</div></div>
+    HTML;
 @endphp
 
 <!-- SIDEBAR (gauche) -->
@@ -194,7 +230,11 @@
         @foreach (array_slice($sections, 2) as $s)
             <section class="doc" id="{{ $s[0] }}">
                 <h2><span class="sico"><i class="fas {{ $s[1] }}"></i></span> {{ $s[2] }}</h2>
-                <p><strong style="color:var(--head)">{{ $s[3] }}.</strong> {{ $s[4] }}</p>
+                @isset($details[$s[0]])
+                    {!! $details[$s[0]] !!}
+                @else
+                    <p><strong style="color:var(--head)">{{ $s[3] }}.</strong> {{ $s[4] }}</p>
+                @endisset
             </section>
         @endforeach
 
