@@ -822,6 +822,16 @@ public function rooms(Request $request)
                 Log::warning('Erreur envoi notification réservation: ' . $notifException->getMessage());
             }
 
+            // Email de confirmation au CLIENT (issue #171) · tolérant aux pannes SMTP
+            if ($customer->email) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to($customer->email)
+                        ->send(new \App\Mail\ReservationConfirmationMail($transaction));
+                } catch (\Throwable $mailEx) {
+                    Log::warning('Email confirmation réservation (en ligne) non envoyé: '.$mailEx->getMessage());
+                }
+            }
+
             Log::info('=== RÉSERVATION RÉUSSIE ===');
             Log::info('Résumé:', [
                 'client_id' => $customer->id,

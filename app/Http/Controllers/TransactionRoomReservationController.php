@@ -256,6 +256,21 @@ class TransactionRoomReservationController extends Controller
                     ->withInput();
             }
 
+            // ============ ANTI-DOUBLON (issue #170) ============
+            // Retour arrière puis re-validation dans l'assistant : on ne recrée
+            // pas une réservation identique (même client, même chambre, mêmes dates).
+            $existing = Transaction::where('customer_id', $customer->id)
+                ->where('room_id', $room->id)
+                ->whereDate('check_in', $checkIn)
+                ->whereDate('check_out', $checkOut)
+                ->whereIn('status', ['reservation', 'active'])
+                ->first();
+
+            if ($existing) {
+                return redirect()->route('transaction.index')
+                    ->with('success', 'Cette réservation existe déjà (n°'.$existing->id.' · '.$customer->name.' · chambre '.$room->number.') : aucun doublon créé.');
+            }
+
             $isOccupied = $this->isRoomOccupied($room->id, $checkIn, $checkOut);
 
             if ($isOccupied) {
@@ -380,6 +395,16 @@ class TransactionRoomReservationController extends Controller
 
                 // ============ CONFIRMATION ============
                 DB::commit();
+
+                // Email de confirmation au CLIENT (issue #171) · tolérant aux pannes SMTP
+                if ($customer->email) {
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($customer->email)
+                            ->send(new \App\Mail\ReservationConfirmationMail($transaction));
+                    } catch (\Throwable $mailEx) {
+                        \Log::warning('Email confirmation réservation non envoyé: '.$mailEx->getMessage());
+                    }
+                }
 
                 $successMessage = $this->buildSuccessMessageWithUser(
                     $transaction,

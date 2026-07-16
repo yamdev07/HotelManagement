@@ -1078,6 +1078,13 @@ document.addEventListener('DOMContentLoaded', function() {
         submitBtn.disabled = !this.checked;
     });
 
+    // Anti double-clic (issue #170) : un seul envoi possible
+    document.getElementById('reservationForm').addEventListener('submit', function () {
+        submitBtn.disabled = true;
+        const st = document.getElementById('submitText');
+        if (st) st.textContent = 'Enregistrement en cours…';
+    });
+
     // Initialisation
     updatePaymentSummary();
 
