@@ -1249,4 +1249,24 @@
         updateClock();
         setInterval(updateClock, 30000);
     });
+
+    // ===== Position de la sidebar conservée entre les pages (issue #172) =====
+    // Avant : après un clic sur un onglet du bas (ex. Journal), la page se
+    // rechargeait et la sidebar revenait en haut (Dashboard). On mémorise le
+    // scroll et on le restaure ; sinon on centre l'élément actif.
+    (function () {
+        const sb = document.querySelector('.sidebar-body');
+        if (!sb) return;
+        const KEY = 'sidebar-scroll';
+        const saved = sessionStorage.getItem(KEY);
+        if (saved !== null) {
+            sb.scrollTop = parseInt(saved, 10) || 0;
+        } else {
+            const active = sb.querySelector('.nav-item.active');
+            if (active) sb.scrollTop = Math.max(0, active.offsetTop - sb.clientHeight / 2);
+        }
+        sb.addEventListener('scroll', function () {
+            sessionStorage.setItem(KEY, sb.scrollTop);
+        }, { passive: true });
+    })();
 </script>
