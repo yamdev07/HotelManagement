@@ -7,12 +7,12 @@
     <div class="row g-3 mb-4">
         @php
             $cards = [
-                ['Inscriptions ce mois', $summary['this_month'], 'fa-user-plus', '#6366f1', '#eef2ff'],
-                ['Revenus totaux', number_format($summary['revenue'], 0, ',', ' ').' F', 'fa-sack-dollar', '#16a34a', '#dcfce7'],
-                ['Revenu mensuel', number_format($summary['mrr'], 0, ',', ' ').' F', 'fa-arrow-trend-up', '#0ea5e9', '#e0f2fe'],
-                ['Hôtels actifs', $summary['active'].' / '.$summary['total'], 'fa-circle-check', '#7c3aed', '#f3e8ff'],
-                ['Réabonnements', $summary['renewals'], 'fa-rotate', '#f59e0b', '#fef3c7'],
-                ['Expirés / suspendus', $summary['expired'], 'fa-triangle-exclamation', '#ef4444', '#fee2e2'],
+                ['Inscriptions ce mois', $summary['this_month'], 'fa-user-plus', '#a9b0ff', 'rgba(124,131,255,.18)'],
+                ['Revenus totaux', number_format($summary['revenue'], 0, ',', ' ').' F', 'fa-sack-dollar', '#34d399', 'rgba(52,211,153,.16)'],
+                ['Revenu mensuel', number_format($summary['mrr'], 0, ',', ' ').' F', 'fa-arrow-trend-up', '#38bdf8', 'rgba(56,189,248,.16)'],
+                ['Hôtels actifs', $summary['active'].' / '.$summary['total'], 'fa-circle-check', '#c4b5fd', 'rgba(176,107,255,.18)'],
+                ['Réabonnements', $summary['renewals'], 'fa-rotate', '#fbbf24', 'rgba(251,191,36,.16)'],
+                ['Expirés / suspendus', $summary['expired'], 'fa-triangle-exclamation', '#fb7185', 'rgba(251,113,133,.16)'],
             ];
         @endphp
         @foreach ($cards as [$label, $value, $icon, $c, $bg])
@@ -42,8 +42,8 @@
 
     {{-- ===== Liste ===== --}}
     <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-list me-2"></i>Tous les hôtels</span>
+        <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+            <span><i class="fas fa-list me-2 text-primary"></i>Tous les hôtels</span>
             <span class="badge bg-light text-dark border">{{ $hotels->count() }}</span>
         </div>
         <div class="table-responsive">
@@ -126,8 +126,8 @@
     </div>
 
     <style>
-        .stat-card { transition: transform .2s, box-shadow .2s; }
-        .stat-card:hover { transform: translateY(-4px); box-shadow: 0 18px 40px -24px rgba(15,23,42,.4) !important; }
+        .stat-card { transition: transform .2s, border-color .2s; }
+        .stat-card:hover { transform: translateY(-4px); border-color: rgba(124,131,255,.5) !important; }
         .stat-ico { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 1.05rem; }
         .hotel-ava { width: 40px; height: 40px; border-radius: 12px; color: #fff; display: grid; place-items: center; font-weight: 700; overflow: hidden; flex-shrink: 0; }
         .hotel-ava img { width: 100%; height: 100%; object-fit: cover; }
@@ -142,7 +142,8 @@
                 labels: data.map(d => d.label),
                 datasets: [{
                     data: data.map(d => d.count),
-                    backgroundColor: '#6366f1',
+                    backgroundColor: 'rgba(124,131,255,.6)',
+                    hoverBackgroundColor: '#b06bff',
                     borderRadius: 8,
                     maxBarThickness: 46,
                 }]
@@ -150,8 +151,8 @@
             options: {
                 plugins: { legend: { display: false } },
                 scales: {
-                    y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#f1f5f9' } },
-                    x: { grid: { display: false } }
+                    y: { beginAtZero: true, ticks: { precision: 0, color: '#94a1bd' }, grid: { color: 'rgba(255,255,255,.06)' } },
+                    x: { ticks: { color: '#94a1bd' }, grid: { display: false } }
                 }
             }
         });
