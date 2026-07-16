@@ -18,6 +18,35 @@ class CustomerCreationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_reservation_dates_validated_with_clear_messages(): void
+    {
+        $hotel = Hotel::create([
+            'name'                    => 'Hotel Dates Resa',
+            'slug'                    => Str::slug('Hotel Dates Resa '.Str::random(4)),
+            'is_active'               => true,
+            'onboarding_completed_at' => now(),
+            'subscription_ends_at'    => now()->addMonth(),
+        ]);
+        $admin = \App\Models\User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
+
+        app(TenantManager::class)->setHotelId($hotel->id);
+        $customer = Customer::create(['name' => 'Client Dates', 'gender' => 'Male']);
+
+        // Issue #174 : arrivée dans le passé -> message clair, pas de blocage silencieux
+        $this->actingAs($admin)->get(route('transaction.reservation.chooseRoom', $customer).'?'.http_build_query([
+            'count_person' => 2,
+            'check_in'     => now()->subDays(3)->toDateString(),
+            'check_out'    => now()->addDay()->toDateString(),
+        ]))->assertSessionHasErrors(['check_in']);
+
+        // Départ avant l'arrivée -> message clair
+        $this->actingAs($admin)->get(route('transaction.reservation.chooseRoom', $customer).'?'.http_build_query([
+            'count_person' => 2,
+            'check_in'     => now()->addDays(5)->toDateString(),
+            'check_out'    => now()->addDays(2)->toDateString(),
+        ]))->assertSessionHasErrors(['check_out']);
+    }
+
     public function test_absurd_birthdate_is_rejected(): void
     {
         $hotel = Hotel::create([

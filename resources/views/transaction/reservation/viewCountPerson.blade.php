@@ -364,12 +364,13 @@
                                 <i class="fas fa-sign-in-alt"></i>
                                 Date d'arrivée
                             </label>
-                            <input type="date" 
-                                   class="form-control @error('check_in') is-invalid @enderror" 
-                                   id="check_in" 
-                                   name="check_in" 
+                            {{-- Saisie libre (issue #174) : pas de bornes bloquantes, la validation
+                                 se fait au clic sur "Suivant" avec un message clair. --}}
+                            <input type="date"
+                                   class="form-control @error('check_in') is-invalid @enderror"
+                                   id="check_in"
+                                   name="check_in"
                                    value="{{ old('check_in', now()->format('Y-m-d')) }}"
-                                   min="{{ now()->format('Y-m-d') }}"
                                    required>
                             @error('check_in')
                                 <div class="error-message">
@@ -384,18 +385,21 @@
                                 <i class="fas fa-sign-out-alt"></i>
                                 Date de départ
                             </label>
-                            <input type="date" 
-                                   class="form-control @error('check_out') is-invalid @enderror" 
-                                   id="check_out" 
-                                   name="check_out" 
+                            <input type="date"
+                                   class="form-control @error('check_out') is-invalid @enderror"
+                                   id="check_out"
+                                   name="check_out"
                                    value="{{ old('check_out', now()->addDays(1)->format('Y-m-d')) }}"
-                                   min="{{ now()->addDays(1)->format('Y-m-d') }}"
                                    required>
                             @error('check_out')
                                 <div class="error-message">
                                     <i class="fas fa-exclamation-circle"></i> {{ $message }}
                                 </div>
                             @enderror
+                            {{-- Indice non bloquant : n'écrase jamais la saisie --}}
+                            <div id="dates-hint" class="error-message" style="display:none;">
+                                <i class="fas fa-circle-info"></i> <span id="dates-hint-text"></span>
+                            </div>
                         </div>
 
                         <!-- Bouton suivant -->
@@ -474,22 +478,28 @@
 @section('footer')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const checkIn = document.getElementById('check_in');
+    const checkIn  = document.getElementById('check_in');
     const checkOut = document.getElementById('check_out');
-    
-    // Valider que la date de départ est après la date d'arrivée
-    checkIn.addEventListener('change', function() {
-        checkOut.min = this.value;
-        if (checkOut.value && checkOut.value < this.value) {
-            checkOut.value = this.value;
+    const hint     = document.getElementById('dates-hint');
+    const hintText = document.getElementById('dates-hint-text');
+
+    // Issue #174 : on ne réécrit JAMAIS la saisie de l'utilisateur.
+    // On affiche seulement un indice ; la vraie validation (avec message clair)
+    // se fait côté serveur au clic sur « Voir les chambres disponibles ».
+    function checkDates() {
+        if (!hint) return;
+        const today = new Date().toISOString().slice(0, 10);
+        let msg = '';
+        if (checkIn.value && checkIn.value < today) {
+            msg = "La date d'arrivée est dans le passé : elle sera refusée à l'étape suivante.";
+        } else if (checkIn.value && checkOut.value && checkOut.value <= checkIn.value) {
+            msg = "La date de départ doit être après la date d'arrivée.";
         }
-    });
-    
-    checkOut.addEventListener('change', function() {
-        if (this.value < checkIn.value) {
-            this.value = checkIn.value;
-        }
-    });
+        hintText.textContent = msg;
+        hint.style.display = msg ? 'flex' : 'none';
+    }
+    checkIn.addEventListener('change', checkDates);
+    checkOut.addEventListener('change', checkDates);
 });
 </script>
 @endsection
