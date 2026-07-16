@@ -18,6 +18,36 @@ class CustomerCreationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_customer_photo_added_during_reservation_is_displayed(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $hotel = Hotel::create([
+            'name'                    => 'Hotel Photo Client',
+            'slug'                    => Str::slug('Hotel Photo Client '.Str::random(4)),
+            'is_active'               => true,
+            'onboarding_completed_at' => now(),
+            'subscription_ends_at'    => now()->addMonth(),
+        ]);
+        $admin = \App\Models\User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
+
+        $this->actingAs($admin)->post(route('transaction.reservation.storeCustomer'), [
+            'name'   => 'Client Photo',
+            'email'  => 'photo@client.test',
+            'phone'  => '+229 00 00 00 00',
+            'gender' => 'Male',
+            'avatar' => \Illuminate\Http\UploadedFile::fake()->image('client.jpg'),
+        ])->assertSessionHasNoErrors()->assertRedirect();
+
+        $c = Customer::withoutGlobalScopes()->where('email', 'photo@client.test')->first();
+        $this->assertNotNull($c);
+        $this->assertStringStartsWith('avatars/', $c->avatar);
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists($c->avatar);
+
+        // Issue #173 : la photo doit être servie via /storage (et plus ignorée)
+        $this->assertStringContainsString('storage/'.$c->avatar, $c->avatar_url);
+    }
+
     public function test_reservation_dates_validated_with_clear_messages(): void
     {
         $hotel = Hotel::create([

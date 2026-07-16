@@ -145,6 +145,14 @@ if (Schema::hasTable('customers')) {
     }
 }
 
+// -- customers.avatar (issue #173) : la photo de la fiche client n'avait pas de colonne --
+if (Schema::hasTable('customers') && ! Schema::hasColumn('customers', 'avatar')) {
+    try {
+        Schema::table('customers', function (Blueprint $t) { $t->string('avatar')->nullable()->after('phone'); });
+        echo "   customers.avatar AJOUTÉE\n";
+    } catch (\Throwable $e) { echo "   customers.avatar: ".$e->getMessage()."\n"; }
+}
+
 // -- customers.user_id nullable : une fiche client peut exister sans compte de connexion --
 if (Schema::hasTable('customers') && Schema::hasColumn('customers', 'user_id')) {
     try {

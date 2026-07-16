@@ -24,6 +24,7 @@ class Customer extends Model
         'user_id',
         'gender',
         'phone',
+        'avatar',
         'identification_type',
         'identification_number',
         'nationality',
@@ -299,11 +300,31 @@ class Customer extends Model
      */
     public function getAvatarUrlAttribute()
     {
+        // 1) Photo propre à la fiche client (ex : ajoutée pendant une réservation).
+        //    Issue #173 : cette colonne était ignorée, la photo ne s'affichait jamais.
+        if ($this->avatar) {
+            $avatar = ltrim($this->avatar, '/');
+
+            if (str_starts_with($avatar, 'http')) {
+                return $this->avatar;
+            }
+            if (str_starts_with($avatar, 'storage/')) {
+                return asset($avatar);
+            }
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($avatar)) {
+                return asset('storage/'.$avatar); // ex: avatars/xxx.jpg (flux réservation)
+            }
+            if (file_exists(public_path($avatar))) {
+                return asset($avatar); // ex: img/... (anciens chemins)
+            }
+        }
+
+        // 2) Sinon, l'avatar du compte de connexion lié (s'il existe)
         if ($this->user && $this->user->avatar) {
             return $this->user->getAvatar();
         }
 
-        // Générer un avatar basé sur le nom
+        // 3) Sinon, un avatar généré à partir du nom
         $name = urlencode($this->name);
         $colors = ['4ecdc4', '45b7d1', '96c93d', 'a363d9', 'e74a3b'];
         $color = $colors[array_rand($colors)];

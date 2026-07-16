@@ -544,8 +544,8 @@
         <div class="col-lg-4">
             <div class="profile-card anim-5">
                 <div class="profile-header">
-                    <img src="{{ $customer->user->getAvatar() }}" 
-                         alt="{{ $customer->name }}" 
+                    <img src="{{ $customer->avatar_url }}"
+                         alt="{{ $customer->name }}"
                          class="profile-avatar">
                     <div class="profile-name">{{ $customer->name }}</div>
                     <div class="profile-id">ID: #{{ $customer->id }}</div>

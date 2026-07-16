@@ -633,11 +633,8 @@
         <div class="col-lg-4">
             <div class="profile-card anim-4">
                 <div class="profile-header">
-                    @php
-                        $avatarUrl = $customer->user ? $customer->user->getAvatar() : null;
-                    @endphp
-                    <img src="{{ $avatarUrl ?? 'https://ui-avatars.com/api/?name='.urlencode($customer->name).'&background=1e6b2e&color=fff&size=120' }}" 
-                         alt="{{ $customer->name }}" 
+                    <img src="{{ $customer->avatar_url }}"
+                         alt="{{ $customer->name }}"
                          class="profile-avatar">
                     <h2 class="profile-name">{{ $customer->name }}</h2>
                     @if($customer->job)<div class="profile-job">{{ $customer->job }}</div>@endif
