@@ -34,7 +34,7 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-semibold mb-0"><i class="fas fa-chart-column me-2 text-primary"></i>Inscriptions — 6 derniers mois</h6>
+                <h6 class="fw-semibold mb-0"><i class="fas fa-chart-column me-2 text-primary"></i>Inscriptions · 6 derniers mois</h6>
             </div>
             <canvas id="regChart" height="90"></canvas>
         </div>
@@ -75,7 +75,7 @@
                                 </div>
                             </td>
                             <td class="small">
-                                <div><i class="fas fa-envelope text-muted me-1"></i>{{ $hotel->contact_email ?? $hotel->owner?->email ?? '—' }}</div>
+                                <div><i class="fas fa-envelope text-muted me-1"></i>{{ $hotel->contact_email ?? $hotel->owner?->email ?? '·' }}</div>
                                 @if ($hotel->contact_phone)<div class="text-muted"><i class="fas fa-phone me-1"></i>{{ $hotel->contact_phone }}</div>@endif
                             </td>
                             <td class="text-center">

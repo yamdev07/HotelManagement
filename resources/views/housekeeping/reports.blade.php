@@ -585,7 +585,7 @@
                                                 @php $mins = \Carbon\Carbon::parse($room->cleaning_started_at)->diffInMinutes($room->cleaning_completed_at); @endphp
                                                 <span class="badge {{ $mins > 60 ? 'badge-red' : ($mins > 45 ? 'badge-orange' : 'badge-green') }}">{{ $mins }} min</span>
                                             @else
-                                                <span class="text-muted">—</span>
+                                                <span class="text-muted">·</span>
                                             @endif
                                         </td>
                                         <td>

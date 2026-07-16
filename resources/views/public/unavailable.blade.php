@@ -11,7 +11,7 @@
     <div class="container d-flex align-items-center justify-content-center" style="min-height:100vh;">
         <div class="text-center" style="max-width:520px;">
             <i class="fas fa-moon fa-3x text-secondary mb-3"></i>
-            <h3 class="fw-bold">{{ $hotel->name }} — site momentanément indisponible</h3>
+            <h3 class="fw-bold">{{ $hotel->name }} · site momentanément indisponible</h3>
             <p class="text-muted">Cette vitrine n'est pas accessible pour le moment. Merci de réessayer plus tard.</p>
         </div>
     </div>

@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Check-in — Dashboard')
+@section('title', 'Check-in · Dashboard')
 @section('content')
 
 <style>
@@ -612,7 +612,7 @@
 }
 
 /* ══════════════════════════════════════════════
-   RIGHT COLUMN — Guest cards
+   RIGHT COLUMN · Guest cards
 ══════════════════════════════════════════════ */
 .guest-card {
     padding: 16px 18px;
@@ -1106,7 +1106,7 @@
     {{-- MAIN GRID --}}
     <div class="ci-main-grid">
 
-        {{-- LEFT — Réservations à venir --}}
+        {{-- LEFT · Réservations à venir --}}
         <div class="anim-4">
             <div class="ci-card">
                 <div class="ci-card-header">

@@ -96,7 +96,7 @@
     </section>
 
     <!-- ═══════════════════════════════════════════
-             OFFCANVAS COMMANDE — LUXURY SIDE PANEL
+             OFFCANVAS COMMANDE · LUXURY SIDE PANEL
         ════════════════════════════════════════════ -->
     @if($showOrderControls ?? true)
     <div class="offcanvas offcanvas-end v-offcanvas" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" data-bs-backdrop="static">
@@ -107,7 +107,7 @@
                     <span class="om-crown"><i class="fas fa-crown"></i></span>
                     <div>
                         <div class="om-title">Finaliser ma Commande</div>
-                        <div class="om-subtitle">Cactus Palace — Expérience Gastronomique</div>
+                        <div class="om-subtitle">Cactus Palace · Expérience Gastronomique</div>
                     </div>
                 </div>
                 <button type="button" class="om-close" data-bs-dismiss="offcanvas"><i class="fas fa-times"></i></button>
@@ -711,7 +711,7 @@
         }
 
         /* ══════════════════════════════════════════════════════
-           OFFCANVAS LUXURY — SIDE ORDER PANEL
+           OFFCANVAS LUXURY · SIDE ORDER PANEL
         ══════════════════════════════════════════════════════ */
         .v-offcanvas {
             width: 480px !important;

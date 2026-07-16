@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Guide d'utilisation — {{ config('app.name', 'checkinHub') }}</title>
+    <title>Guide d'utilisation · {{ config('app.name', 'checkinHub') }}</title>
     <link rel="icon" href="{{ asset('favicon.svg') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -50,7 +50,7 @@
         .gside a.toc-link:hover{color:var(--head);background:var(--panel);}
         .gside a.toc-link.active{color:var(--head);border-left-color:var(--brand);background:var(--panel);}
         .t-empty{color:var(--muted);font-size:.82rem;padding:10px 14px;display:none;}
-        /* content — centré dans l'espace à droite de la sidebar */
+        /* content · centré dans l'espace à droite de la sidebar */
         .gcontent{margin-left:300px;padding:40px 40px 90px;display:flex;flex-direction:column;align-items:center;}
         .gcontent > *{width:100%;max-width:820px;}
         .gburger{display:none;width:40px;height:40px;border-radius:11px;place-items:center;color:var(--head);background:var(--panel);border:1px solid var(--border);}
@@ -112,7 +112,7 @@
 @php
     $sections = [
         ['start','fa-flag-checkered','Premiers pas','Après votre inscription',
-            "Dès la validation de votre essai (ou de votre paiement), vous recevez vos identifiants par email — pensez à vérifier vos spams. Connectez-vous sur la page /login avec l'email et le mot de passe reçus."],
+            "Dès la validation de votre essai (ou de votre paiement), vous recevez vos identifiants par email · pensez à vérifier vos spams. Connectez-vous sur la page /login avec l'email et le mot de passe reçus."],
         ['process','fa-diagram-project','Le parcours d\'un séjour','Le processus métier au quotidien',
             "De la réservation au départ du client, puis à la remise en état de la chambre : voici le déroulé complet géré par l'application."],
         ['brand','fa-palette','Personnaliser votre établissement','Couleurs, logo & site',
@@ -143,9 +143,9 @@
     $details['rooms'] = <<<'HTML'
         <p>L'organisation se fait en deux temps : d'abord les <b>types de chambre</b>, ensuite les <b>chambres</b> elles-mêmes.</p>
         <ol class="steps">
-            <li><b>Créez vos types de chambre</b> — Menu <b>Chambres → Types</b> → « Nouveau type ». Donnez un nom (Standard, Suite, Deluxe…), une <b>capacité</b> (nombre de personnes) et un <b>prix de base</b>. Répétez pour chaque catégorie.</li>
-            <li><b>Ajoutez vos chambres</b> — Menu <b>Chambres → Nouvelle chambre</b>. Indiquez le <b>numéro</b>, choisissez le <b>type</b>, la capacité et le prix. La chambre est créée avec le statut « disponible ».</li>
-            <li><b>Suivez les statuts</b> — chaque chambre affiche son état (disponible, réservée, occupée, à nettoyer, en nettoyage, maintenance). Ces statuts évoluent <b>automatiquement</b> avec les réservations et le housekeeping.</li>
+            <li><b>Créez vos types de chambre</b> · Menu <b>Chambres → Types</b> → « Nouveau type ». Donnez un nom (Standard, Suite, Deluxe…), une <b>capacité</b> (nombre de personnes) et un <b>prix de base</b>. Répétez pour chaque catégorie.</li>
+            <li><b>Ajoutez vos chambres</b> · Menu <b>Chambres → Nouvelle chambre</b>. Indiquez le <b>numéro</b>, choisissez le <b>type</b>, la capacité et le prix. La chambre est créée avec le statut « disponible ».</li>
+            <li><b>Suivez les statuts</b> · chaque chambre affiche son état (disponible, réservée, occupée, à nettoyer, en nettoyage, maintenance). Ces statuts évoluent <b>automatiquement</b> avec les réservations et le housekeeping.</li>
         </ol>
         <div class="tip"><i class="fas fa-lightbulb"></i><div>Le <b>numéro de chambre est unique par établissement</b> : deux hôtels différents peuvent chacun avoir une chambre « 101 » sans conflit.</div></div>
     HTML;
@@ -153,11 +153,11 @@
     $details['bookings'] = <<<'HTML'
         <p>C'est le cœur de l'activité : enregistrer un séjour, accueillir puis faire partir le client.</p>
         <ol class="steps">
-            <li><b>Nouvelle réservation</b> — cliquez sur <b>Nouvelle réservation</b>. Sélectionnez ou créez le <b>client</b>, choisissez la <b>chambre</b> et les <b>dates</b> (arrivée / départ). La chambre passe en « réservée ».</li>
-            <li><b>Le client</b> — recherchez une fiche existante, ou créez-la (nom, téléphone, email facultatif). Un même client peut revenir sans créer de doublon.</li>
-            <li><b>Check-in (arrivée)</b> — à l'arrivée, ouvrez la réservation et cliquez sur <b>Check-in</b>. La chambre devient « occupée » et le séjour est actif. Vous pouvez encaisser un acompte ou la totalité.</li>
-            <li><b>Pendant le séjour</b> — ajoutez si besoin des <b>extras</b> (services, consommations) qui s'ajoutent à la note du client.</li>
-            <li><b>Check-out (départ)</b> — au départ, cliquez sur <b>Check-out</b>. La note finale (chambre + extras) est calculée, puis encaissée en caisse. La chambre bascule en « à nettoyer ».</li>
+            <li><b>Nouvelle réservation</b> · cliquez sur <b>Nouvelle réservation</b>. Sélectionnez ou créez le <b>client</b>, choisissez la <b>chambre</b> et les <b>dates</b> (arrivée / départ). La chambre passe en « réservée ».</li>
+            <li><b>Le client</b> · recherchez une fiche existante, ou créez-la (nom, téléphone, email facultatif). Un même client peut revenir sans créer de doublon.</li>
+            <li><b>Check-in (arrivée)</b> · à l'arrivée, ouvrez la réservation et cliquez sur <b>Check-in</b>. La chambre devient « occupée » et le séjour est actif. Vous pouvez encaisser un acompte ou la totalité.</li>
+            <li><b>Pendant le séjour</b> · ajoutez si besoin des <b>extras</b> (services, consommations) qui s'ajoutent à la note du client.</li>
+            <li><b>Check-out (départ)</b> · au départ, cliquez sur <b>Check-out</b>. La note finale (chambre + extras) est calculée, puis encaissée en caisse. La chambre bascule en « à nettoyer ».</li>
         </ol>
         <div class="tip"><i class="fas fa-lightbulb"></i><div>Un client se présente <b>sans réservation</b> ? Utilisez le <b>check-in direct</b> : la réservation et l'arrivée se font en une seule étape.</div></div>
     HTML;
@@ -165,10 +165,10 @@
     $details['cashier'] = <<<'HTML'
         <p>La caisse suit tout l'argent encaissé pendant un service, avec ouverture et clôture pour le rapprochement.</p>
         <ol class="steps">
-            <li><b>Ouvrir la caisse</b> — en début de service, Menu <b>Caisse → Ouvrir la caisse</b>. Saisissez le <b>fond de caisse</b> (montant de départ).</li>
-            <li><b>Encaisser</b> — enregistrez chaque paiement (chambre, extras) en indiquant le <b>moyen</b> : espèces, Mobile Money, carte… Un paiement peut être <b>partiel</b> (acompte) puis complété plus tard.</li>
-            <li><b>Suivre en temps réel</b> — la caisse affiche le <b>total encaissé</b> de la session au fur et à mesure.</li>
-            <li><b>Fermer la caisse</b> — en fin de service, cliquez sur <b>Fermer la caisse</b> : comptez votre tiroir, l'application calcule le <b>rapprochement</b> et signale tout écart.</li>
+            <li><b>Ouvrir la caisse</b> · en début de service, Menu <b>Caisse → Ouvrir la caisse</b>. Saisissez le <b>fond de caisse</b> (montant de départ).</li>
+            <li><b>Encaisser</b> · enregistrez chaque paiement (chambre, extras) en indiquant le <b>moyen</b> : espèces, Mobile Money, carte… Un paiement peut être <b>partiel</b> (acompte) puis complété plus tard.</li>
+            <li><b>Suivre en temps réel</b> · la caisse affiche le <b>total encaissé</b> de la session au fur et à mesure.</li>
+            <li><b>Fermer la caisse</b> · en fin de service, cliquez sur <b>Fermer la caisse</b> : comptez votre tiroir, l'application calcule le <b>rapprochement</b> et signale tout écart.</li>
         </ol>
         <div class="tip"><i class="fas fa-lightbulb"></i><div>Chaque encaissement est <b>tracé dans le journal d'activité</b> de votre établissement, avec l'auteur et l'heure.</div></div>
     HTML;
@@ -216,13 +216,13 @@
             <h2><span class="sico"><i class="fas fa-diagram-project"></i></span> Le parcours d'un séjour</h2>
             <p>Voici comment l'application accompagne le cycle de vie complet d'un séjour, de la réservation jusqu'à la remise en état de la chambre.</p>
             <ol class="steps">
-                <li><b>Réservation</b> — le client réserve, soit <b>en ligne</b> depuis votre site web (vitrine), soit <b>à la réception</b>. Vous enregistrez le client (fiche client) et choisissez la chambre et les dates. La chambre passe en <b>« réservée »</b>.</li>
-                <li><b>Arrivée (check-in)</b> — à l'arrivée, vous validez le check-in : la chambre devient <b>« occupée »</b> et le séjour est actif. Vous pouvez encaisser un acompte ou l'intégralité.</li>
-                <li><b>Pendant le séjour</b> — vous suivez les clients présents, ajoutez des consommations (restaurant, room service…) et des extras qui s'ajoutent à la note.</li>
-                <li><b>Départ (check-out)</b> — au départ, vous clôturez le séjour : la note finale est calculée (chambre + extras), puis <b>encaissée en caisse</b>. La chambre bascule en <b>« à nettoyer »</b>.</li>
-                <li><b>Housekeeping</b> — l'équipe de ménage voit les chambres à nettoyer, effectue le travail, et la chambre repasse <b>« propre / disponible »</b>, prête pour un nouveau client.</li>
-                <li><b>Caisse & clôture</b> — en fin de service, vous <b>fermez la caisse</b> pour rapprocher les encaissements de la journée.</li>
-                <li><b>Pilotage</b> — à tout moment, le tableau de bord et les rapports vous donnent l'occupation, le chiffre d'affaires et l'activité de votre établissement.</li>
+                <li><b>Réservation</b> · le client réserve, soit <b>en ligne</b> depuis votre site web (vitrine), soit <b>à la réception</b>. Vous enregistrez le client (fiche client) et choisissez la chambre et les dates. La chambre passe en <b>« réservée »</b>.</li>
+                <li><b>Arrivée (check-in)</b> · à l'arrivée, vous validez le check-in : la chambre devient <b>« occupée »</b> et le séjour est actif. Vous pouvez encaisser un acompte ou l'intégralité.</li>
+                <li><b>Pendant le séjour</b> · vous suivez les clients présents, ajoutez des consommations (restaurant, room service…) et des extras qui s'ajoutent à la note.</li>
+                <li><b>Départ (check-out)</b> · au départ, vous clôturez le séjour : la note finale est calculée (chambre + extras), puis <b>encaissée en caisse</b>. La chambre bascule en <b>« à nettoyer »</b>.</li>
+                <li><b>Housekeeping</b> · l'équipe de ménage voit les chambres à nettoyer, effectue le travail, et la chambre repasse <b>« propre / disponible »</b>, prête pour un nouveau client.</li>
+                <li><b>Caisse & clôture</b> · en fin de service, vous <b>fermez la caisse</b> pour rapprocher les encaissements de la journée.</li>
+                <li><b>Pilotage</b> · à tout moment, le tableau de bord et les rapports vous donnent l'occupation, le chiffre d'affaires et l'activité de votre établissement.</li>
             </ol>
             <div class="tip"><i class="fas fa-lightbulb"></i><div>Chaque action (check-in, encaissement, nettoyage…) est <b>tracée dans le journal d'activité</b>, propre à votre établissement.</div></div>
         </section>
@@ -242,7 +242,7 @@
         <section class="doc" id="support">
             <h2><span class="sico"><i class="fas fa-headset"></i></span> Support & aide</h2>
             <p>Une question ? Un blocage ? Notre équipe vous accompagne :</p>
-            <div class="note"><i class="fab fa-whatsapp" style="color:#25d366"></i><div>Support <b>WhatsApp 7j/7</b> — réponse rapide pour vous débloquer.</div></div>
+            <div class="note"><i class="fab fa-whatsapp" style="color:#25d366"></i><div>Support <b>WhatsApp 7j/7</b> · réponse rapide pour vous débloquer.</div></div>
             <div class="cta-final">
                 <h3 style="margin:0 0 8px;">Prêt à gérer votre hôtel sereinement ?</h3>
                 <p style="color:var(--muted);margin:0 0 18px;">Démarrez votre essai gratuit de {{ config('plans.trial_days', 14) }} jours, sans carte.</p>

@@ -1,4 +1,4 @@
-Réinitialisation du mot de passe — {{ config('app.name', 'checkinHub') }}
+Réinitialisation du mot de passe · {{ config('app.name', 'checkinHub') }}
 
 Bonjour,
 

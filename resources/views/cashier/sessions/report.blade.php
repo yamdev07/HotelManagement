@@ -885,7 +885,7 @@ tr:last-child td {
                                 @if($payment->transaction && $payment->transaction->customer)
                                     {{ Str::limit($payment->transaction->customer->name, 15) }}
                                 @else
-                                    —
+                                    ·
                                 @endif
                             </td>
                             <td>

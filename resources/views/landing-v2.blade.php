@@ -57,7 +57,7 @@
 
         .section { padding: 6rem 0; }
         .text-muted2 { color: var(--muted) !important; }
-        /* Le contenu occupe (presque) toute la largeur — marges minimes, plus de "boîte" centrée étroite */
+        /* Le contenu occupe (presque) toute la largeur · marges minimes, plus de "boîte" centrée étroite */
         @media (min-width: 992px){
             .container { max-width: none; padding-left: 3.5vw; padding-right: 3.5vw; }
         }

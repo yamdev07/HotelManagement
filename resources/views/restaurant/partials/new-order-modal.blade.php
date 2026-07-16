@@ -1,5 +1,5 @@
 <!-- ════════════════════════════════════════════════
-     MODAL NOUVELLE COMMANDE — ADMIN 5 ÉTOILES
+     MODAL NOUVELLE COMMANDE · ADMIN 5 ÉTOILES
 ════════════════════════════════════════════════ -->
 <div class="modal fade" id="newOrderModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
@@ -11,7 +11,7 @@
                     <div class="nom-icon-wrap"><i class="fas fa-utensils"></i></div>
                     <div>
                         <div class="nom-title">Nouvelle Commande</div>
-                        <div class="nom-subtitle">Restaurant — Interface Administration</div>
+                        <div class="nom-subtitle">Restaurant · Interface Administration</div>
                     </div>
                 </div>
                 <button type="button" class="nom-close" data-bs-dismiss="modal">✕</button>
@@ -72,7 +72,7 @@
                     <div class="nom-err mt-2" id="n-err-items"></div>
                 </div>
 
-                {{-- Grille menus cachée — nécessaire pour les boutons #naddbtn-* utilisés par la page index --}}
+                {{-- Grille menus cachée · nécessaire pour les boutons #naddbtn-* utilisés par la page index --}}
                 <div style="display:none" aria-hidden="true">
                     @php $modalMenus = $allMenus ?? $menus ?? []; @endphp
                     @foreach($modalMenus as $menu)
@@ -177,7 +177,7 @@
                             
                             {{-- Select caché pour garder la compatibilité JS --}}
                             <select id="n-customer-select" style="display:none">
-                                <option value="">— Sélectionner —</option>
+                                <option value="">· Sélectionner ·</option>
                                 @foreach($customers ?? [] as $customer)
                                 @if(is_object($customer))
                                 <option value="{{ $customer->id ?? 0 }}"
@@ -192,7 +192,7 @@
                             </select>
                         </div>
                         <div class="nom-grid-2 mt-3" id="existing-info" style="display:none">
-                            <div class="nom-info-card"><span class="nom-ic-label">Chambre</span><span class="nom-ic-val" id="disp-room">—</span></div>
+                            <div class="nom-info-card"><span class="nom-ic-label">Chambre</span><span class="nom-ic-val" id="disp-room">·</span></div>
                             <div class="nom-info-card"><span class="nom-ic-label">Statut</span><span class="nom-ic-val text-muted">Client enregistré</span></div>
                         </div>
                     </div>
@@ -759,7 +759,7 @@ function initNomModal() {
     // L'impression est gérée dans orders.blade.php (ouvre /restaurant/orders/{id}/invoice dans un nouvel onglet)
 
     /* ══════════════════════════════════════════
-       NOUVELLE COMMANDE — MULTI-ÉTAPES
+       NOUVELLE COMMANDE · MULTI-ÉTAPES
     ══════════════════════════════════════════ */
     let nomStep = 1;
     let nomItems = {};
@@ -842,7 +842,7 @@ function initNomModal() {
         $('#selected-customer-card').fadeIn();
 
         // Afficher les infos sous la liste (toujours utile pour le récap)
-        $('#disp-room').text(room || '—');
+        $('#disp-room').text(room || '·');
         $('#existing-info').fadeIn();
         
         // Mettre à jour l'affichage de facturation chambre
@@ -1136,7 +1136,7 @@ function initNomModal() {
             const name = $('#n-fullname').val().trim() || '<span class="text-muted">Client inconnu</span>';
             clientHtml = `<div class="nom-recap-line"><span>Nom</span>${name}</div>`;
         }
-        $('#nrecap-client').html(clientHtml || '—');
+        $('#nrecap-client').html(clientHtml || '·');
         
         // Affichage du lieu
         let locHtml = `<div class="nom-recap-line"><span>Lieu</span>${nomLocation === 'room' ? 'En Chambre' : 'À Table'}</div>`;

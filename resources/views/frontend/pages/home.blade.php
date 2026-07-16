@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Cactus Palace — Hôtel 5 Étoiles, Cotonou, Bénin')
+@section('title', 'Cactus Palace · Hôtel 5 Étoiles, Cotonou, Bénin')
 
 @section('content')
     <!-- Hero Section modernisé -->
@@ -16,7 +16,7 @@
                             Cactus Palace
                         </h1>
                         <p class="hero-subtitle mb-5" data-aos="fade-up" data-aos-delay="200">
-                            L'art de l'hospitalité au cœur de Cotonou — une expérience de luxe authentiquement béninoise
+                            L'art de l'hospitalité au cœur de Cotonou · une expérience de luxe authentiquement béninoise
                         </p>
                         <div class="hero-cta" data-aos="fade-up" data-aos-delay="300">
                             <a href="{{ route('frontend.rooms') }}" class="btn-modern btn-primary me-3">

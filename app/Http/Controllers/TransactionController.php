@@ -404,7 +404,7 @@ class TransactionController extends Controller
                 'verified_by'    => auth()->id(),
                 'verified_at'    => now(),
                 'reference'      => 'LATE-' . $transaction->id . '-' . now()->format('YmdHis'),
-                'description'    => 'Supplément late checkout — départ à ' . $request->expected_checkout_time,
+                'description'    => 'Supplément late checkout · départ à ' . $request->expected_checkout_time,
             ]);
         }
 

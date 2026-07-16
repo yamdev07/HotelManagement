@@ -36,7 +36,7 @@
         <div class="col-md-4">
             <div class="card border-0 shadow-sm h-100"><div class="card-body">
                 <div class="text-muted small text-uppercase">Échéance</div>
-                <div class="h4 mb-0 mt-1">{{ $hotel->subscription_ends_at?->format('d/m/Y') ?? '—' }}</div>
+                <div class="h4 mb-0 mt-1">{{ $hotel->subscription_ends_at?->format('d/m/Y') ?? '·' }}</div>
                 <div class="small {{ $expired ? 'text-danger' : 'text-muted' }}">
                     @if ($expired) Expiré @elseif ($daysLeft !== null) Encore {{ $daysLeft }} jour(s) @endif
                 </div>

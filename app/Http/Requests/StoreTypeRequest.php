@@ -15,7 +15,7 @@ class StoreTypeRequest extends FormRequest
 
     public function rules()
     {
-        // Unicité du nom de type PAR hôtel (et non globale) — multi-tenant.
+        // Unicité du nom de type PAR hôtel (et non globale) · multi-tenant.
         $hotelId = app(TenantManager::class)->getHotelId();
         $uniqueName = Rule::unique('types', 'name')
             ->ignore($this->type?->id)

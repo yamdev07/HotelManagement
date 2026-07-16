@@ -823,7 +823,7 @@
     <div class="recep-note anim-4">
         <i class="fas fa-info-circle"></i>
         <div>
-            <strong>💼 Réceptionniste — Permissions Complètes</strong>
+            <strong>💼 Réceptionniste · Permissions Complètes</strong>
             <small>Création, modification, paiements, check-in/out, annulation ✓ (sauf suppression)</small>
         </div>
     </div>

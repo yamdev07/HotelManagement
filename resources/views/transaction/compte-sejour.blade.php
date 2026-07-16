@@ -6,7 +6,7 @@
     <div>
         <h3 class="mb-0">
             <i class="fas fa-receipt me-2 text-success"></i>
-            Compte Séjour — Chambre {{ $transaction->room->number }}
+            Compte Séjour · Chambre {{ $transaction->room->number }}
         </h3>
         <small class="text-muted">
             {{ $transaction->customer->name }} &bull;
@@ -126,7 +126,7 @@
                     </div>
                     @foreach($order->items as $item)
                     <div class="d-flex justify-content-between small ps-2 mt-1">
-                        <span>{{ $item->menu->name ?? '—' }} × {{ $item->quantity }}</span>
+                        <span>{{ $item->menu->name ?? '·' }} × {{ $item->quantity }}</span>
                         <span>{{ number_format($item->price * $item->quantity, 0, ',', ' ') }} CFA</span>
                     </div>
                     @endforeach
@@ -276,8 +276,8 @@
             </div>
             <div class="card-body small">
                 <div><strong>{{ $transaction->customer->name }}</strong></div>
-                <div class="text-muted">{{ $transaction->customer->phone ?? '—' }}</div>
-                <div class="text-muted">{{ $transaction->customer->email ?? '—' }}</div>
+                <div class="text-muted">{{ $transaction->customer->phone ?? '·' }}</div>
+                <div class="text-muted">{{ $transaction->customer->email ?? '·' }}</div>
                 <div class="text-muted">{{ $transaction->customer->nationality ?? '' }}</div>
                 @if($transaction->person_count > 1)
                 <div class="mt-1"><i class="fas fa-users text-muted me-1"></i>{{ $transaction->person_count }} personnes</div>

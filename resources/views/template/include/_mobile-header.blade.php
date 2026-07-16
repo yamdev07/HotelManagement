@@ -292,7 +292,7 @@
 .mh-dd-item--danger:hover { background: #f8f9f8; color: #3a3e3a; }
 
 /* ════════════════════════════════════════
-   RESPONSIVE — mobile header visible ≤ 768px
+   RESPONSIVE · mobile header visible ≤ 768px
 ════════════════════════════════════════ */
 @media (max-width: 768px) {
     .mobile-header { display: block; }

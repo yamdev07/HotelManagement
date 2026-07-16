@@ -100,7 +100,7 @@
                             @endif
                         </div>
                         <input type="file" name="logo" class="form-control" accept="image/*">
-                        <small class="text-muted d-block mt-2">PNG, JPG, SVG ou WEBP — max 2 Mo.</small>
+                        <small class="text-muted d-block mt-2">PNG, JPG, SVG ou WEBP · max 2 Mo.</small>
                     </div>
                 </div>
             </div>
@@ -124,7 +124,7 @@
                     <div class="col-md-7">
                         <label class="form-label">Image de couverture</label>
                         <input type="file" name="cover_image" class="form-control" accept="image/*">
-                        <small class="text-muted">Affichée en bandeau de la vitrine — max 4 Mo.</small>
+                        <small class="text-muted">Affichée en bandeau de la vitrine · max 4 Mo.</small>
                     </div>
                     <div class="col-md-5">
                         @if ($hotel->coverUrl())

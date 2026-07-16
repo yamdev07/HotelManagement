@@ -1921,7 +1921,7 @@ function checkLateCheckoutStatus(transactionId) {
                 console.log('Statut late checkout:', data.data);
             }
         })
-        .catch(() => {}); // silence — non-critique
+        .catch(() => {}); // silence · non-critique
 }
 </script>
 @endsection

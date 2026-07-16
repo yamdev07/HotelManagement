@@ -305,7 +305,7 @@
                     <p><i class="fas fa-phone contact-icon"></i>+229 01 XX XX XX XX</p>
                     <p><i class="fab fa-whatsapp contact-icon"></i>+229 01 XX XX XX XX</p>
                     <p><i class="fas fa-envelope contact-icon"></i>contact@cactushotel.com</p>
-                    <p><i class="fas fa-clock contact-icon"></i>Réception 24h/24 — 7j/7</p>
+                    <p><i class="fas fa-clock contact-icon"></i>Réception 24h/24 · 7j/7</p>
                 </div>
 
             </div>

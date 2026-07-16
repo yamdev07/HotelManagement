@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'MENU — Le Cactus Hotel')
+@section('title', 'MENU · Le Cactus Hotel')
 
 @push('styles')
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">

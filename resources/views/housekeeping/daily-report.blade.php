@@ -517,7 +517,7 @@ textarea.form-control {
                                         @if($room->cleaned_by)
                                             <span class="badge badge-gray">{{ \App\Models\User::find($room->cleaned_by)->name ?? 'Inconnu' }}</span>
                                         @else
-                                            <span class="text-muted">—</span>
+                                            <span class="text-muted">·</span>
                                         @endif
                                     </td>
                                     <td>

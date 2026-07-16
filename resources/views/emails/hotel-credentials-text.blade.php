@@ -10,5 +10,5 @@ Connexion : {{ $loginUrl }}
 
 Pour votre sécurité, pensez à modifier votre mot de passe après votre première connexion.
 
-—
+·
 {{ config('app.name', 'checkinHub') }}

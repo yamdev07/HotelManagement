@@ -57,7 +57,7 @@ body {
 }
 
 /* ══════════════════════════════════════
-   ① TOPBAR — sticky
+   ① TOPBAR · sticky
 ══════════════════════════════════════ */
 .db-topbar {
     position: sticky; top: 0; z-index: 200;
@@ -106,7 +106,7 @@ body {
 }
 
 /* ══════════════════════════════════════
-   ② KPI STRIP — sticky
+   ② KPI STRIP · sticky
 ══════════════════════════════════════ */
 .db-kpibar {
     position: sticky; top: 54px; z-index: 190;
@@ -148,7 +148,7 @@ body {
 .kpi__bar-fill { height: 100%; border-radius: 99px; }
 
 /* ══════════════════════════════════════
-   ③ QUICK ACTIONS BAR — sticky
+   ③ QUICK ACTIONS BAR · sticky
 ══════════════════════════════════════ */
 .db-qabar {
     position: sticky; top: 142px; z-index: 180;

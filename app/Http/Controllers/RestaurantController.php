@@ -454,7 +454,7 @@ class RestaurantController extends Controller
         return response()->json($menus);
     }
 
-    // API publique — vérifier si une chambre a un client actif
+    // API publique · vérifier si une chambre a un client actif
     public function checkRoomGuest(Request $request)
     {
         $roomNumber = trim($request->get('room_number', ''));

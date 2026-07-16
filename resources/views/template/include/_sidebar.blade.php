@@ -522,7 +522,7 @@
 
 <style>
     /* ════════════════════════════════════════
-   SIDEBAR — BASE
+   SIDEBAR · BASE
 ════════════════════════════════════════ */
     .sidebar {
         width: 272px;
@@ -938,7 +938,7 @@
     }
 
     /* ════════════════════════════════════════
-   COLLAPSED (desktop) — réduit à 64px
+   COLLAPSED (desktop) · réduit à 64px
 ════════════════════════════════════════ */
     .sidebar.collapsed {
         width: 64px;
