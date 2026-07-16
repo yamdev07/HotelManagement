@@ -11,7 +11,7 @@
             <div class="mh-brand-icon">
                 <i class="fas fa-hotel"></i>
             </div>
-            <span class="mh-brand-name">Le Cactus Hotel</span>
+            <span class="mh-brand-name">{{ ($currentHotel ?? null)?->name ?? config('app.name', 'checkinHub') }}</span>
         </a>
 
         {{-- ── Right : notifs + profil ── --}}
@@ -131,7 +131,7 @@
     border-radius: 10px;
     background: #f0faf0;
     border: 1.5px solid #d4edda;
-    color: #1e6b2e;
+    color: var(--hotel-primary, #1e6b2e);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; flex-shrink: 0;
     font-size: .95rem;
@@ -147,7 +147,7 @@
 }
 .mh-brand-icon {
     width: 30px; height: 30px; border-radius: 8px;
-    background: #1e6b2e;
+    background: var(--hotel-primary, #1e6b2e);
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: .78rem; flex-shrink: 0;
     box-shadow: 0 2px 6px rgba(30,107,46,.3);
@@ -172,11 +172,11 @@
     cursor: pointer; position: relative; font-size: .85rem;
     transition: background .2s;
 }
-.mh-icon-btn:hover { background: #eff0ef; color: #1e6b2e; }
+.mh-icon-btn:hover { background: #eff0ef; color: var(--hotel-primary, #1e6b2e); }
 
 .mh-notif-dot {
     position: absolute; top: -3px; right: -3px;
-    background: #2e8540; color: white;
+    background: var(--hotel-primary, #2e8540); color: white;
     font-size: .55rem; font-weight: 700;
     min-width: 16px; height: 16px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
@@ -196,7 +196,7 @@
 
 .mh-avatar {
     width: 30px; height: 30px; border-radius: 50%;
-    background: linear-gradient(135deg, #1e6b2e, #2e8540);
+    background: linear-gradient(135deg, var(--hotel-primary, #1e6b2e), var(--hotel-primary, #2e8540));
     color: white; font-size: .7rem; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; font-family: 'DM Mono', monospace;
@@ -235,7 +235,7 @@
 }
 .mh-dd-title { font-size: .82rem; font-weight: 700; color: #252825; }
 .mh-dd-badge {
-    background: #1e6b2e; color: white;
+    background: var(--hotel-primary, #1e6b2e); color: white;
     font-size: .62rem; font-weight: 700;
     padding: 2px 7px; border-radius: 100px;
 }
@@ -251,10 +251,10 @@
     border-bottom: 1px solid #eff0ef;
     transition: background .15s;
 }
-.mh-notif-item:hover { background: #f0faf0; text-decoration: none; color: #1e6b2e; }
+.mh-notif-item:hover { background: #f0faf0; text-decoration: none; color: var(--hotel-primary, #1e6b2e); }
 .mh-notif-ico {
     width: 28px; height: 28px; border-radius: 7px;
-    background: #d4edda; color: #1e6b2e;
+    background: #d4edda; color: var(--hotel-primary, #1e6b2e);
     display: flex; align-items: center; justify-content: center;
     font-size: .72rem; flex-shrink: 0; margin-top: 1px;
 }
@@ -271,7 +271,7 @@
 .mh-dd-footer {
     display: block; text-align: center;
     padding: 10px; font-size: .75rem; font-weight: 600;
-    color: #1e6b2e; text-decoration: none;
+    color: var(--hotel-primary, #1e6b2e); text-decoration: none;
     background: #f8f9f8; border-top: 1.5px solid #eff0ef;
     transition: background .15s;
 }
@@ -286,8 +286,8 @@
     transition: background .15s;
 }
 .mh-dd-item i { width: 14px; text-align: center; color: #9ba09b; font-size: .78rem; }
-.mh-dd-item:hover { background: #f0faf0; color: #1e6b2e; text-decoration: none; }
-.mh-dd-item:hover i { color: #1e6b2e; }
+.mh-dd-item:hover { background: #f0faf0; color: var(--hotel-primary, #1e6b2e); text-decoration: none; }
+.mh-dd-item:hover i { color: var(--hotel-primary, #1e6b2e); }
 .mh-dd-item--danger { color: #545954; }
 .mh-dd-item--danger:hover { background: #f8f9f8; color: #3a3e3a; }
 
