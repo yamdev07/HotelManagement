@@ -41,8 +41,9 @@
         .gside a.toc-link:hover{color:#fff;background:var(--panel);}
         .gside a.toc-link.active{color:#fff;border-left-color:var(--brand);background:var(--panel);}
         .t-empty{color:var(--muted);font-size:.82rem;padding:10px 14px;display:none;}
-        /* content */
-        .gcontent{margin-left:300px;max-width:860px;padding:40px 40px 90px;}
+        /* content — centré dans l'espace à droite de la sidebar */
+        .gcontent{margin-left:300px;padding:40px 40px 90px;display:flex;flex-direction:column;align-items:center;}
+        .gcontent > *{width:100%;max-width:820px;}
         .gburger{display:none;width:40px;height:40px;border-radius:11px;place-items:center;color:#fff;background:var(--panel);border:1px solid var(--border);}
         .hero{margin-bottom:40px;}
         .hero .chip{display:inline-flex;align-items:center;gap:7px;padding:.4rem .9rem;border:1px solid var(--border);
@@ -93,6 +94,8 @@
     $sections = [
         ['start','fa-flag-checkered','Premiers pas','Après votre inscription',
             "Dès la validation de votre essai (ou de votre paiement), vous recevez vos identifiants par email — pensez à vérifier vos spams. Connectez-vous sur la page /login avec l'email et le mot de passe reçus."],
+        ['process','fa-diagram-project','Le parcours d\'un séjour','Le processus métier au quotidien',
+            "De la réservation au départ du client, puis à la remise en état de la chambre : voici le déroulé complet géré par l'application."],
         ['brand','fa-palette','Personnaliser votre établissement','Couleurs, logo & site',
             "À la première connexion, un assistant vous permet de définir le nom affiché, votre logo et vos couleurs. Vous pouvez y revenir à tout moment depuis « Mon établissement »."],
         ['rooms','fa-bed','Configurer vos chambres','Types & chambres',
@@ -153,7 +156,23 @@
             <div class="tip"><i class="fas fa-lightbulb"></i><div>Changez votre mot de passe après la première connexion depuis <b>Profil → Changer le mot de passe</b>.</div></div>
         </section>
 
-        @foreach (array_slice($sections, 1) as $s)
+        <!-- Processus métier (détaillé) -->
+        <section class="doc" id="process">
+            <h2><span class="sico"><i class="fas fa-diagram-project"></i></span> Le parcours d'un séjour</h2>
+            <p>Voici comment l'application accompagne le cycle de vie complet d'un séjour, de la réservation jusqu'à la remise en état de la chambre.</p>
+            <ol class="steps">
+                <li><b>Réservation</b> — le client réserve, soit <b>en ligne</b> depuis votre site web (vitrine), soit <b>à la réception</b>. Vous enregistrez le client (fiche client) et choisissez la chambre et les dates. La chambre passe en <b>« réservée »</b>.</li>
+                <li><b>Arrivée (check-in)</b> — à l'arrivée, vous validez le check-in : la chambre devient <b>« occupée »</b> et le séjour est actif. Vous pouvez encaisser un acompte ou l'intégralité.</li>
+                <li><b>Pendant le séjour</b> — vous suivez les clients présents, ajoutez des consommations (restaurant, room service…) et des extras qui s'ajoutent à la note.</li>
+                <li><b>Départ (check-out)</b> — au départ, vous clôturez le séjour : la note finale est calculée (chambre + extras), puis <b>encaissée en caisse</b>. La chambre bascule en <b>« à nettoyer »</b>.</li>
+                <li><b>Housekeeping</b> — l'équipe de ménage voit les chambres à nettoyer, effectue le travail, et la chambre repasse <b>« propre / disponible »</b>, prête pour un nouveau client.</li>
+                <li><b>Caisse & clôture</b> — en fin de service, vous <b>fermez la caisse</b> pour rapprocher les encaissements de la journée.</li>
+                <li><b>Pilotage</b> — à tout moment, le tableau de bord et les rapports vous donnent l'occupation, le chiffre d'affaires et l'activité de votre établissement.</li>
+            </ol>
+            <div class="tip"><i class="fas fa-lightbulb"></i><div>Chaque action (check-in, encaissement, nettoyage…) est <b>tracée dans le journal d'activité</b>, propre à votre établissement.</div></div>
+        </section>
+
+        @foreach (array_slice($sections, 2) as $s)
             <section class="doc" id="{{ $s[0] }}">
                 <h2><span class="sico"><i class="fas {{ $s[1] }}"></i></span> {{ $s[2] }}</h2>
                 <p><strong style="color:#fff">{{ $s[3] }}.</strong> {{ $s[4] }}</p>
