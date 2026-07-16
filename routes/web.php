@@ -56,10 +56,11 @@ Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(func
 });
 
 // ==================== INSCRIPTION SELF-SERVICE (essai gratuit) ====================
-Route::middleware('guest')->group(function () {
-    Route::get('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'create'])->name('hotel.register');
-    Route::post('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'store'])->name('hotel.register.store');
-});
+// PAS de middleware "guest" : un utilisateur déjà connecté doit quand même pouvoir
+// ouvrir le formulaire et créer un nouvel établissement (sinon il était renvoyé
+// vers son tableau de bord). À la création, il est connecté au nouveau compte.
+Route::get('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'create'])->name('hotel.register');
+Route::post('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'store'])->name('hotel.register.store');
 
 // ==================== ROUTES FRONTEND (Site Vitrine de l'hôtel) ====================
 Route::get('/vitrine', [FrontendController::class, 'home'])->name('frontend.home');
