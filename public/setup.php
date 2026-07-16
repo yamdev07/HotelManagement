@@ -203,10 +203,23 @@ echo "   Identifiants -> $SU_EMAIL / $SU_PASS   (vérif mot de passe: $check)\n\
 echo "5) Lien web/storage...\n";
 $target = realpath(__DIR__.'/../private/storage/app/public');
 $link   = __DIR__.'/storage';
-if (! file_exists($link) && $target) {
-    @symlink($target, $link);
+// Robuste : détecte aussi un FAUX dossier "storage" (pas un lien) ou un lien
+// pointant au mauvais endroit, et le remplace par le bon lien.
+if ($target) {
+    $resolved = @realpath($link);
+    $correct  = is_link($link) && $resolved === $target;
+    if (! $correct) {
+        if (file_exists($link) && ! is_link($link)) {
+            @rename($link, __DIR__.'/storage_old_'.date('Ymd_His')); // sauvegarde du faux dossier
+        } elseif (is_link($link)) {
+            @unlink($link); // lien cassé/mauvaise cible
+        }
+        @symlink($target, $link);
+    }
 }
-echo (file_exists($link) ? "   OK : web/storage\n" : "   ⚠️ À créer à la main (New > Link dans WinSCP).\n")."\n";
+echo (is_link($link) && @realpath($link) === $target
+    ? "   OK : web/storage -> private/storage/app/public\n"
+    : "   ⚠️ Lien incorrect : à créer à la main (WinSCP > New > Link).\n")."\n";
 
 echo "===== TERMINÉ =====\n";
 echo "➡️  Connecte-toi : /login  ($SU_EMAIL / $SU_PASS)\n";
