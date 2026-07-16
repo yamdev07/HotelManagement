@@ -531,7 +531,8 @@ textarea.form-control {
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="form-label"><i class="fas fa-cake-candles"></i> Date de naissance</label>
-                                    <input type="date" class="form-control @error('birthdate') is-invalid @enderror" 
+                                    <input type="date" class="form-control @error('birthdate') is-invalid @enderror"
+                                           min="1900-01-01" max="{{ date('Y-m-d') }}"
                                            name="birthdate" value="{{ old('birthdate', $customer->birthdate) }}">
                                     @error('birthdate')<div class="error-message"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>@enderror
                                 </div>

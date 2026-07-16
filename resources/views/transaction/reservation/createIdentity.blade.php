@@ -553,6 +553,7 @@
                             Date de naissance
                         </label>
                         <input type="date" class="form-control @error('birthdate') is-invalid @enderror"
+                               min="1900-01-01" max="{{ date('Y-m-d') }}"
                                id="birthdate" name="birthdate" value="{{ old('birthdate') }}">
                         @error('birthdate')
                             <div class="error-message">

@@ -46,8 +46,12 @@ class TransactionRoomReservationController extends Controller
             'gender' => 'required|in:Male,Female,Other',
             'address' => 'nullable|string',
             'job' => 'nullable|string|max:100',
-            'birthdate' => 'nullable|date',
+            // Date de naissance plausible : entre 1900 et aujourd'hui (issue #161).
+            'birthdate' => 'nullable|date|after_or_equal:1900-01-01|before_or_equal:today',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'birthdate.after_or_equal' => "La date de naissance n'est pas valide (au plus tôt : 01/01/1900).",
+            'birthdate.before_or_equal' => 'La date de naissance ne peut pas être dans le futur.',
         ]);
 
         // Rechercher un client avec le même email ET même nom

@@ -351,6 +351,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                                     </label>
                                     <input type="date" class="form-control" id="f_birthdate" name="birthdate"
                                            required
+                                           min="1900-01-01"
                                            max="{{ date('Y-m-d', strtotime('-18 years')) }}"
                                            value="{{ date('Y-m-d', strtotime('-30 years')) }}">
                                     <div class="field-hint">Minimum 18 ans requis</div>
