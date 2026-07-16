@@ -26,15 +26,24 @@
         .btn{border-radius:11px;padding:9px 16px;font-weight:600;font-size:.85rem;}
         .btn-glow{background:linear-gradient(90deg,var(--brand),var(--brand2));color:#fff;box-shadow:0 12px 30px -12px rgba(124,131,255,.6);}
         .btn-ghost{border:1px solid var(--border);color:var(--txt);}
-        .wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:250px 1fr;gap:40px;padding:36px 26px 80px;}
-        /* TOC */
-        .toc{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow-y:auto;}
-        .toc .t-title{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:0 0 12px;}
-        .toc a{display:block;color:var(--muted);font-size:.85rem;padding:7px 12px;border-radius:9px;margin-bottom:2px;border-left:2px solid transparent;}
-        .toc a:hover{color:#fff;background:var(--panel);}
-        .toc a.active{color:#fff;border-left-color:var(--brand);background:var(--panel);}
+        /* Sidebar doc (fixe, à gauche) */
+        .gside{position:fixed;top:59px;left:0;bottom:0;width:300px;border-right:1px solid var(--border);
+            background:rgba(9,13,26,.55);backdrop-filter:blur(12px);padding:22px 18px;overflow-y:auto;z-index:20;transition:transform .25s;}
+        .t-search{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);
+            border-radius:12px;padding:11px 14px;margin-bottom:20px;color:var(--muted);}
+        .t-search i{font-size:.85rem;}
+        .t-search input{background:none;border:none;outline:none;color:var(--txt);font-size:.9rem;width:100%;}
+        .t-search input::placeholder{color:var(--muted);}
+        .t-title{font-size:.7rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:0 0 12px;}
+        .gside a.toc-link{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:.92rem;padding:10px 14px;
+            border-radius:10px;margin-bottom:3px;border-left:2px solid transparent;}
+        .gside a.toc-link i{font-size:.8rem;width:16px;text-align:center;}
+        .gside a.toc-link:hover{color:#fff;background:var(--panel);}
+        .gside a.toc-link.active{color:#fff;border-left-color:var(--brand);background:var(--panel);}
+        .t-empty{color:var(--muted);font-size:.82rem;padding:10px 14px;display:none;}
         /* content */
-        .content{min-width:0;}
+        .gcontent{margin-left:300px;max-width:860px;padding:40px 40px 90px;}
+        .gburger{display:none;width:40px;height:40px;border-radius:11px;place-items:center;color:#fff;background:var(--panel);border:1px solid var(--border);}
         .hero{margin-bottom:40px;}
         .hero .chip{display:inline-flex;align-items:center;gap:7px;padding:.4rem .9rem;border:1px solid var(--border);
             border-radius:999px;background:var(--panel);font-size:.78rem;color:var(--muted);margin-bottom:14px;}
@@ -60,13 +69,19 @@
         .note i{color:#fbbf24;margin-top:3px;}
         .cta-final{background:linear-gradient(135deg,rgba(124,131,255,.18),rgba(176,107,255,.12));
             border:1px solid var(--border);border-radius:18px;padding:28px;text-align:center;margin-top:20px;}
-        @media (max-width:900px){.wrap{grid-template-columns:1fr;}.toc{display:none;}}
+        @media (max-width:900px){
+            .gside{transform:translateX(-100%);width:280px;}
+            .gside.open{transform:none;}
+            .gcontent{margin-left:0;padding:26px 20px 80px;}
+            .gburger{display:grid;}
+        }
     </style>
 </head>
 <body>
 <div class="cosmos"></div>
 
 <nav class="nav">
+    <div class="gburger" onclick="document.querySelector('.gside').classList.toggle('open')"><i class="fas fa-bars"></i></div>
     <a href="{{ route('landing') }}" class="logo"><i class="fas fa-location-dot"></i> check<span>inHub</span></a>
     <div style="flex:1"></div>
     <a href="{{ route('landing') }}" class="btn btn-ghost"><i class="fas fa-arrow-left me-1"></i> Site</a>
@@ -101,18 +116,24 @@
     ];
 @endphp
 
-<div class="wrap">
-    <!-- TOC -->
-    <aside class="toc">
-        <div class="t-title">Sur cette page</div>
-        @foreach ($sections as $s)
-            <a href="#{{ $s[0] }}" class="toc-link">{{ $s[2] }}</a>
-        @endforeach
-        <a href="#support" class="toc-link">Support & aide</a>
-    </aside>
+<!-- SIDEBAR (gauche) -->
+<aside class="gside">
+    <div class="t-search">
+        <i class="fas fa-magnifying-glass"></i>
+        <input type="text" id="guideSearch" placeholder="Rechercher dans le guide…" autocomplete="off">
+    </div>
+    <div class="t-title">Sommaire</div>
+    @foreach ($sections as $s)
+        <a href="#{{ $s[0] }}" class="toc-link" data-text="{{ \Illuminate\Support\Str::lower($s[2].' '.$s[3].' '.$s[4]) }}">
+            <i class="fas {{ $s[1] }}"></i> {{ $s[2] }}
+        </a>
+    @endforeach
+    <a href="#support" class="toc-link" data-text="support aide contact whatsapp"><i class="fas fa-headset"></i> Support &amp; aide</a>
+    <div class="t-empty" id="tocEmpty">Aucun résultat pour cette recherche.</div>
+</aside>
 
-    <!-- CONTENT -->
-    <main class="content">
+<!-- CONTENT -->
+<main class="gcontent">
         <div class="hero">
             <span class="chip"><i class="fas fa-book-open" style="color:var(--accent)"></i> Guide d'utilisation</span>
             <h1>Prenez en main {{ config('app.name', 'checkinHub') }} en quelques minutes</h1>
@@ -151,7 +172,6 @@
             </div>
         </section>
     </main>
-</div>
 
 <script>
     // Surlignage de la section active dans le sommaire
@@ -167,6 +187,25 @@
         });
     }, { rootMargin: '-40% 0px -55% 0px' });
     document.querySelectorAll('section.doc').forEach(s => obs.observe(s));
+
+    // Recherche : filtre le sommaire ET les sections
+    const search = document.getElementById('guideSearch');
+    const empty = document.getElementById('tocEmpty');
+    if (search) {
+        search.addEventListener('input', () => {
+            const q = search.value.trim().toLowerCase();
+            let visible = 0;
+            links.forEach(l => {
+                const hay = (l.dataset.text || l.textContent).toLowerCase();
+                const match = !q || hay.includes(q);
+                l.style.display = match ? '' : 'none';
+                const sec = document.getElementById(l.getAttribute('href').slice(1));
+                if (sec) sec.style.display = match ? '' : 'none';
+                if (match) visible++;
+            });
+            if (empty) empty.style.display = visible ? 'none' : 'block';
+        });
+    }
 </script>
 </body>
 </html>
