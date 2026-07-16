@@ -24,7 +24,25 @@ echo "   cible attendue  : $target\n";
 echo "   cible existe    : ".(is_dir($target) ? 'OUI' : 'NON')."\n";
 $resolved = @realpath($link);
 echo "   résolution      : ".($resolved ?: 'ÉCHEC')."\n";
-echo "   pointe au bon endroit : ".($resolved && realpath($target) === $resolved ? 'OUI' : 'NON ⚠️')."\n\n";
+echo "   pointe au bon endroit : ".($resolved && realpath($target) === $resolved ? 'OUI' : 'NON ⚠️')."\n";
+
+// --- Réparation : ?key=...&fixlink=1 ---
+if (isset($_GET['fixlink'])) {
+    echo "\n   -- RÉPARATION DU LIEN --\n";
+    if (file_exists($link) && ! is_link($link)) {
+        $bak = $web.'/storage_old_'.date('Ymd_His');
+        echo "   faux dossier renommé : ".(@rename($link, $bak) ? 'OUI ('.basename($bak).')' : 'ÉCHEC ⚠️')."\n";
+    } elseif (is_link($link)) {
+        @unlink($link);
+        echo "   ancien lien supprimé\n";
+    }
+    if (! file_exists($link)) {
+        echo "   création du lien : ".(@symlink($target, $link) ? 'OUI' : 'ÉCHEC (symlink interdit par l\'hébergeur ?)')."\n";
+        $res = @realpath($link);
+        echo "   vérification : ".($res && realpath($target) === $res ? 'OK ✅' : 'toujours KO ⚠️ (la route Laravel /storage prendra le relais)')."\n";
+    }
+}
+echo "\n";
 
 echo "2) Écriture dans storage/app/public\n";
 $probe = $target.'/diag-'.time().'.txt';
@@ -34,7 +52,12 @@ if ($w) {
     $viaLink = @file_get_contents($link.'/'.basename($probe));
     echo "   lisible via le lien   : ".($viaLink === 'ok' ? 'OUI' : 'NON ⚠️')."\n";
     $url = (isset($_SERVER['HTTPS']) ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].'/storage/'.basename($probe);
-    echo "   teste cette URL dans le navigateur :\n   $url\n";
+    echo "   URL de test : $url\n";
+    // Test HTTP automatique (pas besoin d'ouvrir l'URL à la main)
+    $ctx  = stream_context_create(['http' => ['timeout' => 8, 'ignore_errors' => true]]);
+    $body = @file_get_contents($url, false, $ctx);
+    $stat = $http_response_header[0] ?? 'aucune réponse';
+    echo "   test HTTP auto : $stat".($body === 'ok' ? '  (contenu OK ✅ le service des images FONCTIONNE)' : '  ⚠️')."\n";
     // on laisse le fichier pour le test URL ; retapez ?key=...&clean=1 pour le supprimer
     if (isset($_GET['clean'])) { @unlink($probe); echo "   (fichier test supprimé)\n"; }
 }
