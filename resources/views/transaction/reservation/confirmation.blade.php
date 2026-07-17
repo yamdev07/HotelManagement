@@ -1064,18 +1064,36 @@ document.addEventListener('DOMContentLoaded', function() {
         radio.addEventListener('change', updatePaymentSummary);
     });
 
+    // Issue #169 : saisir un montant sélectionne automatiquement « Payer un acompte »
+    // (avant : montant tapé + option « sans acompte » cochée = état incohérent)
+    function ensureDepositOptionSelected() {
+        const dep = document.getElementById('option_pay_deposit');
+        if (dep && !dep.checked && parseFloat(depositAmount.value) > 0) {
+            dep.checked = true;
+        }
+    }
+
     depositAmount.addEventListener('input', function() {
         depositSlider.value = this.value;
+        ensureDepositOptionSelected();
         updatePaymentSummary();
     });
 
     depositSlider.addEventListener('input', function() {
         depositAmount.value = this.value;
+        ensureDepositOptionSelected();
         updatePaymentSummary();
     });
 
     termsCheckbox.addEventListener('change', function() {
         submitBtn.disabled = !this.checked;
+    });
+
+    // Anti double-clic (issue #170) : un seul envoi possible
+    document.getElementById('reservationForm').addEventListener('submit', function () {
+        submitBtn.disabled = true;
+        const st = document.getElementById('submitText');
+        if (st) st.textContent = 'Enregistrement en cours…';
     });
 
     // Initialisation

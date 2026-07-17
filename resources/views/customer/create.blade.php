@@ -354,10 +354,11 @@
                             <label for="birthdate" class="form-label">
                                 <i class="fas fa-cake-candles"></i> Date de naissance
                             </label>
-                            <input type="date" 
-                                   class="form-control @error('birthdate') is-invalid @enderror" 
+                            <input type="date"
+                                   class="form-control @error('birthdate') is-invalid @enderror"
                                    id="birthdate"
-                                   name="birthdate" 
+                                   name="birthdate"
+                                   min="1900-01-01" max="{{ date('Y-m-d') }}"
                                    value="{{ old('birthdate') }}">
                             @error('birthdate')
                                 <div class="invalid-feedback">

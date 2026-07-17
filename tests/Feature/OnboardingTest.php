@@ -27,7 +27,12 @@ class OnboardingTest extends TestCase
         $hotel = $this->makeHotel(onboarded: false);
         $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
-        $this->actingAs($admin)->get('/')->assertRedirect(route('onboarding.show'));
+        // Issue #156 : les pages PUBLIQUES restent accessibles (landing, guide…)
+        $this->actingAs($admin)->get('/')->assertOk();
+        $this->actingAs($admin)->get('/guide')->assertOk();
+
+        // Mais les pages de l'APP forcent toujours l'onboarding
+        $this->actingAs($admin)->get('/dashboard')->assertRedirect(route('onboarding.show'));
     }
 
     public function test_onboarding_applies_settings_and_marks_completed(): void

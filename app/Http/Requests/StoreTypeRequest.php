@@ -15,14 +15,15 @@ class StoreTypeRequest extends FormRequest
 
     public function rules()
     {
-        // Unicité du nom de type PAR hôtel (et non globale) — multi-tenant.
+        // Unicité du nom de type PAR hôtel (et non globale) · multi-tenant.
         $hotelId = app(TenantManager::class)->getHotelId();
         $uniqueName = Rule::unique('types', 'name')
             ->ignore($this->type?->id)
             ->where(fn ($q) => $hotelId ? $q->where('hotel_id', $hotelId) : $q);
 
         return [
-            'name' => ['required', 'string', 'max:100', $uniqueName],
+            // SafeName : pas d'emoji ni de charabia type "))((" (issue #166)
+            'name' => ['required', 'string', 'max:100', new \App\Rules\SafeName, $uniqueName],
             'information' => 'nullable|string|max:1000',
             'base_price' => 'nullable|numeric|min:0|max:99999999',
             'capacity' => 'nullable|integer|min:1|max:20',
@@ -39,10 +40,10 @@ class StoreTypeRequest extends FormRequest
     public function messages()
     {
         return [
-            'name.required' => 'The room type name is required',
+            'name.required' => 'Le nom du type de chambre est obligatoire.',
             'name.unique' => 'Un type de chambre portant ce nom existe déjà dans votre établissement.',
-            'capacity.max' => 'Capacity cannot exceed 20 persons',
-            'base_price.max' => 'Price is too high',
+            'capacity.max' => 'La capacité ne peut pas dépasser 20 personnes.',
+            'base_price.max' => 'Le prix est trop élevé.',
         ];
     }
 

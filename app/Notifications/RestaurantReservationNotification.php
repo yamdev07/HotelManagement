@@ -20,7 +20,7 @@ class RestaurantReservationNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => 'Nouvelle réservation restaurant — '
+            'message' => 'Nouvelle réservation restaurant · '
                 . $this->reservation->name
                 . ' · ' . $this->reservation->persons . ' pers.'
                 . ' le ' . \Carbon\Carbon::parse($this->reservation->reservation_date)->format('d/m/Y')

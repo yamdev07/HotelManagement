@@ -40,7 +40,7 @@
         ═══════════════════════════════════════════════════
         */
 
-        /* Desktop — sidebar ouverte (272px) */
+        /* Desktop · sidebar ouverte (272px) */
         #page-content-wrapper {
             margin-left: 272px;
             width: auto;          /* NE PAS mettre 100% : block auto = viewport - margin-left */
@@ -51,12 +51,12 @@
             box-sizing: border-box;
         }
 
-        /* Desktop — sidebar collapsed (64px) */
+        /* Desktop · sidebar collapsed (64px) */
         body.sidebar-is-collapsed #page-content-wrapper {
             margin-left: 64px;
         }
 
-        /* Mobile ≤768px — sidebar en overlay, contenu pleine largeur */
+        /* Mobile ≤768px · sidebar en overlay, contenu pleine largeur */
         @media (max-width: 768px) {
             #page-content-wrapper {
                 margin-left: 0 !important;
@@ -114,7 +114,7 @@
     (function () {
         'use strict';
 
-        // Observer #sidebar — quand elle prend/perd la classe .collapsed
+        // Observer #sidebar · quand elle prend/perd la classe .collapsed
         // on ajoute/retire .sidebar-is-collapsed sur <body>
         // => le CSS s'occupe du margin-left automatiquement
         var sidebar = document.getElementById('sidebar');
@@ -180,7 +180,7 @@
             document.querySelectorAll('form[action*="logout"], a[href*="logout"]').forEach(function (el) {
                 el.style.opacity = '0.6';
                 el.style.pointerEvents = 'none';
-                el.title = 'Session active — déconnexion impossible';
+                el.title = 'Session active · déconnexion impossible';
             });
         });
         @else

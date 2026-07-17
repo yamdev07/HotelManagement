@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Chambres & Suites — Cactus Palace 5 Étoiles')
+@section('title', 'Chambres & Suites · Cactus Palace 5 Étoiles')
 
 @push('styles')
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -690,7 +690,7 @@
             <div class="col-lg-8" data-aos="fade-right">
                 <div class="hero-eyebrow">
                     <i class="fas fa-star" style="font-size:10px;"></i>
-                    Hôtel 5 Étoiles — Cotonou, Bénin
+                    Hôtel 5 Étoiles · Cotonou, Bénin
                     <i class="fas fa-star" style="font-size:10px;"></i>
                 </div>
                 <h1>
@@ -698,7 +698,7 @@
                     <em>Suites d'Exception</em>
                 </h1>
                 <p class="hero-lead">
-                    Chaque chambre du Cactus Palace est pensée comme un sanctuaire de confort —
+                    Chaque chambre du Cactus Palace est pensée comme un sanctuaire de confort ·
                     matériaux nobles, literie premium et atmosphère apaisante pour un repos parfait.
                 </p>
                 <div class="hero-counters">
@@ -759,9 +759,9 @@
                     <select class="form-select" id="price_range" name="price_range">
                         <option value="">Tous les tarifs</option>
                         <option value="0-50000"      {{ request('price_range')=='0-50000'      ?'selected':'' }}>Moins de 50 000 FCFA ({{ $priceRanges['0-50000'] ?? 0 }})</option>
-                        <option value="50000-100000"  {{ request('price_range')=='50000-100000' ?'selected':'' }}>50k — 100k FCFA ({{ $priceRanges['50000-100000'] ?? 0 }})</option>
-                        <option value="100000-150000" {{ request('price_range')=='100000-150000'?'selected':'' }}>100k — 150k FCFA ({{ $priceRanges['100000-150000'] ?? 0 }})</option>
-                        <option value="150000-200000" {{ request('price_range')=='150000-200000'?'selected':'' }}>150k — 200k FCFA ({{ $priceRanges['150000-200000'] ?? 0 }})</option>
+                        <option value="50000-100000"  {{ request('price_range')=='50000-100000' ?'selected':'' }}>50k · 100k FCFA ({{ $priceRanges['50000-100000'] ?? 0 }})</option>
+                        <option value="100000-150000" {{ request('price_range')=='100000-150000'?'selected':'' }}>100k · 150k FCFA ({{ $priceRanges['100000-150000'] ?? 0 }})</option>
+                        <option value="150000-200000" {{ request('price_range')=='150000-200000'?'selected':'' }}>150k · 200k FCFA ({{ $priceRanges['150000-200000'] ?? 0 }})</option>
                         <option value="200000+"       {{ request('price_range')=='200000+'      ?'selected':'' }}>Plus de 200k FCFA ({{ $priceRanges['200000+'] ?? 0 }})</option>
                     </select>
                 </div>
@@ -1036,7 +1036,7 @@
                 <div style="display:inline-block;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px 36px;">
                     <div style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;color:var(--gold-accent);line-height:1;">5★</div>
                     <div style="color:rgba(255,255,255,0.9);font-weight:600;margin:8px 0 4px;">Cactus Palace</div>
-                    <div style="color:rgba(255,255,255,0.5);font-size:0.85rem;">Haie Vive, Cotonou — Bénin</div>
+                    <div style="color:rgba(255,255,255,0.5);font-size:0.85rem;">Haie Vive, Cotonou · Bénin</div>
                     <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;color:rgba(255,255,255,0.5);">
                         <i class="fas fa-phone me-2" style="color:var(--gold-accent);"></i>
                         Réservations & informations

@@ -31,7 +31,7 @@ class FacilityController extends Controller
 
         Facility::create($request->all());
 
-        return redirect()->route('facility.index')->with('success', 'Facility added successfully.');
+        return redirect()->route('facility.index')->with('success', 'Équipement ajouté.');
     }
 
     public function edit(Facility $facility)
@@ -49,13 +49,13 @@ class FacilityController extends Controller
 
         $facility->update($request->all());
 
-        return redirect()->route('facility.index')->with('success', 'Facility updated successfully.');
+        return redirect()->route('facility.index')->with('success', 'Équipement mis à jour.');
     }
 
     public function destroy(Facility $facility)
     {
         $facility->delete();
 
-        return redirect()->route('facility.index')->with('success', 'Facility deleted successfully.');
+        return redirect()->route('facility.index')->with('success', 'Équipement supprimé.');
     }
 }

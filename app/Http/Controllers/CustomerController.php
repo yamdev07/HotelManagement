@@ -29,9 +29,20 @@ class CustomerController extends Controller
 
     public function store(StoreCustomerRequest $request)
     {
+        // Anti-doublon (issue #159) : bouton "précédent" du navigateur puis
+        // re-soumission du formulaire déjà rempli -> on ne recrée pas la fiche.
+        $existing = Customer::where('email', $request->email)
+            ->where('name', $request->name)
+            ->first();
+
+        if ($existing) {
+            return redirect('customer')
+                ->with('success', 'Ce client existe déjà ('.$existing->name.') : aucun doublon créé.');
+        }
+
         $customer = $this->customerRepository->store($request);
 
-        return redirect('customer')->with('success', 'Customer '.$customer->name.' created');
+        return redirect('customer')->with('success', 'Client '.$customer->name.' créé');
     }
 
     public function show(Customer $customer)
@@ -78,7 +89,7 @@ class CustomerController extends Controller
             // Supprimez le customer
             $customer->delete();
 
-            return redirect('customer')->with('success', 'Customer '.$customerName.' deleted!');
+            return redirect('customer')->with('success', 'Client '.$customerName.' supprimé !');
 
         } catch (\Exception $e) {
             \Log::error('Delete customer error: '.$e->getMessage());

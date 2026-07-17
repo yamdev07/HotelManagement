@@ -52,7 +52,7 @@ class BillingController extends Controller
 
         // Un compte suspendu par l'admin ne se réactive pas en payant.
         if (! $hotel->is_active) {
-            return back()->with('error', "Votre compte a été suspendu par la plateforme. Le paiement en ligne est indisponible — contactez-nous.");
+            return back()->with('error', "Votre compte a été suspendu par la plateforme. Le paiement en ligne est indisponible · contactez-nous.");
         }
 
         if (! $this->fedapay->isConfigured()) {
@@ -73,7 +73,7 @@ class BillingController extends Controller
                 plan: $plan,
                 amount: $amount,
                 currency: $currency,
-                description: config('app.name', 'checkinHub').' — '.config('plans.tiers.'.$plan.'.name').' × '.$months.' mois ('.$hotel->name.')',
+                description: config('app.name', 'checkinHub').' · '.config('plans.tiers.'.$plan.'.name').' × '.$months.' mois ('.$hotel->name.')',
                 callbackUrl: route('billing.callback'),
                 customerEmail: $hotel->contact_email ?: $user->email,
                 customerName: $user->name,

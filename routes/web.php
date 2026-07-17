@@ -43,6 +43,8 @@ use Illuminate\Support\Facades\Route;
 // Accueil : nouvelle maquette (dark). L'ancienne version claire reste sur /v1.
 Route::view('/', 'landing-v2')->name('landing');
 Route::view('/v1', 'landing')->name('landing.v1');
+// Guide d'utilisation / documentation (accessible à tous)
+Route::view('/guide', 'guide')->name('guide');
 
 // ==================== VITRINE PUBLIQUE PAR HÔTEL (multi-pages) ====================
 Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(function () {
@@ -54,10 +56,11 @@ Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(func
 });
 
 // ==================== INSCRIPTION SELF-SERVICE (essai gratuit) ====================
-Route::middleware('guest')->group(function () {
-    Route::get('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'create'])->name('hotel.register');
-    Route::post('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'store'])->name('hotel.register.store');
-});
+// PAS de middleware "guest" : un utilisateur déjà connecté doit quand même pouvoir
+// ouvrir le formulaire et créer un nouvel établissement (sinon il était renvoyé
+// vers son tableau de bord). À la création, il est connecté au nouveau compte.
+Route::get('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'create'])->name('hotel.register');
+Route::post('/inscription', [\App\Http\Controllers\RegisterHotelController::class, 'store'])->name('hotel.register.store');
 
 // ==================== ROUTES FRONTEND (Site Vitrine de l'hôtel) ====================
 Route::get('/vitrine', [FrontendController::class, 'home'])->name('frontend.home');
@@ -156,8 +159,10 @@ Route::get('/logout-now', function () {
 Route::group(['middleware' => 'guest'], function () {
     Route::get('/forgot-password', fn () => view('auth.passwords.email'))->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
-    Route::get('/reset-password/{token}', fn (string $token) => view('auth.reset-password', ['token' => $token]))
-        ->name('password.reset');
+    Route::get('/reset-password/{token}', fn (string $token) => view('auth.reset-password', [
+        'token' => $token,
+        'email' => request('email'), // pré-rempli depuis le lien reçu par email (issue #151)
+    ]))->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 

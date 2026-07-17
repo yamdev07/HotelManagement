@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Restaurant Gastronomique — Cactus Palace 5 Étoiles')
+@section('title', 'Restaurant Gastronomique · Cactus Palace 5 Étoiles')
 
 @push('styles')
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -425,7 +425,7 @@
                 <div class="col-lg-8" data-aos="fade-right">
                     <div class="hero-eyebrow">
                         <i class="fas fa-utensils" style="font-size:10px;"></i>
-                        Restaurant Gastronomique — Cactus Palace
+                        Restaurant Gastronomique · Cactus Palace
                         <i class="fas fa-utensils" style="font-size:10px;"></i>
                     </div>
                     <h1>

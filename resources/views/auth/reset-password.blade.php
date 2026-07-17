@@ -36,17 +36,17 @@
                             <i class="fas fa-envelope me-2"></i>Email Address
                         </label>
                         <div class="input-wrapper">
+                            {{-- Issue #151 : champ éditable (il était readonly ET jamais pré-rempli) --}}
                             <input
                                 id="email"
                                 type="email"
                                 class="form-control @error('email') is-invalid @enderror"
                                 name="email"
-                                value="{{ $email ?? old('email') }}"
+                                value="{{ old('email', $email ?? '') }}"
                                 required
                                 autocomplete="email"
                                 autofocus
-                                placeholder="Your email address"
-                                readonly
+                                placeholder="Votre adresse email"
                             >
                             @error('email')
                                 <div class="invalid-feedback">

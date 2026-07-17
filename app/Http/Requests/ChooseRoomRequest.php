@@ -29,4 +29,21 @@ class ChooseRoomRequest extends FormRequest
             'check_out' => 'required|date|after:check_in',
         ];
     }
+
+    /**
+     * Messages clairs (issue #174) : l'utilisateur choisit librement ses dates,
+     * et on lui explique précisément le problème à la validation.
+     */
+    public function messages()
+    {
+        return [
+            'check_in.required' => "La date d'arrivée est obligatoire.",
+            'check_in.date' => "La date d'arrivée n'est pas une date valide.",
+            'check_in.after_or_equal' => "La date d'arrivée ne peut pas être dans le passé (au plus tôt : aujourd'hui).",
+            'check_out.required' => 'La date de départ est obligatoire.',
+            'check_out.date' => "La date de départ n'est pas une date valide.",
+            'check_out.after' => "La date de départ doit être après la date d'arrivée (au moins une nuit).",
+            'count_person.required' => 'Le nombre de personnes est obligatoire.',
+        ];
+    }
 }

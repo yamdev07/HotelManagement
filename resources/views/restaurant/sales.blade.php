@@ -54,7 +54,7 @@
         <div class="col-lg-8 mb-4">
             <div class="db-card h-100 anim-3">
                 <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
-                    <i class="fas fa-chart-bar text-primary"></i> Revenus — 7 derniers jours
+                    <i class="fas fa-chart-bar text-primary"></i> Revenus · 7 derniers jours
                 </h5>
                 <div style="height: 300px;">
                     <canvas id="dailyChart"></canvas>
@@ -80,7 +80,7 @@
         <div class="col-lg-7 mb-4">
             <div class="db-card anim-3" style="animation-delay: 0.4s;">
                 <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
-                    <i class="fas fa-trophy text-warning"></i> Top 10 — Plats les plus vendus
+                    <i class="fas fa-trophy text-warning"></i> Top 10 · Plats les plus vendus
                 </h5>
                 <div class="table-responsive">
                     <table class="db-table">

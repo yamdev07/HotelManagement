@@ -266,7 +266,7 @@ class HousekeepingController extends Controller
             $room->update($data);
 
             $statusText = $newStatus === RoomStatus::Available ? 'Disponible' : 'Occupée';
-            return back()->with('success', "Maintenance terminée — chambre {$room->number}: {$statusText}");
+            return back()->with('success', "Maintenance terminée · chambre {$room->number}: {$statusText}");
         } catch (\Throwable $e) {
             Log::error('endMaintenance: '.$e->getMessage());
             return back()->with('error', 'Erreur: '.$e->getMessage());

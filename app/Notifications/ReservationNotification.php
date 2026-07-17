@@ -21,7 +21,7 @@ class ReservationNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => 'Nouvelle réservation en ligne — ' . $this->transaction->customer->name
+            'message' => 'Nouvelle réservation en ligne · ' . $this->transaction->customer->name
                 . ' · Chambre ' . $this->transaction->room->number
                 . ' du ' . $this->transaction->check_in->format('d/m/Y')
                 . ' au ' . $this->transaction->check_out->format('d/m/Y'),

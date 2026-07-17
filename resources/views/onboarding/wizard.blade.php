@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bienvenue — personnalisez votre site</title>
+    <title>Bienvenue · personnalisez votre site</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -106,7 +106,16 @@
                                 <i class="fas fa-check me-2"></i> Valider et accéder à mon espace
                             </button>
                         </div>
+                        {{-- Issue #156 : pouvoir quitter / changer de compte sans être piégé ici --}}
+                        <p class="text-center text-secondary small mt-3 mb-0">
+                            <a href="{{ route('landing') }}" class="text-decoration-none me-3"><i class="fas fa-arrow-left me-1"></i>Retour au site</a>
+                            <a href="#" class="text-decoration-none text-danger"
+                               onclick="event.preventDefault(); document.getElementById('ob-logout').submit();">
+                                <i class="fas fa-arrow-right-from-bracket me-1"></i>Me déconnecter (finir plus tard)
+                            </a>
+                        </p>
                     </form>
+                    <form id="ob-logout" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
                 </div>
             </div>
         </div>

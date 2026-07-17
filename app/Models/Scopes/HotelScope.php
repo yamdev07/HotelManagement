@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Scope;
 /**
  * Filtre automatiquement les requêtes sur l'hôtel courant.
  * Si aucun hôtel n'est résolu (Super-Admin plateforme, console), aucun filtre
- * n'est appliqué — toutes les données restent accessibles.
+ * n'est appliqué · toutes les données restent accessibles.
  */
 class HotelScope implements Scope
 {

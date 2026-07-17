@@ -728,9 +728,9 @@
                         </div>
                         <div class="nights-dates">
                             <div class="nights-route">
-                                <span id="arrival-date" style="color:var(--slate-800)">—</span>
+                                <span id="arrival-date" style="color:var(--slate-800)">·</span>
                                 <span class="nights-arrow"><i class="fas fa-long-arrow-alt-right"></i></span>
-                                <span id="departure-date" style="color:var(--slate-800)">—</span>
+                                <span id="departure-date" style="color:var(--slate-800)">·</span>
                             </div>
                             <div style="font-size:.75rem;color:var(--slate-400);margin-top:5px;">
                                 <i class="fas fa-info-circle me-1"></i>
@@ -858,19 +858,19 @@
                         <div class="selected-room-grid">
                             <div class="srg-item">
                                 <div class="srg-label">Chambre</div>
-                                <div class="srg-value" id="sel-room-num">—</div>
+                                <div class="srg-value" id="sel-room-num">·</div>
                             </div>
                             <div class="srg-item">
                                 <div class="srg-label">Type</div>
-                                <div class="srg-value" id="sel-room-type">—</div>
+                                <div class="srg-value" id="sel-room-type">·</div>
                             </div>
                             <div class="srg-item">
                                 <div class="srg-label">Capacité</div>
-                                <div class="srg-value" id="sel-room-cap">—</div>
+                                <div class="srg-value" id="sel-room-cap">·</div>
                             </div>
                             <div class="srg-item">
                                 <div class="srg-label">Total séjour</div>
-                                <div class="srg-value srg-value-price" id="sel-room-total">—</div>
+                                <div class="srg-value srg-value-price" id="sel-room-total">·</div>
                             </div>
                         </div>
                     </div>
@@ -904,35 +904,35 @@
                             <div class="summary-box-title" style="color:var(--blue-600)">
                                 <i class="fas fa-user"></i> Client
                             </div>
-                            <div class="summary-row"><span class="summary-key">Nom</span><span class="summary-val" id="s-name">—</span></div>
-                            <div class="summary-row"><span class="summary-key">Téléphone</span><span class="summary-val" id="s-phone">—</span></div>
-                            <div class="summary-row"><span class="summary-key">Email</span><span class="summary-val" id="s-email">—</span></div>
+                            <div class="summary-row"><span class="summary-key">Nom</span><span class="summary-val" id="s-name">·</span></div>
+                            <div class="summary-row"><span class="summary-key">Téléphone</span><span class="summary-val" id="s-phone">·</span></div>
+                            <div class="summary-row"><span class="summary-key">Email</span><span class="summary-val" id="s-email">·</span></div>
                             <!-- ✅ AJOUT DU GENRE DANS LE RÉSUMÉ -->
-                            <div class="summary-row"><span class="summary-key">Genre</span><span class="summary-val" id="s-gender">—</span></div>
+                            <div class="summary-row"><span class="summary-key">Genre</span><span class="summary-val" id="s-gender">·</span></div>
                         </div>
                         <div class="summary-box">
                             <div class="summary-box-title" style="color:var(--green-700)">
                                 <i class="fas fa-bed"></i> Chambre
                             </div>
-                            <div class="summary-row"><span class="summary-key">Numéro</span><span class="summary-val" id="s-room">—</span></div>
-                            <div class="summary-row"><span class="summary-key">Type</span><span class="summary-val" id="s-room-type">—</span></div>
-                            <div class="summary-row"><span class="summary-key">Capacité</span><span class="summary-val" id="s-room-cap">—</span></div>
-                            <div class="summary-row"><span class="summary-key">Prix/nuit</span><span class="summary-val" id="s-price-night" style="color:var(--green-700)">—</span></div>
+                            <div class="summary-row"><span class="summary-key">Numéro</span><span class="summary-val" id="s-room">·</span></div>
+                            <div class="summary-row"><span class="summary-key">Type</span><span class="summary-val" id="s-room-type">·</span></div>
+                            <div class="summary-row"><span class="summary-key">Capacité</span><span class="summary-val" id="s-room-cap">·</span></div>
+                            <div class="summary-row"><span class="summary-key">Prix/nuit</span><span class="summary-val" id="s-price-night" style="color:var(--green-700)">·</span></div>
                         </div>
                         <div class="summary-box">
                             <div class="summary-box-title" style="color:var(--blue-600)">
                                 <i class="fas fa-calendar-alt"></i> Séjour
                             </div>
-                            <div class="summary-row"><span class="summary-key">Arrivée</span><span class="summary-val" id="s-checkin">—</span></div>
-                            <div class="summary-row"><span class="summary-key">Départ</span><span class="summary-val" id="s-checkout">—</span></div>
-                            <div class="summary-row"><span class="summary-key">Durée</span><span class="summary-val" id="s-nights">—</span></div>
+                            <div class="summary-row"><span class="summary-key">Arrivée</span><span class="summary-val" id="s-checkin">·</span></div>
+                            <div class="summary-row"><span class="summary-key">Départ</span><span class="summary-val" id="s-checkout">·</span></div>
+                            <div class="summary-row"><span class="summary-key">Durée</span><span class="summary-val" id="s-nights">·</span></div>
                         </div>
                         <div class="summary-box">
                             <div class="summary-box-title" style="color:var(--green-700)">
                                 <i class="fas fa-money-bill-wave"></i> Financier
                             </div>
-                            <div class="summary-row"><span class="summary-key">Prix/nuit</span><span class="summary-val" id="s-price2">—</span></div>
-                            <div class="summary-row"><span class="summary-key">Total</span><span class="summary-val" id="s-total" style="color:var(--green-700);font-size:1rem">—</span></div>
+                            <div class="summary-row"><span class="summary-key">Prix/nuit</span><span class="summary-val" id="s-price2">·</span></div>
+                            <div class="summary-row"><span class="summary-key">Total</span><span class="summary-val" id="s-total" style="color:var(--green-700);font-size:1rem">·</span></div>
                             <div class="summary-row"><span class="summary-key">Méthode</span><span class="summary-val">Direct</span></div>
                         </div>
                     </div>
@@ -1064,8 +1064,8 @@ function calcNights() {
     const co = new Date(document.getElementById('check_out').value);
     if (isNaN(ci) || isNaN(co) || co <= ci) {
         document.getElementById('nights-count').textContent = '0';
-        document.getElementById('arrival-date').textContent = '—';
-        document.getElementById('departure-date').textContent = '—';
+        document.getElementById('arrival-date').textContent = '·';
+        document.getElementById('departure-date').textContent = '·';
         return;
     }
     const n = Math.round((co - ci) / 86400000);
@@ -1122,7 +1122,7 @@ function buildSummary() {
 
     // Récupérer le genre pour l'afficher
     const genderSelect = document.getElementById('gender');
-    const genderText = genderSelect.value === 'Male' ? 'Homme' : (genderSelect.value === 'Female' ? 'Femme' : '—');
+    const genderText = genderSelect.value === 'Male' ? 'Homme' : (genderSelect.value === 'Female' ? 'Femme' : '·');
 
     setText('s-name', document.getElementById('name').value);
     setText('s-phone', document.getElementById('phone').value);

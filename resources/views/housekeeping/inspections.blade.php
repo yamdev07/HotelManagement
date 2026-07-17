@@ -585,7 +585,7 @@
                                         <div>{{ $room->inspection_requested_at->format('d/m/Y') }}</div>
                                         <small class="text-muted">{{ $room->inspection_requested_at->format('H:i') }}</small>
                                     @else
-                                        <span class="text-muted">—</span>
+                                        <span class="text-muted">·</span>
                                     @endif
                                 </td>
                                 <td>

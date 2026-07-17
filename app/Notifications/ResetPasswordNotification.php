@@ -17,7 +17,7 @@ class ResetPasswordNotification extends BaseResetPassword
         $expire = config('auth.passwords.'.config('auth.defaults.passwords').'.expire', 60);
 
         return (new MailMessage)
-            ->subject('Réinitialisation de votre mot de passe — '.config('app.name', 'checkinHub'))
+            ->subject('Réinitialisation de votre mot de passe · '.config('app.name', 'checkinHub'))
             ->view(['emails.reset-password', 'emails.reset-password-text'], [
                 'resetUrl' => $url,
                 'email'    => $notifiable->getEmailForPasswordReset(),

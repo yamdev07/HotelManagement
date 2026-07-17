@@ -17,7 +17,7 @@ class Transaction extends Model
 {
     use HasFactory, LogsActivity, SoftDeletes, \App\Models\Concerns\BelongsToHotel;
 
-    // Spatie auto-logging disabled — manual activity() calls in methods provide richer context
+    // Spatie auto-logging disabled · manual activity() calls in methods provide richer context
     protected static $recordEvents = [];
 
     protected $fillable = [

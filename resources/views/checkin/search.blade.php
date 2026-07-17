@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Check-in — Recherche')
+@section('title', 'Check-in · Recherche')
 @section('content')
 
 <style>

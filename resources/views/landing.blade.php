@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'checkinHub') }} — La plateforme de gestion hôtelière tout-en-un</title>
+    <title>{{ config('app.name', 'checkinHub') }} · La plateforme de gestion hôtelière tout-en-un</title>
     <meta name="description" content="Gérez réservations, caisse, restaurant, housekeeping et rapports pour un ou plusieurs hôtels, depuis une seule plateforme.">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -133,7 +133,7 @@
                 <span class="badge-soft mb-3 d-inline-block" data-aos="fade-up"><i class="fas fa-bolt me-1"></i> Plateforme SaaS multi-établissements</span>
                 <h1 class="mb-3" data-aos="fade-up" data-aos-delay="80">Gérez vos hôtels,<br><span class="text-brand">sans la complexité.</span></h1>
                 <p class="fs-5 text-secondary mb-4" data-aos="fade-up" data-aos-delay="160">
-                    Réservations, check-in, caisse, restaurant, housekeeping et rapports —
+                    Réservations, check-in, caisse, restaurant, housekeeping et rapports ·
                     le tout dans une seule plateforme, pour un hôtel comme pour tout un groupe.
                 </p>
                 <div class="d-flex flex-wrap gap-2 mb-4" data-aos="fade-up" data-aos-delay="240">
@@ -498,7 +498,7 @@
     }
 </script>
 
-<!-- Globe 3D photoréaliste — bloc isolé (indépendant du reste du JS) -->
+<!-- Globe 3D photoréaliste · bloc isolé (indépendant du reste du JS) -->
 <script>
 (function () {
     const servedData = @json(config('plans.countries'));

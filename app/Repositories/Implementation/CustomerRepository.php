@@ -36,7 +36,7 @@ class CustomerRepository implements CustomerRepositoryInterface
     {
         // La fiche client (scopée par hôtel) suffit aux opérations. Le compte de
         // connexion (users, email GLOBALEMENT unique) n'est créé que si l'email est
-        // libre — ainsi le MÊME client peut exister dans plusieurs hôtels sans conflit.
+        // libre · ainsi le MÊME client peut exister dans plusieurs hôtels sans conflit.
         $user = null;
         if ($request->email && ! User::where('email', $request->email)->exists()) {
             $user = User::create([

@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', $room->name . ' — Cactus Palace 5 Étoiles')
+@section('title', $room->name . ' · Cactus Palace 5 Étoiles')
 
 @push('styles')
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -347,7 +347,7 @@
             <div class="col-lg-9" data-aos="fade-up" data-aos-duration="800">
                 <div class="hero-eyebrow">
                     <i class="fas fa-star" style="font-size:9px;"></i>
-                    Chambre — Cactus Palace 5 Étoiles
+                    Chambre · Cactus Palace 5 Étoiles
                     <i class="fas fa-star" style="font-size:9px;"></i>
                 </div>
                 <h1>
@@ -445,7 +445,7 @@
                         Description
                         <div class="title-line"></div>
                     </div>
-                    <p class="room-lead">{{ $room->name }} — {{ $room->type->name ?? 'Chambre Standard' }}</p>
+                    <p class="room-lead">{{ $room->name }} · {{ $room->type->name ?? 'Chambre Standard' }}</p>
                     <p class="room-body-text">{{ $room->type->description_fr ?? 'Profitez d\'un séjour exceptionnel dans cette chambre luxueuse dotée de tous les équipements haut de gamme.' }}</p>
                     @if($room->description)
                     <p class="room-body-text mt-2">{{ $room->description }}</p>
@@ -520,7 +520,7 @@
                 </div>
             </div>
 
-            {{-- ── RIGHT COLUMN — BOOKING ── --}}
+            {{-- ── RIGHT COLUMN · BOOKING ── --}}
             <div class="col-lg-4">
                 <div class="booking-sticky" data-aos="fade-left" data-aos-delay="100">
                     <div class="booking-card">

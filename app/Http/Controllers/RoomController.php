@@ -69,7 +69,7 @@ class RoomController extends Controller
 
         $room = Room::create($data);
 
-        return redirect()->route('room.index')->with('success', 'Room '.$room->number.' created successfully!');
+        return redirect()->route('room.index')->with('success', 'Room '.$room->number.' créée !');
     }
 
     public function show(Room $room)
@@ -122,7 +122,7 @@ class RoomController extends Controller
 
         $room->update($data);
 
-        return redirect()->route('room.index')->with('success', 'Room '.$room->number.' updated successfully!');
+        return redirect()->route('room.index')->with('success', 'Room '.$room->number.' mise à jour !');
     }
 
     public function destroy(Room $room, ImageRepositoryInterface $imageRepository)
@@ -140,7 +140,7 @@ class RoomController extends Controller
 
             // Redirection après suppression
             return redirect()->route('room.index')
-                ->with('success', 'Room '.$room->number.' deleted successfully!');
+                ->with('success', 'Room '.$room->number.' supprimée !');
 
         } catch (\Exception $e) {
             return redirect()->route('room.index')

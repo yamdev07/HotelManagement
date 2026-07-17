@@ -797,10 +797,15 @@
 
     {{-- Grille des clients --}}
     @if($customers->count() > 0)
+    @php
+        // N° stable par hôtel : rang dans l'ordre de création (issue #158).
+        // Avant : numérotation par position dans la page (le nouveau client "volait" le n°1).
+        $customerRanks = \App\Models\Customer::orderBy('id')->pluck('id')->flip();
+    @endphp
     <div class="customer-grid">
         @foreach($customers as $customer)
         @php
-            $index = ($customers->currentPage() - 1) * $customers->perPage() + $loop->index + 1;
+            $index = ($customerRanks[$customer->id] ?? 0) + 1;
             $reservationsCount = $customer->transactions()->count();
         @endphp
         <div class="customer-card" style="animation: fadeSlide .3s ease {{ $loop->index * 0.03 }}s both;">

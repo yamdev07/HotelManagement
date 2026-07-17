@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Contact — Cactus Palace 5 Étoiles')
+@section('title', 'Contact · Cactus Palace 5 Étoiles')
 
 @push('styles')
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -280,7 +280,7 @@
             <div class="col-lg-8" data-aos="fade-right">
                 <div class="hero-eyebrow">
                     <i class="fas fa-star" style="font-size:9px;"></i>
-                    Cactus Palace — Cotonou, Bénin
+                    Cactus Palace · Cotonou, Bénin
                     <i class="fas fa-star" style="font-size:9px;"></i>
                 </div>
                 <h1>
@@ -335,7 +335,7 @@
                     <p>
                         <a href="tel:+22901900000000">+229 01 90 00 00 00</a><br>
                         <a href="tel:+22902900000000">+229 02 90 00 00 00</a><br>
-                        <span style="font-size:12px;color:var(--text-gray);">Disponible 24h/24 — 7j/7</span>
+                        <span style="font-size:12px;color:var(--text-gray);">Disponible 24h/24 · 7j/7</span>
                     </p>
                 </div>
             </div>
@@ -465,7 +465,7 @@
                         </div>
                         <div>
                             <div style="font-weight:700;color:var(--text-dark);font-size:0.9rem;">Ligne directe</div>
-                            <div style="font-size:0.85rem;color:var(--text-gray);">+229 01 90 00 00 00 — 24h/24</div>
+                            <div style="font-size:0.85rem;color:var(--text-gray);">+229 01 90 00 00 00 · 24h/24</div>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:16px;padding:20px;background:var(--light-bg);border-radius:14px;border:1px solid var(--border-color);">
@@ -492,7 +492,7 @@
                     <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(201,169,97,0.12);"></div>
                     <div style="font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:700;color:var(--gold-accent);line-height:1;">5★</div>
                     <div style="color:rgba(255,255,255,0.9);font-weight:600;margin:6px 0 4px;font-size:0.95rem;">Cactus Palace</div>
-                    <div style="color:rgba(255,255,255,0.55);font-size:0.82rem;">Haie Vive, Cotonou — Bénin</div>
+                    <div style="color:rgba(255,255,255,0.55);font-size:0.82rem;">Haie Vive, Cotonou · Bénin</div>
                     <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;color:rgba(255,255,255,0.5);">
                         <i class="fas fa-award me-2" style="color:var(--gold-accent);"></i>
                         Hôtel certifié 5 étoiles depuis 1995

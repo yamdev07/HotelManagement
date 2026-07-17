@@ -24,27 +24,40 @@ class StoreCustomerRequest extends FormRequest
     public function rules()
     {
 
+        // Date de naissance plausible : entre 1900 et aujourd'hui (issue #161).
+        $birthdate = 'required|date|after_or_equal:1900-01-01|before_or_equal:today';
+        // Nom sans emoji/charabia (issues #160, #152)
+        $name = ['required', 'string', 'max:255', new \App\Rules\SafeName];
+
         if ($this->isMethod('put')) {
             return [
-                'name' => 'required',
+                'name' => $name,
                 'address' => 'required|max:255',
                 'job' => 'required',
-                'birthdate' => 'required|date',
+                'birthdate' => $birthdate,
                 'gender' => 'required|in:Male,Female',
                 'avatar' => 'mimes:png,jpg',
             ];
         }
 
         return [
-            'name' => 'required',
+            'name' => $name,
             'address' => 'required|max:255',
             'job' => 'required',
-            'birthdate' => 'required|date',
+            'birthdate' => $birthdate,
             'gender' => 'required|in:Male,Female',
             // Email non unique globalement : le même client peut exister dans
             // plusieurs hôtels (la fiche est propre à chaque établissement).
             'email' => 'required|email',
             'avatar' => 'mimes:png,jpg',
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'birthdate.after_or_equal' => "La date de naissance n'est pas valide (au plus tôt : 01/01/1900).",
+            'birthdate.before_or_equal' => 'La date de naissance ne peut pas être dans le futur.',
         ];
     }
 }

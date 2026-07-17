@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Facture #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }} — Cactus</title>
+    <title>Facture #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }} · Cactus</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -224,7 +224,7 @@
 
     {{-- Pied de page --}}
     <div class="inv-footer">
-        <p>Merci pour votre commande — Restaurant Cactus</p>
+        <p>Merci pour votre commande · Restaurant Cactus</p>
         <p style="margin-top:4px;">Imprimé le {{ now()->format('d/m/Y H:i') }}</p>
     </div>
 

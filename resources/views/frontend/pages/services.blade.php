@@ -849,7 +849,7 @@
             <div class="col-lg-8" data-aos="fade-right">
                 <div class="hero-eyebrow">
                     <i class="fas fa-star"></i>
-                    Hôtel 5 Étoiles — Cotonou, Bénin
+                    Hôtel 5 Étoiles · Cotonou, Bénin
                     <i class="fas fa-star"></i>
                 </div>
                 <h1>
@@ -857,7 +857,7 @@
                     <em>service, 24h/24</em>
                 </h1>
                 <p class="hero-lead">
-                    Du restaurant gastronomique au bar lounge, du service client personnalisé à la piscine —
+                    Du restaurant gastronomique au bar lounge, du service client personnalisé à la piscine ·
                     chaque service du Cactus Palace est conçu pour dépasser vos attentes et sublimer votre séjour.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
@@ -970,7 +970,7 @@
                         <div class="icon-circle"><i class="fas fa-headset"></i></div>
                         <div>
                             <div class="badge-label">Disponibilité</div>
-                            <div class="badge-value">24h/24 — 7j/7</div>
+                            <div class="badge-value">24h/24 · 7j/7</div>
                         </div>
                     </div>
                     <div class="service-rating-overlay">
@@ -1095,7 +1095,7 @@
             <span class="section-tag" style="background:rgba(201,169,97,0.12);color:var(--gold-accent);">Prestations Complètes</span>
             <h2 class="section-title" style="color:var(--white);">Tous les Services<br>Inclus dans votre Séjour</h2>
             <p class="section-subtitle mx-auto" style="color:rgba(255,255,255,0.6);">
-                Parce que le luxe est dans les détails — découvrez l'ensemble de nos prestations pensées pour votre confort absolu.
+                Parce que le luxe est dans les détails · découvrez l'ensemble de nos prestations pensées pour votre confort absolu.
             </p>
         </div>
         <div class="row g-4">
@@ -1104,7 +1104,7 @@
                     <div class="icon-ring"><i class="fas fa-dumbbell"></i></div>
                     <h5>Salle de Sport</h5>
                     <p>Équipements de dernière génération, coaching personnel disponible sur demande.</p>
-                    <div class="availability"><span class="dot"></span>6h — 22h</div>
+                    <div class="availability"><span class="dot"></span>6h · 22h</div>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="60">
@@ -1112,7 +1112,7 @@
                     <div class="icon-ring"><i class="fas fa-swimming-pool"></i></div>
                     <h5>Piscine Extérieure</h5>
                     <p>Piscine chauffée avec vue panoramique, bar piscine et transats réservables.</p>
-                    <div class="availability"><span class="dot"></span>7h — 21h</div>
+                    <div class="availability"><span class="dot"></span>7h · 21h</div>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="120">

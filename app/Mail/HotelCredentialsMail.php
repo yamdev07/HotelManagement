@@ -24,7 +24,7 @@ class HotelCredentialsMail extends Mailable
 
     public function build()
     {
-        return $this->subject('Vos accès administrateur — '.$this->hotel->name)
+        return $this->subject('Vos accès administrateur · '.$this->hotel->name)
             ->view('emails.hotel-credentials')
             ->text('emails.hotel-credentials-text')
             ->with([

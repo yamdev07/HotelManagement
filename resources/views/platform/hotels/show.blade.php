@@ -47,9 +47,9 @@
             <div class="card border-0 shadow-sm mb-3"><div class="card-body">
                 <h6 class="fw-semibold mb-3">Informations</h6>
                 <dl class="row small mb-0">
-                    <dt class="col-5 text-muted">Admin</dt><dd class="col-7">{{ $hotel->owner?->name ?? '—' }}</dd>
-                    <dt class="col-5 text-muted">Email</dt><dd class="col-7">{{ $hotel->contact_email ?? '—' }}</dd>
-                    <dt class="col-5 text-muted">Téléphone</dt><dd class="col-7">{{ $hotel->contact_phone ?? '—' }}</dd>
+                    <dt class="col-5 text-muted">Admin</dt><dd class="col-7">{{ $hotel->owner?->name ?? '·' }}</dd>
+                    <dt class="col-5 text-muted">Email</dt><dd class="col-7">{{ $hotel->contact_email ?? '·' }}</dd>
+                    <dt class="col-5 text-muted">Téléphone</dt><dd class="col-7">{{ $hotel->contact_phone ?? '·' }}</dd>
                     <dt class="col-5 text-muted">Créé le</dt><dd class="col-7">{{ $hotel->created_at?->format('d/m/Y') }}</dd>
                     <dt class="col-5 text-muted">Fin abonnement</dt>
                     <dd class="col-7 {{ $hotel->isSubscriptionExpired() ? 'text-danger fw-semibold' : '' }}">
@@ -84,7 +84,7 @@
                         <tbody>
                             @forelse ($hotel->subscriptions as $sub)
                                 <tr>
-                                    <td class="small">{{ $sub->starts_at?->format('d/m/Y') }} → {{ $sub->ends_at?->format('d/m/Y') ?? '—' }}</td>
+                                    <td class="small">{{ $sub->starts_at?->format('d/m/Y') }} → {{ $sub->ends_at?->format('d/m/Y') ?? '·' }}</td>
                                     <td>{{ ucfirst($sub->plan) }}</td>
                                     <td>
                                         @if ($sub->status === 'trial')
@@ -96,7 +96,7 @@
                                         @endif
                                     </td>
                                     <td class="text-end fw-semibold">{{ number_format($sub->amount, 0, ',', ' ') }} {{ $sub->currency }}</td>
-                                    <td class="small text-muted">{{ $sub->createdBy?->name ?? '—' }}</td>
+                                    <td class="small text-muted">{{ $sub->createdBy?->name ?? '·' }}</td>
                                 </tr>
                             @empty
                                 <tr><td colspan="5" class="text-center text-muted py-3">Aucun abonnement enregistré.</td></tr>

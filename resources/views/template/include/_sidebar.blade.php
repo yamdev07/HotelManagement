@@ -251,6 +251,20 @@
                     </div>
                 @endif
 
+                <!-- AIDE / GUIDE (tous les rôles) -->
+                @if (Route::has('guide'))
+                    <div class="nav-section">
+                        <a href="{{ route('guide') }}" target="_blank" rel="noopener"
+                            class="nav-item" data-tooltip="Guide d'utilisation">
+                            <div class="nav-icon"><i class="fas fa-book-open"></i></div>
+                            <div class="nav-content">
+                                <div class="nav-title">Guide / Aide</div>
+                                <div class="nav-subtitle">Documentation d'utilisation</div>
+                            </div>
+                        </a>
+                    </div>
+                @endif
+
                 <!-- NETTOYAGE -->
                 @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']) && (($currentHotel ?? null)?->hasModule('housekeeping') ?? true))
                     <div class="nav-section">
@@ -508,7 +522,7 @@
 
 <style>
     /* ════════════════════════════════════════
-   SIDEBAR — BASE
+   SIDEBAR · BASE
 ════════════════════════════════════════ */
     .sidebar {
         width: 272px;
@@ -924,7 +938,7 @@
     }
 
     /* ════════════════════════════════════════
-   COLLAPSED (desktop) — réduit à 64px
+   COLLAPSED (desktop) · réduit à 64px
 ════════════════════════════════════════ */
     .sidebar.collapsed {
         width: 64px;
@@ -1235,4 +1249,24 @@
         updateClock();
         setInterval(updateClock, 30000);
     });
+
+    // ===== Position de la sidebar conservée entre les pages (issue #172) =====
+    // Avant : après un clic sur un onglet du bas (ex. Journal), la page se
+    // rechargeait et la sidebar revenait en haut (Dashboard). On mémorise le
+    // scroll et on le restaure ; sinon on centre l'élément actif.
+    (function () {
+        const sb = document.querySelector('.sidebar-body');
+        if (!sb) return;
+        const KEY = 'sidebar-scroll';
+        const saved = sessionStorage.getItem(KEY);
+        if (saved !== null) {
+            sb.scrollTop = parseInt(saved, 10) || 0;
+        } else {
+            const active = sb.querySelector('.nav-item.active');
+            if (active) sb.scrollTop = Math.max(0, active.offsetTop - sb.clientHeight / 2);
+        }
+        sb.addEventListener('scroll', function () {
+            sessionStorage.setItem(KEY, sb.scrollTop);
+        }, { passive: true });
+    })();
 </script>

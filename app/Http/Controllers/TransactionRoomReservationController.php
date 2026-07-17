@@ -40,14 +40,18 @@ class TransactionRoomReservationController extends Controller
     {
         // Validation
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255', new \App\Rules\SafeName],
             'email' => 'required|email',
             'phone' => 'required|string|max:20',
             'gender' => 'required|in:Male,Female,Other',
             'address' => 'nullable|string',
             'job' => 'nullable|string|max:100',
-            'birthdate' => 'nullable|date',
+            // Date de naissance plausible : entre 1900 et aujourd'hui (issue #161).
+            'birthdate' => 'nullable|date|after_or_equal:1900-01-01|before_or_equal:today',
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'birthdate.after_or_equal' => "La date de naissance n'est pas valide (au plus tôt : 01/01/1900).",
+            'birthdate.before_or_equal' => 'La date de naissance ne peut pas être dans le futur.',
         ]);
 
         // Rechercher un client avec le même email ET même nom
@@ -252,6 +256,21 @@ class TransactionRoomReservationController extends Controller
                     ->withInput();
             }
 
+            // ============ ANTI-DOUBLON (issue #170) ============
+            // Retour arrière puis re-validation dans l'assistant : on ne recrée
+            // pas une réservation identique (même client, même chambre, mêmes dates).
+            $existing = Transaction::where('customer_id', $customer->id)
+                ->where('room_id', $room->id)
+                ->whereDate('check_in', $checkIn)
+                ->whereDate('check_out', $checkOut)
+                ->whereIn('status', ['reservation', 'active'])
+                ->first();
+
+            if ($existing) {
+                return redirect()->route('transaction.index')
+                    ->with('success', 'Cette réservation existe déjà (n°'.$existing->id.' · '.$customer->name.' · chambre '.$room->number.') : aucun doublon créé.');
+            }
+
             $isOccupied = $this->isRoomOccupied($room->id, $checkIn, $checkOut);
 
             if ($isOccupied) {
@@ -376,6 +395,16 @@ class TransactionRoomReservationController extends Controller
 
                 // ============ CONFIRMATION ============
                 DB::commit();
+
+                // Email de confirmation au CLIENT (issue #171) · tolérant aux pannes SMTP
+                if ($customer->email) {
+                    try {
+                        \Illuminate\Support\Facades\Mail::to($customer->email)
+                            ->send(new \App\Mail\ReservationConfirmationMail($transaction));
+                    } catch (\Throwable $mailEx) {
+                        \Log::warning('Email confirmation réservation non envoyé: '.$mailEx->getMessage());
+                    }
+                }
 
                 $successMessage = $this->buildSuccessMessageWithUser(
                     $transaction,

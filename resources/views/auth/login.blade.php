@@ -114,9 +114,11 @@
         <i class="fas fa-martini-glass float-ico" style="font-size:1.6rem;bottom:30%;left:42%;animation-delay:-7s;"></i>
 
         <div class="side-inner">
-            <div class="brand anim-l d1"><i class="fas fa-hotel"></i> {{ config('app.name', 'checkinHub') }}</div>
+            <a href="{{ route('landing') }}" class="brand anim-l d1" style="color:inherit;text-decoration:none;" title="Retour au site">
+                <i class="fas fa-hotel"></i> {{ config('app.name', 'checkinHub') }}
+            </a>
             <h1 class="anim-l d2">Gérez votre hôtel,<br><span class="shine">sans la complexité.</span></h1>
-            <p class="anim-l d3" style="opacity:.9;font-size:1.05rem;">Réservations, caisse, restaurant, housekeeping et rapports — réunis sur une seule plateforme.</p>
+            <p class="anim-l d3" style="opacity:.9;font-size:1.05rem;">Réservations, caisse, restaurant, housekeeping et rapports · réunis sur une seule plateforme.</p>
 
             <div class="anim-l d4 feat"><div class="feat-ico"><i class="fas fa-shield-halved"></i></div>
                 <div><div class="fw-semibold">Sécurité garantie</div><div class="small" style="opacity:.8;">Données isolées par établissement</div></div></div>
@@ -145,11 +147,12 @@
             <form action="{{ route('login') }}" method="POST">
                 @csrf
                 <div class="mb-3 anim d2">
-                    <label class="form-label fw-semibold">Adresse email</label>
+                    <label class="form-label fw-semibold">Email ou téléphone</label>
                     <div class="position-relative">
                         <i class="fas fa-envelope input-ico"></i>
-                        <input type="email" name="email" value="{{ old('email') }}" required autofocus
-                               class="form-control @error('email') is-invalid @enderror" placeholder="vous@exemple.com">
+                        {{-- Issue #165 : on peut se connecter avec l'email OU le téléphone donné à l'inscription --}}
+                        <input type="text" name="email" value="{{ old('email') }}" required autofocus
+                               class="form-control @error('email') is-invalid @enderror" placeholder="vous@exemple.com ou +229 01 02 03 04">
                     </div>
                     @error('email')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                 </div>
@@ -181,6 +184,10 @@
 
             <p class="text-center text-secondary small mt-4 mb-0 anim d6">
                 Pas encore de compte ? <a href="{{ route('hotel.register') }}" class="link-brand">Démarrer l'essai gratuit</a>
+            </p>
+            {{-- Issue #163 : retour explicite vers le site vitrine --}}
+            <p class="text-center small mt-2 mb-0 anim d6">
+                <a href="{{ route('landing') }}" class="link-brand"><i class="fas fa-arrow-left me-1"></i>Retour au site</a>
             </p>
         </div>
     </section>

@@ -263,7 +263,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                 <form id="reservationForm" action="{{ route('frontend.reservation.request') }}" method="POST" novalidate>
                     @csrf
 
-                    {{-- SECTION 1 — Infos personnelles --}}
+                    {{-- SECTION 1 · Infos personnelles --}}
                     <div class="card">
                         <div class="card-header">
                             <h4><i class="fas fa-user me-2"></i>Vos informations</h4>
@@ -351,6 +351,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                                     </label>
                                     <input type="date" class="form-control" id="f_birthdate" name="birthdate"
                                            required
+                                           min="1900-01-01"
                                            max="{{ date('Y-m-d', strtotime('-18 years')) }}"
                                            value="{{ date('Y-m-d', strtotime('-30 years')) }}">
                                     <div class="field-hint">Minimum 18 ans requis</div>
@@ -361,7 +362,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                         </div>
                     </div>
 
-                    {{-- SECTION 2 — Dates --}}
+                    {{-- SECTION 2 · Dates --}}
                     <div class="card">
                         <div class="card-header">
                             <h4><i class="fas fa-calendar me-2"></i>Dates du séjour</h4>
@@ -403,7 +404,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                         </div>
                     </div>
 
-                    {{-- SECTION 3 — Chambre --}}
+                    {{-- SECTION 3 · Chambre --}}
                     <div class="card">
                         <div class="card-header">
                             <h4><i class="fas fa-bed me-2"></i>Choisissez votre chambre</h4>
@@ -443,7 +444,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                         </div>
                     </div>
 
-                    {{-- SECTION 4 — Notes + Récap + Submit --}}
+                    {{-- SECTION 4 · Notes + Récap + Submit --}}
                     <div class="card">
                         <div class="card-body">
                             <label class="form-label" for="notes">
@@ -685,7 +686,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!checkIn.value || !checkOut.value) { stayInfo.style.display='none'; return; }
         const nights = Math.ceil((new Date(checkOut.value) - new Date(checkIn.value)) / 86400000);
         if (nights > 0) {
-            $('stayInfoText').textContent = `Séjour de ${nights} nuit${nights>1?'s':''} — du ${fmtDate(checkIn.value)} au ${fmtDate(checkOut.value)}`;
+            $('stayInfoText').textContent = `Séjour de ${nights} nuit${nights>1?'s':''} · du ${fmtDate(checkIn.value)} au ${fmtDate(checkOut.value)}`;
             stayInfo.style.display = 'block';
         } else {
             stayInfo.style.display = 'none';

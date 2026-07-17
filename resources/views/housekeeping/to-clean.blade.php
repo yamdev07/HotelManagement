@@ -562,7 +562,7 @@
                                             @endif
                                         @endforeach
                                     @else
-                                        <span class="text-muted">—</span>
+                                        <span class="text-muted">·</span>
                                     @endif
                                 </td>
                                 <td>
