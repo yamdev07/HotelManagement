@@ -31,7 +31,7 @@ class CustomerController extends Controller
     {
         $customer = $this->customerRepository->store($request);
 
-        return redirect('customer')->with('success', 'Customer '.$customer->name.' created');
+        return redirect('customer')->with('success', 'Client '.$customer->name.' créé');
     }
 
     public function show(Customer $customer)
@@ -78,7 +78,7 @@ class CustomerController extends Controller
             // Supprimez le customer
             $customer->delete();
 
-            return redirect('customer')->with('success', 'Customer '.$customerName.' deleted!');
+            return redirect('customer')->with('success', 'Client '.$customerName.' supprimé !');
 
         } catch (\Exception $e) {
             \Log::error('Delete customer error: '.$e->getMessage());

@@ -51,7 +51,7 @@ class UserController extends Controller
     {
         // Vérification supplémentaire (au cas où)
         if (Auth::user()->role !== 'Super') {
-            abort(403, 'Only Super Admin can access user management.');
+            abort(403, 'Réservé au Super-Admin.');
         }
 
         $users = $this->userRepository->showUser($request);
@@ -67,7 +67,7 @@ class UserController extends Controller
     {
         // Vérification
         if (Auth::user()->role !== 'Super') {
-            abort(403, 'Only Super Admin can create users.');
+            abort(403, 'Réservé au Super-Admin.');
         }
 
         return view('user.create');
@@ -77,13 +77,13 @@ class UserController extends Controller
     {
         // Vérification
         if (Auth::user()->role !== 'Super') {
-            abort(403, 'Only Super Admin can create users.');
+            abort(403, 'Réservé au Super-Admin.');
         }
 
         activity()->causedBy(auth()->user())->log('User '.$request->name.' created');
         $user = $this->userRepository->store($request);
 
-        return redirect()->route('user.index')->with('success', 'User '.$user->name.' created');
+        return redirect()->route('user.index')->with('success', 'Utilisateur '.$user->name.' créé');
     }
 
     public function show(User $user)
@@ -96,7 +96,7 @@ class UserController extends Controller
         }
         // Les autres utilisateurs ne peuvent voir que leur propre profil
         elseif ($currentUser->id !== $user->id) {
-            abort(403, 'You can only view your own profile.');
+            abort(403, 'Vous ne pouvez voir que votre propre profil.');
         }
 
         activity()->causedBy(auth()->user())->log('User '.$user->name.' viewed');
@@ -114,7 +114,7 @@ class UserController extends Controller
     {
         // Seuls les "Super" peuvent éditer les utilisateurs
         if (Auth::user()->role !== 'Super') {
-            abort(403, 'Only Super Admin can edit users.');
+            abort(403, 'Réservé au Super-Admin.');
         }
 
         return view('user.edit', ['user' => $user]);
@@ -124,10 +124,10 @@ class UserController extends Controller
     {
         // Seuls les "Super" peuvent modifier les utilisateurs
         if (Auth::user()->role !== 'Super') {
-            abort(403, 'Only Super Admin can update users.');
+            abort(403, 'Réservé au Super-Admin.');
         }
 
-        activity()->causedBy(auth()->user())->log('User '.$user->name.' updated');
+        activity()->causedBy(auth()->user())->log('Utilisateur '.$user->name.' mis à jour');
         $user->update($request->all());
 
         if ($user->isCustomer()) {
@@ -168,7 +168,7 @@ class UserController extends Controller
             }
         }
 
-        activity()->causedBy(auth()->user())->log('User '.$user->name.' deleted');
+        activity()->causedBy(auth()->user())->log('Utilisateur '.$user->name.' supprimé');
 
         try {
             // Soft delete ou suppression définitive ?

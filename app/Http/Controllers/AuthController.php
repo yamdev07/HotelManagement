@@ -34,7 +34,7 @@ class AuthController extends Controller
                 return redirect()->route('restaurant.orders')->with('success', 'Bienvenue ' . auth()->user()->name);
             }
 
-            return redirect('/home')->with('success', 'Welcome ' . auth()->user()->name);
+            return redirect('/home')->with('success', 'Bienvenue ' . auth()->user()->name);
         }
 
         return redirect('login')->with('failed', 'Incorrect email / password');
@@ -71,7 +71,7 @@ class AuthController extends Controller
         // Régénère le token CSRF
         session()->regenerateToken();
 
-        return redirect('login')->with('success', 'Logout success, goodbye '.$name);
+        return redirect('login')->with('success', 'Déconnexion réussie. Au revoir '.$name.' !');
     }
 
     public function forgotPassword(ForgotPasswordRequest $request)

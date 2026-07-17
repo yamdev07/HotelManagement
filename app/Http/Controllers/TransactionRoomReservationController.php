@@ -40,7 +40,7 @@ class TransactionRoomReservationController extends Controller
     {
         // Validation
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255', new \App\Rules\SafeName],
             'email' => 'required|email',
             'phone' => 'required|string|max:20',
             'gender' => 'required|in:Male,Female,Other',

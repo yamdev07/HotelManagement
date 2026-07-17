@@ -503,9 +503,13 @@
             @if($types->count() > 0)
                 <div style="overflow-x:auto;">
                     <table class="types-table">
+                        @php
+                            // N° stable par hôtel : rang dans l'ordre de création (issue #142)
+                            $typeRanks = \App\Models\Type::orderBy('id')->pluck('id')->flip();
+                        @endphp
                         <thead>
                             <tr>
-                                <th class="ps-4">ID</th>
+                                <th class="ps-4">N°</th>
                                 <th>Détails</th>
                                 <th>Tarif</th>
                                 <th>Capacité</th>
@@ -522,7 +526,8 @@
                                 @endphp
                                 <tr>
                                     <td class="ps-4">
-                                        <span class="badge badge--dark">#{{ $type->id }}</span>
+                                        {{-- N° propre à l'hôtel, pas l'id global de la base (issue #142) --}}
+                                        <span class="badge badge--dark">#{{ ($typeRanks[$type->id] ?? 0) + 1 }}</span>
                                     </td>
                                     <td>
                                         <div style="display:flex; align-items:center; gap:12px;">

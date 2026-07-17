@@ -26,10 +26,12 @@ class StoreCustomerRequest extends FormRequest
 
         // Date de naissance plausible : entre 1900 et aujourd'hui (issue #161).
         $birthdate = 'required|date|after_or_equal:1900-01-01|before_or_equal:today';
+        // Nom sans emoji/charabia (issues #160, #152)
+        $name = ['required', 'string', 'max:255', new \App\Rules\SafeName];
 
         if ($this->isMethod('put')) {
             return [
-                'name' => 'required',
+                'name' => $name,
                 'address' => 'required|max:255',
                 'job' => 'required',
                 'birthdate' => $birthdate,
@@ -39,7 +41,7 @@ class StoreCustomerRequest extends FormRequest
         }
 
         return [
-            'name' => 'required',
+            'name' => $name,
             'address' => 'required|max:255',
             'job' => 'required',
             'birthdate' => $birthdate,

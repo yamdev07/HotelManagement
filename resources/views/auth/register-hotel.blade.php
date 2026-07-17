@@ -112,6 +112,10 @@
                     <p class="text-center text-secondary mb-0">
                         Vous avez déjà un compte ? <a href="{{ route('login.index') }}" class="fw-semibold">Se connecter</a>
                     </p>
+                    {{-- Issue #163 : retour explicite vers le site vitrine --}}
+                    <p class="text-center mb-0 mt-2">
+                        <a href="{{ route('landing') }}" class="text-decoration-none"><i class="fas fa-arrow-left me-1"></i>Retour au site</a>
+                    </p>
                 </div>
             </div>
         </div>

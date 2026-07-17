@@ -159,8 +159,10 @@ Route::get('/logout-now', function () {
 Route::group(['middleware' => 'guest'], function () {
     Route::get('/forgot-password', fn () => view('auth.passwords.email'))->name('password.request');
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
-    Route::get('/reset-password/{token}', fn (string $token) => view('auth.reset-password', ['token' => $token]))
-        ->name('password.reset');
+    Route::get('/reset-password/{token}', fn (string $token) => view('auth.reset-password', [
+        'token' => $token,
+        'email' => request('email'), // pré-rempli depuis le lien reçu par email (issue #151)
+    ]))->name('password.reset');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
 });
 

@@ -37,7 +37,17 @@
         .btn-ghost{border:1px solid var(--border);color:var(--txt);}
         /* Sidebar doc (fixe, à gauche) */
         .gside{position:fixed;top:59px;left:0;bottom:0;width:300px;border-right:1px solid var(--border);
-            background:var(--side-bg);backdrop-filter:blur(12px);padding:22px 18px;overflow-y:auto;z-index:20;transition:transform .25s;}
+            background:var(--side-bg);backdrop-filter:blur(12px);padding:22px 18px;overflow-y:auto;z-index:20;transition:transform .25s;
+            scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+        /* Scrollbar fine et discrète, cohérente avec l'app (issue #167) */
+        .gside::-webkit-scrollbar{width:6px;}
+        .gside::-webkit-scrollbar-track{background:transparent;}
+        .gside::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
+        .gside::-webkit-scrollbar-thumb:hover{background:var(--muted);}
+        body{scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+        body::-webkit-scrollbar{width:9px;}
+        body::-webkit-scrollbar-track{background:transparent;}
+        body::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px;}
         .t-search{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);
             border-radius:12px;padding:11px 14px;margin-bottom:20px;color:var(--muted);}
         .t-search i{font-size:.85rem;}
