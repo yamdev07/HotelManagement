@@ -17,7 +17,12 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request)
     {
-        if (Auth::attempt($request->only('email', 'password'))) {
+        // Connexion par email OU téléphone (issue #165) : si l'identifiant
+        // saisi n'est pas un email, on le traite comme un numéro de téléphone.
+        $identifier = trim((string) $request->input('email'));
+        $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+
+        if (Auth::attempt([$field => $identifier, 'password' => $request->password])) {
             activity()->causedBy(auth()->user())->log('User logged into the portal');
 
             // Super-Admin plateforme (sans hôtel) -> dashboard de gestion des hôtels
@@ -37,7 +42,7 @@ class AuthController extends Controller
             return redirect('/home')->with('success', 'Bienvenue ' . auth()->user()->name);
         }
 
-        return redirect('login')->with('failed', 'Incorrect email / password');
+        return redirect('login')->with('failed', 'Identifiants incorrects. Vérifiez votre email (ou téléphone) et votre mot de passe.');
     }
 
     public function register(Request $request)

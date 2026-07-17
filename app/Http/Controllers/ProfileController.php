@@ -36,7 +36,7 @@ class ProfileController extends Controller
     {
         $request->validate([
             'current_password' => 'required',
-            'password' => 'required|min:6|confirmed',
+            'password' => ['required', 'confirmed', new \App\Rules\StrongPassword],
         ]);
 
         if (! Hash::check($request->current_password, Auth::user()->password)) {
@@ -86,7 +86,7 @@ class ProfileController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$user->id,
-            'password' => 'nullable|min:6|confirmed',
+            'password' => ['nullable', 'confirmed', new \App\Rules\StrongPassword],
         ]);
 
         $user->name = $request->name;

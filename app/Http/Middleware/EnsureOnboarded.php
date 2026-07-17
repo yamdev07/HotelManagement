@@ -21,9 +21,13 @@ class EnsureOnboarded
             return $next($request);
         }
 
-        // Pages toujours accessibles (onboarding lui-même, déconnexion, suspension)
-        if ($request->routeIs('onboarding.show', 'onboarding.store', 'logout', 'logout.now', 'hotel.suspended')
-            || $request->is('logout*', 'force-logout-all')) {
+        // Pages toujours accessibles : onboarding lui-même, déconnexion, suspension,
+        // et les pages PUBLIQUES (landing, guide, vitrines, inscription) · issue #156 :
+        // taper le domaine ne doit pas forcer le retour à l'onboarding.
+        if ($request->routeIs(
+            'onboarding.show', 'onboarding.store', 'logout', 'logout.now', 'hotel.suspended',
+            'landing', 'landing.v1', 'guide', 'hotel.register', 'hotel.register.store', 'public.*'
+        ) || $request->is('logout*', 'force-logout-all')) {
             return $next($request);
         }
 

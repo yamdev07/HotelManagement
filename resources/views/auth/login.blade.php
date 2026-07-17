@@ -147,11 +147,12 @@
             <form action="{{ route('login') }}" method="POST">
                 @csrf
                 <div class="mb-3 anim d2">
-                    <label class="form-label fw-semibold">Adresse email</label>
+                    <label class="form-label fw-semibold">Email ou téléphone</label>
                     <div class="position-relative">
                         <i class="fas fa-envelope input-ico"></i>
-                        <input type="email" name="email" value="{{ old('email') }}" required autofocus
-                               class="form-control @error('email') is-invalid @enderror" placeholder="vous@exemple.com">
+                        {{-- Issue #165 : on peut se connecter avec l'email OU le téléphone donné à l'inscription --}}
+                        <input type="text" name="email" value="{{ old('email') }}" required autofocus
+                               class="form-control @error('email') is-invalid @enderror" placeholder="vous@exemple.com ou +229 01 02 03 04">
                     </div>
                     @error('email')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                 </div>

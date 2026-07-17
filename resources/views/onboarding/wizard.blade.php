@@ -106,7 +106,16 @@
                                 <i class="fas fa-check me-2"></i> Valider et accéder à mon espace
                             </button>
                         </div>
+                        {{-- Issue #156 : pouvoir quitter / changer de compte sans être piégé ici --}}
+                        <p class="text-center text-secondary small mt-3 mb-0">
+                            <a href="{{ route('landing') }}" class="text-decoration-none me-3"><i class="fas fa-arrow-left me-1"></i>Retour au site</a>
+                            <a href="#" class="text-decoration-none text-danger"
+                               onclick="event.preventDefault(); document.getElementById('ob-logout').submit();">
+                                <i class="fas fa-arrow-right-from-bracket me-1"></i>Me déconnecter (finir plus tard)
+                            </a>
+                        </p>
                     </form>
+                    <form id="ob-logout" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
                 </div>
             </div>
         </div>
