@@ -238,17 +238,6 @@
                             </a>
                         @endif
 
-                        @if (Route::has('staff.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
-                            <a href="{{ route('staff.index') }}"
-                                class="nav-item {{ $activeClass('staff.', false) }}" data-tooltip="Personnel">
-                                <div class="nav-icon"><i class="fas fa-user-tie"></i></div>
-                                <div class="nav-content">
-                                    <div class="nav-title">Personnel</div>
-                                    <div class="nav-subtitle">Réception, ménage, service</div>
-                                </div>
-                            </a>
-                        @endif
-
                         @if (Route::has('billing.show') && in_array(auth()->user()->role, ['Super', 'Admin']))
                             <a href="{{ route('billing.show') }}"
                                 class="nav-item {{ $activeClass('billing.') }}" data-tooltip="Mon abonnement">
@@ -346,14 +335,26 @@
                     <div class="nav-section">
                         <div class="nav-section-title">Administration</div>
 
+                        {{-- Personnel : l'hôtelier gère son équipe (issue #180) --}}
+                        @if (Route::has('staff.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                            <a href="{{ route('staff.index') }}"
+                                class="nav-item {{ $activeClass('staff.', false) }}" data-tooltip="Personnel">
+                                <div class="nav-icon"><i class="fas fa-user-tie"></i></div>
+                                <div class="nav-content">
+                                    <div class="nav-title">Personnel</div>
+                                    <div class="nav-subtitle">Réception, ménage, service…</div>
+                                </div>
+                            </a>
+                        @endif
+
                         @if (Route::has('user.index') && auth()->user()->role == 'Super')
                             <a href="{{ route('user.index') }}"
                                 class="nav-item restricted {{ $activeClass('user.index') }}"
-                                data-tooltip="Utilisateurs">
+                                data-tooltip="Utilisateurs (plateforme)">
                                 <div class="nav-icon"><i class="fas fa-user-cog"></i></div>
                                 <div class="nav-content">
                                     <div class="nav-title">Utilisateurs</div>
-                                    <div class="nav-subtitle">Gestion des comptes</div>
+                                    <div class="nav-subtitle">Comptes plateforme</div>
                                 </div>
                             </a>
                         @endif
