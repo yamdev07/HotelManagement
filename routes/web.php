@@ -122,6 +122,14 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::get('/abonnement/retour', [\App\Http\Controllers\BillingController::class, 'callback'])->name('billing.callback');
 });
 
+// ==================== PERSONNEL (l'hôtelier gère son équipe) · issue #180 ====================
+Route::middleware(['auth', 'checkrole:Super,Admin'])->prefix('personnel')->name('staff.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\StaffController::class, 'index'])->name('index');
+    Route::post('/', [\App\Http\Controllers\StaffController::class, 'store'])->name('store');
+    Route::post('/{user}/reinitialiser', [\App\Http\Controllers\StaffController::class, 'resetPassword'])->name('reset');
+    Route::delete('/{user}', [\App\Http\Controllers\StaffController::class, 'destroy'])->name('destroy');
+});
+
 // ==================== DASHBOARD SUPER-ADMIN PLATEFORME ====================
 Route::middleware(['auth', 'checkrole:Super'])->prefix('platform')->name('platform.')->group(function () {
     Route::get('/hotels', [PlatformHotelController::class, 'index'])->name('hotels.index');
