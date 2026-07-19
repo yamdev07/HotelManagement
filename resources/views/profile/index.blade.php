@@ -437,24 +437,28 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="form-label">Nom complet</label>
-                                    <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" 
+                                    <input type="text" name="name" maxlength="255" class="form-control @error('name') is-invalid @enderror"
                                            value="{{ old('name', $user->name) }}" required>
+                                    @error('name')<div class="invalid-feedback d-block"><i class="fas fa-circle-exclamation me-1"></i>{{ $message }}</div>@enderror
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="form-label">Email</label>
-                                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" 
+                                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                                            value="{{ old('email', $user->email) }}" required>
+                                    @error('email')<div class="invalid-feedback d-block"><i class="fas fa-circle-exclamation me-1"></i>{{ $message }}</div>@enderror
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="form-label">Téléphone</label>
-                                    <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror" 
-                                           value="{{ old('phone', $user->phone) }}">
+                                    <input type="tel" name="phone" class="form-control @error('phone') is-invalid @enderror"
+                                           value="{{ old('phone', $user->phone) }}" pattern="[0-9+\s().\-]{6,20}"
+                                           title="Chiffres et + - ( ) espaces uniquement" placeholder="+229 01 02 03 04">
+                                    @error('phone')<div class="invalid-feedback d-block"><i class="fas fa-circle-exclamation me-1"></i>{{ $message }}</div>@enderror
                                 </div>
                             </div>
                             

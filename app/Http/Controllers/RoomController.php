@@ -54,10 +54,14 @@ class RoomController extends Controller
         $types = Type::all();
         $roomstatuses = RoomStatus::all();
 
-        // Retourner directement la vue HTML
+        // Issue #194 : montrer les numéros DÉJÀ pris pour éviter les doublons
+        // (Room est scopé par hôtel, donc uniquement les chambres de cet hôtel).
+        $existingNumbers = Room::orderBy('number')->pluck('number')->values();
+
         return view('room.create', [
             'types' => $types,
             'roomstatuses' => $roomstatuses,
+            'existingNumbers' => $existingNumbers,
         ]);
     }
 

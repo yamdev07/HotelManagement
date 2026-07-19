@@ -49,6 +49,19 @@
                 <div class="alert alert-danger"><ul class="mb-0">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>
             @endif
 
+            {{-- Issues #154 #155 : rassurer sur le changement d'offre --}}
+            <div class="alert alert-light border d-flex align-items-start gap-2">
+                <i class="fas fa-circle-info text-primary mt-1"></i>
+                <div class="small mb-0">
+                    Vous pourrez <strong>changer d'offre à tout moment</strong> (passer de Starter à Pro ou Business)
+                    @if (\Illuminate\Support\Facades\Route::has('billing.show'))
+                        depuis <strong>Mon abonnement</strong>, une fois connecté.
+                    @else
+                        depuis votre espace, une fois connecté.
+                    @endif
+                </div>
+            </div>
+
             <div class="card wizard-card">
                 <div class="card-body p-4 p-md-5">
                     <form action="{{ route('onboarding.store') }}" method="POST" enctype="multipart/form-data">

@@ -21,8 +21,8 @@
                     <div class="auth-logo">
                         <i class="fas fa-key text-primary"></i>
                     </div>
-                    <h1 class="auth-title">Set New Password</h1>
-                    <p class="auth-subtitle">Enter your new password below</p>
+                    <h1 class="auth-title">Nouveau mot de passe</h1>
+                    <p class="auth-subtitle">Choisissez votre nouveau mot de passe</p>
                 </div>
 
                 <!-- Reset Form -->
@@ -33,7 +33,7 @@
                     <!-- Email Field -->
                     <div class="form-group">
                         <label for="email" class="form-label">
-                            <i class="fas fa-envelope me-2"></i>Email Address
+                            <i class="fas fa-envelope me-2"></i>Adresse email
                         </label>
                         <div class="input-wrapper">
                             {{-- Issue #151 : champ éditable (il était readonly ET jamais pré-rempli) --}}
@@ -60,7 +60,7 @@
                     <!-- Password Field -->
                     <div class="form-group">
                         <label for="password" class="form-label">
-                            <i class="fas fa-lock me-2"></i>New Password
+                            <i class="fas fa-lock me-2"></i>Nouveau mot de passe
                         </label>
                         <div class="input-wrapper">
                             <input
@@ -70,7 +70,7 @@
                                 name="password"
                                 required
                                 autocomplete="new-password"
-                                placeholder="Enter new password"
+                                placeholder="Entrez votre nouveau mot de passe"
                                 minlength="8"
                             >
                             <button type="button" class="password-toggle" onclick="togglePassword('password')">
@@ -88,14 +88,20 @@
                             <div class="strength-bar">
                                 <div class="strength-fill" id="strength-fill"></div>
                             </div>
-                            <div class="strength-text" id="strength-text">Password strength</div>
+                            <div class="strength-text" id="strength-text">Force du mot de passe</div>
+                        </div>
+                        <!-- Checklist des conditions (issue #179), juste sous le champ -->
+                        <div class="req-live" id="req-live">
+                            <div class="requirement-item" id="req-length"><i class="fas fa-circle requirement-icon"></i><span>Au moins 8 caractères</span></div>
+                            <div class="requirement-item" id="req-letter"><i class="fas fa-circle requirement-icon"></i><span>Au moins une lettre</span></div>
+                            <div class="requirement-item" id="req-number"><i class="fas fa-circle requirement-icon"></i><span>Au moins un chiffre</span></div>
                         </div>
                     </div>
 
                     <!-- Confirm Password Field -->
                     <div class="form-group">
                         <label for="password-confirm" class="form-label">
-                            <i class="fas fa-shield-alt me-2"></i>Confirm Password
+                            <i class="fas fa-shield-alt me-2"></i>Confirmer le mot de passe
                         </label>
                         <div class="input-wrapper">
                             <input
@@ -105,7 +111,7 @@
                                 name="password_confirmation"
                                 required
                                 autocomplete="new-password"
-                                placeholder="Confirm new password"
+                                placeholder="Confirmez le mot de passe"
                             >
                             <button type="button" class="password-toggle" onclick="togglePassword('password-confirm')">
                                 <i class="fas fa-eye" id="password-confirm-toggle-icon"></i>
@@ -113,8 +119,8 @@
                         </div>
                         <!-- Password Match Indicator -->
                         <div class="password-match" id="password-match" style="display: none;">
-                            <i class="fas fa-check-circle text-success me-1"></i>
-                            <span>Passwords match</span>
+                            <i class="fas fa-check-circle me-1"></i>
+                            <span>Les mots de passe correspondent</span>
                         </div>
                     </div>
 
@@ -122,11 +128,11 @@
                     <button type="submit" class="btn btn-primary auth-submit-btn" id="submitBtn">
                         <span class="btn-text">
                             <i class="fas fa-key me-2"></i>
-                            Reset Password
+                            Réinitialiser le mot de passe
                         </span>
                         <span class="btn-loading d-none">
                             <i class="fas fa-spinner fa-spin me-2"></i>
-                            Resetting...
+                            Réinitialisation...
                         </span>
                     </button>
 
@@ -134,36 +140,10 @@
                     <div class="auth-links">
                         <a href="{{ route('login') }}" class="auth-link">
                             <i class="fas fa-arrow-left me-2"></i>
-                            Back to Login
+                            Retour à la connexion
                         </a>
                     </div>
                 </form>
-
-                <!-- Password Requirements -->
-                <div class="auth-help">
-                    <h6 class="text-white mb-3">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Password Requirements
-                    </h6>
-                    <div class="requirement-list">
-                        <div class="requirement-item" id="req-length">
-                            <i class="fas fa-circle requirement-icon"></i>
-                            <span>At least 8 characters</span>
-                        </div>
-                        <div class="requirement-item" id="req-uppercase">
-                            <i class="fas fa-circle requirement-icon"></i>
-                            <span>One uppercase letter</span>
-                        </div>
-                        <div class="requirement-item" id="req-lowercase">
-                            <i class="fas fa-circle requirement-icon"></i>
-                            <span>One lowercase letter</span>
-                        </div>
-                        <div class="requirement-item" id="req-number">
-                            <i class="fas fa-circle requirement-icon"></i>
-                            <span>One number</span>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -195,36 +175,47 @@
 
         .password-match {
             font-size: 0.875rem;
-            color: #28a745;
             margin-top: 0.5rem;
+            font-weight: 600;
         }
+        /* Issue #176 : couleurs nettes et lisibles (plus de vert/rouge mélangés illisibles) */
+        .password-match.ok { color: #34d399; }
+        .password-match.ko { color: #f87171; }
 
-        .requirement-list {
+        /* Issue #179 : checklist claire des conditions, sous le champ */
+        .req-live {
             display: grid;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            margin-top: 0.7rem;
+            padding: 0.7rem 0.9rem;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
         }
 
         .requirement-item {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            font-size: 0.875rem;
-            color: rgba(255, 255, 255, 0.7);
-            transition: all 0.3s ease;
+            gap: 0.6rem;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.25s ease;
         }
 
         .requirement-item.met {
-            color: #28a745;
+            color: #34d399;
         }
 
         .requirement-icon {
-            font-size: 0.5rem;
-            transition: all 0.3s ease;
+            font-size: 0.7rem;
+            width: 14px;
+            text-align: center;
+            transition: all 0.25s ease;
         }
-
-        .requirement-item.met .requirement-icon {
-            color: #28a745;
-        }
+        /* Puce grise -> coche verte quand la condition est remplie */
+        .requirement-item .requirement-icon::before { content: "\f111"; } /* fa-circle */
+        .requirement-item.met .requirement-icon { color: #34d399; }
+        .requirement-item.met .requirement-icon::before { content: "\f058"; } /* fa-check-circle */
 
         .password-toggle {
             position: absolute;
@@ -273,19 +264,18 @@
             }
         }
 
-        // Password strength checker
+        // Conditions RÉELLES appliquées côté serveur (App\Rules\StrongPassword)
         function checkPasswordStrength(password) {
             let score = 0;
             const requirements = {
                 length: password.length >= 8,
-                uppercase: /[A-Z]/.test(password),
-                lowercase: /[a-z]/.test(password),
+                letter: /\p{L}/u.test(password),
                 number: /\d/.test(password)
             };
 
-            // Update requirement indicators
             Object.keys(requirements).forEach(req => {
                 const element = document.getElementById(`req-${req}`);
+                if (!element) return;
                 if (requirements[req]) {
                     element.classList.add('met');
                     score++;
@@ -294,7 +284,7 @@
                 }
             });
 
-            return { score, total: 4 };
+            return { score, total: 3 };
         }
 
         // Update password strength indicator
@@ -308,24 +298,20 @@
 
             if (score === 0) {
                 strengthFill.style.background = 'transparent';
-                strengthText.textContent = 'Password strength';
+                strengthText.textContent = 'Force du mot de passe';
                 strengthText.style.color = 'rgba(255, 255, 255, 0.7)';
-            } else if (score < 2) {
-                strengthFill.style.background = '#dc3545';
-                strengthText.textContent = 'Weak password';
-                strengthText.style.color = '#dc3545';
-            } else if (score < 3) {
-                strengthFill.style.background = '#ffc107';
-                strengthText.textContent = 'Fair password';
-                strengthText.style.color = '#ffc107';
-            } else if (score < 4) {
-                strengthFill.style.background = '#fd7e14';
-                strengthText.textContent = 'Good password';
-                strengthText.style.color = '#fd7e14';
+            } else if (score === 1) {
+                strengthFill.style.background = '#f87171';
+                strengthText.textContent = 'Mot de passe faible';
+                strengthText.style.color = '#f87171';
+            } else if (score === 2) {
+                strengthFill.style.background = '#fbbf24';
+                strengthText.textContent = 'Mot de passe moyen';
+                strengthText.style.color = '#fbbf24';
             } else {
-                strengthFill.style.background = '#28a745';
-                strengthText.textContent = 'Strong password';
-                strengthText.style.color = '#28a745';
+                strengthFill.style.background = '#34d399';
+                strengthText.textContent = 'Mot de passe valide';
+                strengthText.style.color = '#34d399';
             }
         }
 
@@ -336,13 +322,13 @@
             const matchIndicator = document.getElementById('password-match');
 
             if (confirmPassword.length > 0) {
+                matchIndicator.style.display = 'block';
                 if (password === confirmPassword) {
-                    matchIndicator.style.display = 'block';
-                    matchIndicator.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i><span>Passwords match</span>';
+                    matchIndicator.className = 'password-match ok';
+                    matchIndicator.innerHTML = '<i class="fas fa-check-circle me-1"></i><span>Les mots de passe correspondent</span>';
                 } else {
-                    matchIndicator.style.display = 'block';
-                    matchIndicator.innerHTML = '<i class="fas fa-times-circle text-danger me-1"></i><span>Passwords do not match</span>';
-                    matchIndicator.style.color = '#dc3545';
+                    matchIndicator.className = 'password-match ko';
+                    matchIndicator.innerHTML = '<i class="fas fa-times-circle me-1"></i><span>Les mots de passe ne correspondent pas</span>';
                 }
             } else {
                 matchIndicator.style.display = 'none';
