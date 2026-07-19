@@ -16,6 +16,38 @@ class ProfilePhoneTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_profile_rejects_emoji_name_and_invalid_phone(): void
+    {
+        $hotel = Hotel::create([
+            'name'                    => 'Hotel Profil',
+            'slug'                    => Str::slug('Hotel Profil '.Str::random(4)),
+            'is_active'               => true,
+            'onboarding_completed_at' => now(),
+            'subscription_ends_at'    => now()->addMonth(),
+        ]);
+        $user = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id, 'email' => 'prof@valid.test']);
+
+        // Issue #197 : nom charabia/emoji refusé
+        $this->actingAs($user)->post(route('profile.update.info'), [
+            'name'  => '👗)(*&^%',
+            'email' => 'prof@valid.test',
+        ])->assertSessionHasErrors('name');
+
+        // Téléphone invalide (lettres) refusé
+        $this->actingAs($user)->post(route('profile.update.info'), [
+            'name'  => 'Jean Valide',
+            'email' => 'prof@valid.test',
+            'phone' => 'abcXYZ!!',
+        ])->assertSessionHasErrors('phone');
+
+        // Valeurs correctes : OK
+        $this->actingAs($user)->post(route('profile.update.info'), [
+            'name'  => 'Jean Valide',
+            'email' => 'prof@valid.test',
+            'phone' => '+229 01 02 03 04',
+        ])->assertSessionHasNoErrors();
+    }
+
     public function test_user_can_save_phone_number_in_profile(): void
     {
         $hotel = Hotel::create([

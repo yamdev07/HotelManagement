@@ -19,12 +19,15 @@ class ProfileController extends Controller
     public function updateInfo(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => [
-                'required', 'email', Rule::unique('users')->ignore(Auth::id()),
-            ],
-            'phone' => 'nullable|string|max:20',
-        ]);
+            // Nom sans emoji ni charabia (issue #197, comme les clients)
+            'name'  => ['required', 'string', 'max:255', new \App\Rules\SafeName],
+            'email' => ['required', 'email', Rule::unique('users')->ignore(Auth::id())],
+            // Téléphone : chiffres et séparateurs uniquement (pas de lettres/emoji)
+            'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\s().\-]{6,20}$/'],
+        ], [
+            'phone.regex' => 'Le numéro de téléphone n\'est pas valide (chiffres et + - ( ) espaces uniquement).',
+            'email.unique' => 'Cette adresse email est déjà utilisée par un autre compte.',
+        ], ['name' => 'nom', 'email' => 'email', 'phone' => 'téléphone']);
 
         $user = Auth::user();
         $user->update($request->only('name', 'email', 'phone'));
@@ -84,10 +87,12 @@ class ProfileController extends Controller
         $user = auth()->user();
 
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255', new \App\Rules\SafeName],
             'email' => 'required|email|unique:users,email,'.$user->id,
             'password' => ['nullable', 'confirmed', new \App\Rules\StrongPassword],
-        ]);
+        ], [
+            'email.unique' => 'Cette adresse email est déjà utilisée par un autre compte.',
+        ], ['name' => 'nom', 'email' => 'email']);
 
         $user->name = $request->name;
         $user->email = $request->email;
