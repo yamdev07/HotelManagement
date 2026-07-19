@@ -256,6 +256,33 @@
     font-size: .7rem; color: #b91c1c; margin-top: 4px;
 }
 
+/* ── Numéros déjà pris (issue #194) ── */
+.taken-numbers {
+    margin-top: 10px; padding: 10px 12px;
+    background: var(--surface2); border: 1.5px solid var(--s100);
+    border-radius: var(--r); font-size: .72rem; color: var(--s600);
+    display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+}
+.taken-numbers--empty { color: var(--s500); }
+.taken-numbers--empty i { color: var(--g500); }
+.taken-numbers-label { font-weight: 600; color: var(--s700); display: inline-flex; align-items: center; gap: 5px; }
+.taken-numbers-label i { color: var(--g500); }
+.taken-numbers-list { display: inline-flex; flex-wrap: wrap; gap: 5px; }
+.num-chip {
+    display: inline-block; padding: 2px 9px; border-radius: 999px;
+    background: var(--white); border: 1.5px solid var(--s200);
+    font-family: var(--mono); font-size: .7rem; font-weight: 500;
+    color: var(--s700); transition: var(--transition);
+}
+.num-chip.is-match {
+    background: #fee2e2; border-color: #fca5a5; color: #b91c1c;
+    transform: scale(1.08);
+}
+.num-taken { color: #b91c1c; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+.num-free  { color: var(--g600); font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+#number.is-taken { border-color: #f87171; box-shadow: 0 0 0 3px #fee2e2; }
+#number.is-free  { border-color: var(--g400); box-shadow: 0 0 0 3px var(--g100); }
+
 /* ══════════════════════════════════════════════
    ACTIONS BAR
 ══════════════════════════════════════════════ */
@@ -376,7 +403,30 @@
                             {{ $message }}
                         </div>
                         @enderror
-                        <div class="form-hint">Identifiant unique de la chambre</div>
+                        {{-- Issue #194 : alerte en direct si le numéro est déjà pris --}}
+                        <div class="form-hint" id="number-live-hint" style="display:none;">
+                            <span class="num-taken"><i class="fas fa-exclamation-circle"></i> Ce numéro est <strong>déjà utilisé</strong>, choisissez-en un autre.</span>
+                        </div>
+                        <div class="form-hint" id="number-live-ok" style="display:none;">
+                            <span class="num-free"><i class="fas fa-check-circle"></i> Numéro disponible.</span>
+                        </div>
+                        <div class="form-hint">Identifiant unique de la chambre · doit être différent des numéros existants</div>
+
+                        {{-- Liste des numéros déjà attribués --}}
+                        @if($existingNumbers->isNotEmpty())
+                        <div class="taken-numbers">
+                            <span class="taken-numbers-label"><i class="fas fa-door-closed"></i> Numéros déjà utilisés ({{ $existingNumbers->count() }})&nbsp;:</span>
+                            <span class="taken-numbers-list">
+                                @foreach($existingNumbers as $n)
+                                    <span class="num-chip">{{ $n }}</span>
+                                @endforeach
+                            </span>
+                        </div>
+                        @else
+                        <div class="taken-numbers taken-numbers--empty">
+                            <i class="fas fa-info-circle"></i> Aucune chambre pour l'instant · c'est votre première.
+                        </div>
+                        @endif
                     </div>
                     
                     <!-- Nom de la chambre -->
@@ -555,4 +605,45 @@
         </div>
     </div>
 </div>
+
+{{-- Issue #194 : vérification en direct du numéro de chambre --}}
+<script>
+(function () {
+    const taken = @json($existingNumbers->map(fn ($n) => (string) $n)->values());
+    const takenSet = new Set(taken.map(n => n.trim().toLowerCase()));
+
+    const input    = document.getElementById('number');
+    const hintTaken = document.getElementById('number-live-hint');
+    const hintOk    = document.getElementById('number-live-ok');
+    const submitBtn = document.querySelector('form.form button[type="submit"]');
+    const chips     = Array.from(document.querySelectorAll('.num-chip'));
+
+    if (!input) return;
+
+    function refresh() {
+        const val = (input.value || '').trim().toLowerCase();
+        chips.forEach(c => c.classList.toggle('is-match', c.textContent.trim().toLowerCase() === val && val !== ''));
+
+        if (val === '') {
+            input.classList.remove('is-taken', 'is-free');
+            hintTaken.style.display = 'none';
+            hintOk.style.display = 'none';
+            if (submitBtn) submitBtn.disabled = false;
+            return;
+        }
+        if (takenSet.has(val)) {
+            input.classList.add('is-taken'); input.classList.remove('is-free');
+            hintTaken.style.display = 'block'; hintOk.style.display = 'none';
+            if (submitBtn) submitBtn.disabled = true;
+        } else {
+            input.classList.add('is-free'); input.classList.remove('is-taken');
+            hintTaken.style.display = 'none'; hintOk.style.display = 'block';
+            if (submitBtn) submitBtn.disabled = false;
+        }
+    }
+
+    input.addEventListener('input', refresh);
+    refresh();
+})();
+</script>
 @endsection

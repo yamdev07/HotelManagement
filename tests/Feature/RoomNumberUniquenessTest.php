@@ -19,9 +19,11 @@ class RoomNumberUniquenessTest extends TestCase
     private function hotel(): Hotel
     {
         return Hotel::create([
-            'name'      => 'Hotel '.Str::random(5),
-            'slug'      => Str::slug('Hotel '.Str::random(6)),
-            'is_active' => true,
+            'name'                    => 'Hotel '.Str::random(5),
+            'slug'                    => Str::slug('Hotel '.Str::random(6)),
+            'is_active'               => true,
+            'onboarding_completed_at' => now(),
+            'subscription_ends_at'    => now()->addMonth(),
         ]);
     }
 
@@ -72,5 +74,26 @@ class RoomNumberUniquenessTest extends TestCase
 
         // Doublon dans le MÊME hôtel : refusé
         $this->assertTrue($this->validateNumberFor($a->id, '101')->fails());
+    }
+
+    public function test_create_form_lists_existing_room_numbers(): void
+    {
+        // Issue #194 : la page de création doit afficher les numéros déjà pris
+        // de CET hôtel uniquement (pour éviter les doublons à l'aveugle).
+        $a = $this->hotel();
+        $b = $this->hotel();
+        $this->roomFor($a->id, '101');
+        $this->roomFor($a->id, '102');
+        $this->roomFor($b->id, 'ZQ7X42'); // autre hôtel : ne doit PAS apparaître
+
+        app(TenantManager::class)->setHotelId($a->id);
+        $admin = \App\Models\User::factory()->create(['role' => 'Admin', 'hotel_id' => $a->id]);
+
+        $res = $this->actingAs($admin)->get(route('room.create'));
+        $res->assertOk();
+        $res->assertSee('Numéros déjà utilisés');
+        $res->assertSee('101');
+        $res->assertSee('102');
+        $res->assertDontSee('ZQ7X42'); // fuite inter-hôtels : interdit
     }
 }
