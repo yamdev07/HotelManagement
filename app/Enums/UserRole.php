@@ -6,6 +6,7 @@ enum UserRole: string
 {
     case Super        = 'Super';
     case Admin        = 'Admin';
+    case Manager      = 'Manager';
     case Receptionist = 'Receptionist';
     case Cashier      = 'Cashier';
     case Housekeeping = 'Housekeeping';
@@ -18,6 +19,7 @@ enum UserRole: string
         return match($this) {
             self::Super        => 'Super Admin',
             self::Admin        => 'Administrateur',
+            self::Manager      => 'Direction',
             self::Receptionist => 'Réceptionniste',
             self::Cashier      => 'Caissier',
             self::Housekeeping => 'Housekeeping',
@@ -32,6 +34,7 @@ enum UserRole: string
         return match($this) {
             self::Super        => 'fas fa-crown',
             self::Admin        => 'fas fa-user-shield',
+            self::Manager      => 'fas fa-user-tie',
             self::Receptionist => 'fas fa-concierge-bell',
             self::Cashier      => 'fas fa-cash-register',
             self::Housekeeping => 'fas fa-broom',
@@ -46,6 +49,7 @@ enum UserRole: string
         return match($this) {
             self::Super        => 'danger',
             self::Admin        => 'primary',
+            self::Manager      => 'primary',
             self::Receptionist => 'info',
             self::Cashier      => 'success',
             self::Housekeeping => 'warning',
@@ -60,6 +64,7 @@ enum UserRole: string
         return in_array($this, [
             self::Super,
             self::Admin,
+            self::Manager,
             self::Receptionist,
             self::Cashier,
             self::Housekeeping,
@@ -68,9 +73,21 @@ enum UserRole: string
         ]);
     }
 
+    /** Niveau direction : accès étendu au back-office (≠ facturation). */
+    public function isManagement(): bool
+    {
+        return in_array($this, [self::Super, self::Admin, self::Manager]);
+    }
+
+    /** Seuls le propriétaire (Admin) et le Super gèrent l'abonnement/facturation. */
+    public function canAccessBilling(): bool
+    {
+        return in_array($this, [self::Super, self::Admin]);
+    }
+
     public function canManageReservations(): bool
     {
-        return in_array($this, [self::Super, self::Admin, self::Receptionist]);
+        return in_array($this, [self::Super, self::Admin, self::Manager, self::Receptionist]);
     }
 
     public function canProcessPayments(): bool
@@ -78,6 +95,7 @@ enum UserRole: string
         return in_array($this, [
             self::Super,
             self::Admin,
+            self::Manager,
             self::Receptionist,
             self::Cashier,
             self::Servant,
@@ -87,12 +105,12 @@ enum UserRole: string
 
     public function canManageRooms(): bool
     {
-        return in_array($this, [self::Super, self::Admin]);
+        return in_array($this, [self::Super, self::Admin, self::Manager]);
     }
 
     public function canManageUsers(): bool
     {
-        return in_array($this, [self::Super, self::Admin]);
+        return in_array($this, [self::Super, self::Admin, self::Manager]);
     }
 
     /** @return self[] */
@@ -101,6 +119,7 @@ enum UserRole: string
         return [
             self::Super,
             self::Admin,
+            self::Manager,
             self::Receptionist,
             self::Cashier,
             self::Housekeeping,

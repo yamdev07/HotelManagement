@@ -283,7 +283,7 @@ class RoomController extends Controller
      */
     public function syncStatuses()
     {
-        if (! auth()->user()->isSuper() && ! auth()->user()->isAdmin()) {
+        if (! auth()->user()->roleEnum?->canManageRooms()) {
             return redirect()->back()->with('error', 'Unauthorized');
         }
 

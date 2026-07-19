@@ -83,4 +83,69 @@ class StaffManagementTest extends TestCase
         $this->actingAs($adminA)->delete(route('staff.destroy', $staffB))->assertForbidden();
         $this->assertDatabaseHas('users', ['id' => $staffB->id]);
     }
+
+    /* ───────────────── Rôle Direction (Manager) ───────────────── */
+
+    public function test_admin_can_create_a_direction_manager(): void
+    {
+        [$hotel, $admin] = $this->hotelAdmin('Hotel Dir A');
+
+        $this->actingAs($admin)->post(route('staff.store'), [
+            'name'     => 'Directrice',
+            'email'    => 'dir@staff.test',
+            'role'     => 'Manager',
+            'password' => 'MotDePasse1',
+        ])->assertRedirect();
+
+        $manager = User::where('email', 'dir@staff.test')->first();
+        $this->assertNotNull($manager);
+        $this->assertEquals('Manager', $manager->role);
+        $this->assertEquals($hotel->id, $manager->hotel_id);
+    }
+
+    public function test_manager_cannot_create_another_manager(): void
+    {
+        [$hotel, $admin] = $this->hotelAdmin('Hotel Dir B');
+        $manager = User::factory()->create(['role' => 'Manager', 'hotel_id' => $hotel->id]);
+
+        // Un Manager ne peut créer QUE de l'opérationnel, pas un autre Manager.
+        $this->actingAs($manager)->post(route('staff.store'), [
+            'name'     => 'Autre Dir',
+            'email'    => 'autredir@staff.test',
+            'role'     => 'Manager',
+            'password' => 'MotDePasse1',
+        ])->assertSessionHasErrors('role');
+        $this->assertDatabaseMissing('users', ['email' => 'autredir@staff.test']);
+
+        // …mais il crée bien un réceptionniste.
+        $this->actingAs($manager)->post(route('staff.store'), [
+            'name'     => 'Recep OK',
+            'email'    => 'recepok@staff.test',
+            'role'     => 'Receptionist',
+            'password' => 'MotDePasse1',
+        ])->assertRedirect();
+        $this->assertDatabaseHas('users', ['email' => 'recepok@staff.test', 'role' => 'Receptionist']);
+    }
+
+    public function test_manager_can_access_personnel_but_not_billing(): void
+    {
+        [$hotel] = $this->hotelAdmin('Hotel Dir C');
+        $manager = User::factory()->create(['role' => 'Manager', 'hotel_id' => $hotel->id]);
+
+        // Accès à la gestion du personnel (comme un Admin)
+        $this->actingAs($manager)->get(route('staff.index'))->assertOk();
+
+        // …mais PAS à la facturation/abonnement
+        $this->actingAs($manager)->get(route('billing.show'))->assertForbidden();
+    }
+
+    public function test_manager_cannot_delete_or_touch_another_manager(): void
+    {
+        [$hotel] = $this->hotelAdmin('Hotel Dir D');
+        $manager      = User::factory()->create(['role' => 'Manager', 'hotel_id' => $hotel->id]);
+        $otherManager = User::factory()->create(['role' => 'Manager', 'hotel_id' => $hotel->id]);
+
+        $this->actingAs($manager)->delete(route('staff.destroy', $otherManager))->assertForbidden();
+        $this->assertDatabaseHas('users', ['id' => $otherManager->id]);
+    }
 }

@@ -19,7 +19,7 @@ use Illuminate\Validation\Rule;
  */
 class StaffController extends Controller
 {
-    /** Rôles qu'un hôtelier peut attribuer (jamais Admin ni Super). */
+    /** Rôles opérationnels qu'un membre de la direction peut attribuer. */
     public const ROLES = [
         'Receptionist' => 'Réceptionniste',
         'Cashier'      => 'Caissier / Caissière',
@@ -30,6 +30,7 @@ class StaffController extends Controller
 
     public function __construct()
     {
+        // Direction (Manager) autorisée via l'équivalence Manager→Admin de CheckRole.
         $this->middleware(['auth', 'checkrole:Super,Admin']);
     }
 
@@ -38,11 +39,27 @@ class StaffController extends Controller
         return auth()->user()->hotel_id;
     }
 
-    /** Vérifie que la cible appartient bien à MON hôtel et est un membre du personnel. */
+    /**
+     * Rôles que l'utilisateur COURANT peut gérer (créer / lister / supprimer).
+     * Seuls le propriétaire (Admin) et le Super peuvent créer un compte Direction ;
+     * un Manager ne gère que l'opérationnel (il ne peut pas créer d'autres Managers).
+     */
+    private function manageableRoles(): array
+    {
+        $roles = self::ROLES;
+
+        if (in_array(auth()->user()->role, ['Admin', 'Super'], true)) {
+            $roles['Manager'] = 'Direction';
+        }
+
+        return $roles;
+    }
+
+    /** Vérifie que la cible appartient à MON hôtel et fait partie des rôles que je gère. */
     private function assertOwned(User $user): void
     {
         abort_unless(
-            $user->hotel_id === $this->hotelId() && array_key_exists($user->role, self::ROLES),
+            $user->hotel_id === $this->hotelId() && array_key_exists($user->role, $this->manageableRoles()),
             403,
             'Action non autorisée.'
         );
@@ -51,12 +68,13 @@ class StaffController extends Controller
     public function index()
     {
         $hotelId = $this->hotelId();
+        $roles   = $this->manageableRoles();
 
         $staff = $hotelId
-            ? User::where('hotel_id', $hotelId)->whereIn('role', array_keys(self::ROLES))->orderBy('name')->get()
+            ? User::where('hotel_id', $hotelId)->whereIn('role', array_keys($roles))->orderBy('name')->get()
             : collect();
 
-        return view('staff.index', ['staff' => $staff, 'roles' => self::ROLES]);
+        return view('staff.index', ['staff' => $staff, 'roles' => $roles]);
     }
 
     public function store(Request $request)
@@ -68,7 +86,7 @@ class StaffController extends Controller
             'name'     => ['required', 'string', 'max:255', new SafeName],
             'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone'    => ['nullable', 'string', 'max:30'],
-            'role'     => ['required', Rule::in(array_keys(self::ROLES))],
+            'role'     => ['required', Rule::in(array_keys($this->manageableRoles()))],
             'password' => ['required', new StrongPassword],
         ], [], [
             'name' => 'nom', 'email' => 'email', 'role' => 'rôle', 'password' => 'mot de passe',
