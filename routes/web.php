@@ -41,7 +41,22 @@ use Illuminate\Support\Facades\Route;
 */
 // ==================== LANDING PAGE SAAS (page d'accueil plateforme) ====================
 // Accueil : nouvelle maquette (dark). L'ancienne version claire reste sur /v1.
-Route::view('/', 'landing-v2')->name('landing');
+// Accueil : landing publique. Un utilisateur DÉJÀ connecté est envoyé vers son
+// espace (issue #195) · sauf s'il est en cours d'onboarding, pour qu'il puisse
+// encore voir le site / se déconnecter (issue #156).
+Route::get('/', function () {
+    $u = auth()->user();
+    if ($u) {
+        if ($u->role === 'Super' && $u->hotel_id === null) {
+            return redirect()->route('platform.hotels.index');
+        }
+        if ($u->hotel && ! $u->hotel->needsOnboarding()) {
+            return redirect('/home');
+        }
+    }
+
+    return view('landing-v2');
+})->name('landing');
 Route::view('/v1', 'landing')->name('landing.v1');
 // Guide d'utilisation / documentation (accessible à tous)
 Route::view('/guide', 'guide')->name('guide');

@@ -35,6 +35,20 @@ class OnboardingTest extends TestCase
         $this->actingAs($admin)->get('/dashboard')->assertRedirect(route('onboarding.show'));
     }
 
+    public function test_logged_in_onboarded_admin_is_redirected_from_landing_to_app(): void
+    {
+        // Issue #195 : un admin déjà connecté et configuré ne doit pas retomber
+        // sur la page marketing, mais aller à son espace.
+        $hotel = $this->makeHotel(onboarded: true);
+        $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
+
+        $this->actingAs($admin)->get('/')->assertRedirect('/home');
+
+        // Un visiteur non connecté voit bien la landing
+        auth()->logout();
+        $this->get('/')->assertOk();
+    }
+
     public function test_onboarding_applies_settings_and_marks_completed(): void
     {
         $hotel = $this->makeHotel(onboarded: false);
