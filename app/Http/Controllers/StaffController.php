@@ -22,6 +22,7 @@ class StaffController extends Controller
     /** Rôles qu'un hôtelier peut attribuer (jamais Admin ni Super). */
     public const ROLES = [
         'Receptionist' => 'Réceptionniste',
+        'Cashier'      => 'Caissier / Caissière',
         'Housekeeping' => 'Housekeeping (ménage)',
         'Servant'      => 'Serveur / Serveuse',
         'Cuisiner'     => 'Cuisinier / Cuisinière',

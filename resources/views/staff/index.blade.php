@@ -6,9 +6,10 @@
 @php
     $roleMeta = [
         'Receptionist' => ['Réceptionniste', 'fa-bell-concierge', 'var(--g600)'],
-        'Housekeeping' => ['Housekeeping',   'fa-broom',          'var(--g500)'],
-        'Servant'      => ['Serveur',         'fa-utensils',       'var(--g400)'],
-        'Cuisiner'     => ['Cuisinier',       'fa-kitchen-set',    'var(--g300)'],
+        'Cashier'      => ['Caissier',        'fa-cash-register',  'var(--g500)'],
+        'Housekeeping' => ['Housekeeping',   'fa-broom',          'var(--g400)'],
+        'Servant'      => ['Serveur',         'fa-utensils',       'var(--g300)'],
+        'Cuisiner'     => ['Cuisinier',       'fa-kitchen-set',    'var(--g600)'],
     ];
     $counts = [];
     foreach ($roleMeta as $key => $m) { $counts[$key] = $staff->where('role', $key)->count(); }
