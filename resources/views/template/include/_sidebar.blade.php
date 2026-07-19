@@ -122,7 +122,7 @@
                 @endif
 
                 <!-- OPÉRATIONS -->
-                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist', 'Servant', 'Cuisiner']))
+                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist', 'Cashier', 'Servant', 'Cuisiner']))
                     <div class="nav-section">
                         <div class="nav-section-title">Opérations</div>
 
@@ -493,6 +493,10 @@
 
                             @case('Receptionist')
                                 <span class="role-pill role-recep">Réceptionniste</span>
+                            @break
+
+                            @case('Cashier')
+                                <span class="role-pill role-recep">Caissier</span>
                             @break
 
                             @case('Housekeeping')
