@@ -521,7 +521,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
     });
 
     // ==================== NOTIFICATIONS ====================
-    Route::view('/notification', 'notification.index')->name('notification.index');
+    Route::get('/notification', [NotificationsController::class, 'index'])->name('notification.index');
     Route::get('/mark-all-as-read', [NotificationsController::class, 'markAllAsRead'])->name('notification.markAllAsRead');
     Route::get('/notification-to/{id}', [NotificationsController::class, 'routeTo'])->name('notification.routeTo');
 
