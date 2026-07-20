@@ -47,10 +47,14 @@ class AuthController extends Controller
 
     public function register(Request $request)
     {
+        // Nom sans emoji/charabia (issue #199 : des noms type « lionel sisso🎉🎉🎉 »
+        // se retrouvaient affichés dans les messages de l'app).
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => ['required', 'string', 'max:255', new \App\Rules\SafeName],
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => ['required', 'confirmed', new \App\Rules\StrongPassword],
+        ], [], [
+            'name' => 'nom',
         ]);
 
         User::create([
@@ -64,8 +68,12 @@ class AuthController extends Controller
 
     public function logout()
     {
-        // CORRECTION ICI : Sauvegardez le nom AVANT de déconnecter
+        // Sauvegardez le nom AVANT de déconnecter
         $name = auth()->user()->name;
+
+        // Nettoie les emojis d'éventuels anciens noms (issue #199 : « lionel sisso🎉🎉🎉 »
+        // s'affichait tel quel dans le message de déconnexion).
+        $name = trim(preg_replace('/\s+/', ' ', preg_replace(\App\Rules\NoEmoji::EMOJI_PATTERN, '', $name)));
 
         // Déconnexion complète
         Auth::logout();
@@ -76,7 +84,9 @@ class AuthController extends Controller
         // Régénère le token CSRF
         session()->regenerateToken();
 
-        return redirect('login')->with('success', 'Déconnexion réussie. Au revoir '.$name.' !');
+        $bye = $name !== '' ? 'Au revoir '.$name.' !' : 'À bientôt !';
+
+        return redirect('login')->with('success', 'Déconnexion réussie. '.$bye);
     }
 
     public function forgotPassword(ForgotPasswordRequest $request)
