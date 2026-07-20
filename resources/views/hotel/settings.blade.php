@@ -35,19 +35,22 @@
                         <div class="row g-3">
                             <div class="col-md-8">
                                 <label class="form-label">Nom de l'établissement *</label>
-                                <input type="text" name="name" class="form-control" value="{{ old('name', $hotel->name) }}" required>
+                                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $hotel->name) }}" maxlength="255" required>
+                                @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Devise</label>
-                                <input type="text" name="currency" class="form-control" value="{{ old('currency', $hotel->currency) }}">
+                                <input type="text" name="currency" class="form-control" value="{{ old('currency', $hotel->currency) }}" maxlength="10">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Email de contact</label>
-                                <input type="email" name="contact_email" class="form-control" value="{{ old('contact_email', $hotel->contact_email) }}">
+                                <input type="email" name="contact_email" class="form-control @error('contact_email') is-invalid @enderror" value="{{ old('contact_email', $hotel->contact_email) }}">
+                                @error('contact_email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Téléphone</label>
-                                <input type="text" name="contact_phone" class="form-control" value="{{ old('contact_phone', $hotel->contact_phone) }}">
+                                <input type="tel" name="contact_phone" class="form-control @error('contact_phone') is-invalid @enderror" value="{{ old('contact_phone', $hotel->contact_phone) }}" placeholder="+229 01 02 03 04" pattern="[0-9+\s().\-]{6,20}" maxlength="20">
+                                @error('contact_phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Adresse</label>

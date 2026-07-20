@@ -26,29 +26,39 @@ class HotelSettingsController extends Controller
     {
         $hotel = $this->currentHotel();
 
+        // Issue #184 : validation stricte de la personnalisation (noms, contacts, liens, couleurs).
         $data = $request->validate([
-            'name'            => ['required', 'string', 'max:255'],
+            'name'            => ['required', 'string', 'max:255', new \App\Rules\SafeName],
             'primary_color'   => ['nullable', 'regex:/^#([0-9a-fA-F]{6})$/'],
             'secondary_color' => ['nullable', 'regex:/^#([0-9a-fA-F]{6})$/'],
             'currency'        => ['nullable', 'string', 'max:10'],
             'contact_email'   => ['nullable', 'email', 'max:255'],
-            'contact_phone'   => ['nullable', 'string', 'max:50'],
-            'address'         => ['nullable', 'string', 'max:255'],
-            'tagline'         => ['nullable', 'string', 'max:255'],
+            'contact_phone'   => ['nullable', 'string', 'regex:/^[0-9+\s().\-]{6,20}$/'],
+            'address'         => ['nullable', 'string', 'max:255', new \App\Rules\NoEmoji],
+            'tagline'         => ['nullable', 'string', 'max:255', new \App\Rules\NoEmoji],
             'description'     => ['nullable', 'string', 'max:2000'],
-            'about_title'     => ['nullable', 'string', 'max:255'],
+            'about_title'     => ['nullable', 'string', 'max:255', new \App\Rules\NoEmoji],
             'about_text'      => ['nullable', 'string', 'max:2000'],
             'logo'            => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg,webp', 'max:2048'],
             'cover_image'     => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'services'              => ['nullable', 'array'],
             'services.*.icon'       => ['nullable', 'string', 'max:50'],
-            'services.*.title'      => ['nullable', 'string', 'max:100'],
+            'services.*.title'      => ['nullable', 'string', 'max:100', new \App\Rules\NoEmoji],
             'services.*.description' => ['nullable', 'string', 'max:255'],
             'socials'         => ['nullable', 'array'],
-            'socials.facebook'  => ['nullable', 'string', 'max:255'],
-            'socials.instagram' => ['nullable', 'string', 'max:255'],
+            'socials.facebook'  => ['nullable', 'url', 'max:255'],
+            'socials.instagram' => ['nullable', 'url', 'max:255'],
             'socials.whatsapp'  => ['nullable', 'string', 'max:255'],
-            'socials.website'   => ['nullable', 'string', 'max:255'],
+            'socials.website'   => ['nullable', 'url', 'max:255'],
+        ], [
+            'name.required'        => "Le nom de l'établissement est obligatoire.",
+            'contact_phone.regex'  => 'Le téléphone ne doit contenir que des chiffres, espaces, +, -, ( ).',
+            'contact_email.email'  => "L'email de contact n'est pas valide.",
+            'primary_color.regex'  => 'La couleur principale doit être un code hexadécimal (ex : #2e8540).',
+            'secondary_color.regex' => 'La couleur secondaire doit être un code hexadécimal (ex : #1e6b2e).',
+            'socials.facebook.url'  => "Le lien Facebook doit être une URL valide (https://…).",
+            'socials.instagram.url' => "Le lien Instagram doit être une URL valide (https://…).",
+            'socials.website.url'   => 'Le site web doit être une URL valide (https://…).',
         ]);
 
         // Services : on ne garde que les lignes avec un titre
