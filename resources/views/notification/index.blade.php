@@ -374,6 +374,51 @@
 }
 
 /* ══════════════════════════════════════════════
+   BARRE D'OUTILS : RECHERCHE + FILTRES (issue #198)
+══════════════════════════════════════════════ */
+.notif-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px; margin-bottom: 24px;
+}
+.notif-search {
+    position: relative; flex: 1; min-width: 220px; max-width: 420px;
+}
+.notif-search i {
+    position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+    color: var(--s400); font-size: .8rem;
+}
+.notif-search input {
+    width: 100%; padding: 10px 14px 10px 38px;
+    border: 1.5px solid var(--s200); border-radius: var(--r);
+    font-size: .85rem; font-family: var(--font); background: var(--white);
+    transition: var(--transition);
+}
+.notif-search input:focus {
+    outline: none; border-color: var(--g400);
+    box-shadow: 0 0 0 3px var(--g100);
+}
+.notif-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.notif-filter {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 20px;
+    border: 1.5px solid var(--s200); background: var(--white);
+    color: var(--s600); font-size: .78rem; font-weight: 500;
+    cursor: pointer; transition: var(--transition); font-family: var(--font);
+}
+.notif-filter:hover { border-color: var(--g300); color: var(--g700); }
+.notif-filter.active {
+    background: var(--g600); color: white; border-color: var(--g600);
+    box-shadow: 0 2px 8px rgba(46,133,64,.3);
+}
+.notif-filter .count {
+    font-family: var(--mono); font-size: .7rem; opacity: .85;
+}
+.notif-noresult {
+    display: none; padding: 40px 24px; text-align: center;
+    color: var(--s400); font-size: .8rem;
+}
+
+/* ══════════════════════════════════════════════
    RESPONSIVE
 ══════════════════════════════════════════════ */
 @media(max-width:768px){
@@ -382,6 +427,8 @@
     .stats-mini{ width: 100%; }
     .timeline__cards{ padding-left: 20px; }
     .timeline__cards::before{ left: 5px; }
+    .notif-toolbar{ flex-direction: column; align-items: stretch; }
+    .notif-search{ max-width: 100%; }
 }
 </style>
 
@@ -408,117 +455,96 @@
             <div class="stats-mini">
                 <div class="stat-mini-item">
                     <span class="stat-mini-dot dot-unread"></span>
-                    <span class="stat-mini-label">Non lues</span>
-                    <span class="stat-mini-value">{{ auth()->user()->unreadNotifications->count() }}</span>
+                    <span class="stat-mini-label">Nouvelles</span>
+                    <span class="stat-mini-value">{{ count($newIds) }}</span>
                 </div>
                 <div class="stat-mini-item">
                     <span class="stat-mini-dot dot-read"></span>
-                    <span class="stat-mini-label">Lues</span>
-                    <span class="stat-mini-value">{{ auth()->user()->readNotifications->count() }}</span>
+                    <span class="stat-mini-label">Total</span>
+                    <span class="stat-mini-value">{{ $notifications->count() }}</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Timeline -->
-    <div class="timelines anim-3">
+    @php $newCount = count($newIds); $readCount = $notifications->count() - $newCount; @endphp
 
-        <!-- Unread Section -->
-        <div class="timeline__group">
-            <span class="timeline__year">
-                <i class="fas fa-circle me-2" style="color:var(--g500); font-size:.5rem;"></i>
-                Non lues
-            </span>
-            <div class="timeline__cards">
-                @forelse (auth()->user()->unreadNotifications as $notification)
-                    <div class="notification-card notification-card--unread">
-                        <div class="notification-card__header">
-                            <div class="notification-card__time">
-                                <i class="fas fa-clock"></i>
-                                {{ Helper::dateFormatTimeNoYear($notification->created_at) }}
-                            </div>
-                            <span class="notification-card__badge badge-unread">
-                                <i class="fas fa-circle me-1" style="font-size:.5rem;"></i>
-                                Nouveau
-                            </span>
-                        </div>
-                        <div class="notification-card__content">
-                            <p class="notification-card__message">
-                                {{ $notification->data['message'] ?? 'Nouvelle notification' }}
-                            </p>
-                        </div>
-                        <div class="notification-card__footer">
-                            <a href="{{ route('notification.routeTo', $notification->id) }}" 
-                               class="notification-card__link"
-                               onclick="event.preventDefault(); markAsReadAndRedirect('{{ $notification->id }}', '{{ $notification->data['url'] ?? '#' }}')">
-                                <i class="fas fa-eye"></i>
-                                Voir les détails
-                            </a>
-                            <span class="notification-card__meta">
-                                <i class="fas fa-info-circle"></i>
-                                Cliquez pour marquer comme lu
-                            </span>
-                        </div>
-                    </div>
-                @empty
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <i class="fas fa-bell-slash"></i>
-                        </div>
-                        <p class="empty-title">Aucune notification non lue</p>
-                        <p class="empty-text">Vous n'avez pas de nouvelles notifications</p>
-                    </div>
-                @endforelse
-            </div>
+    <!-- Barre d'outils : recherche + filtres (issue #198) -->
+    <div class="notif-toolbar anim-2">
+        <div class="notif-search">
+            <i class="fas fa-search"></i>
+            <input type="text" id="notifSearch" placeholder="Rechercher dans les notifications…" autocomplete="off">
         </div>
-
-        <!-- Read Section -->
-        <div class="timeline__group">
-            <span class="timeline__year">
-                <i class="fas fa-circle me-2" style="color:var(--s400); font-size:.5rem;"></i>
-                Lues
-            </span>
-            <div class="timeline__cards">
-                @forelse (auth()->user()->readNotifications as $notification)
-                    <div class="notification-card notification-card--read">
-                        <div class="notification-card__header">
-                            <div class="notification-card__time">
-                                <i class="fas fa-clock"></i>
-                                {{ Helper::dateFormatTimeNoYear($notification->created_at) }}
-                            </div>
-                            <span class="notification-card__badge badge-read">
-                                <i class="fas fa-check me-1"></i>
-                                Lu
-                            </span>
-                        </div>
-                        <div class="notification-card__content">
-                            <p class="notification-card__message">
-                                {{ $notification->data['message'] ?? 'Notification' }}
-                            </p>
-                        </div>
-                        <div class="notification-card__footer">
-                            <a href="{{ $notification->data['url'] ?? '#' }}" class="notification-card__link">
-                                <i class="fas fa-eye"></i>
-                                Voir les détails
-                            </a>
-                            <span class="notification-card__meta">
-                                <i class="fas fa-check-circle" style="color:var(--g500);"></i>
-                                Déjà consulté
-                            </span>
-                        </div>
-                    </div>
-                @empty
-                    <div class="empty-state">
-                        <div class="empty-icon">
-                            <i class="fas fa-bell"></i>
-                        </div>
-                        <p class="empty-title">Aucune notification</p>
-                        <p class="empty-text">Vous n'avez pas encore de notifications</p>
-                    </div>
-                @endforelse
-            </div>
+        <div class="notif-filters" id="notifFilters">
+            <button type="button" class="notif-filter active" data-filter="all">
+                <i class="fas fa-layer-group"></i> Toutes <span class="count">{{ $notifications->count() }}</span>
+            </button>
+            <button type="button" class="notif-filter" data-filter="new">
+                <i class="fas fa-circle" style="font-size:.5rem;"></i> Nouvelles <span class="count">{{ $newCount }}</span>
+            </button>
+            <button type="button" class="notif-filter" data-filter="read">
+                <i class="fas fa-check"></i> Lues <span class="count">{{ $readCount }}</span>
+            </button>
         </div>
+    </div>
 
+    <!-- Liste des notifications -->
+    <div class="timeline__cards anim-3" id="notifList">
+        @forelse ($notifications as $notification)
+            @php $isNew = in_array($notification->id, $newIds, true); @endphp
+            <div class="notification-card {{ $isNew ? 'notification-card--unread' : 'notification-card--read' }}"
+                 data-state="{{ $isNew ? 'new' : 'read' }}"
+                 data-text="{{ \Illuminate\Support\Str::lower($notification->data['message'] ?? 'notification') }}">
+                <div class="notification-card__header">
+                    <div class="notification-card__time">
+                        <i class="fas fa-clock"></i>
+                        {{ Helper::dateFormatTimeNoYear($notification->created_at) }}
+                    </div>
+                    @if ($isNew)
+                        <span class="notification-card__badge badge-unread">
+                            <i class="fas fa-circle me-1" style="font-size:.5rem;"></i>
+                            Nouveau
+                        </span>
+                    @else
+                        <span class="notification-card__badge badge-read">
+                            <i class="fas fa-check me-1"></i>
+                            Lu
+                        </span>
+                    @endif
+                </div>
+                <div class="notification-card__content">
+                    <p class="notification-card__message">
+                        {{ $notification->data['message'] ?? 'Notification' }}
+                    </p>
+                </div>
+                <div class="notification-card__footer">
+                    <a href="{{ $notification->data['url'] ?? '#' }}" class="notification-card__link">
+                        <i class="fas fa-eye"></i>
+                        Voir les détails
+                    </a>
+                    <span class="notification-card__meta">
+                        @if ($isNew)
+                            <i class="fas fa-info-circle"></i> Reçue récemment
+                        @else
+                            <i class="fas fa-check-circle" style="color:var(--g500);"></i> Déjà consultée
+                        @endif
+                    </span>
+                </div>
+            </div>
+        @empty
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <p class="empty-title">Aucune notification</p>
+                <p class="empty-text">Vous n'avez pas encore de notifications</p>
+            </div>
+        @endforelse
+    </div>
+
+    <!-- Aucun résultat de recherche/filtre -->
+    <div class="notif-noresult" id="notifNoResult">
+        <i class="fas fa-magnifying-glass me-1"></i> Aucune notification ne correspond à votre recherche.
     </div>
 </div>
 
@@ -526,16 +552,46 @@
 
 @push('scripts')
 <script>
-function markAsReadAndRedirect(notificationId, url) {
-    fetch(`/notification-to/${notificationId}`, {
-        method: 'GET',
-        headers: {
-            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-            'Accept': 'application/json'
-        }
-    })
-    .then(() => { window.location.href = url; })
-    .catch(() => { window.location.href = url; });
-}
+(function () {
+    // Recherche + filtres du centre de notifications (issue #198)
+    const search   = document.getElementById('notifSearch');
+    const filters  = document.getElementById('notifFilters');
+    const list     = document.getElementById('notifList');
+    const noResult = document.getElementById('notifNoResult');
+    if (!list) return;
+
+    const cards = Array.from(list.querySelectorAll('.notification-card'));
+    let activeFilter = 'all';
+
+    function apply() {
+        const q = (search.value || '').trim().toLowerCase();
+        let visible = 0;
+
+        cards.forEach(card => {
+            const state = card.dataset.state;           // 'new' | 'read'
+            const text  = card.dataset.text || '';
+            const matchFilter = activeFilter === 'all' || state === activeFilter;
+            const matchSearch = q === '' || text.includes(q);
+            const show = matchFilter && matchSearch;
+            card.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        if (noResult) noResult.style.display = (cards.length && visible === 0) ? 'block' : 'none';
+    }
+
+    if (search) search.addEventListener('input', apply);
+
+    if (filters) {
+        filters.querySelectorAll('.notif-filter').forEach(btn => {
+            btn.addEventListener('click', function () {
+                filters.querySelectorAll('.notif-filter').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                activeFilter = this.dataset.filter;
+                apply();
+            });
+        });
+    }
+})();
 </script>
 @endpush
