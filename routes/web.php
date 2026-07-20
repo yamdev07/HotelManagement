@@ -245,7 +245,9 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
 
     // ==================== RÉSERVATIONS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
     Route::prefix('transaction/reservation')->name('transaction.reservation.')->middleware('checkrole:Super,Admin,Receptionist')->group(function () {
-        Route::get('/createIdentity', [TransactionRoomReservationController::class, 'createIdentity'])->name('createIdentity');
+        // {customer?} : quand on revient en arrière modifier le client déjà saisi,
+        // on le repasse pour l'ÉDITER au lieu d'en créer un doublon (issue #189).
+        Route::get('/createIdentity/{customer?}', [TransactionRoomReservationController::class, 'createIdentity'])->name('createIdentity');
         Route::get('/pickFromCustomer', [TransactionRoomReservationController::class, 'pickFromCustomer'])->name('pickFromCustomer');
         Route::post('/search-by-email', [TransactionRoomReservationController::class, 'searchByEmail'])->name('searchByEmail');
         Route::post('/storeCustomer', [TransactionRoomReservationController::class, 'storeCustomer'])->name('storeCustomer');

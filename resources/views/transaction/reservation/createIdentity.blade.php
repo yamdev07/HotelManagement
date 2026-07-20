@@ -507,6 +507,8 @@
             <form method="POST" action="{{ route('transaction.reservation.storeCustomer') }}"
                   enctype="multipart/form-data" id="customerForm">
                 @csrf
+                {{-- Édition du client déjà saisi (retour en arrière) : évite le doublon · issue #189 --}}
+                <input type="hidden" name="customer_id" value="{{ old('customer_id', $customer->id ?? '') }}">
 
                 <div class="form-grid">
                     <!-- Email (full width) -->
@@ -516,7 +518,7 @@
                             Adresse email <span class="required">*</span>
                         </label>
                         <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                               id="email" name="email" value="{{ old('email') }}" 
+                               id="email" name="email" value="{{ old('email', $customer->email ?? '') }}"
                                placeholder="exemple@domaine.com" required
                                onblur="checkExistingCustomer()">
                         @error('email')
@@ -537,7 +539,7 @@
                             Nom complet <span class="required">*</span>
                         </label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror" 
-                               id="name" name="name" value="{{ old('name') }}" 
+                               id="name" name="name" value="{{ old('name', $customer->name ?? '') }}"
                                placeholder="Jean Dupont" required>
                         @error('name')
                             <div class="error-message">
@@ -554,7 +556,7 @@
                         </label>
                         <input type="date" class="form-control @error('birthdate') is-invalid @enderror"
                                min="1900-01-01" max="{{ date('Y-m-d') }}"
-                               id="birthdate" name="birthdate" value="{{ old('birthdate') }}">
+                               id="birthdate" name="birthdate" value="{{ old('birthdate', optional($customer)->birthdate ? \Illuminate\Support\Carbon::parse($customer->birthdate)->format('Y-m-d') : '') }}">
                         @error('birthdate')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i> {{ $message }}
@@ -571,9 +573,10 @@
                         <select class="form-select @error('gender') is-invalid @enderror" 
                                 id="gender" name="gender" required>
                             <option value="">-- Sélectionner --</option>
-                            <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>Masculin</option>
-                            <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>Féminin</option>
-                            <option value="Other" {{ old('gender') == 'Other' ? 'selected' : '' }}>Autre</option>
+                            @php $g = old('gender', $customer->gender ?? ''); @endphp
+                            <option value="Male" {{ $g == 'Male' ? 'selected' : '' }}>Masculin</option>
+                            <option value="Female" {{ $g == 'Female' ? 'selected' : '' }}>Féminin</option>
+                            <option value="Other" {{ $g == 'Other' ? 'selected' : '' }}>Autre</option>
                         </select>
                         @error('gender')
                             <div class="error-message">
@@ -589,7 +592,7 @@
                             Téléphone <span class="required">*</span>
                         </label>
                         <input type="text" class="form-control @error('phone') is-invalid @enderror" 
-                               id="phone" name="phone" value="{{ old('phone') }}" 
+                               id="phone" name="phone" value="{{ old('phone', $customer->phone ?? '') }}"
                                placeholder="+229 XX XX XX XX" required>
                         @error('phone')
                             <div class="error-message">
@@ -605,7 +608,7 @@
                             Profession
                         </label>
                         <input type="text" class="form-control @error('job') is-invalid @enderror" 
-                               id="job" name="job" value="{{ old('job') }}" 
+                               id="job" name="job" value="{{ old('job', $customer->job ?? '') }}"
                                placeholder="Développeur, Médecin, Étudiant...">
                         @error('job')
                             <div class="error-message">
@@ -621,8 +624,8 @@
                             Adresse
                         </label>
                         <textarea class="form-control @error('address') is-invalid @enderror" 
-                                  id="address" name="address" rows="3" 
-                                  placeholder="Rue, Ville, Pays">{{ old('address') }}</textarea>
+                                  id="address" name="address" rows="3"
+                                  placeholder="Rue, Ville, Pays">{{ old('address', $customer->address ?? '') }}</textarea>
                         @error('address')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i> {{ $message }}

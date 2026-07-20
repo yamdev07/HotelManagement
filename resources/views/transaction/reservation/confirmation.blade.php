@@ -540,7 +540,7 @@
     <div class="confirm-breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.createIdentity') }}">Création client</a>
+        <a href="{{ route('transaction.reservation.createIdentity', $customer->id) }}">Création client</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('transaction.reservation.viewCountPerson', $customer->id) }}">Dates</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>

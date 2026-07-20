@@ -26,10 +26,11 @@ class TransactionRoomReservationController extends Controller
     /**
      * Afficher le formulaire de création d'identité
      */
-    public function createIdentity()
+    public function createIdentity(?Customer $customer = null)
     {
         return view('transaction.reservation.createIdentity', [
             'info' => 'Same email can be used for multiple reservations. If customer exists, information will be updated.',
+            'customer' => $customer, // non-null quand on revient éditer (issue #189)
         ]);
     }
 
@@ -54,19 +55,32 @@ class TransactionRoomReservationController extends Controller
             'birthdate.before_or_equal' => 'La date de naissance ne peut pas être dans le futur.',
         ]);
 
-        // Rechercher un client avec le même email ET même nom
-        $existingCustomer = Customer::where('email', $validated['email'])
-            ->where('name', $validated['name'])
-            ->first();
+        // Issue #189 : si on revient en arrière modifier le client déjà saisi
+        // (customer_id transmis), on ÉDITE ce client — même si le nom/email a
+        // changé — au lieu d'en créer un doublon.
+        $existingCustomer = null;
+        if ($request->filled('customer_id')) {
+            $existingCustomer = Customer::find($request->input('customer_id'));
+        }
+
+        // Sinon, dédoublonnage classique par email + nom.
+        if (! $existingCustomer) {
+            $existingCustomer = Customer::where('email', $validated['email'])
+                ->where('name', $validated['name'])
+                ->first();
+        }
 
         if ($existingCustomer) {
-            // Mettre à jour le client existant
+            // Mettre à jour le client existant (nom/email inclus : c'est ce que
+            // l'utilisateur corrige quand il revient en arrière · issue #189).
             $updateData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
                 'phone' => $validated['phone'],
                 'gender' => $validated['gender'],
-                'address' => $validated['address'],
-                'job' => $validated['job'],
-                'birthdate' => $validated['birthdate'],
+                'address' => $validated['address'] ?? null,
+                'job' => $validated['job'] ?? null,
+                'birthdate' => $validated['birthdate'] ?? null,
             ];
 
             // Gérer l'avatar si fourni
