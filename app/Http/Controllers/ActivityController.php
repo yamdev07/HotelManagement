@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Support\TenantManager;
 use Illuminate\Http\Request;
-use Spatie\Activitylog\Models\Activity;
+// Modèle custom scopé par hôtel (BelongsToHotel) : le journal ne montre QUE
+// l'hôtel courant. Le Super-Admin plateforme (sans hôtel) voit tout. Issue #144.
+use App\Models\Activity;
 
 class ActivityController extends Controller
 {
@@ -42,7 +45,11 @@ class ActivityController extends Controller
         $perPage = $request->get('per_page', 25);
         $activities = $query->paginate($perPage);
 
-        $users = User::orderBy('name')->get();
+        // Le filtre "utilisateur" ne doit lister que les comptes de MON hôtel
+        // (le modèle User n'est pas auto-scopé). Le Super voit tout le monde.
+        $hotelId = app(TenantManager::class)->getHotelId();
+        $users = User::when($hotelId, fn ($q) => $q->where('hotel_id', $hotelId))
+            ->orderBy('name')->get();
         $totalActivities = Activity::count();
 
         // UTILISE activity/index.blade.php

@@ -291,7 +291,8 @@ class TransactionController extends Controller
         $this->authorize('view', $transaction);
         $transaction->load(['customer.user', 'room.type', 'user', 'payments']);
 
-        $histories = \Spatie\Activitylog\Models\Activity::where('subject_type', Transaction::class)
+        // Modèle scopé par hôtel (défense en profondeur) plutôt que le modèle Spatie brut.
+        $histories = \App\Models\Activity::where('subject_type', Transaction::class)
             ->where('subject_id', $transaction->id)
             ->orderByDesc('created_at')
             ->get();

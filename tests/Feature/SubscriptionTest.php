@@ -38,7 +38,7 @@ class SubscriptionTest extends TestCase
         $this->post('/inscription', [
             'company_name' => 'Hotel Essai',
             'plan'         => 'pro',
-            'admin_name'   => 'X',
+            'admin_name'   => 'Nom Valide',
             'admin_email'  => 'x@essai.test',
         ]);
 
