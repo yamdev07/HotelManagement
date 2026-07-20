@@ -115,8 +115,13 @@
     <div style="flex:1"></div>
     <button class="theme-btn" id="themeToggle" type="button" aria-label="Changer de thème"><i class="fas fa-moon"></i></button>
     <a href="{{ route('landing') }}" class="btn btn-ghost"><i class="fas fa-arrow-left me-1"></i> Site</a>
-    <a href="{{ route('login.index') }}" class="btn btn-ghost">Connexion</a>
-    <a href="{{ route('hotel.register') }}" class="btn btn-glow">Essai gratuit</a>
+    @auth
+        {{-- Déjà connecté : on ne propose pas de se reconnecter à un autre compte (issue #183) --}}
+        <a href="{{ url('/home') }}" class="btn btn-glow"><i class="fas fa-gauge-high me-1"></i> Mon espace</a>
+    @else
+        <a href="{{ route('login.index') }}" class="btn btn-ghost">Connexion</a>
+        <a href="{{ route('hotel.register') }}" class="btn btn-glow">Essai gratuit</a>
+    @endauth
 </nav>
 
 @php
