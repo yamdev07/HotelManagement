@@ -1026,7 +1026,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 Swal.fire({ title: 'Vérification...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 
-                const response = await fetch(`/transactions/${transactionId}/check-availability`, {
+                const response = await fetch(`/transaction/${transactionId}/check-availability`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
