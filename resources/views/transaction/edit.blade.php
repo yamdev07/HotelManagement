@@ -647,9 +647,11 @@
 
                             <!-- Champ raison d'annulation (caché par défaut) -->
                             <div id="cancelReasonField" style="display: none;" class="mb-3">
-                                <label class="form-label">Raison de l'annulation</label>
-                                <textarea name="cancel_reason" class="form-control" rows="2" 
-                                          placeholder="Pourquoi annuler ?">{{ old('cancel_reason', $transaction->cancel_reason) }}</textarea>
+                                <label class="form-label">Motif de l'annulation <span class="text-danger">*</span></label>
+                                <textarea name="cancel_reason" class="form-control @error('cancel_reason') is-invalid @enderror" rows="2"
+                                          minlength="3" maxlength="500"
+                                          placeholder="Motif obligatoire (au moins 3 caractères)">{{ old('cancel_reason', $transaction->cancel_reason) }}</textarea>
+                                @error('cancel_reason')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             @else
                             <div class="alert alert-info">

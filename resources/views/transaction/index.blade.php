@@ -1417,16 +1417,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 Swal.fire({
                     title: 'Annuler cette réservation ?',
-                    html: '<textarea id="reason" class="form-control mt-2" placeholder="Raison (optionnelle)"></textarea>',
+                    html: '<textarea id="reason" class="form-control mt-2" placeholder="Motif de l\'annulation (obligatoire)"></textarea>',
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonText: 'Oui, annuler',
                     cancelButtonText: 'Non',
                     confirmButtonColor: '#545954',
                     cancelButtonColor: '#1e6b2e',
+                    preConfirm: () => {
+                        const reason = (document.getElementById('reason')?.value || '').trim();
+                        if (reason.length < 3) {
+                            Swal.showValidationMessage('Veuillez indiquer un motif (au moins 3 caractères).');
+                            return false;
+                        }
+                        return reason;
+                    },
                 }).then(result => {
                     if (result.isConfirmed) {
-                        document.getElementById('cancel-reason-input').value = document.getElementById('reason')?.value || '';
+                        document.getElementById('cancel-reason-input').value = result.value || '';
                         document.getElementById('cancel-transaction-id-input').value = transactionId;
                         document.getElementById('cancel-form').action = `/transaction/${transactionId}/cancel`;
                         document.getElementById('cancel-form').submit();
