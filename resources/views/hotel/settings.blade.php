@@ -235,6 +235,55 @@
     </form>
 </div>
 
+@if (auth()->user()->id === $hotel->owner_user_id)
+    {{-- Zone de danger : clôture de l'établissement, réservée au propriétaire (issue #191) --}}
+    <div class="card border-danger mt-4" style="max-width:100%;">
+        <div class="card-header bg-danger text-white">
+            <i class="fas fa-triangle-exclamation me-1"></i> Zone de danger
+        </div>
+        <div class="card-body">
+            <h6 class="fw-bold mb-1">Supprimer définitivement mon établissement</h6>
+            <p class="text-muted mb-3" style="font-size:.9rem;">
+                Cette action est <strong>irréversible</strong>. Elle supprime votre établissement
+                « {{ $hotel->name }} » et <strong>toutes</strong> ses données (comptes du personnel,
+                chambres, clients, réservations, paiements, historique). Vos accès seront immédiatement révoqués.
+            </p>
+
+            @if ($errors->hasAny(['password', 'confirmation']))
+                <div class="alert alert-danger py-2">
+                    <ul class="mb-0">
+                        @foreach ($errors->get('password') as $e)<li>{{ $e }}</li>@endforeach
+                        @foreach ($errors->get('confirmation') as $e)<li>{{ $e }}</li>@endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="collapse" data-bs-target="#dangerDelete">
+                <i class="fas fa-trash me-1"></i> Supprimer mon établissement
+            </button>
+
+            <div class="collapse mt-3 {{ $errors->hasAny(['password', 'confirmation']) ? 'show' : '' }}" id="dangerDelete">
+                <form method="POST" action="{{ route('hotel.account.destroy') }}" class="border rounded p-3">
+                    @csrf
+                    @method('DELETE')
+                    <div class="mb-2">
+                        <label class="form-label mb-1">Votre mot de passe</label>
+                        <input type="password" name="password" class="form-control" required autocomplete="current-password">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label mb-1">Tapez <strong>SUPPRIMER</strong> pour confirmer</label>
+                        <input type="text" name="confirmation" class="form-control" placeholder="SUPPRIMER" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger"
+                            onclick="return confirm('Dernière confirmation : supprimer définitivement « {{ $hotel->name }} » et toutes ses données ?');">
+                        <i class="fas fa-trash me-1"></i> Je supprime définitivement
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+@endif
+
 <script>
     (function () {
         const list = document.getElementById('services-list');

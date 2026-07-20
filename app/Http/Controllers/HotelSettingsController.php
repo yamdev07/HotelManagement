@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Hotel;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -87,6 +90,47 @@ class HotelSettingsController extends Controller
 
         return redirect()->route('hotel.settings.edit')
             ->with('success', 'Les informations de votre établissement ont été mises à jour.');
+    }
+
+    /**
+     * Clôture définitive de l'établissement par son propriétaire (issue #191).
+     * Réservé au PROPRIÉTAIRE (ni Manager, ni co-admin), avec confirmation par
+     * mot de passe et saisie explicite. Supprime l'hôtel et toutes ses données.
+     */
+    public function destroyAccount(Request $request)
+    {
+        $hotel = $this->currentHotel();
+        $user  = auth()->user();
+
+        abort_unless(
+            $hotel->owner_user_id === $user->id,
+            403,
+            "Seul le propriétaire de l'établissement peut le supprimer."
+        );
+
+        $request->validate([
+            'password'     => ['required', 'current_password'],
+            'confirmation' => ['required', 'in:SUPPRIMER'],
+        ], [
+            'password.required'         => 'Veuillez saisir votre mot de passe pour confirmer.',
+            'password.current_password' => 'Mot de passe incorrect.',
+            'confirmation.in'           => 'Tapez SUPPRIMER (en majuscules) pour confirmer la suppression.',
+        ]);
+
+        $name = $hotel->name;
+
+        DB::transaction(function () use ($hotel) {
+            User::where('hotel_id', $hotel->id)->delete();
+            $hotel->subscriptions()->delete();
+            $hotel->forceDelete();
+        });
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('landing')
+            ->with('success', "Votre établissement « {$name} » et toutes ses données ont été supprimés. À bientôt.");
     }
 
     private function currentHotel(): Hotel

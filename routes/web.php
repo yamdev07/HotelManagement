@@ -133,6 +133,8 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
 Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::get('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'edit'])->name('hotel.settings.edit');
     Route::put('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'update'])->name('hotel.settings.update');
+    // Clôture définitive par le propriétaire (issue #191)
+    Route::delete('/mon-etablissement/supprimer', [\App\Http\Controllers\HotelSettingsController::class, 'destroyAccount'])->name('hotel.account.destroy');
 });
 
 // ==================== ABONNEMENT / PAIEMENT EN LIGNE (FedaPay) ====================
