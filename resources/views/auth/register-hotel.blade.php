@@ -78,15 +78,19 @@
                         <div class="row g-3 mb-4">
                             <div class="col-md-8">
                                 <label class="form-label">Nom de l'établissement *</label>
-                                <input type="text" name="company_name" class="form-control form-control-lg" value="{{ old('company_name') }}" placeholder="Ex : Cactus Hotel" required>
+                                <input type="text" name="company_name" class="form-control form-control-lg @error('company_name') is-invalid @enderror" value="{{ old('company_name') }}" placeholder="Ex : Cactus Hotel" maxlength="255" required>
+                                @error('company_name')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">Téléphone</label>
-                                <input type="text" name="contact_phone" class="form-control form-control-lg" value="{{ old('contact_phone') }}">
+                                <input type="tel" name="contact_phone" class="form-control form-control-lg @error('contact_phone') is-invalid @enderror" value="{{ old('contact_phone') }}" placeholder="Ex : +229 01 02 03 04" pattern="[0-9+\s().\-]{6,20}" maxlength="20" inputmode="tel">
+                                @error('contact_phone')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-12">
                                 <label class="form-label">Logo (optionnel)</label>
-                                <input type="file" name="logo" class="form-control" accept="image/*">
+                                <input type="file" name="logo" class="form-control @error('logo') is-invalid @enderror" accept=".jpg,.jpeg,.png,.webp,.svg,image/*">
+                                <small class="text-muted">JPG, PNG, WEBP ou SVG · 4 Mo max.</small>
+                                @error('logo')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                             </div>
                         </div>
 
@@ -94,11 +98,13 @@
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label class="form-label">Nom complet *</label>
-                                <input type="text" name="admin_name" class="form-control" value="{{ old('admin_name') }}" required>
+                                <input type="text" name="admin_name" class="form-control @error('admin_name') is-invalid @enderror" value="{{ old('admin_name') }}" maxlength="255" required>
+                                @error('admin_name')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Email *</label>
-                                <input type="email" name="admin_email" class="form-control" value="{{ old('admin_email') }}" required>
+                                <input type="email" name="admin_email" class="form-control @error('admin_email') is-invalid @enderror" value="{{ old('admin_email') }}" required>
+                                @error('admin_email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                 <small class="text-muted">Vos identifiants seront envoyés à cette adresse.</small>
                             </div>
                         </div>
