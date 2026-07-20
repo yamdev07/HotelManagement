@@ -355,11 +355,12 @@
                 <div class="transaction-card-header">
                     <h5><i class="fas fa-edit"></i> Modifier la réservation</h5>
                     <span class="badge-statut badge-{{ $transaction->status }}">
-                        @if($transaction->status == 'reservation') 📅
-                        @elseif($transaction->status == 'active') 🏨
-                        @elseif($transaction->status == 'completed') ✅
-                        @elseif($transaction->status == 'cancelled') ❌
-                        @else 👤
+                        {{-- Icônes Font Awesome au lieu d'emojis, cohérent avec le reste de l'app · issue #185 --}}
+                        @if($transaction->status == 'reservation') <i class="fas fa-calendar-alt"></i>
+                        @elseif($transaction->status == 'active') <i class="fas fa-hotel"></i>
+                        @elseif($transaction->status == 'completed') <i class="fas fa-check-circle"></i>
+                        @elseif($transaction->status == 'cancelled') <i class="fas fa-times-circle"></i>
+                        @else <i class="fas fa-user-times"></i>
                         @endif
                         {{ $transaction->status_label }}
                     </span>

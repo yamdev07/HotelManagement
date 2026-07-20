@@ -671,11 +671,12 @@
                 @csrf
                 @method('PUT')
                 <select name="status" class="status-select" onchange="this.form.submit()">
-                    <option value="reservation" {{ $transaction->status == 'reservation' ? 'selected' : '' }}>📅 Réservation</option>
-                    <option value="active" {{ $transaction->status == 'active' ? 'selected' : '' }}>🏨 Dans l'hôtel</option>
-                    <option value="completed" {{ $transaction->status == 'completed' ? 'selected' : '' }}>✅ Terminé</option>
-                    <option value="cancelled" {{ $transaction->status == 'cancelled' ? 'selected' : '' }}>❌ Annulée</option>
-                    <option value="no_show" {{ $transaction->status == 'no_show' ? 'selected' : '' }}>👤 No Show</option>
+                    {{-- Options texte (les <option> ne rendent pas les icônes) · issue #185 --}}
+                    <option value="reservation" {{ $transaction->status == 'reservation' ? 'selected' : '' }}>Réservation</option>
+                    <option value="active" {{ $transaction->status == 'active' ? 'selected' : '' }}>Dans l'hôtel</option>
+                    <option value="completed" {{ $transaction->status == 'completed' ? 'selected' : '' }}>Terminé</option>
+                    <option value="cancelled" {{ $transaction->status == 'cancelled' ? 'selected' : '' }}>Annulée</option>
+                    <option value="no_show" {{ $transaction->status == 'no_show' ? 'selected' : '' }}>No Show</option>
                 </select>
             </form>
             @endif
@@ -720,7 +721,7 @@
     <div class="alert-status alert-status-reservation">
         <i class="fas fa-calendar-check fa-2x" style="color: var(--amber-600);"></i>
         <div>
-            <strong class="d-block mb-1">📅 RÉSERVATION</strong>
+            <strong class="d-block mb-1">RÉSERVATION</strong>
             <p class="mb-0 small">Arrivée prévue : <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }} à 12h00</strong></p>
         </div>
     </div>
@@ -728,7 +729,7 @@
     <div class="alert-status alert-status-active">
         <i class="fas fa-bed fa-2x" style="color: var(--primary-600);"></i>
         <div>
-            <strong class="d-block mb-1">🏨 DANS L'HÔTEL</strong>
+            <strong class="d-block mb-1">DANS L'HÔTEL</strong>
             <p class="mb-0 small">
                 Départ prévu : 
                 <strong>
@@ -751,7 +752,7 @@
     <div class="alert-status alert-status-completed">
         <i class="fas fa-check-circle fa-2x" style="color: var(--blue-600);"></i>
         <div>
-            <strong class="d-block mb-1">✅ SÉJOUR TERMINÉ</strong>
+            <strong class="d-block mb-1">SÉJOUR TERMINÉ</strong>
             <p class="mb-0 small">
                 Client parti le <strong>{{ \Carbon\Carbon::parse($transaction->check_out_actual ?? $transaction->check_out)->format('d/m/Y à H:i') }}</strong>
                 @if($transaction->late_checkout)
@@ -770,7 +771,7 @@
     <div class="alert-status alert-status-cancelled">
         <i class="fas fa-ban fa-2x" style="color: #b91c1c;"></i>
         <div>
-            <strong class="d-block mb-1">❌ ANNULÉE</strong>
+            <strong class="d-block mb-1">ANNULÉE</strong>
             @if($transaction->cancelled_at)
             <p class="mb-0 small">Annulée le <strong>{{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y à H:i') }}</strong>
                 @if($transaction->cancel_reason)
@@ -784,7 +785,7 @@
     <div class="alert-status alert-status-no_show">
         <i class="fas fa-user-slash fa-2x" style="color: var(--gray-500);"></i>
         <div>
-            <strong class="d-block mb-1">👤 NO SHOW</strong>
+            <strong class="d-block mb-1">NO SHOW</strong>
             <p class="mb-0 small">Client ne s'est pas présenté</p>
         </div>
     </div>
