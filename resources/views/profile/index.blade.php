@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Mon Profil')
+@section('title', __('profile.page_title'))
 @section('content')
 
 <style>
@@ -337,9 +337,9 @@
                 ? route('cashier.dashboard')
                 : route('dashboard.index');
         @endphp
-        <a href="{{ $dashboardRoute }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ $dashboardRoute }}"><i class="fas fa-home fa-xs"></i> {{ __('profile.breadcrumb_dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Mon Profil</span>
+        <span class="current">{{ __('profile.breadcrumb_profile') }}</span>
     </div>
 
     <!-- Header -->
@@ -347,9 +347,9 @@
         <div class="profile-brand">
             <div class="profile-brand-icon"><i class="fas fa-user-circle"></i></div>
             <div>
-                <h1 class="profile-header-title">Bonjour, <em>{{ $user->name }}</em> !</h1>
+                <h1 class="profile-header-title">{!! __('profile.greeting', ['name' => '<em>'.$user->name.'</em>']) !!}</h1>
                 <p class="profile-header-sub">
-                    <i class="fas fa-user me-1"></i> Gérez vos informations personnelles
+                    <i class="fas fa-user me-1"></i> {{ __('profile.subtitle') }}
                 </p>
             </div>
         </div>
@@ -382,7 +382,7 @@
     <div class="alert-db alert-db-danger anim-3">
         <div class="alert-db-icon"><i class="fas fa-exclamation"></i></div>
         <div style="flex:1">
-            <strong>Erreurs :</strong>
+            <strong>{{ __('profile.errors_title') }}</strong>
             <ul class="mb-0 mt-2">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -412,7 +412,7 @@
                         @csrf
                         <input type="file" name="avatar" class="file-input" accept="image/*" id="avatarInput" required>
                         <button type="submit" class="btn-db btn-db-primary">
-                            <i class="fas fa-upload me-2"></i> Changer la photo
+                            <i class="fas fa-upload me-2"></i> {{ __('profile.change_photo') }}
                         </button>
                     </form>
                 </div>
@@ -421,12 +421,16 @@
 
         <!-- Colonne droite - Informations -->
         <div class="col-lg-8">
-            <!-- Informations du compte -->
-            <div class="profile-card anim-5">
+    <!-- Informations du compte -->
+    <div class="profile-card anim-5" id="profileCard"
+         data-pw-match="{{ __('profile.pw_match') }}"
+         data-pw-no-match="{{ __('profile.pw_no_match') }}"
+         data-pw-no-match-alert="{{ __('profile.pw_no_match_alert') }}"
+         data-pw-too-short-alert="{{ __('profile.pw_too_short_alert') }}">
                 <div class="profile-card-header">
                     <h5 class="profile-card-title">
                         <i class="fas fa-id-card"></i>
-                        Informations du compte
+                        {{ __('profile.account_info') }}
                     </h5>
                 </div>
                 <div class="profile-card-body">
@@ -436,7 +440,7 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label">Nom complet</label>
+                                    <label class="form-label">{{ __('profile.full_name') }}</label>
                                     <input type="text" name="name" maxlength="255" class="form-control @error('name') is-invalid @enderror"
                                            value="{{ old('name', $user->name) }}" required>
                                     @error('name')<div class="invalid-feedback d-block"><i class="fas fa-circle-exclamation me-1"></i>{{ $message }}</div>@enderror
@@ -445,7 +449,7 @@
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label">Email</label>
+                                    <label class="form-label">{{ __('profile.email') }}</label>
                                     <input type="email" name="email" class="form-control @error('email') is-invalid @enderror"
                                            value="{{ old('email', $user->email) }}" required>
                                     @error('email')<div class="invalid-feedback d-block"><i class="fas fa-circle-exclamation me-1"></i>{{ $message }}</div>@enderror
@@ -454,24 +458,24 @@
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label">Téléphone</label>
+                                    <label class="form-label">{{ __('profile.phone') }}</label>
                                     <input type="tel" name="phone" class="form-control @error('phone') is-invalid @enderror"
                                            value="{{ old('phone', $user->phone) }}" pattern="[0-9+\s().\-]{6,20}"
-                                           title="Chiffres et + - ( ) espaces uniquement" placeholder="+229 01 02 03 04">
+                                           title="{{ __('profile.phone_title') }}" placeholder="{{ __('profile.phone_placeholder') }}">
                                     @error('phone')<div class="invalid-feedback d-block"><i class="fas fa-circle-exclamation me-1"></i>{{ $message }}</div>@enderror
                                 </div>
                             </div>
                             
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label">Rôle</label>
+                                    <label class="form-label">{{ __('profile.role') }}</label>
                                     <input type="text" class="form-control" value="{{ $user->formatted_role ?? $user->role }}" readonly>
                                 </div>
                             </div>
                         </div>
                         
                         <button type="submit" class="btn-db btn-db-success mt-3">
-                            <i class="fas fa-save me-2"></i> Mettre à jour
+                            <i class="fas fa-save me-2"></i> {{ __('profile.update_button') }}
                         </button>
                     </form>
                 </div>
@@ -482,7 +486,7 @@
                 <div class="profile-card-header">
                     <h5 class="profile-card-title">
                         <i class="fas fa-lock"></i>
-                        Changer le mot de passe
+                        {{ __('profile.change_password') }}
                     </h5>
                 </div>
                 <div class="profile-card-body">
@@ -503,36 +507,36 @@
                         @csrf
 
                         <div class="form-group">
-                            <label class="form-label">Mot de passe actuel</label>
+                            <label class="form-label">{{ __('profile.current_password') }}</label>
                             <div class="pw-wrap">
                                 <input type="password" name="current_password" id="currentPassword" class="form-control" required>
-                                <button type="button" class="pw-eye" data-target="currentPassword" tabindex="-1" aria-label="Afficher le mot de passe"><i class="fas fa-eye"></i></button>
+                                <button type="button" class="pw-eye" data-target="currentPassword" tabindex="-1" aria-label="{{ __('profile.show_password') }}"><i class="fas fa-eye"></i></button>
                             </div>
                         </div>
 
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label">Nouveau mot de passe</label>
+                                    <label class="form-label">{{ __('profile.new_password') }}</label>
                                     <div class="pw-wrap">
                                         <input type="password" name="password" id="password" class="form-control" required>
-                                        <button type="button" class="pw-eye" data-target="password" tabindex="-1" aria-label="Afficher le mot de passe"><i class="fas fa-eye"></i></button>
+                                        <button type="button" class="pw-eye" data-target="password" tabindex="-1" aria-label="{{ __('profile.show_password') }}"><i class="fas fa-eye"></i></button>
                                     </div>
                                     <ul class="pw-checklist" id="pwChecklist">
-                                        <li data-rule="len"><i class="fas fa-circle"></i> Au moins 6 caractères</li>
-                                        <li data-rule="lower"><i class="fas fa-circle"></i> Une lettre minuscule</li>
-                                        <li data-rule="upper"><i class="fas fa-circle"></i> Une lettre majuscule <span class="pw-opt">(conseillé)</span></li>
-                                        <li data-rule="num"><i class="fas fa-circle"></i> Un chiffre <span class="pw-opt">(conseillé)</span></li>
+                                        <li data-rule="len"><i class="fas fa-circle"></i> {{ __('profile.rule_min_length') }}</li>
+                                        <li data-rule="lower"><i class="fas fa-circle"></i> {{ __('profile.rule_lowercase') }}</li>
+                                        <li data-rule="upper"><i class="fas fa-circle"></i> {{ __('profile.rule_uppercase') }} <span class="pw-opt">{{ __('profile.rule_recommended') }}</span></li>
+                                        <li data-rule="num"><i class="fas fa-circle"></i> {{ __('profile.rule_digit') }} <span class="pw-opt">{{ __('profile.rule_recommended') }}</span></li>
                                     </ul>
                                 </div>
                             </div>
 
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label">Confirmer le mot de passe</label>
+                                    <label class="form-label">{{ __('profile.confirm_password') }}</label>
                                     <div class="pw-wrap">
                                         <input type="password" name="password_confirmation" id="passwordConfirm" class="form-control" required>
-                                        <button type="button" class="pw-eye" data-target="passwordConfirm" tabindex="-1" aria-label="Afficher le mot de passe"><i class="fas fa-eye"></i></button>
+                                        <button type="button" class="pw-eye" data-target="passwordConfirm" tabindex="-1" aria-label="{{ __('profile.show_password') }}"><i class="fas fa-eye"></i></button>
                                     </div>
                                     <div style="font-size:.72rem; margin-top:6px;" id="passwordMatch"></div>
                                 </div>
@@ -540,7 +544,7 @@
                         </div>
 
                         <button type="submit" class="btn-db btn-db-warning mt-3">
-                            <i class="fas fa-key me-2"></i> Modifier le mot de passe
+                            <i class="fas fa-key me-2"></i> {{ __('profile.modify_password') }}
                         </button>
                     </form>
                 </div>
@@ -580,6 +584,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Récupérer les traductions depuis les data-attributes
+    const profileCard = document.getElementById('profileCard');
+    const translations = {
+        pwMatch: profileCard.dataset.pwMatch,
+        pwNoMatch: profileCard.dataset.pwNoMatch,
+        pwNoMatchAlert: profileCard.dataset.pwNoMatchAlert,
+        pwTooShortAlert: profileCard.dataset.pwTooShortAlert,
+    };
+
     // Validation en temps réel des critères du mot de passe
     const password = document.getElementById('password');
     const passwordConfirm = document.getElementById('passwordConfirm');
@@ -612,10 +625,10 @@ document.addEventListener('DOMContentLoaded', function() {
     if (passwordConfirm) {
         passwordConfirm.addEventListener('input', function() {
             if (password.value !== this.value) {
-                matchMessage.innerHTML = '<i class="fas fa-times-circle text-danger me-1"></i> Les mots de passe ne correspondent pas';
+                matchMessage.innerHTML = '<i class="fas fa-times-circle text-danger me-1"></i> ' + translations.pwNoMatch;
                 matchMessage.style.color = '#dc3545';
             } else {
-                matchMessage.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i> Les mots de passe correspondent';
+                matchMessage.innerHTML = '<i class="fas fa-check-circle text-success me-1"></i> ' + translations.pwMatch;
                 matchMessage.style.color = '#28a745';
             }
         });
@@ -644,11 +657,11 @@ document.addEventListener('DOMContentLoaded', function() {
         passwordForm.addEventListener('submit', function(e) {
             if (password.value !== passwordConfirm.value) {
                 e.preventDefault();
-                alert('Les mots de passe ne correspondent pas !');
+                alert(translations.pwNoMatchAlert);
             }
             if (password.value.length < 6) {
                 e.preventDefault();
-                alert('Le mot de passe doit contenir au moins 6 caractères !');
+                alert(translations.pwTooShortAlert);
             }
         });
     }

@@ -95,6 +95,9 @@ return [
     'logout_blocked_confirm' => 'Compris',
     'logout_blocked_cancel' => 'Aller à la session',
 
+    // Session display
+    'session_hash' => 'Session #:id',
+
     // Role labels
     'role_super' => 'Super Admin',
     'role_admin' => 'Administrateur',
