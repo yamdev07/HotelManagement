@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'checkinHub') }} : La gestion hôtelière réinventée</title>
+    <title>{{ config('app.name', 'checkinHub') }} : {{ __('landing_v2.page_title') }}</title>
     <link rel="icon" href="{{ asset('favicon.svg') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -175,16 +175,17 @@
         <button class="navbar-toggler border-0 text-white" data-bs-toggle="collapse" data-bs-target="#nv"><i class="fas fa-bars"></i></button>
         <div class="collapse navbar-collapse" id="nv">
             <ul class="navbar-nav mx-auto gap-lg-3">
-                <li class="nav-item"><a class="nav-link" href="#features">Fonctionnalités</a></li>
-                <li class="nav-item"><a class="nav-link" href="#how">Comment ça marche</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ route('guide') }}">Guide</a></li>
-                <li class="nav-item"><a class="nav-link" href="#pricing">Tarifs</a></li>
-                <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
+                <li class="nav-item"><a class="nav-link" href="#features">{{ __('landing_v2.nav_features') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#how">{{ __('landing_v2.nav_how') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ route('guide') }}">{{ __('landing_v2.nav_guide') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#pricing">{{ __('landing_v2.nav_pricing') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#faq">{{ __('landing_v2.nav_faq') }}</a></li>
             </ul>
             <div class="d-flex gap-2 align-items-center">
+                <a href="{{ route('lang.switch', app()->getLocale() === 'fr' ? 'en' : 'fr') }}" class="btn-ghost" style="padding:.45rem .8rem;font-size:.85rem;">{{ __('landing.nav_switch_lang') }}</a>
                 <button class="theme-btn" id="themeToggle" type="button" aria-label="Changer de thème"><i class="fas fa-moon"></i></button>
-                <a href="{{ route('login.index') }}" class="btn-ghost">Connexion</a>
-                <a href="{{ route('hotel.register') }}" class="btn-glow">Essai gratuit</a>
+                <a href="{{ route('login.index') }}" class="btn-ghost">{{ __('landing_v2.nav_login') }}</a>
+                <a href="{{ route('hotel.register') }}" class="btn-glow">{{ __('landing_v2.nav_free_trial') }}</a>
             </div>
         </div>
     </div>
@@ -195,32 +196,32 @@
     <div class="container">
         <div class="row align-items-center g-5">
             <div class="col-lg-5" data-aos="fade-up">
-                <span class="chip mb-3"><i class="fas fa-gem" style="color:var(--accent);font-size:.7rem"></i> Nouveau · Essai gratuit {{ config('plans.trial_days', 14) }} jours sans carte bancaire</span>
-                <h1 class="fw-bold mb-3" style="font-size:clamp(2.3rem,4.6vw,3.4rem);line-height:1.04;">La gestion hôtelière,<br><span class="grad-text">réinventée pour l'Afrique.</span></h1>
+                <span class="chip mb-3"><i class="fas fa-gem" style="color:var(--accent);font-size:.7rem"></i> {{ __('landing_v2.hero_chip', ['text' => config('plans.trial_days', 14)]) }}</span>
+                <h1 class="fw-bold mb-3" style="font-size:clamp(2.3rem,4.6vw,3.4rem);line-height:1.04;">{{ __('landing_v2.hero_title_1') }}<br><span class="grad-text">{{ __('landing_v2.hero_title_2') }}</span></h1>
                 <p class="fs-5 text-muted2 mb-3" style="max-width:480px;">
-                    Centralisez vos réservations, votre caisse, le housekeeping et votre site web sur une seule plateforme pensée pour les hôtels africains.
+                    {{ __('landing_v2.hero_description') }}
                 </p>
                 <div class="d-flex align-items-center gap-2 mb-4">
                     <span style="color:#fbbf24;letter-spacing:2px;">★★★★★</span>
-                    <span class="text-muted2 small"><strong class="text-white">4,9/5</strong> sur plus de 120 avis</span>
+                    <span class="text-muted2 small"><strong class="text-white">4,9/5</strong> {{ __('landing_v2.hero_stars_label') }}</span>
                 </div>
                 <div class="d-flex flex-wrap gap-3 mb-4">
                     <a href="{{ route('hotel.register') }}" class="btn-glow btn-lg" style="line-height:1.15;">
-                        <i class="fas fa-rocket me-1"></i> Essayer gratuitement
-                        <span style="display:block;font-size:.7rem;font-weight:400;opacity:.85">14 jours sans carte bancaire</span>
+                        <i class="fas fa-rocket me-1"></i> {{ __('landing_v2.hero_cta_start') }}
+                        <span style="display:block;font-size:.7rem;font-weight:400;opacity:.85">{{ __('landing_v2.hero_cta_start_sub', ['text' => config('plans.trial_days', 14)]) }}</span>
                     </a>
                     <a href="#features" class="btn-ghost btn-lg d-inline-flex align-items-center gap-2" style="line-height:1.15;">
                         <i class="fas fa-circle-play fs-5"></i>
-                        <span style="text-align:left">Voir une démo<span style="display:block;font-size:.7rem;font-weight:400;opacity:.7">En 2 minutes</span></span>
+                        <span style="text-align:left">{{ __('landing_v2.hero_cta_demo') }}<span style="display:block;font-size:.7rem;font-weight:400;opacity:.7">{{ __('landing_v2.hero_cta_demo_sub') }}</span></span>
                     </a>
                 </div>
                 <div class="d-flex flex-wrap gap-4 text-muted2 small mb-4">
-                    <span><i class="fas fa-check text-white me-1"></i> Sans engagement</span>
-                    <span><i class="fas fa-rotate text-white me-1"></i> Installation en 5 min</span>
-                    <span><i class="fab fa-whatsapp me-1" style="color:#25d366"></i> Support WhatsApp 24/7</span>
+                    <span><i class="fas fa-check text-white me-1"></i> {{ __('landing_v2.hero_check_1') }}</span>
+                    <span><i class="fas fa-rotate text-white me-1"></i> {{ __('landing_v2.hero_check_2') }}</span>
+                    <span><i class="fab fa-whatsapp me-1" style="color:#25d366"></i> {{ __('landing_v2.hero_check_3') }}</span>
                 </div>
                 <div class="glass p-3" style="max-width:520px;">
-                    <div class="small text-muted2 mb-2">Déjà adopté dans <strong class="text-white">{{ count(config('plans.countries')) }} pays africains</strong></div>
+                    <div class="small text-muted2 mb-2">{{ __('landing_v2.hero_countries_label', ['count' => count(config('plans.countries'))]) }}</div>
                     <div class="d-flex flex-wrap gap-2">
                         @php $flags = ['SN'=>'🇸🇳','CI'=>'🇨🇮','BJ'=>'🇧🇯','TG'=>'🇹🇬','BF'=>'🇧🇫','ML'=>'🇲🇱']; @endphp
                         @foreach ($flags as $code => $flag)
@@ -311,10 +312,10 @@
                     $kpi = ['hotels' => 0, 'rooms' => 0, 'bookings' => 0];
                 }
                 $stats = [
-                    ['target'=>$kpi['hotels'],                    'suffix'=>'', 'label'=>'Établissements actifs', 'icon'=>'fa-hotel'],
-                    ['target'=>count(config('plans.countries')),  'suffix'=>'', 'label'=>'Pays disponibles',      'icon'=>'fa-earth-africa'],
-                    ['target'=>$kpi['rooms'],                     'suffix'=>'', 'label'=>'Chambres gérées',       'icon'=>'fa-bed'],
-                    ['target'=>$kpi['bookings'],                  'suffix'=>'', 'label'=>'Réservations traitées', 'icon'=>'fa-calendar-check'],
+                    ['target'=>$kpi['hotels'],                    'suffix'=>'', 'label'=>__('landing_v2.stat_hotels'), 'icon'=>'fa-hotel'],
+                    ['target'=>count(config('plans.countries')),  'suffix'=>'', 'label'=>__('landing_v2.stat_countries'),      'icon'=>'fa-earth-africa'],
+                    ['target'=>$kpi['rooms'],                     'suffix'=>'', 'label'=>__('landing_v2.stat_rooms'),       'icon'=>'fa-bed'],
+                    ['target'=>$kpi['bookings'],                  'suffix'=>'', 'label'=>__('landing_v2.stat_bookings'), 'icon'=>'fa-calendar-check'],
                 ];
             @endphp
             @foreach ($stats as $i => $s)
@@ -334,17 +335,17 @@
 <section class="section" id="features">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <span class="chip mb-2">Fonctionnalités</span>
-            <h2 class="fw-bold">Tout votre hôtel, <span class="grad-text">au même endroit</span></h2>
+            <span class="chip mb-2">{{ __('landing_v2.features_badge') }}</span>
+            <h2 class="fw-bold">{{ __('landing_v2.features_title_1') }} <span class="grad-text">{{ __('landing_v2.features_title_2') }}</span></h2>
         </div>
         <div class="row g-4">
             @php $feats = [
-                ['fa-calendar-check','Réservations & check-in','Planning en temps réel, arrivées/départs, check-in direct en un clic.'],
-                ['fa-cash-register','Caisse & paiements','Encaissements, ouverture/fermeture de caisse, suivi des transactions.'],
-                ['fa-broom','Housekeeping','Statuts des chambres, tâches du personnel, suivi du ménage.'],
-                ['fa-utensils','Restaurant','Commandes, service en chambre, gestion des points de vente.'],
-                ['fa-chart-line','Rapports','Occupation, revenus et performance sur des tableaux de bord clairs.'],
-                ['fa-globe','Vitrine web','Un mini-site à vos couleurs pour vos réservations en ligne.'],
+                ['fa-calendar-check',__('landing_v2.feature_1_title'),__('landing_v2.feature_1_desc')],
+                ['fa-cash-register',__('landing_v2.feature_2_title'),__('landing_v2.feature_2_desc')],
+                ['fa-broom',__('landing_v2.feature_3_title'),__('landing_v2.feature_3_desc')],
+                ['fa-utensils',__('landing_v2.feature_4_title'),__('landing_v2.feature_4_desc')],
+                ['fa-chart-line',__('landing_v2.feature_5_title'),__('landing_v2.feature_5_desc')],
+                ['fa-globe',__('landing_v2.feature_6_title'),__('landing_v2.feature_6_desc')],
             ]; @endphp
             @foreach ($feats as $i => $f)
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ ($i%3)*100 }}">
@@ -363,13 +364,13 @@
 <section class="section" id="how">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <span class="chip mb-2">Simple</span>
-            <h2 class="fw-bold">Opérationnel en <span class="grad-text">3 étapes</span></h2>
+            <span class="chip mb-2">{{ __('landing_v2.how_badge') }}</span>
+            <h2 class="fw-bold">{{ __('landing_v2.how_title_1') }} <span class="grad-text">{{ __('landing_v2.how_title_2') }}</span></h2>
         </div>
         <div class="row g-4">
-            @php $steps = [['Créez votre compte','Inscription en 2 minutes, essai gratuit immédiat, sans carte.'],
-                ['Personnalisez','Vos couleurs, votre logo, vos chambres et votre vitrine web.'],
-                ['Accueillez vos clients','Réservations, check-in et caisse dès le premier jour.']]; @endphp
+            @php $steps = [[__('landing_v2.how_step_1_title'),__('landing_v2.how_step_1_desc')],
+                [__('landing_v2.how_step_2_title'),__('landing_v2.how_step_2_desc')],
+                [__('landing_v2.how_step_3_title'),__('landing_v2.how_step_3_desc')]]; @endphp
             @foreach ($steps as $i => $s)
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ $i*120 }}">
                     <div class="glass p-4 h-100">
@@ -387,14 +388,14 @@
 <section class="section" id="temoignages">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <span class="chip mb-2">Témoignages</span>
-            <h2 class="fw-bold">Ils gèrent leur hôtel avec <span class="grad-text">checkinHub</span></h2>
+            <span class="chip mb-2">{{ __('landing_v2.testimonials_badge') }}</span>
+            <h2 class="fw-bold">{{ __('landing_v2.testimonials_title_1') }} <span class="grad-text">{{ __('landing_v2.testimonials_title_2') }}</span></h2>
         </div>
         <div class="row g-4">
             @php $temoins = [
-                ['A','Aïcha D.','Directrice, Résidence Les Palmiers','checkinHub a remplacé nos cahiers et nos fichiers Excel. Le check-in prend deux minutes et la caisse est enfin claire.'],
-                ['K','Koffi M.','Gérant, Hôtel Baobab','Mise en route en une après-midi. Mes réceptionnistes ont adopté l’outil tout de suite, sans formation compliquée.'],
-                ['F','Fatou S.','Propriétaire, Villa Océane','Le prix adapté à mon pays a fait la différence. Et la vitrine web m’apporte des réservations directes.'],
+                [__('landing_v2.testimonial_1_name'),__('landing_v2.testimonial_1_role'),__('landing_v2.testimonial_1_quote')],
+                [__('landing_v2.testimonial_2_name'),__('landing_v2.testimonial_2_role'),__('landing_v2.testimonial_2_quote')],
+                [__('landing_v2.testimonial_3_name'),__('landing_v2.testimonial_3_role'),__('landing_v2.testimonial_3_quote')],
             ]; @endphp
             @foreach ($temoins as $i => $t)
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ $i*120 }}">
@@ -402,12 +403,12 @@
                         <div class="mb-2" style="color:var(--accent)">
                             <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
                         </div>
-                        <p class="mb-4">“{{ $t[3] }}”</p>
+                        <p class="mb-4">“{{ $t[2] }}”</p>
                         <div class="d-flex align-items-center gap-3 mt-auto">
-                            <div class="ico" style="width:44px;height:44px;font-family:'Space Grotesk';font-weight:700">{{ $t[0] }}</div>
+                            <div class="ico" style="width:44px;height:44px;font-family:'Space Grotesk';font-weight:700">{{ substr($t[0], 0, 1) }}</div>
                             <div>
-                                <div class="fw-semibold">{{ $t[1] }}</div>
-                                <div class="text-muted2 small">{{ $t[2] }}</div>
+                                <div class="fw-semibold">{{ $t[0] }}</div>
+                                <div class="text-muted2 small">{{ $t[1] }}</div>
                             </div>
                         </div>
                     </div>
@@ -421,9 +422,9 @@
 <section class="section" id="pricing">
     <div class="container">
         <div class="text-center mb-4" data-aos="fade-up">
-            <span class="chip mb-2">Tarifs</span>
-            <h2 class="fw-bold">Des prix <span class="grad-text">adaptés à votre pays</span></h2>
-            <p class="text-muted2">Coût de la vie & devise locale pris en compte.</p>
+            <span class="chip mb-2">{{ __('landing_v2.pricing_badge') }}</span>
+            <h2 class="fw-bold">{{ __('landing_v2.pricing_title_1') }} <span class="grad-text">{{ __('landing_v2.pricing_title_2') }}</span></h2>
+            <p class="text-muted2">{{ __('landing_v2.pricing_description') }}</p>
             <div class="d-inline-flex align-items-center gap-2 mt-2">
                 <i class="fas fa-earth-africa" style="color:var(--brand)"></i>
                 <select id="pricing-country" class="form-select" style="width:auto;">
@@ -442,19 +443,19 @@
                 @endphp
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index*120 }}">
                     <div class="price-card {{ $pop ? 'pop' : '' }} p-4 h-100" data-base="{{ $tier['price'] }}">
-                        @if ($pop)<span class="chip mb-2" style="border-color:var(--brand);color:var(--head)"><i class="fas fa-star" style="color:var(--accent)"></i> Populaire</span>@endif
+                        @if ($pop)<span class="chip mb-2" style="border-color:var(--brand);color:var(--head)"><i class="fas fa-star" style="color:var(--accent)"></i> {{ __('landing_v2.pricing_popular') }}</span>@endif
                         <h4 class="fw-bold">{{ $tier['name'] }}</h4>
                         <p class="text-muted2 small">{{ $tier['tagline'] }}</p>
                         <div class="chip mb-2" style="color:var(--head)"><i class="fas fa-bed" style="color:var(--brand)"></i> {{ $rooms }}@if ($max === null) · illimité @endif</div>
                         <div class="my-2"><span class="price-amount pr-amount">{{ number_format($tier['price'],0,',',' ') }}</span>
-                            <span class="text-muted2"><span class="pr-cur">XOF</span> / mois</span></div>
+                            <span class="text-muted2"><span class="pr-cur">XOF</span> / {{ __('landing_v2.pricing_month') }}</span></div>
                         <hr style="border-color:var(--border)">
                         <ul class="list-unstyled mb-4">
                             @foreach ($tier['features'] as $item)
                                 <li class="mb-2 text-muted2"><i class="fas fa-check me-2" style="color:var(--accent)"></i>{{ $item }}</li>
                             @endforeach
                         </ul>
-                        <a href="{{ route('hotel.register', ['plan'=>$key]) }}" class="{{ $pop ? 'btn-glow' : 'btn-ghost' }} w-100 d-block text-center">Choisir {{ $tier['name'] }}</a>
+                        <a href="{{ route('hotel.register', ['plan'=>$key]) }}" class="{{ $pop ? 'btn-glow' : 'btn-ghost' }} w-100 d-block text-center">{{ __('landing_v2.pricing_choose') }} {{ $tier['name'] }}</a>
                     </div>
                 </div>
             @endforeach
@@ -466,17 +467,17 @@
 <section class="section" id="faq">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <span class="chip mb-2">FAQ</span>
-            <h2 class="fw-bold">Les questions <span class="grad-text">fréquentes</span></h2>
+            <span class="chip mb-2">{{ __('landing_v2.faq_badge') }}</span>
+            <h2 class="fw-bold">{{ __('landing_v2.faq_title_1') }} <span class="grad-text">{{ __('landing_v2.faq_title_2') }}</span></h2>
         </div>
         <div class="row justify-content-center">
             <div class="col-lg-8" data-aos="fade-up">
                 @php $faqs = [
-                    ["L'essai gratuit nécessite-t-il une carte bancaire ?","Non. Vous démarrez votre essai de ".config('plans.trial_days',14)." jours immédiatement, sans aucune carte. Vous ne payez que si vous décidez de continuer."],
-                    ["Comment sont fixés les prix ?","Le tarif dépend de votre pays : nous ajustons les prix au coût de la vie local et affichons votre devise. Sélectionnez votre pays dans la section Tarifs pour voir vos prix."],
-                    ["Mes données sont-elles isolées des autres hôtels ?","Oui. Chaque établissement dispose de son espace cloisonné : vos réservations, clients et transactions ne sont jamais mélangés avec ceux d'un autre hôtel."],
-                    ["Puis-je changer de formule plus tard ?","Bien sûr. Vous pouvez passer à une formule supérieure ou inférieure à tout moment depuis votre espace, selon le nombre de chambres."],
-                    ["Comment se passe le paiement de l'abonnement ?","Le paiement se fait en ligne (Mobile Money & carte). Votre accès est prolongé automatiquement dès la confirmation du paiement."],
+                    [__('landing_v2.faq_1_q'),__('landing_v2.faq_1_a', ['text' => config('plans.trial_days', 14)])],
+                    [__('landing_v2.faq_2_q'),__('landing_v2.faq_2_a')],
+                    [__('landing_v2.faq_3_q'),__('landing_v2.faq_3_a')],
+                    [__('landing_v2.faq_4_q'),__('landing_v2.faq_4_a')],
+                    [__('landing_v2.faq_5_q'),__('landing_v2.faq_5_a')],
                 ]; @endphp
                 <div class="accordion accordion-flush" id="faqAcc">
                     @foreach ($faqs as $i => $q)
@@ -502,9 +503,9 @@
 <section class="section">
     <div class="container">
         <div class="glass p-5 text-center" data-aos="zoom-in" style="background:linear-gradient(135deg, rgba(124,131,255,.18), rgba(176,107,255,.12));">
-            <h2 class="fw-bold mb-2">Prêt à moderniser votre hôtel ?</h2>
-            <p class="text-muted2 mb-4">Démarrez votre essai gratuit de {{ config('plans.trial_days',14) }} jours, aucune carte requise.</p>
-            <a href="{{ route('hotel.register') }}" class="btn-glow btn-lg"><i class="fas fa-rocket me-2"></i>Créer mon établissement</a>
+            <h2 class="fw-bold mb-2">{{ __('landing_v2.cta_title') }}</h2>
+            <p class="text-muted2 mb-4">{{ __('landing_v2.cta_description', ['text' => config('plans.trial_days', 14)]) }}</p>
+            <a href="{{ route('hotel.register') }}" class="btn-glow btn-lg"><i class="fas fa-rocket me-2"></i>{{ __('landing_v2.cta_button') }}</a>
         </div>
     </div>
 </section>
@@ -513,8 +514,8 @@
 <footer class="py-5">
     <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
         <span class="brand-logo">check<span>inHub</span></span>
-        <span class="text-muted2 small">© {{ now()->year }} checkinHub. La gestion hôtelière réinventée.</span>
-        <a href="{{ route('login.index') }}" class="btn-ghost">Connexion</a>
+        <span class="text-muted2 small">&copy; {{ now()->year }} checkinHub. {{ __('landing_v2.footer_rights') }}</span>
+        <a href="{{ route('login.index') }}" class="btn-ghost">{{ __('landing_v2.footer_login') }}</a>
     </div>
 </footer>
 
