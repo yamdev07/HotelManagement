@@ -14,8 +14,14 @@
             <span class="mh-brand-name">{{ ($currentHotel ?? null)?->name ?? config('app.name', 'checkinHub') }}</span>
         </a>
 
-        {{-- ── Right : notifs + profil ── --}}
+        {{-- ── Right : lang + notifs + profil ── --}}
         <div class="mh-right">
+
+            {{-- Language Toggle --}}
+            <a href="{{ route('lang.switch', app()->getLocale() === 'fr' ? 'en' : 'fr') }}"
+               class="mh-icon-btn" title="{{ app()->getLocale() === 'fr' ? 'English' : 'Français' }}">
+                {{ strtoupper(app()->getLocale()) }}
+            </a>
 
             {{-- Notifications --}}
             <div class="dropdown">
@@ -27,7 +33,7 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-end mh-dropdown-notif shadow-lg">
                     <div class="mh-dd-head">
-                        <span class="mh-dd-title">Notifications</span>
+                        <span class="mh-dd-title">{{ __('sidebar.notif_dropdown_title') }}</span>
                         @if(auth()->user()->unreadNotifications->count() > 0)
                         <span class="mh-dd-badge">{{ auth()->user()->unreadNotifications->count() }}</span>
                         @endif
@@ -37,20 +43,20 @@
                         <a href="{{ route('notification.routeTo', ['id' => $notification->id]) }}" class="mh-notif-item">
                             <div class="mh-notif-ico"><i class="fas fa-bell"></i></div>
                             <div class="mh-notif-body">
-                                <div class="mh-notif-msg">{{ Str::limit($notification->data['title'] ?? 'Nouvelle notification', 42) }}</div>
+                                <div class="mh-notif-msg">{{ Str::limit($notification->data['title'] ?? __('sidebar.notif_new'), 42) }}</div>
                                 <div class="mh-notif-time">{{ $notification->created_at->diffForHumans() }}</div>
                             </div>
                         </a>
                         @empty
                         <div class="mh-notif-empty">
                             <i class="fas fa-bell-slash"></i>
-                            <span>Aucune notification</span>
+                            <span>{{ __('sidebar.notif_empty') }}</span>
                         </div>
                         @endforelse
                     </div>
                     @if(auth()->user()->unreadNotifications->count() > 4)
                     <a href="{{ route('notification.index') }}" class="mh-dd-footer">
-                        Voir tout ({{ auth()->user()->unreadNotifications->count() }})
+                        {{ __('sidebar.notif_view_all') }} ({{ auth()->user()->unreadNotifications->count() }})
                     </a>
                     @endif
                 </div>
@@ -80,19 +86,19 @@
                     <div class="mh-dd-divider"></div>
                     @if(Route::has('profile.index'))
                     <a class="mh-dd-item" href="{{ route('profile.index') }}">
-                        <i class="fas fa-user"></i> Mon Profil
+                        <i class="fas fa-user"></i> {{ __('sidebar.my_profile') }}
                     </a>
                     @endif
                     @if(Route::has('notification.index'))
                     <a class="mh-dd-item" href="{{ route('notification.index') }}">
-                        <i class="fas fa-bell"></i> Notifications
+                        <i class="fas fa-bell"></i> {{ __('sidebar.notifications_title') }}
                     </a>
                     @endif
                     <div class="mh-dd-divider"></div>
                     <a class="mh-dd-item mh-dd-item--danger"
                        href="{{ route('logout') }}"
                        onclick="event.preventDefault(); document.getElementById('mh-logout-form').submit();">
-                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                        <i class="fas fa-sign-out-alt"></i> {{ __('sidebar.logout_title') }}
                     </a>
                     <form id="mh-logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
                 </div>
