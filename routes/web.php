@@ -61,6 +61,16 @@ Route::view('/v1', 'landing')->name('landing.v1');
 // Guide d'utilisation / documentation (accessible à tous)
 Route::view('/guide', 'guide')->name('guide');
 
+Route::get('/lang/{locale}', function (string $locale) {
+    if (! in_array($locale, ['fr', 'en'])) {
+        abort(400);
+    }
+    app()->setLocale($locale);
+    session(['locale' => $locale]);
+
+    return redirect()->back();
+})->name('lang.switch');
+
 // ==================== VITRINE PUBLIQUE PAR HÔTEL (multi-pages) ====================
 Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(function () {
     Route::get('/h/{slug}', 'show')->name('public.hotel');
