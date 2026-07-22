@@ -189,8 +189,7 @@ return [
     // Step 3 – Choose room
     'step3_page_title' => 'Choix de la chambre',
     'step3_breadcrumb_room' => 'Choix chambre',
-    'step3_title_1' => 'Choix de la',
-    'step3_title_2' => 'chambre',
+    'step3_title' => 'Choix de la <em>chambre</em>',
     'step3_subtitle' => 'Étape 3/4 · Sélection de la chambre',
     'rooms_available' => ':count chambre(s) disponible(s)',
     'persons_count' => ':count personne(s)',

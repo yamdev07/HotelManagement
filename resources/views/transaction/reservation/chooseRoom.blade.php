@@ -389,7 +389,7 @@
         <div class="choose-brand">
             <div class="choose-brand-icon"><i class="fas fa-bed"></i></div>
             <div>
-                <h1 class="choose-header-title">{!! __('reservation.step3_title_1') !!}</h1>
+                <h1 class="choose-header-title">{!! __('reservation.step3_title') !!}</h1>
                 <p class="choose-header-sub">
                     <i class="fas fa-door-open me-1"></i> {{ __('reservation.step3_subtitle') }}
                 </p>

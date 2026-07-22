@@ -165,8 +165,7 @@ return [
     // Step 3 – Choose room
     'step3_page_title' => 'Room selection',
     'step3_breadcrumb_room' => 'Choose room',
-    'step3_title_1' => 'Choose a',
-    'step3_title_2' => 'room',
+    'step3_title' => 'Choose a <em>room</em>',
     'step3_subtitle' => 'Step 3/4 · Room selection',
     'rooms_available' => ':count room(s) available',
     'persons_count' => ':count guest(s)',
