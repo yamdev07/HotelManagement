@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Mes Réservations')
+@section('title', __('my-reservations.page_title'))
 @section('content')
 <div class="container-fluid">
     <div class="row mb-4">
@@ -7,9 +7,9 @@
             <h2>
                 <i class="fas fa-calendar-alt me-2"></i>
                 @if($isCustomer)
-                    Mes Réservations
+                    {{ __('my-reservations.my_reservations') }}
                 @else
-                    Toutes les Réservations
+                    {{ __('my-reservations.all_reservations') }}
                 @endif
             </h2>
         </div>
@@ -19,7 +19,7 @@
     @if($isCustomer)
     <div class="alert alert-info">
         <i class="fas fa-info-circle me-2"></i>
-        Vous voyez ici uniquement vos propres réservations.
+        {{ __('my-reservations.customer_info') }}
     </div>
     @endif
 
@@ -27,7 +27,7 @@
     <div class="row mb-4">
         <div class="col-12">
             <h5 class="mb-3">
-                <i class="fas fa-clock me-2"></i>Réservations Actives
+                <i class="fas fa-clock me-2"></i>{{ __('my-reservations.active_reservations') }}
                 <span class="badge bg-primary">{{ $transactions->count() }}</span>
             </h5>
             
@@ -39,14 +39,14 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Chambre</th>
-                                    <th>Arrivée</th>
-                                    <th>Départ</th>
-                                    <th>Nuits</th>
-                                    <th>Total</th>
-                                    <th>Payé</th>
-                                    <th>Statut</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('my-reservations.room') }}</th>
+                                    <th>{{ __('my-reservations.arrival') }}</th>
+                                    <th>{{ __('my-reservations.departure') }}</th>
+                                    <th>{{ __('my-reservations.nights') }}</th>
+                                    <th>{{ __('my-reservations.total') }}</th>
+                                    <th>{{ __('my-reservations.paid') }}</th>
+                                    <th>{{ __('my-reservations.status') }}</th>
+                                    <th>{{ __('my-reservations.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -61,9 +61,9 @@
                                     <td>{{ Helper::formatCFA($transaction->getTotalPayment()) }}</td>
                                     <td>
                                         @if($transaction->getTotalPrice() - $transaction->getTotalPayment() <= 0)
-                                            <span class="badge bg-success">Payé</span>
+                                            <span class="badge bg-success">{{ __('my-reservations.status_paid') }}</span>
                                         @else
-                                            <span class="badge bg-warning">En attente</span>
+                                            <span class="badge bg-warning">{{ __('my-reservations.status_pending') }}</span>
                                         @endif
                                     </td>
                                     <td>
@@ -82,7 +82,7 @@
             @else
             <div class="alert alert-warning">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                Aucune réservation active.
+                {{ __('my-reservations.no_active_reservations') }}
             </div>
             @endif
         </div>
@@ -92,7 +92,7 @@
     <div class="row">
         <div class="col-12">
             <h5 class="mb-3">
-                <i class="fas fa-history me-2"></i>Anciennes Réservations
+                <i class="fas fa-history me-2"></i>{{ __('my-reservations.past_reservations') }}
                 <span class="badge bg-secondary">{{ $transactionsExpired->count() }}</span>
             </h5>
             
@@ -104,12 +104,12 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Chambre</th>
-                                    <th>Arrivée</th>
-                                    <th>Départ</th>
-                                    <th>Nuits</th>
-                                    <th>Total</th>
-                                    <th>Statut</th>
+                                    <th>{{ __('my-reservations.room') }}</th>
+                                    <th>{{ __('my-reservations.arrival') }}</th>
+                                    <th>{{ __('my-reservations.departure') }}</th>
+                                    <th>{{ __('my-reservations.nights') }}</th>
+                                    <th>{{ __('my-reservations.total') }}</th>
+                                    <th>{{ __('my-reservations.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -122,7 +122,7 @@
                                     <td>{{ $transaction->getDateDifferenceWithPlural() }}</td>
                                     <td>{{ Helper::formatCFA($transaction->getTotalPrice()) }}</td>
                                     <td>
-                                        <span class="badge bg-secondary">Terminée</span>
+                                        <span class="badge bg-secondary">{{ __('my-reservations.status_completed') }}</span>
                                     </td>
                                 </tr>
                                 @endforeach
@@ -134,7 +134,7 @@
             @else
             <div class="alert alert-warning">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                Aucune ancienne réservation.
+                {{ __('my-reservations.no_past_reservations') }}
             </div>
             @endif
         </div>
