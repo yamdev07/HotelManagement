@@ -957,9 +957,9 @@
 
     {{-- ─── BREADCRUMB ─────────────────────────── --}}
     <div class="ci-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('checkin.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Check-in</span>
+        <span class="current">{{ __('checkin.checkin') }}</span>
     </div>
 
     {{-- ─── HEADER ─────────────────────────────── --}}
@@ -967,21 +967,21 @@
         <div class="ci-brand">
             <div class="ci-brand-icon"><i class="fas fa-door-open"></i></div>
             <div>
-                <h1 class="ci-header-title">Gestion des <em>Check-in</em></h1>
+                <h1 class="ci-header-title">{!! __('checkin.title') !!}</h1>
                 <div class="ci-header-sub">
-                    <span>Arrivées, séjours et départs</span>
+                    <span>{{ __('checkin.subtitle') }}</span>
                     <span class="time-badge">
-                        <i class="fas fa-clock"></i> Check-in 12h | Check-out 12h (largesse 14h)
+                        <i class="fas fa-clock"></i> {{ __('checkin.checkin_time') }}
                     </span>
                 </div>
             </div>
         </div>
         <div class="ci-header-actions">
             <a href="{{ route('checkin.search') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-search fa-xs"></i> Rechercher
+                <i class="fas fa-search fa-xs"></i> {{ __('checkin.search') }}
             </a>
             <a href="{{ route('checkin.direct') }}" class="btn-db btn-db-primary">
-                <i class="fas fa-user-plus fa-xs"></i> Check-in Direct
+                <i class="fas fa-user-plus fa-xs"></i> {{ __('checkin.checkin_direct') }}
             </a>
         </div>
     </div>
@@ -1007,11 +1007,11 @@
     <div class="ci-alert ci-alert-warning anim-2">
         <i class="fas fa-broom fa-lg"></i>
         <span>
-            <strong>{{ $stats['urgent_cleaning'] }} chambre(s) sale(s) avec arrivée aujourd'hui !</strong>
-            <br><small>Ces chambres doivent être nettoyées en priorité avant l'arrivée des clients.</small>
+            <strong>{{ __('checkin.urgent_cleaning', ['count' => $stats['urgent_cleaning']]) }}</strong>
+            <br><small>{{ __('checkin.urgent_cleaning_desc') }}</small>
         </span>
         <a href="{{ route('housekeeping.index') }}" class="btn-db btn-db-ghost" style="margin-left:auto;background:#ffc107;color:#856404;border-color:#ffc107;padding:5px 12px;border-radius:20px;text-decoration:none;">
-            <i class="fas fa-bell me-1"></i> Voir housekeeping
+            <i class="fas fa-bell me-1"></i> {{ __('checkin.view_housekeeping') }}
         </a>
     </div>
     @endif
@@ -1021,84 +1021,84 @@
         <div class="stat-card stat-card--arrivals">
             <div class="stat-card-top">
                 <div>
-                    <div class="stat-card-label">Arrivées aujourd'hui</div>
+                    <div class="stat-card-label">{{ __('checkin.arrivals_today') }}</div>
                     <div class="stat-card-value">{{ $stats['arrivals_today'] }}</div>
                 </div>
                 <div class="stat-card-icon"><i class="fas fa-calendar-day"></i></div>
             </div>
-            <div class="stat-card-meta">
+                    <div class="stat-card-meta">
                 <i class="fas fa-clock fa-xs"></i>
-                Prévues pour {{ $today->format('d/m/Y') }}
+                {{ __('checkin.scheduled_for', ['date' => $today->format('d/m/Y')]) }}
             </div>
         </div>
 
         <div class="stat-card stat-card--staying">
             <div class="stat-card-top">
                 <div>
-                    <div class="stat-card-label">Séjours en cours</div>
+                    <div class="stat-card-label">{{ __('checkin.current_stays') }}</div>
                     <div class="stat-card-value">{{ $stats['currently_checked_in'] }}</div>
                 </div>
                 <div class="stat-card-icon"><i class="fas fa-bed"></i></div>
             </div>
             <div class="stat-card-meta">
                 <i class="fas fa-hotel fa-xs"></i>
-                Clients dans l'hôtel
+                {{ __('checkin.guests_in_hotel') }}
             </div>
         </div>
 
         <div class="stat-card stat-card--departures">
             <div class="stat-card-top">
                 <div>
-                    <div class="stat-card-label">Départs aujourd'hui</div>
+                    <div class="stat-card-label">{{ __('checkin.departures_today') }}</div>
                     <div class="stat-card-value">{{ $stats['departures_today'] }}</div>
                 </div>
                 <div class="stat-card-icon"><i class="fas fa-sign-out-alt"></i></div>
             </div>
             <div class="stat-card-meta">
                 <i class="fas fa-door-open fa-xs"></i>
-                Chambres à libérer
+                {{ __('checkin.rooms_to_free') }}
             </div>
         </div>
 
         <div class="stat-card stat-card--available">
             <div class="stat-card-top">
                 <div>
-                    <div class="stat-card-label">Chambres disponibles</div>
+                    <div class="stat-card-label">{{ __('checkin.available_rooms') }}</div>
                     <div class="stat-card-value">{{ $stats['available_rooms'] }}</div>
                 </div>
                 <div class="stat-card-icon"><i class="fas fa-door-closed"></i></div>
             </div>
             <div class="stat-card-meta">
                 <i class="fas fa-check-circle fa-xs"></i>
-                Prêtes à l'accueil
+                {{ __('checkin.ready_to_welcome') }}
             </div>
         </div>
 
         <div class="stat-card stat-card--dirty">
             <div class="stat-card-top">
                 <div>
-                    <div class="stat-card-label">Chambres sales</div>
+                    <div class="stat-card-label">{{ __('checkin.dirty_rooms') }}</div>
                     <div class="stat-card-value">{{ $stats['dirty_rooms'] ?? 0 }}</div>
                 </div>
                 <div class="stat-card-icon"><i class="fas fa-broom"></i></div>
             </div>
             <div class="stat-card-meta">
                 <i class="fas fa-exclamation-triangle fa-xs"></i>
-                <span>Dont <strong>{{ $stats['urgent_cleaning'] ?? 0 }}</strong> avec arrivée</span>
+                <span>{{ __('checkin.with_arrival', ['count' => $stats['urgent_cleaning'] ?? 0]) }}</span>
             </div>
         </div>
 
         <div class="stat-card stat-card--urgent">
             <div class="stat-card-top">
                 <div>
-                    <div class="stat-card-label">Urgences nettoyage</div>
+                    <div class="stat-card-label">{{ __('checkin.cleaning_urgencies') }}</div>
                     <div class="stat-card-value">{{ $stats['urgent_cleaning'] ?? 0 }}</div>
                 </div>
                 <div class="stat-card-icon"><i class="fas fa-exclamation-triangle"></i></div>
             </div>
             <div class="stat-card-meta">
                 <i class="fas fa-clock fa-xs"></i>
-                <a href="{{ route('housekeeping.index') }}">Voir housekeeping <i class="fas fa-arrow-right fa-xs"></i></a>
+                <a href="{{ route('housekeeping.index') }}">{{ __('checkin.see_housekeeping') }} <i class="fas fa-arrow-right fa-xs"></i></a>
             </div>
         </div>
     </div>
@@ -1112,18 +1112,18 @@
                 <div class="ci-card-header">
                     <h3 class="ci-card-title">
                         <i class="fas fa-calendar-check"></i>
-                        Réservations à venir
+                        {{ __('checkin.upcoming_reservations') }}
                     </h3>
-                    <span class="ci-card-badge">{{ $upcomingReservations->count() }} groupe(s)</span>
+                    <span class="ci-card-badge">{{ __('checkin.groups', ['count' => $upcomingReservations->count()]) }}</span>
                 </div>
 
                 @if($upcomingReservations->isEmpty())
                 <div class="ci-empty">
                     <div class="ci-empty-icon"><i class="fas fa-calendar-times"></i></div>
-                    <p class="ci-empty-title">Aucune arrivée prévue</p>
-                    <p class="ci-empty-text">Pas de réservations pour aujourd'hui ni demain</p>
+                    <p class="ci-empty-title">{{ __('checkin.no_arrivals_planned') }}</p>
+                    <p class="ci-empty-text">{{ __('checkin.no_reservations_today') }}</p>
                     <a href="{{ route('checkin.search') }}" class="btn-db btn-db-primary" style="margin-top:8px;">
-                        <i class="fas fa-search fa-xs"></i> Chercher des réservations
+                        <i class="fas fa-search fa-xs"></i> {{ __('checkin.search_reservations') }}
                     </a>
                 </div>
                 @else
@@ -1136,7 +1136,7 @@
                             </span>
                             <span class="date-group-pill">
                                 <i class="fas fa-ticket-alt fa-xs"></i>
-                                {{ $reservations->count() }} réservation{{ $reservations->count() > 1 ? 's' : '' }}
+                                {{ __('checkin.reservation_count', ['count' => $reservations->count()]) }}
                             </span>
                         </div>
 
@@ -1175,15 +1175,15 @@
                                     {{ $transaction->customer->name }}
                                     @if($isDirty)
                                         <span class="room-status-badge dirty">
-                                            <i class="fas fa-broom"></i> Sale
+                                            <i class="fas fa-broom"></i> {{ __('checkin.room_dirty') }}
                                         </span>
                                     @elseif($isCleaning)
                                         <span class="room-status-badge cleaning">
-                                            <i class="fas fa-spinner fa-spin"></i> Nettoyage
+                                            <i class="fas fa-spinner fa-spin"></i> {{ __('checkin.room_cleaning') }}
                                         </span>
                                     @elseif($isAvailable)
                                         <span class="room-status-badge clean">
-                                            <i class="fas fa-check-circle"></i> Prête
+                                            <i class="fas fa-check-circle"></i> {{ __('checkin.room_ready') }}
                                         </span>
                                     @endif
                                 </div>
@@ -1200,13 +1200,13 @@
 
                             <div class="res-time">
                                 <span class="res-time-val">12:00</span>
-                                <span class="res-time-label">Arrivée</span>
+                                <span class="res-time-label">{{ __('checkin.arrival_label') }}</span>
                                 @if($checkinFuture)
                                     <div class="date-indicator di-upcoming">J-{{ $now->diffInDays($checkInDate) }}</div>
                                 @elseif($checkinTooEarly)
-                                    <div class="date-indicator di-waiting">Attente 12h</div>
+                                    <div class="date-indicator di-waiting">{{ __('checkin.waiting_12h') }}</div>
                                 @elseif($isUrgent)
-                                    <div class="date-indicator di-urgent">⚠️ Urgent</div>
+                                    <div class="date-indicator di-urgent">{{ __('checkin.urgent') }}</div>
                                 @endif
                             </div>
 
@@ -1219,35 +1219,35 @@
                                 @if($canCheckin)
                                     <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
                                         @csrf
-                                        <button type="submit" class="btn-res btn-res-checkin" onclick="return confirm('Confirmer l\'arrivée de {{ $transaction->customer->name }} ?')">
-                                            <i class="fas fa-door-open"></i> Check-in
+                                        <button type="submit" class="btn-res btn-res-checkin" onclick="return confirm('{{ __('checkin.confirm_arrival', ['name' => $transaction->customer->name]) }}')">
+                                            <i class="fas fa-door-open"></i> {{ __('checkin.checkin_button') }}
                                         </button>
                                     </form>
                                 @elseif($isUrgent)
                                     <button onclick="notifyHousekeeping({{ $room->id }}, this)" class="btn-res btn-res-notify">
-                                        <i class="fas fa-bell"></i> Notifier
+                                        <i class="fas fa-bell"></i> {{ __('checkin.notify') }}
                                     </button>
-                                    <a href="{{ route('checkin.show', $transaction) }}" class="btn-res btn-res-view" title="Voir détails">
+                                    <a href="{{ route('checkin.show', $transaction) }}" class="btn-res btn-res-view" title="{{ __('checkin.view_details') }}">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 @elseif($isCleaning && $isToday)
                                     <span class="btn-res btn-res-disabled" style="background:#17a2b8;color:white;">
-                                        <i class="fas fa-spinner fa-spin"></i> Nettoyage
+                                        <i class="fas fa-spinner fa-spin"></i> {{ __('checkin.room_cleaning') }}
                                     </span>
                                     <a href="{{ route('checkin.show', $transaction) }}" class="btn-res btn-res-view">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 @elseif($checkinTooEarly)
-                                    <span class="btn-res btn-res-checkin btn-res-disabled" title="Check-in possible à partir de 12h">
-                                        <i class="fas fa-clock"></i> Check-in
+                                    <span class="btn-res btn-res-checkin btn-res-disabled" title="{{ __('checkin.checkin_button') }} - 12h">
+                                        <i class="fas fa-clock"></i> {{ __('checkin.checkin_button') }}
                                     </span>
                                 @elseif($checkinFuture)
-                                    <span class="btn-res btn-res-checkin btn-res-disabled" title="Arrivée prévue le {{ $checkInDate->format('d/m/Y') }}">
-                                        <i class="fas fa-calendar"></i> Check-in
+                                    <span class="btn-res btn-res-checkin btn-res-disabled" title="{{ __('checkin.arrival_label') }} {{ $checkInDate->format('d/m/Y') }}">
+                                        <i class="fas fa-calendar"></i> {{ __('checkin.checkin_button') }}
                                     </span>
                                 @else
                                     <a href="{{ route('checkin.show', $transaction) }}" class="btn-res btn-res-view">
-                                        <i class="fas fa-eye"></i> Voir
+                                        <i class="fas fa-eye"></i> {{ __('checkin.view_details') }}
                                     </a>
                                 @endif
                                 
@@ -1264,7 +1264,7 @@
 
                     <div class="ci-card-footer">
                         <a href="{{ route('transaction.index') }}?status=reservation" class="btn-ci-footer">
-                            <i class="fas fa-list fa-xs"></i> Voir toutes les réservations
+                            <i class="fas fa-list fa-xs"></i> {{ __('checkin.see_all_reservations') }}
                         </a>
                     </div>
                 @endif
@@ -1279,15 +1279,15 @@
                 <div class="ci-card-header">
                     <h3 class="ci-card-title">
                         <i class="fas fa-users"></i>
-                        Dans l'hôtel
+                        {{ __('checkin.guests_in_hotel_title') }}
                     </h3>
-                    <span class="ci-card-badge">{{ $activeGuests->count() }} client{{ $activeGuests->count() > 1 ? 's' : '' }}</span>
+                    <span class="ci-card-badge">{{ __('checkin.guests_count', ['count' => $activeGuests->count()]) }}</span>
                 </div>
 
                 @if($activeGuests->isEmpty())
                 <div class="ci-empty" style="padding: 32px 20px;">
                     <div class="ci-empty-icon" style="width:56px;height:56px;font-size:1.4rem;"><i class="fas fa-users-slash"></i></div>
-                    <p class="ci-empty-title" style="font-size:.85rem;">Aucun client en ce moment</p>
+                    <p class="ci-empty-title" style="font-size:.85rem;">{{ __('checkin.no_guests_now') }}</p>
                 </div>
                 @else
                     @foreach($activeGuests as $transaction)
@@ -1331,32 +1331,32 @@
                         <div class="guest-card-footer">
                             <div class="guest-card-departure">
                                 <i class="fas fa-calendar-minus" style="color:var(--g400);"></i>
-                                Départ {{ $transaction->check_out->format('d/m') }} à 12h00
+                                {{ __('checkin.departure_label', ['date' => $transaction->check_out->format('d/m')]) }}
                                 @if($isInLargess)
-                                    <span class="tag-largesse"><i class="fas fa-gift fa-xs"></i> largesse</span>
+                                    <span class="tag-largesse"><i class="fas fa-gift fa-xs"></i> {{ __('checkin.largesse') }}</span>
                                 @endif
                                 @if($isLate)
-                                    <span class="tag-urgent"><i class="fas fa-exclamation-triangle fa-xs"></i> Dépassé</span>
+                                    <span class="tag-urgent"><i class="fas fa-exclamation-triangle fa-xs"></i> {{ __('checkin.overdue') }}</span>
                                 @endif
                             </div>
                             <div class="guest-card-actions">
-                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-ghost-sm" title="Voir détails">
+                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-ghost-sm" title="{{ __('checkin.view_details') }}">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 @if(!$isFullyPaid)
-                                <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-ghost-sm" title="Paiement">
+                                <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-ghost-sm" title="{{ __('checkin.pay_button') }}">
                                     <i class="fas fa-money-bill-wave-alt"></i>
                                 </a>
                                 @endif
                                 @if($canCheckout)
                                 <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="btn-ghost-sm" title="Check-out (largesse)" onclick="return confirm('Confirmer le départ de {{ $transaction->customer->name }} ?')">
+                                    <button type="submit" class="btn-ghost-sm" title="{{ __('checkin.departure_label', ['date' => $transaction->check_out->format('d/m')]) }}" onclick="return confirm('{{ __('checkin.confirm_departure') }}')">
                                         <i class="fas fa-sign-out-alt"></i>
                                     </button>
                                 </form>
                                 @elseif($isLate)
-                                <span class="btn-ghost-sm" style="opacity:0.5;cursor:not-allowed;background:var(--g50);" title="Départ après 14h - Prolongation nécessaire">
+                                <span class="btn-ghost-sm" style="opacity:0.5;cursor:not-allowed;background:var(--g50);" title="{{ __('checkin.overdue') }}">
                                     <i class="fas fa-hourglass-end"></i>
                                 </span>
                                 @else
@@ -1373,7 +1373,7 @@
                 @if($activeGuests->isNotEmpty())
                 <div class="ci-card-footer">
                     <a href="{{ route('transaction.index') }}?status=active" class="btn-ci-footer">
-                        <i class="fas fa-list fa-xs"></i> Voir tous les séjours
+                        <i class="fas fa-list fa-xs"></i> {{ __('checkin.see_all_stays') }}
                     </a>
                 </div>
                 @endif
@@ -1385,7 +1385,7 @@
                 <div class="ci-card-header warning">
                     <h3 class="ci-card-title">
                         <i class="fas fa-broom" style="color:#856404;"></i>
-                        Urgences nettoyage
+                        {{ __('checkin.cleaning_urgencies') }}
                     </h3>
                     <span class="ci-card-badge" style="background:#ffc107;color:#856404;">{{ $urgentCleanings->count() }}</span>
                 </div>
@@ -1395,7 +1395,7 @@
                     <div class="dep-row-info">
                         <div class="dep-row-name">
                             {{ $urgent['customer_name'] }}
-                            <span class="badge bg-warning ms-2">Arrivée {{ $urgent['arrival_time_formatted'] }}</span>
+                            <span class="badge bg-warning ms-2">{{ __('checkin.arrival_label') }} {{ $urgent['arrival_time_formatted'] }}</span>
                         </div>
                         <div class="dep-row-room">
                             <i class="fas fa-door-closed"></i>
@@ -1405,7 +1405,7 @@
                     <div class="dep-row-right">
                         <div class="dep-actions">
                             <button onclick="notifyHousekeeping({{ $urgent['room_id'] }}, this)" class="btn-dep-checkout" style="background:#ffc107;color:#856404;border-color:#ffc107;">
-                                <i class="fas fa-bell"></i> Notifier
+                                <i class="fas fa-bell"></i> {{ __('checkin.notify') }}
                             </button>
                             <a href="{{ route('checkin.show', $urgent['reservation_id']) }}" class="btn-dep-invoice">
                                 <i class="fas fa-eye"></i>
@@ -1417,7 +1417,7 @@
 
                 <div class="ci-card-footer">
                     <a href="{{ route('housekeeping.index') }}" class="btn-ci-footer">
-                        <i class="fas fa-broom fa-xs"></i> Voir housekeeping
+                        <i class="fas fa-broom fa-xs"></i> {{ __('checkin.view_housekeeping') }}
                     </a>
                 </div>
             </div>
@@ -1428,7 +1428,7 @@
                 <div class="ci-card-header">
                     <h3 class="ci-card-title">
                         <i class="fas fa-sign-out-alt"></i>
-                        Départs aujourd'hui
+                        {{ __('checkin.departures_title') }}
                     </h3>
                     <span class="ci-card-badge">{{ $todayDepartures->count() }}</span>
                 </div>
@@ -1438,7 +1438,7 @@
                     <div class="ci-empty-icon" style="width:56px;height:56px;font-size:1.4rem;background:var(--g50);color:var(--g400);">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <p class="ci-empty-title" style="font-size:.85rem;">Aucun départ prévu</p>
+                    <p class="ci-empty-title" style="font-size:.85rem;">{{ __('checkin.no_departures_planned') }}</p>
                 </div>
                 @else
                     @foreach($todayDepartures as $transaction)
@@ -1462,7 +1462,7 @@
                                 <i class="fas fa-door-closed"></i>
                                 Chambre {{ $transaction->room->number }}
                                 @if(!$isFullyPaid)
-                                <span class="badge badge-danger" style="background:#fee2e2;color:#b91c1c;padding:2px 6px;border-radius:4px;font-size:.6rem;margin-left:5px;">Impayé</span>
+                                <span class="badge badge-danger" style="background:#fee2e2;color:#b91c1c;padding:2px 6px;border-radius:4px;font-size:.6rem;margin-left:5px;">{{ __('checkin.unpaid') }}</span>
                                 @endif
                             </div>
                         </div>
@@ -1475,16 +1475,16 @@
                                 @if($canCheckout)
                                 <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="btn-dep-checkout" onclick="return confirm('Confirmer le départ ?')">
-                                        <i class="fas fa-sign-out-alt"></i> Out
+                                    <button type="submit" class="btn-dep-checkout" onclick="return confirm('{{ __('checkin.confirm_departure') }}')">
+                                        <i class="fas fa-sign-out-alt"></i> {{ __('checkin.out_button') }}
                                     </button>
                                 </form>
                                 @elseif($isLate && $isFullyPaid)
                                 <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
                                     @csrf
                                     <input type="hidden" name="override" value="1">
-                                    <button type="submit" class="btn-dep-checkout btn-dep-checkout-late" onclick="return confirm('Dérogation après 14h ? Confirmer le départ ?')">
-                                        <i class="fas fa-gavel"></i> Dérog.
+                                    <button type="submit" class="btn-dep-checkout btn-dep-checkout-late" onclick="return confirm('{{ __('checkin.override_after_14h') }}')">
+                                        <i class="fas fa-gavel"></i> {{ __('checkin.override_button') }}
                                     </button>
                                 </form>
                                 @elseif(!$isFullyPaid)
@@ -1503,7 +1503,7 @@
 
                     <div class="ci-card-footer">
                         <a href="{{ route('transaction.index') }}?check_out={{ $today->format('Y-m-d') }}" class="btn-ci-footer">
-                            <i class="fas fa-door-open fa-xs"></i> Gérer tous les départs
+                            <i class="fas fa-door-open fa-xs"></i> {{ __('checkin.manage_all_departures') }}
                         </a>
                     </div>
                 @endif
@@ -1538,7 +1538,7 @@ function showToast(msg, type = 'success') {
 
 /* ── Quick check-in (rapide) ───────────────────── */
 function quickCheckIn(id, btn) {
-    if (!confirm('Effectuer un check-in rapide ?')) return;
+    if (!confirm('{{ __('checkin.quick_checkin_confirm') }}')) return;
 
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -1555,16 +1555,16 @@ function quickCheckIn(id, btn) {
     .then(r => r.json())
     .then(data => {
         if (data.success) {
-            showToast(data.message || 'Check-in effectué avec succès !');
+            showToast(data.message || '{{ __('checkin.checkin_success') }}');
             setTimeout(() => location.reload(), 1600);
         } else {
-            showToast(data.error || 'Échec du check-in', 'error');
+            showToast(data.error || '{{ __('checkin.checkin_failed') }}', 'error');
             btn.innerHTML = orig;
             btn.disabled = false;
         }
     })
     .catch(() => {
-        showToast('Une erreur est survenue', 'error');
+        showToast('{{ __('checkin.error_occurred') }}', 'error');
         btn.innerHTML = orig;
         btn.disabled = false;
     });
@@ -1572,12 +1572,12 @@ function quickCheckIn(id, btn) {
 
 /* ── Notifier housekeeping ─────────────────────── */
 function notifyHousekeeping(roomId, btn) {
-    if (!confirm('Notifier l\'équipe housekeeping pour nettoyage urgent ?')) return;
+    if (!confirm('{{ __('checkin.notify_housekeeping_confirm') }}')) return;
 
     const orig = btn.innerHTML;
     const origClass = btn.className;
     
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Envoi...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __('checkin.sending') }}';
     btn.disabled = true;
 
     fetch(`/checkin/notify-housekeeping/${roomId}`, {
@@ -1592,13 +1592,13 @@ function notifyHousekeeping(roomId, btn) {
     .then(data => {
         if (data.success) {
             showToast('✅ ' + data.message, 'success');
-            btn.innerHTML = '<i class="fas fa-check"></i> Notifié';
+            btn.innerHTML = '<i class="fas fa-check"></i> {{ __('checkin.notified') }}';
             btn.classList.remove('btn-res-notify');
             btn.classList.add('btn-res-notified');
             
             // Réinitialiser après 3 secondes
             setTimeout(() => {
-                btn.innerHTML = '<i class="fas fa-bell"></i> Notifier';
+                btn.innerHTML = '<i class="fas fa-bell"></i> {{ __('checkin.notify') }}';
                 btn.classList.remove('btn-res-notified');
                 btn.classList.add('btn-res-notify');
                 btn.disabled = false;
@@ -1610,7 +1610,7 @@ function notifyHousekeeping(roomId, btn) {
         }
     })
     .catch(() => {
-        showToast('❌ Erreur lors de la notification', 'error');
+        showToast('❌ {{ __('checkin.notify_error') }}', 'error');
         btn.innerHTML = orig;
         btn.disabled = false;
     });

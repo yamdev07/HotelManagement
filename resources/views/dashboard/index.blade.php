@@ -703,7 +703,7 @@
                         <div class="date-card-row">
                             <span class="date-card-row-label">
                                 <span class="row-ico"><i class="fas fa-sign-in-alt fa-xs"></i></span>
-                                Arrivées
+                                {{ __('dashboard.arrivals') }}
                             </span>
                             <span class="date-card-row-val">{{ $stats['tomorrowArrivals'] ?? 0 }}</span>
                         </div>
@@ -726,7 +726,7 @@
                         <div class="date-card-row">
                             <span class="date-card-row-label">
                                 <span class="row-ico"><i class="fas fa-sign-in-alt fa-xs"></i></span>
-                                Arrivées
+                                {{ __('dashboard.arrivals') }}
                             </span>
                             <span class="date-card-row-val">{{ $stats['day2Arrivals'] ?? 0 }}</span>
                         </div>
