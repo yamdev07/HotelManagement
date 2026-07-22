@@ -1,12 +1,12 @@
 @extends('template.master')
-@section('title', 'Compte Séjour – Chambre ' . $transaction->room->number)
+@section('title', __('compte-sejour.page_title', ['room' => $transaction->room->number]))
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <h3 class="mb-0">
             <i class="fas fa-receipt me-2 text-success"></i>
-            Compte Séjour · Chambre {{ $transaction->room->number }}
+            {{ __('compte-sejour.page_heading', ['room' => $transaction->room->number]) }}
         </h3>
         <small class="text-muted">
             {{ $transaction->customer->name }} &bull;
@@ -16,11 +16,11 @@
     </div>
     <div class="d-flex gap-2">
         <a href="{{ route('transaction.show', $transaction) }}" class="btn btn-outline-secondary btn-sm">
-            <i class="fas fa-arrow-left me-1"></i> Retour
+            <i class="fas fa-arrow-left me-1"></i> {{ __('compte-sejour.back') }}
         </a>
         @if($transaction->payments()->exists())
         <a href="{{ route('transaction.invoice', $transaction) }}" class="btn btn-success btn-sm">
-            <i class="fas fa-file-invoice me-1"></i> Facture finale
+            <i class="fas fa-file-invoice me-1"></i> {{ __('compte-sejour.final_invoice') }}
         </a>
         @endif
     </div>
@@ -32,9 +32,9 @@
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body text-center">
                 <i class="fas fa-bed fa-2x text-primary mb-2"></i>
-                <div class="text-muted small">Chambre</div>
+                <div class="text-muted small">{{ __('compte-sejour.room') }}</div>
                 <div class="fw-bold fs-5">{{ number_format($roomSubtotal, 0, ',', ' ') }} CFA</div>
-                <small class="text-muted">{{ $transaction->nights }} nuit(s)</small>
+                <small class="text-muted">{{ __('compte-sejour.nights_count', ['count' => $transaction->nights]) }}</small>
             </div>
         </div>
     </div>
@@ -42,9 +42,9 @@
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body text-center">
                 <i class="fas fa-utensils fa-2x text-warning mb-2"></i>
-                <div class="text-muted small">Restaurant</div>
+                <div class="text-muted small">{{ __('compte-sejour.restaurant') }}</div>
                 <div class="fw-bold fs-5">{{ number_format($restaurantTotal, 0, ',', ' ') }} CFA</div>
-                <small class="text-muted">{{ $transaction->restaurantOrders->whereNotIn('status', ['paid','cancelled'])->count() }} commande(s)</small>
+                <small class="text-muted">{{ __('compte-sejour.orders_count', ['count' => $transaction->restaurantOrders->whereNotIn('status', ['paid','cancelled'])->count()]) }}</small>
             </div>
         </div>
     </div>
@@ -52,9 +52,9 @@
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body text-center">
                 <i class="fas fa-concierge-bell fa-2x text-info mb-2"></i>
-                <div class="text-muted small">Extras</div>
+                <div class="text-muted small">{{ __('compte-sejour.extras') }}</div>
                 <div class="fw-bold fs-5">{{ number_format($extrasTotal, 0, ',', ' ') }} CFA</div>
-                <small class="text-muted">{{ $transaction->extras->count() }} article(s)</small>
+                <small class="text-muted">{{ __('compte-sejour.articles_count', ['count' => $transaction->extras->count()]) }}</small>
             </div>
         </div>
     </div>
@@ -62,13 +62,13 @@
         <div class="card border-0 shadow-sm h-100 border-start border-4 border-success">
             <div class="card-body text-center">
                 <i class="fas fa-receipt fa-2x text-success mb-2"></i>
-                <div class="text-muted small">Total à payer</div>
+                <div class="text-muted small">{{ __('compte-sejour.total_to_pay') }}</div>
                 <div class="fw-bold fs-4 text-success">{{ number_format($grandTotal, 0, ',', ' ') }} CFA</div>
                 <small class="{{ $remaining > 0 ? 'text-danger' : 'text-success' }}">
                     @if($remaining > 0)
-                        Reste : {{ number_format($remaining, 0, ',', ' ') }} CFA
+                        {{ __('compte-sejour.remaining', ['amount' => number_format($remaining, 0, ',', ' ')]) }}
                     @else
-                        <i class="fas fa-check-circle"></i> Soldé
+                        <i class="fas fa-check-circle"></i> {{ __('compte-sejour.paid') }}
                     @endif
                 </small>
             </div>
@@ -85,20 +85,20 @@
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-header bg-primary text-white d-flex align-items-center">
                 <i class="fas fa-bed me-2"></i>
-                <strong>Chambre {{ $transaction->room->number }}</strong>
+                <strong>{{ __('compte-sejour.room_section_title', ['room' => $transaction->room->number]) }}</strong>
                 <span class="ms-auto badge bg-white text-primary">{{ $transaction->room->type->name ?? 'Standard' }}</span>
             </div>
             <div class="card-body p-0">
                 <table class="table table-sm mb-0">
                     <tbody>
                         <tr>
-                            <td>Nuitée × {{ $transaction->nights }}</td>
-                            <td class="text-end">{{ number_format($transaction->room->price, 0, ',', ' ') }} CFA / nuit</td>
+                            <td>{{ __('compte-sejour.night_x_count', ['count' => $transaction->nights]) }}</td>
+                            <td class="text-end">{{ __('compte-sejour.price_per_night', ['price' => number_format($transaction->room->price, 0, ',', ' ')]) }}</td>
                             <td class="text-end fw-bold">{{ number_format($roomSubtotal, 0, ',', ' ') }} CFA</td>
                         </tr>
                         @if($transaction->late_checkout && $transaction->late_checkout_fee > 0)
                         <tr class="table-warning">
-                            <td colspan="2">Late checkout</td>
+                            <td colspan="2">{{ __('compte-sejour.late_checkout') }}</td>
                             <td class="text-end fw-bold">+ {{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} CFA</td>
                         </tr>
                         @endif
@@ -111,7 +111,7 @@
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-header bg-warning text-dark d-flex align-items-center">
                 <i class="fas fa-utensils me-2"></i>
-                <strong>Commandes Restaurant</strong>
+                <strong>{{ __('compte-sejour.restaurant_orders') }}</strong>
                 <span class="ms-auto badge bg-white text-warning">{{ number_format($restaurantTotal, 0, ',', ' ') }} CFA</span>
             </div>
             <div class="card-body p-0">
@@ -119,7 +119,7 @@
                 <div class="border-bottom px-3 py-2">
                     <div class="d-flex justify-content-between align-items-center">
                         <small class="text-muted">
-                            Commande #{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}
+                            {{ __('compte-sejour.order_number', ['number' => str_pad($order->id, 5, '0', STR_PAD_LEFT)]) }}
                             &bull; {{ $order->created_at->format('d/m H:i') }}
                         </small>
                         <span class="badge bg-{{ $order->status === 'delivered' ? 'success' : 'secondary' }}">{{ $order->status }}</span>
@@ -137,7 +137,7 @@
                 @empty
                 <div class="text-center text-muted py-3">
                     <i class="fas fa-utensils mb-1 d-block"></i>
-                    Aucune commande restaurant sur ce séjour
+                    {{ __('compte-sejour.no_restaurant_orders') }}
                 </div>
                 @endforelse
             </div>
@@ -147,7 +147,7 @@
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-header bg-info text-white d-flex align-items-center">
                 <i class="fas fa-concierge-bell me-2"></i>
-                <strong>Extras (minibar, lessive, services…)</strong>
+                <strong>{{ __('compte-sejour.extras_title') }}</strong>
                 <span class="ms-auto badge bg-white text-info">{{ number_format($extrasTotal, 0, ',', ' ') }} CFA</span>
             </div>
             <div class="card-body p-0">
@@ -167,7 +167,7 @@
                         <form method="POST" action="{{ route('transaction.extras.destroy', [$transaction, $extra]) }}" class="d-inline">
                             @csrf @method('DELETE')
                             <button type="submit" class="btn btn-sm btn-outline-danger py-0"
-                                onclick="return confirm('Supprimer cet extra ?')">
+                                onclick="return confirm('{{ __('compte-sejour.delete_extra_confirm') }}')">
                                 <i class="fas fa-times"></i>
                             </button>
                         </form>
@@ -177,7 +177,7 @@
                 @empty
                 <div class="text-center text-muted py-3">
                     <i class="fas fa-concierge-bell mb-1 d-block"></i>
-                    Aucun extra enregistré
+                    {{ __('compte-sejour.no_extras') }}
                 </div>
                 @endforelse
             </div>
@@ -189,33 +189,33 @@
                 <table class="table table-sm mb-0">
                     <tbody>
                         <tr>
-                            <td class="text-muted">Chambre</td>
+                            <td class="text-muted">{{ __('compte-sejour.room') }}</td>
                             <td class="text-end">{{ number_format($roomSubtotal, 0, ',', ' ') }} CFA</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">Restaurant</td>
+                            <td class="text-muted">{{ __('compte-sejour.restaurant') }}</td>
                             <td class="text-end">{{ number_format($restaurantTotal, 0, ',', ' ') }} CFA</td>
                         </tr>
                         <tr>
-                            <td class="text-muted">Extras</td>
+                            <td class="text-muted">{{ __('compte-sejour.extras') }}</td>
                             <td class="text-end">{{ number_format($extrasTotal, 0, ',', ' ') }} CFA</td>
                         </tr>
                         @if($transaction->late_checkout && $transaction->late_checkout_fee > 0)
                         <tr>
-                            <td class="text-muted">Late checkout</td>
+                            <td class="text-muted">{{ __('compte-sejour.late_checkout') }}</td>
                             <td class="text-end">{{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} CFA</td>
                         </tr>
                         @endif
                         <tr class="border-top">
-                            <td class="fw-bold fs-5">TOTAL FACTURE</td>
+                            <td class="fw-bold fs-5">{{ __('compte-sejour.total_invoice') }}</td>
                             <td class="text-end fw-bold fs-5 text-success">{{ number_format($grandTotal, 0, ',', ' ') }} CFA</td>
                         </tr>
                         <tr class="text-muted">
-                            <td>Déjà payé</td>
+                            <td>{{ __('compte-sejour.already_paid') }}</td>
                             <td class="text-end">− {{ number_format($totalPaid, 0, ',', ' ') }} CFA</td>
                         </tr>
                         <tr>
-                            <td class="fw-bold {{ $remaining > 0 ? 'text-danger' : 'text-success' }}">Reste à payer</td>
+                            <td class="fw-bold {{ $remaining > 0 ? 'text-danger' : 'text-success' }}">{{ __('compte-sejour.remaining_to_pay') }}</td>
                             <td class="text-end fw-bold {{ $remaining > 0 ? 'text-danger' : 'text-success' }}">
                                 {{ number_format($remaining, 0, ',', ' ') }} CFA
                             </td>
@@ -232,13 +232,13 @@
         {{-- Ajouter un extra --}}
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-header bg-dark text-white">
-                <i class="fas fa-plus me-2"></i><strong>Ajouter un extra</strong>
+                <i class="fas fa-plus me-2"></i><strong>{{ __('compte-sejour.add_extra') }}</strong>
             </div>
             <div class="card-body">
                 <form method="POST" action="{{ route('transaction.extras.store', $transaction) }}">
                     @csrf
                     <div class="mb-2">
-                        <label class="form-label form-label-sm">Catégorie</label>
+                        <label class="form-label form-label-sm">{{ __('compte-sejour.category') }}</label>
                         <select name="category" class="form-select form-select-sm" required>
                             @foreach($extraCategories as $key => $label)
                             <option value="{{ $key }}">{{ $label }}</option>
@@ -246,24 +246,24 @@
                         </select>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label form-label-sm">Description</label>
+                        <label class="form-label form-label-sm">{{ __('compte-sejour.description') }}</label>
                         <input type="text" name="description" class="form-control form-control-sm"
-                            placeholder="Ex: Coca-Cola, Lessive chemise…" required>
+                            placeholder="{{ __('compte-sejour.description_placeholder') }}" required>
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-7">
-                            <label class="form-label form-label-sm">Prix unitaire (CFA)</label>
+                            <label class="form-label form-label-sm">{{ __('compte-sejour.unit_price') }}</label>
                             <input type="number" name="amount" class="form-control form-control-sm"
                                 min="0" step="50" required>
                         </div>
                         <div class="col-5">
-                            <label class="form-label form-label-sm">Qté</label>
+                            <label class="form-label form-label-sm">{{ __('compte-sejour.quantity') }}</label>
                             <input type="number" name="quantity" class="form-control form-control-sm"
                                 min="1" value="1" required>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-success btn-sm w-100">
-                        <i class="fas fa-plus me-1"></i> Ajouter à la facture
+                        <i class="fas fa-plus me-1"></i> {{ __('compte-sejour.add_to_invoice') }}
                     </button>
                 </form>
             </div>
@@ -272,7 +272,7 @@
         {{-- Informations client --}}
         <div class="card border-0 shadow-sm mb-3">
             <div class="card-header bg-light">
-                <i class="fas fa-user me-2"></i><strong>Client</strong>
+                <i class="fas fa-user me-2"></i><strong>{{ __('compte-sejour.customer') }}</strong>
             </div>
             <div class="card-body small">
                 <div><strong>{{ $transaction->customer->name }}</strong></div>
@@ -280,7 +280,7 @@
                 <div class="text-muted">{{ $transaction->customer->email ?? '·' }}</div>
                 <div class="text-muted">{{ $transaction->customer->nationality ?? '' }}</div>
                 @if($transaction->person_count > 1)
-                <div class="mt-1"><i class="fas fa-users text-muted me-1"></i>{{ $transaction->person_count }} personnes</div>
+                <div class="mt-1"><i class="fas fa-users text-muted me-1"></i>{{ __('compte-sejour.persons_count', ['count' => $transaction->person_count]) }}</div>
                 @endif
             </div>
         </div>
@@ -288,20 +288,20 @@
         {{-- Paiement rapide --}}
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-light">
-                <i class="fas fa-cash-register me-2"></i><strong>Paiement</strong>
+                <i class="fas fa-cash-register me-2"></i><strong>{{ __('compte-sejour.payment') }}</strong>
             </div>
             <div class="card-body text-center">
                 @if($remaining > 0)
-                <p class="text-danger mb-2 small">Solde restant : <strong>{{ number_format($remaining, 0, ',', ' ') }} CFA</strong></p>
+                <p class="text-danger mb-2 small">{{ __('compte-sejour.remaining_balance', ['amount' => number_format($remaining, 0, ',', ' ')]) }}</p>
                 <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn btn-success btn-sm w-100 mb-2">
-                    <i class="fas fa-credit-card me-1"></i> Enregistrer un paiement
+                    <i class="fas fa-credit-card me-1"></i> {{ __('compte-sejour.record_payment') }}
                 </a>
                 @else
-                <p class="text-success mb-2 small"><i class="fas fa-check-circle me-1"></i> Compte soldé</p>
+                <p class="text-success mb-2 small"><i class="fas fa-check-circle me-1"></i> {{ __('compte-sejour.account_paid') }}</p>
                 @endif
                 @if($transaction->payments()->exists())
                 <a href="{{ route('transaction.invoice', $transaction) }}" class="btn btn-outline-success btn-sm w-100">
-                    <i class="fas fa-file-pdf me-1"></i> Voir la facture
+                    <i class="fas fa-file-pdf me-1"></i> {{ __('compte-sejour.view_invoice') }}
                 </a>
                 @endif
             </div>
