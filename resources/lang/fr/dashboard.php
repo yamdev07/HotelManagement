@@ -1,0 +1,103 @@
+<?php
+
+return [
+    // Header
+    'greeting' => 'Bonjour',
+    'overview' => 'Vue d\'ensemble des opérations',
+    'website' => 'Site web',
+
+    // Stat cards
+    'today_badge' => 'Aujourd\'hui',
+    'active_guests' => 'Clients actifs',
+    'new_arrivals' => ':count nouvelle(s) arrivée(s)',
+    'completed_badge' => 'Terminé',
+    'checkouts_today' => 'Check-outs aujourd\'hui',
+    'payments_settled' => 'Paiements soldés',
+    'attention_badge' => 'Attention',
+    'pending_payments' => 'Paiements en attente',
+    'follow_up_required' => 'Suivi requis',
+    'urgent_badge' => 'Urgent',
+    'due_under_24h' => 'Échéance < 24h',
+    'immediate_action' => 'Action immédiate',
+
+    // Arrivals & departures panel
+    'arrivals_departures' => 'Arrivées & Départs',
+    'forecast' => 'Prévisions',
+    'today' => 'Aujourd\'hui',
+    'tomorrow' => 'Demain',
+    'day_2' => 'J+2',
+    'arrivals' => 'Arrivées',
+    'departures' => 'Départs',
+    'room_occupancy' => 'Occupation des chambres',
+    'free_rooms' => 'Chambres libres',
+    'vacant' => 'Vacant',
+    'out_of_rooms' => 'sur :count chambres',
+    'occupied_rooms' => 'Chambres occupées',
+    'occupied' => 'Occupé',
+    'right_now' => 'en ce moment',
+    'occupancy_rate' => 'Taux d\'occupation',
+
+    // Active guests table
+    'active_guests_title' => 'Clients actifs',
+    'guests_count' => ':count client(s) en ce moment',
+    'refresh' => 'Actualiser',
+    'filter' => 'Filtrer',
+    'filter_active_only' => 'Actifs seulement',
+    'filter_reservations' => 'Réservations',
+    'filter_pending_payments' => 'Paiements en attente',
+    'filter_today' => 'Aujourd\'hui',
+    'filter_tomorrow' => 'Demain',
+    'filter_this_week' => 'Cette semaine',
+    'filter_all_dates' => 'Toutes les dates',
+    'new_client' => 'Nouveau client',
+    'col_guest' => 'Client',
+    'col_room' => 'Chambre',
+    'col_dates' => 'Dates',
+    'col_balance' => 'Solde',
+    'col_actions' => 'Actions',
+    'new_tag' => 'Nouveau',
+    'departure_today' => 'Départ aujourd\'hui',
+    'settled' => 'Soldé',
+    'total_label' => 'Total : :amount',
+    'collect' => 'Encaisser',
+    'edit' => 'Modifier',
+    'invoice' => 'Facture',
+    'cancel' => 'Annuler',
+    'no_active_guests' => 'Aucun client actif',
+    'no_guests_recorded' => 'Aucun client enregistré pour le moment',
+    'add_guest' => 'Ajouter un client',
+
+    // Quick check-in sidebar
+    'quick_checkin' => 'Check-in rapide',
+    'check_existing' => 'Vérifier une réservation existante',
+    'search_placeholder' => 'Nom, chambre, ID…',
+    'all_arrivals' => 'Toutes les arrivées',
+    'direct_checkin' => 'Check-in direct',
+
+    // Quick actions
+    'quick_actions' => 'Actions rapides',
+    'manage_rooms' => 'Gérer les chambres',
+    'guests_link' => 'Clients',
+    'checkin_dashboard' => 'Dashboard check-in',
+    'payments_link' => 'Paiements',
+    'reports_link' => 'Rapports',
+    'cashier_link' => 'Caisse',
+    'visit_website' => 'Visiter le site',
+
+    // System status
+    'system_status' => 'Statut système',
+    'last_updated' => 'Dernière mise à jour',
+    'active_sessions' => 'Sessions actives',
+    'database' => 'Base de données',
+    'online' => 'En ligne',
+    'memory' => 'Mémoire',
+    'normal' => 'Normal',
+    'refresh_dashboard' => 'Actualiser le dashboard',
+
+    // SweetAlert
+    'cancel_reservation_title' => 'Annuler la réservation ?',
+    'cancel_reservation_text' => 'Annuler la réservation de <strong>:name</strong>.<br><small style="color:#9ba09b">Cette action est irréversible.</small>',
+    'confirm_cancel' => 'Oui, annuler',
+    'keep_reservation' => 'Conserver',
+    'loading' => 'Chargement…',
+];
