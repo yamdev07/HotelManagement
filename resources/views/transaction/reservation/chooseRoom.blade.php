@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Choix de la chambre')
+@section('title', __('reservation.step3_page_title'))
 @section('content')
 
 <style>
@@ -377,11 +377,11 @@
     <div class="choose-breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.createIdentity') }}">Création client</a>
+        <a href="{{ route('transaction.reservation.createIdentity') }}">{{ __('reservation.step_identity') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.viewCountPerson', $customer->id) }}">Dates</a>
+        <a href="{{ route('transaction.reservation.viewCountPerson', $customer->id) }}">{{ __('reservation.step_dates') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Choix chambre</span>
+        <span class="current">{{ __('reservation.step3_breadcrumb_room') }}</span>
     </div>
 
     <!-- Header -->
@@ -389,15 +389,15 @@
         <div class="choose-brand">
             <div class="choose-brand-icon"><i class="fas fa-bed"></i></div>
             <div>
-                <h1 class="choose-header-title">Choix de la <em>chambre</em></h1>
+                <h1 class="choose-header-title">{!! __('reservation.step3_title_1') !!}</h1>
                 <p class="choose-header-sub">
-                    <i class="fas fa-door-open me-1"></i> Étape 3/4 · Sélection de la chambre
+                    <i class="fas fa-door-open me-1"></i> {{ __('reservation.step3_subtitle') }}
                 </p>
             </div>
         </div>
         <div class="choose-header-actions">
             <a href="{{ route('transaction.reservation.viewCountPerson', $customer->id) }}?check_in={{ request()->input('check_in') }}&check_out={{ request()->input('check_out') }}&count_person={{ request()->input('count_person') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-arrow-left me-2"></i> Retour
+                <i class="fas fa-arrow-left me-2"></i> {{ __('reservation.back') }}
             </a>
         </div>
     </div>
@@ -407,19 +407,19 @@
         <div class="progress-steps">
             <div class="progress-step step-completed">
                 <div class="step-circle"><i class="fas fa-check"></i></div>
-                <div class="step-label">Identité</div>
+                <div class="step-label">{{ __('reservation.step_identity') }}</div>
             </div>
             <div class="progress-step step-completed">
                 <div class="step-circle"><i class="fas fa-check"></i></div>
-                <div class="step-label">Dates</div>
+                <div class="step-label">{{ __('reservation.step_dates') }}</div>
             </div>
             <div class="progress-step step-active">
                 <div class="step-circle">3</div>
-                <div class="step-label">Chambre</div>
+                <div class="step-label">{{ __('reservation.step_room') }}</div>
             </div>
             <div class="progress-step">
                 <div class="step-circle">4</div>
-                <div class="step-label">Confirmation</div>
+                <div class="step-label">{{ __('reservation.step_confirmation') }}</div>
             </div>
         </div>
     </div>
@@ -431,12 +431,12 @@
             <div class="summary-box anim-4">
                 <div class="summary-title">
                     <i class="fas fa-door-open me-2"></i>
-                    {{ $roomsCount }} chambre(s) disponible(s)
+                    {{ __('reservation.rooms_available', ['count' => $roomsCount]) }}
                 </div>
                 <div class="summary-details">
-                    <span><i class="fas fa-users me-1"></i>{{ request()->input('count_person') }} personne(s)</span>
-                    <span><i class="fas fa-calendar-alt me-1"></i>Du {{ Helper::dateFormat(request()->input('check_in')) }}</span>
-                    <span><i class="fas fa-calendar-alt me-1"></i>Au {{ Helper::dateFormat(request()->input('check_out')) }}</span>
+                    <span><i class="fas fa-users me-1"></i>{{ __('reservation.persons_count', ['count' => request()->input('count_person')]) }}</span>
+                    <span><i class="fas fa-calendar-alt me-1"></i>{{ __('reservation.from_date', ['date' => Helper::dateFormat(request()->input('check_in'))]) }}</span>
+                    <span><i class="fas fa-calendar-alt me-1"></i>{{ __('reservation.to_date', ['date' => Helper::dateFormat(request()->input('check_out'))]) }}</span>
                 </div>
             </div>
 
@@ -449,23 +449,23 @@
 
                     <div class="row g-3">
                         <div class="col-md-5">
-                            <div class="filter-label">Trier par</div>
+                            <div class="filter-label">{{ __('reservation.sort_by') }}</div>
                             <select class="filter-select" name="sort_name">
-                                <option value="Price" @if(request()->input('sort_name') == 'Price') selected @endif>Prix</option>
-                                <option value="Number" @if(request()->input('sort_name') == 'Number') selected @endif>Numéro</option>
-                                <option value="Capacity" @if(request()->input('sort_name') == 'Capacity') selected @endif>Capacité</option>
+                                <option value="Price" @if(request()->input('sort_name') == 'Price') selected @endif>{{ __('reservation.price') }}</option>
+                                <option value="Number" @if(request()->input('sort_name') == 'Number') selected @endif>{{ __('reservation.number') }}</option>
+                                <option value="Capacity" @if(request()->input('sort_name') == 'Capacity') selected @endif>{{ __('reservation.capacity') }}</option>
                             </select>
                         </div>
                         <div class="col-md-5">
-                            <div class="filter-label">Ordre</div>
+                            <div class="filter-label">{{ __('reservation.sort_order') }}</div>
                             <select class="filter-select" name="sort_type">
-                                <option value="ASC" @if(request()->input('sort_type') == 'ASC') selected @endif>Croissant</option>
-                                <option value="DESC" @if(request()->input('sort_type') == 'DESC') selected @endif>Décroissant</option>
+                                <option value="ASC" @if(request()->input('sort_type') == 'ASC') selected @endif>{{ __('reservation.ascending') }}</option>
+                                <option value="DESC" @if(request()->input('sort_type') == 'DESC') selected @endif>{{ __('reservation.descending') }}</option>
                             </select>
                         </div>
                         <div class="col-md-2">
                             <button type="submit" class="search-btn">
-                                <i class="fas fa-search me-2"></i>Filtrer
+                                <i class="fas fa-search me-2"></i>{{ __('reservation.filter') }}
                             </button>
                         </div>
                     </div>
@@ -478,14 +478,14 @@
                     <div class="row g-0">
                         <div class="col-md-4">
                             <img src="{{ $room->firstImage() }}" 
-                                 alt="Chambre {{ $room->number }}" 
+                                 alt="{{ __('reservation.room_number', ['number' => $room->number]) }}" 
                                  class="room-image">
                         </div>
                         <div class="col-md-8">
                             <div class="room-info">
                                 <div class="room-header">
                                     <div>
-                                        <div class="room-number">Chambre {{ $room->number }}</div>
+                                        <div class="room-number">{{ __('reservation.room_number', ['number' => $room->number]) }}</div>
                                         <div class="room-type">{{ $room->type->name ?? 'Standard' }}</div>
                                     </div>
                                     <span class="room-capacity">
@@ -494,11 +494,11 @@
                                 </div>
 
                                 <div class="room-price">
-                                    {{ Helper::formatCFA($room->price) }} <small>/nuit</small>
+                                    {{ Helper::formatCFA($room->price) }} <small>{{ __('reservation.per_night') }}</small>
                                 </div>
 
                                 <div class="room-description">
-                                    {{ $room->type->description_fr ?? 'Description non disponible' }}
+                                    {{ $room->type->description_fr ?? __('reservation.no_description') }}
                                 </div>
 
                                 <a href="{{ route('transaction.reservation.confirmation', [
@@ -508,7 +508,7 @@
                                     'to' => request()->input('check_out')
                                 ]) }}" class="choose-btn">
                                     <i class="fas fa-check-circle"></i>
-                                    Choisir cette chambre
+                                    {{ __('reservation.choose_this_room') }}
                                 </a>
                             </div>
                         </div>
@@ -516,10 +516,9 @@
                 </div>
             @empty
                 <div class="no-rooms anim-4">
-                    <h3><i class="fas fa-bed me-2"></i>Aucune chambre disponible</h3>
+                    <h3><i class="fas fa-bed me-2"></i>{{ __('reservation.no_rooms_available') }}</h3>
                     <p class="text-muted">
-                        Aucune chambre ne correspond à votre recherche pour 
-                        {{ request()->input('count_person') }} personne(s)
+                        {{ __('reservation.no_rooms_match', ['count' => request()->input('count_person')]) }}
                     </p>
                 </div>
             @endforelse
@@ -555,8 +554,8 @@
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas {{ $customer->gender == 'Male' ? 'fa-mars' : 'fa-venus' }}"></i></div>
                         <div class="profile-info-content">
-                            <div class="profile-info-label">Genre</div>
-                            <div class="profile-info-value">{{ $customer->gender == 'Male' ? 'Homme' : ($customer->gender == 'Female' ? 'Femme' : 'Autre') }}</div>
+                            <div class="profile-info-label">{{ __('reservation.profile_gender') }}</div>
+                            <div class="profile-info-value">{{ $customer->gender == 'Male' ? __('reservation.man') : ($customer->gender == 'Female' ? __('reservation.woman') : __('reservation.other')) }}</div>
                         </div>
                     </div>
 
@@ -564,7 +563,7 @@
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-briefcase"></i></div>
                         <div class="profile-info-content">
-                            <div class="profile-info-label">Profession</div>
+                            <div class="profile-info-label">{{ __('reservation.profession') }}</div>
                             <div class="profile-info-value">{{ $customer->job }}</div>
                         </div>
                     </div>
@@ -574,7 +573,7 @@
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-birthday-cake"></i></div>
                         <div class="profile-info-content">
-                            <div class="profile-info-label">Naissance</div>
+                            <div class="profile-info-label">{{ __('reservation.profile_birth') }}</div>
                             <div class="profile-info-value">{{ \Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y') }}</div>
                         </div>
                     </div>
@@ -584,7 +583,7 @@
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-phone"></i></div>
                         <div class="profile-info-content">
-                            <div class="profile-info-label">Téléphone</div>
+                            <div class="profile-info-label">{{ __('reservation.phone') }}</div>
                             <div class="profile-info-value">{{ $customer->phone }}</div>
                         </div>
                     </div>
@@ -594,7 +593,7 @@
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-map-marker-alt"></i></div>
                         <div class="profile-info-content">
-                            <div class="profile-info-label">Adresse</div>
+                            <div class="profile-info-label">{{ __('reservation.profile_address') }}</div>
                             <div class="profile-info-value">{{ Str::limit($customer->address, 30) }}</div>
                         </div>
                     </div>

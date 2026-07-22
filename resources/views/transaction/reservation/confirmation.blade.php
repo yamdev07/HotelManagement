@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Confirmation de Réservation')
+@section('title', __('reservation.step4_page_title'))
 
 @section('content')
 
@@ -540,11 +540,11 @@
     <div class="confirm-breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.createIdentity') }}">Création client</a>
+        <a href="{{ route('transaction.reservation.createIdentity') }}">{{ __('reservation.create_client') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('transaction.reservation.viewCountPerson', $customer->id) }}">Dates</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.chooseRoom', $customer->id) }}?check_in={{ $stayFrom }}&check_out={{ $stayUntil }}">Choix chambre</a>
+        <a href="{{ route('transaction.reservation.chooseRoom', $customer->id) }}?check_in={{ $stayFrom }}&check_out={{ $stayUntil }}">{{ __('reservation.step3_breadcrumb_room') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">Confirmation</span>
     </div>
@@ -554,15 +554,15 @@
         <div class="confirm-brand">
             <div class="confirm-brand-icon"><i class="fas fa-file-invoice"></i></div>
             <div>
-                <h1 class="confirm-header-title">Confirmation de <em>réservation</em></h1>
+                <h1 class="confirm-header-title">{{ __('reservation.step4_title_1') }} <em>{{ __('reservation.step4_title_2') }}</em></h1>
                 <p class="confirm-header-sub">
-                    <i class="fas fa-check-circle me-1"></i> Étape 4/4 · Récapitulatif et paiement
+                    <i class="fas fa-check-circle me-1"></i> {{ __('reservation.step4_subtitle') }}
                 </p>
             </div>
         </div>
         <div class="confirm-header-actions">
             <a href="{{ route('transaction.reservation.chooseRoom', $customer->id) }}?check_in={{ $stayFrom }}&check_out={{ $stayUntil }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-arrow-left me-2"></i> Retour
+                <i class="fas fa-arrow-left me-2"></i> {{ __('reservation.back') }}
             </a>
         </div>
     </div>
@@ -572,19 +572,19 @@
         <div class="progress-steps">
             <div class="progress-step step-completed">
                 <div class="step-circle"><i class="fas fa-check"></i></div>
-                <div class="step-label">Identité</div>
+                <div class="step-label">{{ __('reservation.step_identity') }}</div>
             </div>
             <div class="progress-step step-completed">
                 <div class="step-circle"><i class="fas fa-check"></i></div>
-                <div class="step-label">Dates</div>
+                <div class="step-label">{{ __('reservation.step_dates') }}</div>
             </div>
             <div class="progress-step step-completed">
                 <div class="step-circle"><i class="fas fa-check"></i></div>
-                <div class="step-label">Chambre</div>
+                <div class="step-label">{{ __('reservation.step_room') }}</div>
             </div>
             <div class="progress-step step-active">
                 <div class="step-circle">4</div>
-                <div class="step-label">Confirmation</div>
+                <div class="step-label">{{ __('reservation.step_confirmation') }}</div>
             </div>
         </div>
     </div>
@@ -633,11 +633,11 @@
             <div class="alert-db alert-db-info anim-4">
                 <i class="fas fa-info-circle"></i>
                 <div>
-                    <strong>Client régulier</strong><br>
-                    <span>Ce client a déjà {{ $existingReservationsCount }} réservation(s) dans notre établissement.</span>
+                    <strong>{{ __('reservation.regular_customer') }}</strong><br>
+                    <span>{{ __('reservation.regular_customer_desc', ['count' => $existingReservationsCount]) }}</span>
                     <a href="{{ route('transaction.reservation.customerReservations', $customer) }}" 
                        class="btn-db btn-db-ghost mt-2" style="padding:5px 12px; font-size:.7rem;">
-                        <i class="fas fa-history me-1"></i> Voir l'historique
+                        <i class="fas fa-history me-1"></i> {{ __('reservation.view_history') }}
                     </a>
                 </div>
             </div>
@@ -648,7 +648,7 @@
                 <div class="confirm-card-header">
                     <h5 class="confirm-card-title">
                         <i class="fas fa-file-invoice"></i>
-                        Confirmation de réservation
+                        {{ __('reservation.reservation_confirmation') }}
                     </h5>
                 </div>
 
@@ -659,22 +659,22 @@
                             <div class="summary-card">
                                 <div class="summary-title">
                                     <i class="fas fa-bed"></i>
-                                    Chambre sélectionnée
+                                    {{ __('reservation.selected_room') }}
                                 </div>
                                 <div class="room-info">
                                     <div class="room-icon">
                                         <i class="fas fa-door-open"></i>
                                     </div>
                                     <div class="room-details">
-                                        <h6>Chambre {{ $room->number }}</h6>
+                                        <h6>{{ __('reservation.col_room') }} {{ $room->number }}</h6>
                                         <p>{{ $room->type->name ?? 'Standard' }}</p>
                                         <span class="badge-db badge-db-info">
-                                            <i class="fas fa-user me-1"></i> {{ $room->capacity }} personnes
+                                            <i class="fas fa-user me-1"></i> {{ $room->capacity }} {{ __('reservation.count_person') }}
                                         </span>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between mt-3 pt-3 border-top" style="border-color:var(--s100);">
-                                    <span class="text-muted">Prix par nuit</span>
+                                    <span class="text-muted">{{ __('reservation.price_per_night') }}</span>
                                     <span class="fw-bold" style="color:var(--s800); font-family:var(--mono);">{{ number_format($room->price, 0, ',', ' ') }} FCFA</span>
                                 </div>
                             </div>
@@ -685,26 +685,26 @@
                             <div class="summary-card">
                                 <div class="summary-title">
                                     <i class="fas fa-calendar-alt"></i>
-                                    Détails du séjour
+                                    {{ __('reservation.stay_details') }}
                                 </div>
                                 <div class="timeline">
                                     <div class="timeline-item">
                                         <div class="timeline-marker"></div>
                                         <div class="timeline-content">
-                                            <h6>Arrivée</h6>
+                                            <h6>{{ __('reservation.arrival') }}</h6>
                                             <p>{{ \Carbon\Carbon::parse($stayFrom)->format('d/m/Y') }} • <span style="color:var(--g600);">14:00</span></p>
                                         </div>
                                     </div>
                                     <div class="timeline-item">
                                         <div class="timeline-marker"></div>
                                         <div class="timeline-content">
-                                            <h6>Départ</h6>
+                                            <h6>{{ __('reservation.departure') }}</h6>
                                             <p>{{ \Carbon\Carbon::parse($stayUntil)->format('d/m/Y') }} • <span style="color:var(--g600);">12:00</span></p>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="d-flex justify-content-between mt-3 pt-3 border-top" style="border-color:var(--s100);">
-                                    <span class="text-muted">Nombre de nuits</span>
+                                    <span class="text-muted">{{ __('reservation.nights_count_label') }}</span>
                                     <span class="fw-bold">{{ $dayDifference }}</span>
                                 </div>
                             </div>
@@ -717,15 +717,15 @@
                             <div class="summary-card">
                                 <div class="summary-title">
                                     <i class="fas fa-calculator"></i>
-                                    Calcul du prix
+                                    {{ __('reservation.price_calculation') }}
                                 </div>
                                 <table class="table-db">
                                     <tr>
-                                        <td>{{ number_format($room->price, 0, ',', ' ') }} FCFA × {{ $dayDifference }} nuit(s)</td>
+                                        <td>{{ number_format($room->price, 0, ',', ' ') }} FCFA × {{ $dayDifference }} {{ __('reservation.nights', ['count' => $dayDifference]) }}</td>
                                         <td>{{ number_format($room->price * $dayDifference, 0, ',', ' ') }} FCFA</td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Total séjour</strong></td>
+                                        <td><strong>{{ __('reservation.total_stay') }}</strong></td>
                                         <td><strong style="color:var(--g600);">{{ number_format($room->price * $dayDifference, 0, ',', ' ') }} FCFA</strong></td>
                                     </tr>
                                 </table>
@@ -745,7 +745,7 @@
                         <div class="confirm-card-header" style="background:var(--g50); color:var(--s800);">
                             <h5 class="confirm-card-title" style="color:var(--s800);">
                                 <i class="fas fa-credit-card" style="color:var(--g500);"></i>
-                                Mode de paiement
+                                {{ __('reservation.payment_method_label') }}
                             </h5>
                         </div>
                         <div class="confirm-card-body">
@@ -769,14 +769,14 @@
                                                 <i class="fas fa-calendar-check"></i>
                                             </div>
                                             <div class="payment-info">
-                                                <div class="payment-title">Réserver sans acompte</div>
-                                                <div class="payment-desc">Confirmation immédiate sans paiement</div>
+                                                <div class="payment-title">{{ __('reservation.reserve_no_deposit') }}</div>
+                                                <div class="payment-desc">{{ __('reservation.immediate_no_payment') }}</div>
                                             </div>
                                         </div>
                                         <div class="payment-details">
                                             <div class="alert-db alert-db-info">
                                                 <i class="fas fa-info-circle"></i>
-                                                <small>La réservation est confirmée sans paiement immédiat. Le paiement complet sera effectué à l'arrivée du client.</small>
+                                                <small>{{ __('reservation.reserve_no_deposit_desc') }}</small>
                                             </div>
                                         </div>
                                     </div>
@@ -790,15 +790,15 @@
                                                 <i class="fas fa-money-bill-wave"></i>
                                             </div>
                                             <div class="payment-info">
-                                                <div class="payment-title">Payer un acompte</div>
-                                                <div class="payment-desc">Sécurisez votre réservation avec un acompte</div>
+                                                <div class="payment-title">{{ __('reservation.pay_deposit') }}</div>
+                                                <div class="payment-desc">{{ __('reservation.pay_deposit_desc') }}</div>
                                             </div>
                                         </div>
                                         <div class="payment-details">
                                             <div class="form-group">
                                                 <label class="form-label">
                                                     <i class="fas fa-money-bill"></i>
-                                                    Montant de l'acompte
+                                                    {{ __('reservation.deposit_amount') }}
                                                 </label>
                                                 <div class="input-group">
                                                     <span class="input-group-text">FCFA</span>
@@ -809,20 +809,20 @@
                                                        min="0" max="{{ $room->price * $dayDifference }}" step="500"
                                                        value="{{ $downPayment }}">
                                                 <div class="d-flex justify-content-between mt-2">
-                                                    <small class="text-muted">Min: 0 FCFA</small>
-                                                    <small class="text-muted">Recommandé: {{ number_format($downPayment, 0, ',', ' ') }} FCFA</small>
-                                                    <small class="text-muted">Max: {{ number_format($room->price * $dayDifference, 0, ',', ' ') }} FCFA</small>
+                                                    <small class="text-muted">{{ __('reservation.min') }}: 0 FCFA</small>
+                                                    <small class="text-muted">{{ __('reservation.recommended') }}: {{ number_format($downPayment, 0, ',', ' ') }} FCFA</small>
+                                                    <small class="text-muted">{{ __('reservation.max') }}: {{ number_format($room->price * $dayDifference, 0, ',', ' ') }} FCFA</small>
                                                 </div>
                                             </div>
                                             <div class="form-group">
                                                 <label class="form-label">
                                                     <i class="fas fa-credit-card"></i>
-                                                    Méthode de paiement
+                                                    {{ __('reservation.payment_method_label') }}
                                                 </label>
                                                 <select class="form-select" id="payment_method">
-                                                    <option value="cash">💵 Espèces</option>
-                                                    <option value="card">💳 Carte bancaire</option>
-                                                    <option value="mobile_money">📱 Mobile Money</option>
+                                                    <option value="cash">💵 {{ __('reservation.cash') }}</option>
+                                                    <option value="card">💳 {{ __('reservation.card') }}</option>
+                                                    <option value="mobile_money">📱 {{ __('reservation.mobile_money') }}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -837,27 +837,27 @@
                                                 <i class="fas fa-wallet"></i>
                                             </div>
                                             <div class="payment-info">
-                                                <div class="payment-title">Paiement complet</div>
-                                                <div class="payment-desc">Payez l'intégralité du séjour maintenant</div>
+                                                <div class="payment-title">{{ __('reservation.pay_full') }}</div>
+                                                <div class="payment-desc">{{ __('reservation.pay_full_desc') }}</div>
                                             </div>
                                         </div>
                                         <div class="payment-details">
                                             <div class="alert-db alert-db-success">
                                                 <i class="fas fa-check-circle"></i>
                                                 <div>
-                                                    <strong>Paiement complet</strong><br>
+                                                    <strong>{{ __('reservation.pay_full') }}</strong><br>
                                                     <span class="fw-bold">{{ number_format($room->price * $dayDifference, 0, ',', ' ') }} FCFA</span>
                                                 </div>
                                             </div>
                                             <div class="form-group">
                                                 <label class="form-label">
                                                     <i class="fas fa-credit-card"></i>
-                                                    Méthode de paiement
+                                                    {{ __('reservation.payment_method_label') }}
                                                 </label>
                                                 <select class="form-select" id="payment_method_full">
-                                                    <option value="cash">💵 Espèces</option>
-                                                    <option value="card">💳 Carte bancaire</option>
-                                                    <option value="mobile_money">📱 Mobile Money</option>
+                                                    <option value="cash">💵 {{ __('reservation.cash') }}</option>
+                                                    <option value="card">💳 {{ __('reservation.card') }}</option>
+                                                    <option value="mobile_money">📱 {{ __('reservation.mobile_money') }}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -868,16 +868,16 @@
                                 <div class="alert-db alert-db-info mt-4" id="paymentSummary">
                                     <i class="fas fa-file-invoice fa-lg"></i>
                                     <div class="flex-grow-1">
-                                        <strong id="summaryText">Réservation sans acompte</strong>
+                                        <strong id="summaryText">{{ __('reservation.reserve_no_deposit') }}</strong>
                                         <div id="amountDetails" style="display:none; margin-top:12px;">
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="d-flex justify-content-between mb-1">
-                                                        <span class="text-muted">Payé :</span>
+                                                        <span class="text-muted">{{ __('reservation.paid_label') }}</span>
                                                         <strong id="paidAmount" class="fw-bold">0 FCFA</strong>
                                                     </div>
                                                     <div class="d-flex justify-content-between">
-                                                        <span class="text-muted">Solde :</span>
+                                                        <span class="text-muted">{{ __('reservation.balance_label') }}</span>
                                                         <strong id="balanceAmount" class="fw-bold">{{ number_format($room->price * $dayDifference, 0, ',', ' ') }} FCFA</strong>
                                                     </div>
                                                 </div>
@@ -885,7 +885,7 @@
                                                     <div class="progress">
                                                         <div class="progress-bar progress-bar-success" id="paymentProgress" style="width:0%"></div>
                                                     </div>
-                                                    <small class="text-muted d-block text-center mt-1" id="progressText">Aucun paiement</small>
+                                                    <small class="text-muted d-block text-center mt-1" id="progressText">{{ __('reservation.no_payment') }}</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -896,13 +896,13 @@
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="terms" required>
                                     <label class="form-check-label" for="terms">
-                                        J'accepte les conditions générales de réservation :
+                                        {{ __('reservation.terms_label') }}
                                         <ul>
-                                            <li>La réservation est confirmée immédiatement après validation</li>
-                                            <li>Le paiement complet est dû à l'arrivée (sauf paiement anticipé)</li>
-                                            <li>Annulation gratuite jusqu'à 48h avant l'arrivée</li>
-                                            <li>Check-in à partir de 14h, check-out avant 12h</li>
-                                            <li>Présentation d'une pièce d'identité obligatoire à l'arrivée</li>
+                                            <li>{{ __('reservation.terms_1') }}</li>
+                                            <li>{{ __('reservation.terms_2') }}</li>
+                                            <li>{{ __('reservation.terms_3') }}</li>
+                                            <li>{{ __('reservation.terms_4') }}</li>
+                                            <li>{{ __('reservation.terms_5') }}</li>
                                         </ul>
                                     </label>
                                 </div>
@@ -911,11 +911,11 @@
                                 <div class="d-flex justify-content-between gap-3 mt-4">
                                     <a href="{{ route('transaction.reservation.chooseRoom', $customer->id) }}?check_in={{ $stayFrom }}&check_out={{ $stayUntil }}" 
                                        class="btn-db btn-db-ghost flex-grow-1">
-                                        <i class="fas fa-arrow-left me-2"></i> Retour
+                <i class="fas fa-arrow-left me-2"></i> {{ __('reservation.back') }}
                                     </a>
                                     <button type="submit" class="btn-db btn-db-success flex-grow-1" id="submitBtn">
-                                        <span id="submitText">Confirmer la réservation</span>
-                                        <small class="d-block fw-normal opacity-75">Agent: {{ auth()->user()->name ?? 'Système' }}</small>
+                                        <span id="submitText">{{ __('reservation.confirm_reservation') }}</span>
+                                        <small class="d-block fw-normal opacity-75">{{ __('reservation.agent_label', ['name' => auth()->user()->name ?? 'Système']) }}</small>
                                     </button>
                                 </div>
                             </form>
@@ -942,13 +942,13 @@
                 <div class="profile-body">
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-{{ $customer->gender == 'Male' ? 'mars' : 'venus' }}"></i></div>
-                        <div class="profile-info-label">Genre</div>
-                        <div class="profile-info-value">{{ $customer->gender == 'Male' ? 'Homme' : 'Femme' }}</div>
+                        <div class="profile-info-label">{{ __('reservation.gender') }}</div>
+                        <div class="profile-info-value">{{ $customer->gender == 'Male' ? __('reservation.man') : __('reservation.woman') }}</div>
                     </div>
                     @if($customer->phone)
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-phone"></i></div>
-                        <div class="profile-info-label">Téléphone</div>
+                        <div class="profile-info-label">{{ __('reservation.phone') }}</div>
                         <div class="profile-info-value">{{ $customer->phone }}</div>
                     </div>
                     @endif
@@ -962,22 +962,22 @@
                     @if($customer->job)
                     <div class="profile-info-row">
                         <div class="profile-info-icon"><i class="fas fa-briefcase"></i></div>
-                        <div class="profile-info-label">Profession</div>
+                        <div class="profile-info-label">{{ __('reservation.profession') }}</div>
                         <div class="profile-info-value">{{ $customer->job }}</div>
                     </div>
                     @endif
                     @if($existingReservationsCount > 0)
                     <div class="profile-info-row" style="background:var(--g50);">
                         <div class="profile-info-icon"><i class="fas fa-bed"></i></div>
-                        <div class="profile-info-label">Historique</div>
-                        <div class="profile-info-value">{{ $existingReservationsCount }} réservation(s)</div>
+                        <div class="profile-info-label">{{ __('reservation.history') }}</div>
+                        <div class="profile-info-value">{{ $existingReservationsCount }} {{ __('reservation.reservations_count', ['count' => $existingReservationsCount]) }}</div>
                     </div>
                     @endif
                 </div>
                 <div class="confirm-card-footer">
                     <small class="text-muted d-block text-center">
                         <i class="fas fa-clock me-1"></i>
-                        Création le {{ now()->format('d/m/Y H:i') }}
+                        {{ __('reservation.created_on') }} {{ now()->format('d/m/Y H:i') }}
                     </small>
                 </div>
             </div>
@@ -1019,19 +1019,19 @@ document.addEventListener('DOMContentLoaded', function() {
         switch(selectedOption) {
             case 'reserve_only':
                 paymentAmount = 0;
-                summary = 'Réservation sans acompte';
+                summary = "{{ __('reservation.js_reservation_no_deposit') }}";
                 amountDetails.style.display = 'none';
                 downPaymentHidden.value = 0;
                 break;
             case 'pay_deposit':
                 paymentAmount = parseFloat(depositAmount.value) || 0;
-                summary = `Acompte de ${formatCurrency(paymentAmount)}`;
+                summary = "{{ __('reservation.js_deposit_of', ['amount' => '']) }}" + formatCurrency(paymentAmount);
                 amountDetails.style.display = 'block';
                 downPaymentHidden.value = paymentAmount;
                 break;
             case 'pay_full':
                 paymentAmount = totalPrice;
-                summary = 'Paiement complet';
+                summary = "{{ __('reservation.js_full_payment') }}";
                 amountDetails.style.display = 'block';
                 downPaymentHidden.value = paymentAmount;
                 break;
@@ -1044,16 +1044,16 @@ document.addEventListener('DOMContentLoaded', function() {
             paidAmount.textContent = formatCurrency(paymentAmount);
             balanceAmount.textContent = formatCurrency(totalPrice - paymentAmount);
             paymentProgress.style.width = percentage + '%';
-            progressText.textContent = percentage === 100 ? 'Paiement complet' : percentage + '% payé';
+            progressText.textContent = percentage === 100 ? "{{ __('reservation.js_full_payment_progress') }}" : "{{ __('reservation.js_percent_paid', ['percent' => '']) }}" + percentage;
         }
 
         // Texte du bouton
         if (paymentAmount === totalPrice) {
-            submitText.innerHTML = '<i class="fas fa-wallet me-2"></i> Payer et réserver';
+            submitText.innerHTML = '<i class="fas fa-wallet me-2"></i> {{ __("reservation.js_pay_and_reserve") }}';
         } else if (paymentAmount > 0) {
-            submitText.innerHTML = `<i class="fas fa-money-bill-wave me-2"></i> Payer ${formatCurrency(paymentAmount)}`;
+            submitText.innerHTML = `<i class="fas fa-money-bill-wave me-2"></i> {{ __("reservation.js_pay_amount", ['amount' => "' + formatCurrency(paymentAmount) + '"]) }}`;
         } else {
-            submitText.innerHTML = 'Confirmer la réservation';
+            submitText.innerHTML = '{{ __("reservation.confirm_reservation") }}';
         }
 
         submitBtn.disabled = !termsCheckbox.checked;
@@ -1093,7 +1093,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('reservationForm').addEventListener('submit', function () {
         submitBtn.disabled = true;
         const st = document.getElementById('submitText');
-        if (st) st.textContent = 'Enregistrement en cours…';
+        if (st) st.textContent = "{{ __('reservation.saving_in_progress') }}";
     });
 
     // Initialisation
