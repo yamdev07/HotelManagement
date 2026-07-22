@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Gestion des Réservations')
+@section('title', __('reservation.page_title'))
 @section('content')
 
 <style>
@@ -766,22 +766,22 @@
         <div class="trx-brand">
             <div class="trx-brand-icon"><i class="fas fa-calendar-check"></i></div>
             <div>
-                <h1 class="trx-header-title">Gestion des <em>Réservations</em></h1>
-                <p class="trx-header-sub">{{ now()->translatedFormat('l d F Y') }} · Gérez les arrivées, séjours et départs</p>
+                <h1 class="trx-header-title">{!! __('reservation.header_title_1') !!}</h1>
+                <p class="trx-header-sub">{{ now()->translatedFormat('l d F Y') }} · {{ __('reservation.header_sub') }}</p>
             </div>
         </div>
         <div class="trx-header-actions">
             @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
             <button type="button" class="btn-db btn-db-primary" data-bs-toggle="modal" data-bs-target="#newReservationModal">
-                <i class="fas fa-plus fa-xs"></i> Nouvelle réservation
+                <i class="fas fa-plus fa-xs"></i> {{ __('reservation.new_reservation') }}
             </button>
             @endif
             <a href="{{ route('payment.index') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-history fa-xs"></i> Historique
+                <i class="fas fa-history fa-xs"></i> {{ __('reservation.history') }}
             </a>
             @if(auth()->user()->role == 'Receptionist')
             <span class="btn-db btn-db-ghost" style="background: var(--g50); border-color: var(--g200); color: var(--g700);">
-                <i class="fas fa-user-check fa-xs"></i> Permissions complètes
+                <i class="fas fa-user-check fa-xs"></i> {{ __('reservation.full_permissions') }}
             </span>
             @endif
         </div>
@@ -789,29 +789,29 @@
 
     {{-- ─── LÉGENDE ─────────────────────────────── --}}
     <div class="legend-grid anim-2">
-        <span class="legend-item"><span class="legend-dot dot-reservation"></span> Réservation</span>
-        <span class="legend-item"><span class="legend-dot dot-active"></span> Dans l'hôtel</span>
-        <span class="legend-item"><span class="legend-dot dot-completed"></span> Terminé (payé)</span>
-        <span class="legend-item"><span class="legend-dot dot-cancelled"></span> Annulée</span>
-        <span class="legend-item"><span class="legend-dot dot-no_show"></span> No Show</span>
-        <span class="legend-item"><span class="legend-dot dot-late"></span> Late checkout</span>
+        <span class="legend-item"><span class="legend-dot dot-reservation"></span> {{ __('reservation.legend_reservation') }}</span>
+        <span class="legend-item"><span class="legend-dot dot-active"></span> {{ __('reservation.legend_in_hotel') }}</span>
+        <span class="legend-item"><span class="legend-dot dot-completed"></span> {{ __('reservation.legend_completed') }}</span>
+        <span class="legend-item"><span class="legend-dot dot-cancelled"></span> {{ __('reservation.legend_cancelled') }}</span>
+        <span class="legend-item"><span class="legend-dot dot-no_show"></span> {{ __('reservation.legend_no_show') }}</span>
+        <span class="legend-item"><span class="legend-dot dot-late"></span> {{ __('reservation.legend_late') }}</span>
     </div>
 
     {{-- ─── RECHERCHE ───────────────────────────── --}}
     <div class="search-card anim-3">
         <div class="search-card-header">
-            <h5><i class="fas fa-search"></i> Rechercher une réservation</h5>
+            <h5><i class="fas fa-search"></i> {{ __('reservation.search_title') }}</h5>
         </div>
         <div class="search-card-body">
             <form method="GET" action="{{ route('transaction.index') }}" class="search-form">
                 <input type="text" class="search-input" name="search" value="{{ request('search') }}" 
-                       placeholder="ID, nom client ou numéro de chambre...">
+                       placeholder="{{ __('reservation.search_placeholder') }}">
                 <button type="submit" class="search-btn">
-                    <i class="fas fa-search fa-xs"></i> Rechercher
+                    <i class="fas fa-search fa-xs"></i> {{ __('reservation.search_button') }}
                 </button>
                 @if(request('search'))
                 <a href="{{ route('transaction.index') }}" class="btn-db btn-db-ghost">
-                    <i class="fas fa-times fa-xs"></i> Effacer
+                    <i class="fas fa-times fa-xs"></i> {{ __('reservation.clear') }}
                 </a>
                 @endif
             </form>
@@ -823,8 +823,8 @@
     <div class="recep-note anim-4">
         <i class="fas fa-info-circle"></i>
         <div>
-            <strong>💼 Réceptionniste · Permissions Complètes</strong>
-            <small>Création, modification, paiements, check-in/out, annulation ✓ (sauf suppression)</small>
+            <strong>💼 {{ __('reservation.recep_note_title') }}</strong>
+            <small>{{ __('reservation.recep_note_desc') }}</small>
         </div>
     </div>
     @endif
@@ -856,27 +856,27 @@
         <div class="trx-card-header">
             <h3 class="trx-card-title">
                 <i class="fas fa-users"></i>
-                Réservations en cours
+                {{ __('reservation.active_reservations') }}
                 <span class="trx-card-count">{{ $transactions->count() }}</span>
             </h3>
-            <span class="trx-card-subtitle">Arrivées & séjours en cours</span>
+            <span class="trx-card-subtitle">{{ __('reservation.arrivals_stays') }}</span>
         </div>
 
         <div style="overflow-x: auto;">
             <table class="trx-table">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Client</th>
-                        <th>Chambre</th>
-                        <th>Arrivée</th>
-                        <th>Départ</th>
-                        <th>Nuits</th>
-                        <th>Total</th>
-                        <th>Payé</th>
-                        <th>Reste</th>
-                        <th class="text-center">Statut</th>
-                        <th class="text-end">Actions</th>
+                        <th>{{ __('reservation.col_id') }}</th>
+                        <th>{{ __('reservation.col_client') }}</th>
+                        <th>{{ __('reservation.col_room') }}</th>
+                        <th>{{ __('reservation.col_arrival') }}</th>
+                        <th>{{ __('reservation.col_departure') }}</th>
+                        <th>{{ __('reservation.col_nights') }}</th>
+                        <th>{{ __('reservation.col_total') }}</th>
+                        <th>{{ __('reservation.col_paid') }}</th>
+                        <th>{{ __('reservation.col_remaining') }}</th>
+                        <th class="text-center">{{ __('reservation.col_status') }}</th>
+                        <th class="text-end">{{ __('reservation.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -932,26 +932,26 @@
                             if ($now->isSameDay($checkOutDateTime) && $now->gte($checkOutDeadline) && $now->lte($checkOutLargess) && $isFullyPaid) {
                                 $canDepart = true;
                                 $departureButtonType = 'btn-departed';
-                                $departureButtonTitle = 'Départ (largesse jusqu\'à 14h)';
+                                $departureButtonTitle = __('reservation.departure_largesse');
                             } elseif ($isLateCheckout && $isLatePaid && $now->isSameDay($checkOutDateTime) && $now->gte($checkOutLargess) && $now->lt($lateCheckoutEnd)) {
                                 $canDepart = true;
                                 $departureButtonType = 'btn-departed';
-                                $departureButtonTitle = 'Départ (late checkout)';
+                                $departureButtonTitle = __('reservation.departure_late');
                             } elseif ($isLateCheckout && !$isLatePaid) {
                                 $departureButtonType = 'disabled';
-                                $departureButtonTitle = 'Supplément late checkout de ' . number_format($lateCheckoutFee, 0, ',', ' ') . ' FCFA en attente';
+                                $departureButtonTitle = __('reservation.late_fee_pending') . ' ' . number_format($lateCheckoutFee, 0, ',', ' ') . ' FCFA';
                             } elseif ($now->isSameDay($checkOutDateTime) && $now->gt($checkOutLargess) && !$isLateCheckout) {
                                 $departureButtonType = 'extend';
-                                $departureButtonTitle = 'Départ après 14h - Prolonger';
+                                $departureButtonTitle = __('reservation.departure_after_14h');
                             }
                         }
                         
                         $arrivalTooltip = '';
                         if ($arrivalNotReached) {
                             if (!$now->isSameDay($checkInDateTime)) {
-                                $arrivalTooltip = "Arrivée prévue le " . $checkInDateTime->format('d/m/Y');
+                                $arrivalTooltip = __('reservation.arrival_scheduled') . ' ' . $checkInDateTime->format('d/m/Y');
                             } elseif ($now->lt($checkInTime)) {
-                                $arrivalTooltip = "Check-in possible à partir de 12h. Encore $arrivalHoursLeft heure(s).";
+                                $arrivalTooltip = __('reservation.checkin_available_12h') . ' ' . $arrivalHoursLeft . ' ' . __('reservation.nights_count');
                             }
                         }
                         
@@ -959,9 +959,9 @@
                         if (!$canDepart && $departureButtonType != 'disabled' && $departureButtonType != 'extend') {
                             if ($status == 'active') {
                                 if (!$now->isSameDay($checkOutDateTime)) {
-                                    $departureTooltip = "Départ prévu le " . $checkOutDateTime->format('d/m/Y');
+                                    $departureTooltip = __('reservation.departure_scheduled') . ' ' . $checkOutDateTime->format('d/m/Y');
                                 } elseif ($now->lt($checkOutDeadline)) {
-                                    $departureTooltip = "Check-out possible à partir de 12h. Encore " . $now->diffInHours($checkOutDeadline) . " heure(s).";
+                                    $departureTooltip = __('reservation.checkout_available_12h') . ' ' . $now->diffInHours($checkOutDeadline) . ' ' . __('reservation.nights_count');
                                 }
                             }
                         }
@@ -1001,7 +1001,7 @@
                                     </div>
                                 @elseif($now->gte($checkInDateTime))
                                     <div class="date-indicator di-ready">
-                                        <i class="fas fa-check-circle"></i> Prêt
+                                        <i class="fas fa-check-circle"></i> {{ __('reservation.ready') }}
                                     </div>
                                 @endif
                             @endif
@@ -1016,7 +1016,7 @@
                                     @if($lateCheckoutFee > 0)
                                         (+{{ number_format($lateCheckoutFee, 0, ',', ' ') }} FCFA)
                                         @if(!$isLatePaid)
-                                            <span class="ms-1" style="color: #b91c1c;">(non payé)</span>
+                                            <span class="ms-1" style="color: #b91c1c;">{{ __('reservation.status_non_paid') }}</span>
                                         @endif
                                     @endif
                                 </div>
@@ -1029,14 +1029,14 @@
                                         </div>
                                     @elseif($now->gte($checkOutDateTime) && $now->lte($checkOutLargess))
                                         <div class="date-indicator di-ready">
-                                            <i class="fas fa-check-circle"></i> Départ possible
+                                            <i class="fas fa-check-circle"></i> {{ __('reservation.departure_possible') }}
                                             @if($now->gt($checkOutDeadline) && $now->lte($checkOutLargess))
-                                                <small>(largesse)</small>
+                                                <small>({{ __('reservation.grace') }})</small>
                                             @endif
                                         </div>
                                     @elseif($now->gt($checkOutLargess))
                                         <div class="date-indicator di-overdue">
-                                            <i class="fas fa-exclamation-triangle"></i> Dépassé
+                                            <i class="fas fa-exclamation-triangle"></i> {{ __('reservation.overdue') }}
                                         </div>
                                     @endif
                                 @endif
@@ -1044,7 +1044,7 @@
                         </td>
                         
                         <td>
-                            <span class="nights-badge">{{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}</span>
+                            <span class="nights-badge">{{ $nights }} {{ __('reservation.nights_count') }}{{ $nights > 1 ? 's' : '' }}</span>
                         </td>
                         
                         <td class="price price-positive">{{ number_format($totalPrice, 0, ',', ' ') }} FCFA</td>
@@ -1053,13 +1053,13 @@
                         
                         <td>
                             @if($isFullyPaid)
-                                <span class="badge-paid"><i class="fas fa-check"></i> Soldé</span>
+                                <span class="badge-paid"><i class="fas fa-check"></i> {{ __('reservation.settled') }}</span>
                             @else
                                 <span class="price price-danger">{{ number_format($remaining, 0, ',', ' ') }} FCFA</span>
                                 @if($checkOut->isPast() && $status == 'active')
                                     <div class="unpaid-alert">
                                         <i class="fas fa-exclamation-triangle"></i>
-                                        <a href="{{ route('transaction.payment.create', $transaction) }}">Régler</a>
+                                        <a href="{{ route('transaction.payment.create', $transaction) }}">{{ __('reservation.pay_now') }}</a>
                                     </div>
                                 @endif
                             @endif
@@ -1077,28 +1077,28 @@
                                     @elseif($status == 'cancelled') <i class="fas fa-times-circle"></i>
                                     @else <i class="fas fa-user-times"></i>
                                     @endif
-                                    {{ $isLateCheckout ? 'Late checkout' : ($status == 'reservation' ? 'Réservation' : ($status == 'active' ? 'Dans hôtel' : ($status == 'completed' ? 'Terminé' : ($status == 'cancelled' ? 'Annulée' : 'No Show')))) }}
+                                    {{ $isLateCheckout ? __('reservation.legend_late') : ($status == 'reservation' ? __('reservation.status_reservation') : ($status == 'active' ? __('reservation.status_in_hotel') : ($status == 'completed' ? __('reservation.status_completed') : ($status == 'cancelled' ? __('reservation.status_cancelled') : __('reservation.status_no_show'))))) }}
                                 </button>
                                 <div class="db-dropdown-menu" id="status-dd-{{ $transaction->id }}">
                                     <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST">
                                         @csrf @method('PUT')
                                         <input type="hidden" name="status" value="reservation">
                                         <button type="submit" class="db-dropdown-item" {{ $status == 'reservation' ? 'disabled' : '' }}>
-                                            <i class="fas fa-calendar-alt me-1"></i> Réservation
+                                            <i class="fas fa-calendar-alt me-1"></i> {{ __('reservation.status_reservation') }}
                                         </button>
                                     </form>
                                     <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST">
                                         @csrf @method('PUT')
                                         <input type="hidden" name="status" value="active">
                                         <button type="submit" class="db-dropdown-item" {{ $status == 'active' ? 'disabled' : '' }}>
-                                            <i class="fas fa-hotel me-1"></i> Dans l'hôtel
+                                            <i class="fas fa-hotel me-1"></i> {{ __('reservation.status_in_hotel') }}
                                         </button>
                                     </form>
                                     <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST">
                                         @csrf @method('PUT')
                                         <input type="hidden" name="status" value="completed">
                                         <button type="submit" class="db-dropdown-item" {{ !$isFullyPaid ? 'disabled' : '' }} {{ $status == 'completed' ? 'disabled' : '' }}>
-                                            <i class="fas fa-check-circle me-1"></i> Terminé {{ !$isFullyPaid ? '(impayé)' : '' }}
+                                            <i class="fas fa-check-circle me-1"></i> {{ __('reservation.status_completed') }} {{ !$isFullyPaid ? '(' . __('reservation.status_unpaid') . ')' : '' }}
                                         </button>
                                     </form>
                                     <div class="db-dropdown-divider"></div>
@@ -1106,14 +1106,14 @@
                                         @csrf @method('PUT')
                                         <input type="hidden" name="status" value="cancelled">
                                         <button type="submit" class="db-dropdown-item" {{ $status == 'cancelled' ? 'disabled' : '' }}>
-                                            <i class="fas fa-times-circle me-1"></i> Annulée
+                                            <i class="fas fa-times-circle me-1"></i> {{ __('reservation.status_cancelled') }}
                                         </button>
                                     </form>
                                     <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST">
                                         @csrf @method('PUT')
                                         <input type="hidden" name="status" value="no_show">
                                         <button type="submit" class="db-dropdown-item" {{ $status == 'no_show' ? 'disabled' : '' }}>
-                                            <i class="fas fa-user-times me-1"></i> No Show
+                                            <i class="fas fa-user-times me-1"></i> {{ __('reservation.status_no_show') }}
                                         </button>
                                     </form>
                                 </div>
@@ -1127,7 +1127,7 @@
                                 @elseif($status == 'cancelled') <i class="fas fa-times-circle"></i>
                                 @else <i class="fas fa-user-times"></i>
                                 @endif
-                                {{ $isLateCheckout ? 'Late checkout' : ($status == 'reservation' ? 'Réservation' : ($status == 'active' ? 'Dans hôtel' : ($status == 'completed' ? 'Terminé' : ($status == 'cancelled' ? 'Annulée' : 'No Show')))) }}
+                                {{ $isLateCheckout ? __('reservation.legend_late') : ($status == 'reservation' ? __('reservation.status_reservation') : ($status == 'active' ? __('reservation.status_in_hotel') : ($status == 'completed' ? __('reservation.status_completed') : ($status == 'cancelled' ? __('reservation.status_cancelled') : __('reservation.status_no_show'))))) }}
                             </span>
                             @endif
                         </td>
@@ -1135,7 +1135,7 @@
                         <td>
                             <div class="action-buttons">
                                 @if($canPay)
-                                <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-action btn-pay" data-bs-toggle="tooltip" title="Paiement">
+                                <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-action btn-pay" data-bs-toggle="tooltip" title="{{ __('reservation.tooltip_payment') }}">
                                     <i class="fas fa-money-bill-wave-alt"></i>
                                 </a>
                                 @endif
@@ -1143,7 +1143,7 @@
                                 @if($canMarkArrivedNow)
                                 <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="btn-action btn-arrived" data-bs-toggle="tooltip" title="Marquer arrivé">
+                                    <button type="submit" class="btn-action btn-arrived" data-bs-toggle="tooltip" title="{{ __('reservation.tooltip_mark_arrived') }}">
                                         <i class="fas fa-sign-in-alt"></i>
                                     </button>
                                 </form>
@@ -1178,22 +1178,22 @@
                                 @endif
                                 
                                 @if($isLateCheckout && $isAdmin)
-                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-action btn-late" data-bs-toggle="tooltip" title="Voir détails late checkout">
+                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-action btn-late" data-bs-toggle="tooltip" title="{{ __('reservation.tooltip_view_late') }}">
                                     <i class="fas fa-clock"></i>
                                 </a>
                                 @endif
                                 
                                 @if($isSuperAdmin || ($isReceptionist && !in_array($status, ['cancelled', 'no_show', 'completed'])))
-                                <a href="{{ route('transaction.edit', $transaction) }}" class="btn-action btn-edit" data-bs-toggle="tooltip" title="Modifier">
+                                <a href="{{ route('transaction.edit', $transaction) }}" class="btn-action btn-edit" data-bs-toggle="tooltip" title="{{ __('reservation.tooltip_edit') }}">
                                     <i class="fas fa-edit"></i>
                                 </a>
                                 @endif
                                 
-                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-action btn-view" data-bs-toggle="tooltip" title="Voir détails">
+                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-action btn-view" data-bs-toggle="tooltip" title="{{ __('reservation.tooltip_view') }}">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 @if(in_array($status, ['active', 'pending_checkout']))
-                                <a href="{{ route('transaction.compte-sejour', $transaction) }}" class="btn-action" style="background:#10b981; color:#fff;" data-bs-toggle="tooltip" title="Compte séjour">
+                                <a href="{{ route('transaction.compte-sejour', $transaction) }}" class="btn-action" style="background:#10b981; color:#fff;" data-bs-toggle="tooltip" title="{{ __('reservation.tooltip_stay_bill') }}">
                                     <i class="fas fa-receipt"></i>
                                 </a>
                                 @endif
@@ -1205,11 +1205,11 @@
                         <td colspan="12" class="text-center">
                             <div class="trx-empty">
                                 <div class="trx-empty-icon"><i class="fas fa-bed"></i></div>
-                                <h5 style="color: var(--s600); margin-bottom: 6px;">Aucune réservation active</h5>
-                                <p style="color: var(--s400); margin-bottom: 18px;">Commencez par créer une nouvelle réservation</p>
+                                <h5 style="color: var(--s600); margin-bottom: 6px;">{{ __('reservation.no_active_reservations') }}</h5>
+                                <p style="color: var(--s400); margin-bottom: 18px;">{{ __('reservation.start_create') }}</p>
                                 @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                                 <button class="btn-db btn-db-primary" data-bs-toggle="modal" data-bs-target="#newReservationModal">
-                                    <i class="fas fa-plus"></i> Nouvelle réservation
+                                    <i class="fas fa-plus"></i> {{ __('reservation.new_reservation') }}
                                 </button>
                                 @endif
                             </div>
@@ -1233,27 +1233,27 @@
         <div class="trx-card-header">
             <h3 class="trx-card-title">
                 <i class="fas fa-history"></i>
-                Anciennes réservations
+                {{ __('reservation.old_reservations') }}
                 <span class="trx-card-count">{{ $transactionsExpired->count() }}</span>
             </h3>
-            <span class="trx-card-subtitle">Terminées ou expirées</span>
+            <span class="trx-card-subtitle">{{ __('reservation.old_reservations_sub') }}</span>
         </div>
 
         <div style="overflow-x: auto;">
             <table class="trx-table">
                 <thead>
                     <tr>
-                        <th>#</th>
-                        <th>Client</th>
-                        <th>Chambre</th>
-                        <th>Arrivée</th>
-                        <th>Départ</th>
-                        <th>Nuits</th>
-                        <th>Total</th>
-                        <th>Payé</th>
-                        <th>Reste</th>
-                        <th class="text-center">Statut</th>
-                        <th class="text-end">Actions</th>
+                        <th>{{ __('reservation.col_id') }}</th>
+                        <th>{{ __('reservation.col_client') }}</th>
+                        <th>{{ __('reservation.col_room') }}</th>
+                        <th>{{ __('reservation.col_arrival') }}</th>
+                        <th>{{ __('reservation.col_departure') }}</th>
+                        <th>{{ __('reservation.col_nights') }}</th>
+                        <th>{{ __('reservation.col_total') }}</th>
+                        <th>{{ __('reservation.col_paid') }}</th>
+                        <th>{{ __('reservation.col_remaining') }}</th>
+                        <th class="text-center">{{ __('reservation.col_status') }}</th>
+                        <th class="text-end">{{ __('reservation.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -1282,12 +1282,12 @@
                                 <span class="badge-late ms-1">{{ $expectedCheckoutTime }}</span>
                             @endif
                         </td>
-                        <td><span class="nights-badge">{{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}</span></td>
+                        <td><span class="nights-badge">{{ $nights }} {{ __('reservation.nights_count') }}{{ $nights > 1 ? 's' : '' }}</span></td>
                         <td class="price price-positive">{{ number_format($totalPrice, 0, ',', ' ') }} FCFA</td>
                         <td class="price price-success">{{ number_format($totalPayment, 0, ',', ' ') }} FCFA</td>
                         <td>
                             @if($isFullyPaid)
-                                <span class="badge-paid"><i class="fas fa-check"></i> Soldé</span>
+                                <span class="badge-paid"><i class="fas fa-check"></i> {{ __('reservation.settled') }}</span>
                             @else
                                 <span class="price price-danger">{{ number_format($remaining, 0, ',', ' ') }} FCFA</span>
                             @endif
@@ -1301,23 +1301,23 @@
                                 @elseif($status == 'cancelled') ❌
                                 @else 👤
                                 @endif
-                                {{ $isLateCheckout ? 'Late' : ($status == 'reservation' ? 'Réservation' : ($status == 'active' ? 'Dans hôtel' : ($status == 'completed' ? 'Terminé' : ($status == 'cancelled' ? 'Annulée' : 'No Show')))) }}
+                                {{ $isLateCheckout ? __('reservation.status_late') : ($status == 'reservation' ? __('reservation.status_reservation') : ($status == 'active' ? __('reservation.status_in_hotel') : ($status == 'completed' ? __('reservation.status_completed') : ($status == 'cancelled' ? __('reservation.status_cancelled') : __('reservation.status_no_show'))))) }}
                             </span>
                         </td>
                         <td>
                             <div class="action-buttons">
                                 @if($canPay)
-                                <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-action btn-pay" data-bs-toggle="tooltip" title="Payer dette">
+                                <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-action btn-pay" data-bs-toggle="tooltip" title="{{ __('reservation.tooltip_payment') }}">
                                     <i class="fas fa-money-bill-wave-alt"></i>
                                 </a>
                                 @endif
-                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-action btn-view" data-bs-toggle="tooltip" title="Voir détails">
+                                <a href="{{ route('transaction.show', $transaction) }}" class="btn-action btn-view" data-bs-toggle="tooltip" title="{{ __('reservation.tooltip_view') }}">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 @if(auth()->user()->role == 'Super' && $status == 'cancelled')
                                 <form action="{{ route('transaction.restore', $transaction) }}" method="POST" class="d-inline">
                                     @csrf
-                                    <button type="submit" class="btn-action" style="background: var(--g50); color: var(--g600);" onclick="return confirm('Restaurer cette réservation ?')" data-bs-toggle="tooltip" title="Restaurer">
+                                    <button type="submit" class="btn-action" style="background: var(--g50); color: var(--g600);" onclick="return confirm('{{ __('reservation.confirm_restore') }}')" data-bs-toggle="tooltip" title="{{ __('reservation.confirm_restore') }}">
                                         <i class="fas fa-undo"></i>
                                     </button>
                                 </form>
@@ -1342,18 +1342,18 @@
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="fas fa-plus-circle me-2" style="color: var(--g600);"></i>
-                    Nouvelle Réservation
+                    {{ __('reservation.new_reservation') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body text-center">
-                <p class="mb-4" style="color: var(--s500);">Le client a-t-il déjà un compte ?</p>
+                <p class="mb-4" style="color: var(--s500);">{{ __('reservation.has_account_question') }}</p>
                 <div class="d-flex justify-content-center gap-3">
                     <a href="{{ route('transaction.reservation.createIdentity') }}" class="btn-db btn-db-primary">
-                        <i class="fas fa-user-plus"></i> Nouveau compte
+                        <i class="fas fa-user-plus"></i> {{ __('reservation.new_account') }}
                     </a>
                     <a href="{{ route('transaction.reservation.pickFromCustomer') }}" class="btn-db btn-db-ghost">
-                        <i class="fas fa-users"></i> Client existant
+                        <i class="fas fa-users"></i> {{ __('reservation.existing_customer') }}
                     </a>
                 </div>
             </div>
@@ -1416,12 +1416,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (newStatus === 'cancelled') {
                 e.preventDefault();
                 Swal.fire({
-                    title: 'Annuler cette réservation ?',
-                    html: '<textarea id="reason" class="form-control mt-2" placeholder="Raison (optionnelle)"></textarea>',
+                    title: '{{ __("reservation.confirm_cancel_reservation") }}',
+                    html: '<textarea id="reason" class="form-control mt-2" placeholder="{{ __("reservation.cancel_reason_placeholder") }}"></textarea>',
                     icon: 'warning',
                     showCancelButton: true,
-                    confirmButtonText: 'Oui, annuler',
-                    cancelButtonText: 'Non',
+                    confirmButtonText: '{{ __("reservation.yes") }}, {{ __("reservation.cancel") }}',
+                    cancelButtonText: '{{ __("reservation.no") }}',
                     confirmButtonColor: '#545954',
                     cancelButtonColor: '#1e6b2e',
                 }).then(result => {
@@ -1438,12 +1438,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (newStatus === 'no_show') {
                 e.preventDefault();
                 Swal.fire({
-                    title: 'Marquer comme "No Show" ?',
-                    text: 'Le client ne s\'est pas présenté',
+                    title: '{{ __("reservation.mark_no_show") }}',
+                    text: '{{ __("reservation.no_show_message") }}',
                     icon: 'question',
                     showCancelButton: true,
-                    confirmButtonText: 'Oui',
-                    cancelButtonText: 'Non',
+                    confirmButtonText: '{{ __("reservation.yes") }}',
+                    cancelButtonText: '{{ __("reservation.no") }}',
                     confirmButtonColor: '#1e6b2e',
                 }).then(result => {
                     if (result.isConfirmed) form.submit();
@@ -1467,8 +1467,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentHour < 12) {
                 Swal.fire({
                     icon: 'warning',
-                    title: '⏳ Trop tôt',
-                    text: 'Check-out possible à partir de 12h',
+                    title: '{{ __("reservation.too_early") }}',
+                    text: '{{ __("reservation.checkout_from_12h") }}',
                     timer: 3000
                 });
                 return;
@@ -1477,8 +1477,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (currentHour >= 20) {
                 Swal.fire({
                     icon: 'error',
-                    title: '⚠️ Après 20h',
-                    text: 'Départ impossible après 20h. Veuillez prolonger le séjour.',
+                    title: '{{ __("reservation.after_8pm") }}',
+                    text: '{{ __("reservation.departure_impossible_after_20h") }}',
                     confirmButtonColor: '#1e6b2e'
                 });
                 return;
@@ -1487,9 +1487,9 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!isPaid) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Paiement incomplet',
+                    title: '{{ __("reservation.incomplete_payment") }}',
                     html: `Solde restant: <strong>${parseInt(remaining).toLocaleString()} CFA</strong>`,
-                    confirmButtonText: 'Aller au paiement',
+                    confirmButtonText: '{{ __("reservation.go_to_payment") }}',
                     showCancelButton: true,
                     confirmButtonColor: '#1e6b2e'
                 }).then(result => {
@@ -1500,20 +1500,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            let message = 'La chambre sera marquée comme à nettoyer.';
+            let message = '{{ __("reservation.room_marked_clean") }}';
             if (currentHour >= 14) {
-                message = 'Late checkout - La chambre sera marquée comme à nettoyer.';
+                message = '{{ __("reservation.late_checkout_room_clean") }}';
             } else if (currentHour >= 12) {
-                message = 'Largesse de 2h accordée. La chambre sera marquée comme à nettoyer.';
+                message = '{{ __("reservation.grace_2h_room_clean") }}';
             }
             
             Swal.fire({
-                title: 'Confirmer le départ ?',
+                title: '{{ __("reservation.confirm_departure") }}',
                 text: message,
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Oui, départ',
-                cancelButtonText: 'Annuler',
+                confirmButtonText: '{{ __("reservation.yes_departure") }}',
+                cancelButtonText: '{{ __("reservation.cancel") }}',
                 confirmButtonColor: '#1e6b2e'
             }).then(result => {
                 if (result.isConfirmed) {

@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Création Client')
+@section('title', __('reservation.create_client'))
 @section('content')
 
 <style>
@@ -403,7 +403,7 @@
     <div class="identity-breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Création client</span>
+        <span class="current">{{ __('reservation.create_client') }}</span>
     </div>
 
     <!-- Header -->
@@ -411,15 +411,15 @@
         <div class="identity-brand">
             <div class="identity-brand-icon"><i class="fas fa-user-plus"></i></div>
             <div>
-                <h1 class="identity-header-title">Création <em>client</em></h1>
+                <h1 class="identity-header-title">{{ __('reservation.create_client_title_1') }} <em>{{ __('reservation.create_client_title_2') }}</em></h1>
                 <p class="identity-header-sub">
-                    <i class="fas fa-users me-1"></i> Étape 1/4 · Informations personnelles
+                    <i class="fas fa-users me-1"></i> {{ __('reservation.step_1_4') }}
                 </p>
             </div>
         </div>
         <div class="identity-header-actions">
             <a href="{{ route('dashboard.index') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-times me-2"></i> Annuler
+                <i class="fas fa-times me-2"></i> {{ __('reservation.cancel') }}
             </a>
         </div>
     </div>
@@ -429,19 +429,19 @@
         <div class="progress-steps">
             <div class="progress-step step-active">
                 <div class="step-circle">1</div>
-                <div class="step-label">Identité</div>
+                <div class="step-label">{{ __('reservation.step_identity') }}</div>
             </div>
             <div class="progress-step">
                 <div class="step-circle">2</div>
-                <div class="step-label">Dates</div>
+                <div class="step-label">{{ __('reservation.step_dates') }}</div>
             </div>
             <div class="progress-step">
                 <div class="step-circle">3</div>
-                <div class="step-label">Chambre</div>
+                <div class="step-label">{{ __('reservation.step_room') }}</div>
             </div>
             <div class="progress-step">
                 <div class="step-circle">4</div>
-                <div class="step-label">Confirmation</div>
+                <div class="step-label">{{ __('reservation.step_confirmation') }}</div>
             </div>
         </div>
     </div>
@@ -451,7 +451,7 @@
         <div class="identity-card-header">
             <h5 class="identity-card-title">
                 <i class="fas fa-user-circle"></i>
-                Informations client
+                {{ __('reservation.customer_info') }}
             </h5>
         </div>
 
@@ -462,8 +462,7 @@
                     <i class="fas fa-info-circle"></i>
                 </div>
                 <div class="info-text">
-                    <strong>Important :</strong> Le même email peut être utilisé pour plusieurs réservations. 
-                    Si le client existe déjà, ses informations seront mises à jour.
+                    {{ __('reservation.important_email') }}
                 </div>
             </div>
 
@@ -474,10 +473,10 @@
                         <i class="fas fa-user-check"></i>
                     </div>
                     <div class="existing-details">
-                        <div class="existing-title">Client existant trouvé</div>
+                        <div class="existing-title">{{ __('reservation.existing_customer_found') }}</div>
                         <div class="existing-info" id="customerDetails"></div>
                         <div class="existing-meta">
-                            <span id="reservationCount">0</span> réservation(s) existante(s)
+                            <span id="reservationCount">0</span> {{ __('reservation.existing_reservations') }}
                         </div>
                     </div>
                 </div>
@@ -494,7 +493,7 @@
                 <div class="alert-db alert-db-danger">
                     <i class="fas fa-exclamation-circle"></i>
                     <div style="flex:1">
-                        <strong>Veuillez corriger les erreurs :</strong>
+                        <strong>{{ __('reservation.fix_errors') }}</strong>
                         <ul>
                             @foreach($errors->all() as $error)
                                 <li>{{ $error }}</li>
@@ -513,7 +512,7 @@
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label for="email" class="form-label">
                             <i class="fas fa-envelope"></i>
-                            Adresse email <span class="required">*</span>
+                            {{ __('reservation.email_label') }} <span class="required">*</span>
                         </label>
                         <input type="email" class="form-control @error('email') is-invalid @enderror" 
                                id="email" name="email" value="{{ old('email') }}" 
@@ -526,7 +525,7 @@
                         @enderror
                         <div class="form-text">
                             <i class="fas fa-lightbulb"></i>
-                            Saisissez l'email du client. Le système vérifiera s'il existe déjà.
+                            {{ __('reservation.email_hint') }}
                         </div>
                     </div>
 
@@ -534,7 +533,7 @@
                     <div class="form-group">
                         <label for="name" class="form-label">
                             <i class="fas fa-user"></i>
-                            Nom complet <span class="required">*</span>
+                            {{ __('reservation.full_name') }} <span class="required">*</span>
                         </label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror" 
                                id="name" name="name" value="{{ old('name') }}" 
@@ -550,7 +549,7 @@
                     <div class="form-group">
                         <label for="birthdate" class="form-label">
                             <i class="fas fa-birthday-cake"></i>
-                            Date de naissance
+                            {{ __('reservation.birthdate') }}
                         </label>
                         <input type="date" class="form-control @error('birthdate') is-invalid @enderror"
                                min="1900-01-01" max="{{ date('Y-m-d') }}"
@@ -566,14 +565,14 @@
                     <div class="form-group">
                         <label for="gender" class="form-label">
                             <i class="fas fa-venus-mars"></i>
-                            Genre <span class="required">*</span>
+                            {{ __('reservation.gender') }} <span class="required">*</span>
                         </label>
                         <select class="form-select @error('gender') is-invalid @enderror" 
                                 id="gender" name="gender" required>
-                            <option value="">-- Sélectionner --</option>
-                            <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>Masculin</option>
-                            <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>Féminin</option>
-                            <option value="Other" {{ old('gender') == 'Other' ? 'selected' : '' }}>Autre</option>
+                            <option value="">{{ __('reservation.select') }}</option>
+                            <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>{{ __('reservation.male') }}</option>
+                            <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>{{ __('reservation.female') }}</option>
+                            <option value="Other" {{ old('gender') == 'Other' ? 'selected' : '' }}>{{ __('reservation.other') }}</option>
                         </select>
                         @error('gender')
                             <div class="error-message">
@@ -582,11 +581,11 @@
                         @enderror
                     </div>
 
-                    <!-- Téléphone -->
+                    <!-- {{ __('reservation.phone') }} -->
                     <div class="form-group">
                         <label for="phone" class="form-label">
                             <i class="fas fa-phone"></i>
-                            Téléphone <span class="required">*</span>
+                            {{ __('reservation.phone') }} <span class="required">*</span>
                         </label>
                         <input type="text" class="form-control @error('phone') is-invalid @enderror" 
                                id="phone" name="phone" value="{{ old('phone') }}" 
@@ -602,11 +601,11 @@
                     <div class="form-group">
                         <label for="job" class="form-label">
                             <i class="fas fa-briefcase"></i>
-                            Profession
+                            {{ __('reservation.profession') }}
                         </label>
                         <input type="text" class="form-control @error('job') is-invalid @enderror" 
                                id="job" name="job" value="{{ old('job') }}" 
-                               placeholder="Développeur, Médecin, Étudiant...">
+                               placeholder="{{ __('reservation.profession_placeholder') }}">
                         @error('job')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i> {{ $message }}
@@ -618,11 +617,11 @@
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label for="address" class="form-label">
                             <i class="fas fa-map-marker-alt"></i>
-                            Adresse
+                            {{ __('reservation.address') }}
                         </label>
                         <textarea class="form-control @error('address') is-invalid @enderror" 
                                   id="address" name="address" rows="3" 
-                                  placeholder="Rue, Ville, Pays">{{ old('address') }}</textarea>
+                                  placeholder="{{ __('reservation.address_placeholder') }}">{{ old('address') }}</textarea>
                         @error('address')
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i> {{ $message }}
@@ -634,18 +633,18 @@
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label for="avatar" class="form-label">
                             <i class="fas fa-camera"></i>
-                            Photo de profil
+                            {{ __('reservation.photo') }}
                         </label>
                         <div class="input-group">
                             <input class="form-control @error('avatar') is-invalid @enderror" 
                                    type="file" name="avatar" id="avatar" accept="image/*">
                             <button class="btn-outline" type="button" onclick="clearAvatar()">
-                                <i class="fas fa-times"></i> Effacer
+                                <i class="fas fa-times"></i> {{ __('reservation.clear_photo') }}
                             </button>
                         </div>
                         <div class="form-text">
                             <i class="fas fa-image"></i>
-                            Formats acceptés : JPEG, PNG, GIF (max 2MB)
+                            {{ __('reservation.formats_accepted') }}
                         </div>
                         @error('avatar')
                             <div class="error-message">
@@ -655,7 +654,7 @@
 
                         <!-- Avatar preview -->
                         <div id="avatarPreview" class="avatar-preview">
-                            <img id="previewImage" src="#" alt="Aperçu" class="preview-image">
+                            <img id="previewImage" src="#" alt="{{ __('reservation.preview') }}" class="preview-image">
                         </div>
                     </div>
                 </div>
@@ -663,11 +662,10 @@
                 <!-- Actions -->
                 <div style="display: flex; justify-content: space-between; margin-top: 28px;">
                     <a href="{{ route('dashboard.index') }}" class="btn-db btn-db-ghost">
-                        <i class="fas fa-times me-2"></i> Annuler
+                        <i class="fas fa-times me-2"></i> {{ __('reservation.cancel') }}
                     </a>
                     <button type="submit" class="btn-db btn-db-primary">
-                        <i class="fas fa-save me-2"></i> Enregistrer
-                        <span id="submitText">et continuer</span>
+                        <i class="fas fa-save me-2"></i> <span id="submitText">{{ __('reservation.save_continue') }}</span>
                     </button>
                 </div>
             </form>
@@ -676,10 +674,10 @@
         <div class="identity-card-footer">
             <div class="footer-info">
                 <div>
-                    <i class="fas fa-user me-1"></i> Étape 1/4 - Identité
+                    <i class="fas fa-user me-1"></i> {{ __('reservation.step_1_identity') }}
                 </div>
                 <div>
-                    <i class="fas fa-arrow-right me-1"></i> Prochaine étape : Dates et chambre
+                    <i class="fas fa-arrow-right me-1"></i> {{ __('reservation.next_step') }}
                 </div>
             </div>
         </div>
@@ -703,7 +701,7 @@ function checkExistingCustomer() {
     // Afficher un indicateur de chargement
     const submitButton = document.querySelector('button[type="submit"]');
     const originalText = submitButton.innerHTML;
-    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Vérification...';
+    submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> {{ __("reservation.checking") }}';
     submitButton.disabled = true;
     
     // Effectuer la requête AJAX
@@ -728,11 +726,11 @@ function checkExistingCustomer() {
             
             // Mettre à jour le texte du bouton
             document.getElementById('submitText').innerHTML = 
-                'et mettre à jour <span class="reservation-badge">' + 
-                data.customer.reservation_count + ' résa(s)</span>';
+                '{{ __("reservation.save_update") }} <span class="reservation-badge">' + 
+                data.customer.reservation_count + '</span>';
         } else {
             hideExistingCustomerInfo();
-            document.getElementById('submitText').innerHTML = 'et continuer';
+            document.getElementById('submitText').innerHTML = '{{ __("reservation.save_continue") }}';
         }
     })
     .catch(error => {
@@ -762,7 +760,7 @@ function showExistingCustomerInfo(data) {
 // Fonction pour masquer les informations du client existant
 function hideExistingCustomerInfo() {
     document.getElementById('existingCustomerInfo').style.display = 'none';
-    document.getElementById('submitText').innerHTML = 'et continuer';
+    document.getElementById('submitText').innerHTML = '{{ __("reservation.save_continue") }}';
 }
 
 // Fonction de validation d'email
@@ -803,14 +801,14 @@ document.getElementById('customerForm').addEventListener('submit', function(e) {
     
     if (!validateEmail(email)) {
         e.preventDefault();
-        alert('Veuillez saisir une adresse email valide.');
+        alert('{{ __("reservation.invalid_email") }}');
         document.getElementById('email').focus();
         return false;
     }
     
     if (!name.trim()) {
         e.preventDefault();
-        alert('Veuillez saisir le nom du client.');
+        alert('{{ __("reservation.enter_name") }}');
         document.getElementById('name').focus();
         return false;
     }
@@ -818,7 +816,7 @@ document.getElementById('customerForm').addEventListener('submit', function(e) {
     // Vérifier si on veut confirmer pour un client existant
     const existingCustomerDiv = document.getElementById('existingCustomerInfo');
     if (existingCustomerDiv.style.display === 'block') {
-        if (!confirm('Ce client existe déjà. Voulez-vous mettre à jour ses informations et créer une nouvelle réservation ?')) {
+        if (!confirm('{{ __("reservation.confirm_existing") }}')) {
             e.preventDefault();
             return false;
         }
