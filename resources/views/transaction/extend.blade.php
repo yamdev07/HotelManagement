@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Prolonger la Réservation #' . $transaction->id)
+@section('title', __('extend.page_title', ['id' => $transaction->id]))
 @section('content')
 
 <style>
@@ -332,13 +332,13 @@
 <div class="container-fluid px-4 py-3">
     <!-- Breadcrumb -->
     <div class="breadcrumb-modern">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>{{ __('extend.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.index') }}">Réservations</a>
+        <a href="{{ route('transaction.index') }}">{{ __('extend.reservations') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('transaction.show', $transaction) }}">#{{ $transaction->id }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span style="color: var(--gray-700); font-weight: 500;">Prolonger</span>
+        <span style="color: var(--gray-700); font-weight: 500;">{{ __('extend.extend') }}</span>
     </div>
 
     <!-- En-tête -->
@@ -346,13 +346,13 @@
         <div>
             <h2 class="h4 mb-1" style="color: var(--gray-800); font-weight: 700;">
                 <i class="fas fa-calendar-plus me-2" style="color: var(--primary);"></i>
-                Prolonger la Réservation #{{ $transaction->id }}
+                {{ __('extend.page_heading', ['id' => $transaction->id]) }}
             </h2>
-            <p class="text-muted small mb-0">Ajoutez des nuits supplémentaires au séjour du client</p>
+            <p class="text-muted small mb-0">{{ __('extend.page_description') }}</p>
         </div>
         
         <a href="{{ route('transaction.show', $transaction) }}" class="btn-modern btn-outline-modern">
-            <i class="fas fa-arrow-left me-1"></i>Retour
+            <i class="fas fa-arrow-left me-1"></i>{{ __('extend.back') }}
         </a>
     </div>
 
@@ -375,7 +375,7 @@
         <div class="col-lg-8">
             <div class="extend-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-calendar-alt me-2"></i>Prolonger le séjour</h5>
+                    <h5><i class="fas fa-calendar-alt me-2"></i>{{ __('extend.additional_nights_title') }}</h5>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ route('transaction.extend.process', $transaction) }}" id="extend-form">
@@ -385,28 +385,28 @@
                         <div class="alert alert-info d-flex align-items-center gap-3 mb-4" style="background: var(--info-light); border: 1px solid rgba(59, 130, 246, 0.1); color: #1e40af;">
                             <i class="fas fa-info-circle fa-2x"></i>
                             <div>
-                                <strong>Séjour actuel</strong>
+                                <strong>{{ __('extend.current_stay') }}</strong>
                                 <div class="row mt-2">
                                     <div class="col-md-6">
-                                        <small>Client</small>
+                                        <small>{{ __('extend.client') }}</small>
                                         <p class="mb-1"><strong>{{ $transaction->customer->name }}</strong></p>
                                     </div>
                                     <div class="col-md-6">
-                                        <small>Chambre</small>
-                                        <p class="mb-1"><strong>Chambre {{ $transaction->room->number }}</strong></p>
+                                        <small>{{ __('extend.room') }}</small>
+                                        <p class="mb-1"><strong>{{ __('extend.room_number', ['number' => $transaction->room->number]) }}</strong></p>
                                     </div>
                                 </div>
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <small>Arrivée</small>
+                                        <small>{{ __('extend.arrival') }}</small>
                                         <p class="mb-1"><strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</strong></p>
                                     </div>
                                     <div class="col-md-4">
-                                        <small>Départ actuel</small>
+                                        <small>{{ __('extend.current_departure') }}</small>
                                         <p class="mb-1"><strong>{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</strong></p>
                                     </div>
                                     <div class="col-md-4">
-                                        <small>Nuits actuelles</small>
+                                        <small>{{ __('extend.current_nights') }}</small>
                                         <p class="mb-1"><strong>{{ \Carbon\Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out) }}</strong></p>
                                     </div>
                                 </div>
@@ -416,7 +416,7 @@
                         <!-- Sélection du nombre de nuits supplémentaires -->
                         <div class="mb-4">
                             <h6 style="font-size: 0.9rem; font-weight: 600; color: var(--gray-700); margin-bottom: 16px; border-bottom: 1px solid var(--gray-200); padding-bottom: 8px;">
-                                <i class="fas fa-moon me-2" style="color: var(--primary);"></i>Nombre de nuits supplémentaires
+                                <i class="fas fa-moon me-2" style="color: var(--primary);"></i>{{ __('extend.additional_nights_title') }}
                             </h6>
                             
                             <div class="row g-3 mb-3" id="nights-options">
@@ -424,7 +424,7 @@
                                 <div class="col-md-3">
                                     <div class="night-option" data-nights="{{ $night }}" onclick="selectNights({{ $night }})">
                                         <div class="h4">{{ $night }}</div>
-                                        <small>{{ $night == 1 ? 'Nuit' : 'Nuits' }}</small>
+                                        <small>{{ $night == 1 ? __('extend.night_singular') : __('extend.night_plural') }}</small>
                                     </div>
                                 </div>
                                 @endforeach
@@ -433,7 +433,7 @@
                             <!-- Sélection personnalisée -->
                             <div class="mt-4">
                                 <label for="additional_nights" class="form-label" style="font-size: 0.85rem; font-weight: 500; color: var(--gray-700);">
-                                    <i class="fas fa-sliders-h me-1" style="color: var(--primary);"></i>Nombre personnalisé
+                                    <i class="fas fa-sliders-h me-1" style="color: var(--primary);"></i>{{ __('extend.custom_number') }}
                                 </label>
                                 <div class="input-group">
                                     <input type="number" 
@@ -446,19 +446,19 @@
                                            required
                                            onchange="updatePreview()"
                                            style="border-radius: 6px 0 0 6px; border: 1px solid var(--gray-200); padding: 8px 12px;">
-                                    <span class="input-group-text" style="background: var(--gray-100); border: 1px solid var(--gray-200); border-left: none; border-radius: 0 6px 6px 0; color: var(--gray-600);">nuit(s)</span>
+                                    <span class="input-group-text" style="background: var(--gray-100); border: 1px solid var(--gray-200); border-left: none; border-radius: 0 6px 6px 0; color: var(--gray-600);">{{ __('extend.nights_unit') }}</span>
                                 </div>
                                 @error('additional_nights')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
-                                <small class="text-muted" style="font-size: 0.7rem;">Maximum 30 nuits supplémentaires</small>
+                                <small class="text-muted" style="font-size: 0.7rem;">{{ __('extend.max_nights_help') }}</small>
                             </div>
                         </div>
 
                         <!-- Nouvelle date de départ -->
                         <div class="mb-4">
                             <label for="new_check_out" class="form-label" style="font-size: 0.85rem; font-weight: 500; color: var(--gray-700);">
-                                <i class="fas fa-calendar-day me-1" style="color: var(--primary);"></i>Nouvelle date de départ
+                                    <i class="fas fa-calendar-day me-1" style="color: var(--primary);"></i>{{ __('extend.new_departure_date') }}
                             </label>
                             <div class="input-group">
                                 <input type="date" 
@@ -477,36 +477,36 @@
                                 <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
                             <small class="text-muted" style="font-size: 0.7rem;">
-                                Départ actuel : {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}
+                                {{ __('extend.current_departure_label') }} {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}
                             </small>
                         </div>
 
                         <!-- Prévisualisation -->
                         <div class="date-preview mb-4">
-                            <h6><i class="fas fa-eye me-2" style="color: var(--primary);"></i>Prévisualisation</h6>
+                            <h6><i class="fas fa-eye me-2" style="color: var(--primary);"></i>{{ __('extend.preview') }}</h6>
                             <div class="row text-center">
                                 <div class="col-md-4">
                                     <div class="preview-number">{{ \Carbon\Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out) }}</div>
-                                    <div class="preview-label">Nuits actuelles</div>
+                                    <div class="preview-label">{{ __('extend.current_nights_label') }}</div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="preview-number primary" id="additional-nights-preview">0</div>
-                                    <div class="preview-label">Nuits supplémentaires</div>
+                                    <div class="preview-label">{{ __('extend.additional_nights_label') }}</div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="preview-number success" id="total-nights">0</div>
-                                    <div class="preview-label">Total nuits</div>
+                                    <div class="preview-label">{{ __('extend.total_nights_label') }}</div>
                                 </div>
                             </div>
                             <div class="row mt-3">
                                 <div class="col-md-6">
-                                    <div class="preview-label">Nouvelle date de départ</div>
+                                    <div class="preview-label">{{ __('extend.new_departure_label') }}</div>
                                     <div class="h5 mb-0" id="new-check-out-preview">-</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="preview-label">Disponibilité</div>
+                                    <div class="preview-label">{{ __('extend.availability_label') }}</div>
                                     <div id="availability-status">
-                                        <span class="badge" style="background: var(--gray-200); color: var(--gray-600);">Non vérifié</span>
+                                        <span class="badge" style="background: var(--gray-200); color: var(--gray-600);">{{ __('extend.not_checked') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -514,24 +514,24 @@
 
                         <!-- Détails du prix -->
                         <div class="price-breakdown mb-4">
-                            <h6><i class="fas fa-calculator me-2"></i>Détails du prix</h6>
+                            <h6><i class="fas fa-calculator me-2"></i>{{ __('extend.price_details') }}</h6>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <div class="price-label">Prix par nuit</div>
+                                    <div class="price-label">{{ __('extend.price_per_night') }}</div>
                                     <div class="price-value primary">{{ number_format($transaction->room->price, 0, ',', ' ') }} CFA</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="price-label">Total actuel</div>
+                                    <div class="price-label">{{ __('extend.current_total') }}</div>
                                     <div class="price-value">{{ number_format($transaction->getTotalPrice(), 0, ',', ' ') }} CFA</div>
                                 </div>
                             </div>
                             <div class="row mt-3 pt-3" style="border-top: 1px solid rgba(37, 99, 235, 0.1);">
                                 <div class="col-md-6">
-                                    <div class="price-label">Supplément</div>
+                                    <div class="price-label">{{ __('extend.supplement') }}</div>
                                     <div class="price-value primary" id="additional-price">0 CFA</div>
                                 </div>
                                 <div class="col-md-6">
-                                    <div class="price-label">Nouveau total</div>
+                                    <div class="price-label">{{ __('extend.new_total') }}</div>
                                     <div class="price-value success" id="new-total-price">0 CFA</div>
                                 </div>
                             </div>
@@ -540,7 +540,7 @@
                         <!-- Vérification de disponibilité -->
                         <div class="mb-4">
                             <button type="button" id="check-availability-btn" class="btn-modern btn-outline-modern">
-                                <i class="fas fa-search me-1"></i>Vérifier disponibilité
+                                <i class="fas fa-search me-1"></i>{{ __('extend.check_availability') }}
                             </button>
                             <div id="availability-result" class="mt-2"></div>
                         </div>
@@ -548,14 +548,14 @@
                         <!-- Notes -->
                         <div class="mb-4">
                             <label for="notes" class="form-label" style="font-size: 0.85rem; font-weight: 500; color: var(--gray-700);">
-                                <i class="fas fa-sticky-note me-1" style="color: var(--primary);"></i>Notes (optionnel)
+                                <i class="fas fa-sticky-note me-1" style="color: var(--primary);"></i>{{ __('extend.notes_optional') }}
                             </label>
                             <textarea class="form-control" 
                                       id="notes" 
                                       name="notes" 
                                       rows="3"
                                       style="border: 1px solid var(--gray-200); border-radius: 6px; padding: 8px 12px;"
-                                      placeholder="Raison de la prolongation, instructions spéciales...">{{ old('notes') }}</textarea>
+                                      placeholder="{{ __('extend.notes_placeholder') }}">{{ old('notes') }}</textarea>
                             @error('notes')
                                 <div class="text-danger small mt-1">{{ $message }}</div>
                             @enderror
@@ -564,10 +564,10 @@
                         <!-- Boutons -->
                         <div class="d-flex justify-content-between">
                             <a href="{{ route('transaction.show', $transaction) }}" class="btn-modern btn-outline-modern">
-                                <i class="fas fa-times me-1"></i>Annuler
+                                <i class="fas fa-times me-1"></i>{{ __('extend.cancel') }}
                             </a>
                             <button type="submit" class="btn-modern btn-primary-modern" id="extend-btn">
-                                <i class="fas fa-calendar-plus me-1"></i>Confirmer la prolongation
+                                <i class="fas fa-calendar-plus me-1"></i>{{ __('extend.confirm_extension') }}
                             </button>
                         </div>
                     </form>
@@ -580,34 +580,34 @@
             <!-- Résumé -->
             <div class="info-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-info-circle" style="color: var(--primary);"></i>Résumé</h5>
+                    <h5><i class="fas fa-info-circle" style="color: var(--primary);"></i>{{ __('extend.summary') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="info-item">
-                        <span class="info-label"><i class="fas fa-user"></i>Client</span>
+                        <span class="info-label"><i class="fas fa-user"></i>{{ __('extend.client') }}</span>
                         <span class="info-value">{{ $transaction->customer->name }}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label"><i class="fas fa-bed"></i>Chambre</span>
+                        <span class="info-label"><i class="fas fa-bed"></i>{{ __('extend.room') }}</span>
                         <span class="info-value">{{ $transaction->room->number }}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label"><i class="fas fa-calendar-check"></i>Arrivée</span>
+                        <span class="info-label"><i class="fas fa-calendar-check"></i>{{ __('extend.arrival') }}</span>
                         <span class="info-value">{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label"><i class="fas fa-calendar-times"></i>Départ actuel</span>
+                        <span class="info-label"><i class="fas fa-calendar-times"></i>{{ __('extend.current_departure') }}</span>
                         <span class="info-value">{{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label"><i class="fas fa-money-bill"></i>Prix/nuit</span>
+                        <span class="info-label"><i class="fas fa-money-bill"></i>{{ __('extend.price_per_night') }}</span>
                         <span class="info-value">{{ number_format($transaction->room->price, 0, ',', ' ') }} CFA</span>
                     </div>
                     <div class="info-item">
-                        <span class="info-label"><i class="fas fa-chart-line"></i>Statut</span>
+                        <span class="info-label"><i class="fas fa-chart-line"></i>{{ __('extend.status_active') }}</span>
                         <span class="info-value">
                             <span class="badge" style="background: {{ $transaction->status == 'active' ? 'var(--success-light)' : 'var(--warning-light)' }}; color: {{ $transaction->status == 'active' ? '#047857' : '#b45309' }};">
-                                {{ $transaction->status == 'active' ? 'Dans l\'hôtel' : 'Réservation' }}
+                                {{ $transaction->status == 'active' ? __('extend.status_active') : __('extend.status_reservation') }}
                             </span>
                         </span>
                     </div>
@@ -617,15 +617,15 @@
             <!-- Important -->
             <div class="info-card important-card">
                 <div class="card-header">
-                    <h6><i class="fas fa-exclamation-triangle"></i>Important</h6>
+                    <h6><i class="fas fa-exclamation-triangle"></i>{{ __('extend.important') }}</h6>
                 </div>
                 <div class="card-body">
                     <ul>
-                        <li><i class="fas fa-check-circle"></i> La prolongation prend effet immédiatement</li>
-                        <li><i class="fas fa-check-circle"></i> Le supplément sera ajouté au total</li>
-                        <li><i class="fas fa-check-circle"></i> Vérifiez la disponibilité de la chambre</li>
-                        <li><i class="fas fa-check-circle"></i> Le client sera notifié</li>
-                        <li><i class="fas fa-check-circle"></i> Toute modification est enregistrée</li>
+                        <li><i class="fas fa-check-circle"></i> {{ __('extend.notice_immediate') }}</li>
+                        <li><i class="fas fa-check-circle"></i> {{ __('extend.notice_supplement') }}</li>
+                        <li><i class="fas fa-check-circle"></i> {{ __('extend.notice_availability') }}</li>
+                        <li><i class="fas fa-check-circle"></i> {{ __('extend.notice_notification') }}</li>
+                        <li><i class="fas fa-check-circle"></i> {{ __('extend.notice_recorded') }}</li>
                     </ul>
                 </div>
             </div>
@@ -715,12 +715,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const transactionId = {{ $transaction->id }};
         
         if (!newCheckOut) {
-            alert('Veuillez d\'abord sélectionner une date de départ');
+            alert('{{ __("extend.alert_select_date") }}');
             return;
         }
         
         if (new Date(newCheckOut) <= new Date(currentCheckOut)) {
-            alert('La nouvelle date de départ doit être après la date actuelle');
+            alert('{{ __("extend.alert_date_after_current") }}');
             return;
         }
         
@@ -728,7 +728,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Afficher chargement
             const checkBtn = document.getElementById('check-availability-btn');
             const originalText = checkBtn.innerHTML;
-            checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Vérification...';
+            checkBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ __("extend.checking") }}';
             checkBtn.disabled = true;
             
             const response = await fetch(`/transaction/${transactionId}/check-availability`, {
@@ -757,29 +757,29 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.available) {
                 resultDiv.innerHTML = `
                     <div class="alert alert-success py-2" style="background: var(--success-light); border: 1px solid rgba(16, 185, 129, 0.2); color: #047857;">
-                        <i class="fas fa-check-circle me-1"></i> Disponible !
+                        <i class="fas fa-check-circle me-1"></i> {{ __('extend.available') }}
                     </div>
                 `;
-                statusBadge.innerHTML = '<span class="badge" style="background: var(--success); color: white;">Disponible ✓</span>';
+                statusBadge.innerHTML = '<span class="badge" style="background: var(--success); color: white;">{{ __("extend.available_badge") }}</span>';
             } else {
                 resultDiv.innerHTML = `
                     <div class="alert alert-danger py-2" style="background: var(--danger-light); border: 1px solid rgba(239, 68, 68, 0.2); color: #b91c1c;">
-                        <i class="fas fa-times-circle me-1"></i> Non disponible !
+                        <i class="fas fa-times-circle me-1"></i> {{ __('extend.not_available') }}
                     </div>
                 `;
-                statusBadge.innerHTML = '<span class="badge" style="background: var(--danger); color: white;">Non disponible ✗</span>';
+                statusBadge.innerHTML = '<span class="badge" style="background: var(--danger); color: white;">{{ __("extend.not_available_badge") }}</span>';
             }
             
         } catch (error) {
             console.error('Erreur:', error);
             document.getElementById('availability-result').innerHTML = `
                 <div class="alert alert-warning py-2" style="background: var(--warning-light); border: 1px solid rgba(245, 158, 11, 0.2); color: #b45309;">
-                    <i class="fas fa-exclamation-triangle me-1"></i> Erreur lors de la vérification
+                    <i class="fas fa-exclamation-triangle me-1"></i> {{ __('extend.check_error') }}
                 </div>
             `;
             
             const checkBtn = document.getElementById('check-availability-btn');
-            checkBtn.innerHTML = '<i class="fas fa-search me-1"></i>Vérifier disponibilité';
+            checkBtn.innerHTML = '<i class="fas fa-search me-1"></i>{{ __("extend.check_availability") }}';
             checkBtn.disabled = false;
         }
     }
@@ -794,20 +794,20 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (additionalNights < 1 || additionalNights > 30) {
             e.preventDefault();
-            alert('Le nombre de nuits supplémentaires doit être entre 1 et 30');
+            alert('{{ __("extend.alert_invalid_nights") }}');
             return false;
         }
         
         if (new Date(newCheckOut) <= new Date(currentCheckOut)) {
             e.preventDefault();
-            alert('La nouvelle date de départ doit être après la date actuelle');
+            alert('{{ __("extend.alert_date_after_current") }}');
             return false;
         }
         
         // Désactiver le bouton pour éviter double soumission
         const extendBtn = document.getElementById('extend-btn');
         extendBtn.disabled = true;
-        extendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Traitement...';
+        extendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>{{ __("extend.processing") }}';
         
         return true;
     });
