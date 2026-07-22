@@ -1,4 +1,5 @@
 <?php
+
 return [
     'page_title' => 'Reservation Management',
     'header_title_1' => 'Reservation',
@@ -102,40 +103,40 @@ return [
     'has_account_question' => 'Does the guest already have an account?',
     'new_account' => 'New account',
     'existing_customer' => 'Existing guest',
-    
+
     // JS messages
     'checking' => 'Checking...',
     'invalid_email' => 'Please enter a valid email address.',
     'enter_name' => 'Please enter the guest name.',
     'confirm_existing' => 'This guest already exists. Do you want to update their information and create a new reservation?',
-    
+
     // Status extra
     'status_non_paid' => '(unpaid)',
-    
+
     // Restore
     'confirm_restore' => 'Restore this reservation?',
-    
+
     // Cancel reservation
     'confirm_cancel_reservation' => 'Cancel this reservation?',
     'no_show_message' => 'The guest did not show up',
-    
+
     // Checkout time messages
     'too_early' => '⏳ Too early',
     'checkout_from_12h' => 'Check-out available from 12pm',
     'after_8pm' => '⚠️ After 8pm',
     'departure_impossible_after_20h' => 'Departure not possible after 8pm. Please extend the stay.',
-    
+
     // Departure confirmation
     'room_marked_clean' => 'The room will be marked as to clean.',
     'late_checkout_room_clean' => 'Late checkout - The room will be marked as to clean.',
     'grace_2h_room_clean' => '2h grace granted. The room will be marked as to clean.',
     'confirm_departure' => 'Confirm departure?',
     'yes_departure' => 'Yes, depart',
-    
+
     // Create Identity extras
     'profession_placeholder' => 'Developer, Doctor, Student...',
     'preview' => 'Preview',
-    
+
     // JS generic
     'yes' => 'Yes',
     'no' => 'No',

@@ -1,8 +1,9 @@
 <?php
+
 return [
     // Page title
     'page_title' => 'Gestion des Réservations',
-    
+
     // Header
     'header_title_1' => 'Gestion des',
     'header_title_2' => 'Réservations',
@@ -10,7 +11,7 @@ return [
     'new_reservation' => 'Nouvelle réservation',
     'history' => 'Historique',
     'full_permissions' => 'Permissions complètes',
-    
+
     // Legend
     'legend_reservation' => 'Réservation',
     'legend_in_hotel' => 'Dans l\'hôtel',
@@ -18,17 +19,17 @@ return [
     'legend_cancelled' => 'Annulée',
     'legend_no_show' => 'No Show',
     'legend_late' => 'Late checkout',
-    
+
     // Search
     'search_title' => 'Rechercher une réservation',
     'search_placeholder' => 'ID, nom client ou numéro de chambre...',
     'search_button' => 'Rechercher',
     'clear' => 'Effacer',
-    
+
     // Receptionist note
     'recep_note_title' => 'Réceptionniste · Permissions Complètes',
     'recep_note_desc' => 'Création, modification, paiements, check-in/out, annulation ✓ (sauf suppression)',
-    
+
     // Active reservations
     'active_reservations' => 'Réservations en cours',
     'arrivals_stays' => 'Arrivées & séjours en cours',
@@ -50,7 +51,7 @@ return [
     'overdue' => 'Dépassé',
     'settled' => 'Soldé',
     'pay_now' => 'Régler',
-    
+
     // Status labels
     'status_reservation' => 'Réservation',
     'status_in_hotel' => 'Dans hôtel',
@@ -59,7 +60,7 @@ return [
     'status_no_show' => 'No Show',
     'status_late' => 'Late checkout',
     'status_unpaid' => '(impayé)',
-    
+
     // Action tooltips
     'tooltip_payment' => 'Paiement',
     'tooltip_mark_arrived' => 'Marquer arrivé',
@@ -67,15 +68,15 @@ return [
     'tooltip_view' => 'Voir détails',
     'tooltip_view_late' => 'Voir détails late checkout',
     'tooltip_stay_bill' => 'Compte séjour',
-    
+
     // Empty state
     'no_active_reservations' => 'Aucune réservation active',
     'start_create' => 'Commencez par créer une nouvelle réservation',
-    
+
     // Old reservations
     'old_reservations' => 'Anciennes réservations',
     'old_reservations_sub' => 'Terminées ou expirées',
-    
+
     // Departure tooltips
     'departure_largesse' => 'Départ (largesse jusqu\'à 14h)',
     'departure_late' => 'Départ (late checkout)',
@@ -85,7 +86,7 @@ return [
     'checkin_available_12h' => 'Check-in possible à partir de 12h. Encore :hours heure(s).',
     'departure_scheduled' => 'Départ prévu le :date',
     'checkout_available_12h' => 'Check-out possible à partir de 12h. Encore :hours heure(s).',
-    
+
     // Create Identity page
     'create_client' => 'Création client',
     'create_client_title_1' => 'Création',
@@ -121,45 +122,45 @@ return [
     'save_update' => 'et mettre à jour',
     'step_1_identity' => 'Étape 1/4 - Identité',
     'next_step' => 'Prochaine étape : Dates et chambre',
-    
+
     // Modal new reservation
     'has_account_question' => 'Le client a-t-il déjà un compte ?',
     'new_account' => 'Nouveau compte',
     'existing_customer' => 'Client existant',
-    
+
     // JS messages
     'checking' => 'Vérification...',
     'invalid_email' => 'Veuillez saisir une adresse email valide.',
     'enter_name' => 'Veuillez saisir le nom du client.',
     'confirm_existing' => 'Ce client existe déjà. Voulez-vous mettre à jour ses informations et créer une nouvelle réservation ?',
-    
+
     // Status extra
     'status_non_paid' => '(non payé)',
-    
+
     // Restore
     'confirm_restore' => 'Restaurer cette réservation ?',
-    
+
     // Cancel reservation
     'confirm_cancel_reservation' => 'Annuler cette réservation ?',
     'no_show_message' => 'Le client ne s\'est pas présenté',
-    
+
     // Checkout time messages
     'too_early' => '⏳ Trop tôt',
     'checkout_from_12h' => 'Check-out possible à partir de 12h',
     'after_8pm' => '⚠️ Après 20h',
     'departure_impossible_after_20h' => 'Départ impossible après 20h. Veuillez prolonger le séjour.',
-    
+
     // Departure confirmation
     'room_marked_clean' => 'La chambre sera marquée comme à nettoyer.',
     'late_checkout_room_clean' => 'Late checkout - La chambre sera marquée comme à nettoyer.',
     'grace_2h_room_clean' => 'Largesse de 2h accordée. La chambre sera marquée comme à nettoyer.',
     'confirm_departure' => 'Confirmer le départ ?',
     'yes_departure' => 'Oui, départ',
-    
+
     // Create Identity extras
     'profession_placeholder' => 'Développeur, Médecin, Étudiant...',
     'preview' => 'Aperçu',
-    
+
     // JS generic
     'yes' => 'Oui',
     'no' => 'Non',
