@@ -498,7 +498,7 @@
                                 </div>
 
                                 <div class="room-description">
-                                    {{ $room->type->description_fr ?? __('reservation.no_description') }}
+                                    {{ $room->type->{'description_' . app()->getLocale()} ?? $room->type->description_fr ?? __('reservation.no_description') }}
                                 </div>
 
                                 <a href="{{ route('transaction.reservation.confirmation', [
