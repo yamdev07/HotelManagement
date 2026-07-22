@@ -594,8 +594,8 @@
         <div class="db-brand">
             <div class="db-brand-icon"><i class="fas fa-hotel"></i></div>
             <div>
-                <h1 class="db-header-greeting">Bonjour, <em>{{ auth()->user()->name }}</em> 👋</h1>
-                <p class="db-header-sub">{{ now()->translatedFormat('l d F Y') }} · Vue d'ensemble des opérations</p>
+                <h1 class="db-header-greeting">{{ __('dashboard.greeting') }}, <em>{{ auth()->user()->name }}</em> 👋</h1>
+                <p class="db-header-sub">{{ now()->translatedFormat('l d F Y') }} · {{ __('dashboard.overview') }}</p>
             </div>
         </div>
         <div class="db-header-right">
@@ -605,7 +605,7 @@
                 <span class="db-clock-date">{{ now()->translatedFormat('d M') }}</span>
             </div>
             <a href="{{ isset($currentHotel) && $currentHotel ? $currentHotel->publicUrl() : route('frontend.home') }}" target="_blank" class="btn-site">
-                <i class="fas fa-external-link-alt fa-xs"></i> Site web
+                <i class="fas fa-external-link-alt fa-xs"></i> {{ __('dashboard.website') }}
             </a>
         </div>
     </div>
@@ -616,44 +616,44 @@
         <a href="{{ route('transaction.index') }}?status=active&date_filter=today" class="stat-card stat-card--primary">
             <div class="stat-card-head">
                 <div class="stat-card-icon"><i class="fas fa-users"></i></div>
-                <span class="stat-card-badge">Aujourd'hui</span>
+                <span class="stat-card-badge">{{ __('dashboard.today_badge') }}</span>
             </div>
             <div class="stat-card-value">{{ $stats['activeGuests'] ?? 0 }}</div>
-            <div class="stat-card-label">Clients actifs</div>
+            <div class="stat-card-label">{{ __('dashboard.active_guests') }}</div>
             <div class="stat-card-meta">
                 <i class="fas fa-arrow-up fa-xs"></i>
-                {{ $stats['todayArrivals'] ?? 0 }} nouvelle{{ ($stats['todayArrivals'] ?? 0) > 1 ? 's' : '' }} arrivée{{ ($stats['todayArrivals'] ?? 0) > 1 ? 's' : '' }}
+                {{ __('dashboard.new_arrivals', ['count' => $stats['todayArrivals'] ?? 0]) }}
             </div>
         </a>
 
         <a href="{{ route('transaction.index') }}?status=completed&date_filter=today" class="stat-card stat-card--secondary">
             <div class="stat-card-head">
                 <div class="stat-card-icon"><i class="fas fa-check-circle"></i></div>
-                <span class="stat-card-badge">Terminé</span>
+                <span class="stat-card-badge">{{ __('dashboard.completed_badge') }}</span>
             </div>
             <div class="stat-card-value">{{ $stats['completedToday'] ?? 0 }}</div>
-            <div class="stat-card-label">Check-outs aujourd'hui</div>
-            <div class="stat-card-meta"><i class="fas fa-check fa-xs"></i> Paiements soldés</div>
+            <div class="stat-card-label">{{ __('dashboard.checkouts_today') }}</div>
+            <div class="stat-card-meta"><i class="fas fa-check fa-xs"></i> {{ __('dashboard.payments_settled') }}</div>
         </a>
 
         <a href="{{ route('transaction.index') }}?payment_status=pending" class="stat-card stat-card--muted">
             <div class="stat-card-head">
                 <div class="stat-card-icon"><i class="fas fa-clock"></i></div>
-                <span class="stat-card-badge">Attention</span>
+                <span class="stat-card-badge">{{ __('dashboard.attention_badge') }}</span>
             </div>
             <div class="stat-card-value">{{ $stats['pendingPayments'] ?? 0 }}</div>
-            <div class="stat-card-label">Paiements en attente</div>
-            <div class="stat-card-meta"><i class="fas fa-exclamation-circle fa-xs"></i> Suivi requis</div>
+            <div class="stat-card-label">{{ __('dashboard.pending_payments') }}</div>
+            <div class="stat-card-meta"><i class="fas fa-exclamation-circle fa-xs"></i> {{ __('dashboard.follow_up_required') }}</div>
         </a>
 
         <a href="{{ route('transaction.index') }}?payment_status=urgent&due_within=24h" class="stat-card stat-card--neutral">
             <div class="stat-card-head">
                 <div class="stat-card-icon"><i class="fas fa-exclamation-triangle"></i></div>
-                <span class="stat-card-badge">Urgent</span>
+                <span class="stat-card-badge">{{ __('dashboard.urgent_badge') }}</span>
             </div>
             <div class="stat-card-value">{{ $stats['urgentPayments'] ?? 0 }}</div>
-            <div class="stat-card-label">Échéance &lt; 24h</div>
-            <div class="stat-card-meta"><i class="fas fa-clock fa-xs"></i> Action immédiate</div>
+            <div class="stat-card-label">{!! __('dashboard.due_under_24h') !!}</div>
+            <div class="stat-card-meta"><i class="fas fa-clock fa-xs"></i> {{ __('dashboard.immediate_action') }}</div>
         </a>
 
     </div>
@@ -663,31 +663,31 @@
         <div class="db-panel-header">
             <h2 class="db-panel-title">
                 <div class="db-panel-title-icon"><i class="fas fa-calendar-alt"></i></div>
-                Arrivées &amp; Départs
+                {{ __('dashboard.arrivals_departures') }}
             </h2>
         </div>
         <div class="db-panel-body">
 
-            <div class="section-label">Prévisions</div>
+            <div class="section-label">{{ __('dashboard.forecast') }}</div>
             <div class="dates-grid">
 
                 <a href="{{ route('checkin.index') }}?date=today" class="date-card date-card--today">
                     <div class="date-card-head">
-                        <span class="date-card-name">Aujourd'hui</span>
+                        <span class="date-card-name">{{ __('dashboard.today') }}</span>
                         <span class="date-card-pill">{{ now()->format('d M') }}</span>
                     </div>
                     <div class="date-card-rows">
                         <div class="date-card-row">
                             <span class="date-card-row-label">
                                 <span class="row-ico green"><i class="fas fa-sign-in-alt fa-xs"></i></span>
-                                Arrivées
+                                {{ __('dashboard.arrivals') }}
                             </span>
                             <span class="date-card-row-val">{{ $stats['todayArrivals'] ?? 0 }}</span>
                         </div>
                         <div class="date-card-row">
                             <span class="date-card-row-label">
                                 <span class="row-ico"><i class="fas fa-sign-out-alt fa-xs"></i></span>
-                                Départs
+                                {{ __('dashboard.departures') }}
                             </span>
                             <span class="date-card-row-val">{{ $stats['todayDepartures'] ?? 0 }}</span>
                         </div>
@@ -696,7 +696,7 @@
 
                 <a href="{{ route('checkin.index') }}?date=tomorrow" class="date-card">
                     <div class="date-card-head">
-                        <span class="date-card-name">Demain</span>
+                        <span class="date-card-name">{{ __('dashboard.tomorrow') }}</span>
                         <span class="date-card-pill">{{ now()->addDay()->format('d M') }}</span>
                     </div>
                     <div class="date-card-rows">
@@ -710,7 +710,7 @@
                         <div class="date-card-row">
                             <span class="date-card-row-label">
                                 <span class="row-ico"><i class="fas fa-sign-out-alt fa-xs"></i></span>
-                                Départs
+                                {{ __('dashboard.departures') }}
                             </span>
                             <span class="date-card-row-val">{{ $stats['tomorrowDepartures'] ?? 0 }}</span>
                         </div>
@@ -719,7 +719,7 @@
 
                 <a href="{{ route('checkin.index') }}?date=day+2" class="date-card">
                     <div class="date-card-head">
-                        <span class="date-card-name">J+2</span>
+                        <span class="date-card-name">{{ __('dashboard.day_2') }}</span>
                         <span class="date-card-pill">{{ now()->addDays(2)->format('d M') }}</span>
                     </div>
                     <div class="date-card-rows">
@@ -733,7 +733,7 @@
                         <div class="date-card-row">
                             <span class="date-card-row-label">
                                 <span class="row-ico"><i class="fas fa-sign-out-alt fa-xs"></i></span>
-                                Départs
+                                {{ __('dashboard.departures') }}
                             </span>
                             <span class="date-card-row-val">{{ $stats['day2Departures'] ?? 0 }}</span>
                         </div>
@@ -742,31 +742,31 @@
 
             </div>
 
-            <div class="section-label">Occupation des chambres</div>
+            <div class="section-label">{{ __('dashboard.room_occupancy') }}</div>
             <div class="rooms-grid">
 
                 <a href="{{ route('room.index') }}?status=available" class="room-stat-card">
                     <div class="room-stat-label">
-                        Chambres libres
-                        <span class="room-stat-badge rsb-green">Vacant</span>
+                        {{ __('dashboard.free_rooms') }}
+                        <span class="room-stat-badge rsb-green">{{ __('dashboard.vacant') }}</span>
                     </div>
                     <div class="room-stat-value">{{ $stats['availableRooms'] ?? 0 }}</div>
-                    <div class="room-stat-sub">sur {{ $stats['totalRooms'] ?? 0 }} chambres</div>
+                    <div class="room-stat-sub">{{ __('dashboard.out_of_rooms', ['count' => $stats['totalRooms'] ?? 0]) }}</div>
                 </a>
 
                 <a href="{{ route('room.index') }}?status=occupied" class="room-stat-card">
                     <div class="room-stat-label">
-                        Chambres occupées
-                        <span class="room-stat-badge rsb-grey">Occupé</span>
+                        {{ __('dashboard.occupied_rooms') }}
+                        <span class="room-stat-badge rsb-grey">{{ __('dashboard.occupied') }}</span>
                     </div>
                     <div class="room-stat-value">{{ $stats['occupiedRooms'] ?? 0 }}</div>
-                    <div class="room-stat-sub">en ce moment</div>
+                    <div class="room-stat-sub">{{ __('dashboard.right_now') }}</div>
                 </a>
 
                 <a href="{{ route('reports.index') }}" class="room-stat-card">
                     <div class="room-stat-label">
-                        Taux d'occupation
-                        <span class="room-stat-badge rsb-light">Aujourd'hui</span>
+                        {{ __('dashboard.occupancy_rate') }}
+                        <span class="room-stat-badge rsb-light">{{ __('dashboard.today_badge') }}</span>
                     </div>
                     <div class="room-stat-value">{{ $stats['occupancyRate'] ?? 0 }}%</div>
                     <div class="occ-bar">
@@ -788,31 +788,31 @@
                     <div>
                         <h2 class="db-card-title">
                             <span class="db-card-title-dot" style="background:var(--g500)"></span>
-                            Clients actifs
+                            {{ __('dashboard.active_guests_title') }}
                         </h2>
-                        <div class="db-card-subtitle">{{ $transactions->count() }} client{{ $transactions->count() > 1 ? 's' : '' }} en ce moment</div>
+                        <div class="db-card-subtitle">{{ __('dashboard.guests_count', ['count' => $transactions->count()]) }}</div>
                     </div>
                     <div class="db-card-actions">
                         <button class="btn-db btn-db-ghost" onclick="refreshDashboard()">
-                            <i class="fas fa-sync-alt fa-xs"></i> Actualiser
+                            <i class="fas fa-sync-alt fa-xs"></i> {{ __('dashboard.refresh') }}
                         </button>
                         <div class="db-dropdown" id="filter-dropdown">
                             <button class="btn-db btn-db-ghost" onclick="toggleDropdown('filter-dropdown')">
-                                <i class="fas fa-filter fa-xs"></i> Filtrer
+                                <i class="fas fa-filter fa-xs"></i> {{ __('dashboard.filter') }}
                             </button>
                             <div class="db-dropdown-menu db-filter-dropdown">
-                                <a class="db-dropdown-item" href="?status=active"><i class="fas fa-user-check fa-xs"></i> Actifs seulement</a>
-                                <a class="db-dropdown-item" href="?status=reservation"><i class="fas fa-calendar fa-xs"></i> Réservations</a>
-                                <a class="db-dropdown-item" href="?payment_status=pending"><i class="fas fa-clock fa-xs"></i> Paiements en attente</a>
+                                <a class="db-dropdown-item" href="?status=active"><i class="fas fa-user-check fa-xs"></i> {{ __('dashboard.filter_active_only') }}</a>
+                                <a class="db-dropdown-item" href="?status=reservation"><i class="fas fa-calendar fa-xs"></i> {{ __('dashboard.filter_reservations') }}</a>
+                                <a class="db-dropdown-item" href="?payment_status=pending"><i class="fas fa-clock fa-xs"></i> {{ __('dashboard.filter_pending_payments') }}</a>
                                 <div class="db-dropdown-divider"></div>
-                                <a class="db-dropdown-item" href="?date_filter=today"><i class="fas fa-sun fa-xs"></i> Aujourd'hui</a>
-                                <a class="db-dropdown-item" href="?date_filter=tomorrow"><i class="fas fa-arrow-right fa-xs"></i> Demain</a>
-                                <a class="db-dropdown-item" href="?date_filter=this_week"><i class="fas fa-calendar-week fa-xs"></i> Cette semaine</a>
-                                <a class="db-dropdown-item" href="?date_filter=all"><i class="fas fa-list fa-xs"></i> Toutes les dates</a>
+                                <a class="db-dropdown-item" href="?date_filter=today"><i class="fas fa-sun fa-xs"></i> {{ __('dashboard.filter_today') }}</a>
+                                <a class="db-dropdown-item" href="?date_filter=tomorrow"><i class="fas fa-arrow-right fa-xs"></i> {{ __('dashboard.filter_tomorrow') }}</a>
+                                <a class="db-dropdown-item" href="?date_filter=this_week"><i class="fas fa-calendar-week fa-xs"></i> {{ __('dashboard.filter_this_week') }}</a>
+                                <a class="db-dropdown-item" href="?date_filter=all"><i class="fas fa-list fa-xs"></i> {{ __('dashboard.filter_all_dates') }}</a>
                             </div>
                         </div>
                         <a href="{{ route('transaction.reservation.createIdentity') }}" class="btn-db btn-db-primary">
-                            <i class="fas fa-plus fa-xs"></i> Nouveau client
+                            <i class="fas fa-plus fa-xs"></i> {{ __('dashboard.new_client') }}
                         </a>
                     </div>
                 </div>
@@ -822,11 +822,11 @@
                     <table class="db-table">
                         <thead>
                             <tr>
-                                <th>Client</th>
-                                <th>Chambre</th>
-                                <th>Dates</th>
-                                <th>Solde</th>
-                                <th style="text-align:right">Actions</th>
+                                <th>{{ __('dashboard.col_guest') }}</th>
+                                <th>{{ __('dashboard.col_room') }}</th>
+                                <th>{{ __('dashboard.col_dates') }}</th>
+                                <th>{{ __('dashboard.col_balance') }}</th>
+                                <th style="text-align:right">{{ __('dashboard.col_actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -849,7 +849,7 @@
                                                 <a href="{{ route('customer.show', $transaction->customer->id) }}" class="guest-name">
                                                     {{ $transaction->customer->name }}
                                                 </a>
-                                                @if($isNew)<span class="tag-new"><i class="fas fa-star fa-xs"></i> Nouveau</span>@endif
+                                                @if($isNew)<span class="tag-new"><i class="fas fa-star fa-xs"></i> {{ __('dashboard.new_tag') }}</span>@endif
                                             </div>
                                             <div class="guest-sub">{{ $transaction->customer->phone ?? 'N/A' }}</div>
                                         </div>
@@ -865,18 +865,18 @@
                                     <div class="date-in"><i class="fas fa-sign-in-alt fa-xs"></i> {{ $transaction->check_in->format('d/m/Y') }}</div>
                                     <div class="date-out"><i class="fas fa-sign-out-alt fa-xs"></i> {{ $transaction->check_out->format('d/m/Y') }}</div>
                                     @if($isOut)
-                                    <div class="checkout-today-tag"><i class="fas fa-exclamation-circle fa-xs"></i> Départ aujourd'hui</div>
+                                    <div class="checkout-today-tag"><i class="fas fa-exclamation-circle fa-xs"></i> {{ __('dashboard.departure_today') }}</div>
                                     @endif
                                 </td>
 
                                 <td>
                                     @if($balance <= 0)
-                                        <span class="balance-paid"><i class="fas fa-check fa-xs"></i> Soldé</span>
+                                        <span class="balance-paid"><i class="fas fa-check fa-xs"></i> {{ __('dashboard.settled') }}</span>
                                     @else
                                         <div class="balance-due-amount">{{ $balanceFmt }}</div>
-                                        <div class="balance-total">Total : {{ $totalFmt }}</div>
+                                        <div class="balance-total">{{ __('dashboard.total_label', ['amount' => $totalFmt]) }}</div>
                                         <a href="{{ route('transaction.payment.create', ['transaction' => $transaction->id]) }}" class="btn-pay-now">
-                                            <i class="fas fa-credit-card fa-xs"></i> Encaisser
+                                            <i class="fas fa-credit-card fa-xs"></i> {{ __('dashboard.collect') }}
                                         </a>
                                     @endif
                                 </td>
@@ -897,16 +897,16 @@
                                             </button>
                                             <div class="db-dropdown-menu">
                                                 <a class="db-dropdown-item" href="{{ route('transaction.edit', ['transaction' => $transaction->id]) }}">
-                                                    <i class="fas fa-edit fa-xs"></i> Modifier
+                                                    <i class="fas fa-edit fa-xs"></i> {{ __('dashboard.edit') }}
                                                 </a>
                                                 <a class="db-dropdown-item" href="{{ route('transaction.invoice', ['transaction' => $transaction->id]) }}">
-                                                    <i class="fas fa-file-invoice fa-xs"></i> Facture
+                                                    <i class="fas fa-file-invoice fa-xs"></i> {{ __('dashboard.invoice') }}
                                                 </a>
                                                 @if($transaction->canBeCancelled())
                                                 <div class="db-dropdown-divider"></div>
                                                 <button class="db-dropdown-item db-dropdown-item-danger"
                                                         onclick="confirmCancel('{{ route('transaction.cancel', ['transaction' => $transaction->id]) }}', '{{ $transaction->customer->name }}')">
-                                                    <i class="fas fa-times fa-xs"></i> Annuler
+                                                    <i class="fas fa-times fa-xs"></i> {{ __('dashboard.cancel') }}
                                                 </button>
                                                 @endif
                                             </div>
@@ -927,10 +927,10 @@
                 @else
                 <div class="db-empty">
                     <div class="db-empty-icon"><i class="fas fa-bed"></i></div>
-                    <p style="font-size:.95rem;font-weight:600;color:var(--s700);margin-bottom:6px;">Aucun client actif</p>
-                    <p style="font-size:.8rem;color:var(--s400);margin-bottom:18px;">Aucun client enregistré pour le moment</p>
+                    <p style="font-size:.95rem;font-weight:600;color:var(--s700);margin-bottom:6px;">{{ __('dashboard.no_active_guests') }}</p>
+                    <p style="font-size:.8rem;color:var(--s400);margin-bottom:18px;">{{ __('dashboard.no_guests_recorded') }}</p>
                     <a href="{{ route('transaction.reservation.createIdentity') }}" class="btn-db btn-db-primary">
-                        <i class="fas fa-plus fa-xs"></i> Ajouter un client
+                        <i class="fas fa-plus fa-xs"></i> {{ __('dashboard.add_guest') }}
                     </a>
                 </div>
                 @endif
@@ -945,22 +945,22 @@
                 <div class="db-card-header">
                     <h2 class="db-card-title">
                         <span class="db-card-title-dot" style="background:var(--g500)"></span>
-                        Check-in rapide
+                        {{ __('dashboard.quick_checkin') }}
                     </h2>
                 </div>
                 <div class="db-card-body">
-                    <p style="font-size:.78rem;color:var(--s400);margin-bottom:12px;">Vérifier une réservation existante</p>
+                    <p style="font-size:.78rem;color:var(--s400);margin-bottom:12px;">{{ __('dashboard.check_existing') }}</p>
                     <form action="{{ route('checkin.search') }}" method="GET" class="qci-form">
                         <input type="text" class="qci-input" name="search"
-                               placeholder="Nom, chambre, ID…" value="{{ request('search') }}">
+                               placeholder="{{ __('dashboard.search_placeholder') }}" value="{{ request('search') }}">
                         <button type="submit" class="qci-btn"><i class="fas fa-search fa-xs"></i></button>
                     </form>
                     <div class="qci-cta">
                         <a href="{{ route('checkin.index') }}" class="btn-qci-outline">
-                            <i class="fas fa-list fa-xs"></i> Toutes les arrivées
+                            <i class="fas fa-list fa-xs"></i> {{ __('dashboard.all_arrivals') }}
                         </a>
                         <a href="{{ route('checkin.direct') }}" class="btn-qci-solid">
-                            <i class="fas fa-user-plus fa-xs"></i> Check-in direct
+                            <i class="fas fa-user-plus fa-xs"></i> {{ __('dashboard.direct_checkin') }}
                         </a>
                     </div>
                 </div>
@@ -970,40 +970,40 @@
                 <div class="db-card-header">
                     <h2 class="db-card-title">
                         <span class="db-card-title-dot" style="background:var(--g300)"></span>
-                        Actions rapides
+                        {{ __('dashboard.quick_actions') }}
                     </h2>
                 </div>
                 <div class="db-card-body" style="padding:12px 14px;">
                     <div class="qa-list">
                         <a href="{{ route('room.index') }}" class="qa-item">
                             <span class="qa-item-icon"><i class="fas fa-bed fa-xs"></i></span>
-                            Gérer les chambres
+                            {{ __('dashboard.manage_rooms') }}
                         </a>
                         <a href="{{ route('customer.index') }}" class="qa-item">
                             <span class="qa-item-icon"><i class="fas fa-users fa-xs"></i></span>
-                            Clients
+                            {{ __('dashboard.guests_link') }}
                         </a>
                         <a href="{{ route('checkin.index') }}" class="qa-item">
                             <span class="qa-item-icon"><i class="fas fa-calendar-check fa-xs"></i></span>
-                            Dashboard check-in
+                            {{ __('dashboard.checkin_dashboard') }}
                         </a>
                         <a href="{{ route('payments.index') }}" class="qa-item">
                             <span class="qa-item-icon"><i class="fas fa-money-bill-wave fa-xs"></i></span>
-                            Paiements
+                            {{ __('dashboard.payments_link') }}
                         </a>
                         <a href="{{ route('reports.index') }}" class="qa-item">
                             <span class="qa-item-icon"><i class="fas fa-chart-bar fa-xs"></i></span>
-                            Rapports
+                            {{ __('dashboard.reports_link') }}
                         </a>
                         @if(auth()->user()->isAdmin() || auth()->user()->role === 'Super')
                         <a href="{{ route('cashier.dashboard') }}" class="qa-item">
                             <span class="qa-item-icon"><i class="fas fa-cash-register fa-xs"></i></span>
-                            Caisse
+                            {{ __('dashboard.cashier_link') }}
                         </a>
                         @endif
                         <a href="{{ isset($currentHotel) && $currentHotel ? $currentHotel->publicUrl() : route('frontend.home') }}" target="_blank" class="qa-item">
                             <span class="qa-item-icon"><i class="fas fa-external-link-alt fa-xs"></i></span>
-                            Visiter le site
+                            {{ __('dashboard.visit_website') }}
                         </a>
                     </div>
                 </div>
@@ -1013,30 +1013,30 @@
                 <div class="db-card-header">
                     <h2 class="db-card-title">
                         <span class="db-card-title-dot" style="background:var(--s300)"></span>
-                        Statut système
+                        {{ __('dashboard.system_status') }}
                     </h2>
                 </div>
                 <div class="db-card-body">
                     <div class="status-list">
                         <div class="status-row">
-                            <span class="status-key">Dernière mise à jour</span>
+                            <span class="status-key">{{ __('dashboard.last_updated') }}</span>
                             <span class="status-badge status-neutral" id="last-updated">{{ now()->format('H:i:s') }}</span>
                         </div>
                         <div class="status-row">
-                            <span class="status-key">Sessions actives</span>
+                            <span class="status-key">{{ __('dashboard.active_sessions') }}</span>
                             <span class="status-badge status-info">1</span>
                         </div>
                         <div class="status-row">
-                            <span class="status-key">Base de données</span>
-                            <span class="status-badge status-online">En ligne</span>
+                            <span class="status-key">{{ __('dashboard.database') }}</span>
+                            <span class="status-badge status-online">{{ __('dashboard.online') }}</span>
                         </div>
                         <div class="status-row">
-                            <span class="status-key">Mémoire</span>
-                            <span class="status-badge status-normal">Normal</span>
+                            <span class="status-key">{{ __('dashboard.memory') }}</span>
+                            <span class="status-badge status-normal">{{ __('dashboard.normal') }}</span>
                         </div>
                     </div>
                     <button class="btn-refresh-full" onclick="refreshDashboard()">
-                        <i class="fas fa-sync-alt fa-xs"></i> Actualiser le dashboard
+                        <i class="fas fa-sync-alt fa-xs"></i> {{ __('dashboard.refresh_dashboard') }}
                     </button>
                 </div>
             </div>
@@ -1089,7 +1089,7 @@ document.addEventListener('click', function(e) {
 function refreshDashboard() {
     document.querySelectorAll('[onclick="refreshDashboard()"]').forEach(b => {
         b.disabled = true;
-        b.innerHTML = '<i class="fas fa-spinner fa-spin fa-xs"></i> Chargement…';
+        b.innerHTML = '<i class="fas fa-spinner fa-spin fa-xs"></i> {{ __('dashboard.loading') }}';
     });
     setTimeout(() => location.reload(), 600);
 }
@@ -1097,12 +1097,12 @@ function refreshDashboard() {
 /* ── Annulation ── */
 function confirmCancel(url, name) {
     Swal.fire({
-        title: 'Annuler la réservation ?',
-        html: `Annuler la réservation de <strong>${name}</strong>.<br><small style="color:#9ba09b">Cette action est irréversible.</small>`,
+        title: '{{ __("dashboard.cancel_reservation_title") }}',
+        html: `{!! __("dashboard.cancel_reservation_text", ["name" => "__NAME__"]) !!}`.replace('__NAME__', name),
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Oui, annuler',
-        cancelButtonText: 'Conserver',
+        confirmButtonText: '{{ __("dashboard.confirm_cancel") }}',
+        cancelButtonText: '{{ __("dashboard.keep_reservation") }}',
         confirmButtonColor: '#545954',
         cancelButtonColor: '#1e6b2e',
     }).then(r => {
