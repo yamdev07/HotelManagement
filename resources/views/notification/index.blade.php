@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Notifications')
+@section('title', __('notification.page_title'))
 @section('content')
 
 <style>
@@ -388,9 +388,9 @@
 <div class="notifications-page">
     <!-- Breadcrumb -->
     <div class="notifications-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('notification.breadcrumb_dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Notifications</span>
+        <span class="current">{{ __('notification.breadcrumb_notifications') }}</span>
     </div>
 
     <!-- Header -->
@@ -398,9 +398,9 @@
         <div class="notifications-brand">
             <div class="notifications-brand-icon"><i class="fas fa-bell"></i></div>
             <div>
-                <h1 class="notifications-header-title">Centre de <em>notifications</em></h1>
+                <h1 class="notifications-header-title">{!! __('notification.header_title') !!}</h1>
                 <p class="notifications-header-sub">
-                    <i class="fas fa-bell me-1"></i> Restez informé des activités importantes
+                    <i class="fas fa-bell me-1"></i> {{ __('notification.header_subtitle') }}
                 </p>
             </div>
         </div>
@@ -408,12 +408,12 @@
             <div class="stats-mini">
                 <div class="stat-mini-item">
                     <span class="stat-mini-dot dot-unread"></span>
-                    <span class="stat-mini-label">Non lues</span>
+                    <span class="stat-mini-label">{{ __('notification.unread') }}</span>
                     <span class="stat-mini-value">{{ auth()->user()->unreadNotifications->count() }}</span>
                 </div>
                 <div class="stat-mini-item">
                     <span class="stat-mini-dot dot-read"></span>
-                    <span class="stat-mini-label">Lues</span>
+                    <span class="stat-mini-label">{{ __('notification.read') }}</span>
                     <span class="stat-mini-value">{{ auth()->user()->readNotifications->count() }}</span>
                 </div>
             </div>
@@ -427,7 +427,7 @@
         <div class="timeline__group">
             <span class="timeline__year">
                 <i class="fas fa-circle me-2" style="color:var(--g500); font-size:.5rem;"></i>
-                Non lues
+                {{ __('notification.unread_section') }}
             </span>
             <div class="timeline__cards">
                 @forelse (auth()->user()->unreadNotifications as $notification)
@@ -439,12 +439,12 @@
                             </div>
                             <span class="notification-card__badge badge-unread">
                                 <i class="fas fa-circle me-1" style="font-size:.5rem;"></i>
-                                Nouveau
+                                {{ __('notification.unread_badge') }}
                             </span>
                         </div>
                         <div class="notification-card__content">
                             <p class="notification-card__message">
-                                {{ $notification->data['message'] ?? 'Nouvelle notification' }}
+                                {{ $notification->data['message'] ?? __('notification.unread_fallback') }}
                             </p>
                         </div>
                         <div class="notification-card__footer">
@@ -452,11 +452,11 @@
                                class="notification-card__link"
                                onclick="event.preventDefault(); markAsReadAndRedirect('{{ $notification->id }}', '{{ $notification->data['url'] ?? '#' }}')">
                                 <i class="fas fa-eye"></i>
-                                Voir les détails
+                                {{ __('notification.view_details') }}
                             </a>
                             <span class="notification-card__meta">
                                 <i class="fas fa-info-circle"></i>
-                                Cliquez pour marquer comme lu
+                                {{ __('notification.click_to_mark_read') }}
                             </span>
                         </div>
                     </div>
@@ -465,8 +465,8 @@
                         <div class="empty-icon">
                             <i class="fas fa-bell-slash"></i>
                         </div>
-                        <p class="empty-title">Aucune notification non lue</p>
-                        <p class="empty-text">Vous n'avez pas de nouvelles notifications</p>
+                        <p class="empty-title">{{ __('notification.empty_unread_title') }}</p>
+                        <p class="empty-text">{{ __('notification.empty_unread_text') }}</p>
                     </div>
                 @endforelse
             </div>
@@ -476,7 +476,7 @@
         <div class="timeline__group">
             <span class="timeline__year">
                 <i class="fas fa-circle me-2" style="color:var(--s400); font-size:.5rem;"></i>
-                Lues
+                {{ __('notification.read_section') }}
             </span>
             <div class="timeline__cards">
                 @forelse (auth()->user()->readNotifications as $notification)
@@ -488,22 +488,22 @@
                             </div>
                             <span class="notification-card__badge badge-read">
                                 <i class="fas fa-check me-1"></i>
-                                Lu
+                                {{ __('notification.read_badge') }}
                             </span>
                         </div>
                         <div class="notification-card__content">
                             <p class="notification-card__message">
-                                {{ $notification->data['message'] ?? 'Notification' }}
+                                {{ $notification->data['message'] ?? __('notification.read_fallback') }}
                             </p>
                         </div>
                         <div class="notification-card__footer">
                             <a href="{{ $notification->data['url'] ?? '#' }}" class="notification-card__link">
                                 <i class="fas fa-eye"></i>
-                                Voir les détails
+                                {{ __('notification.view_details') }}
                             </a>
                             <span class="notification-card__meta">
                                 <i class="fas fa-check-circle" style="color:var(--g500);"></i>
-                                Déjà consulté
+                                {{ __('notification.already_read') }}
                             </span>
                         </div>
                     </div>
@@ -512,8 +512,8 @@
                         <div class="empty-icon">
                             <i class="fas fa-bell"></i>
                         </div>
-                        <p class="empty-title">Aucune notification</p>
-                        <p class="empty-text">Vous n'avez pas encore de notifications</p>
+                        <p class="empty-title">{{ __('notification.empty_all_title') }}</p>
+                        <p class="empty-text">{{ __('notification.empty_all_text') }}</p>
                     </div>
                 @endforelse
             </div>
