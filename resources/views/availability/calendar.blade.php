@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Calendrier des disponibilités')
+@section('title', __('messages.calendar_title'))
 
 @push('styles')
 <style>
@@ -798,12 +798,12 @@
             <div class="cal-topbar__title">
                 <h1>
                     <i class="fas fa-calendar-alt" style="color:var(--g600)"></i>
-                    Calendrier des disponibilités
+                    {{ __('messages.calendar_title') }}
                     <span class="time-badge">
-                        <i class="fas fa-clock"></i> Check-in 12h | Check-out 12h
+                        <i class="fas fa-clock"></i> {{ __('messages.checkin_12h_checkout_12h') }}
                     </span>
                 </h1>
-                <p>Visualisez les réservations et disponibilités des chambres</p>
+                <p>{{ __('messages.visualize_reservations') }}</p>
             </div>
             <div class="cal-topbar__actions">
                 <div class="cal-nav">
@@ -821,7 +821,7 @@
                 </div>
                 <a href="{{ route('availability.search') }}" class="btn-db btn-db-primary">
                     <i class="fas fa-search"></i>
-                    Rechercher
+                    {{ __('messages.search') }}
                 </a>
             </div>
         </div>
@@ -836,34 +836,34 @@
                 <i class="fas fa-bed"></i>
             </div>
             <div>
-                <div class="kpi-label">Chambres totales</div>
+                <div class="kpi-label">{{ __('messages.total_rooms_label') }}</div>
                 <div class="kpi-value">{{ $stats['total_rooms'] }}</div>
             </div>
         </div>
-        <div class="kpi-card" onclick="filterByStatus('available')" title="Voir les chambres disponibles">
+        <div class="kpi-card" onclick="filterByStatus('available')" title="{{ __('messages.available') }}">
             <div class="kpi-icon" style="background:var(--g50);color:var(--g600)">
                 <i class="fas fa-check-circle"></i>
             </div>
             <div>
-                <div class="kpi-label">Disponibles</div>
+                <div class="kpi-label">{{ __('messages.available_rooms') }}</div>
                 <div class="kpi-value" style="color:var(--g600)">{{ $stats['available_today'] }}</div>
             </div>
         </div>
-        <div class="kpi-card" onclick="filterByStatus('reserved')" title="Voir les chambres réservées">
+        <div class="kpi-card" onclick="filterByStatus('reserved')" title="{{ __('messages.reserved') }}">
             <div class="kpi-icon" style="background:#fee2e2;color:#b91c1c">
                 <i class="fas fa-calendar-check"></i>
             </div>
             <div>
-                <div class="kpi-label">Réservées</div>
+                <div class="kpi-label">{{ __('messages.reserved_label') }}</div>
                 <div class="kpi-value" style="color:#b91c1c">{{ $stats['occupied_today'] }}</div>
             </div>
         </div>
-        <div class="kpi-card" onclick="filterByStatus('unavailable')" title="Voir les chambres indisponibles">
+        <div class="kpi-card" onclick="filterByStatus('unavailable')" title="{{ __('messages.unavailable') }}">
             <div class="kpi-icon" style="background:var(--s100);color:var(--s500)">
                 <i class="fas fa-times-circle"></i>
             </div>
             <div>
-                <div class="kpi-label">Indisponibles</div>
+                <div class="kpi-label">{{ __('messages.unavailable_label') }}</div>
                 <div class="kpi-value" style="color:var(--s500)">{{ $stats['unavailable_today'] }}</div>
             </div>
         </div>
@@ -877,9 +877,9 @@
             <form method="GET" id="calendarFilterForm">
                 <div class="filter-grid">
                     <div class="form-group">
-                        <label>Type de chambre</label>
+                        <label>{{ __('messages.room_type') }}</label>
                         <select name="room_type" class="form-select" onchange="this.form.submit()">
-                            <option value="">Tous les types</option>
+                            <option value="">{{ __('messages.all_types') }}</option>
                             @foreach($roomTypes as $type)
                                 <option value="{{ $type->id }}" {{ request('room_type') == $type->id ? 'selected' : '' }}>
                                     {{ $type->name }}
@@ -888,14 +888,14 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Numéro de chambre</label>
+                        <label>{{ __('messages.room_number') }}</label>
                         <input type="text" name="room_number" class="form-control" 
                                value="{{ request('room_number') }}"
                                placeholder="Ex: 101, 102..."
                                onkeyup="filterByRoomNumber(this.value)">
                     </div>
                     <div class="form-group">
-                        <label>Mois</label>
+                        <label>{{ __('messages.month') }}</label>
                         <input type="month" name="month_year" class="form-control" 
                                value="{{ $year }}-{{ str_pad($month, 2, '0', STR_PAD_LEFT) }}"
                                onchange="this.form.submit()">
@@ -903,11 +903,11 @@
                     <div class="filter-actions">
                         <button type="submit" class="btn-db btn-db-primary">
                             <i class="fas fa-filter"></i>
-                            Filtrer
+                            {{ __('messages.filter') }}
                         </button>
                         <a href="{{ route('availability.calendar') }}" class="btn-db btn-db-ghost">
                             <i class="fas fa-times"></i>
-                            Réinitialiser
+                            {{ __('messages.reset') }}
                         </a>
                     </div>
                 </div>
@@ -921,27 +921,27 @@
     <div class="cal-legend anim-4">
         <div class="legend-item" onclick="filterByStatus('available')">
             <div class="legend-sq available"></div>
-            <span>Disponible</span>
+            <span>{{ __('messages.available') }}</span>
         </div>
         <div class="legend-item" onclick="filterByStatus('reserved')">
             <div class="legend-sq reserved"></div>
-            <span>Réservée</span>
+            <span>{{ __('messages.reserved') }}</span>
         </div>
         <div class="legend-item" onclick="filterByStatus('unavailable')">
             <div class="legend-sq unavailable"></div>
-            <span>Indisponible</span>
+            <span>{{ __('messages.unavailable') }}</span>
         </div>
         <div class="legend-item" onclick="window.scrollToToday()">
             <div class="legend-sq today"></div>
-            <span>Aujourd'hui</span>
+            <span>{{ __('messages.today') }}</span>
         </div>
         <div class="legend-item">
             <div class="badge badge-danger" style="background:#b91c1c;color:white;">2+</div>
-            <span>Conflit</span>
+            <span>{{ __('messages.conflict') }}</span>
         </div>
         <div class="legend-tip">
             <i class="fas fa-info-circle"></i>
-            Cliquez sur une cellule pour plus de détails
+            {{ __('messages.click_cell_details') }}
         </div>
     </div>
 
@@ -956,8 +956,8 @@
                         <tr>
                             <th class="room-col">
                                 <div style="display:flex;justify-content:space-between;align-items:center">
-                                    <span>Chambre / Date</span>
-                                    <button type="button" class="btn-icon" onclick="window.scrollToToday()" title="Aller à aujourd'hui" id="todayButton">
+                                    <span>{{ __('messages.room_date') }}</span>
+                                    <button type="button" class="btn-icon" onclick="window.scrollToToday()" title="{{ __('messages.go_to_today') }}" id="todayButton">
                                         <i class="fas fa-calendar-day"></i>
                                     </button>
                                 </div>
@@ -966,7 +966,7 @@
                                 <th class="date-col {{ $dateInfo['is_today'] ? 'th-today' : '' }} {{ $dateInfo['is_weekend'] ? 'th-weekend' : '' }}"
                                     data-date="{{ $dateString }}"
                                     onclick="window.scrollToDate('{{ $dateString }}')"
-                                    title="Cliquez pour centrer">
+                                    title="{{ __('messages.click_to_center') }}">
                                     <div class="date-day">{{ $dateInfo['date']->format('d') }}</div>
                                     <div class="date-name">{{ $dateInfo['day_name'] }}</div>
                                 </th>
@@ -979,8 +979,8 @@
                                 <td colspan="{{ count($dates) + 1 }}">
                                     <div class="empty-state">
                                         <i class="fas fa-bed"></i>
-                                        <h5>Aucune chambre trouvée</h5>
-                                        <p>Aucune chambre ne correspond aux filtres sélectionnés</p>
+                                        <h5>{{ __('messages.no_room_found') }}</h5>
+                                        <p>{{ __('messages.no_room_matches_filters') }}</p>
                                     </div>
                                 </td>
                             </tr>
@@ -991,21 +991,21 @@
                                         <div class="room-cell__inner">
                                             <div class="room-badge">{{ $roomData['room']->number }}</div>
                                             <div class="room-info">
-                                                <div class="room-type">{{ $roomData['room']->type->name ?? 'Type inconnu' }}</div>
+                                                <div class="room-type">{{ $roomData['room']->type->name ?? __('messages.type_unknown') }}</div>
                                                 <div class="room-meta">
                                                     <span><i class="fas fa-users"></i> {{ $roomData['room']->capacity }} pers.</span>
                                                 </div>
                                                 <div class="room-price">{{ number_format($roomData['room']->price, 0, ',', ' ') }} FCFA/nuit</div>
                                                 @if($roomData['room']->room_status_id != 1)
                                                     <span class="room-status-badge">
-                                                        {{ $roomData['room']->roomStatus->name ?? 'Indisponible' }}
+                                                        {{ $roomData['room']->roomStatus->name ?? __('messages.unavailable') }}
                                                     </span>
                                                 @endif
                                             </div>
                                             <div class="room-actions">
                                                 <a href="{{ route('availability.room.detail', $roomData['room']->id) }}" 
                                                    class="btn-icon"
-                                                   title="Voir détails">
+                                                   title="{{ __('messages.details') }}">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                             </div>
@@ -1040,7 +1040,7 @@
                                             data-is-occupied="{{ $isOccupied ? 'true' : 'false' }}"
                                             data-reservation-count="{{ $reservationCount }}"
                                             data-can-reserve="{{ $canReserve ? 'true' : 'false' }}"
-                                            title="{{ $dateInfo['date']->format('d/m/Y') }} - Chambre {{ $roomData['room']->number }} - {{ $isOccupied ? 'Réservée' : 'Disponible' }}">
+                                            title="{{ $dateInfo['date']->format('d/m/Y') }} - Chambre {{ $roomData['room']->number }} - {{ $isOccupied ? __('messages.reserved') : __('messages.available') }}">
                                             @if($isOccupied)
                                                 <i class="fas fa-calendar-check" style="color:#b91c1c;"></i>
                                                 @if($reservationCount > 1)
@@ -1072,17 +1072,17 @@
         <div class="btn-group">
             <button type="button" class="btn-db btn-db-ghost" onclick="window.selectDateRange()">
                 <i class="fas fa-calendar-range"></i>
-                Sélectionner période
+                {{ __('messages.select_period') }}
             </button>
             <button type="button" class="btn-db btn-db-ghost" onclick="window.checkAllAvailability()">
                 <i class="fas fa-search"></i>
-                Vérifier disponibilité
+                {{ __('messages.check_availability') }}
             </button>
         </div>
         <div class="btn-group">
             <button class="btn-db btn-db-ghost" onclick="window.print()">
                 <i class="fas fa-print"></i>
-                Imprimer
+                {{ __('messages.print') }}
             </button>
             <a href="{{ route('availability.export', [
                 'type' => 'excel',
@@ -1091,7 +1091,7 @@
                 'year' => $year
             ]) }}" class="btn-db btn-db-ghost" style="color:var(--g600);border-color:var(--g200);">
                 <i class="fas fa-file-excel"></i>
-                Exporter Excel
+                {{ __('messages.export_excel') }}
             </a>
         </div>
     </div>

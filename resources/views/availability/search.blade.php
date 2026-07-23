@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Recherche de disponibilité')
+@section('title', __('messages.search_title'))
 @section('content')
 
 <style>
@@ -540,22 +540,22 @@
     <div class="breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Disponibilité</span>
+        <span class="current">{{ __('messages.availability') }}</span>
     </div>
 
     {{-- En-tête --}}
     <div class="page-header anim-2">
         <div class="header-title">
             <span class="header-icon"><i class="fas fa-search"></i></span>
-            <h1>Recherche de <em>disponibilité</em></h1>
+            <h1>{{ __('messages.search_title') }}</h1>
         </div>
         
         <div class="header-actions">
             <a href="{{ route('availability.calendar') }}" class="btn btn-gray">
-                <i class="fas fa-calendar-alt"></i> Calendrier
+                <i class="fas fa-calendar-alt"></i> {{ __('messages.calendar') }}
             </a>
             <a href="{{ route('availability.inventory') }}" class="btn btn-gray">
-                <i class="fas fa-clipboard-list"></i> Inventaire
+                <i class="fas fa-clipboard-list"></i> {{ __('messages.inventory') }}
             </a>
         </div>
     </div>
@@ -566,30 +566,30 @@
             <form method="GET" action="{{ route('availability.search') }}">
                 <div class="search-grid">
                     <div class="form-group">
-                        <label class="form-label">Arrivée</label>
+                        <label class="form-label">{{ __('messages.arrival') }}</label>
                         <input type="date" name="check_in" class="form-control" 
                                value="{{ $checkIn }}" min="{{ now()->format('Y-m-d') }}" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Départ</label>
+                        <label class="form-label">{{ __('messages.departure') }}</label>
                         <input type="date" name="check_out" class="form-control" 
                                value="{{ $checkOut }}" min="{{ now()->addDay()->format('Y-m-d') }}" required>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Adultes</label>
+                        <label class="form-label">{{ __('messages.adults') }}</label>
                         <select name="adults" class="form-select">
                             @for($i = 1; $i <= 10; $i++)
-                                <option value="{{ $i }}" {{ $adults == $i ? 'selected' : '' }}>{{ $i }} {{ $i == 1 ? 'Adulte' : 'Adultes' }}</option>
+                                <option value="{{ $i }}" {{ $adults == $i ? 'selected' : '' }}>{{ $i }} {{ $i == 1 ? __('messages.person') : __('messages.people') }}</option>
                             @endfor
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label class="form-label">Type de chambre</label>
+                        <label class="form-label">{{ __('messages.room_type') }}</label>
                         <select name="room_type_id" class="form-select">
-                            <option value="">Tous les types</option>
+                            <option value="">{{ __('messages.all_types') }}</option>
                             @foreach($roomTypes as $type)
                                 <option value="{{ $type->id }}" {{ $roomTypeId == $type->id ? 'selected' : '' }}>{{ $type->name }}</option>
                             @endforeach
@@ -599,10 +599,10 @@
                 
                 <div class="search-actions">
                     <button type="submit" class="btn btn-green">
-                        <i class="fas fa-search"></i> Rechercher
+                        <i class="fas fa-search"></i> {{ __('messages.search') }}
                     </button>
                     <a href="{{ route('availability.search') }}" class="btn btn-gray">
-                        <i class="fas fa-times"></i> Réinitialiser
+                        <i class="fas fa-times"></i> {{ __('messages.reset') }}
                     </a>
                 </div>
             </form>
@@ -614,9 +614,9 @@
     <div class="row g-4 mb-4">
         <div class="col-md-8">
             <div class="results-count anim-4">
-                <span class="count-badge">{{ count($availableRooms) }} disponible(s)</span>
-                <span class="count-text">sur {{ count($availableRooms) + count($unavailableRooms) }} chambres</span>
-                <span class="count-badge count-badge-red" style="margin-left: auto;">{{ $nights }} nuit(s)</span>
+                <span class="count-badge">{{ count($availableRooms) }} {{ __('messages.available') }}</span>
+                <span class="count-text">sur {{ count($availableRooms) + count($unavailableRooms) }} {{ __('messages.rooms') }}</span>
+                <span class="count-badge count-badge-red" style="margin-left: auto;">{{ $nights }} {{ __('messages.nights') }}</span>
             </div>
         </div>
         <div class="col-md-4">
@@ -624,22 +624,22 @@
                 <div class="info-item">
                     <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
                     <div class="info-content">
-                        <div class="info-label">Période</div>
+                        <div class="info-label">{{ __('messages.period') }}</div>
                         <div class="info-value">{{ \Carbon\Carbon::parse($checkIn)->format('d/m/Y') }} → {{ \Carbon\Carbon::parse($checkOut)->format('d/m/Y') }}</div>
                     </div>
                 </div>
                 <div class="info-item">
                     <div class="info-icon"><i class="fas fa-users"></i></div>
                     <div class="info-content">
-                        <div class="info-label">Personnes</div>
-                        <div class="info-value">{{ $adults + $children }} ({{ $adults }} adulte(s), {{ $children }} enfant(s))</div>
+                        <div class="info-label">{{ __('messages.guests') }}</div>
+                        <div class="info-value">{{ $adults + $children }} ({{ $adults }} {{ __('messages.adults') }}, {{ $children }} {{ __('messages.children') }})</div>
                     </div>
                 </div>
                 <div class="info-item">
                     <div class="info-icon"><i class="fas fa-clock"></i></div>
                     <div class="info-content">
-                        <div class="info-label">Horaires</div>
-                        <div class="info-value">Check-in 14h00 · Check-out 12h00</div>
+                        <div class="info-label">{{ __('messages.schedules') }}</div>
+                        <div class="info-value">{{ __('messages.checkin_14h_checkout_12h') }}</div>
                     </div>
                 </div>
             </div>
@@ -654,14 +654,14 @@
         <div class="mb-4">
             <h5 class="fw-bold mb-3" style="color:var(--green-700);">
                 <i class="fas fa-check-circle me-2" style="color:var(--green-600);"></i>
-                Chambres disponibles ({{ count($availableRooms) }})
+                {{ __('messages.available_rooms_list', ['count' => count($availableRooms)]) }}
             </h5>
             <div class="room-grid">
                 @foreach($availableRooms as $roomData)
                 <div class="room-card available">
                     <div class="room-card-header">
                         <div>
-                            <div class="room-number">Chambre {{ $roomData['room']->number }}</div>
+                            <div class="room-number">{{ __('messages.room') }} {{ $roomData['room']->number }}</div>
                             <span class="room-type">{{ $roomData['room']->type->name ?? 'Standard' }}</span>
                         </div>
                         <div class="text-end">
@@ -672,7 +672,7 @@
                     
                     <div class="room-card-body">
                         <div class="room-feature">
-                            <i class="fas fa-users"></i> Capacité: <strong>{{ $roomData['room']->capacity }} personnes</strong>
+                            <i class="fas fa-users"></i> {{ __('messages.capacity') }}: <strong>{{ $roomData['room']->capacity }} {{ __('messages.people') }}</strong>
                         </div>
                         <div class="room-feature">
                             <i class="fas fa-bed"></i> Type: <strong>{{ $roomData['room']->type->name ?? 'Standard' }}</strong>
@@ -700,7 +700,7 @@
                     
                     <div class="room-card-footer">
                         <a href="{{ route('availability.room.detail', $roomData['room']->id) }}" class="btn-room btn-room-gray">
-                            <i class="fas fa-eye"></i> Détails
+                            <i class="fas fa-eye"></i> {{ __('messages.details') }}
                         </a>
                         <a href="{{ route('transaction.reservation.createIdentity', [
                             'room_id' => $roomData['room']->id,
@@ -709,7 +709,7 @@
                             'adults' => $adults,
                             'children' => $children
                         ]) }}" class="btn-room btn-room-green">
-                            <i class="fas fa-book"></i> Réserver
+                            <i class="fas fa-book"></i> {{ __('messages.book') }}
                         </a>
                     </div>
                 </div>
@@ -723,21 +723,21 @@
         <div class="mt-4">
             <h5 class="fw-bold mb-3" style="color:var(--red-600);">
                 <i class="fas fa-times-circle me-2" style="color:var(--red-500);"></i>
-                Chambres non disponibles ({{ count($unavailableRooms) }})
+                {{ __('messages.unavailable_rooms_list', ['count' => count($unavailableRooms)]) }}
             </h5>
             <div class="room-grid">
                 @foreach($unavailableRooms as $room)
                 <div class="room-card unavailable">
                     <div class="room-card-header">
                         <div>
-                            <div class="room-number">Chambre {{ $room->number }}</div>
+                            <div class="room-number">{{ __('messages.room') }} {{ $room->number }}</div>
                             <span class="room-type">{{ $room->type->name ?? 'Standard' }}</span>
                         </div>
                     </div>
                     
                     <div class="room-card-body">
                         <div class="room-feature">
-                            <i class="fas fa-users"></i> Capacité: <strong>{{ $room->capacity }} personnes</strong>
+                            <i class="fas fa-users"></i> {{ __('messages.capacity') }}: <strong>{{ $room->capacity }} {{ __('messages.people') }}</strong>
                         </div>
                         <div class="room-feature">
                             <i class="fas fa-bed"></i> Type: <strong>{{ $room->type->name ?? 'Standard' }}</strong>
@@ -748,7 +748,7 @@
                         <div class="conflict-info">
                             <div class="conflict-header">
                                 <i class="fas fa-exclamation-triangle" style="color:var(--red-500);"></i>
-                                <strong style="color:var(--red-700);">Réservations en conflit</strong>
+                                <strong style="color:var(--red-700);">{{ __('messages.conflicting_reservations') }}</strong>
                                 <span class="conflict-count">{{ count($roomConflicts[$room->id]) }}</span>
                             </div>
                             <div class="conflict-details">
@@ -780,7 +780,7 @@
                             
                             <a href="{{ route('availability.room.conflicts', $room->id) }}?check_in={{ request('check_in') }}&check_out={{ request('check_out') }}"
                                class="conflict-link">
-                                <i class="fas fa-external-link-alt"></i> Voir tous les détails
+                                <i class="fas fa-external-link-alt"></i> {{ __('messages.view_all_details') }}
                             </a>
                         </div>
                         @endif
@@ -788,11 +788,11 @@
                     
                     <div class="room-card-footer">
                         <a href="{{ route('availability.room.detail', $room->id) }}" class="btn-room btn-room-gray">
-                            <i class="fas fa-eye"></i> Détails
+                            <i class="fas fa-eye"></i> {{ __('messages.details') }}
                         </a>
                         <a href="{{ route('availability.room.conflicts', $room->id) }}?check_in={{ request('check_in') }}&check_out={{ request('check_out') }}" 
                            class="btn-room btn-room-red">
-                            <i class="fas fa-exclamation-triangle"></i> Conflits
+                            <i class="fas fa-exclamation-triangle"></i> {{ __('messages.conflict') }}
                         </a>
                     </div>
                 </div>
@@ -805,10 +805,10 @@
         @if(count($availableRooms) == 0 && count($unavailableRooms) == 0)
         <div class="empty-state">
             <i class="fas fa-bed"></i>
-            <h4>Aucune chambre trouvée</h4>
-            <p>Aucune chambre ne correspond à vos critères de recherche.<br>Essayez de modifier vos dates ou le type de chambre.</p>
+            <h4>{{ __('messages.no_room_match_criteria') }}</h4>
+            <p>{{ __('messages.try_modify_dates') }}</p>
             <a href="{{ route('availability.search') }}" class="btn btn-green">
-                <i class="fas fa-edit me-2"></i> Modifier la recherche
+                <i class="fas fa-edit me-2"></i> {{ __('messages.modify_search') }}
             </a>
         </div>
         @endif

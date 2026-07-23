@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Chambre ' . $room->number)
+@section('title', __('messages.room_number_label', ['number' => $room->number]))
 
 @push('styles')
 <style>
@@ -765,38 +765,38 @@
 <div class="room-topbar anim-1">
     <div class="room-topbar__inner">
         <div class="room-topbar__title">
-            <h1>Chambre <em>{{ $room->number }}</em></h1>
+            <h1>{{ __('messages.room') }} <em>{{ $room->number }}</em></h1>
             <div class="room-topbar__meta">
                 <span class="badge badge-{{ $room->room_status_id == 1 ? 'success' : ($room->room_status_id == 2 ? 'danger' : 'warning') }}">
                     <i class="fas fa-{{ $room->room_status_id == 1 ? 'check' : ($room->room_status_id == 2 ? 'tools' : 'broom') }}"></i>
-                    {{ $room->roomStatus->name ?? 'Statut inconnu' }}
+                    {{ $room->roomStatus->name ?? __('messages.status_unknown') }}
                 </span>
                 <span>
                     <i class="fas fa-bed" style="color:var(--g500);"></i>
-                    {{ $room->type->name ?? 'Type inconnu' }}
+                    {{ $room->type->name ?? __('messages.type_unknown') }}
                 </span>
                 <span>
                     <i class="fas fa-users" style="color:var(--g500);"></i>
-                    {{ $room->capacity }} personnes
+                    {{ $room->capacity }} {{ __('messages.people') }}
                 </span>
                 <span>
                     <i class="fas fa-tag" style="color:var(--g500);"></i>
-                    {{ number_format($room->price, 0, ',', ' ') }} FCFA/nuit
+                    {{ number_format($room->price, 0, ',', ' ') }} FCFA{{ __('messages.per_night') }}
                 </span>
             </div>
         </div>
         <div class="room-topbar__actions">
             <a href="{{ route('availability.calendar') }}?room_number={{ $room->number }}" class="btn-db btn-db-ghost">
                 <i class="fas fa-calendar-alt"></i>
-                Calendrier
+                {{ __('messages.calendar') }}
             </a>
             <a href="{{ route('availability.inventory') }}" class="btn-db btn-db-ghost">
                 <i class="fas fa-clipboard-list"></i>
-                Inventaire
+                {{ __('messages.inventory') }}
             </a>
             <a href="{{ route('room.edit', $room->id) }}" class="btn-db btn-db-primary">
                 <i class="fas fa-edit"></i>
-                Modifier
+                {{ __('messages.edit') }}
             </a>
         </div>
     </div>
@@ -814,19 +814,19 @@
             <div class="card">
                 <div class="card-header card-header-primary">
                     <i class="fas fa-info-circle"></i>
-                    Informations générales
+                    {{ __('messages.general_info') }}
                 </div>
                 <div class="card-body">
                     <div class="info-row">
-                        <div class="info-label">Numéro de chambre</div>
+                        <div class="info-label">{{ __('messages.room_number_field') }}</div>
                         <div class="info-value info-value-lg">{{ $room->number }}</div>
                     </div>
                     <div class="info-row">
-                        <div class="info-label">Type</div>
-                        <div class="info-value">{{ $room->type->name ?? 'Type inconnu' }}</div>
+                        <div class="info-label">{{ __('messages.type') }}</div>
+                        <div class="info-value">{{ $room->type->name ?? __('messages.type_unknown') }}</div>
                     </div>
                     <div class="info-row">
-                        <div class="info-label">Prix par nuit</div>
+                        <div class="info-label">{{ __('messages.price_per_night_field') }}</div>
                         <div class="info-value info-value-lg info-value-price">
                             {{ number_format($room->price, 0, ',', ' ') }} FCFA
                         </div>
@@ -834,14 +834,14 @@
                     
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;">
                         <div class="info-row">
-                            <div class="info-label">Capacité</div>
+                            <div class="info-label">{{ __('messages.capacity') }}</div>
                             <div class="info-value">
                                 <i class="fas fa-users" style="color:var(--g500); margin-right:4px;"></i>
                                 {{ $room->capacity }}
                             </div>
                         </div>
                         <div class="info-row">
-                            <div class="info-label">Étage</div>
+                            <div class="info-label">{{ __('messages.floor') }}</div>
                             <div class="info-value">{{ $room->floor ?? 'N/A' }}</div>
                         </div>
                         <div class="info-row">
@@ -849,13 +849,13 @@
                             <div class="info-value">{{ $room->size ?? 'N/A' }} m²</div>
                         </div>
                         <div class="info-row">
-                            <div class="info-label">Vue</div>
+                            <div class="info-label">{{ __('messages.view_field') }}</div>
                             <div class="info-value">{{ $room->view ?? 'N/A' }}</div>
                         </div>
                     </div>
                     
                     <div class="info-row">
-                        <div class="info-label">Dernière mise à jour</div>
+                        <div class="info-label">{{ __('messages.last_update_field') }}</div>
                         <div class="info-value info-value-sm">
                             <i class="fas fa-clock" style="color:var(--g500); margin-right:4px;"></i>
                             {{ $room->updated_at ? $room->updated_at->format('d/m/Y H:i') : 'N/A' }}
@@ -869,7 +869,7 @@
             <div class="card">
                 <div class="card-header card-header-success">
                     <i class="fas fa-wifi"></i>
-                    Équipements
+                    {{ __('messages.facilities') }}
                 </div>
                 <div class="card-body">
                     <div class="facilities">
@@ -888,25 +888,25 @@
             <div class="card">
                 <div class="card-header card-header-info">
                     <i class="fas fa-chart-bar"></i>
-                    Statistiques (30 jours)
+                    {{ __('messages.statistics_30d') }}
                 </div>
                 <div class="card-body">
                     <div class="stats-grid">
                         <div class="stat-item">
                             <div class="stat-value">{{ $roomStats['total_transactions'] }}</div>
-                            <div class="stat-label">Réservations</div>
+                            <div class="stat-label">{{ __('messages.reservations_stat') }}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value">{{ number_format($roomStats['occupancy_rate_30d'], 1) }}%</div>
-                            <div class="stat-label">Taux d'occ.</div>
+                            <div class="stat-label">{{ __('messages.occupancy_rate_stat') }}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value">{{ number_format($roomStats['avg_stay_duration'], 1) }}</div>
-                            <div class="stat-label">Nuits moy.</div>
+                            <div class="stat-label">{{ __('messages.avg_nights') }}</div>
                         </div>
                         <div class="stat-item">
                             <div class="stat-value">{{ number_format($roomStats['avg_daily_rate'], 0) }}</div>
-                            <div class="stat-label">Prix moy.</div>
+                            <div class="stat-label">{{ __('messages.avg_price') }}</div>
                         </div>
                     </div>
                     
@@ -914,18 +914,18 @@
                         <div class="stat-value" style="color:var(--g600);">
                             {{ number_format($roomStats['total_revenue_30d'], 0, ',', ' ') }} FCFA
                         </div>
-                        <div class="stat-label">Revenu total (30j)</div>
+                        <div class="stat-label">{{ __('messages.total_revenue_30d') }}</div>
                     </div>
                     
                     @if($roomStats['next_available'] && $roomStats['next_available'] instanceof \Carbon\Carbon)
                     <div style="margin-top:16px;padding:12px;background:var(--amber-light);border:1.5px solid var(--amber);border-radius:var(--rl);text-align:center;">
-                        <div style="font-size:.65rem;color:var(--s500);margin-bottom:4px;text-transform:uppercase;">Prochaine disponibilité</div>
+                        <div style="font-size:.65rem;color:var(--s500);margin-bottom:4px;text-transform:uppercase;">{{ __('messages.next_availability') }}</div>
                         <div style="font-weight:700;color:var(--amber);">{{ $roomStats['next_available']->format('d/m/Y') }}</div>
                     </div>
                     @elseif(isset($roomStats['formatted_next_available']) && $roomStats['formatted_next_available'] != 'Immédiate')
                     <div style="margin-top:16px;padding:12px;background:var(--g50);border:1.5px solid var(--g200);border-radius:var(--rl);text-align:center;">
-                        <div style="font-size:.65rem;color:var(--s500);margin-bottom:4px;text-transform:uppercase;">Disponible</div>
-                        <div style="font-weight:700;color:var(--g600);">Immédiatement</div>
+                        <div style="font-size:.65rem;color:var(--s500);margin-bottom:4px;text-transform:uppercase;">{{ __('messages.available') }}</div>
+                        <div style="font-weight:700;color:var(--g600);">{{ __('messages.immediately') }}</div>
                     </div>
                     @endif
                 </div>
@@ -939,7 +939,7 @@
             <div class="card" style="border-color:var(--amber);">
                 <div class="card-header card-header-warning">
                     <i class="fas fa-user-check"></i>
-                    Client actuel
+                    {{ __('messages.current_guest') }}
                     <span class="card-badge">
                         <span class="badge badge-light">
                             {{ $currentTransaction->check_in->format('d/m/Y') }} - {{ $currentTransaction->check_out->format('d/m/Y') }}
@@ -962,16 +962,16 @@
                                 @endif
                             </div>
                             <div class="guest-badges">
-                                <span class="badge badge-info">{{ $currentTransaction->nights ?? 1 }} nuit(s)</span>
+                                <span class="badge badge-info">{{ $currentTransaction->nights ?? 1 }} {{ __('messages.night') }}</span>
                                 <span class="badge badge-success">{{ number_format($currentTransaction->total_price ?? 0, 0, ',', ' ') }} FCFA</span>
                                 <span class="badge badge-{{ ($currentTransaction->status ?? '') == 'active' ? 'warning' : 'info' }}">
-                                    {{ $currentTransaction->status_label ?? 'Réservation' }}
+                                    {{ $currentTransaction->status_label ?? __('messages.reservation') }}
                                 </span>
                             </div>
                         </div>
                         <div class="guest-actions">
                             <a href="{{ route('transaction.show', ['transaction' => $currentTransaction->id]) }}" class="btn-db btn-db-ghost">
-                                <i class="fas fa-eye"></i> Détails
+                                <i class="fas fa-eye"></i> {{ __('messages.details') }}
                             </a>
                             @if(($currentTransaction->status ?? '') == 'active')
                                 @if($canCheckOut)
@@ -994,7 +994,7 @@
             <div class="card" style="border-color:var(--g600);">
                 <div class="card-header card-header-success">
                     <i class="fas fa-door-open"></i>
-                    Chambre disponible
+                    {{ __('messages.room_available') }}
                     <span class="card-badge">
                         <span class="badge badge-light">{{ now()->format('d/m/Y H:i') }}</span>
                     </span>
@@ -1002,12 +1002,12 @@
                 <div class="card-body">
                     <div class="available-state">
                         <i class="fas fa-check-circle"></i>
-                        <h5>Chambre libre</h5>
-                        <p>Cette chambre est actuellement disponible pour une nouvelle réservation.</p>
+                        <h5>{{ __('messages.room_free') }}</h5>
+                        <p>{{ __('messages.room_available_desc') }}</p>
                         @if($room->room_status_id == 1)
                         <a href="{{ route('transaction.reservation.createIdentity') }}?room_id={{ $room->id }}" class="btn-db btn-db-success">
                             <i class="fas fa-plus-circle"></i>
-                            Créer une réservation
+                            {{ __('messages.create_reservation') }}
                         </a>
                         @endif
                     </div>
@@ -1019,7 +1019,7 @@
             <div class="card">
                 <div class="card-header card-header-dark">
                     <i class="fas fa-calendar-alt"></i>
-                    Disponibilité (30 prochains jours)
+                    {{ __('messages.availability_30d') }}
                     <span class="card-badge">
                         <small style="color:rgba(255,255,255,.7);">{{ now()->format('d/m') }} → {{ now()->addDays(30)->format('d/m') }}</small>
                     </span>
@@ -1028,19 +1028,19 @@
                     <div class="legend">
                         <div class="legend-item">
                             <div class="legend-sq legend-sq-avail"></div>
-                            <span>Disponible</span>
+                            <span>{{ __('messages.available') }}</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-sq legend-sq-occ"></div>
-                            <span>Occupée</span>
+                            <span>{{ __('messages.occupied') }}</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-sq legend-sq-unavail"></div>
-                            <span>Indisponible</span>
+                            <span>{{ __('messages.unavailable') }}</span>
                         </div>
                         <div class="legend-item">
                             <div class="legend-sq legend-sq-today"></div>
-                            <span>Aujourd'hui</span>
+                            <span>{{ __('messages.today') }}</span>
                         </div>
                     </div>
                     
@@ -1132,15 +1132,15 @@
                     <div class="cal-footer">
                         <div class="cal-footer__info">
                             <i class="fas fa-info-circle" style="color:var(--g500);"></i>
-                            Cliquez sur une date pour voir/réserver
+                            {{ __('messages.click_date_reserve') }}
                         </div>
                         <div style="display:flex;gap:8px;">
                             <button class="btn-db btn-db-ghost" style="font-size:.7rem;padding:6px 12px;" onclick="scrollToTodayInCalendar()">
-                                <i class="fas fa-calendar-day"></i> Aujourd'hui
+                                <i class="fas fa-calendar-day"></i> {{ __('messages.today') }}
                             </button>
                             <a href="{{ route('availability.calendar') }}?room_number={{ $room->number }}" 
                                class="btn-db btn-db-ghost" style="font-size:.7rem;padding:6px 12px;">
-                                <i class="fas fa-expand-alt"></i> Calendrier complet
+                                <i class="fas fa-expand-alt"></i> {{ __('messages.full_calendar') }}
                             </a>
                         </div>
                     </div>
@@ -1152,7 +1152,7 @@
             <div class="card">
                 <div class="card-header card-header-info">
                     <i class="fas fa-calendar-plus"></i>
-                    Prochaine réservation
+                    {{ __('messages.next_reservation') }}
                     <span class="card-badge">
                         <span class="badge badge-light">{{ $nextReservation->check_in->format('d/m/Y') }}</span>
                     </span>
@@ -1166,13 +1166,13 @@
                                 {{ $nextReservation->check_in->format('d/m/Y') }} → {{ $nextReservation->check_out->format('d/m/Y') }}
                                 &nbsp;•&nbsp;
                                 <i class="fas fa-moon" style="color:var(--g500);"></i>
-                                {{ $nextReservation->nights }} nuit(s)
+                                {{ $nextReservation->nights }} {{ __('messages.night') }}
                                 &nbsp;•&nbsp;
                                 <i class="fas fa-users" style="color:var(--g500);"></i>
-                                {{ $nextReservation->person_count ?? 1 }} pers.
+                                {{ $nextReservation->person_count ?? 1 }} {{ __('messages.person') }}
                             </div>
                         </div>
-                        <span class="badge badge-warning">Confirmée</span>
+                        <span class="badge badge-warning">{{ __('messages.confirmed') }}</span>
                     </div>
                 </div>
             </div>
@@ -1182,29 +1182,29 @@
             <div class="card">
                 <div class="card-header card-header-primary">
                     <i class="fas fa-bolt"></i>
-                    Actions rapides
+                    {{ __('messages.quick_actions') }}
                 </div>
                 <div class="card-body">
                     <div class="actions-grid">
                         <a href="{{ route('availability.search', ['room_type_id' => $room->type_id, 'check_in' => now()->format('Y-m-d'), 'check_out' => now()->addDays(1)->format('Y-m-d')]) }}" 
                            class="action-btn action-btn--primary">
                             <div class="action-btn__icon"><i class="fas fa-search"></i></div>
-                            <div class="action-btn__title">Rechercher</div>
-                            <div class="action-btn__desc">Voir disponibilités</div>
+                            <div class="action-btn__title">{{ __('messages.search') }}</div>
+                            <div class="action-btn__desc">{{ __('messages.view_availability') }}</div>
                         </a>
                         
                         @if($room->room_status_id == 1)
                         <a href="{{ route('transaction.reservation.createIdentity', ['room_id' => $room->id]) }}" 
                            class="action-btn action-btn--success">
                             <div class="action-btn__icon"><i class="fas fa-book"></i></div>
-                            <div class="action-btn__title">Réserver</div>
-                            <div class="action-btn__desc">Nouvelle réservation</div>
+                            <div class="action-btn__title">{{ __('messages.new_reservation') }}</div>
+                            <div class="action-btn__desc">{{ __('messages.new_reservation') }}</div>
                         </a>
                         @else
                         <button class="action-btn" disabled>
                             <div class="action-btn__icon" style="color:var(--s400);"><i class="fas fa-ban"></i></div>
-                            <div class="action-btn__title">Indisponible</div>
-                            <div class="action-btn__desc">{{ $room->roomStatus->name ?? 'Non disponible' }}</div>
+                            <div class="action-btn__title">{{ __('messages.unavailable') }}</div>
+                            <div class="action-btn__desc">{{ $room->roomStatus->name ?? __('messages.unavailable') }}</div>
                         </button>
                         @endif
                         
@@ -1215,13 +1215,13 @@
                         <a href="{{ route('housekeeping.mark-maintenance', $room->id) }}" class="action-btn action-btn--warning">
                             <div class="action-btn__icon"><i class="fas fa-tools"></i></div>
                             <div class="action-btn__title">Maintenance</div>
-                            <div class="action-btn__desc">Marquer en maintenance</div>
+                            <div class="action-btn__desc">{{ __('messages.mark_maintenance') }}</div>
                         </a>
                         @else
-                        <button class="action-btn" disabled title="{{ !$canMaintenance ? 'Non autorisé' : 'Chambre déjà en maintenance' }}">
+                        <button class="action-btn" disabled title="{{ !$canMaintenance ? __('messages.not_authorized') : 'Chambre déjà en maintenance' }}">
                             <div class="action-btn__icon" style="color:var(--s400);"><i class="fas fa-tools"></i></div>
                             <div class="action-btn__title">Maintenance</div>
-                            <div class="action-btn__desc">{{ !$canMaintenance ? 'Non autorisé' : 'Indisponible' }}</div>
+                            <div class="action-btn__desc">{{ !$canMaintenance ? __('messages.not_authorized') : __('messages.unavailable') }}</div>
                         </button>
                         @endif
                         
@@ -1233,13 +1233,13 @@
                         <a href="{{ route('housekeeping.mark-cleaned', $room->id) }}" class="action-btn action-btn--info">
                             <div class="action-btn__icon"><i class="fas fa-broom"></i></div>
                             <div class="action-btn__title">Nettoyée</div>
-                            <div class="action-btn__desc">Marquer comme nettoyée</div>
+                            <div class="action-btn__desc">{{ __('messages.mark_cleaned') }}</div>
                         </a>
                         @else
-                        <button class="action-btn" disabled title="{{ !$canClean ? 'Non autorisé' : 'Chambre déjà nettoyée' }}">
+                        <button class="action-btn" disabled title="{{ !$canClean ? __('messages.not_authorized') : 'Chambre déjà nettoyée' }}">
                             <div class="action-btn__icon" style="color:var(--s400);"><i class="fas fa-broom"></i></div>
                             <div class="action-btn__title">Nettoyée</div>
-                            <div class="action-btn__desc">{{ !$canClean ? 'Non autorisé' : 'Indisponible' }}</div>
+                            <div class="action-btn__desc">{{ !$canClean ? __('messages.not_authorized') : __('messages.unavailable') }}</div>
                         </button>
                         @endif
                     </div>
@@ -1291,7 +1291,7 @@ function showOccupancyDetailsModal(roomId, date, roomNumber) {
     const formattedDate = new Date(date).toLocaleDateString('fr-FR');
     const content = `
         <div class="modal-header" style="background:linear-gradient(135deg, #b91c1c, #991b1b); color:white;">
-            <h5 class="modal-title"><i class="fas fa-calendar-times me-2"></i>Chambre Occupée</h5>
+            <h5 class="modal-title"><i class="fas fa-calendar-times me-2"></i>{{ __('messages.room') }} {{ __('messages.occupied') }}</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
@@ -1306,7 +1306,7 @@ function showOccupancyDetailsModal(roomId, date, roomNumber) {
                 </div>
                 <div>
                     <div class="info-label">STATUT</div>
-                    <span class="badge badge-danger">Occupée</span>
+                    <span class="badge badge-danger">{{ __('messages.occupied') }}</span>
                 </div>
             </div>
             <div class="alert alert-info" style="background:var(--g50); border-color:var(--g200); color:var(--g700); padding:16px; border-radius:var(--rl);">
@@ -1315,7 +1315,7 @@ function showOccupancyDetailsModal(roomId, date, roomNumber) {
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">Fermer</button>
+            <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">{{ __('messages.close') }}</button>
             <a href="/transaction" class="btn-db btn-db-primary"><i class="fas fa-list me-2"></i>Voir transactions</a>
         </div>
     `;
@@ -1333,7 +1333,7 @@ function showReservationModal(roomId, roomNumber, date) {
     
     const content = `
         <div class="modal-header" style="background:linear-gradient(135deg, var(--g600), var(--g500)); color:white;">
-            <h5 class="modal-title"><i class="fas fa-calendar-plus me-2"></i>Réserver la chambre</h5>
+            <h5 class="modal-title"><i class="fas fa-calendar-plus me-2"></i>{{ __('messages.book') }}</h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">

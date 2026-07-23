@@ -47,6 +47,7 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\EnsureHotelActive::class,
             \App\Http\Middleware\EnsureOnboarded::class,
+            \App\Http\Middleware\SetLocale::class,
 
             // SUPPRIMEZ CETTE LIGNE TEMPORAIREMENT POUR DÉBOGUER
             // \App\Http\Middleware\TrackUserActivity::class,

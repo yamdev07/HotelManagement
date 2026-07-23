@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Dashboard disponibilité')
+@section('title', __('messages.availability_dashboard'))
 
 @push('styles')
 <style>
@@ -437,7 +437,7 @@ body {
         <div class="db-topbar__icon"><i class="fas fa-hotel"></i></div>
         <span class="db-topbar__title">
             Dashboard
-            <span class="db-topbar__sub"> · Disponibilité</span>
+            <span class="db-topbar__sub"> · {{ __('messages.availability') }}</span>
         </span>
     </div>
     <div class="pulse"></div>
@@ -452,7 +452,7 @@ body {
             <i class="fas fa-bed"></i>
         </div>
         <div>
-            <div class="kpi__label">Total chambres</div>
+            <div class="kpi__label">{{ __('messages.total_rooms') }}</div>
             <div class="kpi__value">{{ $stats['total_rooms'] }}</div>
             <div class="kpi__bar">
                 <div class="kpi__bar-fill" style="width:100%;background:var(--s400)"></div>
@@ -466,7 +466,7 @@ body {
             <i class="fas fa-check-circle"></i>
         </div>
         <div>
-            <div class="kpi__label">Disponibles</div>
+            <div class="kpi__label">{{ __('messages.available_rooms') }}</div>
             <div class="kpi__value" style="color:var(--g600)">{{ $stats['available_rooms'] }}</div>
             <div class="kpi__bar">
                 <div class="kpi__bar-fill" style="width:{{ $pA }}%;background:var(--g500)"></div>
@@ -480,7 +480,7 @@ body {
             <i class="fas fa-users"></i>
         </div>
         <div>
-            <div class="kpi__label">Occupées</div>
+            <div class="kpi__label">{{ __('messages.occupied_rooms') }}</div>
             <div class="kpi__value">{{ $stats['occupied_rooms'] }}</div>
             <div class="kpi__bar">
                 <div class="kpi__bar-fill" style="width:{{ $pO }}%;background:var(--s400)"></div>
@@ -493,7 +493,7 @@ body {
             <i class="fas fa-chart-line"></i>
         </div>
         <div>
-            <div class="kpi__label">Taux occupation</div>
+            <div class="kpi__label">{{ __('messages.occupancy_rate') }}</div>
             <div class="kpi__value" style="color:var(--g600)">{{ number_format($stats['occupancy_rate'], 1) }}%</div>
             <div class="kpi__bar">
                 <div class="kpi__bar-fill" style="width:{{ $stats['occupancy_rate'] }}%;background:var(--g400)"></div>
@@ -505,10 +505,10 @@ body {
 
 {{-- ③ QUICK ACTIONS BAR --}}
 <div class="db-qabar">
-    <span class="db-qabar__label">Actions</span>
+    <span class="db-qabar__label">{{ __('messages.actions') }}</span>
 
     <a href="{{ route('transaction.reservation.createIdentity') }}" class="qa qa--primary">
-        <i class="fas fa-plus-circle"></i> Réservation
+        <i class="fas fa-plus-circle"></i> {{ __('messages.reservation') }}
     </a>
     <a href="{{ route('checkin.index') }}" class="qa qa--dark">
         <i class="fas fa-door-open"></i> Check-in / Check-out
@@ -517,19 +517,19 @@ body {
     <div class="qa-sep"></div>
 
     <a href="{{ route('availability.calendar') }}" class="qa">
-        <i class="fas fa-calendar-alt"></i> Calendrier
+        <i class="fas fa-calendar-alt"></i> {{ __('messages.calendar') }}
     </a>
     <a href="{{ route('availability.search') }}" class="qa qa--primary">
-        <i class="fas fa-search"></i> Rechercher
+        <i class="fas fa-search"></i> {{ __('messages.search') }}
     </a>
     <a href="{{ route('availability.inventory') }}" class="qa">
-        <i class="fas fa-clipboard-list"></i> Inventaire
+        <i class="fas fa-clipboard-list"></i> {{ __('messages.inventory') }}
     </a>
 
     <div class="qa-sep"></div>
 
     <a href="{{ route('housekeeping.index') }}" class="qa">
-        <i class="fas fa-broom"></i> Nettoyage
+        <i class="fas fa-broom"></i> {{ __('messages.cleaning') }}
     </a>
 </div>
 
@@ -545,10 +545,10 @@ body {
                 <div class="card__icon" style="background:var(--g100);color:var(--g600)">
                     <i class="fas fa-bed"></i>
                 </div>
-                <span class="card__title">Chambres disponibles maintenant</span>
+                <span class="card__title">{{ __('messages.rooms_available_now') }}</span>
                 <span class="card__badge">
                     <span class="badge badge--green">
-                        {{ $availableNow->count() }} libre{{ $availableNow->count() > 1 ? 's' : '' }}
+                        {{ $availableNow->count() }} {{ __('messages.free_pl') }}
                     </span>
                 </span>
             </div>
@@ -558,7 +558,7 @@ body {
                 <table class="tbl">
                     <thead>
                         <tr>
-                            <th>N°</th><th>Type</th><th>Prix / nuit</th><th>Cap.</th><th></th>
+                            <th>{{ __('messages.room_number') }}</th><th>{{ __('messages.type') }}</th><th>{{ __('messages.price_per_night') }}</th><th>{{ __('messages.cap_abbrev') }}</th><th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -576,7 +576,7 @@ body {
                             </td>
                             <td>
                                 <a href="{{ route('availability.room.detail', $room->id) }}" class="btn btn--green btn--icon">
-                                    <i class="fas fa-eye"></i> Voir
+                                    <i class="fas fa-eye"></i> {{ __('messages.view') }}
                                 </a>
                             </td>
                         </tr>
@@ -586,7 +586,7 @@ body {
                 @else
                 <div class="empty">
                     <i class="fas fa-bed"></i>
-                    <p>Aucune chambre disponible<br>Toutes les chambres sont occupées ou en maintenance</p>
+                    <p>{{ __('messages.no_room_available') }}<br>{{ __('messages.all_rooms_occupied') }}</p>
                 </div>
                 @endif
             </div>
@@ -594,7 +594,7 @@ body {
             @if($availableNow->count() > 0)
             <div class="card__foot">
                 <a href="{{ route('availability.search') }}" class="btn btn--green">
-                    <i class="fas fa-search"></i> Rechercher des disponibilités
+                    <i class="fas fa-search"></i> {{ __('messages.search_availability') }}
                 </a>
             </div>
             @endif
@@ -606,7 +606,7 @@ body {
                 <div class="card__icon" style="background:var(--s100);color:var(--s600)">
                     <i class="fas fa-tools"></i>
                 </div>
-                <span class="card__title">Maintenance / Nettoyage</span>
+                <span class="card__title">{{ __('messages.maintenance_cleaning') }}</span>
                 <span class="card__badge">
                     <span class="badge badge--dark">{{ $unavailableRooms->count() }}</span>
                 </span>
@@ -617,7 +617,7 @@ body {
                 <table class="tbl">
                     <thead>
                         <tr>
-                            <th>N°</th><th>Type</th><th>Statut</th><th>Depuis</th><th></th>
+                            <th>{{ __('messages.room_number') }}</th><th>{{ __('messages.type') }}</th><th>{{ __('messages.status') }}</th><th>{{ __('messages.since') }}</th><th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -644,7 +644,7 @@ body {
                                         <i class="fas fa-check"></i> OK
                                     </a>
                                 @else
-                                    <span style="font-size:.7rem;color:var(--s400)">En cours…</span>
+                                    <span style="font-size:.7rem;color:var(--s400)">{{ __('messages.in_progress') }}</span>
                                 @endif
                             </td>
                         </tr>
@@ -654,7 +654,7 @@ body {
                 @else
                 <div class="empty">
                     <i class="fas fa-check-circle" style="color:var(--g400)"></i>
-                    <p>Aucune chambre en maintenance<br>Tout est opérationnel</p>
+                    <p>{{ __('messages.no_room_maintenance') }}<br>{{ __('messages.all_operational') }}</p>
                 </div>
                 @endif
             </div>
@@ -662,7 +662,7 @@ body {
             @if($unavailableRooms->count() > 0)
             <div class="card__foot">
                 <a href="{{ route('housekeeping.index') }}" class="btn btn--dark">
-                    <i class="fas fa-broom"></i> Gestion nettoyage
+                    <i class="fas fa-broom"></i> {{ __('messages.cleaning_management') }}
                 </a>
             </div>
             @endif
@@ -676,9 +676,9 @@ body {
             <div class="card__icon" style="background:var(--s100);color:var(--s600)">
                 <i class="fas fa-broom"></i>
             </div>
-            <span class="card__title">Chambres sales · Disponibilité après nettoyage</span>
+            <span class="card__title">{{ __('messages.dirty_rooms_availability') }}</span>
             <span class="card__badge">
-                <span class="badge badge--dark">{{ $stats['dirty_rooms'] ?? 0 }} sale(s)</span>
+                <span class="badge badge--dark">{{ $stats['dirty_rooms'] ?? 0 }} {{ __('messages.dirty_count', ['count' => $stats['dirty_rooms'] ?? 0]) }}</span>
             </span>
         </div>
 
@@ -698,8 +698,8 @@ body {
                             <i class="fas fa-user"></i>
                         </div>
                         <div>
-                            <div class="dirty-col-title">Occupées (sales)</div>
-                            <div class="dirty-col-sub">Client présent · À nettoyer après départ</div>
+                            <div class="dirty-col-title">{{ __('messages.occupied_dirty') }}</div>
+                            <div class="dirty-col-sub">{{ __('messages.guest_present_clean_after') }}</div>
                         </div>
                     </div>
 
@@ -708,7 +708,7 @@ body {
                         @foreach($dirtyOccupied->take(3) as $room)
                         <div class="dirty-row">
                             <div>
-                                <span class="dirty-row-name">Ch. {{ $room->number }}</span>
+                                <span class="dirty-row-name">{{ __('messages.room') }} {{ $room->number }}</span>
                                 <span class="dirty-row-type">{{ $room->type->name ?? 'Std' }}</span>
                             </div>
                             <span class="badge badge--muted">{{ $room->capacity }}p</span>
@@ -717,19 +717,19 @@ body {
                         @if($dirtyOccupied->count() > 3)
                         <div style="text-align:center;margin-top:8px">
                             <a href="{{ route('housekeeping.to-clean') }}" class="btn btn--dark btn--sm">
-                                +{{ $dirtyOccupied->count()-3 }} autres
+                                +{{ $dirtyOccupied->count()-3 }} {{ __('messages.others') }}
                             </a>
                         </div>
                         @endif
                     </div>
                     <div style="margin-top:8px;font-size:.7rem;color:var(--s400)">
-                        <i class="fas fa-clock"></i> Nettoyage après check-out
+                        <i class="fas fa-clock"></i> {{ __('messages.clean_after_checkout') }}
                     </div>
                     @else
                     <div class="dirty-inner">
                         <div class="dirty-empty">
                             <i class="fas fa-check-circle" style="color:var(--g400)"></i>
-                            Aucune chambre avec client présent
+                            {{ __('messages.no_room_with_guest') }}
                         </div>
                     </div>
                     @endif
@@ -742,8 +742,8 @@ body {
                             <i class="fas fa-door-open"></i>
                         </div>
                         <div>
-                            <div class="dirty-col-title" style="color:var(--g700)">Non occupées (sales)</div>
-                            <div class="dirty-col-sub">Client parti · À nettoyer maintenant</div>
+                            <div class="dirty-col-title" style="color:var(--g700)">{{ __('messages.unoccupied_dirty') }}</div>
+                            <div class="dirty-col-sub">{{ __('messages.guest_left_clean_now') }}</div>
                         </div>
                     </div>
 
@@ -752,18 +752,18 @@ body {
                         @foreach($dirtyUnoccupied->take(3) as $room)
                         <div class="dirty-row">
                             <div>
-                                <span class="dirty-row-name">Ch. {{ $room->number }}</span>
+                                <span class="dirty-row-name">{{ __('messages.room') }} {{ $room->number }}</span>
                                 <span class="dirty-row-type">{{ $room->type->name ?? 'Std' }}</span>
                             </div>
                             <a href="{{ route('housekeeping.start-cleaning', $room->id) }}" class="btn btn--green btn--sm">
-                                <i class="fas fa-broom"></i> Nettoyer
+                                <i class="fas fa-broom"></i> {{ __('messages.clean') }}
                             </a>
                         </div>
                         @endforeach
                         @if($dirtyUnoccupied->count() > 3)
                         <div style="text-align:center;margin-top:8px">
                             <a href="{{ route('housekeeping.to-clean') }}" class="btn btn--green btn--sm">
-                                +{{ $dirtyUnoccupied->count()-3 }} autres
+                                +{{ $dirtyUnoccupied->count()-3 }} {{ __('messages.others') }}
                             </a>
                         </div>
                         @endif
@@ -772,7 +772,7 @@ body {
                     <div class="dirty-inner">
                         <div class="dirty-empty">
                             <i class="fas fa-check-circle" style="color:var(--g400)"></i>
-                            Aucune chambre à nettoyer
+                            {{ __('messages.no_room_to_clean') }}
                         </div>
                     </div>
                     @endif
@@ -785,8 +785,8 @@ body {
                             <i class="fas fa-sign-out-alt"></i>
                         </div>
                         <div>
-                            <div class="dirty-col-title">Départs aujourd'hui</div>
-                            <div class="dirty-col-sub">Seront libres après 12h</div>
+                            <div class="dirty-col-title">{{ __('messages.departures_today') }}</div>
+                            <div class="dirty-col-sub">{{ __('messages.free_after_12h') }}</div>
                         </div>
                     </div>
 
@@ -795,7 +795,7 @@ body {
                         @foreach($roomsToBeFreed->take(3) as $room)
                         <div class="dirty-row">
                             <div>
-                                <span class="dirty-row-name">Ch. {{ $room->number }}</span>
+                                <span class="dirty-row-name">{{ __('messages.room') }} {{ $room->number }}</span>
                                 <span class="dirty-row-type">{{ $room->type->name ?? 'Std' }}</span>
                             </div>
                             <span class="badge badge--muted">12h</span>
@@ -804,19 +804,19 @@ body {
                         @if($roomsToBeFreed->count() > 3)
                         <div style="text-align:center;margin-top:8px">
                             <a href="{{ route('checkin.index') }}" class="btn btn--outline btn--sm">
-                                +{{ $roomsToBeFreed->count()-3 }} autres
+                                +{{ $roomsToBeFreed->count()-3 }} {{ __('messages.others') }}
                             </a>
                         </div>
                         @endif
                     </div>
                     <div style="margin-top:8px;font-size:.7rem;color:var(--s400)">
-                        <i class="fas fa-clock"></i> Largesse jusqu'à 14h
+                        <i class="fas fa-clock"></i> {{ __('messages.grace_until_14h') }}
                     </div>
                     @else
                     <div class="dirty-inner">
                         <div class="dirty-empty">
                             <i class="fas fa-calendar-check" style="color:var(--s300)"></i>
-                            Aucun départ prévu aujourd'hui
+                            {{ __('messages.no_departure_today') }}
                         </div>
                     </div>
                     @endif
@@ -829,23 +829,23 @@ body {
                 <div class="dirty-foot-stats">
                     <span class="dirty-foot-stat">
                         <i class="fas fa-bed" style="color:var(--s400)"></i>
-                        Total sales : <strong>{{ $stats['dirty_rooms'] ?? 0 }}</strong>
+                        {{ __('messages.total_dirty') }} <strong>{{ $stats['dirty_rooms'] ?? 0 }}</strong>
                     </span>
                     <span class="dirty-foot-stat">
                         <i class="fas fa-user" style="color:var(--s600)"></i>
-                        Clients présents : <strong>{{ $dirtyOccupied->count() }}</strong>
+                        {{ __('messages.guests_present') }} <strong>{{ $dirtyOccupied->count() }}</strong>
                     </span>
                     <span class="dirty-foot-stat">
                         <i class="fas fa-door-open" style="color:var(--g500)"></i>
-                        À nettoyer maintenant : <strong>{{ $dirtyUnoccupied->count() }}</strong>
+                        {{ __('messages.to_clean_now') }} <strong>{{ $dirtyUnoccupied->count() }}</strong>
                     </span>
                     <span class="dirty-foot-stat">
                         <i class="fas fa-sign-out-alt" style="color:var(--s400)"></i>
-                        Départs : <strong>{{ $roomsToBeFreed->count() }}</strong>
+                        {{ __('messages.departures') }} <strong>{{ $roomsToBeFreed->count() }}</strong>
                     </span>
                 </div>
                 <a href="{{ route('housekeeping.to-clean') }}" class="btn btn--dark">
-                    <i class="fas fa-broom"></i> Gérer le nettoyage
+                    <i class="fas fa-broom"></i> {{ __('messages.manage_cleaning') }}
                 </a>
             </div>
         </div>
@@ -860,10 +860,10 @@ body {
                 <div class="card__icon" style="background:var(--g100);color:var(--g600)">
                     <i class="fas fa-chart-pie"></i>
                 </div>
-                <span class="card__title">Occupation par type de chambre</span>
+                <span class="card__title">{{ __('messages.occupancy_by_room_type') }}</span>
                 <span class="card__badge">
                     @php $avgOcc = collect($occupancyByType)->avg('percentage') ?? 0; @endphp
-                    <span class="badge badge--soft">Moy. {{ number_format($avgOcc, 1) }}%</span>
+                    <span class="badge badge--soft">{{ __('messages.avg') }} {{ number_format($avgOcc, 1) }}%</span>
                 </span>
             </div>
 
@@ -885,11 +885,11 @@ body {
                         <div class="occ-nums">
                             <div class="occ-num">
                                 <span style="color:{{ $col }}">{{ $type['occupied'] ?? 0 }}</span>
-                                <small>Occupées</small>
+                                <small>{{ __('messages.occupied_short') }}</small>
                             </div>
                             <div class="occ-num">
                                 <span>{{ $type['total'] ?? 0 }}</span>
-                                <small>Total</small>
+                                <small>{{ __('messages.total') }}</small>
                             </div>
                             <span class="badge {{ $bdg }}">{{ number_format($pct, 0) }}%</span>
                         </div>
@@ -900,7 +900,7 @@ body {
                 @else
                 <div class="empty">
                     <i class="fas fa-chart-pie"></i>
-                    <p>Aucune donnée d'occupation disponible</p>
+                    <p>{{ __('messages.no_occupancy_data') }}</p>
                 </div>
                 @endif
             </div>
@@ -912,15 +912,15 @@ body {
                 <div class="card__icon" style="background:var(--s100);color:var(--s500)">
                     <i class="fas fa-info-circle"></i>
                 </div>
-                <span class="card__title">Informations</span>
+                <span class="card__title">{{ __('messages.informations') }}</span>
             </div>
             <div class="card__body">
                 <div class="empty">
                     <i class="fas fa-clock" style="color:var(--g400)"></i>
-                    <p>Les arrivées et départs<br>sont gérés dans les sections dédiées</p>
+                    <p>{{ __('messages.arrivals_departures_info') }}</p>
                     <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap;justify-content:center">
                         <a href="{{ route('checkin.index') }}" class="btn btn--dark">
-                            <i class="fas fa-door-open"></i> Check-in / Check-out
+        <i class="fas fa-door-open"></i> {{ __('messages.checkin_checkout') }}
                         </a>
                         <a href="{{ route('availability.calendar') }}" class="btn btn--green">
                             <i class="fas fa-calendar-alt"></i> Calendrier
@@ -959,7 +959,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function toast() {
         const el = document.createElement('div');
         el.className = 'toast-box';
-        el.innerHTML = '<i class="fas fa-sync-alt"></i> Données actualisées';
+        el.innerHTML = '<i class="fas fa-sync-alt"></i> {{ __("messages.data_updated") }}';
         document.body.appendChild(el);
         setTimeout(() => el.remove(), 2500);
     }

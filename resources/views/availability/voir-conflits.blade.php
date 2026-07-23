@@ -1,7 +1,7 @@
 {{-- resources/views/availability/conflicts.blade.php --}}
 @extends('template.master')
 
-@section('title', 'Conflits de réservation')
+@section('title', __('messages.conflict_title'))
 
 @section('content')
 <style>
@@ -377,12 +377,12 @@
         <div>
             <h1>
                 <i class="fas fa-exclamation-triangle"></i>
-                Conflits de réservation
+                {{ __('messages.conflict_title') }}
             </h1>
-            <p>Chambre {{ $room->number }} - {{ $room->type->name ?? 'Standard' }}</p>
+            <p>{{ __('messages.room') }} {{ $room->number }} - {{ $room->type->name ?? 'Standard' }}</p>
         </div>
         <a href="{{ route('availability.search') }}" class="btn btn-outline">
-            <i class="fas fa-arrow-left"></i> Retour à la recherche
+            <i class="fas fa-arrow-left"></i> {{ __('messages.back_to_search') }}
         </a>
     </div>
 
@@ -391,46 +391,46 @@
         <div class="col-md-8 anim-2">
             <div class="card">
                 <div class="card-header">
-                    <h5>Votre recherche</h5>
+                    <h5>{{ __('messages.your_search') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3">
-                            <div class="info-label">Arrivée</div>
+                            <div class="info-label">{{ __('messages.arrival') }}</div>
                             <div class="info-value">{{ \Carbon\Carbon::parse($checkIn)->format('d/m/Y') }}</div>
                         </div>
                         <div class="col-md-3">
-                            <div class="info-label">Départ</div>
+                            <div class="info-label">{{ __('messages.departure') }}</div>
                             <div class="info-value">{{ \Carbon\Carbon::parse($checkOut)->format('d/m/Y') }}</div>
                         </div>
                         <div class="col-md-2">
-                            <div class="info-label">Durée</div>
-                            <div class="info-value">{{ $nights }} nuit(s)</div>
+                            <div class="info-label">{{ __('messages.duration') }}</div>
+                            <div class="info-value">{{ $nights }} {{ __('messages.nights') }}</div>
                         </div>
                         <div class="col-md-2">
-                            <div class="info-label">Adultes</div>
+                            <div class="info-label">{{ __('messages.adults') }}</div>
                             <div class="info-value">{{ $adults }}</div>
                         </div>
                         <div class="col-md-2">
-                            <div class="info-label">Enfants</div>
+                            <div class="info-label">{{ __('messages.children') }}</div>
                             <div class="info-value">{{ $children }}</div>
                         </div>
                     </div>
                     
                     <div class="row mt-4">
                         <div class="col-md-6">
-                            <div class="info-label">Prix total pour cette période</div>
+                            <div class="info-label">{{ __('messages.total_price_for_period') }}</div>
                             <div class="info-value-lg">{{ $formattedSearchPrice }}</div>
                             <small class="text-muted">({{ $formattedRoomPrice }})</small>
                         </div>
                         <div class="col-md-6">
                             <div class="d-flex gap-4">
                                 <div>
-                                    <div class="info-label">Capacité</div>
-                                    <div class="info-value">{{ $roomCapacity }} personnes</div>
+                                    <div class="info-label">{{ __('messages.capacity') }}</div>
+                                    <div class="info-value">{{ $roomCapacity }} {{ __('messages.people') }}</div>
                                 </div>
                                 <div>
-                                    <div class="info-label">Statut</div>
+                                    <div class="info-label">{{ __('messages.status') }}</div>
                                     <div class="info-value">{{ $roomStatus }}</div>
                                 </div>
                             </div>
@@ -448,14 +448,14 @@
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
                     <div class="stat-number">{{ $conflicts->count() }}</div>
-                    <div class="badge badge-red mb-2">réservation(s) en conflit</div>
-                    <div class="badge badge-gray">Indisponible</div>
+                    <div class="badge badge-red mb-2">{{ __('messages.conflicting_reservations') }}</div>
+                    <div class="badge badge-gray">{{ __('messages.unavailable') }}</div>
                 @else
                     <div class="stat-icon" style="color:var(--green-600);">
                         <i class="fas fa-check-circle"></i>
                     </div>
                     <div class="stat-number">✓</div>
-                    <div class="badge badge-green">Aucun conflit</div>
+                    <div class="badge badge-green">{{ __('messages.no_conflict') }}</div>
                 @endif
             </div>
         </div>
@@ -469,7 +469,7 @@
                 <div class="card-header" style="background: var(--red-50);">
                     <h5 style="color:var(--red-600);">
                         <i class="fas fa-calendar-times me-2"></i>
-                        Réservations en conflit ({{ $conflicts->count() }})
+                        {{ __('messages.conflicting_reservations') }} ({{ $conflicts->count() }})
                     </h5>
                 </div>
                 <div class="card-body">
@@ -479,8 +479,8 @@
                             <i class="fas fa-info-circle"></i>
                         </div>
                         <div>
-                            <strong>Cette chambre n'est pas disponible pour votre période</strong>
-                            <p class="mb-0">La chambre {{ $room->number }} est déjà réservée pendant votre séjour.</p>
+                            <strong>{{ __('messages.room_not_available_period') }}</strong>
+                            <p class="mb-0">{{ __('messages.room_conflict_detail', ['number' => $room->number]) }}</p>
                         </div>
                     </div>
 
@@ -488,20 +488,20 @@
                         <table class="table">
                             <thead>
                                 <tr>
-                                    <th>Client</th>
-                                    <th>Arrivée</th>
-                                    <th>Départ</th>
-                                    <th>Durée</th>
-                                    <th>Statut</th>
-                                    <th>Prix</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('messages.customer') }}</th>
+                                    <th>{{ __('messages.arrival') }}</th>
+                                    <th>{{ __('messages.departure') }}</th>
+                                    <th>{{ __('messages.duration') }}</th>
+                                    <th>{{ __('messages.status') }}</th>
+                                    <th>{{ __('messages.price') }}</th>
+                                    <th>{{ __('messages.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($conflicts as $reservation)
                                 <tr>
                                     <td>
-                                        <div class="fw-bold">{{ $reservation->customer->name ?? 'Client inconnu' }}</div>
+                                        <div class="fw-bold">{{ $reservation->customer->name ?? __('messages.unknown_customer') }}</div>
                                         <small class="text-muted">{{ $reservation->customer->phone ?? 'N/A' }}</small>
                                     </td>
                                     <td>
@@ -514,14 +514,14 @@
                                     </td>
                                     <td>
                                         <span class="badge badge-gray">
-                                            {{ $reservation->check_in->diffInDays($reservation->check_out) }} nuit(s)
+                                            {{ $reservation->check_in->diffInDays($reservation->check_out) }} {{ __('messages.nights') }}
                                         </span>
                                     </td>
                                     <td>
                                         @if($reservation->status == 'active')
-                                            <span class="badge badge-green">En séjour</span>
+                                            <span class="badge badge-green">{{ __('messages.in_stay') }}</span>
                                         @elseif($reservation->status == 'reservation')
-                                            <span class="badge badge-gray">Réservée</span>
+                                            <span class="badge badge-gray">{{ __('messages.reserved') }}</span>
                                         @else
                                             <span class="badge badge-gray">{{ $reservation->status }}</span>
                                         @endif
@@ -530,7 +530,7 @@
                                     <td>
                                         <a href="{{ route('transaction.show', $reservation->id) }}" 
                                            class="btn btn-outline btn-sm" style="padding:4px 10px; font-size:.7rem;">
-                                            <i class="fas fa-eye"></i> Voir
+                                            <i class="fas fa-eye"></i> {{ __('messages.view') }}
                                         </a>
                                     </td>
                                 </tr>
@@ -549,7 +549,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="fas fa-calendar-alt me-2" style="color:var(--green-600);"></i> Visualisation de la période</h5>
+                    <h5><i class="fas fa-calendar-alt me-2" style="color:var(--green-600);"></i> {{ __('messages.period_visualization') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="timeline-simple">
@@ -562,11 +562,11 @@
                         <div class="d-flex align-items-center gap-4 mb-3">
                             <div class="d-flex align-items-center gap-2">
                                 <div class="legend-color green"></div>
-                                <small class="text-muted">Votre recherche</small>
+                                <small class="text-muted">{{ __('messages.your_search') }}</small>
                             </div>
                             <div class="d-flex align-items-center gap-2">
                                 <div class="legend-color red"></div>
-                                <small class="text-muted">Réservation existante</small>
+                                <small class="text-muted">{{ __('messages.existing_reservation') }}</small>
                             </div>
                         </div>
                         
@@ -610,11 +610,11 @@
                 <div class="solution-icon green">
                     <i class="fas fa-search"></i>
                 </div>
-                <div class="solution-title">Option 1 : Autres chambres</div>
-                <div class="solution-text">Trouvez d'autres chambres disponibles pour vos dates</div>
+                <div class="solution-title">{{ __('messages.option_1_other_rooms') }}</div>
+                <div class="solution-text">{{ __('messages.find_other_available_rooms') }}</div>
                 <a href="{{ route('availability.search') }}?check_in={{ $checkIn }}&check_out={{ $checkOut }}&adults={{ $adults }}&children={{ $children }}" 
                    class="btn btn-outline btn-sm">
-                    <i class="fas fa-bed me-2"></i> Voir disponibilités
+                    <i class="fas fa-bed me-2"></i> {{ __('messages.view_availability') }}
                 </a>
             </div>
         </div>
@@ -624,10 +624,10 @@
                 <div class="solution-icon red">
                     <i class="fas fa-calendar-edit"></i>
                 </div>
-                <div class="solution-title">Option 2 : Modifier vos dates</div>
-                <div class="solution-text">Changez les dates de votre séjour</div>
+                <div class="solution-title">{{ __('messages.option_2_modify_dates') }}</div>
+                <div class="solution-text">{{ __('messages.change_stay_dates') }}</div>
                 <a href="{{ route('availability.search') }}" class="btn btn-outline btn-sm">
-                    <i class="fas fa-calendar me-2"></i> Modifier
+                    <i class="fas fa-calendar me-2"></i> {{ __('messages.modify') }}
                 </a>
             </div>
         </div>
@@ -637,21 +637,21 @@
                 <div class="solution-icon gray">
                     <i class="fas fa-clock"></i>
                 </div>
-                <div class="solution-title">Option 3 : Attendre</div>
+                <div class="solution-title">{{ __('messages.option_3_wait') }}</div>
                 <div class="solution-text">
-                    Disponible à partir du 
+                    {{ __('messages.available_from') }}
                     @php
                         $nextAvailable = $conflicts->sortBy('check_out')->first();
                     @endphp
                     @if($nextAvailable)
                         <strong>{{ $nextAvailable->check_out->format('d/m/Y') }}</strong>
                     @else
-                        <strong>prochainement</strong>
+                        <strong>{{ __('messages.soon') }}</strong>
                     @endif
                 </div>
                 <a href="{{ route('availability.calendar') }}?room_type={{ $room->type_id }}" 
                    class="btn btn-outline btn-sm">
-                    <i class="fas fa-calendar-alt me-2"></i> Calendrier
+                    <i class="fas fa-calendar-alt me-2"></i> {{ __('messages.calendar') }}
                 </a>
             </div>
         </div>
