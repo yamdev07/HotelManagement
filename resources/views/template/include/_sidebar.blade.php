@@ -511,6 +511,20 @@
                     @endif
                 </div>
             </div>
+            <div class="sidebar-lang" style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);">
+                <div style="font-size:.62rem;text-transform:uppercase;letter-spacing:.8px;color:rgba(255,255,255,.35);font-weight:700;margin-bottom:6px;">{{ __('messages.language') }}</div>
+                <div style="display:flex;gap:4px;">
+                    @php $currentUrl = request()->url(); @endphp
+                    <a href="{{ $currentUrl }}?lang=fr"
+                       style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0;border-radius:6px;font-size:.72rem;font-weight:600;text-decoration:none;transition:all .18s;{{ App::getLocale() === 'fr' ? 'background:rgba(16,185,129,.22);color:#34d399;border:1px solid rgba(16,185,129,.35);' : 'background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.08);' }}">
+                        🇫🇷 {{ __('messages.french') }}
+                    </a>
+                    <a href="{{ $currentUrl }}?lang=en"
+                       style="flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 0;border-radius:6px;font-size:.72rem;font-weight:600;text-decoration:none;transition:all .18s;{{ App::getLocale() === 'en' ? 'background:rgba(16,185,129,.22);color:#34d399;border:1px solid rgba(16,185,129,.35);' : 'background:rgba(255,255,255,.06);color:rgba(255,255,255,.65);border:1px solid rgba(255,255,255,.08);' }}">
+                        🇬🇧 {{ __('messages.english') }}
+                    </a>
+                </div>
+            </div>
             <div class="sidebar-time">
                 <i class="far fa-clock"></i>
                 <span id="sidebar-datetime">{{ now()->format('d/m/Y H:i') }}</span>

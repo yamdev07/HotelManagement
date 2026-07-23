@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Inventaire des chambres')
+@section('title', __('messages.inventory_title'))
 @section('content')
 
 <style>
@@ -512,7 +512,7 @@
     <div class="breadcrumb-custom anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Inventaire</span>
+        <span class="current">{{ __('messages.inventory') }}</span>
     </div>
 
     {{-- ─── HEADER ─────────────────────────────── --}}
@@ -520,21 +520,21 @@
         <div class="inventory-brand">
             <div class="inventory-brand-icon"><i class="fas fa-clipboard-list"></i></div>
             <div>
-                <h1 class="inventory-header-title">Inventaire des <em>chambres</em></h1>
+                <h1 class="inventory-header-title">{!! __('messages.inventory_title') !!}</h1>
                 <div class="inventory-header-sub">
-                    <span>Statut et occupation des chambres en temps réel</span>
+                    <span>{{ __('messages.realtime_status') }}</span>
                 </div>
             </div>
         </div>
         <div class="inventory-header-actions">
             <a href="{{ route('availability.calendar') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-calendar-alt"></i> Calendrier
+                <i class="fas fa-calendar-alt"></i> {{ __('messages.calendar') }}
             </a>
             <a href="{{ route('availability.dashboard') }}" class="btn-db btn-db-ghost">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
             <button class="btn-db btn-db-primary" onclick="window.print()">
-                <i class="fas fa-print"></i> Imprimer
+                <i class="fas fa-print"></i> {{ __('messages.print') }}
             </button>
         </div>
     </div>
@@ -547,7 +547,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-number">{{ $stats['total_rooms'] }}</div>
-                <div class="stat-label">Chambres totales</div>
+                <div class="stat-label">{{ __('messages.total_rooms') }}</div>
             </div>
         </div>
         
@@ -557,7 +557,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-number">{{ $stats['available_rooms'] }}</div>
-                <div class="stat-label">Chambres disponibles</div>
+                <div class="stat-label">{{ __('messages.available_rooms') }}</div>
             </div>
         </div>
         
@@ -567,7 +567,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-number">{{ $stats['occupied_rooms'] }}</div>
-                <div class="stat-label">Chambres occupées</div>
+                <div class="stat-label">{{ __('messages.occupied_rooms') }}</div>
             </div>
         </div>
         
@@ -577,7 +577,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-number">{{ number_format($stats['occupancy_rate'], 1) }}%</div>
-                <div class="stat-label">Taux d'occupation</div>
+                <div class="stat-label">{{ __('messages.occupancy_rate') }}</div>
             </div>
         </div>
     </div>
@@ -587,11 +587,11 @@
         <div class="table-header">
             <h5>
                 <i class="fas fa-list-alt"></i>
-                Inventaire par type de chambre
+                {{ __('messages.inventory_by_type') }}
             </h5>
             <div class="update-badge">
                 <i class="fas fa-clock fa-xs"></i>
-                Mis à jour: {{ now()->format('H:i') }}
+                {{ __('messages.updated_at') }} {{ now()->format('H:i') }}
             </div>
         </div>
         
@@ -599,14 +599,14 @@
             <table class="table-modern">
                 <thead>
                     <tr>
-                        <th>Type de chambre</th>
-                        <th class="text-center">Total</th>
-                        <th class="text-center">Disponibles</th>
-                        <th class="text-center">Occupées</th>
-                        <th class="text-center">Nettoyage</th>
-                        <th class="text-center">Maintenance</th>
-                        <th class="text-center">Taux d'occupation</th>
-                        <th class="text-center">Actions</th>
+                        <th>{{ __('messages.room_type') }}</th>
+                        <th class="text-center">{{ __('messages.total') }}</th>
+                        <th class="text-center">{{ __('messages.available') }}</th>
+                        <th class="text-center">{{ __('messages.occupied') }}</th>
+                        <th class="text-center">{{ __('messages.cleaning') }}</th>
+                        <th class="text-center">{{ __('messages.maintenance_cleaning') }}</th>
+                        <th class="text-center">{{ __('messages.occupancy_rate') }}</th>
+                        <th class="text-center">{{ __('messages.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -642,9 +642,9 @@
                                             @else
                                                 {{ number_format($avgPrice, 0, ',', ' ') }} FCFA
                                             @endif
-                                            <span class="text-muted">/nuit</span>
+                                            <span class="text-muted">{{ __('messages.per_night') }}</span>
                                         @else
-                                            <span class="text-muted">Prix non défini</span>
+                                            <span class="text-muted">{{ __('messages.price_not_set') }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -693,7 +693,7 @@
         <div class="table-header" style="background: linear-gradient(135deg, var(--blue), var(--g600)); color: white;">
             <h5 style="color: white;">
                 <i class="fas fa-clipboard-check" style="color: white;"></i>
-                Chambres par statut
+                        {{ __('messages.rooms_by_status') }}
             </h5>
         </div>
         
@@ -769,7 +769,7 @@
     <div class="text-end mt-3 anim-6">
         <span class="update-badge">
             <i class="fas fa-sync-alt fa-xs"></i>
-            Dernière mise à jour: {{ now()->format('d/m/Y H:i:s') }}
+            {{ __('messages.last_update') }} {{ now()->format('d/m/Y H:i:s') }}
         </span>
     </div>
 

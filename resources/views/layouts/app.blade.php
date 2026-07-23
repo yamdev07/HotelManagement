@@ -21,8 +21,8 @@
     <!-- Chart.js (pour les graphiques) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <!-- Vite - Assets compilés (si disponible) -->
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <!-- jQuery (required by some plugins) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
     <!-- Fallback CSS personnalisé (si Vite ne charge pas) -->
     <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
