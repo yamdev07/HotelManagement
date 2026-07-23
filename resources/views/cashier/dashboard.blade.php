@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Dashboard Caissier')
+@section('title', __('cashier-dashboard.title'))
 
 @push('styles')
 <style>
@@ -548,10 +548,10 @@
             <div>
                 <h1 class="header-title">
                     <i class="fas fa-cash-register"></i>
-                    Dashboard Caissier
+                    {{ __('cashier-dashboard.title') }}
                 </h1>
                 <div class="user-badge mt-2">
-                    Bonjour, <strong class="mx-1">{{ auth()->user()->name }}</strong>
+                    {{ __('cashier-dashboard.greeting') }}, <strong class="mx-1">{{ auth()->user()->name }}</strong>
                     <span class="role-badge role-{{ $isAdmin ? 'admin' : ($isCashier ? 'cashier' : 'receptionist') }}">
                         <i class="fas {{ $isAdmin ? 'fa-crown' : ($isCashier ? 'fa-cash-register' : 'fa-user') }}"></i>
                         {{ auth()->user()->role }}
@@ -562,16 +562,16 @@
             @if($isAdmin && $canStartSession && !$activeSession)
             <div>
                 <a href="{{ route('cashier.sessions.create') }}" class="btn btn-green">
-                    <i class="fas fa-plus"></i> Nouvelle session
+                    <i class="fas fa-plus"></i> {{ __('cashier-dashboard.new_session') }}
                 </a>
             </div>
             @endif
         </div>
         
         <div class="breadcrumb">
-            <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Accueil</a>
+            <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> {{ __('cashier-dashboard.home') }}</a>
             <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-            <span class="active">Caissier</span>
+            <span class="active">{{ __('cashier-dashboard.cashier') }}</span>
         </div>
     </div>
 
@@ -583,22 +583,22 @@
         </div>
         <div>
             <h6 class="fw-bold mb-1">
-                @if($isCashier) Mode Caissier @else Mode Lecture Seule @endif
+                @if($isCashier) {{ __('cashier-dashboard.mode_cashier') }} @else {{ __('cashier-dashboard.mode_readonly') }} @endif
             </h6>
             <p class="small mb-2">
                 @if($isCashier)
-                Vous pouvez gérer votre session et les paiements.
+                {{ __('cashier-dashboard.cashier_description') }}
                 @else
-                Vous pouvez consulter les données mais seuls les administrateurs peuvent effectuer des modifications.
+                {{ __('cashier-dashboard.readonly_description') }}
                 @endif
             </p>
             <div class="permission-badges">
-                <span class="permission-badge"><i class="fas fa-check" style="color:var(--green-600);"></i> Visualisation</span>
+                <span class="permission-badge"><i class="fas fa-check" style="color:var(--green-600);"></i> {{ __('cashier-dashboard.viewing') }}</span>
                 @if($isCashier)
-                <span class="permission-badge"><i class="fas fa-check" style="color:var(--green-600);"></i> Paiements</span>
-                <span class="permission-badge"><i class="fas fa-times" style="color:var(--red-500);"></i> Administration</span>
+                <span class="permission-badge"><i class="fas fa-check" style="color:var(--green-600);"></i> {{ __('cashier-dashboard.payments') }}</span>
+                <span class="permission-badge"><i class="fas fa-times" style="color:var(--red-500);"></i> {{ __('cashier-dashboard.administration') }}</span>
                 @else
-                <span class="permission-badge"><i class="fas fa-times" style="color:var(--red-500);"></i> Modification</span>
+                <span class="permission-badge"><i class="fas fa-times" style="color:var(--red-500);"></i> {{ __('cashier-dashboard.modification') }}</span>
                 @endif
             </div>
         </div>
@@ -615,7 +615,7 @@
                 </div>
                 <div>
                     <h5 class="fw-bold mb-2">
-                        Session Active #{{ $activeSession->id }}
+                        {{ __('cashier-dashboard.active_session') }} #{{ $activeSession->id }}
                         @if($activeSession->user_id != auth()->id())
                         <span class="badge badge-gray">{{ $activeSession->user->name }}</span>
                         @endif
@@ -629,9 +629,9 @@
                 </div>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('cashier.sessions.show', $activeSession) }}" class="btn btn-gray"><i class="fas fa-eye"></i> Détails</a>
+                <a href="{{ route('cashier.sessions.show', $activeSession) }}" class="btn btn-gray"><i class="fas fa-eye"></i> {{ __('cashier-dashboard.details') }}</a>
                 @if(($isAdmin && $activeSession->user_id == auth()->id()) || $isCashier || $isReceptionist)
-                <button class="btn btn-red" data-bs-toggle="modal" data-bs-target="#closeModal"><i class="fas fa-lock"></i> Clôturer</button>
+                <button class="btn btn-red" data-bs-toggle="modal" data-bs-target="#closeModal"><i class="fas fa-lock"></i> {{ __('cashier-dashboard.close') }}</button>
                 @endif
             </div>
         </div>
@@ -644,15 +644,15 @@
                     <i class="fas fa-pause-circle"></i>
                 </div>
                 <div>
-                    <h5 class="fw-bold mb-1">Aucune session active</h5>
+                    <h5 class="fw-bold mb-1">{{ __('cashier-dashboard.no_active_session') }}</h5>
                     <p class="mb-0 text-muted">
-                        @if($isAdmin || $isCashier) Démarrez une nouvelle session pour commencer
-                        @else Contactez un administrateur pour démarrer une session @endif
+                        @if($isAdmin || $isCashier) {{ __('cashier-dashboard.start_new_session_message') }}
+                        @else {{ __('cashier-dashboard.contact_admin_message') }} @endif
                     </p>
                 </div>
             </div>
             @if(($isAdmin || $isCashier) && $canStartSession)
-            <a href="{{ route('cashier.sessions.create') }}" class="btn btn-green"><i class="fas fa-play"></i> Démarrer</a>
+            <a href="{{ route('cashier.sessions.create') }}" class="btn btn-green"><i class="fas fa-play"></i> {{ __('cashier-dashboard.start') }}</a>
             @endif
         </div>
     </div>
@@ -661,33 +661,33 @@
     {{-- Stats --}}
     <div class="stats-grid anim-3">
         <div class="stat-card">
-            <div class="stat-label">Réservations</div>
+            <div class="stat-label">{{ __('cashier-dashboard.reservations') }}</div>
             <div class="stat-value">{{ $todayStats['totalBookings'] }}</div>
-            <div class="stat-subtitle">Aujourd'hui</div>
+            <div class="stat-subtitle">{{ __('cashier-dashboard.today') }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Chiffre d'affaires</div>
+            <div class="stat-label">{{ __('cashier-dashboard.revenue') }}</div>
             <div class="stat-value">{{ number_format($todayStats['revenue'], 0, ',', ' ') }}</div>
             <div class="stat-subtitle">FCFA</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Check-ins</div>
+            <div class="stat-label">{{ __('cashier-dashboard.checkins') }}</div>
             <div class="stat-value">{{ $todayStats['checkins'] }}</div>
-            <div class="stat-subtitle">Aujourd'hui</div>
+            <div class="stat-subtitle">{{ __('cashier-dashboard.today') }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">En attente</div>
+            <div class="stat-label">{{ __('cashier-dashboard.pending') }}</div>
             <div class="stat-value">{{ $todayStats['pendingPayments'] }}</div>
-            <div class="stat-subtitle">Paiements</div>
+            <div class="stat-subtitle">{{ __('cashier-dashboard.pending_subtitle') }}</div>
         </div>
     </div>
 
     {{-- Tabs --}}
     <div class="nav-tabs">
-        <button class="nav-tab active" onclick="switchTab('pending')"><i class="fas fa-clock me-1"></i> Paiements <span class="badge">{{ $pendingPayments->count() }}</span></button>
-        <button class="nav-tab" onclick="switchTab('sessions')"><i class="fas fa-history me-1"></i> Mes sessions <span class="badge">{{ $recentSessions->count() }}</span></button>
+        <button class="nav-tab active" onclick="switchTab('pending')"><i class="fas fa-clock me-1"></i> {{ __('cashier-dashboard.pending_payments_tab') }} <span class="badge">{{ $pendingPayments->count() }}</span></button>
+        <button class="nav-tab" onclick="switchTab('sessions')"><i class="fas fa-history me-1"></i> {{ __('cashier-dashboard.my_sessions') }} <span class="badge">{{ $recentSessions->count() }}</span></button>
         @if($isAdmin)
-        <button class="nav-tab" onclick="switchTab('all-sessions')"><i class="fas fa-users me-1"></i> Toutes les sessions <span class="badge">{{ $allSessionsCount ?? 0 }}</span></button>
+        <button class="nav-tab" onclick="switchTab('all-sessions')"><i class="fas fa-users me-1"></i> {{ __('cashier-dashboard.all_sessions') }} <span class="badge">{{ $allSessionsCount ?? 0 }}</span></button>
         @endif
     </div>
 
@@ -704,12 +704,12 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Référence</th>
-                            <th>Montant</th>
-                            <th>Client</th>
-                            <th>Méthode</th>
-                            <th>Date</th>
-                            <th>Actions</th>
+                            <th>{{ __('cashier-dashboard.reference') }}</th>
+                            <th>{{ __('cashier-dashboard.amount') }}</th>
+                            <th>{{ __('cashier-dashboard.client') }}</th>
+                            <th>{{ __('cashier-dashboard.method') }}</th>
+                            <th>{{ __('cashier-dashboard.date') }}</th>
+                            <th>{{ __('cashier-dashboard.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -727,7 +727,7 @@
                                     </span>
                                 @endif
                             </td>
-                            <td>{{ $payment->transaction->customer->name ?? 'N/A' }}</td>
+                            <td>{{ $payment->transaction->customer->name ?? __('cashier-dashboard.na') }}</td>
                             <td>
                                 <span class="payment-badge payment-cash">
                                     <i class="fas {{ $payment->payment_method == 'cash' ? 'fa-money-bill-wave' : ($payment->payment_method == 'card' ? 'fa-credit-card' : 'fa-mobile-alt') }}"></i>
@@ -747,13 +747,13 @@
                         <tr>
                             <td colspan="6" class="text-end">
                                 <div class="d-flex justify-content-end align-items-center gap-3">
-                                    <small class="text-muted">Encaissements:</small>
+                                    <small class="text-muted">{{ __('cashier-dashboard.collections') }}:</small>
                                     <span class="badge badge-green">{{ number_format($totalEncaissements, 0, ',', ' ') }} FCFA</span>
                                     
-                                    <small class="text-muted">Remboursements:</small>
+                                    <small class="text-muted">{{ __('cashier-dashboard.refunds') }}:</small>
                                     <span class="badge badge-red">{{ number_format($totalRemboursements, 0, ',', ' ') }} FCFA</span>
                                     
-                                    <small class="text-muted">Net:</small>
+                                    <small class="text-muted">{{ __('cashier-dashboard.net') }}:</small>
                                     <strong class="badge {{ $netTotal >= 0 ? 'badge-green' : 'badge-red' }}" style="font-size:.9rem; padding:6px 16px;">
                                         {{ number_format($netTotal, 0, ',', ' ') }} FCFA
                                     </strong>
@@ -766,10 +766,10 @@
             @else
             <div class="empty-state">
                 <div class="empty-icon"><i class="fas fa-money-bill-wave"></i></div>
-                <h5 class="fw-bold mb-2">Aucun paiement</h5>
+                <h5 class="fw-bold mb-2">{{ __('cashier-dashboard.no_payment') }}</h5>
                 <p class="text-muted">
-                    @if($activeSession) Aucun paiement pendant cette session 
-                    @else Démarrez une session @endif
+                    @if($activeSession) {{ __('cashier-dashboard.no_payment_in_session') }} 
+                    @else {{ __('cashier-dashboard.start_session') }} @endif
                 </p>
             </div>
             @endif
@@ -783,14 +783,14 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Session</th>
-                            <th>Début</th>
-                            <th>Fin</th>
-                            <th>Durée</th>
-                            <th>Initial</th>
-                            <th>Final</th>
-                            <th>Statut</th>
-                            <th>Actions</th>
+                            <th>{{ __('cashier-dashboard.session') }}</th>
+                            <th>{{ __('cashier-dashboard.start_date') }}</th>
+                            <th>{{ __('cashier-dashboard.end_date') }}</th>
+                            <th>{{ __('cashier-dashboard.duration') }}</th>
+                            <th>{{ __('cashier-dashboard.initial') }}</th>
+                            <th>{{ __('cashier-dashboard.final') }}</th>
+                            <th>{{ __('cashier-dashboard.status') }}</th>
+                            <th>{{ __('cashier-dashboard.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -802,7 +802,7 @@
                                 @if($session->end_time)
                                     {{ $session->end_time->format('d/m H:i') }}
                                 @else
-                                    <span class="badge badge-green">En cours</span>
+                                    <span class="badge badge-green">{{ __('cashier-dashboard.in_progress') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -817,7 +817,7 @@
                             <td>{{ number_format($session->final_balance ?? 0, 0, ',', ' ') }}</td>
                             <td>
                                 <span class="badge {{ $session->status == 'active' ? 'badge-green' : 'badge-gray' }}">
-                                    {{ $session->status == 'active' ? 'Active' : 'Terminée' }}
+                                    {{ $session->status == 'active' ? __('cashier-dashboard.active') : __('cashier-dashboard.completed') }}
                                 </span>
                             </td>
                             <td>
@@ -833,7 +833,7 @@
             @else
             <div class="empty-state">
                 <div class="empty-icon"><i class="fas fa-history"></i></div>
-                <h5 class="fw-bold mb-2">Aucune session</h5>
+                <h5 class="fw-bold mb-2">{{ __('cashier-dashboard.no_session') }}</h5>
             </div>
             @endif
         </div>
@@ -847,16 +847,16 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Utilisateur</th>
-                            <th>Session</th>
-                            <th>Début</th>
-                            <th>Fin</th>
-                            <th>Durée</th>
-                            <th>Initial</th>
-                            <th>Final</th>
-                            <th>Diff</th>
-                            <th>Statut</th>
-                            <th>Actions</th>
+                            <th>{{ __('cashier-dashboard.user') }}</th>
+                            <th>{{ __('cashier-dashboard.session') }}</th>
+                            <th>{{ __('cashier-dashboard.start_date') }}</th>
+                            <th>{{ __('cashier-dashboard.end_date') }}</th>
+                            <th>{{ __('cashier-dashboard.duration') }}</th>
+                            <th>{{ __('cashier-dashboard.initial') }}</th>
+                            <th>{{ __('cashier-dashboard.final') }}</th>
+                            <th>{{ __('cashier-dashboard.diff') }}</th>
+                            <th>{{ __('cashier-dashboard.status') }}</th>
+                            <th>{{ __('cashier-dashboard.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -866,7 +866,7 @@
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="user-avatar-sm"><i class="fas fa-user"></i></div>
-                                    {{ $session->user->name ?? 'N/A' }}
+                                    {{ $session->user->name ?? __('cashier-dashboard.na') }}
                                 </div>
                             </td>
                             <td><strong>#{{ $session->id }}</strong></td>
@@ -875,7 +875,7 @@
                                 @if($session->end_time)
                                     {{ $session->end_time->format('d/m H:i') }}
                                 @else
-                                    <span class="badge badge-green">En cours</span>
+                                    <span class="badge badge-green">{{ __('cashier-dashboard.in_progress') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -895,7 +895,7 @@
                             </td>
                             <td>
                                 <span class="badge {{ $session->status == 'active' ? 'badge-green' : 'badge-gray' }}">
-                                    {{ $session->status == 'active' ? 'Active' : 'Terminée' }}
+                                    {{ $session->status == 'active' ? __('cashier-dashboard.active') : __('cashier-dashboard.completed') }}
                                 </span>
                             </td>
                             <td>
@@ -911,7 +911,7 @@
             @else
             <div class="empty-state">
                 <div class="empty-icon"><i class="fas fa-users"></i></div>
-                <h5 class="fw-bold mb-2">Aucune session</h5>
+                <h5 class="fw-bold mb-2">{{ __('cashier-dashboard.no_session') }}</h5>
             </div>
             @endif
         </div>
@@ -927,7 +927,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-lock text-danger me-2"></i> Clôturer #{{ $activeSession->id }}
+                    <i class="fas fa-lock text-danger me-2"></i> {{ __('cashier-dashboard.close_session_title') }} #{{ $activeSession->id }}
                 </h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -935,47 +935,47 @@
                 @csrf @method('DELETE')
                 <div class="modal-body">
                     <div class="alert-warning">
-                        <i class="fas fa-exclamation-triangle"></i> Action irréversible. Vérifiez le solde.
+                        <i class="fas fa-exclamation-triangle"></i> {{ __('cashier-dashboard.irreversible_warning') }}
                     </div>
                     <div class="summary-card">
-                        <h6 class="fw-bold mb-2">Récapitulatif</h6>
+                        <h6 class="fw-bold mb-2">{{ __('cashier-dashboard.summary') }}</h6>
                         <div class="summary-item">
-                            <span>Début</span>
+                            <span>{{ __('cashier-dashboard.start_label') }}</span>
                             <span>{{ $activeSession->start_time->format('d/m/Y H:i') }}</span>
                         </div>
                         <div class="summary-item">
-                            <span>Durée</span>
+                            <span>{{ __('cashier-dashboard.duration_label') }}</span>
                             <span>{{ $activeSession->start_time->diffForHumans(now(), true) }}</span>
                         </div>
                         <div class="summary-item">
-                            <span>Solde théorique</span>
+                            <span>{{ __('cashier-dashboard.theoretical_balance') }}</span>
                             <span class="text-success">{{ number_format($activeSession->current_balance, 0, ',', ' ') }} FCFA</span>
                         </div>
                         <div class="summary-item">
-                            <span>Paiements</span>
+                            <span>{{ __('cashier-dashboard.payments_count') }}</span>
                             <span>{{ $activeSession->payments->count() }}</span>
                         </div>
                         <div class="summary-item">
-                            <span>Encaissements</span>
+                            <span>{{ __('cashier-dashboard.collections_label') }}</span>
                             <span class="badge badge-green">{{ number_format($activeSession->payments->where('status', 'completed')->where('payment_method', '!=', 'refund')->sum('amount'), 0, ',', ' ') }} FCFA</span>
                         </div>
                         <div class="summary-item">
-                            <span>Remboursements</span>
+                            <span>{{ __('cashier-dashboard.refunds_label') }}</span>
                             <span class="badge badge-red">{{ number_format($activeSession->payments->where('payment_method', 'refund')->where('status', 'completed')->sum('amount'), 0, ',', ' ') }} FCFA</span>
                         </div>
                     </div>
                     <div class="mb-4">
-                        <label class="form-label">Solde final réel</label>
+                        <label class="form-label">{{ __('cashier-dashboard.actual_final_balance') }}</label>
                         <input type="number" name="final_balance" class="form-control" value="{{ $activeSession->current_balance }}" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Notes</label>
+                        <label class="form-label">{{ __('cashier-dashboard.notes') }}</label>
                         <textarea name="closing_notes" class="form-control" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-gray" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-red">Confirmer</button>
+                    <button class="btn btn-gray" data-bs-dismiss="modal">{{ __('cashier-dashboard.cancel') }}</button>
+                    <button type="submit" class="btn btn-red">{{ __('cashier-dashboard.confirm') }}</button>
                 </div>
             </form>
         </div>
@@ -992,7 +992,7 @@ function switchTab(tabId) {
 }
 
 function showPayment(id) {
-    alert('Détails paiement #' + id);
+    alert('{{ __("cashier-dashboard.payment_details_alert") }}' + id);
     // À implémenter: modal avec détails du paiement
 }
 </script>
