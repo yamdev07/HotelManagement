@@ -46,7 +46,7 @@ class RegisterHotelController extends Controller
             // 'file' plutôt que 'image' : 'image' (getimagesize) rejette les SVG.
             'logo'          => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:4096'],
             'admin_name'    => ['required', 'string', 'max:255', new \App\Rules\NoEmoji],
-            'admin_email'   => ['required', 'email', 'max:255', 'unique:users,email'],
+            'admin_email'   => ['required', 'email', 'max:255'],
         ], [
             'logo.mimes' => 'Le logo doit être une image JPG, PNG, WEBP ou SVG.',
             'logo.max'   => 'Le logo est trop lourd (4 Mo maximum). Réduisez sa taille et réessayez.',
@@ -55,6 +55,37 @@ class RegisterHotelController extends Controller
             'company_name' => "nom de l'établissement",
             'admin_name'   => 'nom complet',
         ]);
+
+        // Si l'email existe déjà (l'utilisateur revient en arrière pour changer de plan),
+        // on met à jour l'hôtel avec les nouvelles infos et on le reconnecte.
+        $existingUser = User::where('email', $data['admin_email'])->first();
+        if ($existingUser) {
+            $plan    = $data['plan'] ?? config('plans.default', 'starter');
+            $tier    = config('plans.tiers')[$plan];
+            $country = $data['country'] ?? config('plans.default_country', 'BJ');
+            $currency = config('plans.countries.'.$country.'.currency', 'XOF');
+
+            if ($existingUser->hotel) {
+                $existingUser->hotel->update([
+                    'name'       => $data['company_name'],
+                    'country'    => $country,
+                    'currency'   => $currency,
+                    'plan'       => $plan,
+                    'room_limit' => $tier['room_limit'],
+                ]);
+
+                if ($request->hasFile('logo')) {
+                    $existingUser->hotel->update([
+                        'logo' => $request->file('logo')->store('hotel-logos', 'public'),
+                    ]);
+                }
+            }
+
+            Auth::login($existingUser);
+            return redirect()->route('onboarding.show')
+                ->with('success', 'Compte existant détecté. Plan mis à jour : '.$tier['name'].'.')
+                ->with('credentials_email', $existingUser->email);
+        }
 
         $plan    = $data['plan'] ?? config('plans.default', 'starter');
         $tier    = config('plans.tiers')[$plan];
