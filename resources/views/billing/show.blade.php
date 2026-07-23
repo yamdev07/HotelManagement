@@ -122,7 +122,7 @@
                 <h5 class="mb-3"><i class="fas fa-clock-rotate-left me-2"></i>{{ __('billing.history_title') }}</h5>
                 <div class="table-responsive">
                     <table class="table table-sm align-middle mb-0">
-                        <thead><tr><th>{{ __('billing.history_table_date') }}</th><th>{{ __('billing.history_table_plan') }}</th><th>{{ __('billing.history_table_type') }}</th><th class="text-end">{{ __('billing.history_table_amount') }}</th><th>{{ __('billing.history_table_until') }}</th></tr></thead>
+                        <thead><tr><th>{{ __('billing.history_date') }}</th><th>{{ __('billing.history_plan') }}</th><th>{{ __('billing.history_type') }}</th><th class="text-end">{{ __('billing.history_amount') }}</th><th>{{ __('billing.history_until') }}</th></tr></thead>
                         <tbody>
                         @foreach ($hotel->subscriptions as $s)
                             <tr>
