@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Nouvelle Chambre')
+@section('title', __('room.create_page_title'))
 
 @section('content')
 <style>
@@ -321,11 +321,11 @@
 <div class="create-page">
     <!-- Breadcrumb -->
     <div class="create-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('room.breadcrumb_dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('room.index') }}">Chambres</a>
+        <a href="{{ route('room.index') }}">{{ __('room.breadcrumb_rooms') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Nouvelle chambre</span>
+        <span class="current">{{ __('room.breadcrumb_new') }}</span>
     </div>
 
     <!-- Header -->
@@ -333,15 +333,15 @@
         <div class="create-brand">
             <div class="create-brand-icon"><i class="fas fa-plus"></i></div>
             <div>
-                <h1 class="create-header-title">Nouvelle <em>chambre</em></h1>
+                <h1 class="create-header-title">{!! __('room.create_title') !!}</h1>
                 <p class="create-header-sub">
-                    <i class="fas fa-door-open me-1"></i> Ajouter une nouvelle chambre à l'hôtel
+                    <i class="fas fa-door-open me-1"></i> {{ __('room.create_subtitle') }}
                 </p>
             </div>
         </div>
         <div class="create-header-actions">
             <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-arrow-left me-2"></i> Retour
+                <i class="fas fa-arrow-left me-2"></i> {{ __('room.back') }}
             </a>
         </div>
     </div>
@@ -351,7 +351,7 @@
     <div class="alert-modern alert-danger anim-2">
         <div class="alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
         <div style="flex:1">
-            <strong>Veuillez corriger les erreurs suivantes :</strong>
+            <strong>{{ __('room.error_heading') }}</strong>
             <ul>
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -375,7 +375,7 @@
         <div class="create-card-header">
             <h5 class="create-card-title">
                 <i class="fas fa-info-circle"></i>
-                Informations de la chambre
+                {{ __('room.card_info') }}
             </h5>
         </div>
         <div class="create-card-body">
@@ -388,14 +388,14 @@
                     <div class="form-group">
                         <label for="number" class="form-label">
                             <i class="fas fa-hashtag"></i>
-                            Numéro de chambre *
+                            {{ __('room.label_number') }}
                         </label>
                         <input type="text" 
                                class="form-control @error('number') is-invalid @enderror" 
                                id="number" 
                                name="number" 
                                value="{{ old('number') }}" 
-                               placeholder="Ex: 101, 201, 301" 
+                               placeholder="{{ __('room.placeholder_number') }}" 
                                required>
                         @error('number')
                         <div class="invalid-feedback">
@@ -405,17 +405,17 @@
                         @enderror
                         {{-- Issue #194 : alerte en direct si le numéro est déjà pris --}}
                         <div class="form-hint" id="number-live-hint" style="display:none;">
-                            <span class="num-taken"><i class="fas fa-exclamation-circle"></i> Ce numéro est <strong>déjà utilisé</strong>, choisissez-en un autre.</span>
+                            <span class="num-taken"><i class="fas fa-exclamation-circle"></i> {!! __('room.number_taken') !!}</span>
                         </div>
                         <div class="form-hint" id="number-live-ok" style="display:none;">
-                            <span class="num-free"><i class="fas fa-check-circle"></i> Numéro disponible.</span>
+                            <span class="num-free"><i class="fas fa-check-circle"></i> {{ __('room.number_available') }}</span>
                         </div>
-                        <div class="form-hint">Identifiant unique de la chambre · doit être différent des numéros existants</div>
+                        <div class="form-hint">{{ __('room.hint_unique_id') }}</div>
 
                         {{-- Liste des numéros déjà attribués --}}
                         @if($existingNumbers->isNotEmpty())
                         <div class="taken-numbers">
-                            <span class="taken-numbers-label"><i class="fas fa-door-closed"></i> Numéros déjà utilisés ({{ $existingNumbers->count() }})&nbsp;:</span>
+                            <span class="taken-numbers-label"><i class="fas fa-door-closed"></i> {{ __('room.existing_numbers_title', ['count' => $existingNumbers->count()]) }}&nbsp;:</span>
                             <span class="taken-numbers-list">
                                 @foreach($existingNumbers as $n)
                                     <span class="num-chip">{{ $n }}</span>
@@ -424,7 +424,7 @@
                         </div>
                         @else
                         <div class="taken-numbers taken-numbers--empty">
-                            <i class="fas fa-info-circle"></i> Aucune chambre pour l'instant · c'est votre première.
+                            <i class="fas fa-info-circle"></i> {{ __('room.existing_numbers_empty') }}
                         </div>
                         @endif
                     </div>
@@ -433,35 +433,35 @@
                     <div class="form-group">
                         <label for="name" class="form-label">
                             <i class="fas fa-signature"></i>
-                            Nom de la chambre
-                            <span class="optional">(Optionnel)</span>
+                            {{ __('room.label_name') }}
+                            <span class="optional">{{ __('room.optional') }}</span>
                         </label>
                         <input type="text" 
                                class="form-control @error('name') is-invalid @enderror" 
                                id="name" 
                                name="name" 
                                value="{{ old('name') }}" 
-                               placeholder="Ex: Suite Présidentielle, Vue Mer">
+                               placeholder="{{ __('room.placeholder_name') }}">
                         @error('name')
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
                             {{ $message }}
                         </div>
                         @enderror
-                        <div class="form-hint">Nom descriptif de la chambre</div>
+                        <div class="form-hint">{{ __('room.hint_name') }}</div>
                     </div>
                     
                     <!-- Type de chambre -->
                     <div class="form-group">
                         <label for="type_id" class="form-label">
                             <i class="fas fa-bed"></i>
-                            Type de chambre *
+                            {{ __('room.label_type') }}
                         </label>
                         <select id="type_id" 
                                 name="type_id" 
                                 class="form-select @error('type_id') is-invalid @enderror" 
                                 required>
-                            <option value="" disabled selected>-- Sélectionner un type --</option>
+                            <option value="" disabled selected>{{ __('room.hint_select_type') }}</option>
                             @foreach ($types as $type)
                                 <option value="{{ $type->id }}" {{ old('type_id') == $type->id ? 'selected' : '' }}>
                                     {{ $type->name }} 
@@ -483,13 +483,13 @@
                     <div class="form-group">
                         <label for="room_status_id" class="form-label">
                             <i class="fas fa-circle"></i>
-                            Statut de la chambre *
+                            {{ __('room.label_room_status') }}
                         </label>
                         <select id="room_status_id" 
                                 name="room_status_id" 
                                 class="form-select @error('room_status_id') is-invalid @enderror" 
                                 required>
-                            <option value="" disabled selected>-- Sélectionner un statut --</option>
+                            <option value="" disabled selected>{{ __('room.hint_select_status') }}</option>
                             @foreach ($roomstatuses as $roomstatus)
                                 @php
                                     $badgeClass = match($roomstatus->code ?? '') {
@@ -510,21 +510,21 @@
                             {{ $message }}
                         </div>
                         @enderror
-                        <div class="form-hint">Statut initial de la chambre (peut être modifié plus tard)</div>
+                        <div class="form-hint">{{ __('room.hint_status_initial') }}</div>
                     </div>
                     
                     <!-- Capacité -->
                     <div class="form-group">
                         <label for="capacity" class="form-label">
                             <i class="fas fa-users"></i>
-                            Capacité *
+                            {{ __('room.label_capacity') }}
                         </label>
                         <input type="number" 
                                class="form-control @error('capacity') is-invalid @enderror" 
                                id="capacity" 
                                name="capacity" 
                                value="{{ old('capacity', 2) }}" 
-                               placeholder="Ex: 2, 4, 6" 
+                               placeholder="{{ __('room.placeholder_capacity') }}" 
                                min="1" 
                                max="10" 
                                required>
@@ -534,14 +534,14 @@
                             {{ $message }}
                         </div>
                         @enderror
-                        <div class="form-hint">Nombre de personnes (1-10)</div>
+                        <div class="form-hint">{{ __('room.hint_capacity') }}</div>
                     </div>
                     
                     <!-- Prix par nuit -->
                     <div class="form-group">
                         <label for="price" class="form-label">
                             <i class="fas fa-money-bill-wave"></i>
-                            Prix par nuit *
+                            {{ __('room.label_price') }}
                         </label>
                         <div class="input-group">
                             <span class="input-group-text">FCFA</span>
@@ -550,7 +550,7 @@
                                    id="price" 
                                    name="price" 
                                    value="{{ old('price') }}" 
-                                   placeholder="Ex: 50000" 
+                                   placeholder="{{ __('room.placeholder_price') }}" 
                                    min="0" 
                                    required>
                         </div>
@@ -566,20 +566,20 @@
                     <div class="form-group">
                         <label for="view" class="form-label">
                             <i class="fas fa-binoculars"></i>
-                            Description de la vue
+                            {{ __('room.label_view') }}
                         </label>
                         <textarea class="form-control @error('view') is-invalid @enderror" 
                                   id="view" 
                                   name="view" 
                                   rows="1" 
-                                  placeholder="Ex: Vue sur mer, Vue sur montagne, Vue sur ville">{{ old('view') }}</textarea>
+                                  placeholder="{{ __('room.placeholder_view') }}">{{ old('view') }}</textarea>
                         @error('view')
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
                             {{ $message }}
                         </div>
                         @enderror
-                        <div class="form-hint">Optionnel - décrit la vue depuis la chambre</div>
+                        <div class="form-hint">{{ __('room.hint_view_optional') }}</div>
                     </div>
                     
                 </div>
@@ -588,16 +588,16 @@
                 <div class="actions-bar">
                     <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost">
                         <i class="fas fa-times me-2"></i>
-                        Annuler
+                        {{ __('room.cancel') }}
                     </a>
                     <div class="actions-group">
                         <button type="reset" class="btn-db btn-db-ghost">
                             <i class="fas fa-redo me-2"></i>
-                            Réinitialiser
+                            {{ __('room.reset') }}
                         </button>
                         <button type="submit" class="btn-db btn-db-primary">
                             <i class="fas fa-save me-2"></i>
-                            Créer la chambre
+                            {{ __('room.create_submit') }}
                         </button>
                     </div>
                 </div>

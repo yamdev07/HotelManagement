@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Gestion des Chambres')
+@section('title', __('room.page_title'))
 
 @section('content')
 <style>
@@ -544,18 +544,18 @@
         <div class="rooms-brand">
             <div class="rooms-brand-icon"><i class="fas fa-bed"></i></div>
             <div>
-                <h1 class="rooms-header-title">Gestion des <em>chambres</em></h1>
+                <h1 class="rooms-header-title">{!! __('room.header_title') !!}</h1>
                 <p class="rooms-header-sub">
-                    <i class="fas fa-door-open me-1"></i> {{ $rooms->total() }} chambres au total
+                    <i class="fas fa-door-open me-1"></i> {{ $rooms->total() }} {{ __('room.total_rooms_suffix') }}
                     @if($rooms->total() > 0)
-                        · Affichage {{ $rooms->firstItem() }}-{{ $rooms->lastItem() }}
+                        · {{ __('room.showing_range', ['first' => $rooms->firstItem(), 'last' => $rooms->lastItem()]) }}
                     @endif
                 </p>
             </div>
         </div>
         <div class="rooms-header-actions">
             <a href="{{ route('room.create') }}" class="btn-db btn-db-primary">
-                <i class="fas fa-plus-circle me-2"></i> Nouvelle chambre
+                <i class="fas fa-plus-circle me-2"></i> {{ __('room.new_room') }}
             </a>
         </div>
     </div>
@@ -575,10 +575,10 @@
                 <div class="stat-card-icon"><i class="fas fa-building"></i></div>
             </div>
             <div class="stat-card-value">{{ $totalRooms }}</div>
-            <div class="stat-card-label">Total chambres</div>
+            <div class="stat-card-label">{{ __('room.stat_total') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-door-open"></i>
-                Capacité totale
+                {{ __('room.stat_total_footer') }}
             </div>
         </div>
 
@@ -587,10 +587,10 @@
                 <div class="stat-card-icon"><i class="fas fa-check-circle"></i></div>
             </div>
             <div class="stat-card-value">{{ $availableRooms }}</div>
-            <div class="stat-card-label">Disponibles</div>
+            <div class="stat-card-label">{{ __('room.stat_available') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-door-open"></i>
-                Prêtes pour check-in
+                {{ __('room.stat_available_footer') }}
             </div>
         </div>
 
@@ -599,10 +599,10 @@
                 <div class="stat-card-icon"><i class="fas fa-user"></i></div>
             </div>
             <div class="stat-card-value">{{ $occupiedRooms }}</div>
-            <div class="stat-card-label">Occupées</div>
+            <div class="stat-card-label">{{ __('room.stat_occupied') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-clock"></i>
-                En cours
+                {{ __('room.stat_occupied_footer') }}
             </div>
         </div>
 
@@ -611,10 +611,10 @@
                 <div class="stat-card-icon"><i class="fas fa-broom"></i></div>
             </div>
             <div class="stat-card-value">{{ $dirtyRooms }}</div>
-            <div class="stat-card-label">À nettoyer</div>
+            <div class="stat-card-label">{{ __('room.stat_dirty') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-exclamation-triangle"></i>
-                Check-in bloqué
+                {{ __('room.stat_dirty_footer') }}
             </div>
         </div>
 
@@ -623,10 +623,10 @@
                 <div class="stat-card-icon"><i class="fas fa-tools"></i></div>
             </div>
             <div class="stat-card-value">{{ $maintenanceRooms }}</div>
-            <div class="stat-card-label">Maintenance</div>
+            <div class="stat-card-label">{{ __('room.stat_maintenance') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-exclamation-triangle"></i>
-                Hors service
+                {{ __('room.stat_maintenance_footer') }}
             </div>
         </div>
     </div>
@@ -653,7 +653,7 @@
         <div class="action-left">
             <span class="filter-badge">
                 <i class="fas fa-bed"></i>
-                Toutes les chambres
+                {{ __('room.all_rooms') }}
                 <span class="badge-count">{{ $rooms->total() }}</span>
             </span>
         </div>
@@ -664,7 +664,7 @@
                 <input type="text" 
                        class="search-input" 
                        id="searchInput"
-                       placeholder="Rechercher par numéro, nom ou type..." 
+                       placeholder="{{ __('room.search_placeholder') }}"
                        autocomplete="off">
             </div>
         </div>
@@ -675,11 +675,11 @@
         <div class="rooms-card-header">
             <h5 class="rooms-card-title">
                 <i class="fas fa-door-open"></i>
-                Liste des chambres
+                {{ __('room.list_title') }}
             </h5>
             <span class="rooms-card-badge">
                 <i class="fas fa-list"></i>
-                {{ $rooms->total() }} entrées
+                {{ __('room.entries_badge', ['count' => $rooms->total()]) }}
             </span>
         </div>
         <div class="rooms-card-body">
@@ -687,13 +687,13 @@
                 <table class="rooms-table" id="roomsTable">
                     <thead>
                         <tr>
-                            <th>N° Chambre</th>
-                            <th>Nom</th>
-                            <th>Type</th>
-                            <th>Capacité</th>
-                            <th>Prix (FCFA)</th>
-                            <th>Statut</th>
-                            <th style="text-align: center;">Actions</th>
+                            <th>{{ __('room.col_number') }}</th>
+                            <th>{{ __('room.col_name') }}</th>
+                            <th>{{ __('room.col_type') }}</th>
+                            <th>{{ __('room.col_capacity') }}</th>
+                            <th>{{ __('room.col_price') }}</th>
+                            <th>{{ __('room.col_status') }}</th>
+                            <th style="text-align: center;">{{ __('room.col_actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -734,10 +734,10 @@
                             </td>
                             <td>
                                 <div>
-                                    <div class="room-type">{{ $room->type->name ?? 'Standard' }}</div>
+                                    <div class="room-type">{{ $room->type->name ?? __('room.standard') }}</div>
                                     @if($room->type && $room->type->base_price)
                                     <div class="room-type__base">
-                                        Base: {{ number_format($room->type->base_price, 0, ',', ' ') }} FCFA
+                                        {{ __('room.base_price', ['price' => number_format($room->type->base_price, 0, ',', ' ')]) }}
                                     </div>
                                     @endif
                                 </div>
@@ -745,7 +745,7 @@
                             <td>
                                 <div class="room-capacity">
                                     <i class="fas fa-users"></i>
-                                    <span>{{ $room->capacity }} personne(s)</span>
+                                    <span>{{ $room->capacity }} {{ __('room.person_s') }}</span>
                                 </div>
                             </td>
                             <td>
@@ -755,7 +755,7 @@
                                     @if($room->type && $room->type->base_price && $room->price != $room->type->base_price)
                                     <div class="room-price__custom">
                                         <i class="fas fa-exclamation-circle"></i>
-                                        Prix personnalisé
+                                        {{ __('room.custom_price') }}
                                     </div>
                                     @endif
                                     @endif
@@ -773,7 +773,7 @@
                                 @endphp
                                 <span class="badge badge--{{ $statusColor }}">
                                     <i class="{{ $room->status_icon ?? 'fa-door-closed' }}"></i>
-                                    {{ $room->roomStatus->name ?? 'Inconnu' }}
+                                    {{ $room->roomStatus->name ?? __('room.unknown') }}
                                 </span>
                             </td>
                             <td style="text-align: center;">
@@ -781,14 +781,14 @@
                                     <!-- Bouton Voir (toujours actif) -->
                                     <a href="{{ route('room.show', $room->id) }}" 
                                        class="btn-db-icon" 
-                                       title="Voir détails">
+                                       title="{{ __('room.tooltip_view') }}">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     
                                     <!-- Bouton Modifier (toujours actif) -->
                                     <a href="{{ route('room.edit', $room->id) }}" 
                                        class="btn-db-icon" 
-                                       title="Modifier">
+                                       title="{{ __('room.tooltip_edit') }}">
                                         <i class="fas fa-edit"></i>
                                     </a>
 
@@ -801,14 +801,14 @@
                                                 @csrf
                                                 <button type="submit" 
                                                         class="btn-db-icon btn-db-icon-warning"
-                                                        title="Marquer comme sale"
-                                                        onclick="return confirm('Marquer la chambre {{ $room->number }} comme sale ?')">
+                                                        title="{{ __('room.tooltip_mark_dirty') }}"
+                                                        onclick="return confirm('{{ __('room.confirm_mark_dirty', ['number' => $room->number]) }}')">
                                                     <i class="fas fa-broom"></i>
                                                 </button>
                                             </form>
                                         @else
                                             <button class="btn-db-icon" disabled
-                                                    title="{{ $isDirty ? 'Déjà sale' : ($isOccupied ? 'Chambre occupée' : 'Action non disponible') }}">
+                                                    title="{{ $isDirty ? __('room.tooltip_already_dirty') : ($isOccupied ? __('room.tooltip_room_occupied') : __('room.tooltip_action_unavailable')) }}">
                                                 <i class="fas fa-broom"></i>
                                             </button>
                                         @endif
@@ -821,14 +821,14 @@
                                                 @csrf
                                                 <button type="submit" 
                                                         class="btn-db-icon btn-db-icon-success"
-                                                        title="Marquer comme propre"
-                                                        onclick="return confirm('Marquer la chambre {{ $room->number }} comme propre ?')">
+                                                        title="{{ __('room.tooltip_mark_clean') }}"
+                                                        onclick="return confirm('{{ __('room.confirm_mark_clean', ['number' => $room->number]) }}')">
                                                     <i class="fas fa-check"></i>
                                                 </button>
                                             </form>
                                         @else
                                             <button class="btn-db-icon" disabled
-                                                    title="{{ !$isDirty ? 'Pas besoin de nettoyage' : 'Action non disponible' }}">
+                                                    title="{{ !$isDirty ? __('room.tooltip_no_clean_needed') : __('room.tooltip_action_unavailable') }}">
                                                 <i class="fas fa-check"></i>
                                             </button>
                                         @endif
@@ -840,18 +840,18 @@
                                             <form method="POST" 
                                                   action="{{ route('room.destroy', $room->id) }}"
                                                   style="display:inline"
-                                                  onsubmit="return confirm('Supprimer la chambre {{ $room->number }} ? Cette action est irréversible.')">
+                                                  onsubmit="return confirm('{{ __('room.confirm_delete', ['number' => $room->number]) }}')">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" 
                                                         class="btn-db-icon btn-db-icon-danger"
-                                                        title="Supprimer">
+                                                        title="{{ __('room.tooltip_delete') }}">
                                                     <i class="fas fa-trash"></i>
                                                 </button>
                                             </form>
                                         @else
                                             <button class="btn-db-icon btn-db-icon-danger" disabled
-                                                    title="Impossible de supprimer une chambre occupée">
+                                                    title="{{ __('room.tooltip_delete_occupied') }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         @endif
@@ -866,11 +866,11 @@
                                     <div class="empty-icon">
                                         <i class="fas fa-door-closed"></i>
                                     </div>
-                                    <p class="empty-title">Aucune chambre trouvée</p>
-                                    <p class="empty-text">Vous n'avez pas encore ajouté de chambres.</p>
+                                    <p class="empty-title">{{ __('room.empty_title') }}</p>
+                                    <p class="empty-text">{{ __('room.empty_text') }}</p>
                                     <a href="{{ route('room.create') }}" class="btn-db btn-db-primary">
                                         <i class="fas fa-plus-circle me-2"></i>
-                                        Ajouter une chambre
+                                        {{ __('room.empty_add') }}
                                     </a>
                                 </div>
                             </td>
@@ -884,7 +884,7 @@
             @if($rooms->hasPages())
             <div class="pagination-wrap">
                 <div class="pagination-info">
-                    Affichage de {{ $rooms->firstItem() }} à {{ $rooms->lastItem() }} sur {{ $rooms->total() }} entrées
+                    {{ __('room.pagination_info', ['first' => $rooms->firstItem(), 'last' => $rooms->lastItem(), 'total' => $rooms->total()]) }}
                 </div>
                 <div>
                     {{ $rooms->onEachSide(1)->links('pagination::bootstrap-4') }}
@@ -945,8 +945,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td colspan="7">
                         <div class="empty-state" style="padding: 40px 20px;">
                             <div class="empty-icon"><i class="fas fa-search"></i></div>
-                            <p class="empty-title">Aucun résultat</p>
-                            <p class="empty-text">Aucune chambre ne correspond à votre recherche</p>
+                            <p class="empty-title">{{ __('room.search_no_result') }}</p>
+                            <p class="empty-text">{{ __('room.search_no_match') }}</p>
                         </div>
                     </td>
                 `;
