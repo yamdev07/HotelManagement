@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\StaffCredentialsMail;
 use App\Models\User;
+use App\Notifications\StaffCreatedNotification;
 use App\Rules\SafeName;
 use App\Rules\StrongPassword;
 use Illuminate\Http\Request;
@@ -88,6 +89,8 @@ class StaffController extends Controller
 
         $newUser = User::where('email', $data['email'])->first();
         Mail::to($data['email'])->send(new StaffCredentialsMail($newUser, $data['password']));
+
+        auth()->user()->notify(new StaffCreatedNotification($newUser, $data['password']));
 
         return back()->with('success', __('staff.alert_success_created', ['name' => $data['name']]));
     }
