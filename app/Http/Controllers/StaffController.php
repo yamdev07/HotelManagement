@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\StaffCredentialsMail;
 use App\Models\User;
 use App\Rules\SafeName;
 use App\Rules\StrongPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -83,6 +85,9 @@ class StaffController extends Controller
             'password'   => Hash::make($data['password']),
             'random_key' => Str::random(60),
         ]);
+
+        $newUser = User::where('email', $data['email'])->first();
+        Mail::to($data['email'])->send(new StaffCredentialsMail($newUser, $data['password']));
 
         return back()->with('success', __('staff.alert_success_created', ['name' => $data['name']]));
     }
