@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Journal d\'activités')
+@section('title', 'activity.page_title_activity_log')
 @section('content')
 
 <style>
@@ -663,16 +663,16 @@
     <div class="breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Journal d'activités</span>
+        <span class="current">{{ __('activity.breadcrumb_activity_log') }}</span>
     </div>
 
     {{-- En-tête --}}
     <div class="page-header anim-2">
         <div class="header-title">
             <span class="header-icon"><i class="fas fa-history"></i></span>
-            <h1>Journal d'<em>activités</em></h1>
+            <h1>{!! __('activity.header_title') !!}</h1>
         </div>
-        <p class="header-subtitle">Consultez l'historique des actions système</p>
+        <p class="header-subtitle">{{ __('activity.header_subtitle') }}</p>
     </div>
 
     {{-- Statistiques --}}
@@ -680,16 +680,16 @@
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-history"></i></div>
             <div class="stat-content">
-                <div class="stat-label">Total activités</div>
+                <div class="stat-label">{{ __('activity.stat_total_activities') }}</div>
                 <div class="stat-value">{{ $activities->total() }}</div>
-                <div class="stat-change"><i class="fas fa-calendar-alt"></i> {{ $activities->lastPage() }} pages</div>
+                <div class="stat-change"><i class="fas fa-calendar-alt"></i> {{ __('activity.stat_pages', ['count' => $activities->lastPage()]) }}</div>
             </div>
         </div>
         
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-calendar-week"></i></div>
             <div class="stat-content">
-                <div class="stat-label">Cette semaine</div>
+                <div class="stat-label">{{ __('activity.stat_this_week') }}</div>
                 <div class="stat-value">{{ $weeklyCount ?? 0 }}</div>
                 <div class="stat-change {{ isset($weeklyChange) && $weeklyChange > 0 ? 'positive' : '' }}">
                     @if(isset($weeklyChange))
@@ -703,9 +703,9 @@
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-users"></i></div>
             <div class="stat-content">
-                <div class="stat-label">Utilisateurs actifs</div>
+                <div class="stat-label">{{ __('activity.stat_active_users') }}</div>
                 <div class="stat-value">{{ $activeUsersCount ?? $users->count() }}</div>
-                <div class="stat-change"><i class="fas fa-clock"></i> 24h</div>
+                <div class="stat-change"><i class="fas fa-clock"></i> {{ __('activity.stat_24h') }}</div>
             </div>
         </div>
     </div>
@@ -715,9 +715,9 @@
         <form method="GET" action="{{ route('activity.index') }}" id="filterForm">
             <div class="filter-grid">
                 <div class="form-group">
-                    <label class="form-label">Utilisateur</label>
+                    <label class="form-label">{{ __('activity.filter_user') }}</label>
                     <select name="user_id" class="form-select">
-                        <option value="">Tous</option>
+                        <option value="">{{ __('activity.filter_all_users') }}</option>
                         @foreach($users as $user)
                             <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>{{ $user->name }}</option>
                         @endforeach
@@ -725,29 +725,29 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Événement</label>
+                    <label class="form-label">{{ __('activity.filter_event') }}</label>
                     <select name="event" class="form-select">
-                        <option value="">Tous</option>
-                        <option value="created" {{ request('event') == 'created' ? 'selected' : '' }}>Création</option>
-                        <option value="updated" {{ request('event') == 'updated' ? 'selected' : '' }}>Modification</option>
-                        <option value="deleted" {{ request('event') == 'deleted' ? 'selected' : '' }}>Suppression</option>
+                        <option value="">{{ __('activity.filter_all') }}</option>
+                        <option value="created" {{ request('event') == 'created' ? 'selected' : '' }}>{{ __('activity.event_created') }}</option>
+                        <option value="updated" {{ request('event') == 'updated' ? 'selected' : '' }}>{{ __('activity.event_updated') }}</option>
+                        <option value="deleted" {{ request('event') == 'deleted' ? 'selected' : '' }}>{{ __('activity.event_deleted') }}</option>
                     </select>
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Date début</label>
+                    <label class="form-label">{{ __('activity.filter_date_start') }}</label>
                     <input type="date" name="date_from" class="form-control" value="{{ request('date_from') }}">
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Date fin</label>
+                    <label class="form-label">{{ __('activity.filter_date_end') }}</label>
                     <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Objet</label>
+                    <label class="form-label">{{ __('activity.filter_subject') }}</label>
                     <select name="subject_type" class="form-select">
-                        <option value="">Tous</option>
+                        <option value="">{{ __('activity.filter_all') }}</option>
                         <option value="App\Models\User" {{ request('subject_type') == 'App\Models\User' ? 'selected' : '' }}>Utilisateurs</option>
                         <option value="App\Models\Room" {{ request('subject_type') == 'App\Models\Room' ? 'selected' : '' }}>Chambres</option>
                         <option value="App\Models\Transaction" {{ request('subject_type') == 'App\Models\Transaction' ? 'selected' : '' }}>Transactions</option>
@@ -755,25 +755,25 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Recherche</label>
-                    <input type="text" name="search" class="form-control" placeholder="Description..." value="{{ request('search') }}">
+                    <label class="form-label">{{ __('activity.filter_search') }}</label>
+                    <input type="text" name="search" class="form-control" placeholder="{{ __('activity.filter_search_placeholder') }}" value="{{ request('search') }}">
                 </div>
             </div>
             
             <div class="filter-actions">
                 <button type="submit" class="btn btn-green">
-                    <i class="fas fa-filter"></i> Filtrer
+                    <i class="fas fa-filter"></i> {{ __('activity.filter_apply') }}
                 </button>
                 <a href="{{ route('activity.index') }}" class="btn btn-gray">
-                    <i class="fas fa-times"></i> Réinitialiser
+                    <i class="fas fa-times"></i> {{ __('activity.filter_reset') }}
                 </a>
                 <button type="button" class="btn btn-gray" data-bs-toggle="modal" data-bs-target="#cleanupModal">
-                    <i class="fas fa-broom"></i> Nettoyer
+                    <i class="fas fa-broom"></i> {{ __('activity.filter_cleanup') }}
                 </button>
                 
                 <div class="dropdown" style="margin-left:auto;">
                     <button class="btn btn-gray dropdown-toggle" data-bs-toggle="dropdown">
-                        <i class="fas fa-download"></i> Exporter
+                        <i class="fas fa-download"></i> {{ __('activity.filter_export') }}
                     </button>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="{{ route('activity.export', ['format' => 'csv']) }}"><i class="fas fa-file-csv"></i> CSV</a></li>
@@ -786,7 +786,7 @@
         @if(request()->anyFilled(['user_id', 'event', 'date_from', 'date_to', 'search', 'subject_type']))
             <div class="filter-badge mt-4">
                 <i class="fas fa-info-circle"></i>
-                <span>{{ $activities->total() }} résultat(s) trouvé(s)</span>
+                <span>{{ __('activity.filter_results', ['count' => $activities->total()]) }}</span>
                 <a href="{{ route('activity.index') }}" class="btn-icon" style="width:auto; padding:0 6px;"><i class="fas fa-times"></i></a>
             </div>
         @endif
@@ -799,12 +799,12 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Date & Heure</th>
-                        <th>Action</th>
-                        <th>Utilisateur</th>
-                        <th>Objet</th>
-                        <th>Événement</th>
-                        <th class="text-center">Actions</th>
+                        <th>{{ __('activity.table_date_time') }}</th>
+                        <th>{{ __('activity.table_action') }}</th>
+                        <th>{{ __('activity.table_user') }}</th>
+                        <th>{{ __('activity.table_subject') }}</th>
+                        <th>{{ __('activity.table_event') }}</th>
+                        <th class="text-center">{{ __('activity.table_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -823,9 +823,9 @@
                                 default => 'fa-history'
                             };
                             $eventLabel = match($activity->event) {
-                                'created' => 'Création',
-                                'updated' => 'Modification',
-                                'deleted' => 'Suppression',
+                                'created' => __('activity.event_created'),
+                                'updated' => __('activity.event_updated'),
+                                'deleted' => __('activity.event_deleted'),
                                 default => ucfirst($activity->event)
                             };
                             
@@ -852,7 +852,7 @@
                                     <button class="btn btn-sm btn-gray" 
                                             data-bs-toggle="collapse" 
                                             data-bs-target="#details-{{ $activity->id }}">
-                                        <i class="fas fa-code"></i> Détails
+                                        <i class="fas fa-code"></i> {{ __('activity.action_details') }}
                                     </button>
                                     <div class="collapse details-collapse" id="details-{{ $activity->id }}">
                                         <pre class="details-pre">{{ json_encode($activity->properties, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
@@ -870,7 +870,7 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <div style="font-weight:500;">{{ $activity->causer->name ?? 'Système' }}</div>
+                                        <div style="font-weight:500;">{{ $activity->causer->name ?? __('activity.system_system') }}</div>
                                         <div style="font-size:.65rem; color:var(--gray-500);">{{ $activity->causer->email ?? '' }}</div>
                                     </div>
                                 </div>
@@ -892,10 +892,10 @@
                             
                             <td class="text-center">
                                 <div class="d-flex gap-1 justify-content-center">
-                                    <button class="btn-icon" onclick="showActivityDetails({{ $activity->id }})" title="Détails">
+                                    <button class="btn-icon" onclick="showActivityDetails({{ $activity->id }})" title="{{ __('activity.action_details') }}">
                                         <i class="fas fa-search"></i>
                                     </button>
-                                    <a href="{{ route('activity.show', $activity->id) }}" class="btn-icon" title="Ouvrir">
+                                    <a href="{{ route('activity.show', $activity->id) }}" class="btn-icon" title="{{ __('activity.action_open') }}">
                                         <i class="fas fa-external-link-alt"></i>
                                     </a>
                                 </div>
@@ -906,8 +906,8 @@
                             <td colspan="7">
                                 <div class="empty-state">
                                     <i class="fas fa-history"></i>
-                                    <h5>Aucune activité trouvée</h5>
-                                    <p>Aucun log d'activité n'a été enregistré</p>
+                                    <h5>{{ __('activity.empty_no_activity') }}</h5>
+                                    <p>{{ __('activity.empty_no_activity_desc') }}</p>
                                 </div>
                             </td>
                         </tr>
@@ -964,12 +964,12 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-info-circle me-2" style="color:var(--green-600);"></i> Détails de l'activité</h5>
+                    <h5 class="modal-title"><i class="fas fa-info-circle me-2" style="color:var(--green-600);"></i> {{ __('activity.modal_details_title') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body" id="activityModalBody"></div>
                 <div class="modal-footer">
-                    <button class="btn btn-gray" data-bs-dismiss="modal">Fermer</button>
+                    <button class="btn btn-gray" data-bs-dismiss="modal">{{ __('activity.modal_close') }}</button>
                 </div>
             </div>
         </div>
@@ -980,25 +980,25 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-broom me-2" style="color:var(--green-600);"></i> Nettoyer les logs</h5>
+                    <h5 class="modal-title"><i class="fas fa-broom me-2" style="color:var(--green-600);"></i> {{ __('activity.modal_cleanup_title') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form action="{{ route('activity.cleanup') }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <p style="margin-bottom:16px;">Supprimer les logs plus anciens que :</p>
+                        <p style="margin-bottom:16px;">{{ __('activity.modal_cleanup_desc') }}</p>
                         <div class="form-group mb-4">
                             <input type="number" name="days" class="form-control" min="1" max="365" value="30">
                             <small class="text-muted">(jours)</small>
                         </div>
                         <div class="alert alert-green">
                             <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
-                            <div>Cette action est irréversible. {{ $activities->total() }} logs analysés.</div>
+                            <div>{{ __('activity.modal_cleanup_warning', ['count' => $activities->total()]) }}</div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-gray" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-red"><i class="fas fa-broom me-2"></i>Nettoyer</button>
+                        <button class="btn btn-gray" data-bs-dismiss="modal">{{ __('activity.modal_cancel') }}</button>
+                        <button type="submit" class="btn btn-red"><i class="fas fa-broom me-2"></i>{{ __('activity.modal_cleanup_confirm') }}</button>
                     </div>
                 </form>
             </div>

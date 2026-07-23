@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Tous les logs d\'activité')
+@section('title', 'activity.page_title_all_logs')
 @section('content')
 
 <style>
@@ -335,16 +335,16 @@
     {{-- En-tête --}}
     <div class="page-header anim-1">
         <div>
-            <h1 class="header-title">Tous les logs d'<em>activité</em></h1>
-            <p class="header-subtitle">{{ $activities->count() }} activités enregistrées</p>
+            <h1 class="header-title">{!! __('activity.header_all_logs') !!}</h1>
+            <p class="header-subtitle">{{ __('activity.header_subtitle_count', ['count' => $activities->count()]) }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('activity-log.index') }}" class="btn btn-gray btn-sm">
-                <i class="fas fa-arrow-left"></i> Vue paginée
+                <i class="fas fa-arrow-left"></i> {{ __('activity.action_back_to_log') }}
             </a>
             <div class="dropdown">
                 <button class="btn btn-gray btn-sm dropdown-toggle" data-bs-toggle="dropdown">
-                    <i class="fas fa-download"></i> Exporter
+                    <i class="fas fa-download"></i> {{ __('activity.filter_export') }}
                 </button>
                 <ul class="dropdown-menu">
                     <li><a class="dropdown-item" href="{{ route('activity-log.export', 'csv') }}">CSV</a></li>
@@ -365,12 +365,12 @@
                 <thead>
                     <tr>
                         <th width="50">#</th>
-                        <th width="140">Date</th>
-                        <th>Description</th>
-                        <th width="200">Utilisateur</th>
-                        <th width="90">Événement</th>
-                        <th width="90">Objet</th>
-                        <th width="60" class="text-center">Actions</th>
+                        <th width="140">{{ __('activity.table_date') }}</th>
+                        <th>{{ __('activity.table_description') }}</th>
+                        <th width="200">{{ __('activity.table_user') }}</th>
+                        <th width="90">{{ __('activity.table_event') }}</th>
+                        <th width="90">{{ __('activity.table_subject') }}</th>
+                        <th width="60" class="text-center">{{ __('activity.table_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -384,10 +384,10 @@
                                 default => 'badge-gray'
                             };
                             $eventLabel = match($activity->event) {
-                                'created' => 'Créé',
-                                'updated' => 'Modifié',
-                                'deleted' => 'Supprimé',
-                                'restored' => 'Restauré',
+                                'created' => __('activity.event_created_short'),
+                                'updated' => __('activity.event_updated_short'),
+                                'deleted' => __('activity.event_deleted_short'),
+                                'restored' => __('activity.event_restored_short'),
                                 default => ucfirst($activity->event)
                             };
                         @endphp
@@ -399,7 +399,7 @@
                             <td>
                                 <div class="fw-semibold">{{ Str::limit($activity->description, 50) }}</div>
                                 @if($activity->properties->count() > 0)
-                                    <small class="text-muted">{{ $activity->properties->count() }} propriété(s)</small>
+                                    <small class="text-muted">{{ __('activity.properties_count', ['count' => $activity->properties->count()]) }}</small>
                                 @endif
                             </td>
                             <td>
@@ -414,7 +414,7 @@
                                         </div>
                                     </div>
                                 @else
-                                    <span class="text-muted fst-italic">Système</span>
+                                    <span class="text-muted fst-italic">{{ __('activity.system_system') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -424,14 +424,14 @@
                                 @if($activity->subject)
                                     <span class="badge badge-gray">{{ class_basename($activity->subject_type) }}</span>
                                 @else
-                                    <span class="text-muted fst-italic">Supprimé</span>
+                                    <span class="text-muted fst-italic">{{ __('activity.system_deleted') }}</span>
                                 @endif
                             </td>
                             <td class="text-center">
                                 <a href="{{ route('activity-log.show', $activity->id) }}" 
                                    class="btn-icon"
                                    data-bs-toggle="tooltip" 
-                                   title="Voir détails">
+                                    title="{{ __('activity.action_details') }}">
                                     <i class="fas fa-eye"></i>
                                 </a>
                             </td>
@@ -441,8 +441,8 @@
                             <td colspan="7">
                                 <div class="empty-state">
                                     <i class="fas fa-inbox"></i>
-                                    <h4>Aucune activité trouvée</h4>
-                                    <p>Aucun log d'activité n'a été enregistré pour le moment.</p>
+                                    <h4>{{ __('activity.empty_no_activity') }}</h4>
+                                    <p>{{ __('activity.empty_no_activity_desc_full') }}</p>
                                 </div>
                             </td>
                         </tr>
@@ -454,10 +454,10 @@
         <div class="card-footer">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="text-muted">
-                    Total : <strong>{{ $activities->count() }}</strong> activités
+                    {{ __('activity.footer_total', ['count' => $activities->count()]) }}
                 </div>
                 <button class="btn btn-red btn-sm" data-bs-toggle="modal" data-bs-target="#cleanupModal">
-                    <i class="fas fa-broom"></i> Nettoyer les anciens logs
+                    <i class="fas fa-broom"></i> {{ __('activity.action_cleanup_old') }}
                 </button>
             </div>
         </div>
@@ -468,25 +468,25 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-broom me-2" style="color:var(--green-600);"></i> Nettoyer les logs</h5>
+                    <h5 class="modal-title"><i class="fas fa-broom me-2" style="color:var(--green-600);"></i> {{ __('activity.modal_cleanup_title') }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <form action="{{ route('activity-log.cleanup') }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <p class="mb-3">Supprimer les logs plus anciens que :</p>
+                        <p class="mb-3">{{ __('activity.modal_cleanup_desc') }}</p>
                         <div class="mb-4">
-                            <label class="form-label">Nombre de jours</label>
+                            <label class="form-label">{{ __('activity.modal_cleanup_days') }}</label>
                             <input type="number" name="days" class="form-control" min="1" max="365" value="30">
                         </div>
                         <div class="alert alert-red">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <span>Attention : Cette action est irréversible.</span>
+                            <span>{{ __('activity.modal_cleanup_alert') }}</span>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-gray" data-bs-dismiss="modal">Annuler</button>
-                        <button type="submit" class="btn btn-red">Nettoyer</button>
+                        <button class="btn btn-gray" data-bs-dismiss="modal">{{ __('activity.modal_cancel') }}</button>
+                        <button type="submit" class="btn btn-red">{{ __('activity.modal_cleanup_confirm') }}</button>
                     </div>
                 </form>
             </div>

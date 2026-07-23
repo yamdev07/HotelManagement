@@ -75,10 +75,10 @@ class ActivityController extends Controller
         };
 
         $eventLabel = match ($activity->event) {
-            'created' => 'Création',
-            'updated' => 'Modification',
-            'deleted' => 'Suppression',
-            'restored' => 'Restauration',
+            'created' => __('activity.event_created'),
+            'updated' => __('activity.event_updated'),
+            'deleted' => __('activity.event_deleted'),
+            'restored' => __('activity.event_restored'),
             default => ucfirst($activity->event)
         };
 
@@ -113,10 +113,10 @@ class ActivityController extends Controller
         $data = $activities->map(function ($activity) {
             return [
                 'ID' => $activity->id,
-                'Date' => $activity->created_at->format('Y-m-d H:i:s'),
-                'Description' => $activity->description,
-                'Événement' => $activity->event,
-                'Utilisateur' => $activity->causer->name ?? 'Système',
+                __('activity.table_date') => $activity->created_at->format('Y-m-d H:i:s'),
+                __('activity.table_description') => $activity->description,
+                __('activity.table_event') => $activity->event,
+                __('activity.table_user') => $activity->causer->name ?? __('activity.system_system'),
                 'Email' => $activity->causer->email ?? 'N/A',
                 'Objet Type' => class_basename($activity->subject_type),
                 'Objet ID' => $activity->subject_id,
@@ -177,9 +177,8 @@ class ActivityController extends Controller
             ])
             ->log('a nettoyé les logs d\'activité');
 
-        // CORRECTION ICI : Utilisez activity.index
         return redirect()->route('activity.index')
-            ->with('success', "{$deletedCount} logs plus anciens que {$request->days} jours ont été supprimés.");
+            ->with('success', __('activity.cleanup_success', ['count' => $deletedCount, 'days' => $request->days]));
     }
 
     public function statistics()

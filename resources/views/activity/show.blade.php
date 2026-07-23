@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Détails de l\'activité #' . $activity->id)
+@section('title', __("activity.page_title_activity_details", ["id" => $activity->id]))
 @section('content')
 
 <style>
@@ -344,27 +344,27 @@
     <div class="breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('activity.index') }}">Journal d'activités</a>
+        <a href="{{ route('activity.index') }}">{{ __('activity.breadcrumb_activity_log') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Détails #{{ $activity->id }}</span>
+        <span class="current">{{ __('activity.breadcrumb_details', ['id' => $activity->id]) }}</span>
     </div>
 
     {{-- En-tête --}}
     <div class="page-header anim-2">
         <div class="header-title">
             <span class="header-icon"><i class="fas fa-info-circle"></i></span>
-            <h1>Détails de l'activité <em>#{{ $activity->id }}</em></h1>
+            <h1>{!! __('activity.header_details_title', ['id' => $activity->id]) !!}</h1>
         </div>
-        <p class="header-subtitle">Informations complètes sur cette action</p>
+        <p class="header-subtitle">{{ __('activity.header_details_subtitle') }}</p>
     </div>
 
     {{-- Actions --}}
     <div class="d-flex justify-content-end gap-2 mb-4">
         <a href="{{ route('activity.index') }}" class="btn btn-gray btn-sm">
-            <i class="fas fa-arrow-left"></i> Retour
+            <i class="fas fa-arrow-left"></i> {{ __('activity.action_back') }}
         </a>
         <button onclick="window.print()" class="btn btn-gray btn-sm">
-            <i class="fas fa-print"></i> Imprimer
+            <i class="fas fa-print"></i> {{ __('activity.action_print') }}
         </button>
     </div>
 
@@ -374,7 +374,7 @@
         {{-- Informations générales --}}
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-info-circle"></i> Informations générales</h5>
+                <h5><i class="fas fa-info-circle"></i> {{ __('activity.detail_general_info') }}</h5>
             </div>
             <div class="card-body">
                 <table class="table">
@@ -383,18 +383,18 @@
                         <td><span class="badge badge-gray">#{{ $activity->id }}</span></td>
                     </tr>
                     <tr>
-                        <th>Date & Heure</th>
+                        <th>{{ __('activity.table_date_time') }}</th>
                         <td>
                             <div style="font-weight:500;">{{ $activity->created_at->format('d/m/Y') }}</div>
                             <div style="font-size:.7rem; color:var(--gray-500);">{{ $activity->created_at->format('H:i:s') }}</div>
                         </td>
                     </tr>
                     <tr>
-                        <th>Description</th>
+                        <th>{{ __('activity.table_description') }}</th>
                         <td style="font-weight:500;">{{ $activity->description }}</td>
                     </tr>
                     <tr>
-                        <th>Événement</th>
+                        <th>{{ __('activity.table_event') }}</th>
                         <td>
                             @php
                                 $badgeClass = match($activity->event) {
@@ -404,9 +404,9 @@
                                     default => 'badge-gray'
                                 };
                                 $eventLabel = match($activity->event) {
-                                    'created' => 'Création',
-                                    'updated' => 'Modification',
-                                    'deleted' => 'Suppression',
+                                    'created' => __('activity.event_created'),
+                                    'updated' => __('activity.event_updated'),
+                                    'deleted' => __('activity.event_deleted'),
                                     default => ucfirst($activity->event)
                                 };
                                 $eventIcon = match($activity->event) {
@@ -422,7 +422,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <th>Log Name</th>
+                        <th>{{ __('activity.detail_log_name') }}</th>
                         <td><span class="inline-code">{{ $activity->log_name }}</span></td>
                     </tr>
                 </table>
@@ -432,7 +432,7 @@
         {{-- Utilisateur --}}
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-user"></i> Utilisateur</h5>
+                <h5><i class="fas fa-user"></i> {{ __('activity.detail_user') }}</h5>
             </div>
             <div class="card-body">
                 @if($activity->causer)
@@ -458,8 +458,8 @@
                 @else
                     <div class="empty-state">
                         <i class="fas fa-robot"></i>
-                        <h5>Action système</h5>
-                        <p>Aucun utilisateur associé</p>
+                        <h5>{{ __('activity.detail_system_action') }}</h5>
+                        <p>{{ __('activity.detail_no_user') }}</p>
                     </div>
                 @endif
             </div>
@@ -468,7 +468,7 @@
         {{-- Objet concerné --}}
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-cube"></i> Objet concerné</h5>
+                <h5><i class="fas fa-cube"></i> {{ __('activity.detail_subject') }}</h5>
             </div>
             <div class="card-body">
                 @if($activity->subject)
@@ -496,7 +496,7 @@
                     
                     @if(method_exists($activity->subject, 'getNameAttribute') && $activity->subject->getNameAttribute())
                         <div class="d-flex gap-3 mb-2">
-                            <span style="color:var(--gray-500); width:80px;">Nom</span>
+                            <span style="color:var(--gray-500); width:80px;">{{ __('activity.table_name') }}</span>
                             <span>{{ $activity->subject->getNameAttribute() }}</span>
                         </div>
                     @endif
@@ -504,15 +504,15 @@
                     @if($activity->subject_url)
                         <div class="mt-4">
                             <a href="{{ $activity->subject_url }}" class="btn btn-gray btn-sm">
-                                <i class="fas fa-external-link-alt"></i> Voir l'objet
+                                <i class="fas fa-external-link-alt"></i> {{ __('activity.action_view_object') }}
                             </a>
                         </div>
                     @endif
                 @else
                     <div class="empty-state">
                         <i class="fas fa-trash-alt"></i>
-                        <h5>Objet supprimé</h5>
-                        <p>L'objet n'existe plus dans la base de données</p>
+                        <h5>{{ __('activity.detail_deleted_object') }}</h5>
+                        <p>{{ __('activity.detail_deleted_object_desc') }}</p>
                     </div>
                 @endif
             </div>
@@ -521,7 +521,7 @@
         {{-- Informations techniques --}}
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-microchip"></i> Informations techniques</h5>
+                <h5><i class="fas fa-microchip"></i> {{ __('activity.detail_tech_info') }}</h5>
             </div>
             <div class="card-body">
                 <table class="table">
@@ -555,8 +555,8 @@
     {{-- Propriétés complètes --}}
     <div class="card">
         <div class="card-header">
-            <h5><i class="fas fa-code"></i> Propriétés complètes</h5>
-            <span class="badge badge-gray">{{ $activity->properties->count() }} propriété(s)</span>
+            <h5><i class="fas fa-code"></i> {{ __('activity.detail_properties') }}</h5>
+            <span class="badge badge-gray">{{ __('activity.properties_count', ['count' => $activity->properties->count()]) }}</span>
         </div>
         <div class="card-body">
             @if($activity->properties->count() > 0)
@@ -565,19 +565,19 @@
                 @if(isset($activity->properties['old']) || isset($activity->properties['attributes']))
                 <div style="margin-top:20px;">
                     <h6 style="font-weight:600; margin-bottom:12px;">
-                        <i class="fas fa-exchange-alt me-2" style="color:var(--green-600);"></i> Modifications
+                        <i class="fas fa-exchange-alt me-2" style="color:var(--green-600);"></i> {{ __('activity.detail_modifications') }}
                     </h6>
                     <div style="background:var(--gray-50); border-radius:var(--rl); padding:16px;">
                         @if(isset($activity->properties['old']))
                         <div style="margin-bottom:16px;">
-                            <div style="font-size:.7rem; color:var(--gray-500); margin-bottom:4px;">Anciennes valeurs</div>
+                            <div style="font-size:.7rem; color:var(--gray-500); margin-bottom:4px;">{{ __('activity.detail_old_values') }}</div>
                             <pre class="code-block" style="max-height:150px;">{{ json_encode($activity->properties['old'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                         </div>
                         @endif
                         
                         @if(isset($activity->properties['attributes']))
                         <div>
-                            <div style="font-size:.7rem; color:var(--gray-500); margin-bottom:4px;">Nouvelles valeurs</div>
+                            <div style="font-size:.7rem; color:var(--gray-500); margin-bottom:4px;">{{ __('activity.detail_new_values') }}</div>
                             <pre class="code-block" style="max-height:150px;">{{ json_encode($activity->properties['attributes'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                         </div>
                         @endif
@@ -587,8 +587,8 @@
             @else
                 <div class="empty-state">
                     <i class="fas fa-inbox"></i>
-                    <h5>Aucune propriété</h5>
-                    <p>Aucune propriété supplémentaire n'est associée</p>
+                    <h5>{{ __('activity.detail_no_property') }}</h5>
+                    <p>{{ __('activity.detail_no_property_desc') }}</p>
                 </div>
             @endif
         </div>

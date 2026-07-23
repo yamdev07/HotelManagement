@@ -1,15 +1,15 @@
 @extends('template.master')
 
-@section('title', 'Personnel')
+@section('title', __('staff.page_title'))
 
 @section('content')
 @php
     $roleMeta = [
-        'Receptionist' => ['Réceptionniste', 'fa-bell-concierge', 'var(--g600)'],
-        'Cashier'      => ['Caissier',        'fa-cash-register',  'var(--g500)'],
-        'Housekeeping' => ['Housekeeping',   'fa-broom',          'var(--g400)'],
-        'Servant'      => ['Serveur',         'fa-utensils',       'var(--g300)'],
-        'Cuisiner'     => ['Cuisinier',       'fa-kitchen-set',    'var(--g600)'],
+        'Receptionist' => [__('staff.role_receptionist'), 'fa-bell-concierge', 'var(--g600)'],
+        'Cashier'      => [__('staff.role_cashier'),      'fa-cash-register',  'var(--g500)'],
+        'Housekeeping' => [__('staff.role_housekeeping'), 'fa-broom',          'var(--g400)'],
+        'Servant'      => [__('staff.role_servant'),      'fa-utensils',       'var(--g300)'],
+        'Cuisiner'     => [__('staff.role_cuisinier'),    'fa-kitchen-set',    'var(--g600)'],
     ];
     $counts = [];
     foreach ($roleMeta as $key => $m) { $counts[$key] = $staff->where('role', $key)->count(); }
@@ -22,13 +22,13 @@
         <div class="users-brand">
             <span class="users-brand-icon"><i class="fas fa-user-tie"></i></span>
             <div>
-                <div class="users-header-title">Gestion du <em>personnel</em></div>
-                <div class="users-header-sub"><i class="fas fa-shield-halved"></i> Comptes de votre équipe · limités à votre établissement</div>
+                <div class="users-header-title">{!! __('staff.header_title') !!}</div>
+                <div class="users-header-sub">{!! __('staff.header_subtitle') !!}</div>
             </div>
         </div>
         <div class="users-header-actions">
             <button class="btn-db btn-db-primary" type="button" data-bs-toggle="collapse" data-bs-target="#addStaff">
-                <i class="fas fa-plus"></i> Nouveau membre
+                <i class="fas fa-plus"></i> {{ __('staff.btn_new_member') }}
             </button>
         </div>
     </div>
@@ -48,8 +48,8 @@
         <div class="stat-card stat-card--total">
             <div class="stat-card-head"><span class="stat-card-icon"><i class="fas fa-users"></i></span></div>
             <div class="stat-card-value">{{ $staff->count() }}</div>
-            <div class="stat-card-label">Membres au total</div>
-            <div class="stat-card-footer"><i class="fas fa-user-shield"></i> Votre équipe</div>
+            <div class="stat-card-label">{{ __('staff.stat_total_members') }}</div>
+            <div class="stat-card-footer"><i class="fas fa-user-shield"></i> {{ __('staff.stat_your_team') }}</div>
         </div>
         @foreach ($roleMeta as $key => $m)
             <div class="stat-card" style="--bar-c: {{ $m[2] }};">
@@ -64,31 +64,31 @@
     <div class="collapse {{ $errors->any() ? 'show' : '' }}" id="addStaff">
         <div class="users-card">
             <div class="users-card-header">
-                <div class="users-card-title"><i class="fas fa-user-plus" style="color:var(--g600)"></i> Ajouter un membre</div>
+                <div class="users-card-title"><i class="fas fa-user-plus" style="color:var(--g600)"></i> {{ __('staff.form_add_member') }}</div>
             </div>
             <div style="padding: 20px 24px;">
-                <p class="sp-hint">Chaque membre reçoit ses <strong>propres identifiants</strong> et n'accède qu'à ce que son rôle autorise. Vous ne partagez jamais votre mot de passe.</p>
+                <p class="sp-hint">{!! __('staff.form_hint') !!}</p>
                 <form action="{{ route('staff.store') }}" method="POST">
                     @csrf
                     <div class="row g-3">
-                        <div class="col-md-6"><label class="sp-label">Nom complet *</label>
+                        <div class="col-md-6"><label class="sp-label">{{ __('staff.form_full_name') }}</label>
                             <input type="text" name="name" class="search-input" value="{{ old('name') }}" required></div>
-                        <div class="col-md-6"><label class="sp-label">Email * <span class="text-muted">(identifiant de connexion)</span></label>
+                        <div class="col-md-6"><label class="sp-label">{!! __('staff.form_email') !!}</label>
                             <input type="email" name="email" class="search-input" value="{{ old('email') }}" required></div>
-                        <div class="col-md-4"><label class="sp-label">Téléphone</label>
+                        <div class="col-md-4"><label class="sp-label">{{ __('staff.form_phone') }}</label>
                             <input type="text" name="phone" class="search-input" value="{{ old('phone') }}"></div>
-                        <div class="col-md-4"><label class="sp-label">Rôle *</label>
+                        <div class="col-md-4"><label class="sp-label">{{ __('staff.form_role') }}</label>
                             <select name="role" class="search-input" required>
-                                <option value="">— Choisir —</option>
+                                <option value="">{{ __('staff.form_role_placeholder') }}</option>
                                 @foreach ($roleMeta as $key => $m)
                                     <option value="{{ $key }}" {{ old('role') === $key ? 'selected' : '' }}>{{ $m[0] }}</option>
                                 @endforeach
                             </select></div>
-                        <div class="col-md-4"><label class="sp-label">Mot de passe *</label>
-                            <input type="text" name="password" class="search-input" value="{{ old('password') }}" required placeholder="8+ car., lettres + chiffres"></div>
+                        <div class="col-md-4"><label class="sp-label">{{ __('staff.form_password') }}</label>
+                            <input type="text" name="password" class="search-input" value="{{ old('password') }}" required placeholder="{{ __('staff.form_password_placeholder') }}"></div>
                     </div>
                     <div class="d-flex justify-content-end mt-3">
-                        <button type="submit" class="btn-db btn-db-primary"><i class="fas fa-check"></i> Créer le compte</button>
+                        <button type="submit" class="btn-db btn-db-primary"><i class="fas fa-check"></i> {{ __('staff.btn_create_account') }}</button>
                     </div>
                 </form>
             </div>
@@ -98,12 +98,12 @@
     {{-- ===== ACTION BAR (recherche) ===== --}}
     <div class="action-bar">
         <div class="action-left">
-            <span class="filter-badge"><i class="fas fa-users"></i> Équipe <span class="badge-count">{{ $staff->count() }}</span></span>
+            <span class="filter-badge"><i class="fas fa-users"></i> {{ __('staff.action_team') }} <span class="badge-count">{{ $staff->count() }}</span></span>
         </div>
         <div class="action-right">
             <div class="search-container">
                 <i class="fas fa-search search-icon"></i>
-                <input type="text" id="staffSearch" class="search-input" placeholder="Rechercher un membre…">
+                <input type="text" id="staffSearch" class="search-input" placeholder="{{ __('staff.action_search_placeholder') }}">
             </div>
         </div>
     </div>
@@ -111,12 +111,12 @@
     {{-- ===== LISTE ===== --}}
     <div class="users-card">
         <div class="users-card-header">
-            <div class="users-card-title"><i class="fas fa-user-group" style="color:var(--g600)"></i> Mon équipe</div>
-            <span class="filter-badge">{{ $staff->count() }} enregistré(s)</span>
+            <div class="users-card-title"><i class="fas fa-user-group" style="color:var(--g600)"></i> {{ __('staff.list_title') }}</div>
+            <span class="filter-badge">{{ __('staff.table_registered', ['count' => $staff->count()]) }}</span>
         </div>
         <div class="table-responsive">
             <table class="users-table" id="staffTable">
-                <thead><tr><th style="width:48px">#</th><th>Membre</th><th>Rôle</th><th class="text-end">Actions</th></tr></thead>
+                <thead><tr><th style="width:48px">#</th><th>{{ __('staff.table_member') }}</th><th>{{ __('staff.table_role') }}</th><th class="text-end">{{ __('staff.table_actions') }}</th></tr></thead>
                 <tbody>
                 @forelse ($staff as $i => $m)
                     <tr class="staff-row">
@@ -132,10 +132,10 @@
                         </td>
                         <td><span class="sp-role" style="color:{{ $roleMeta[$m->role][2] ?? 'var(--g600)' }};background:var(--g50);">{{ $roleMeta[$m->role][0] ?? $m->role }}</span></td>
                         <td class="text-end text-nowrap">
-                            <button class="btn-db btn-db-ghost btn-sm" title="Réinitialiser le mot de passe" onclick="document.getElementById('rp-{{ $m->id }}').classList.toggle('d-none')"><i class="fas fa-key"></i></button>
-                            <form action="{{ route('staff.destroy', $m) }}" method="POST" class="d-inline" onsubmit="return confirm('Supprimer le compte de {{ $m->name }} ?')">
+                            <button class="btn-db btn-db-ghost btn-sm" title="{{ __('staff.action_reset_password') }}" onclick="document.getElementById('rp-{{ $m->id }}').classList.toggle('d-none')"><i class="fas fa-key"></i></button>
+                            <form action="{{ route('staff.destroy', $m) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('staff.confirm_delete', ['name' => $m->name]) }}')">
                                 @csrf @method('DELETE')
-                                <button class="btn-db btn-db-ghost btn-sm sp-danger" title="Supprimer"><i class="fas fa-trash"></i></button>
+                                <button class="btn-db btn-db-ghost btn-sm sp-danger" title="{{ __('staff.action_delete') }}"><i class="fas fa-trash"></i></button>
                             </form>
                         </td>
                     </tr>
@@ -144,15 +144,15 @@
                         <td colspan="3">
                             <form action="{{ route('staff.reset', $m) }}" method="POST" class="d-flex gap-2 align-items-center flex-wrap">
                                 @csrf
-                                <input type="text" name="password" class="search-input" style="max-width:360px" placeholder="Nouveau mot de passe (8+, lettres + chiffres)" required>
-                                <button class="btn-db btn-db-primary btn-sm text-nowrap">Réinitialiser</button>
+                                <input type="text" name="password" class="search-input" style="max-width:360px" placeholder="{{ __('staff.password_new_placeholder') }}" required>
+                                <button class="btn-db btn-db-primary btn-sm text-nowrap">{{ __('staff.action_reset') }}</button>
                             </form>
                         </td>
                     </tr>
                 @empty
                     <tr><td colspan="4" class="sp-empty">
                         <i class="fas fa-user-plus"></i>
-                        <div>Aucun membre pour l'instant.<br>Cliquez sur <strong>« Nouveau membre »</strong> pour ajouter votre première recrue.</div>
+                        <div>{{ __('staff.empty_title') }}<br>{!! __('staff.empty_desc') !!}</div>
                     </td></tr>
                 @endforelse
                 </tbody>
