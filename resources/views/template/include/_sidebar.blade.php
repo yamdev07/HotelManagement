@@ -534,6 +534,12 @@
                     <span>{{ app()->getLocale() === 'fr' ? 'English' : 'Français' }}</span>
                 </a>
             </div>
+            <div class="sidebar-theme-toggle">
+                <button type="button" class="theme-toggle-btn" id="themeToggle" title="Changer de thème">
+                    <i class="fas fa-sun" id="themeIcon"></i>
+                    <span id="themeLabel">Clair</span>
+                </button>
+            </div>
             <div class="sidebar-time">
                 <i class="far fa-clock"></i>
                 <span id="sidebar-datetime">{{ now()->format('d/m/Y H:i') }}</span>
@@ -982,6 +988,40 @@
         font-size: .85rem;
     }
 
+    /* ── Theme Toggle ── */
+    .sidebar-theme-toggle {
+        margin-top: 6px;
+    }
+    .theme-toggle-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: rgba(255, 255, 255, .7);
+        border: none;
+        background: none;
+        width: 100%;
+        font-size: .78rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background .2s, color .2s;
+        font-family: inherit;
+    }
+    .theme-toggle-btn:hover {
+        background: rgba(255, 255, 255, .1);
+        color: #fff;
+    }
+    .theme-toggle-btn i {
+        font-size: .85rem;
+        width: 18px;
+        text-align: center;
+    }
+
+    .sidebar.collapsed .sidebar-theme-toggle {
+        display: none;
+    }
+
     .sidebar.collapsed .sidebar-lang-toggle {
         display: none;
     }
@@ -1004,6 +1044,7 @@
     .sidebar.collapsed .nav-badge,
     .sidebar.collapsed .user-info,
     .sidebar.collapsed .sidebar-time,
+    .sidebar.collapsed .sidebar-theme-toggle,
     .sidebar.collapsed .restricted::after,
     .sidebar.collapsed .readonly-tag {
         display: none;
