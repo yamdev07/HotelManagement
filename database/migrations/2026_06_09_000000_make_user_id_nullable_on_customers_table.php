@@ -14,8 +14,10 @@ return new class extends Migration
     public function up(): void
     {
         if (Schema::hasTable('customers') && Schema::hasColumn('customers', 'user_id')) {
-            // MODIFY conserve la clé étrangère existante, rend juste la colonne nullable.
-            DB::statement('ALTER TABLE `customers` MODIFY `user_id` BIGINT UNSIGNED NULL');
+            if (DB::getDriverName() === 'mysql') {
+                // MODIFY conserve la clé étrangère existante, rend juste la colonne nullable.
+                DB::statement('ALTER TABLE `customers` MODIFY `user_id` BIGINT UNSIGNED NULL');
+            }
         }
     }
 

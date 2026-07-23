@@ -14,6 +14,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         if (! Schema::hasTable('cashier_transactions')) {
             DB::statement("
                 CREATE TABLE `cashier_transactions` (
@@ -126,6 +130,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         Schema::dropIfExists('cashier_transactions');
         Schema::dropIfExists('receptionist_commissions');
         Schema::dropIfExists('receptionist_profiles');

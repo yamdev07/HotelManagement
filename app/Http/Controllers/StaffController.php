@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\StaffCredentialsMail;
 use App\Models\User;
+use App\Notifications\StaffCreatedNotification;
 use App\Rules\SafeName;
 use App\Rules\StrongPassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -21,11 +24,11 @@ class StaffController extends Controller
 {
     /** Rôles qu'un hôtelier peut attribuer (jamais Admin ni Super). */
     public const ROLES = [
-        'Receptionist' => 'Réceptionniste',
-        'Cashier'      => 'Caissier / Caissière',
-        'Housekeeping' => 'Housekeeping (ménage)',
-        'Servant'      => 'Serveur / Serveuse',
-        'Cuisiner'     => 'Cuisinier / Cuisinière',
+        'Receptionist' => 'staff.role_receptionist',
+        'Cashier'      => 'staff.role_cashier',
+        'Housekeeping' => 'staff.role_housekeeping',
+        'Servant'      => 'staff.role_servant',
+        'Cuisiner'     => 'staff.role_cuisinier',
     ];
 
     public function __construct()
@@ -44,7 +47,7 @@ class StaffController extends Controller
         abort_unless(
             $user->hotel_id === $this->hotelId() && array_key_exists($user->role, self::ROLES),
             403,
-            'Action non autorisée.'
+            __('staff.alert_error_unauthorized')
         );
     }
 
@@ -62,7 +65,7 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         $hotelId = $this->hotelId();
-        abort_if($hotelId === null, 403, 'Aucun établissement associé à votre compte.');
+        abort_if($hotelId === null, 403, __('staff.alert_error_no_hotel'));
 
         $data = $request->validate([
             'name'     => ['required', 'string', 'max:255', new SafeName],
@@ -71,7 +74,7 @@ class StaffController extends Controller
             'role'     => ['required', Rule::in(array_keys(self::ROLES))],
             'password' => ['required', new StrongPassword],
         ], [], [
-            'name' => 'nom', 'email' => 'email', 'role' => 'rôle', 'password' => 'mot de passe',
+            'name' => __('staff.validation_name'), 'email' => __('staff.validation_email'), 'role' => __('staff.validation_role'), 'password' => __('staff.validation_password'),
         ]);
 
         User::create([
@@ -84,17 +87,22 @@ class StaffController extends Controller
             'random_key' => Str::random(60),
         ]);
 
-        return back()->with('success', 'Membre du personnel « '.$data['name'].' » créé. Il se connecte avec son email et le mot de passe que vous avez défini.');
+        $newUser = User::where('email', $data['email'])->first();
+        Mail::to($data['email'])->send(new StaffCredentialsMail($newUser, $data['password']));
+
+        auth()->user()->notify(new StaffCreatedNotification($newUser, $data['password']));
+
+        return back()->with('success', __('staff.alert_success_created', ['name' => $data['name']]));
     }
 
     public function resetPassword(Request $request, User $user)
     {
         $this->assertOwned($user);
 
-        $data = $request->validate(['password' => ['required', new StrongPassword]], [], ['password' => 'mot de passe']);
+        $data = $request->validate(['password' => ['required', new StrongPassword]], [], ['password' => __('staff.validation_password')]);
         $user->update(['password' => Hash::make($data['password'])]);
 
-        return back()->with('success', 'Mot de passe de '.$user->name.' réinitialisé.');
+        return back()->with('success', __('staff.alert_success_reset', ['name' => $user->name]));
     }
 
     public function destroy(User $user)
@@ -103,6 +111,6 @@ class StaffController extends Controller
         $name = $user->name;
         $user->delete();
 
-        return back()->with('success', 'Membre « '.$name.' » supprimé.');
+        return back()->with('success', __('staff.alert_success_deleted', ['name' => $name]));
     }
 }

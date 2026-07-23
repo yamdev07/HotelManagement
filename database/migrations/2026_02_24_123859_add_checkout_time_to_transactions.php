@@ -30,12 +30,14 @@ return new class extends Migration
         });
 
         // Modifier le commentaire du statut (optionnel)
-        try {
-            DB::statement("ALTER TABLE transactions MODIFY COLUMN status 
-                          VARCHAR(255) NOT NULL DEFAULT 'reservation' 
-                          COMMENT 'reservation, active, completed, cancelled, no_show, pending_checkout, reserved_waiting'");
-        } catch (\Exception $e) {
-            // Ignorer si la modification échoue
+        if (DB::getDriverName() === 'mysql') {
+            try {
+                DB::statement("ALTER TABLE transactions MODIFY COLUMN status 
+                              VARCHAR(255) NOT NULL DEFAULT 'reservation' 
+                              COMMENT 'reservation, active, completed, cancelled, no_show, pending_checkout, reserved_waiting'");
+            } catch (\Exception $e) {
+                // Ignorer si la modification échoue
+            }
         }
     }
 
