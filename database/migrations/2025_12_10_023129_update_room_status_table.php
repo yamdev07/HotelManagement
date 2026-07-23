@@ -8,17 +8,9 @@ return new class extends Migration
 {
     public function up()
     {
-        // Désactivez temporairement les contraintes de clé étrangère
         Schema::disableForeignKeyConstraints();
-
-        // Supprimez d'abord les contraintes de clé étrangère
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
-
-        // Supprimez toutes les données existantes (les types de chambres)
         DB::table('room_statuses')->truncate();
-
-        // Réactivez les contraintes
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        Schema::enableForeignKeyConstraints();
 
         // Insérez les vrais statuts
         $statuses = [
@@ -48,8 +40,6 @@ return new class extends Migration
     public function down()
     {
         Schema::disableForeignKeyConstraints();
-        DB::statement('SET FOREIGN_KEY_CHECKS=0');
-
         DB::table('room_statuses')->truncate();
 
         // Si vous voulez restaurer les anciens types (optionnel)
@@ -73,7 +63,6 @@ return new class extends Migration
             ]);
         }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1');
         Schema::enableForeignKeyConstraints();
     }
 };

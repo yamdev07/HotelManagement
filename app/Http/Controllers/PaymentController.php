@@ -296,4 +296,138 @@ class PaymentController extends Controller
             'status'        => $transaction->status,
         ]);
     }
+
+    public function markAsPaid(Payment $payment)
+    {
+        $this->authorize('update', $payment);
+
+        if ($payment->status !== Payment::STATUS_PENDING) {
+            return redirect()->back()->with('error', 'Seuls les paiements en attente peuvent être marqués comme payés.');
+        }
+
+        try {
+            $payment->markAsCompleted(auth()->id());
+
+            return redirect()->back()->with('success', 'Paiement marqué comme payé avec succès.');
+
+        } catch (\Exception $e) {
+            Log::error('Erreur markAsPaid', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Erreur lors de la mise à jour du paiement.');
+        }
+    }
+
+    public function getDetails(Payment $payment)
+    {
+        $this->authorize('view', $payment);
+
+        $payment->load(['transaction.customer', 'transaction.room.type', 'user', 'createdBy', 'cancelledByUser']);
+
+        return response()->json([
+            'id'               => $payment->id,
+            'reference'        => $payment->reference,
+            'amount'           => $payment->amount,
+            'formatted_amount' => $payment->formatted_amount,
+            'status'           => $payment->status,
+            'status_text'      => $payment->status_text,
+            'status_class'     => $payment->status_class,
+            'payment_method'   => $payment->payment_method,
+            'method_label'     => $payment->payment_method_label,
+            'method_icon'      => $payment->payment_method_icon,
+            'description'      => $payment->description,
+            'payment_date'     => $payment->payment_date?->format('d/m/Y H:i'),
+            'created_at'       => $payment->created_at->format('d/m/Y H:i'),
+            'created_by'       => $payment->createdBy?->name ?? 'Système',
+            'verified_by'      => $payment->verifiedByUser?->name ?? 'Non vérifié',
+            'cancel_reason'    => $payment->cancel_reason,
+            'transaction'      => $payment->transaction ? [
+                'id'     => $payment->transaction->id,
+                'status' => $payment->transaction->status,
+                'total'  => $payment->transaction->total_price,
+            ] : null,
+            'customer'         => $payment->transaction?->customer ? [
+                'name'  => $payment->transaction->customer->name,
+                'email' => $payment->transaction->customer->email,
+            ] : null,
+            'can_cancel'       => $payment->can_be_cancelled,
+            'can_refund'       => $payment->can_be_refunded,
+        ]);
+    }
+
+    public function restore(Payment $payment)
+    {
+        $this->authorize('update', $payment);
+
+        if (! in_array($payment->status, [Payment::STATUS_CANCELLED, Payment::STATUS_EXPIRED])) {
+            return redirect()->back()->with('error', 'Seuls les paiements annulés ou expirés peuvent être restaurés.');
+        }
+
+        try {
+            $payment->update([
+                'status'       => Payment::STATUS_PENDING,
+                'cancelled_at' => null,
+                'cancelled_by' => null,
+                'cancel_reason' => null,
+            ]);
+
+            if ($payment->transaction) {
+                $payment->transaction->updatePaymentStatus();
+            }
+
+            activity()->causedBy(auth()->user())->performedOn($payment)
+                ->log('Paiement restauré');
+
+            return redirect()->back()->with('success', 'Paiement restauré avec succès.');
+
+        } catch (\Exception $e) {
+            Log::error('Erreur restore payment', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Erreur lors de la restauration du paiement.');
+        }
+    }
+
+    public function markAsExpired(Payment $payment)
+    {
+        $this->authorize('update', $payment);
+
+        if ($payment->status !== Payment::STATUS_PENDING) {
+            return redirect()->back()->with('error', 'Seuls les paiements en attente peuvent être marqués comme expirés.');
+        }
+
+        try {
+            $payment->update([
+                'status' => Payment::STATUS_EXPIRED,
+            ]);
+
+            if ($payment->transaction) {
+                $payment->transaction->updatePaymentStatus();
+            }
+
+            activity()->causedBy(auth()->user())->performedOn($payment)
+                ->log('Paiement marqué comme expiré');
+
+            return redirect()->back()->with('success', 'Paiement marqué comme expiré.');
+
+        } catch (\Exception $e) {
+            Log::error('Erreur markAsExpired', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Erreur lors de la mise à jour du paiement.');
+        }
+    }
+
+    public function forceSync(Transaction $transaction)
+    {
+        $this->authorize('viewAny', Payment::class);
+
+        $transaction->updatePaymentStatus();
+        $transaction->refresh();
+
+        return response()->json([
+            'success'      => true,
+            'total_price'  => $transaction->total_price,
+            'total_payment' => $transaction->total_payment,
+            'remaining'    => $transaction->getRemainingPayment(),
+            'payment_rate' => $transaction->getPaymentRate(),
+            'is_fully_paid' => $transaction->isFullyPaid(),
+            'status'       => $transaction->status,
+            'message'      => 'Statut de paiement synchronisé avec succès.',
+        ]);
+    }
 }

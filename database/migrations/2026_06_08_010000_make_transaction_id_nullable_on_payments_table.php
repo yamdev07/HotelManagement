@@ -16,9 +16,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->dropForeign('payments_transaction_id_foreign');
-        });
+        if (config('database.default') !== 'sqlite') {
+            Schema::table('payments', function (Blueprint $table) {
+                $table->dropForeign('payments_transaction_id_foreign');
+            });
+        }
 
         Schema::table('payments', function (Blueprint $table) {
             $table->foreignId('transaction_id')->nullable()->change();
@@ -31,9 +33,11 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('payments', function (Blueprint $table) {
-            $table->dropForeign('payments_transaction_id_foreign');
-        });
+        if (config('database.default') !== 'sqlite') {
+            Schema::table('payments', function (Blueprint $table) {
+                $table->dropForeign('payments_transaction_id_foreign');
+            });
+        }
 
         Schema::table('payments', function (Blueprint $table) {
             $table->foreignId('transaction_id')->nullable(false)->change();

@@ -7,11 +7,15 @@ return new class extends Migration
 {
     public function up()
     {
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Cashier','Housekeeping')");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Cashier','Housekeeping')");
+        }
     }
 
     public function down()
     {
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Cashier','Manager','Housekeeping')");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Cashier','Manager','Housekeeping')");
+        }
     }
 };

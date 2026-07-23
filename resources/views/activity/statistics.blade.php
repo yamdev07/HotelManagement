@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Statistiques des Activités')
+@section('title', 'activity.page_title_statistics')
 @section('content')
 <div class="container-fluid py-4">
     <div class="row mb-4">
@@ -10,12 +10,12 @@
                         <div>
                             <h4 class="mb-0">
                                 <i class="fas fa-chart-bar me-2 text-info"></i>
-                                Statistiques des Activités
+                                {{ __('activity.header_stats_title') }}
                             </h4>
-                            <p class="text-muted mb-0">Analyse des logs d'activité</p>
+                            <p class="text-muted mb-0">{{ __('activity.header_stats_subtitle') }}</p>
                         </div>
                         <a href="{{ route('activity-log.index') }}" class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-arrow-left me-1"></i> Retour au journal
+                            <i class="fas fa-arrow-left me-1"></i> {{ __('activity.action_back') }}
                         </a>
                     </div>
                 </div>
@@ -30,14 +30,14 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h5 class="text-muted mb-0">Total</h5>
+                            <h5 class="text-muted mb-0">{{ __('activity.stats_total') }}</h5>
                             <h2 class="mt-2">{{ number_format($stats['total']) }}</h2>
                         </div>
                         <div class="avatar bg-primary bg-opacity-10 rounded-circle p-3">
                             <i class="fas fa-history text-primary fa-2x"></i>
                         </div>
                     </div>
-                    <p class="text-muted mb-0">Activités enregistrées</p>
+                    <p class="text-muted mb-0">{{ __('activity.stats_registered') }}</p>
                 </div>
             </div>
         </div>
@@ -47,14 +47,14 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h5 class="text-muted mb-0">Aujourd'hui</h5>
+                            <h5 class="text-muted mb-0">{{ __('activity.stats_today') }}</h5>
                             <h2 class="mt-2">{{ number_format($stats['today']) }}</h2>
                         </div>
                         <div class="avatar bg-success bg-opacity-10 rounded-circle p-3">
                             <i class="fas fa-calendar-day text-success fa-2x"></i>
                         </div>
                     </div>
-                    <p class="text-muted mb-0">Activités aujourd'hui</p>
+                    <p class="text-muted mb-0">{{ __('activity.stats_today_desc') }}</p>
                 </div>
             </div>
         </div>
@@ -64,14 +64,14 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h5 class="text-muted mb-0">Cette semaine</h5>
+                            <h5 class="text-muted mb-0">{{ __('activity.stats_this_week') }}</h5>
                             <h2 class="mt-2">{{ number_format($stats['this_week']) }}</h2>
                         </div>
                         <div class="avatar bg-warning bg-opacity-10 rounded-circle p-3">
                             <i class="fas fa-calendar-week text-warning fa-2x"></i>
                         </div>
                     </div>
-                    <p class="text-muted mb-0">Activités cette semaine</p>
+                    <p class="text-muted mb-0">{{ __('activity.stats_this_week_desc') }}</p>
                 </div>
             </div>
         </div>
@@ -81,14 +81,14 @@
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
                         <div>
-                            <h5 class="text-muted mb-0">Ce mois</h5>
+                            <h5 class="text-muted mb-0">{{ __('activity.stats_this_month') }}</h5>
                             <h2 class="mt-2">{{ number_format($stats['this_month']) }}</h2>
                         </div>
                         <div class="avatar bg-info bg-opacity-10 rounded-circle p-3">
                             <i class="fas fa-calendar-alt text-info fa-2x"></i>
                         </div>
                     </div>
-                    <p class="text-muted mb-0">Activités ce mois</p>
+                    <p class="text-muted mb-0">{{ __('activity.stats_this_month_desc') }}</p>
                 </div>
             </div>
         </div>
@@ -100,17 +100,17 @@
         <div class="col-lg-6 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Répartition par événement</h5>
+                    <h5 class="mb-0">{{ __('activity.stats_by_event') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th>Événement</th>
-                                    <th>Nombre</th>
-                                    <th>Pourcentage</th>
-                                    <th>Barre</th>
+                                    <th>{{ __('activity.stats_event') }}</th>
+                                    <th>{{ __('activity.stats_count') }}</th>
+                                    <th>{{ __('activity.stats_percentage') }}</th>
+                                    <th>{{ __('activity.stats_bar') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -128,10 +128,10 @@
                                             default => 'secondary'
                                         };
                                         $label = match($event) {
-                                            'created' => 'Créations',
-                                            'updated' => 'Modifications',
-                                            'deleted' => 'Suppressions',
-                                            'restored' => 'Restaurations',
+                                            'created' => __('activity.event_created'),
+                                            'updated' => __('activity.event_updated'),
+                                            'deleted' => __('activity.event_deleted'),
+                                            'restored' => __('activity.event_restored'),
                                             default => ucfirst($event)
                                         };
                                     @endphp
@@ -160,16 +160,16 @@
         <div class="col-lg-6 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Top 10 des utilisateurs actifs</h5>
+                    <h5 class="mb-0">{{ __('activity.stats_top_users') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th>Utilisateur</th>
-                                    <th>Actions</th>
-                                    <th>Pourcentage</th>
+                                    <th>{{ __('activity.stats_user') }}</th>
+                                    <th>{{ __('activity.stats_actions') }}</th>
+                                    <th>{{ __('activity.stats_percentage') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -207,16 +207,16 @@
         <div class="col-lg-6 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Activités par type de modèle</h5>
+                    <h5 class="mb-0">{{ __('activity.stats_by_model') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th>Modèle</th>
-                                    <th>Actions</th>
-                                    <th>Pourcentage</th>
+                                    <th>{{ __('activity.stats_model') }}</th>
+                                    <th>{{ __('activity.stats_actions') }}</th>
+                                    <th>{{ __('activity.stats_percentage') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -251,8 +251,8 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Activités récentes</h5>
-                        <span class="text-muted small">Derniers 7 jours</span>
+                        <h5 class="mb-0">{{ __('activity.stats_recent') }}</h5>
+                        <span class="text-muted small">{{ __('activity.stats_last_7_days') }}</span>
                     </div>
                 </div>
                 <div class="card-body">
@@ -260,9 +260,9 @@
                         <table class="table table-sm">
                             <thead>
                                 <tr>
-                                    <th>Jour</th>
-                                    <th>Activités</th>
-                                    <th>Tendance</th>
+                                    <th>{{ __('activity.stats_day') }}</th>
+                                    <th>{{ __('activity.stats_activities') }}</th>
+                                    <th>{{ __('activity.stats_trend') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -310,7 +310,7 @@
                                                          style="width: {{ $width }}%;"></div>
                                                 </div>
                                             @else
-                                                <span class="text-muted small">Aucune</span>
+                                                <span class="text-muted small">{{ __('activity.stats_none') }}</span>
                                             @endif
                                         </td>
                                     </tr>
@@ -328,24 +328,24 @@
         <div class="col-12">
             <div class="card shadow-sm">
                 <div class="card-header bg-white">
-                    <h5 class="mb-0">Résumé des statistiques</h5>
+                    <h5 class="mb-0">{{ __('activity.stats_summary') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>Moyenne quotidienne</span>
+                                    <span>{{ __('activity.stats_daily_average') }}</span>
                                     <span class="badge bg-primary rounded-pill">
-                                        {{ $total > 0 ? number_format($total / 30, 1) : 0 }}/jour
+                                        {{ $total > 0 ? number_format($total / 30, 1) : 0 }}{{ __('activity.stats_per_day') }}
                                     </span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>Hier</span>
+                                    <span>{{ __('activity.stats_yesterday') }}</span>
                                     <span class="badge bg-secondary rounded-pill">{{ $stats['yesterday'] }}</span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>Utilisateurs actifs (30j)</span>
+                                    <span>{{ __('activity.stats_active_users_30d') }}</span>
                                     <span class="badge bg-success rounded-pill">{{ $stats['by_user']->count() }}</span>
                                 </li>
                             </ul>
@@ -353,17 +353,17 @@
                         <div class="col-md-6">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>Modèles suivis</span>
+                                    <span>{{ __('activity.stats_tracked_models') }}</span>
                                     <span class="badge bg-info rounded-pill">{{ $stats['by_model']->count() }}</span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>Taux de création</span>
+                                    <span>{{ __('activity.stats_creation_rate') }}</span>
                                     <span class="badge bg-warning rounded-pill">
                                         {{ $total > 0 ? number_format(($stats['by_event']['created'] ?? 0) / $total * 100, 1) : 0 }}%
                                     </span>
                                 </li>
                                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                                    <span>Taux de modification</span>
+                                    <span>{{ __('activity.stats_update_rate') }}</span>
                                     <span class="badge bg-warning rounded-pill">
                                         {{ $total > 0 ? number_format(($stats['by_event']['updated'] ?? 0) / $total * 100, 1) : 0 }}%
                                     </span>
@@ -374,7 +374,7 @@
                 </div>
                 <div class="card-footer text-center">
                     <a href="{{ route('activity-log.export', 'csv') }}" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-download me-1"></i> Exporter les statistiques
+                        <i class="fas fa-download me-1"></i> {{ __('activity.stats_export') }}
                     </a>
                 </div>
             </div>

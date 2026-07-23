@@ -19,23 +19,25 @@ return new class extends Migration
             return;
         }
 
-        // Champs facultatifs à l'accueil : rendus nullable.
-        foreach (['address' => 'VARCHAR(255)', 'job' => 'VARCHAR(255)', 'birthdate' => 'DATE'] as $col => $type) {
-            if (Schema::hasColumn('customers', $col)) {
-                try {
-                    DB::statement("ALTER TABLE `customers` MODIFY `{$col}` {$type} NULL");
-                } catch (\Throwable $e) {
-                    // ignore : déjà nullable ou moteur différent
+        if (DB::getDriverName() === 'mysql') {
+            // Champs facultatifs à l'accueil : rendus nullable.
+            foreach (['address' => 'VARCHAR(255)', 'job' => 'VARCHAR(255)', 'birthdate' => 'DATE'] as $col => $type) {
+                if (Schema::hasColumn('customers', $col)) {
+                    try {
+                        DB::statement("ALTER TABLE `customers` MODIFY `{$col}` {$type} NULL");
+                    } catch (\Throwable $e) {
+                        // ignore : déjà nullable ou moteur différent
+                    }
                 }
             }
-        }
 
-        // Le formulaire propose "Other" : on l'ajoute à l'enum.
-        if (Schema::hasColumn('customers', 'gender')) {
-            try {
-                DB::statement("ALTER TABLE `customers` MODIFY `gender` ENUM('Male','Female','Other') NOT NULL DEFAULT 'Other'");
-            } catch (\Throwable $e) {
-                // ignore
+            // Le formulaire propose "Other" : on l'ajoute à l'enum.
+            if (Schema::hasColumn('customers', 'gender')) {
+                try {
+                    DB::statement("ALTER TABLE `customers` MODIFY `gender` ENUM('Male','Female','Other') NOT NULL DEFAULT 'Other'");
+                } catch (\Throwable $e) {
+                    // ignore
+                }
             }
         }
     }
