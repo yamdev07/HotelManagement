@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Nouvelle Session de Caisse')
+@section('title', __('cashier-sessions.create_title'))
 
 @push('styles')
 <style>
@@ -445,17 +445,17 @@
             <div>
                 <h1 class="header-title">
                     <i class="fas fa-cash-register"></i>
-                    Nouvelle Session
+                    {{ __('cashier-sessions.create_title') }}
                 </h1>
             </div>
         </div>
         
         <div class="breadcrumb">
-            <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Accueil</a>
+            <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> {{ __('cashier-sessions.home') }}</a>
             <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-            <a href="{{ route('cashier.dashboard') }}">Caissier</a>
+            <a href="{{ route('cashier.dashboard') }}">{{ __('cashier-sessions.cashier') }}</a>
             <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-            <span class="active">Nouvelle session</span>
+            <span class="active">{{ __('cashier-sessions.create_breadcrumb') }}</span>
         </div>
     </div>
 
@@ -490,7 +490,7 @@
         <div class="alert alert-red">
             <div class="alert-icon"><i class="fas fa-exclamation-circle"></i></div>
             <div class="alert-content">
-                <strong>Veuillez corriger les erreurs :</strong>
+                <strong>{{ __('cashier-sessions.alert_fix_errors') }}</strong>
                 <ul class="mb-0 mt-2">
                     @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -505,13 +505,13 @@
         <div class="rules-card anim-2">
             <div class="rules-title">
                 <i class="fas fa-info-circle"></i>
-                Règles importantes
+                {{ __('cashier-sessions.rules_title') }}
             </div>
             <ul class="rules-list">
-                <li>Une seule session active à la fois par utilisateur</li>
-                <li>Cette session enregistrera tous vos paiements</li>
-                <li>Vous pourrez la clôturer à tout moment avec un rapport détaillé</li>
-                <li>Le solde de départ est automatiquement à 0 FCFA</li>
+                <li>{{ __('cashier-sessions.rule_one_session') }}</li>
+                <li>{{ __('cashier-sessions.rule_records_payments') }}</li>
+                <li>{{ __('cashier-sessions.rule_close_anytime') }}</li>
+                <li>{{ __('cashier-sessions.rule_starting_balance') }}</li>
             </ul>
         </div>
 
@@ -520,8 +520,8 @@
             <div class="form-icon">
                 <i class="fas fa-play"></i>
             </div>
-            <div class="form-title">Démarrer une nouvelle session</div>
-            <div class="form-subtitle">Ouvrez votre shift pour commencer à enregistrer les paiements</div>
+            <div class="form-title">{{ __('cashier-sessions.form_start_new_session') }}</div>
+            <div class="form-subtitle">{{ __('cashier-sessions.form_start_subtitle') }}</div>
 
             <form action="{{ route('cashier.sessions.store') }}" method="POST" id="startSessionForm">
                 @csrf
@@ -530,13 +530,13 @@
                 <div class="info-box">
                     <div class="info-box-title">
                         <i class="fas fa-file-invoice"></i>
-                        Informations de la session
+                        {{ __('cashier-sessions.form_session_info') }}
                     </div>
                     
                     <div class="info-item">
                         <i class="fas fa-user"></i>
                         <div>
-                            <span class="info-label">Réceptionniste:</span>
+                            <span class="info-label">{{ __('cashier-sessions.form_receptionist') }}</span>
                             <span class="info-value">{{ auth()->user()->name }}</span>
                             <span class="info-badge">{{ auth()->user()->role }}</span>
                         </div>
@@ -545,7 +545,7 @@
                     <div class="info-item">
                         <i class="fas fa-calendar"></i>
                         <div>
-                            <span class="info-label">Date:</span>
+                            <span class="info-label">{{ __('cashier-sessions.form_date') }}</span>
                             <span class="info-value">{{ now()->format('d/m/Y') }}</span>
                         </div>
                     </div>
@@ -553,7 +553,7 @@
                     <div class="info-item">
                         <i class="fas fa-clock"></i>
                         <div>
-                            <span class="info-label">Heure:</span>
+                            <span class="info-label">{{ __('cashier-sessions.form_time') }}</span>
                             <span class="info-value">{{ now()->format('H:i:s') }}</span>
                         </div>
                     </div>
@@ -561,7 +561,7 @@
                     <div class="info-item">
                         <i class="fas fa-wallet"></i>
                         <div>
-                            <span class="info-label">Solde de départ:</span>
+                            <span class="info-label">{{ __('cashier-sessions.form_starting_balance') }}</span>
                             <span class="info-value">0 FCFA</span>
                         </div>
                     </div>
@@ -569,8 +569,8 @@
                     <div class="info-item">
                         <i class="fas fa-hashtag"></i>
                         <div>
-                            <span class="info-label">Session #:</span>
-                            <span class="info-value">Généré automatiquement</span>
+                            <span class="info-label">{{ __('cashier-sessions.form_session_number') }}</span>
+                            <span class="info-value">{{ __('cashier-sessions.form_auto_generated') }}</span>
                         </div>
                     </div>
                 </div>
@@ -579,36 +579,36 @@
                 <div class="form-group">
                     <label for="notes" class="form-label">
                         <i class="fas fa-sticky-note"></i>
-                        Notes (optionnel)
+                        {{ __('cashier-sessions.form_notes_optional') }}
                     </label>
                     <textarea name="notes" 
                               id="notes"
                               class="form-control @error('notes') is-invalid @enderror" 
                               rows="3"
-                              placeholder="Informations complémentaires (observations particulières...)">{{ old('notes') }}</textarea>
+                              placeholder="{{ __('cashier-sessions.form_notes_placeholder') }}">{{ old('notes') }}</textarea>
                     @error('notes')
                     <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                     <div class="text-muted">
                         <i class="fas fa-info-circle"></i>
-                        Maximum 500 caractères
+                        {{ __('cashier-sessions.form_notes_max') }}
                     </div>
                 </div>
 
                 {{-- Boutons d'action --}}
                 <div class="d-flex gap-2">
                     <a href="{{ route('cashier.dashboard') }}" class="btn btn-gray">
-                        <i class="fas fa-times"></i> Annuler
+                        <i class="fas fa-times"></i> {{ __('cashier-sessions.btn_cancel') }}
                     </a>
                     <button type="submit" class="btn btn-green" id="submitBtn">
-                        <i class="fas fa-play"></i> Démarrer
+                        <i class="fas fa-play"></i> {{ __('cashier-sessions.btn_start_session') }}
                     </button>
                 </div>
 
                 {{-- Note de sécurité --}}
                 <div class="security-note">
                     <i class="fas fa-shield-alt"></i>
-                    Toutes les actions seront enregistrées avec votre nom
+                    {{ __('cashier-sessions.security_note') }}
                 </div>
             </form>
         </div>
@@ -628,12 +628,12 @@
     form.addEventListener('submit', function(e) {
         e.preventDefault();
         
-        if (!confirm('Démarrer une nouvelle session ?')) {
+        if (!confirm('{{ __('cashier-sessions.confirm_start') }}')) {
             return;
         }
         
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Démarrage...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __('cashier-sessions.starting') }}';
         
         form.submit();
     });

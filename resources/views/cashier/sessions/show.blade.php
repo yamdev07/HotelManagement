@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Détails de la Session #' . $cashierSession->id)
+@section('title', __('cashier-sessions.show_title') . ' #' . $cashierSession->id)
 
 @push('styles')
 <style>
@@ -453,17 +453,17 @@
             <div>
                 <h1 class="header-title">
                     <i class="fas fa-cash-register"></i>
-                    Détails de la Session #{{ $cashierSession->id }}
+                    {{ __('cashier-sessions.show_title') }} #{{ $cashierSession->id }}
                 </h1>
             </div>
         </div>
         
         <div class="breadcrumb">
-            <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Accueil</a>
+            <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> {{ __('cashier-sessions.home') }}</a>
             <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-            <a href="{{ route('cashier.dashboard') }}">Caissier</a>
+            <a href="{{ route('cashier.dashboard') }}">{{ __('cashier-sessions.cashier') }}</a>
             <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-            <a href="{{ route('cashier.sessions.index') }}">Sessions</a>
+            <a href="{{ route('cashier.sessions.index') }}">{{ __('cashier-sessions.sessions') }}</a>
             <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
             <span class="active">#{{ $cashierSession->id }}</span>
         </div>
@@ -476,10 +476,10 @@
                 <i class="fas fa-cash-register"></i>
             </div>
             <div class="session-title">
-                <h2>Session #{{ $cashierSession->id }}</h2>
+                <h2>{{ __('cashier-sessions.session_label') }} #{{ $cashierSession->id }}</h2>
                 <div class="d-flex gap-2 mt-1">
                     <span class="session-badge {{ $cashierSession->status == 'active' ? 'badge-green' : 'badge-gray' }}">
-                        {{ $cashierSession->status == 'active' ? 'Active' : 'Fermée' }}
+                        {{ $cashierSession->status == 'active' ? __('cashier-sessions.status_active') : __('cashier-sessions.status_closed') }}
                     </span>
                     <small class="text-muted">
                         <i class="fas fa-user me-1" style="color:var(--green-600);"></i>
@@ -491,7 +491,7 @@
         <div>
             @if($cashierSession->status == 'active' && auth()->id() == $cashierSession->user_id)
             <button class="btn btn-red" data-bs-toggle="modal" data-bs-target="#closeModal">
-                <i class="fas fa-lock"></i> Clôturer
+                <i class="fas fa-lock"></i> {{ __('cashier-sessions.close') }}
             </button>
             @endif
         </div>
@@ -509,47 +509,47 @@
     {{-- Cartes résumé --}}
     <div class="stats-grid anim-3">
         <div class="stat-card">
-            <div class="stat-label">Période</div>
+            <div class="stat-label">{{ __('cashier-sessions.period') }}</div>
             <div class="stat-value">{{ $cashierSession->start_time->format('d/m/Y') }}</div>
             <div class="stat-sub">
                 {{ $cashierSession->start_time->format('H:i') }} - 
-                {{ $cashierSession->end_time ? $cashierSession->end_time->format('H:i') : 'En cours' }}
+                {{ $cashierSession->end_time ? $cashierSession->end_time->format('H:i') : __('cashier-sessions.in_progress') }}
             </div>
         </div>
 
         <div class="stat-card">
-            <div class="stat-label">Solde initial</div>
+            <div class="stat-label">{{ __('cashier-sessions.initial_balance') }}</div>
             <div class="stat-value">{{ number_format($cashierSession->initial_balance, 0, ',', ' ') }}</div>
             <div class="stat-sub">FCFA</div>
         </div>
 
         <div class="stat-card">
-            <div class="stat-label">Encaissements</div>
+            <div class="stat-label">{{ __('cashier-sessions.collections') }}</div>
             <div class="stat-value green">{{ number_format($encaissements, 0, ',', ' ') }}</div>
-            <div class="stat-sub">{{ $paymentCount }} paiement(s)</div>
+            <div class="stat-sub">{{ __('cashier-sessions.payments_count', ['count' => $paymentCount]) }}</div>
         </div>
 
         <div class="stat-card">
-            <div class="stat-label">Remboursements</div>
+            <div class="stat-label">{{ __('cashier-sessions.refunds') }}</div>
             <div class="stat-value red">{{ number_format($remboursements, 0, ',', ' ') }}</div>
-            <div class="stat-sub">{{ $payments->where('status', 'completed')->where('payment_method', 'refund')->count() }} tx</div>
+            <div class="stat-sub">{{ __('cashier-sessions.refunds_count', ['count' => $payments->where('status', 'completed')->where('payment_method', 'refund')->count()]) }}</div>
         </div>
 
         <div class="stat-card">
-            <div class="stat-label">Net</div>
+            <div class="stat-label">{{ __('cashier-sessions.net') }}</div>
             <div class="stat-value {{ $netTotal >= 0 ? 'green' : 'red' }}">{{ number_format($netTotal, 0, ',', ' ') }}</div>
             <div class="stat-sub">FCFA</div>
         </div>
 
         <div class="stat-card">
-            <div class="stat-label">Solde final</div>
+            <div class="stat-label">{{ __('cashier-sessions.final_balance') }}</div>
             <div class="stat-value {{ ($netTotal + $cashierSession->initial_balance) >= 0 ? 'green' : 'red' }}">
                 {{ number_format($netTotal + $cashierSession->initial_balance, 0, ',', ' ') }}
             </div>
             @if($difference != 0)
             <div class="stat-diff {{ $difference > 0 ? 'green' : 'red' }}">
                 <i class="fas {{ $difference > 0 ? 'fa-arrow-up' : 'fa-arrow-down' }}"></i>
-                Écart: {{ number_format(abs($difference), 0, ',', ' ') }}
+                {{ __('cashier-sessions.gap') }}: {{ number_format(abs($difference), 0, ',', ' ') }}
             </div>
             @endif
         </div>
@@ -559,9 +559,9 @@
     <div class="table-card">
         <div class="table-card-header">
             <i class="fas fa-list"></i>
-            <h5>Historique des paiements</h5>
+            <h5>{{ __('cashier-sessions.payment_history') }}</h5>
             <span class="badge {{ $payments->count() > 0 ? 'badge-green' : 'badge-gray' }}" style="margin-left:auto;">
-                {{ $payments->count() }} transaction(s)
+                {{ __('cashier-sessions.transactions_count', ['count' => $payments->count()]) }}
             </span>
         </div>
         
@@ -570,13 +570,13 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>Référence</th>
-                        <th>Date</th>
-                        <th>Client</th>
-                        <th>Montant</th>
-                        <th>Méthode</th>
-                        <th>Statut</th>
-                        <th class="text-center">Actions</th>
+                        <th>{{ __('cashier-sessions.col_reference') }}</th>
+                        <th>{{ __('cashier-sessions.col_date') }}</th>
+                        <th>{{ __('cashier-sessions.col_client') }}</th>
+                        <th>{{ __('cashier-sessions.col_amount') }}</th>
+                        <th>{{ __('cashier-sessions.col_method') }}</th>
+                        <th>{{ __('cashier-sessions.col_status') }}</th>
+                        <th class="text-center">{{ __('cashier-sessions.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -617,11 +617,11 @@
                         </td>
                         <td>
                             <span class="status-badge status-{{ $payment->status }}">
-                                {{ $payment->status == 'completed' ? '✓ Complété' : '⏱ En attente' }}
+                                {{ $payment->status == 'completed' ? __('cashier-sessions.status_completed') : __('cashier-sessions.status_pending') }}
                             </span>
                         </td>
                         <td class="text-center">
-                            <a href="{{ route('payment.show', $payment) }}" class="btn-icon" title="Voir détails">
+                            <a href="{{ route('payment.show', $payment) }}" class="btn-icon" title="{{ __('cashier-sessions.btn_view_payment') }}">
                                 <i class="fas fa-eye"></i>
                             </a>
                         </td>
@@ -642,8 +642,8 @@
             <div class="empty-icon">
                 <i class="fas fa-money-bill-wave"></i>
             </div>
-            <h5>Aucun paiement</h5>
-            <p class="text-muted">Aucun paiement n'a été enregistré pendant cette session.</p>
+            <h5>{{ __('cashier-sessions.empty_payments_title') }}</h5>
+            <p class="text-muted">{{ __('cashier-sessions.empty_payments_message') }}</p>
         </div>
         @endif
     </div>
@@ -656,7 +656,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-lock text-danger me-2"></i>Clôturer la session</h5>
+                <h5 class="modal-title"><i class="fas fa-lock text-danger me-2"></i>{{ __('cashier-sessions.close_session_title') }}</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="{{ route('cashier.sessions.destroy', $cashierSession) }}" method="POST">
@@ -664,45 +664,45 @@
                 <div class="modal-body">
                     <div class="alert-warning">
                         <i class="fas fa-exclamation-triangle"></i>
-                        Cette action est irréversible.
+                        {{ __('cashier-sessions.close_session_irreversible') }}
                     </div>
                     
                     <div class="summary-box">
                         <div class="summary-row">
-                            <span>Solde initial</span>
+                            <span>{{ __('cashier-sessions.summary_initial_balance') }}</span>
                             <span class="fw-bold">{{ number_format($cashierSession->initial_balance, 0, ',', ' ') }} FCFA</span>
                         </div>
                         <div class="summary-row">
-                            <span>Encaissements</span>
+                            <span>{{ __('cashier-sessions.summary_collections') }}</span>
                             <span class="fw-bold green">{{ number_format($encaissements, 0, ',', ' ') }} FCFA</span>
                         </div>
                         <div class="summary-row">
-                            <span>Remboursements</span>
+                            <span>{{ __('cashier-sessions.summary_refunds') }}</span>
                             <span class="fw-bold red">{{ number_format($remboursements, 0, ',', ' ') }} FCFA</span>
                         </div>
                         <div class="summary-row">
-                            <span>Solde théorique</span>
+                            <span>{{ __('cashier-sessions.summary_theoretical_balance') }}</span>
                             <span class="fw-bold">{{ number_format($netTotal + $cashierSession->initial_balance, 0, ',', ' ') }} FCFA</span>
                         </div>
                     </div>
                     
                     <div class="mb-4">
-                        <label class="form-label">Solde final réel</label>
+                        <label class="form-label">{{ __('cashier-sessions.form_real_balance') }}</label>
                         <input type="number" name="final_balance" class="form-control" 
                                step="0.01" value="{{ $netTotal + $cashierSession->initial_balance }}" required>
-                        <small class="text-muted">Montant réel en caisse</small>
+                        <small class="text-muted">{{ __('cashier-sessions.form_real_balance_hint') }}</small>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Notes</label>
+                        <label class="form-label">{{ __('cashier-sessions.form_notes') }}</label>
                         <textarea name="closing_notes" class="form-control" rows="3" 
-                                  placeholder="Observations, anomalies..."></textarea>
+                                  placeholder="{{ __('cashier-sessions.form_notes_placeholder') }}"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-gray" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-gray" data-bs-dismiss="modal">{{ __('cashier-sessions.cancel') }}</button>
                     <button type="submit" class="btn btn-red">
-                        <i class="fas fa-lock"></i> Clôturer
+                        <i class="fas fa-lock"></i> {{ __('cashier-sessions.btn_close_session') }}
                     </button>
                 </div>
             </form>

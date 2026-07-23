@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Rapport de Session #' . $session->id)
+@section('title', __('cashier-sessions.report_title') . ' #' . $session->id)
 
 @push('styles')
 <!-- Font Awesome 6 -->
@@ -708,7 +708,7 @@ tr:last-child td {
         <!-- EN-TÊTE -->
         <div class="report-header">
             <div class="header-title">
-                <h1>Rapport de Session <em>#{{ $session->id }}</em></h1>
+                <h1>{{ __('cashier-sessions.report_title') }} <em>#{{ $session->id }}</em></h1>
                 <p>
                     <i class="fas fa-circle"></i>
                     {{ now()->format('d/m/Y H:i') }} • {{ auth()->user()->name }}
@@ -717,7 +717,7 @@ tr:last-child td {
             
             <div class="header-badge {{ $session->status }}">
                 <i class="fas fa-{{ $session->status == 'active' ? 'play' : 'check-circle' }}"></i>
-                {{ $session->status == 'active' ? 'Session active' : 'Fermée' }}
+                {{ $session->status == 'active' ? __('cashier-sessions.session_active_badge') : __('cashier-sessions.status_closed') }}
             </div>
         </div>
 
@@ -726,7 +726,7 @@ tr:last-child td {
             <div class="info-item">
                 <div class="info-icon"><i class="fas fa-user"></i></div>
                 <div class="info-content">
-                    <div class="info-label">RÉCEPTIONNISTE</div>
+                    <div class="info-label">{{ __('cashier-sessions.info_receptionist') }}</div>
                     <div class="info-value">{{ $session->user->name }}</div>
                 </div>
             </div>
@@ -734,7 +734,7 @@ tr:last-child td {
             <div class="info-item">
                 <div class="info-icon"><i class="fas fa-calendar"></i></div>
                 <div class="info-content">
-                    <div class="info-label">DATE</div>
+                    <div class="info-label">{{ __('cashier-sessions.info_date') }}</div>
                     <div class="info-value">{{ $session->start_time->format('d/m/Y') }}</div>
                 </div>
             </div>
@@ -742,7 +742,7 @@ tr:last-child td {
             <div class="info-item">
                 <div class="info-icon"><i class="fas fa-clock"></i></div>
                 <div class="info-content">
-                    <div class="info-label">HORAIRES</div>
+                    <div class="info-label">{{ __('cashier-sessions.info_schedule') }}</div>
                     <div class="info-value">{{ $session->start_time->format('H:i') }}-{{ $session->end_time ? $session->end_time->format('H:i') : '...' }}</div>
                 </div>
             </div>
@@ -750,7 +750,7 @@ tr:last-child td {
             <div class="info-item">
                 <div class="info-icon"><i class="fas fa-coins"></i></div>
                 <div class="info-content">
-                    <div class="info-label">SOLDE INITIAL</div>
+                    <div class="info-label">{{ __('cashier-sessions.info_initial_balance') }}</div>
                     <div class="info-value">{{ number_format($session->initial_balance, 0, ',', ' ') }}</div>
                 </div>
             </div>
@@ -760,19 +760,19 @@ tr:last-child td {
         <div class="kpi-grid">
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-title">Encaissé</span>
+                    <span class="kpi-title">{{ __('cashier-sessions.kpi_collected') }}</span>
                     <span class="kpi-icon"><i class="fas fa-arrow-up"></i></span>
                 </div>
                 <div class="kpi-value">{{ number_format($totalCompleted, 0, ',', ' ') }}</div>
                 <div class="kpi-footer">
                     <span>FCFA</span>
-                    <span class="kpi-badge green">{{ $paymentCount }} paiements</span>
+                    <span class="kpi-badge green">{{ __('cashier-sessions.kpi_payments_count', ['count' => $paymentCount]) }}</span>
                 </div>
             </div>
 
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-title">Remboursé</span>
+                    <span class="kpi-title">{{ __('cashier-sessions.kpi_refunded') }}</span>
                     <span class="kpi-icon"><i class="fas fa-arrow-down"></i></span>
                 </div>
                 <div class="kpi-value" style="color: var(--red-500);">{{ number_format($totalRefunded, 0, ',', ' ') }}</div>
@@ -783,20 +783,20 @@ tr:last-child td {
 
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-title">Net</span>
+                    <span class="kpi-title">{{ __('cashier-sessions.kpi_net') }}</span>
                     <span class="kpi-icon"><i class="fas fa-wallet"></i></span>
                 </div>
                 <div class="kpi-value {{ $netTotal >= 0 ? 'green' : 'red' }}">{{ number_format($netTotal, 0, ',', ' ') }}</div>
                 <div class="kpi-footer">
                     @if($session->balance_difference != 0)
-                    <span>Écart: {{ number_format(abs($session->balance_difference), 0, ',', ' ') }}</span>
+                    <span>{{ __('cashier-sessions.kpi_gap', ['amount' => number_format(abs($session->balance_difference), 0, ',', ' ')]) }}</span>
                     @endif
                 </div>
             </div>
 
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-title">Moyenne</span>
+                    <span class="kpi-title">{{ __('cashier-sessions.kpi_avg') }}</span>
                     <span class="kpi-icon"><i class="fas fa-chart-line"></i></span>
                 </div>
                 <div class="kpi-value">{{ $paymentCount > 0 ? number_format($totalCompleted / $paymentCount, 0, ',', ' ') : 0 }}</div>
@@ -811,9 +811,9 @@ tr:last-child td {
         <div class="section-header">
             <div class="section-title">
                 <i class="fas fa-chart-pie"></i>
-                <h2>Répartition</h2>
+                <h2>{{ __('cashier-sessions.section_breakdown') }}</h2>
             </div>
-            <span class="section-count">{{ $paymentCount }} tx</span>
+            <span class="section-count">{{ __('cashier-sessions.section_tx_count', ['count' => $paymentCount]) }}</span>
         </div>
 
         <div class="methods-grid">
@@ -844,7 +844,7 @@ tr:last-child td {
         <div class="section-header">
             <div class="section-title">
                 <i class="fas fa-list"></i>
-                <h2>Transactions</h2>
+                <h2>{{ __('cashier-sessions.section_transactions') }}</h2>
             </div>
         </div>
 
@@ -853,12 +853,12 @@ tr:last-child td {
                 <table>
                     <thead>
                         <tr>
-                            <th>Réf.</th>
-                            <th>Date</th>
-                            <th>Client</th>
-                            <th>Méthode</th>
-                            <th>Montant</th>
-                            <th>Statut</th>
+                            <th>{{ __('cashier-sessions.col_ref_short') }}</th>
+                            <th>{{ __('cashier-sessions.col_date') }}</th>
+                            <th>{{ __('cashier-sessions.col_client') }}</th>
+                            <th>{{ __('cashier-sessions.col_method_short') }}</th>
+                            <th>{{ __('cashier-sessions.col_amount') }}</th>
+                            <th>{{ __('cashier-sessions.col_status') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -912,19 +912,19 @@ tr:last-child td {
             <div class="table-footer">
                 <div class="table-totals">
                     <div>
-                        <span class="total-label">Total</span>
+                        <span class="total-label">{{ __('cashier-sessions.total') }}</span>
                         <span class="total-value">{{ $paymentCount }}</span>
                     </div>
                     <div>
-                        <span class="total-label">Encaissé</span>
+                        <span class="total-label">{{ __('cashier-sessions.total_collected') }}</span>
                         <span class="total-value green">{{ number_format($totalCompleted, 0, ',', ' ') }}</span>
                     </div>
                     <div>
-                        <span class="total-label">Remboursé</span>
+                        <span class="total-label">{{ __('cashier-sessions.total_refunded') }}</span>
                         <span class="total-value red">{{ number_format($totalRefunded, 0, ',', ' ') }}</span>
                     </div>
                     <div>
-                        <span class="total-label">Net</span>
+                        <span class="total-label">{{ __('cashier-sessions.total_net') }}</span>
                         <span class="total-value {{ $netTotal >= 0 ? 'green' : 'red' }}">{{ number_format($netTotal, 0, ',', ' ') }}</span>
                     </div>
                 </div>
@@ -938,23 +938,23 @@ tr:last-child td {
 
         <!-- RÉSUMÉ FINANCIER -->
         <div class="summary-grid">
-            <div class="summary-item">
-                <div class="summary-label">Solde initial</div>
+                <div class="summary-item">
+                    <div class="summary-label">{{ __('cashier-sessions.summary_initial') }}</div>
                 <div class="summary-value">{{ number_format($session->initial_balance, 0, ',', ' ') }}</div>
             </div>
             
-            <div class="summary-item">
-                <div class="summary-label">Total encaissé</div>
+                <div class="summary-item">
+                    <div class="summary-label">{{ __('cashier-sessions.summary_total_collected') }}</div>
                 <div class="summary-value green">{{ number_format($totalCompleted, 0, ',', ' ') }}</div>
             </div>
             
-            <div class="summary-item">
-                <div class="summary-label">Total remboursé</div>
+                <div class="summary-item">
+                    <div class="summary-label">{{ __('cashier-sessions.summary_total_refunded') }}</div>
                 <div class="summary-value red">{{ number_format($totalRefunded, 0, ',', ' ') }}</div>
             </div>
             
-            <div class="summary-item">
-                <div class="summary-label">Solde final</div>
+                <div class="summary-item">
+                    <div class="summary-label">{{ __('cashier-sessions.summary_final') }}</div>
                 <div class="summary-value {{ $netTotal >= 0 ? 'green' : 'red' }}">{{ number_format($netTotal + $session->initial_balance, 0, ',', ' ') }}</div>
             </div>
         </div>
@@ -963,17 +963,17 @@ tr:last-child td {
         <div class="report-footer">
             <div class="signatures">
                 <div class="signature-item">
-                    <div class="signature-title">Réceptionniste</div>
+                    <div class="signature-title">{{ __('cashier-sessions.signature_receptionist') }}</div>
                     <div class="signature-line"></div>
                     <span class="signature-name">{{ $session->user->name }}</span>
                 </div>
                 <div class="signature-item">
-                    <div class="signature-title">Supérieur</div>
+                    <div class="signature-title">{{ __('cashier-sessions.signature_superior') }}</div>
                     <div class="signature-line"></div>
                     <span class="signature-empty"></span>
                 </div>
                 <div class="signature-item">
-                    <div class="signature-title">Cachet</div>
+                    <div class="signature-title">{{ __('cashier-sessions.signature_stamp') }}</div>
                     <div class="signature-line"></div>
                     <span class="signature-empty"></span>
                 </div>
@@ -981,10 +981,10 @@ tr:last-child td {
             
             <div class="footer-actions">
                 <a href="{{ route('cashier.sessions.show', $session) }}" class="btn btn-gray">
-                    <i class="fas fa-arrow-left"></i> Retour
+                    <i class="fas fa-arrow-left"></i> {{ __('cashier-sessions.back') }}
                 </a>
                 <button onclick="window.print()" class="btn btn-green">
-                    <i class="fas fa-print"></i> Imprimer
+                    <i class="fas fa-print"></i> {{ __('cashier-sessions.print') }}
                 </button>
             </div>
         </div>
