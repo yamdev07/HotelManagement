@@ -17,8 +17,8 @@ return [
     // Form
     'form_title' => 'Welcome back 👋',
     'form_description' => 'Log in to your dashboard.',
-    'field_email' => 'Email or phone',
-    'field_email_placeholder' => 'you@example.com or +229 01 02 03 04',
+    'field_email' => 'Email',
+    'field_email_placeholder' => 'you@example.com',
     'field_password' => 'Password',
     'field_password_placeholder' => '••••••••',
     'field_password_toggle' => 'Show password',
