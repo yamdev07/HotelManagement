@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Modifier le Type de Chambre')
+@section('title', __('type.page_title'))
 @section('content')
 
 <style>
@@ -263,11 +263,11 @@
 <div class="edit-type-page">
     <!-- Breadcrumb -->
     <div class="edit-type-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('type.breadcrumb_dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('type.index') }}">Types de chambres</a>
+        <a href="{{ route('type.index') }}">{{ __('type.breadcrumb_types') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Modifier: {{ $type->name }}</span>
+        <span class="current">{{ __('type.breadcrumb_edit', ['name' => $type->name]) }}</span>
     </div>
 
     <!-- Header -->
@@ -275,15 +275,15 @@
         <div class="edit-type-brand">
             <div class="edit-type-brand-icon"><i class="fas fa-edit"></i></div>
             <div>
-                <h1 class="edit-type-header-title">Modifier le <em>type</em></h1>
+                <h1 class="edit-type-header-title">{!! __('type.edit_title') !!}</h1>
                 <p class="edit-type-header-sub">
-                    <i class="fas fa-tag me-1"></i> {{ $type->name }} · Mise à jour des informations
+                    <i class="fas fa-tag me-1"></i> {{ __('type.edit_subtitle', ['name' => $type->name]) }}
                 </p>
             </div>
         </div>
         <div class="edit-type-header-actions">
             <a href="{{ route('type.index') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-arrow-left me-2"></i> Retour
+                <i class="fas fa-arrow-left me-2"></i> {{ __('type.back') }}
             </a>
         </div>
     </div>
@@ -293,7 +293,7 @@
         <div class="edit-type-card-header">
             <h5 class="edit-type-card-title">
                 <i class="fas fa-info-circle"></i>
-                Informations du type
+                {{ __('type.card_info') }}
             </h5>
         </div>
         <div class="edit-type-card-body">
@@ -306,36 +306,36 @@
                     <div class="form-group">
                         <label class="form-label">
                             <i class="fas fa-tag"></i>
-                            Nom du type <span class="required">*</span>
+                            {{ __('type.label_name') }}
                         </label>
                         <input type="text" name="name" class="form-control" 
                                value="{{ $type->name }}" required
-                               placeholder="Ex: Standard, Deluxe, Suite">
+                               placeholder="{{ __('type.placeholder_name') }}">
                     </div>
                     
                     <!-- Prix de base -->
                     <div class="form-group">
                         <label class="form-label">
                             <i class="fas fa-money-bill-wave"></i>
-                            Prix de base (FCFA)
+                            {{ __('type.label_price') }}
                         </label>
                         <div class="input-group">
                             <input type="number" name="base_price" class="form-control"
                                    value="{{ $type->base_price }}" min="0"
-                                   placeholder="50000">
+                                   placeholder="{{ __('type.placeholder_price') }}">
                             <span class="input-group-text">FCFA</span>
                         </div>
-                        <div class="form-hint">Prix par nuit recommandé</div>
+                        <div class="form-hint">{{ __('type.hint_price') }}</div>
                     </div>
                     
                     <!-- Capacité -->
                     <div class="form-group">
                         <label class="form-label">
                             <i class="fas fa-users"></i>
-                            Capacité
+                            {{ __('type.label_capacity') }}
                         </label>
                         <select name="capacity" class="form-select">
-                            <option value="">-- Sélectionner --</option>
+                            <option value="">{{ __('type.hint_select') }}</option>
                             @for($i = 1; $i <= 10; $i++)
                                 <option value="{{ $i }}" {{ $type->capacity == $i ? 'selected' : '' }}>
                                     {{ $i }} personne(s)
@@ -349,10 +349,10 @@
                 <div class="form-group" style="margin-top:16px;">
                     <label class="form-label">
                         <i class="fas fa-align-left"></i>
-                        Description
+                        {{ __('type.label_description') }}
                     </label>
                     <textarea name="information" class="form-control" rows="4" 
-                              placeholder="Description du type de chambre...">{{ $type->information }}</textarea>
+                              placeholder="{{ __('type.placeholder_description') }}">{{ $type->information }}</textarea>
                 </div>
                 
                 <!-- Statut actif -->
@@ -360,17 +360,17 @@
                     <input class="form-check-input" type="checkbox" value="1" 
                            id="is_active" name="is_active" {{ $type->is_active ? 'checked' : '' }}>
                     <label class="form-check-label" for="is_active">
-                        Actif (disponible pour sélection)
+                        {{ __('type.label_active') }}
                     </label>
                 </div>
                 
                 <!-- Actions -->
                 <div class="actions-bar">
                     <button type="submit" class="btn-db btn-db-warning">
-                        <i class="fas fa-save me-2"></i> Mettre à jour
+                        <i class="fas fa-save me-2"></i> {{ __('type.submit_update') }}
                     </button>
                     <a href="{{ route('type.index') }}" class="btn-db btn-db-ghost">
-                        <i class="fas fa-times me-2"></i> Annuler
+                        <i class="fas fa-times me-2"></i> {{ __('type.cancel') }}
                     </a>
                 </div>
             </form>
@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const originalText = button.innerHTML;
             
             button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Enregistrement...';
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ __('type.saving') }}';
             
             fetch(this.action, {
                 method: 'POST',
@@ -408,14 +408,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert(data.message);
                     window.location.href = '{{ route("type.index") }}';
                 } else {
-                    alert(data.message || 'Erreur lors de la modification');
+                    alert(data.message || '{{ __('type.js_error_edit') }}');
                     button.disabled = false;
                     button.innerHTML = originalText;
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Erreur réseau. Veuillez réessayer.');
+                alert('{{ __('type.js_error_network') }}');
                 button.disabled = false;
                 button.innerHTML = originalText;
             });
