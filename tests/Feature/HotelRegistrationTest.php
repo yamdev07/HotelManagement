@@ -198,17 +198,19 @@ class HotelRegistrationTest extends TestCase
         $this->assertDatabaseMissing('hotels', ['name' => 'Hotel Bad Logo']);
     }
 
-    public function test_email_must_be_unique(): void
+    public function test_existing_email_auto_logs_in_instead_of_error(): void
     {
         Mail::fake();
         User::factory()->create(['email' => 'taken@test.test']);
 
-        $this->post('/inscription', [
+        $response = $this->post('/inscription', [
             'company_name' => 'Hotel Dup',
             'admin_name'   => 'X',
             'admin_email'  => 'taken@test.test',
-        ])->assertSessionHasErrors('admin_email');
+        ]);
 
+        $response->assertRedirectToRoute('onboarding.show');
+        $response->assertSessionHas('success');
         $this->assertDatabaseMissing('hotels', ['name' => 'Hotel Dup']);
     }
 }
