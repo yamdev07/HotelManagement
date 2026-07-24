@@ -13,8 +13,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
-use App\Models\RoomStatus; 
-
 
 class AvailabilityController extends Controller
 {
@@ -485,179 +483,180 @@ class AvailabilityController extends Controller
      * Dashboard de disponibilité
      */
     public function dashboard()
-{
-    try {
-        $now = now();
-        $today = $now; // Pour la vue
-        
-        // Récupérer les IDs des statuts "sale"
-        $dirtyStatusIds = DB::table('room_statuses')
-            ->whereIn('name', ['Sale', 'À nettoyer', 'Dirty'])
-            ->orWhere('name', 'LIKE', '%sale%')
-            ->orWhere('name', 'LIKE', '%nettoy%')
-            ->pluck('id')
-            ->toArray();
+    {
+        try {
+            $now = now();
+            $today = $now; // Pour la vue
 
-        if (empty($dirtyStatusIds)) {
-            $dirtyStatusIds = [3, 4]; // IDs par défaut
-        }
+            // Récupérer les IDs des statuts "sale"
+            $dirtyStatusIds = DB::table('room_statuses')
+                ->whereIn('name', ['Sale', 'À nettoyer', 'Dirty'])
+                ->orWhere('name', 'LIKE', '%sale%')
+                ->orWhere('name', 'LIKE', '%nettoy%')
+                ->pluck('id')
+                ->toArray();
 
-        // Statistiques générales
-        $totalRooms = Room::count();
-        
-        // Récupérer toutes les transactions avec leur statut
-        $transactions = Transaction::with('customer')
-            ->whereIn('status', ['active', 'reservation', 'checked_out'])
-            ->get();
-
-        // Organiser les transactions par chambre et par statut
-        $activeTransactions = collect(); // status = 'active' (client présent)
-        $checkedOutTransactions = collect(); // status = 'checked_out' (client parti)
-        $todayDepartures = collect(); // Départs d'aujourd'hui (pour l'affichage)
-        
-        foreach ($transactions as $transaction) {
-            // Classification par statut
-            if ($transaction->status == 'active') {
-                // ✅ Client ENCORE dans l'hôtel
-                $activeTransactions[$transaction->room_id] = $transaction;
-            } elseif ($transaction->status == 'checked_out') {
-                // ✅ Client PARTI
-                $checkedOutTransactions[$transaction->room_id] = $transaction;
+            if (empty($dirtyStatusIds)) {
+                $dirtyStatusIds = [3, 4]; // IDs par défaut
             }
-            
-            // Vérifier si c'est un départ aujourd'hui (pour l'affichage)
-            if ($transaction->check_out->isToday()) {
-                $todayDepartures[$transaction->room_id] = [
-                    'transaction' => $transaction,
-                    'room' => $transaction->room,
-                    'check_out' => $transaction->check_out,
-                    'status' => $transaction->status,
-                    'is_active' => $transaction->status == 'active',
-                ];
-            }
-        }
 
-        // Récupérer toutes les chambres
-        $rooms = Room::with(['type', 'roomStatus'])->get();
+            // Statistiques générales
+            $totalRooms = Room::count();
 
-        // Initialiser les collections
-        $availableNow = collect();
-        $unavailableRooms = collect();
-        $dirtyOccupied = collect();   // ⬅️ Sales avec client ENCORE présent (status = 'active')
-        $dirtyUnoccupied = collect();  // ⬅️ Sales avec client PARTI (status = 'checked_out')
-        $departingToday = collect();   // Pour l'affichage des départs
+            // Récupérer toutes les transactions avec leur statut
+            $transactions = Transaction::with('customer')
+                ->whereIn('status', ['active', 'reservation', 'checked_out'])
+                ->get();
 
-        // Analyser chaque chambre
-        foreach ($rooms as $room) {
-            // Vérifier le statut du client pour cette chambre
-            $hasActiveClient = $activeTransactions->has($room->id);
-            $hasCheckedOutClient = $checkedOutTransactions->has($room->id);
-            
-            // Vérifier si c'est un départ aujourd'hui
-            if (isset($todayDepartures[$room->id])) {
-                $departingToday->push((object)[
-                    'room' => $room,
-                    'transaction' => $todayDepartures[$room->id]['transaction'],
-                    'check_out' => $todayDepartures[$room->id]['check_out'],
-                    'status' => $todayDepartures[$room->id]['status'],
-                ]);
-            }
-            
-            // Vérifier si la chambre est sale
-            $isDirty = in_array($room->room_status_id, $dirtyStatusIds) ||
-                      str_contains(strtolower($room->roomStatus->name ?? ''), 'sale') ||
-                      str_contains(strtolower($room->roomStatus->name ?? ''), 'nettoy');
-            
-            // CLASSIFICATION DES CHAMBRES SALES basée sur le statut du client
-            if ($isDirty) {
-                if ($hasActiveClient) {
-                    // ✅ CAS 1: Client ENCORE présent (status = 'active') → "Occupées sales"
-                    $dirtyOccupied->push($room);
-                } elseif ($hasCheckedOutClient) {
-                    // ✅ CAS 2: Client PARTI (status = 'checked_out') → "Non occupées sales"
-                    $dirtyUnoccupied->push($room);
-                } else {
-                    // ✅ CAS 3: Pas de transaction mais chambre sale → "Non occupées sales"
-                    $dirtyUnoccupied->push($room);
+            // Organiser les transactions par chambre et par statut
+            $activeTransactions = collect(); // status = 'active' (client présent)
+            $checkedOutTransactions = collect(); // status = 'checked_out' (client parti)
+            $todayDepartures = collect(); // Départs d'aujourd'hui (pour l'affichage)
+
+            foreach ($transactions as $transaction) {
+                // Classification par statut
+                if ($transaction->status == 'active') {
+                    // ✅ Client ENCORE dans l'hôtel
+                    $activeTransactions[$transaction->room_id] = $transaction;
+                } elseif ($transaction->status == 'checked_out') {
+                    // ✅ Client PARTI
+                    $checkedOutTransactions[$transaction->room_id] = $transaction;
+                }
+
+                // Vérifier si c'est un départ aujourd'hui (pour l'affichage)
+                if ($transaction->check_out->isToday()) {
+                    $todayDepartures[$transaction->room_id] = [
+                        'transaction' => $transaction,
+                        'room' => $transaction->room,
+                        'check_out' => $transaction->check_out,
+                        'status' => $transaction->status,
+                        'is_active' => $transaction->status == 'active',
+                    ];
                 }
             }
 
-            // Autres classifications
-            if ($room->room_status_id == 2) {
-                $unavailableRooms->push($room);
+            // Récupérer toutes les chambres
+            $rooms = Room::with(['type', 'roomStatus'])->get();
+
+            // Initialiser les collections
+            $availableNow = collect();
+            $unavailableRooms = collect();
+            $dirtyOccupied = collect();   // ⬅️ Sales avec client ENCORE présent (status = 'active')
+            $dirtyUnoccupied = collect();  // ⬅️ Sales avec client PARTI (status = 'checked_out')
+            $departingToday = collect();   // Pour l'affichage des départs
+
+            // Analyser chaque chambre
+            foreach ($rooms as $room) {
+                // Vérifier le statut du client pour cette chambre
+                $hasActiveClient = $activeTransactions->has($room->id);
+                $hasCheckedOutClient = $checkedOutTransactions->has($room->id);
+
+                // Vérifier si c'est un départ aujourd'hui
+                if (isset($todayDepartures[$room->id])) {
+                    $departingToday->push((object) [
+                        'room' => $room,
+                        'transaction' => $todayDepartures[$room->id]['transaction'],
+                        'check_out' => $todayDepartures[$room->id]['check_out'],
+                        'status' => $todayDepartures[$room->id]['status'],
+                    ]);
+                }
+
+                // Vérifier si la chambre est sale
+                $isDirty = in_array($room->room_status_id, $dirtyStatusIds) ||
+                          str_contains(strtolower($room->roomStatus->name ?? ''), 'sale') ||
+                          str_contains(strtolower($room->roomStatus->name ?? ''), 'nettoy');
+
+                // CLASSIFICATION DES CHAMBRES SALES basée sur le statut du client
+                if ($isDirty) {
+                    if ($hasActiveClient) {
+                        // ✅ CAS 1: Client ENCORE présent (status = 'active') → "Occupées sales"
+                        $dirtyOccupied->push($room);
+                    } elseif ($hasCheckedOutClient) {
+                        // ✅ CAS 2: Client PARTI (status = 'checked_out') → "Non occupées sales"
+                        $dirtyUnoccupied->push($room);
+                    } else {
+                        // ✅ CAS 3: Pas de transaction mais chambre sale → "Non occupées sales"
+                        $dirtyUnoccupied->push($room);
+                    }
+                }
+
+                // Autres classifications
+                if ($room->room_status_id == 2) {
+                    $unavailableRooms->push($room);
+                }
+
+                // Chambres disponibles (libres, propres, pas de client)
+                if ($room->room_status_id == 1 && ! $hasActiveClient && ! $hasCheckedOutClient) {
+                    $availableNow->push($room);
+                }
             }
 
-            // Chambres disponibles (libres, propres, pas de client)
-            if ($room->room_status_id == 1 && !$hasActiveClient && !$hasCheckedOutClient) {
-                $availableNow->push($room);
-            }
-        }
+            // Debug pour la chambre 203
+            $room203 = $rooms->firstWhere('number', '203');
+            if ($room203) {
+                $hasActive203 = $activeTransactions->has($room203->id);
+                $hasCheckedOut203 = $checkedOutTransactions->has($room203->id);
+                $isDirty203 = in_array($room203->room_status_id, $dirtyStatusIds) ||
+                             str_contains(strtolower($room203->roomStatus->name ?? ''), 'sale');
 
-        // Debug pour la chambre 203
-        $room203 = $rooms->firstWhere('number', '203');
-        if ($room203) {
-            $hasActive203 = $activeTransactions->has($room203->id);
-            $hasCheckedOut203 = $checkedOutTransactions->has($room203->id);
-            $isDirty203 = in_array($room203->room_status_id, $dirtyStatusIds) ||
-                         str_contains(strtolower($room203->roomStatus->name ?? ''), 'sale');
-            
-            \Log::info('🔍 DEBUG Chambre 203:', [
-                'heure' => $now->format('H:i:s'),
-                'has_active_client' => $hasActive203 ? 'OUI' : 'NON',
-                'has_checked_out_client' => $hasCheckedOut203 ? 'OUI' : 'NON',
-                'is_dirty' => $isDirty203 ? 'OUI' : 'NON',
-                'dans_dirty_occupied' => $dirtyOccupied->contains('id', $room203->id) ? 'OUI' : 'NON',
-                'dans_dirty_unoccupied' => $dirtyUnoccupied->contains('id', $room203->id) ? 'OUI' : 'NON',
+                \Log::info('🔍 DEBUG Chambre 203:', [
+                    'heure' => $now->format('H:i:s'),
+                    'has_active_client' => $hasActive203 ? 'OUI' : 'NON',
+                    'has_checked_out_client' => $hasCheckedOut203 ? 'OUI' : 'NON',
+                    'is_dirty' => $isDirty203 ? 'OUI' : 'NON',
+                    'dans_dirty_occupied' => $dirtyOccupied->contains('id', $room203->id) ? 'OUI' : 'NON',
+                    'dans_dirty_unoccupied' => $dirtyUnoccupied->contains('id', $room203->id) ? 'OUI' : 'NON',
+                ]);
+            }
+
+            // Statistiques
+            $stats = [
+                'total_rooms' => $totalRooms,
+                'available_rooms' => $availableNow->count(),
+                'occupied_rooms' => $activeTransactions->count(),
+                'occupancy_rate' => $totalRooms > 0 ? round(($activeTransactions->count() / $totalRooms) * 100, 1) : 0,
+                'dirty_rooms' => $dirtyOccupied->count() + $dirtyUnoccupied->count(),
+                'dirty_occupied' => $dirtyOccupied->count(),   // ⬅️ Basé sur status = 'active'
+                'dirty_unoccupied' => $dirtyUnoccupied->count(), // ⬅️ Basé sur status = 'checked_out' ou pas de client
+                'departures_today' => $departingToday->count(),
+            ];
+
+            \Log::info('📊 RÉSULTAT FINAL:', [
+                'dirty_occupied' => $dirtyOccupied->pluck('number')->toArray(),
+                'dirty_unoccupied' => $dirtyUnoccupied->pluck('number')->toArray(),
+                'active_clients' => $activeTransactions->keys()->toArray(),
+                'checked_out_clients' => $checkedOutTransactions->keys()->toArray(),
             ]);
+
+            $roomsByStatus = [
+                'dirty' => $dirtyOccupied->merge($dirtyUnoccupied),
+                'dirty_occupied' => $dirtyOccupied,
+                'dirty_unoccupied' => $dirtyUnoccupied,
+            ];
+
+            // Occupation par type (si nécessaire)
+            $occupancyByType = []; // À calculer si besoin
+
+            // CORRECTION ICI : Utiliser un tableau associatif au lieu de compact avec =>
+            return view('availability.dashboard', [
+                'stats' => $stats,
+                'availableNow' => $availableNow,
+                'unavailableRooms' => $unavailableRooms,
+                'occupancyByType' => $occupancyByType,
+                'today' => $today,
+                'dirtyOccupied' => $dirtyOccupied,
+                'dirtyUnoccupied' => $dirtyUnoccupied,
+                'todayDepartures' => $departingToday,
+                'roomsToBeFreed' => $departingToday->pluck('room'),
+                'roomsByStatus' => $roomsByStatus,
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Dashboard error: '.$e->getMessage());
+
+            return back()->with('error', 'Erreur: '.$e->getMessage());
         }
-
-        // Statistiques
-        $stats = [
-            'total_rooms' => $totalRooms,
-            'available_rooms' => $availableNow->count(),
-            'occupied_rooms' => $activeTransactions->count(),
-            'occupancy_rate' => $totalRooms > 0 ? round(($activeTransactions->count() / $totalRooms) * 100, 1) : 0,
-            'dirty_rooms' => $dirtyOccupied->count() + $dirtyUnoccupied->count(),
-            'dirty_occupied' => $dirtyOccupied->count(),   // ⬅️ Basé sur status = 'active'
-            'dirty_unoccupied' => $dirtyUnoccupied->count(), // ⬅️ Basé sur status = 'checked_out' ou pas de client
-            'departures_today' => $departingToday->count(),
-        ];
-
-        \Log::info('📊 RÉSULTAT FINAL:', [
-            'dirty_occupied' => $dirtyOccupied->pluck('number')->toArray(),
-            'dirty_unoccupied' => $dirtyUnoccupied->pluck('number')->toArray(),
-            'active_clients' => $activeTransactions->keys()->toArray(),
-            'checked_out_clients' => $checkedOutTransactions->keys()->toArray(),
-        ]);
-
-        $roomsByStatus = [
-            'dirty' => $dirtyOccupied->merge($dirtyUnoccupied),
-            'dirty_occupied' => $dirtyOccupied,
-            'dirty_unoccupied' => $dirtyUnoccupied,
-        ];
-
-        // Occupation par type (si nécessaire)
-        $occupancyByType = []; // À calculer si besoin
-
-        // CORRECTION ICI : Utiliser un tableau associatif au lieu de compact avec =>
-        return view('availability.dashboard', [
-            'stats' => $stats,
-            'availableNow' => $availableNow,
-            'unavailableRooms' => $unavailableRooms,
-            'occupancyByType' => $occupancyByType,
-            'today' => $today,
-            'dirtyOccupied' => $dirtyOccupied,
-            'dirtyUnoccupied' => $dirtyUnoccupied,
-            'todayDepartures' => $departingToday,
-            'roomsToBeFreed' => $departingToday->pluck('room'),
-            'roomsByStatus' => $roomsByStatus,
-        ]);
-
-    } catch (\Exception $e) {
-        \Log::error('Dashboard error: '.$e->getMessage());
-        return back()->with('error', 'Erreur: '.$e->getMessage());
     }
-}
 
     /**
      * Inventaire des chambres

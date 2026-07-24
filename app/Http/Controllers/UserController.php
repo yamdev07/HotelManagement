@@ -144,7 +144,7 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         // Vérification des permissions (Super ou Admin)
-        if (!in_array(Auth::user()->role, ['Super', 'Admin'])) {
+        if (! in_array(Auth::user()->role, ['Super', 'Admin'])) {
             abort(403, 'Seuls les Super Admins et Admins peuvent supprimer des utilisateurs.');
         }
 
@@ -157,12 +157,12 @@ class UserController extends Controller
         // Vérifier si l'utilisateur a des transactions actives
         if ($user->role === 'Customer') {
             $customer = Customer::where('user_id', $user->id)->first();
-            
+
             if ($customer) {
                 $activeTransactions = $customer->transactions()
                     ->whereIn('status', ['reservation', 'active'])
                     ->count();
-                
+
                 if ($activeTransactions > 0) {
                     return redirect()->route('user.index')
                         ->with('error', 'Ce client a des réservations actives. Impossible de supprimer.');
@@ -178,7 +178,7 @@ class UserController extends Controller
 
             return redirect()->route('user.index')
                 ->with('success', 'Utilisateur '.$user->name.' supprimé avec succès!');
-                
+
         } catch (\Exception $e) {
             return redirect()->route('user.index')
                 ->with('error', 'Impossible de supprimer '.$user->name.'. Erreur: '.$e->getMessage());
@@ -210,12 +210,12 @@ class UserController extends Controller
                 'password' => Hash::make($request->password),
             ]);
 
-            activity()->causedBy(auth()->user())->log('Mot de passe réinitialisé pour ' . $user->name);
+            activity()->causedBy(auth()->user())->log('Mot de passe réinitialisé pour '.$user->name);
 
             return redirect()->route('user.show', $user)->with('success', 'Mot de passe réinitialisé avec succès.');
 
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erreur lors de la réinitialisation : ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Erreur lors de la réinitialisation : '.$e->getMessage());
         }
     }
 
@@ -235,7 +235,7 @@ class UserController extends Controller
             return redirect()->back()->with('success', "Utilisateur {$label} avec succès.");
 
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erreur lors du changement de statut : ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Erreur lors du changement de statut : '.$e->getMessage());
         }
     }
 
@@ -247,9 +247,9 @@ class UserController extends Controller
             ->paginate(20);
 
         return view('activity.index', [
-            'activities'       => $activities,
-            'users'            => [$user],
-            'totalActivities'  => activity()->causedBy($user)->count(),
+            'activities' => $activities,
+            'users' => [$user],
+            'totalActivities' => activity()->causedBy($user)->count(),
         ]);
     }
 
@@ -279,6 +279,6 @@ class UserController extends Controller
 
         return response($data)
             ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="utilisateurs_' . date('Y-m-d') . '.csv"');
+            ->header('Content-Disposition', 'attachment; filename="utilisateurs_'.date('Y-m-d').'.csv"');
     }
 }

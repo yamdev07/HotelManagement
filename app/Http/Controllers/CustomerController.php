@@ -115,11 +115,11 @@ class CustomerController extends Controller
     public function apiSearch(Request $request)
     {
         $search = $request->get('search', '');
-        
+
         if (strlen($search) < 2) {
             return response()->json([]);
         }
-        
+
         $customers = Customer::with('user')
             ->where('name', 'LIKE', "%{$search}%")
             ->orWhere('phone', 'LIKE', "%{$search}%")
@@ -137,7 +137,7 @@ class CustomerController extends Controller
                     'reservation_count' => $customer->transactions()->count(),
                 ];
             });
-        
+
         return response()->json($customers);
     }
 }

@@ -19,9 +19,7 @@ class BillingController extends Controller
 
     private const SESSION_KEY = 'billing.pending';
 
-    public function __construct(private FedaPayService $fedapay)
-    {
-    }
+    public function __construct(private FedaPayService $fedapay) {}
 
     /** Page « Mon abonnement » : état courant + formules payables. */
     public function show(Request $request)
@@ -30,10 +28,10 @@ class BillingController extends Controller
         abort_unless($hotel, 403);
 
         return view('billing.show', [
-            'hotel'            => $hotel,
-            'tiers'            => config('plans.tiers'),
-            'months'           => self::MONTHS,
-            'configured'       => $this->fedapay->isConfigured(),
+            'hotel' => $hotel,
+            'tiers' => config('plans.tiers'),
+            'months' => self::MONTHS,
+            'configured' => $this->fedapay->isConfigured(),
             // Suspendu manuellement par l'admin (≠ simple expiration) : paiement bloqué.
             'suspendedByAdmin' => ! $hotel->is_active,
         ]);
@@ -46,23 +44,23 @@ class BillingController extends Controller
         abort_unless($hotel, 403);
 
         $data = $request->validate([
-            'plan'   => ['required', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
+            'plan' => ['required', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
             'months' => ['required', 'integer', 'in:'.implode(',', self::MONTHS)],
         ]);
 
         // Un compte suspendu par l'admin ne se réactive pas en payant.
         if (! $hotel->is_active) {
-            return back()->with('error', "Votre compte a été suspendu par la plateforme. Le paiement en ligne est indisponible · contactez-nous.");
+            return back()->with('error', 'Votre compte a été suspendu par la plateforme. Le paiement en ligne est indisponible · contactez-nous.');
         }
 
         if (! $this->fedapay->isConfigured()) {
             return back()->with('error', "Le paiement en ligne n'est pas encore configuré. Contactez la plateforme.");
         }
 
-        $months   = (int) $data['months'];
-        $plan     = $data['plan'];
-        $unit     = Hotel::priceFor($plan, $hotel->country);
-        $amount   = $unit * $months;
+        $months = (int) $data['months'];
+        $plan = $data['plan'];
+        $unit = Hotel::priceFor($plan, $hotel->country);
+        $amount = $unit * $months;
         $currency = $hotel->displayCurrency();
 
         $user = $request->user();
@@ -81,15 +79,15 @@ class BillingController extends Controller
         } catch (\Throwable $e) {
             Log::error('FedaPay checkout: '.$e->getMessage());
 
-            return back()->with('error', "Impossible de démarrer le paiement pour le moment. Réessayez plus tard.");
+            return back()->with('error', 'Impossible de démarrer le paiement pour le moment. Réessayez plus tard.');
         }
 
         $request->session()->put(self::SESSION_KEY, [
             'transaction_id' => $checkout['transaction_id'],
-            'plan'           => $plan,
-            'months'         => $months,
-            'amount'         => $amount,
-            'hotel_id'       => $hotel->id,
+            'plan' => $plan,
+            'months' => $months,
+            'amount' => $amount,
+            'hotel_id' => $hotel->id,
         ]);
 
         return redirect()->away($checkout['url']);
@@ -128,7 +126,7 @@ class BillingController extends Controller
             plan: $pending['plan'],
             extra: [
                 'currency' => $hotel->displayCurrency(),
-                'status'   => 'active',
+                'status' => 'active',
             ],
         );
 

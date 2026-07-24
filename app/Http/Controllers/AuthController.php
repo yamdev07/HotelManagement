@@ -24,19 +24,19 @@ class AuthController extends Controller
 
             // Super-Admin plateforme (sans hôtel) -> dashboard de gestion des hôtels
             if (auth()->user()->hotel_id === null && auth()->user()->role === 'Super') {
-                return redirect()->route('platform.hotels.index')->with('success', 'Bienvenue ' . auth()->user()->name);
+                return redirect()->route('platform.hotels.index')->with('success', 'Bienvenue '.auth()->user()->name);
             }
 
             // Redirection intelligente selon le rôle
             if (auth()->user()->role === 'Customer') {
-                return redirect()->route('transaction.myReservations')->with('success', 'Bienvenue ' . auth()->user()->name);
+                return redirect()->route('transaction.myReservations')->with('success', 'Bienvenue '.auth()->user()->name);
             }
 
             if (in_array(auth()->user()->role, ['Servant', 'Cuisiner'])) {
-                return redirect()->route('restaurant.orders')->with('success', 'Bienvenue ' . auth()->user()->name);
+                return redirect()->route('restaurant.orders')->with('success', 'Bienvenue '.auth()->user()->name);
             }
 
-            return redirect('/home')->with('success', 'Bienvenue ' . auth()->user()->name);
+            return redirect('/home')->with('success', 'Bienvenue '.auth()->user()->name);
         }
 
         return redirect('login')->with('failed', 'Identifiants incorrects. Vérifiez votre email et votre mot de passe.');

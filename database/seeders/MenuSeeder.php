@@ -197,7 +197,7 @@ class MenuSeeder extends Seeder
                 'image' => 'https://images.unsplash.com/photo-1511920170033-f8396924c348?auto=format&fit=crop&q=80&w=800',
                 'available_days' => ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'],
                 'is_available' => true,
-            ]
+            ],
         ];
 
         foreach ($menus as $menuData) {

@@ -12,6 +12,7 @@ class PaymentException extends HotelException
     public static function amountExceedsBalance(float $remaining): self
     {
         $formatted = number_format($remaining, 0, ',', ' ');
+
         return new self("Le montant dépasse le solde restant de {$formatted} CFA.");
     }
 
@@ -29,6 +30,7 @@ class PaymentException extends HotelException
     {
         $req = number_format($required, 0, ',', ' ');
         $avail = number_format($available, 0, ',', ' ');
+
         return new self("Solde insuffisant. Requis : {$req} CFA, disponible : {$avail} CFA.");
     }
 

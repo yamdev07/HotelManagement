@@ -42,25 +42,25 @@ class CheckReceptionistRestriction
     public function handle(Request $request, Closure $next)
     {
         $user = Auth::user();
-        
+
         // Si pas d'utilisateur ou pas réceptionniste, laisser passer
         if (! $user || $user->role !== 'Receptionist') {
             return $next($request);
         }
-        
+
         $routeName = $request->route()->getName();
         $method = $request->method();
-        
+
         // Si pas de nom de route, laisser passer
         if (! $routeName) {
             return $next($request);
         }
-        
+
         // Vérifier si c'est une route restreinte
         if (in_array($routeName, $this->restrictedRoutes)) {
             return $this->handleUnauthorized($request, $routeName);
         }
-        
+
         // Journaliser l'accès en mode debug
         if (config('app.debug') && in_array($routeName, $this->requiresAuthorization)) {
             Log::channel('receptionist')->info('Receptionist accessed route that may require authorization', [
@@ -69,7 +69,7 @@ class CheckReceptionistRestriction
                 'method' => $method,
             ]);
         }
-        
+
         // Laisser passer pour toutes les autres routes
         // Les restrictions spécifiques seront gérées dans les contrôleurs
         return $next($request);
@@ -81,7 +81,7 @@ class CheckReceptionistRestriction
     protected function handleUnauthorized(Request $request, $routeName)
     {
         $user = Auth::user();
-        
+
         // Journaliser la tentative d'accès non autorisé
         Log::warning('Réceptionniste a tenté une action restreinte', [
             'user_id' => $user->id,
@@ -90,7 +90,7 @@ class CheckReceptionistRestriction
             'method' => $request->method(),
             'ip' => $request->ip(),
         ]);
-        
+
         // Si c'est une requête AJAX/API
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
@@ -99,7 +99,7 @@ class CheckReceptionistRestriction
                 'requires_authorization' => in_array($routeName, $this->requiresAuthorization),
             ], 403);
         }
-        
+
         // Message d'erreur selon le type d'action
         $messages = [
             'transaction.cancel' => '❌ L\'annulation des réservations est réservée aux administrateurs.',
@@ -110,13 +110,13 @@ class CheckReceptionistRestriction
             'housekeeping.assign-cleaner' => '❌ L\'assignation du personnel de ménage est réservée aux administrateurs.',
             'housekeeping.start-cleaning' => '❌ Le démarrage du nettoyage est réservé au personnel housekeeping.',
         ];
-        
+
         $message = $messages[$routeName] ?? '❌ Action non autorisée pour le personnel de réception.';
-        
+
         if (in_array($routeName, $this->requiresAuthorization)) {
             $message .= ' Cette action nécessite une autorisation spéciale.';
         }
-        
+
         return redirect()->back()
             ->with('error', $message)
             ->with('unauthorized_access', true);
@@ -129,6 +129,7 @@ class CheckReceptionistRestriction
     public static function requiresAuthorization($routeName)
     {
         $instance = new self;
+
         return in_array($routeName, $instance->requiresAuthorization);
     }
 
@@ -139,13 +140,14 @@ class CheckReceptionistRestriction
     public static function canAccess($routeName)
     {
         $user = Auth::user();
-        
+
         // Si pas d'utilisateur ou pas réceptionniste, autoriser
         if (! $user || $user->role !== 'Receptionist') {
             return true;
         }
-        
+
         $instance = new self;
-        return !in_array($routeName, $instance->restrictedRoutes);
+
+        return ! in_array($routeName, $instance->restrictedRoutes);
     }
 }

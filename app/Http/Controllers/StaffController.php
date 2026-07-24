@@ -25,10 +25,10 @@ class StaffController extends Controller
     /** Rôles qu'un hôtelier peut attribuer (jamais Admin ni Super). */
     public const ROLES = [
         'Receptionist' => 'staff.role_receptionist',
-        'Cashier'      => 'staff.role_cashier',
+        'Cashier' => 'staff.role_cashier',
         'Housekeeping' => 'staff.role_housekeeping',
-        'Servant'      => 'staff.role_servant',
-        'Cuisiner'     => 'staff.role_cuisinier',
+        'Servant' => 'staff.role_servant',
+        'Cuisiner' => 'staff.role_cuisinier',
     ];
 
     public function __construct()
@@ -68,22 +68,22 @@ class StaffController extends Controller
         abort_if($hotelId === null, 403, __('staff.alert_error_no_hotel'));
 
         $data = $request->validate([
-            'name'     => ['required', 'string', 'max:255', new SafeName],
-            'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone'    => ['nullable', 'string', 'max:30'],
-            'role'     => ['required', Rule::in(array_keys(self::ROLES))],
+            'name' => ['required', 'string', 'max:255', new SafeName],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'role' => ['required', Rule::in(array_keys(self::ROLES))],
             'password' => ['required', new StrongPassword],
         ], [], [
             'name' => __('staff.validation_name'), 'email' => __('staff.validation_email'), 'role' => __('staff.validation_role'), 'password' => __('staff.validation_password'),
         ]);
 
         User::create([
-            'hotel_id'   => $hotelId,
-            'name'       => $data['name'],
-            'email'      => $data['email'],
-            'phone'      => $data['phone'] ?? null,
-            'role'       => $data['role'],
-            'password'   => Hash::make($data['password']),
+            'hotel_id' => $hotelId,
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'role' => $data['role'],
+            'password' => Hash::make($data['password']),
             'random_key' => Str::random(60),
         ]);
 

@@ -22,8 +22,8 @@ class ActivityLogIsolationTest extends TestCase
     private function hotel(string $name): Hotel
     {
         return Hotel::create([
-            'name'      => $name,
-            'slug'      => Str::slug($name.' '.Str::random(4)),
+            'name' => $name,
+            'slug' => Str::slug($name.' '.Str::random(4)),
             'is_active' => true,
         ]);
     }
@@ -32,8 +32,8 @@ class ActivityLogIsolationTest extends TestCase
     {
         $hotelA = $this->hotel('Hotel A');
         $hotelB = $this->hotel('Hotel B');
-        $userA  = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotelA->id]);
-        $userB  = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotelB->id]);
+        $userA = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotelA->id]);
+        $userB = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotelB->id]);
 
         $tm = app(TenantManager::class);
 

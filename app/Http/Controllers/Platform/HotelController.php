@@ -35,13 +35,13 @@ class HotelController extends Controller
         $active = $hotels->filter->hasActiveAccess();
 
         $summary = [
-            'total'      => $hotels->count(),
-            'active'     => $active->count(),
-            'expired'    => $hotels->count() - $active->count(),
+            'total' => $hotels->count(),
+            'active' => $active->count(),
+            'expired' => $hotels->count() - $active->count(),
             'this_month' => Hotel::whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count(),
-            'revenue'    => (float) \App\Models\Subscription::sum('amount'),
-            'renewals'   => (int) \App\Models\Subscription::where('is_renewal', true)->count(),
-            'mrr'        => (float) $active->sum(fn (Hotel $h) => $h->monthlyPrice()),
+            'revenue' => (float) \App\Models\Subscription::sum('amount'),
+            'renewals' => (int) \App\Models\Subscription::where('is_renewal', true)->count(),
+            'mrr' => (float) $active->sum(fn (Hotel $h) => $h->monthlyPrice()),
         ];
 
         // Inscriptions des 6 derniers mois (pour le graphe)
@@ -75,13 +75,13 @@ class HotelController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'           => ['required', 'string', 'max:255'],
-            'currency'       => ['nullable', 'string', 'max:10'],
-            'contact_email'  => ['nullable', 'email', 'max:255'],
-            'contact_phone'  => ['nullable', 'string', 'max:50'],
+            'name' => ['required', 'string', 'max:255'],
+            'currency' => ['nullable', 'string', 'max:10'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:50'],
             'subscription_ends_at' => ['nullable', 'date'],
-            'admin_name'     => ['required', 'string', 'max:255'],
-            'admin_email'    => ['required', 'email', 'max:255', 'unique:users,email'],
+            'admin_name' => ['required', 'string', 'max:255'],
+            'admin_email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'admin_password' => ['nullable', 'string', 'min:6'],
         ]);
 
@@ -92,21 +92,21 @@ class HotelController extends Controller
 
         [$hotel, $admin] = DB::transaction(function () use ($data, $plainPassword) {
             $hotel = Hotel::create([
-                'name'                 => $data['name'],
-                'slug'                 => $this->uniqueSlug($data['name']),
-                'currency'             => $data['currency'] ?? 'CFA',
-                'contact_email'        => $data['contact_email'] ?? $data['admin_email'],
-                'contact_phone'        => $data['contact_phone'] ?? null,
+                'name' => $data['name'],
+                'slug' => $this->uniqueSlug($data['name']),
+                'currency' => $data['currency'] ?? 'CFA',
+                'contact_email' => $data['contact_email'] ?? $data['admin_email'],
+                'contact_phone' => $data['contact_phone'] ?? null,
                 'subscription_ends_at' => $data['subscription_ends_at'] ?? null,
-                'is_active'            => true,
+                'is_active' => true,
             ]);
 
             $admin = User::create([
-                'hotel_id'   => $hotel->id,
-                'name'       => $data['admin_name'],
-                'email'      => $data['admin_email'],
-                'role'       => 'Admin',
-                'password'   => Hash::make($plainPassword),
+                'hotel_id' => $hotel->id,
+                'name' => $data['admin_name'],
+                'email' => $data['admin_email'],
+                'role' => 'Admin',
+                'password' => Hash::make($plainPassword),
                 'random_key' => Str::random(60),
             ]);
 
@@ -114,10 +114,10 @@ class HotelController extends Controller
 
             // Historique : abonnement initial
             $hotel->recordSubscription([
-                'status'    => $hotel->subscription_ends_at ? 'active' : 'trial',
-                'amount'    => $hotel->subscription_ends_at ? $hotel->monthlyPrice() : 0,
+                'status' => $hotel->subscription_ends_at ? 'active' : 'trial',
+                'amount' => $hotel->subscription_ends_at ? $hotel->monthlyPrice() : 0,
                 'starts_at' => now(),
-                'ends_at'   => $hotel->subscription_ends_at,
+                'ends_at' => $hotel->subscription_ends_at,
             ]);
 
             return [$hotel, $admin];
@@ -142,10 +142,10 @@ class HotelController extends Controller
     public function update(Request $request, Hotel $hotel)
     {
         $data = $request->validate([
-            'name'                 => ['required', 'string', 'max:255'],
-            'currency'             => ['nullable', 'string', 'max:10'],
-            'contact_email'        => ['nullable', 'email', 'max:255'],
-            'contact_phone'        => ['nullable', 'string', 'max:50'],
+            'name' => ['required', 'string', 'max:255'],
+            'currency' => ['nullable', 'string', 'max:10'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:50'],
             'subscription_ends_at' => ['nullable', 'date'],
         ]);
 
@@ -160,7 +160,7 @@ class HotelController extends Controller
         $nowActive = ! $hotel->is_active;
 
         $hotel->update([
-            'is_active'         => $nowActive,
+            'is_active' => $nowActive,
             // On mémorise la raison à la suspension, on l'efface à la réactivation
             'suspension_reason' => $nowActive ? null : ($request->input('reason') ?: 'Suspension par l\'administrateur de la plateforme'),
         ]);
@@ -188,11 +188,11 @@ class HotelController extends Controller
         $hotel->update(['subscription_ends_at' => $newEnd, 'is_active' => true]);
 
         $hotel->recordSubscription([
-            'status'     => 'active',
+            'status' => 'active',
             'is_renewal' => true,
-            'amount'     => $hotel->monthlyPrice() * $months,
-            'starts_at'  => $start,
-            'ends_at'    => $newEnd,
+            'amount' => $hotel->monthlyPrice() * $months,
+            'starts_at' => $start,
+            'ends_at' => $newEnd,
         ]);
 
         return redirect()->route('platform.hotels.show', $hotel)

@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 
 class SetLocale
 {

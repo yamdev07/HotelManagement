@@ -26,12 +26,12 @@ class StaffCreatedNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => 'Compte créé : ' . $this->staff->name . ' (' . $this->staff->role . ')',
-            'url'     => route('staff.index'),
-            'type'    => 'staff_created',
-            'staff_name'  => $this->staff->name,
+            'message' => 'Compte créé : '.$this->staff->name.' ('.$this->staff->role.')',
+            'url' => route('staff.index'),
+            'type' => 'staff_created',
+            'staff_name' => $this->staff->name,
             'staff_email' => $this->staff->email,
-            'staff_role'  => $this->staff->role,
+            'staff_role' => $this->staff->role,
         ];
     }
 }

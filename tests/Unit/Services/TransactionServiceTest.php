@@ -7,7 +7,6 @@ use App\Exceptions\TransactionException;
 use App\Models\Transaction;
 use App\Repositories\Interfaces\TransactionRepositoryInterface;
 use App\Services\TransactionService;
-use Carbon\Carbon;
 use Mockery;
 use Mockery\MockInterface;
 use PHPUnit\Framework\TestCase;
@@ -20,7 +19,7 @@ class TransactionServiceTest extends TestCase
     {
         parent::setUp();
 
-        $repo          = Mockery::mock(TransactionRepositoryInterface::class);
+        $repo = Mockery::mock(TransactionRepositoryInterface::class);
         $this->service = new TransactionService($repo);
     }
 

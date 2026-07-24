@@ -19,11 +19,11 @@ class RoomNumberUniquenessTest extends TestCase
     private function hotel(): Hotel
     {
         return Hotel::create([
-            'name'                    => 'Hotel '.Str::random(5),
-            'slug'                    => Str::slug('Hotel '.Str::random(6)),
-            'is_active'               => true,
+            'name' => 'Hotel '.Str::random(5),
+            'slug' => Str::slug('Hotel '.Str::random(6)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
     }
 
@@ -34,15 +34,15 @@ class RoomNumberUniquenessTest extends TestCase
         $statusId = DB::table('room_statuses')->value('id');
 
         DB::table('rooms')->insert([
-            'type_id'        => $type->id,
+            'type_id' => $type->id,
             'room_status_id' => $statusId,
-            'number'         => $number,
-            'capacity'       => 2,
-            'price'          => 100,
-            'view'           => '',
-            'hotel_id'       => $hotelId,
-            'created_at'     => now(),
-            'updated_at'     => now(),
+            'number' => $number,
+            'capacity' => 2,
+            'price' => 100,
+            'view' => '',
+            'hotel_id' => $hotelId,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 

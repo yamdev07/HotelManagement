@@ -79,7 +79,7 @@ class UserRoleTest extends TestCase
         $this->assertNotContains('Customer', $values);
     }
 
-    public function test_tryFrom_returns_null_for_unknown_value(): void
+    public function test_try_from_returns_null_for_unknown_value(): void
     {
         $this->assertNull(UserRole::tryFrom('Ghost'));
     }

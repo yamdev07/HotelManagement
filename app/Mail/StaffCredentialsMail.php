@@ -24,16 +24,16 @@ class StaffCredentialsMail extends Mailable
     {
         $hotel = $this->staff->hotel;
 
-        return $this->subject('Vos accès · ' . ($hotel->name ?? config('app.name')))
+        return $this->subject('Vos accès · '.($hotel->name ?? config('app.name')))
             ->view('emails.staff-credentials')
             ->text('emails.staff-credentials-text')
             ->with([
                 'staffName' => $this->staff->name,
-                'email'     => $this->staff->email,
-                'password'  => $this->plainPassword,
-                'role'      => $this->staff->role,
+                'email' => $this->staff->email,
+                'password' => $this->plainPassword,
+                'role' => $this->staff->role,
                 'hotelName' => $hotel->name ?? 'Hôtel',
-                'loginUrl'  => route('login.index'),
+                'loginUrl' => route('login.index'),
             ]);
     }
 }

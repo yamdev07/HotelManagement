@@ -16,9 +16,9 @@ class HotelBrandingTest extends TestCase
     private function hotelWithAdmin(): array
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Cactus',
-            'slug'                    => 'hotel-cactus',
-            'is_active'               => true,
+            'name' => 'Hotel Cactus',
+            'slug' => 'hotel-cactus',
+            'is_active' => true,
             'onboarding_completed_at' => now(),
         ]);
 
@@ -42,10 +42,10 @@ class HotelBrandingTest extends TestCase
         [$hotel, $admin] = $this->hotelWithAdmin();
 
         $response = $this->actingAs($admin)->put('/mon-etablissement', [
-            'name'            => 'Hotel Cactus Premium',
-            'primary_color'   => '#ff8800',
+            'name' => 'Hotel Cactus Premium',
+            'primary_color' => '#ff8800',
             'secondary_color' => '#222222',
-            'contact_email'   => 'contact@cactus.test',
+            'contact_email' => 'contact@cactus.test',
         ]);
 
         $response->assertRedirectToRoute('hotel.settings.edit');
@@ -76,7 +76,7 @@ class HotelBrandingTest extends TestCase
         [$hotel, $admin] = $this->hotelWithAdmin();
 
         $response = $this->actingAs($admin)->put('/mon-etablissement', [
-            'name'          => $hotel->name,
+            'name' => $hotel->name,
             'primary_color' => 'not-a-color',
         ]);
 

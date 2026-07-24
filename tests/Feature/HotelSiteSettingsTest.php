@@ -15,9 +15,9 @@ class HotelSiteSettingsTest extends TestCase
     private function makeHotel(array $attrs = []): Hotel
     {
         return Hotel::create(array_merge([
-            'name'                    => 'Hotel Test',
-            'slug'                    => Str::slug('Hotel Test '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Test',
+            'slug' => Str::slug('Hotel Test '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
         ], $attrs));
     }
@@ -25,11 +25,11 @@ class HotelSiteSettingsTest extends TestCase
     public function test_disabled_section_pages_return_404_and_enabled_ones_work(): void
     {
         $hotel = $this->makeHotel([
-            'slug'            => 'hotel-toggle',
-            'show_rooms'      => false,
+            'slug' => 'hotel-toggle',
+            'show_rooms' => false,
             'show_restaurant' => false,
-            'show_services'   => true,
-            'show_contact'    => false,
+            'show_services' => true,
+            'show_contact' => false,
         ]);
 
         // L'accueil reste accessible
@@ -50,12 +50,12 @@ class HotelSiteSettingsTest extends TestCase
         $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
         $this->actingAs($admin)->put('/mon-etablissement', [
-            'name'     => $hotel->name,
+            'name' => $hotel->name,
             'services' => [
                 ['icon' => 'fa-spa', 'title' => 'Spa & Massage', 'description' => 'Détente absolue'],
                 ['icon' => 'fa-water', 'title' => '', 'description' => 'ligne vide ignorée'],
             ],
-            'socials'  => ['facebook' => 'https://facebook.com/monhotel', 'instagram' => ''],
+            'socials' => ['facebook' => 'https://facebook.com/monhotel', 'instagram' => ''],
             'about_title' => 'Notre maison',
         ])->assertRedirectToRoute('hotel.settings.edit');
 
@@ -73,13 +73,13 @@ class HotelSiteSettingsTest extends TestCase
         $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
         $response = $this->actingAs($admin)->put('/mon-etablissement', [
-            'name'            => $hotel->name,
-            'tagline'         => 'Le meilleur accueil',
-            'description'     => 'Un établissement chaleureux au cœur de la ville.',
-            'show_rooms'      => '1',
+            'name' => $hotel->name,
+            'tagline' => 'Le meilleur accueil',
+            'description' => 'Un établissement chaleureux au cœur de la ville.',
+            'show_rooms' => '1',
             'show_restaurant' => '0',
-            'show_services'   => '1',
-            'show_contact'    => '0',
+            'show_services' => '1',
+            'show_contact' => '0',
         ]);
 
         $response->assertRedirectToRoute('hotel.settings.edit');

@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up()
     {
-        if (!Schema::hasColumn('transactions', 'late_checkout')) {
+        if (! Schema::hasColumn('transactions', 'late_checkout')) {
             Schema::table('transactions', function (Blueprint $table) {
                 $table->boolean('late_checkout')->default(false)->after('check_out');
             });

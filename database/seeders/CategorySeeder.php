@@ -16,7 +16,7 @@ class CategorySeeder extends Seeder
             'Dessert',
             'Boisson',
             'Surgelé',
-            'Divers'
+            'Divers',
         ];
         // Note: slugs will be 'plat', 'entree', etc.
 

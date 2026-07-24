@@ -26,10 +26,10 @@ class HotelRegistrationTest extends TestCase
 
         $response = $this->post('/inscription', [
             'company_name' => 'Nouvel Hotel',
-            'plan'         => 'pro',
+            'plan' => 'pro',
             'contact_phone' => '+229 00 00 00 00',
-            'admin_name'   => 'Patron',
-            'admin_email'  => 'patron@nouvel.test',
+            'admin_name' => 'Patron',
+            'admin_email' => 'patron@nouvel.test',
         ]);
 
         $response->assertRedirectToRoute('onboarding.show');
@@ -59,9 +59,9 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel Spam',
-            'plan'         => 'starter',
-            'admin_name'   => 'X',
-            'admin_email'  => 'spam@notice.test',
+            'plan' => 'starter',
+            'admin_name' => 'X',
+            'admin_email' => 'spam@notice.test',
         ])->assertSessionHas('credentials_email', 'spam@notice.test');
 
         // Le bandeau "vérifiez vos spams" s'affiche sur l'onboarding
@@ -77,8 +77,8 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel 🏨 Cactus 😀',
-            'admin_name'   => 'X',
-            'admin_email'  => 'emoji@test.test',
+            'admin_name' => 'X',
+            'admin_email' => 'emoji@test.test',
         ])->assertSessionHasErrors('company_name');
 
         $this->assertDatabaseMissing('hotels', ['name' => 'Hotel 🏨 Cactus 😀']);
@@ -90,8 +90,8 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => "Résidence l'Océan & Fils (2024)",
-            'admin_name'   => 'André Éboué',
-            'admin_email'  => 'accent@test.test',
+            'admin_name' => 'André Éboué',
+            'admin_email' => 'accent@test.test',
         ]);
 
         $this->assertDatabaseHas('hotels', ['name' => "Résidence l'Océan & Fils (2024)"]);
@@ -103,10 +103,10 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel Abidjan',
-            'plan'         => 'pro',
-            'country'      => 'CI',
-            'admin_name'   => 'X',
-            'admin_email'  => 'x@ci.test',
+            'plan' => 'pro',
+            'country' => 'CI',
+            'admin_name' => 'X',
+            'admin_email' => 'x@ci.test',
         ]);
 
         $hotel = \App\Models\Hotel::where('name', 'Hotel Abidjan')->first();
@@ -124,8 +124,8 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel Defaut',
-            'admin_name'   => 'X',
-            'admin_email'  => 'x@defaut.test',
+            'admin_name' => 'X',
+            'admin_email' => 'x@defaut.test',
         ]);
 
         $hotel = Hotel::where('name', 'Hotel Defaut')->first();
@@ -140,10 +140,10 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel Logo',
-            'plan'         => 'starter',
-            'admin_name'   => 'Boss',
-            'admin_email'  => 'boss@logo.test',
-            'logo'         => UploadedFile::fake()->image('logo.png'),
+            'plan' => 'starter',
+            'admin_name' => 'Boss',
+            'admin_email' => 'boss@logo.test',
+            'logo' => UploadedFile::fake()->image('logo.png'),
         ]);
 
         $hotel = Hotel::where('name', 'Hotel Logo')->first();
@@ -159,9 +159,9 @@ class HotelRegistrationTest extends TestCase
         // ~3 Mo : refusé avant (limite 2 Mo), accepté maintenant (4 Mo)
         $this->post('/inscription', [
             'company_name' => 'Hotel Gros Logo',
-            'admin_name'   => 'Boss',
-            'admin_email'  => 'boss@gros.test',
-            'logo'         => UploadedFile::fake()->image('logo.png')->size(3000),
+            'admin_name' => 'Boss',
+            'admin_email' => 'boss@gros.test',
+            'logo' => UploadedFile::fake()->image('logo.png')->size(3000),
         ])->assertSessionDoesntHaveErrors('logo');
 
         $this->assertNotNull(Hotel::where('name', 'Hotel Gros Logo')->first()?->logo);
@@ -175,9 +175,9 @@ class HotelRegistrationTest extends TestCase
         // SVG : refusé avant par la règle 'image' (getimagesize), accepté maintenant
         $this->post('/inscription', [
             'company_name' => 'Hotel SVG',
-            'admin_name'   => 'Boss',
-            'admin_email'  => 'boss@svg.test',
-            'logo'         => UploadedFile::fake()->create('logo.svg', 40, 'image/svg+xml'),
+            'admin_name' => 'Boss',
+            'admin_email' => 'boss@svg.test',
+            'logo' => UploadedFile::fake()->create('logo.svg', 40, 'image/svg+xml'),
         ])->assertSessionDoesntHaveErrors('logo');
 
         $this->assertNotNull(Hotel::where('name', 'Hotel SVG')->first());
@@ -190,9 +190,9 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel Bad Logo',
-            'admin_name'   => 'X',
-            'admin_email'  => 'bad@logo.test',
-            'logo'         => UploadedFile::fake()->create('doc.pdf', 20, 'application/pdf'),
+            'admin_name' => 'X',
+            'admin_email' => 'bad@logo.test',
+            'logo' => UploadedFile::fake()->create('doc.pdf', 20, 'application/pdf'),
         ])->assertSessionHasErrors('logo');
 
         $this->assertDatabaseMissing('hotels', ['name' => 'Hotel Bad Logo']);
@@ -205,8 +205,8 @@ class HotelRegistrationTest extends TestCase
 
         $response = $this->post('/inscription', [
             'company_name' => 'Hotel Dup',
-            'admin_name'   => 'X',
-            'admin_email'  => 'taken@test.test',
+            'admin_name' => 'X',
+            'admin_email' => 'taken@test.test',
         ]);
 
         $response->assertRedirectToRoute('onboarding.show');

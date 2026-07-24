@@ -30,7 +30,9 @@ class PublicSiteController extends Controller
     public function show(string $slug)
     {
         $hotel = $this->resolve($slug);
-        if (! $hotel instanceof Hotel) return $hotel;
+        if (! $hotel instanceof Hotel) {
+            return $hotel;
+        }
 
         $rooms = Room::with(['type', 'images'])
             ->where('room_status_id', Room::STATUS_AVAILABLE)
@@ -42,7 +44,9 @@ class PublicSiteController extends Controller
     public function rooms(string $slug)
     {
         $hotel = $this->resolve($slug);
-        if (! $hotel instanceof Hotel) return $hotel;
+        if (! $hotel instanceof Hotel) {
+            return $hotel;
+        }
         abort_unless($hotel->show_rooms, 404);
 
         $rooms = Room::with(['type', 'images'])
@@ -55,7 +59,9 @@ class PublicSiteController extends Controller
     public function restaurant(string $slug)
     {
         $hotel = $this->resolve($slug);
-        if (! $hotel instanceof Hotel) return $hotel;
+        if (! $hotel instanceof Hotel) {
+            return $hotel;
+        }
         abort_unless($hotel->show_restaurant, 404);
 
         $menus = Menu::limit(12)->get();
@@ -66,7 +72,9 @@ class PublicSiteController extends Controller
     public function services(string $slug)
     {
         $hotel = $this->resolve($slug);
-        if (! $hotel instanceof Hotel) return $hotel;
+        if (! $hotel instanceof Hotel) {
+            return $hotel;
+        }
         abort_unless($hotel->show_services, 404);
 
         return view('public.pages.services', compact('hotel'));
@@ -75,7 +83,9 @@ class PublicSiteController extends Controller
     public function contact(string $slug)
     {
         $hotel = $this->resolve($slug);
-        if (! $hotel instanceof Hotel) return $hotel;
+        if (! $hotel instanceof Hotel) {
+            return $hotel;
+        }
         abort_unless($hotel->show_contact, 404);
 
         return view('public.pages.contact', compact('hotel'));

@@ -82,35 +82,73 @@ return new class extends Migration
                 $table->string('reference')->nullable()->change();
             }
 
-            if (! Schema::hasColumn('payments', 'check_number')) $table->string('check_number')->nullable();
-            if (! Schema::hasColumn('payments', 'card_last_four')) $table->string('card_last_four', 4)->nullable();
-            if (! Schema::hasColumn('payments', 'card_type')) $table->string('card_type', 20)->nullable();
-            if (! Schema::hasColumn('payments', 'mobile_money_provider')) $table->string('mobile_money_provider', 50)->nullable();
-            if (! Schema::hasColumn('payments', 'mobile_money_number')) $table->string('mobile_money_number', 20)->nullable();
-            if (! Schema::hasColumn('payments', 'bank_name')) $table->string('bank_name', 100)->nullable();
-            if (! Schema::hasColumn('payments', 'account_number')) $table->string('account_number', 50)->nullable();
+            if (! Schema::hasColumn('payments', 'check_number')) {
+                $table->string('check_number')->nullable();
+            }
+            if (! Schema::hasColumn('payments', 'card_last_four')) {
+                $table->string('card_last_four', 4)->nullable();
+            }
+            if (! Schema::hasColumn('payments', 'card_type')) {
+                $table->string('card_type', 20)->nullable();
+            }
+            if (! Schema::hasColumn('payments', 'mobile_money_provider')) {
+                $table->string('mobile_money_provider', 50)->nullable();
+            }
+            if (! Schema::hasColumn('payments', 'mobile_money_number')) {
+                $table->string('mobile_money_number', 20)->nullable();
+            }
+            if (! Schema::hasColumn('payments', 'bank_name')) {
+                $table->string('bank_name', 100)->nullable();
+            }
+            if (! Schema::hasColumn('payments', 'account_number')) {
+                $table->string('account_number', 50)->nullable();
+            }
 
-            if (! Schema::hasColumn('payments', 'notes')) $table->text('notes')->nullable();
+            if (! Schema::hasColumn('payments', 'notes')) {
+                $table->text('notes')->nullable();
+            }
 
-            if (! Schema::hasColumn('payments', 'cancelled_at')) $table->timestamp('cancelled_at')->nullable();
-            if (! Schema::hasColumn('payments', 'cancelled_by')) $table->foreignId('cancelled_by')->nullable()->constrained('users');
-            if (! Schema::hasColumn('payments', 'cancel_reason')) $table->text('cancel_reason')->nullable();
+            if (! Schema::hasColumn('payments', 'cancelled_at')) {
+                $table->timestamp('cancelled_at')->nullable();
+            }
+            if (! Schema::hasColumn('payments', 'cancelled_by')) {
+                $table->foreignId('cancelled_by')->nullable()->constrained('users');
+            }
+            if (! Schema::hasColumn('payments', 'cancel_reason')) {
+                $table->text('cancel_reason')->nullable();
+            }
 
-            if (! Schema::hasColumn('payments', 'deleted_at')) $table->softDeletes();
+            if (! Schema::hasColumn('payments', 'deleted_at')) {
+                $table->softDeletes();
+            }
         });
 
         // Indexes (attempt add; ignore if already exists)
         Schema::table('payments', function (Blueprint $table) {
-            try { $table->index('reference'); } catch (\Throwable $e) {}
-            try { $table->index('payment_method'); } catch (\Throwable $e) {}
-            try { $table->index('status'); } catch (\Throwable $e) {}
-            try { $table->index(['transaction_id', 'status']); } catch (\Throwable $e) {}
+            try {
+                $table->index('reference');
+            } catch (\Throwable $e) {
+            }
+            try {
+                $table->index('payment_method');
+            } catch (\Throwable $e) {
+            }
+            try {
+                $table->index('status');
+            } catch (\Throwable $e) {
+            }
+            try {
+                $table->index(['transaction_id', 'status']);
+            } catch (\Throwable $e) {
+            }
         });
     }
 
     public function down(): void
     {
-        if (! Schema::hasTable('payments')) return;
+        if (! Schema::hasTable('payments')) {
+            return;
+        }
 
         Schema::table('payments', function (Blueprint $table) {
             foreach ([
@@ -119,7 +157,10 @@ return new class extends Migration
                 'notes', 'cancelled_at', 'cancelled_by', 'cancel_reason', 'deleted_at',
             ] as $col) {
                 if (Schema::hasColumn('payments', $col)) {
-                    try { $table->dropColumn($col); } catch (\Throwable $e) {}
+                    try {
+                        $table->dropColumn($col);
+                    } catch (\Throwable $e) {
+                    }
                 }
             }
         });

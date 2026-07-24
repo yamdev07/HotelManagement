@@ -24,10 +24,10 @@ class Subscription extends Model
     ];
 
     protected $casts = [
-        'amount'     => 'decimal:2',
+        'amount' => 'decimal:2',
         'is_renewal' => 'boolean',
-        'starts_at'  => 'datetime',
-        'ends_at'    => 'datetime',
+        'starts_at' => 'datetime',
+        'ends_at' => 'datetime',
     ];
 
     public function hotel(): BelongsTo

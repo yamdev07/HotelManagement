@@ -31,13 +31,13 @@ class CheckInService
 
         return DB::transaction(function () use ($transaction, $data) {
             $updateData = [
-                'status'           => TransactionStatus::Active->value,
-                'actual_check_in'  => now(),
+                'status' => TransactionStatus::Active->value,
+                'actual_check_in' => now(),
                 'special_requests' => $data['special_requests'] ?? $transaction->special_requests,
-                'id_type'          => $data['id_type'] ?? $transaction->id_type,
-                'id_number'        => $data['id_number'] ?? $transaction->id_number,
-                'nationality'      => $data['nationality'] ?? $transaction->nationality,
-                'person_count'     => $data['person_count'] ?? $transaction->person_count ?? 1,
+                'id_type' => $data['id_type'] ?? $transaction->id_type,
+                'id_number' => $data['id_number'] ?? $transaction->id_number,
+                'nationality' => $data['nationality'] ?? $transaction->nationality,
+                'person_count' => $data['person_count'] ?? $transaction->person_count ?? 1,
             ];
 
             if (! empty($data['new_room_id']) && (int) $data['new_room_id'] !== $transaction->room_id) {
@@ -56,13 +56,13 @@ class CheckInService
                 ->performedOn($transaction)
                 ->withProperties([
                     'check_in_time' => now()->toDateTimeString(),
-                    'room'          => optional($transaction->room)->number,
-                    'person_count'  => $transaction->person_count,
+                    'room' => optional($transaction->room)->number,
+                    'person_count' => $transaction->person_count,
                 ])
                 ->log('a effectué le check-in');
 
             Log::info("Check-in transaction #{$transaction->id}", [
-                'by'   => Auth::id(),
+                'by' => Auth::id(),
                 'room' => optional($transaction->room)->number,
             ]);
 
@@ -92,7 +92,7 @@ class CheckInService
 
         return DB::transaction(function () use ($transaction) {
             $transaction->update([
-                'status'           => TransactionStatus::Completed->value,
+                'status' => TransactionStatus::Completed->value,
                 'actual_check_out' => now(),
             ]);
 
@@ -108,12 +108,12 @@ class CheckInService
                 ->performedOn($transaction)
                 ->withProperties([
                     'check_out_time' => now()->toDateTimeString(),
-                    'total_paid'     => $transaction->getTotalPayment(),
+                    'total_paid' => $transaction->getTotalPayment(),
                 ])
                 ->log('a effectué le check-out');
 
             Log::info("Check-out transaction #{$transaction->id}", [
-                'by'   => Auth::id(),
+                'by' => Auth::id(),
                 'room' => optional($transaction->room)->number,
             ]);
 
@@ -127,7 +127,7 @@ class CheckInService
 
     private function assertCheckInTime(Transaction $transaction): void
     {
-        $now        = Carbon::now();
+        $now = Carbon::now();
         $checkInDay = Carbon::parse($transaction->check_in)->startOfDay();
 
         if (! $now->isSameDay($checkInDay)) {
@@ -137,8 +137,8 @@ class CheckInService
         $checkInTime = $checkInDay->copy()->setTime(12, 0);
 
         if ($now->lt($checkInTime)) {
-            $diff    = (int) $now->diffInMinutes($checkInTime, false);
-            $hours   = (int) floor($diff / 60);
+            $diff = (int) $now->diffInMinutes($checkInTime, false);
+            $hours = (int) floor($diff / 60);
             $minutes = (int) ($diff % 60);
             throw ReservationException::tooEarlyForCheckIn($hours, $minutes);
         }
@@ -146,7 +146,7 @@ class CheckInService
 
     private function assertCheckOutTime(Transaction $transaction): void
     {
-        $now         = Carbon::now();
+        $now = Carbon::now();
         $checkOutDay = Carbon::parse($transaction->check_out)->startOfDay();
 
         if (! $now->isSameDay($checkOutDay)) {
@@ -154,7 +154,7 @@ class CheckInService
         }
 
         $deadline = $checkOutDay->copy()->setTime(12, 0);
-        $largess  = $checkOutDay->copy()->setTime(14, 0);
+        $largess = $checkOutDay->copy()->setTime(14, 0);
 
         if ($now->lt($deadline)) {
             throw TransactionException::cannotCheckOut('check-out possible à partir de 12h.');

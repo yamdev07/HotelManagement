@@ -16,17 +16,17 @@ return new class extends Migration
     public function up()
     {
         Schema::table('transactions', function (Blueprint $table) {
-            if (!Schema::hasColumn('transactions', 'created_by')) {
+            if (! Schema::hasColumn('transactions', 'created_by')) {
                 $table->foreignId('created_by')->nullable()->after('status')
                     ->constrained('users')->nullOnDelete();
             }
 
-            if (!Schema::hasColumn('transactions', 'checked_in_by')) {
+            if (! Schema::hasColumn('transactions', 'checked_in_by')) {
                 $table->foreignId('checked_in_by')->nullable()->after('created_by')
                     ->constrained('users')->nullOnDelete();
             }
 
-            if (!Schema::hasColumn('transactions', 'checked_out_by')) {
+            if (! Schema::hasColumn('transactions', 'checked_out_by')) {
                 $table->foreignId('checked_out_by')->nullable()->after('checked_in_by')
                     ->constrained('users')->nullOnDelete();
             }

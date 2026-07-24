@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Statuts des Chambres')
+@section('title', __('roomstatus.title'))
 @section('content')
 
 <style>
@@ -474,7 +474,7 @@
     <div class="status-breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Statuts des chambres</span>
+        <span class="current">{{ __('roomstatus.breadcrumb') }}</span>
     </div>
 
     <!-- Header -->
@@ -482,15 +482,15 @@
         <div class="status-brand">
             <div class="status-brand-icon"><i class="fas fa-toggle-on"></i></div>
             <div>
-                <h1 class="status-header-title">Statuts des <em>chambres</em></h1>
+                <h1 class="status-header-title">{!! __('roomstatus.header') !!}</h1>
                 <p class="status-header-sub">
-                    <i class="fas fa-info-circle me-1"></i> Gérez les statuts de disponibilité des chambres
+                    <i class="fas fa-info-circle me-1"></i> {{ __('roomstatus.header_desc') }}
                 </p>
             </div>
         </div>
         <div class="status-header-actions">
             <button id="add-button" class="btn-db btn-db-primary">
-                <i class="fas fa-plus-circle me-2"></i> Nouveau statut
+                <i class="fas fa-plus-circle me-2"></i> {{ __('roomstatus.btn_new') }}
             </button>
         </div>
     </div>
@@ -511,10 +511,10 @@
                 <div class="stat-card-icon"><i class="fas fa-tags"></i></div>
             </div>
             <div class="stat-card-value">{{ $totalStatuses }}</div>
-            <div class="stat-card-label">Statuts totaux</div>
+            <div class="stat-card-label">{{ __('roomstatus.stat_total') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-list"></i>
-                Tous les statuts
+                {{ __('roomstatus.stat_all') }}
             </div>
         </div>
         
@@ -523,10 +523,10 @@
                 <div class="stat-card-icon"><i class="fas fa-check-circle"></i></div>
             </div>
             <div class="stat-card-value">{{ $availableCount }}</div>
-            <div class="stat-card-label">Disponibles</div>
+            <div class="stat-card-label">{{ __('roomstatus.stat_available') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-door-open"></i>
-                Chambres libres
+                {{ __('roomstatus.stat_available_desc') }}
             </div>
         </div>
         
@@ -535,10 +535,10 @@
                 <div class="stat-card-icon"><i class="fas fa-user"></i></div>
             </div>
             <div class="stat-card-value">{{ $occupiedCount }}</div>
-            <div class="stat-card-label">Occupés</div>
+            <div class="stat-card-label">{{ __('roomstatus.stat_occupied') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-bed"></i>
-                Chambres prises
+                {{ __('roomstatus.stat_occupied_desc') }}
             </div>
         </div>
         
@@ -547,10 +547,10 @@
                 <div class="stat-card-icon"><i class="fas fa-tools"></i></div>
             </div>
             <div class="stat-card-value">{{ $maintenanceCount + $cleaningCount }}</div>
-            <div class="stat-card-label">Hors service</div>
+            <div class="stat-card-label">{{ __('roomstatus.stat_out_of_service') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-wrench"></i>
-                Maintenance/nettoyage
+                {{ __('roomstatus.stat_out_of_service_desc') }}
             </div>
         </div>
     </div>
@@ -560,7 +560,7 @@
         <div class="action-left">
             <span class="filter-badge">
                 <i class="fas fa-toggle-on"></i>
-                Tous les statuts
+                {{ __('roomstatus.filter_all') }}
                 <span class="badge-count">{{ $totalStatuses }}</span>
             </span>
         </div>
@@ -571,7 +571,7 @@
                 <input type="text" 
                        class="search-input" 
                        id="searchInput"
-                       placeholder="Rechercher un statut..." 
+                       placeholder="{{ __('roomstatus.search_placeholder') }}" 
                        autocomplete="off">
             </div>
         </div>
@@ -582,11 +582,11 @@
         <div class="status-card-header">
             <h5 class="status-card-title">
                 <i class="fas fa-toggle-on"></i>
-                Liste des statuts
+                {{ __('roomstatus.card_title') }}
             </h5>
             <span class="status-card-badge">
                 <i class="fas fa-list"></i>
-                {{ $totalStatuses }} enregistrés
+                {{ $totalStatuses }} {{ __('roomstatus.card_registered') }}
             </span>
         </div>
         
@@ -595,11 +595,11 @@
                 <table id="roomstatus-table" class="status-table" style="width: 100%;">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Nom</th>
-                            <th>Code</th>
-                            <th>Information</th>
-                            <th class="text-center">Actions</th>
+                            <th>{{ __('roomstatus.th_id') }}</th>
+                            <th>{{ __('roomstatus.th_name') }}</th>
+                            <th>{{ __('roomstatus.th_code') }}</th>
+                            <th>{{ __('roomstatus.th_info') }}</th>
+                            <th class="text-center">{{ __('roomstatus.th_actions') }}</th>
                         </tr>
                     </thead>
                     <tbody id="tableBody">
@@ -632,27 +632,27 @@
 $(document).ready(function() {
     // Sample data for room statuses
     var statusData = [
-        { id: 1, name: 'Disponible', code: 'AVBL', info: 'Chambre prête pour check-in', statusClass: 'available' },
-        { id: 2, name: 'Occupée', code: 'OCC', info: 'Chambre actuellement occupée', statusClass: 'occupied' },
-        { id: 3, name: 'Maintenance', code: 'MNT', info: 'Chambre en maintenance', statusClass: 'maintenance' },
-        { id: 4, name: 'Nettoyage', code: 'CLN', info: 'Chambre en cours de nettoyage', statusClass: 'cleaning' },
-        { id: 5, name: 'Réservée', code: 'RSV', info: 'Chambre réservée', statusClass: 'reserved' },
-        { id: 6, name: 'Hors service', code: 'OOO', info: 'Chambre temporairement indisponible', statusClass: 'out-of-order' },
-        { id: 7, name: 'Ne pas déranger', code: 'DND', info: 'Client demande la tranquillité', statusClass: 'occupied' },
-        { id: 8, name: 'Départ', code: 'COUT', info: 'Chambre en attente de nettoyage', statusClass: 'cleaning' }
+        { id: 1, name: 'Available', code: 'AVBL', info: 'Room ready for check-in', statusClass: 'available' },
+        { id: 2, name: 'Occupied', code: 'OCC', info: 'Room currently occupied', statusClass: 'occupied' },
+        { id: 3, name: 'Maintenance', code: 'MNT', info: 'Room under maintenance', statusClass: 'maintenance' },
+        { id: 4, name: 'Cleaning', code: 'CLN', info: 'Room being cleaned', statusClass: 'cleaning' },
+        { id: 5, name: 'Reserved', code: 'RSV', info: 'Room reserved', statusClass: 'reserved' },
+        { id: 6, name: 'Out of order', code: 'OOO', info: 'Room temporarily unavailable', statusClass: 'out-of-order' },
+        { id: 7, name: 'Do not disturb', code: 'DND', info: 'Guest requests quiet', statusClass: 'occupied' },
+        { id: 8, name: 'Checkout', code: 'COUT', info: 'Room awaiting cleaning', statusClass: 'cleaning' }
     ];
 
     // Function to get status badge class
     function getStatusClass(name) {
         const statusMap = {
-            'Disponible': 'available',
-            'Occupée': 'occupied',
+            'Available': 'available',
+            'Occupied': 'occupied',
             'Maintenance': 'maintenance',
-            'Nettoyage': 'cleaning',
-            'Réservée': 'reserved',
-            'Hors service': 'out-of-order',
-            'Ne pas déranger': 'occupied',
-            'Départ': 'cleaning'
+            'Cleaning': 'cleaning',
+            'Reserved': 'reserved',
+            'Out of order': 'out-of-order',
+            'Do not disturb': 'occupied',
+            'Checkout': 'cleaning'
         };
         return statusMap[name] || 'available';
     }
@@ -671,12 +671,12 @@ $(document).ready(function() {
                 data: 'name',
                 render: function(data, type, row) {
                     var statusClass = getStatusClass(data);
-                    var icon = data === 'Disponible' ? 'check-circle' : 
-                               (data === 'Occupée' ? 'user' : 
-                               (data === 'Maintenance' ? 'tools' : 
-                               (data === 'Nettoyage' ? 'broom' : 
-                               (data === 'Réservée' ? 'calendar-check' : 
-                               (data === 'Hors service' ? 'exclamation-triangle' : 'circle')))));
+                    var icon = data === 'Available' ? 'check-circle' :
+                               (data === 'Occupied' ? 'user' :
+                               (data === 'Maintenance' ? 'tools' :
+                               (data === 'Cleaning' ? 'broom' :
+                               (data === 'Reserved' ? 'calendar-check' :
+                               (data === 'Out of order' ? 'exclamation-triangle' : 'circle')))));
                     
                     return '<span class="status-badge-custom status-badge--' + statusClass + '">' +
                            '<i class="fas fa-' + icon + ' fa-xs"></i>' +
@@ -700,13 +700,13 @@ $(document).ready(function() {
                 data: null,
                 render: function(data, type, row) {
                     return '<div class="action-group">' +
-                           '<button class="btn-db-icon btn-db-icon-view" onclick="viewStatus(' + row.id + ')" title="Voir">' +
+                           '<button class="btn-db-icon btn-db-icon-view" onclick="viewStatus(' + row.id + ')" title="@lang(\'roomstatus.btn_view\')">' +
                            '<i class="fas fa-eye"></i>' +
                            '</button>' +
-                           '<button class="btn-db-icon btn-db-icon-edit" onclick="editStatus(' + row.id + ')" title="Modifier">' +
+                           '<button class="btn-db-icon btn-db-icon-edit" onclick="editStatus(' + row.id + ')" title="@lang(\'roomstatus.btn_edit\')">' +
                            '<i class="fas fa-edit"></i>' +
                            '</button>' +
-                           '<button class="btn-db-icon btn-db-icon-delete" onclick="deleteStatus(' + row.id + ', \'' + row.name + '\')" title="Supprimer">' +
+                           '<button class="btn-db-icon btn-db-icon-delete" onclick="deleteStatus(' + row.id + ', \'' + row.name + '\')" title="@lang(\'roomstatus.btn_delete\')">' +
                            '<i class="fas fa-trash"></i>' +
                            '</button>' +
                            '</div>';
@@ -714,17 +714,17 @@ $(document).ready(function() {
             }
         ],
         language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/fr-FR.json',
-            emptyTable: "Aucun statut disponible",
-            info: "Affichage de _START_ à _END_ sur _TOTAL_ statuts",
-            infoEmpty: "Affichage 0 à 0 sur 0 statuts",
-            infoFiltered: "(filtré sur _MAX_ statuts au total)",
-            lengthMenu: "Afficher _MENU_ statuts",
-            search: "Rechercher :",
-            zeroRecords: "Aucun statut trouvé"
+            url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/{{ app()->getLocale() === 'fr' ? 'fr-FR' : 'en-GB' }}.json',
+            emptyTable: @json(__('roomstatus.dt_empty')),
+            info: @json(__('roomstatus.dt_info')),
+            infoEmpty: @json(__('roomstatus.dt_info_empty')),
+            infoFiltered: @json(__('roomstatus.dt_info_filtered')),
+            lengthMenu: @json(__('roomstatus.dt_length_menu')),
+            search: @json(__('roomstatus.dt_search')),
+            zeroRecords: @json(__('roomstatus.dt_zero_records'))
         },
         pageLength: 10,
-        lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "Tous"]],
+        lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, @json(__('roomstatus.dt_all'))]],
         initComplete: function() {
             // Hide default search input
             $('.dataTables_filter').hide();
@@ -743,32 +743,32 @@ $(document).ready(function() {
     // Add button click handler
     $('#add-button').on('click', function() {
         Swal.fire({
-            title: 'Ajouter un statut',
+            title: @json(__('roomstatus.swal_add_title')),
             html: `
                 <div style="text-align: left;">
                     <div style="margin-bottom: 15px;">
                         <label style="font-weight: 600; color: var(--s600); margin-bottom: 5px; display: block;">
-                            <i class="fas fa-tag" style="color: var(--g500); margin-right: 5px;"></i>Nom du statut
+                            <i class="fas fa-tag" style="color: var(--g500); margin-right: 5px;"></i>{!! __('roomstatus.swal_label_name') !!}
                         </label>
-                        <input id="statusName" class="swal2-input" placeholder="Ex: Disponible" style="width: 100%;">
+                        <input id="statusName" class="swal2-input" placeholder="{!! __('roomstatus.swal_placeholder_name') !!}" style="width: 100%;">
                     </div>
                     <div style="margin-bottom: 15px;">
                         <label style="font-weight: 600; color: var(--s600); margin-bottom: 5px; display: block;">
-                            <i class="fas fa-code" style="color: var(--g500); margin-right: 5px;"></i>Code
+                            <i class="fas fa-code" style="color: var(--g500); margin-right: 5px;"></i>{!! __('roomstatus.swal_label_code') !!}
                         </label>
-                        <input id="statusCode" class="swal2-input" placeholder="Ex: AVBL" style="width: 100%;">
+                        <input id="statusCode" class="swal2-input" placeholder="{!! __('roomstatus.swal_placeholder_code') !!}" style="width: 100%;">
                     </div>
                     <div>
                         <label style="font-weight: 600; color: var(--s600); margin-bottom: 5px; display: block;">
-                            <i class="fas fa-info-circle" style="color: var(--g500); margin-right: 5px;"></i>Information
+                            <i class="fas fa-info-circle" style="color: var(--g500); margin-right: 5px;"></i>{!! __('roomstatus.swal_label_info') !!}
                         </label>
-                        <textarea id="statusInfo" class="swal2-textarea" placeholder="Description du statut..." style="width: 100%;"></textarea>
+                        <textarea id="statusInfo" class="swal2-textarea" placeholder="{!! __('roomstatus.swal_placeholder_info') !!}" style="width: 100%;"></textarea>
                     </div>
                 </div>
             `,
             showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-save me-2"></i>Ajouter',
-            cancelButtonText: '<i class="fas fa-times me-2"></i>Annuler',
+            confirmButtonText: '<i class="fas fa-save me-2"></i>{!! __('roomstatus.swal_btn_add') !!}',
+            cancelButtonText: '<i class="fas fa-times me-2"></i>{!! __('roomstatus.swal_btn_cancel') !!}',
             reverseButtons: true,
             confirmButtonColor: '#1e6b2e',
             cancelButtonColor: '#737873',
@@ -778,7 +778,7 @@ $(document).ready(function() {
                 const info = document.getElementById('statusInfo').value;
                 
                 if (!name || !code) {
-                    Swal.showValidationMessage('Le nom et le code sont requis');
+                    Swal.showValidationMessage(@json(__('roomstatus.swal_validation_required')));
                     return false;
                 }
                 
@@ -799,8 +799,8 @@ $(document).ready(function() {
                 table.clear().rows.add(statusData).draw();
                 
                 Swal.fire({
-                    title: 'Succès!',
-                    text: `Le statut "${result.value.name}" a été ajouté.`,
+                    title: @json(__('roomstatus.swal_success_title')),
+                    text: @json(__('roomstatus.swal_success_added')),
                     icon: 'success',
                     confirmButtonColor: '#1e6b2e',
                     timer: 2000
@@ -813,16 +813,16 @@ $(document).ready(function() {
 // View function
 function viewStatus(id) {
     Swal.fire({
-        title: 'Détails du statut',
+        title: @json(__('roomstatus.swal_view_title')),
         html: `
             <div style="text-align: left; padding: 10px;">
                 <p><strong><i class="fas fa-hashtag" style="color: var(--g500);"></i> ID:</strong> ${id}</p>
-                <p><strong><i class="fas fa-tag" style="color: var(--g500);"></i> Nom:</strong> Statut exemple</p>
-                <p><strong><i class="fas fa-code" style="color: var(--g500);"></i> Code:</strong> SMP</p>
-                <p><strong><i class="fas fa-info-circle" style="color: var(--g500);"></i> Information:</strong> Description détaillée du statut.</p>
+                <p><strong><i class="fas fa-tag" style="color: var(--g500);"></i> {!! __('roomstatus.swal_view_name') !!}:</strong> Statut exemple</p>
+                <p><strong><i class="fas fa-code" style="color: var(--g500);"></i> {!! __('roomstatus.swal_view_code') !!}:</strong> SMP</p>
+                <p><strong><i class="fas fa-info-circle" style="color: var(--g500);"></i> {!! __('roomstatus.swal_view_info') !!}:</strong> Description détaillée du statut.</p>
             </div>
         `,
-        confirmButtonText: '<i class="fas fa-check me-2"></i>Fermer',
+        confirmButtonText: '<i class="fas fa-check me-2"></i>{!! __('roomstatus.swal_btn_close') !!}',
         confirmButtonColor: '#1e6b2e'
     });
 }
@@ -830,40 +830,40 @@ function viewStatus(id) {
 // Edit function
 function editStatus(id) {
     Swal.fire({
-        title: 'Modifier le statut',
+        title: @json(__('roomstatus.swal_edit_title')),
         html: `
             <div style="text-align: left;">
                 <div style="margin-bottom: 15px;">
                     <label style="font-weight: 600; color: var(--s600); margin-bottom: 5px; display: block;">
-                        <i class="fas fa-tag" style="color: var(--g500); margin-right: 5px;"></i>Nom du statut
+                        <i class="fas fa-tag" style="color: var(--g500); margin-right: 5px;"></i>{!! __('roomstatus.swal_label_name') !!}
                     </label>
                     <input id="editStatusName" class="swal2-input" value="Statut exemple" style="width: 100%;">
                 </div>
                 <div style="margin-bottom: 15px;">
                     <label style="font-weight: 600; color: var(--s600); margin-bottom: 5px; display: block;">
-                        <i class="fas fa-code" style="color: var(--g500); margin-right: 5px;"></i>Code
+                        <i class="fas fa-code" style="color: var(--g500); margin-right: 5px;"></i>{!! __('roomstatus.swal_label_code') !!}
                     </label>
                     <input id="editStatusCode" class="swal2-input" value="SMP" style="width: 100%;">
                 </div>
                 <div>
                     <label style="font-weight: 600; color: var(--s600); margin-bottom: 5px; display: block;">
-                        <i class="fas fa-info-circle" style="color: var(--g500); margin-right: 5px;"></i>Information
+                        <i class="fas fa-info-circle" style="color: var(--g500); margin-right: 5px;"></i>{!! __('roomstatus.swal_label_info') !!}
                     </label>
                     <textarea id="editStatusInfo" class="swal2-textarea" style="width: 100%;">Description détaillée</textarea>
                 </div>
             </div>
         `,
         showCancelButton: true,
-        confirmButtonText: '<i class="fas fa-save me-2"></i>Enregistrer',
-        cancelButtonText: '<i class="fas fa-times me-2"></i>Annuler',
+        confirmButtonText: '<i class="fas fa-save me-2"></i>{!! __('roomstatus.swal_btn_save') !!}',
+        cancelButtonText: '<i class="fas fa-times me-2"></i>{!! __('roomstatus.swal_btn_cancel') !!}',
         reverseButtons: true,
         confirmButtonColor: '#1e6b2e',
         cancelButtonColor: '#737873'
     }).then((result) => {
         if (result.isConfirmed) {
             Swal.fire({
-                title: 'Succès!',
-                text: 'Le statut a été modifié.',
+                title: @json(__('roomstatus.swal_success_title')),
+                text: @json(__('roomstatus.swal_success_edited')),
                 icon: 'success',
                 confirmButtonColor: '#1e6b2e',
                 timer: 2000
@@ -875,20 +875,20 @@ function editStatus(id) {
 // Delete function
 function deleteStatus(id, name) {
     Swal.fire({
-        title: 'Confirmer la suppression',
-        html: `<strong>${name}</strong> sera supprimé définitivement.`,
+        title: @json(__('roomstatus.swal_delete_title')),
+        html: `<strong>${name}</strong> ${@json(__('roomstatus.swal_delete_text'))}`,
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: '<i class="fas fa-trash me-2"></i>Oui, supprimer',
-        cancelButtonText: '<i class="fas fa-times me-2"></i>Annuler',
+        confirmButtonText: '<i class="fas fa-trash me-2"></i>{!! __('roomstatus.swal_btn_confirm_delete') !!}',
+        cancelButtonText: '<i class="fas fa-times me-2"></i>{!! __('roomstatus.swal_btn_cancel') !!}',
         reverseButtons: true,
         confirmButtonColor: '#dc3545',
         cancelButtonColor: '#737873'
     }).then((result) => {
         if (result.isConfirmed) {
             Swal.fire({
-                title: 'Supprimé!',
-                text: `Le statut "${name}" a été supprimé.`,
+                title: @json(__('roomstatus.swal_success_deleted_title')),
+                text: @json(__('roomstatus.swal_success_deleted')),
                 icon: 'success',
                 confirmButtonColor: '#1e6b2e',
                 timer: 2000

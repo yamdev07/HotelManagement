@@ -1,9 +1,9 @@
 <?php
- 
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
- 
+
 return new class extends Migration
 {
     public function up(): void
@@ -15,11 +15,11 @@ return new class extends Migration
             $table->json('layout');           // tableau JSON des éléments positionnés
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
- 
+
             $table->unique('room_id');        // un seul plan par salle
         });
     }
- 
+
     public function down(): void
     {
         Schema::dropIfExists('floor_plans');

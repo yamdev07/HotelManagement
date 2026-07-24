@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Image extends Model
 {
-    use HasFactory, \App\Models\Concerns\BelongsToHotel;
+    use \App\Models\Concerns\BelongsToHotel, HasFactory;
 
     protected $fillable = [
         'room_id',
@@ -28,7 +28,7 @@ class Image extends Model
         // Images are stored at public/img/room/{room_number}/{filename}
         $roomNumber = $this->room?->number;
         if ($roomNumber) {
-            $path = 'img/room/' . $roomNumber . '/' . ltrim($this->url, '/');
+            $path = 'img/room/'.$roomNumber.'/'.ltrim($this->url, '/');
             if (file_exists(public_path($path))) {
                 return asset($path);
             }

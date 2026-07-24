@@ -23,25 +23,25 @@ class StoreRoomRequest extends FormRequest
         $typeExists = Rule::exists('types', 'id')->where($scope);
 
         return [
-            'type_id'        => ['required', $typeExists],
+            'type_id' => ['required', $typeExists],
             'room_status_id' => 'required|exists:room_statuses,id',
-            'number'         => ['required', 'string', 'max:10', $uniqueNumber],
-            'name'           => 'nullable|string|max:255',
-            'capacity'       => 'required|integer|min:1|max:10',
-            'price'          => 'required|numeric|min:0',
-            'view'           => 'nullable|string|max:500',
+            'number' => ['required', 'string', 'max:10', $uniqueNumber],
+            'name' => 'nullable|string|max:255',
+            'capacity' => 'required|integer|min:1|max:10',
+            'price' => 'required|numeric|min:0',
+            'view' => 'nullable|string|max:500',
         ];
     }
 
     public function messages(): array
     {
         return [
-            'type_id.required'        => 'Please select a room type',
+            'type_id.required' => 'Please select a room type',
             'room_status_id.required' => 'Please select a room status',
-            'number.required'         => 'Room number is required',
-            'number.unique'           => 'This room number already exists',
-            'capacity.required'       => 'Capacity is required',
-            'price.required'          => 'Price is required',
+            'number.required' => 'Room number is required',
+            'number.unique' => 'This room number already exists',
+            'capacity.required' => 'Capacity is required',
+            'price.required' => 'Price is required',
         ];
     }
 }

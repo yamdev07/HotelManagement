@@ -15,7 +15,7 @@ class CheckRole
             return redirect()->route('login')->with('error', 'Veuillez vous connecter.');
         }
 
-        $user     = Auth::user();
+        $user = Auth::user();
         $userRole = $user->roleEnum;
 
         // Super admin bypass
@@ -36,10 +36,10 @@ class CheckRole
 
         if (app()->environment('local')) {
             \Log::debug('Accès refusé par CheckRole', [
-                'user_id'       => $user->id,
-                'user_role'     => $user->role,
-                'roles_requis'  => $roles,
-                'url'           => $request->fullUrl(),
+                'user_id' => $user->id,
+                'user_role' => $user->role,
+                'roles_requis' => $roles,
+                'url' => $request->fullUrl(),
             ]);
         }
 

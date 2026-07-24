@@ -19,7 +19,7 @@ trait BelongsToHotel
 {
     public static function bootBelongsToHotel(): void
     {
-        static::addGlobalScope(new HotelScope());
+        static::addGlobalScope(new HotelScope);
 
         static::creating(function ($model) {
             if (empty($model->hotel_id)) {

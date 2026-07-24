@@ -85,7 +85,7 @@ class Kernel extends HttpKernel
         'admin.restrict' => CheckAdminRestriction::class,
         'receptionist.restrict' => CheckReceptionistRestriction::class,
         'housekeeping.readonly' => CheckHousekeepingReadOnly::class,
-        
+
         // SUPPRIMEZ CES LIGNES TEMPORAIREMENT POUR DÉBOGUER
         // 'activity' => TrackUserActivity::class,
         // 'activity.withparams' => \App\Http\Middleware\TrackUserActivity::class,

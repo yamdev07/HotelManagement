@@ -20,7 +20,7 @@ class ProfileController extends Controller
     {
         $request->validate([
             // Nom sans emoji ni charabia (issue #197, comme les clients)
-            'name'  => ['required', 'string', 'max:255', new \App\Rules\SafeName],
+            'name' => ['required', 'string', 'max:255', new \App\Rules\SafeName],
             'email' => ['required', 'email', Rule::unique('users')->ignore(Auth::id())],
             // Téléphone : chiffres et séparateurs uniquement (pas de lettres/emoji)
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\s().\-]{6,20}$/'],
@@ -68,7 +68,7 @@ class ProfileController extends Controller
         } catch (\Throwable $e) {
             \Log::error('Upload avatar échoué: '.$e->getMessage());
 
-            return back()->with('error', "Le téléversement de la photo a échoué. Réessayez avec une image JPG/PNG de moins de 2 Mo.");
+            return back()->with('error', 'Le téléversement de la photo a échoué. Réessayez avec une image JPG/PNG de moins de 2 Mo.');
         }
 
         // Supprime l'ancien avatar s'il était sur le disque public

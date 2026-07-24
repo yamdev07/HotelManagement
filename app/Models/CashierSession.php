@@ -10,7 +10,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class CashierSession extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes, \App\Models\Concerns\BelongsToHotel;
+    use \App\Models\Concerns\BelongsToHotel, HasFactory, LogsActivity, SoftDeletes;
 
     protected static $recordEvents = [];
 
@@ -99,17 +99,27 @@ class CashierSession extends Model
     ];
 
     const STATUS_ACTIVE = 'active';
+
     const STATUS_CLOSED = 'closed';
+
     const STATUS_PENDING_REVIEW = 'pending_review';
+
     const STATUS_VERIFIED = 'verified';
+
     const STATUS_ABANDONED = 'abandoned';
+
     const STATUS_SUSPENDED = 'suspended';
+
     const STATUS_LOCKED = 'locked';
 
     const SHIFT_MORNING = 'morning';
+
     const SHIFT_EVENING = 'evening';
+
     const SHIFT_NIGHT = 'night';
+
     const SHIFT_FULL_DAY = 'full_day';
+
     const SHIFT_CUSTOM = 'custom';
 
     const ALLOWED_DIFFERENCE = 1000; // Tolérance de 1000 CFA
@@ -894,7 +904,7 @@ class CashierSession extends Model
         // Si c'est une mise à jour (session existe déjà)
         if ($this->exists) {
             $original = $this->getOriginal('start_time');
-            
+
             // Vérifier si quelqu'un essaie de modifier start_time
             if ($original && $this->start_time != $original) {
                 \Log::warning('🚨 TENTATIVE DE MODIFICATION DE START_TIME BLOQUÉE', [
@@ -902,14 +912,14 @@ class CashierSession extends Model
                     'original' => $original->format('Y-m-d H:i:s'),
                     'tentative' => $this->start_time ? $this->start_time->format('Y-m-d H:i:s') : 'null',
                     'user_id' => auth()->id(),
-                    'url' => request()->fullUrl()
+                    'url' => request()->fullUrl(),
                 ]);
-                
+
                 // Restaurer la valeur originale
                 $this->start_time = $original;
             }
         }
-        
+
         return parent::save($options);
     }
 
@@ -923,12 +933,12 @@ class CashierSession extends Model
             \Log::warning('🚨 TENTATIVE DE MODIFICATION DE START_TIME VIA update()', [
                 'session_id' => $this->id,
                 'start_time_proposed' => $attributes['start_time'],
-                'user_id' => auth()->id()
+                'user_id' => auth()->id(),
             ]);
-            
+
             unset($attributes['start_time']);
         }
-        
+
         return parent::update($attributes, $options);
     }
 
@@ -978,16 +988,16 @@ class CashierSession extends Model
         static::updating(function ($session) {
             $dirty = $session->getDirty();
             $original = $session->getOriginal();
-            
+
             // Log de toutes les modifications (pour débogage)
-            if (!empty($dirty)) {
+            if (! empty($dirty)) {
                 \Log::info('🔄 Mise à jour session', [
                     'session_id' => $session->id,
                     'modified_fields' => array_keys($dirty),
                     'old_start_time' => isset($original['start_time']) ? $original['start_time']->format('Y-m-d H:i:s') : null,
                     'new_start_time' => isset($dirty['start_time']) ? $session->start_time->format('Y-m-d H:i:s') : 'non modifié',
                     'old_balance' => $original['current_balance'] ?? null,
-                    'new_balance' => $dirty['current_balance'] ?? 'non modifié'
+                    'new_balance' => $dirty['current_balance'] ?? 'non modifié',
                 ]);
             }
         });

@@ -15,9 +15,9 @@ class OnboardingTest extends TestCase
     private function makeHotel(bool $onboarded): Hotel
     {
         return Hotel::create([
-            'name'                    => 'Hotel Onb',
-            'slug'                    => Str::slug('Hotel Onb '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Onb',
+            'slug' => Str::slug('Hotel Onb '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => $onboarded ? now() : null,
         ]);
     }
@@ -55,9 +55,9 @@ class OnboardingTest extends TestCase
         $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
         $response = $this->actingAs($admin)->post('/bienvenue', [
-            'name'            => 'Hotel Personnalisé',
-            'tagline'         => 'Le meilleur accueil',
-            'primary_color'   => '#1e6b2e',
+            'name' => 'Hotel Personnalisé',
+            'tagline' => 'Le meilleur accueil',
+            'primary_color' => '#1e6b2e',
             'secondary_color' => '#0f3d1a',
         ]);
 

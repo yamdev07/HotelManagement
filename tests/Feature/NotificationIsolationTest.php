@@ -19,8 +19,8 @@ class NotificationIsolationTest extends TestCase
     private function hotel(string $name): Hotel
     {
         return Hotel::create([
-            'name'      => $name,
-            'slug'      => Str::slug($name.' '.Str::random(4)),
+            'name' => $name,
+            'slug' => Str::slug($name.' '.Str::random(4)),
             'is_active' => true,
         ]);
     }
@@ -33,7 +33,7 @@ class NotificationIsolationTest extends TestCase
         $staffA = User::factory()->create(['role' => 'Receptionist', 'hotel_id' => $hotelA->id]);
         $adminA = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotelA->id]);
         $staffB = User::factory()->create(['role' => 'Receptionist', 'hotel_id' => $hotelB->id]);
-        $super  = User::factory()->create(['role' => 'Super', 'hotel_id' => null]);
+        $super = User::factory()->create(['role' => 'Super', 'hotel_id' => null]);
 
         // Destinataires calculés comme dans les contrôleurs (staff de l'hôtel A)
         $recipients = User::staff()->where('hotel_id', $hotelA->id)->get();

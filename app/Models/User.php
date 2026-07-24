@@ -56,11 +56,11 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'email_verified_at'  => 'datetime',
-        'last_login_at'      => 'datetime',
+        'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
         'last_login_attempt' => 'datetime',
-        'is_active'          => 'boolean',
-        'login_attempts'     => 'integer',
+        'is_active' => 'boolean',
+        'login_attempts' => 'integer',
     ];
 
     public function getRoleEnumAttribute(): ?UserRole
@@ -197,12 +197,12 @@ class User extends Authenticatable
     public function getPermissionsAttribute(): array
     {
         return match (true) {
-            $this->isSuper()                        => ['all'],
-            $this->isAdmin()                        => ['manage_users', 'view_reports', 'manage_settings'],
+            $this->isSuper() => ['all'],
+            $this->isAdmin() => ['manage_users', 'view_reports', 'manage_settings'],
             $this->isReceptionist() || $this->isCashier() => ['manage_bookings', 'process_payments', 'view_cashier_dashboard'],
-            $this->isServant()                      => ['manage_restaurant', 'view_cashier_dashboard', 'process_payments'],
-            $this->isCustomer()                     => ['view_bookings', 'make_payments'],
-            default                                 => [],
+            $this->isServant() => ['manage_restaurant', 'view_cashier_dashboard', 'process_payments'],
+            $this->isCustomer() => ['view_bookings', 'make_payments'],
+            default => [],
         };
     }
 
@@ -297,6 +297,7 @@ class User extends Authenticatable
     public function scopeByRole($query, UserRole|string $role): mixed
     {
         $value = $role instanceof UserRole ? $role->value : $role;
+
         return $query->where('role', $value);
     }
 
@@ -327,16 +328,24 @@ class User extends Authenticatable
 
     public function canEditUser(User $targetUser): bool
     {
-        if ($this->id === $targetUser->id) return true;
-        if ($this->isSuper()) return true;
-        if ($this->isAdmin() && ! $targetUser->isSuper()) return true;
+        if ($this->id === $targetUser->id) {
+            return true;
+        }
+        if ($this->isSuper()) {
+            return true;
+        }
+        if ($this->isAdmin() && ! $targetUser->isSuper()) {
+            return true;
+        }
 
         return false;
     }
 
     public function canDeleteUser(User $targetUser): bool
     {
-        if ($this->id === $targetUser->id) return false;
+        if ($this->id === $targetUser->id) {
+            return false;
+        }
 
         return $this->isSuper() && ! $targetUser->isSuper();
     }

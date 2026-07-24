@@ -33,6 +33,7 @@ class HousekeepingService
             return $updated->count();
         } catch (\Throwable $e) {
             Log::error('autoMarkDirtyRooms: '.$e->getMessage());
+
             return 0;
         }
     }
@@ -97,29 +98,30 @@ class HousekeepingService
         }
 
         return [
-            'dirty'       => $rooms->where('room_status_id', RoomStatus::Dirty->value)->values(),
-            'cleaning'    => $rooms->where('room_status_id', RoomStatus::Cleaning->value)->values(),
-            'clean'       => $rooms->where('room_status_id', RoomStatus::Available->value)
-                                ->filter(fn ($r) => ! $r->is_occupied)->values(),
-            'occupied'    => $rooms->filter(fn ($r) => $r->is_occupied || $r->room_status_id == RoomStatus::Occupied->value)
-                                ->unique('id')->values(),
+            'dirty' => $rooms->where('room_status_id', RoomStatus::Dirty->value)->values(),
+            'cleaning' => $rooms->where('room_status_id', RoomStatus::Cleaning->value)->values(),
+            'clean' => $rooms->where('room_status_id', RoomStatus::Available->value)
+                ->filter(fn ($r) => ! $r->is_occupied)->values(),
+            'occupied' => $rooms->filter(fn ($r) => $r->is_occupied || $r->room_status_id == RoomStatus::Occupied->value)
+                ->unique('id')->values(),
             'maintenance' => $rooms->where('room_status_id', RoomStatus::Maintenance->value)->values(),
-            'reserved'    => $rooms->where('room_status_id', RoomStatus::Reserved->value)->values(),
+            'reserved' => $rooms->where('room_status_id', RoomStatus::Reserved->value)->values(),
         ];
     }
 
     public function getStats(array $roomsByStatus): array
     {
         $allRooms = Room::count();
+
         return [
-            'total_rooms'       => $allRooms,
-            'dirty_rooms'       => $roomsByStatus['dirty']->count(),
-            'cleaning_rooms'    => $roomsByStatus['cleaning']->count(),
-            'clean_rooms'       => $roomsByStatus['clean']->count(),
-            'occupied_rooms'    => $roomsByStatus['occupied']->count(),
+            'total_rooms' => $allRooms,
+            'dirty_rooms' => $roomsByStatus['dirty']->count(),
+            'cleaning_rooms' => $roomsByStatus['cleaning']->count(),
+            'clean_rooms' => $roomsByStatus['clean']->count(),
+            'occupied_rooms' => $roomsByStatus['occupied']->count(),
             'maintenance_rooms' => $roomsByStatus['maintenance']->count(),
-            'reserved_rooms'    => $roomsByStatus['reserved']->count(),
-            'cleaned_today'     => Room::whereDate('last_cleaned_at', Carbon::today())->count(),
+            'reserved_rooms' => $roomsByStatus['reserved']->count(),
+            'cleaned_today' => Room::whereDate('last_cleaned_at', Carbon::today())->count(),
         ];
     }
 
@@ -144,12 +146,12 @@ class HousekeepingService
     public function statusIdFromSlug(string $slug): ?int
     {
         $map = [
-            'dirty'       => RoomStatus::Dirty->value,
-            'cleaning'    => RoomStatus::Cleaning->value,
-            'clean'       => RoomStatus::Available->value,
-            'occupied'    => RoomStatus::Occupied->value,
+            'dirty' => RoomStatus::Dirty->value,
+            'cleaning' => RoomStatus::Cleaning->value,
+            'clean' => RoomStatus::Available->value,
+            'occupied' => RoomStatus::Occupied->value,
             'maintenance' => RoomStatus::Maintenance->value,
-            'reserved'    => RoomStatus::Reserved->value,
+            'reserved' => RoomStatus::Reserved->value,
         ];
 
         return $map[$slug] ?? null;

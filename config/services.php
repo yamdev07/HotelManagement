@@ -38,7 +38,7 @@ return [
     'fedapay' => [
         'secret' => env('FEDAPAY_SECRET'),
         'public' => env('FEDAPAY_PUBLIC'),
-        'env'    => env('FEDAPAY_ENV', 'sandbox'),
+        'env' => env('FEDAPAY_ENV', 'sandbox'),
     ],
 
 ];

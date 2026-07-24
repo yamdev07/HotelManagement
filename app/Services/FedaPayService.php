@@ -57,14 +57,14 @@ class FedaPayService
         [$firstname, $lastname] = $this->splitName($customerName);
 
         $create = $this->client()->post($this->baseUrl().'/transactions', [
-            'description'  => $description,
-            'amount'       => $amount,
-            'currency'     => ['iso' => $currency],
+            'description' => $description,
+            'amount' => $amount,
+            'currency' => ['iso' => $currency],
             'callback_url' => $callbackUrl,
-            'customer'     => [
+            'customer' => [
                 'firstname' => $firstname,
-                'lastname'  => $lastname,
-                'email'     => $customerEmail,
+                'lastname' => $lastname,
+                'email' => $customerEmail,
             ],
         ]);
 
@@ -94,7 +94,7 @@ class FedaPayService
 
         return [
             'transaction_id' => (int) $transactionId,
-            'url'            => $url,
+            'url' => $url,
         ];
     }
 

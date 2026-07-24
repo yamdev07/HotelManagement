@@ -24,13 +24,13 @@ class UpdateRoomRequest extends FormRequest
         $typeExists = Rule::exists('types', 'id')->where($scope);
 
         return [
-            'type_id'        => ['required', $typeExists],
+            'type_id' => ['required', $typeExists],
             'room_status_id' => 'required|exists:room_statuses,id',
-            'number'         => ['required', 'string', 'max:10', $uniqueNumber],
-            'name'           => 'nullable|string|max:255',
-            'capacity'       => 'required|integer|min:1|max:10',
-            'price'          => 'required|numeric|min:0',
-            'view'           => 'nullable|string|max:500',
+            'number' => ['required', 'string', 'max:10', $uniqueNumber],
+            'name' => 'nullable|string|max:255',
+            'capacity' => 'required|integer|min:1|max:10',
+            'price' => 'required|numeric|min:0',
+            'view' => 'nullable|string|max:500',
         ];
     }
 }

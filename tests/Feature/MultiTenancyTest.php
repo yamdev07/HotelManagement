@@ -20,8 +20,8 @@ class MultiTenancyTest extends TestCase
     private function makeHotel(string $name): Hotel
     {
         return Hotel::create([
-            'name'      => $name,
-            'slug'      => \Illuminate\Support\Str::slug($name),
+            'name' => $name,
+            'slug' => \Illuminate\Support\Str::slug($name),
             'is_active' => true,
         ]);
     }

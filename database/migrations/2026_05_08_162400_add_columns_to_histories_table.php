@@ -12,25 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('histories', function (Blueprint $table) {
-            if (!Schema::hasColumn('histories', 'transaction_id')) {
+            if (! Schema::hasColumn('histories', 'transaction_id')) {
                 $table->foreignId('transaction_id')->nullable()->constrained()->onDelete('cascade')->after('id');
             }
-            if (!Schema::hasColumn('histories', 'user_id')) {
+            if (! Schema::hasColumn('histories', 'user_id')) {
                 $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade')->after('transaction_id');
             }
-            if (!Schema::hasColumn('histories', 'action')) {
+            if (! Schema::hasColumn('histories', 'action')) {
                 $table->string('action')->nullable()->after('user_id');
             }
-            if (!Schema::hasColumn('histories', 'description')) {
+            if (! Schema::hasColumn('histories', 'description')) {
                 $table->text('description')->nullable()->after('action');
             }
-            if (!Schema::hasColumn('histories', 'old_values')) {
+            if (! Schema::hasColumn('histories', 'old_values')) {
                 $table->json('old_values')->nullable()->after('description');
             }
-            if (!Schema::hasColumn('histories', 'new_values')) {
+            if (! Schema::hasColumn('histories', 'new_values')) {
                 $table->json('new_values')->nullable()->after('old_values');
             }
-            if (!Schema::hasColumn('histories', 'notes')) {
+            if (! Schema::hasColumn('histories', 'notes')) {
                 $table->text('notes')->nullable()->after('new_values');
             }
         });

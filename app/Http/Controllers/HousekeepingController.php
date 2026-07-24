@@ -30,13 +30,14 @@ class HousekeepingController extends Controller
             $this->housekeeping->autoMarkDirtyRooms();
 
             $roomsByStatus = $this->housekeeping->getRoomsByStatus();
-            $stats         = $this->housekeeping->getStats($roomsByStatus);
+            $stats = $this->housekeeping->getStats($roomsByStatus);
             $todayDepartures = $this->housekeeping->getTodayDepartures();
-            $todayArrivals   = $this->housekeeping->getTodayArrivals();
+            $todayArrivals = $this->housekeeping->getTodayArrivals();
 
             return view('housekeeping.index', compact('roomsByStatus', 'stats', 'todayDepartures', 'todayArrivals'));
         } catch (\Throwable $e) {
             Log::error('Housekeeping index: '.$e->getMessage());
+
             return back()->with('error', 'Erreur lors du chargement: '.$e->getMessage());
         }
     }
@@ -44,7 +45,7 @@ class HousekeepingController extends Controller
     public function mobile()
     {
         try {
-            $dirtyRooms   = Room::with(['type', 'roomStatus'])
+            $dirtyRooms = Room::with(['type', 'roomStatus'])
                 ->where('room_status_id', RoomStatus::Dirty->value)
                 ->orderBy('updated_at')->get();
 
@@ -53,8 +54,8 @@ class HousekeepingController extends Controller
                 ->orderBy('updated_at')->get();
 
             $stats = [
-                'dirty'        => $dirtyRooms->count(),
-                'cleaning'     => $cleaningRooms->count(),
+                'dirty' => $dirtyRooms->count(),
+                'cleaning' => $cleaningRooms->count(),
                 'cleaned_today' => Room::whereDate('last_cleaned_at', Carbon::today())->count(),
                 'cleaned_by_me' => Room::where('cleaned_by', Auth::id())
                     ->whereDate('last_cleaned_at', Carbon::today())->count(),
@@ -63,6 +64,7 @@ class HousekeepingController extends Controller
             return view('housekeeping.mobile', compact('dirtyRooms', 'cleaningRooms', 'stats'));
         } catch (\Throwable $e) {
             Log::error('Housekeeping mobile: '.$e->getMessage());
+
             return back()->with('error', "Erreur lors du chargement de l'interface mobile");
         }
     }
@@ -85,18 +87,19 @@ class HousekeepingController extends Controller
             }
 
             $labels = [
-                'dirty'       => 'À nettoyer',
-                'cleaning'    => 'En nettoyage',
-                'clean'       => 'Nettoyées/Disponibles',
-                'occupied'    => 'Occupées',
+                'dirty' => 'À nettoyer',
+                'cleaning' => 'En nettoyage',
+                'clean' => 'Nettoyées/Disponibles',
+                'occupied' => 'Occupées',
                 'maintenance' => 'Maintenance',
-                'reserved'    => 'Réservées',
+                'reserved' => 'Réservées',
             ];
             $statusLabel = $labels[$status] ?? ucfirst($status);
 
             return view('housekeeping.quick-list', compact('rooms', 'status', 'statusLabel'));
         } catch (\Throwable $e) {
             Log::error('Housekeeping quickList: '.$e->getMessage());
+
             return back()->with('error', 'Erreur lors du chargement de la liste');
         }
     }
@@ -110,7 +113,7 @@ class HousekeepingController extends Controller
     {
         $request->validate([
             'room_number' => 'required|string|max:10',
-            'action'      => 'required|in:start-cleaning,finish-cleaning,maintenance',
+            'action' => 'required|in:start-cleaning,finish-cleaning,maintenance',
         ]);
 
         $room = Room::where('number', $request->room_number)->first();
@@ -120,10 +123,10 @@ class HousekeepingController extends Controller
         }
 
         return match ($request->action) {
-            'start-cleaning'  => $this->startCleaning($room),
+            'start-cleaning' => $this->startCleaning($room),
             'finish-cleaning' => $this->finishCleaning($room),
-            'maintenance'     => redirect()->route('housekeeping.maintenance-form', $room),
-            default           => back()->with('error', 'Action non reconnue'),
+            'maintenance' => redirect()->route('housekeeping.maintenance-form', $room),
+            default => back()->with('error', 'Action non reconnue'),
         };
     }
 
@@ -151,8 +154,8 @@ class HousekeepingController extends Controller
 
             $stats = [
                 'total_to_clean' => $rooms->count(),
-                'dirty'          => $rooms->where('room_status_id', RoomStatus::Dirty->value)->count(),
-                'cleaning'       => $rooms->where('room_status_id', RoomStatus::Cleaning->value)->count(),
+                'dirty' => $rooms->where('room_status_id', RoomStatus::Dirty->value)->count(),
+                'cleaning' => $rooms->where('room_status_id', RoomStatus::Cleaning->value)->count(),
                 'departing_today' => $rooms->filter(fn ($r) => $r->transactions()
                     ->whereIn('status', ['active', 'checked_in'])
                     ->whereDate('check_out', Carbon::today())->exists())->count(),
@@ -161,6 +164,7 @@ class HousekeepingController extends Controller
             return view('housekeeping.to-clean', compact('rooms', 'stats'));
         } catch (\Throwable $e) {
             Log::error('Housekeeping toClean: '.$e->getMessage());
+
             return back()->with('error', 'Erreur lors du chargement des chambres à nettoyer');
         }
     }
@@ -169,9 +173,11 @@ class HousekeepingController extends Controller
     {
         try {
             $this->housekeeping->startCleaning($room, Auth::id());
+
             return back()->with('success', 'Nettoyage démarré pour la chambre '.$room->number);
         } catch (\Throwable $e) {
             Log::error('startCleaning: '.$e->getMessage());
+
             return back()->with('error', 'Erreur lors du démarrage du nettoyage: '.$e->getMessage());
         }
     }
@@ -179,11 +185,13 @@ class HousekeepingController extends Controller
     public function finishCleaning(Room $room)
     {
         try {
-            $newStatus  = $this->housekeeping->finishCleaning($room, Auth::id());
+            $newStatus = $this->housekeeping->finishCleaning($room, Auth::id());
             $statusText = $newStatus === RoomStatus::Available ? 'Disponible' : 'Occupée';
+
             return back()->with('success', "Chambre {$room->number} nettoyée. Statut: {$statusText}");
         } catch (\Throwable $e) {
             Log::error('finishCleaning: '.$e->getMessage());
+
             return back()->with('error', 'Erreur lors du marquage comme nettoyée: '.$e->getMessage());
         }
     }
@@ -196,8 +204,8 @@ class HousekeepingController extends Controller
     public function markMaintenance(Request $request, Room $room)
     {
         $request->validate([
-            'maintenance_reason'   => 'required|string|max:500',
-            'estimated_duration'   => 'nullable|integer|min:1',
+            'maintenance_reason' => 'required|string|max:500',
+            'estimated_duration' => 'nullable|integer|min:1',
         ]);
 
         try {
@@ -222,6 +230,7 @@ class HousekeepingController extends Controller
                 ->with('success', "Chambre {$room->number} marquée comme en maintenance");
         } catch (\Throwable $e) {
             Log::error('markMaintenance: '.$e->getMessage());
+
             return back()->with('error', 'Erreur lors du marquage en maintenance: '.$e->getMessage());
         }
     }
@@ -235,15 +244,16 @@ class HousekeepingController extends Controller
 
             $stats = [
                 'total_maintenance' => $maintenanceRooms->count(),
-                'rooms_available'   => Room::where('room_status_id', RoomStatus::Available->value)->count(),
-                'rooms_occupied'    => Room::where('room_status_id', RoomStatus::Occupied->value)->count(),
-                'rooms_dirty'       => Room::where('room_status_id', RoomStatus::Dirty->value)->count(),
-                'rooms_cleaning'    => Room::where('room_status_id', RoomStatus::Cleaning->value)->count(),
+                'rooms_available' => Room::where('room_status_id', RoomStatus::Available->value)->count(),
+                'rooms_occupied' => Room::where('room_status_id', RoomStatus::Occupied->value)->count(),
+                'rooms_dirty' => Room::where('room_status_id', RoomStatus::Dirty->value)->count(),
+                'rooms_cleaning' => Room::where('room_status_id', RoomStatus::Cleaning->value)->count(),
             ];
 
             return view('housekeeping.maintenance', compact('maintenanceRooms', 'stats'));
         } catch (\Throwable $e) {
             Log::error('maintenance page: '.$e->getMessage());
+
             return back()->with('error', 'Erreur: '.$e->getMessage());
         }
     }
@@ -252,7 +262,7 @@ class HousekeepingController extends Controller
     {
         try {
             $isOccupied = $this->housekeeping->isRoomOccupied($room->id);
-            $newStatus  = $isOccupied ? RoomStatus::Occupied : RoomStatus::Available;
+            $newStatus = $isOccupied ? RoomStatus::Occupied : RoomStatus::Available;
 
             $data = ['room_status_id' => $newStatus->value];
 
@@ -266,9 +276,11 @@ class HousekeepingController extends Controller
             $room->update($data);
 
             $statusText = $newStatus === RoomStatus::Available ? 'Disponible' : 'Occupée';
+
             return back()->with('success', "Maintenance terminée · chambre {$room->number}: {$statusText}");
         } catch (\Throwable $e) {
             Log::error('endMaintenance: '.$e->getMessage());
+
             return back()->with('error', 'Erreur: '.$e->getMessage());
         }
     }
@@ -291,6 +303,7 @@ class HousekeepingController extends Controller
             return back()->with('success', "Inspection demandée pour la chambre {$room->number}");
         } catch (\Throwable $e) {
             Log::error('markInspection: '.$e->getMessage());
+
             return back()->with('error', "Erreur lors de la demande d'inspection: ".$e->getMessage());
         }
     }
@@ -314,6 +327,7 @@ class HousekeepingController extends Controller
             return view('housekeeping.inspections', compact('inspectionRooms'));
         } catch (\Throwable $e) {
             Log::error('inspections page: '.$e->getMessage());
+
             return back()->with('error', 'Erreur: '.$e->getMessage());
         }
     }
@@ -336,6 +350,7 @@ class HousekeepingController extends Controller
             return back()->with('success', "Inspection terminée pour la chambre {$room->number}");
         } catch (\Throwable $e) {
             Log::error('completeInspection: '.$e->getMessage());
+
             return back()->with('error', "Erreur lors de la fin d'inspection: ".$e->getMessage());
         }
     }
@@ -345,9 +360,11 @@ class HousekeepingController extends Controller
         try {
             $newStatus = $this->housekeeping->finishCleaning($room, Auth::id());
             $statusText = $newStatus === RoomStatus::Available ? 'Disponible' : 'Occupée';
+
             return back()->with('success', "Chambre {$room->number} marquée comme propre. Statut: {$statusText}");
         } catch (\Throwable $e) {
             Log::error('cleanRoom: '.$e->getMessage());
+
             return back()->with('error', 'Erreur: '.$e->getMessage());
         }
     }
@@ -361,10 +378,11 @@ class HousekeepingController extends Controller
     {
         try {
             $checkins = $this->housekeeping->getTodayArrivals();
+
             return view('housekeeping.index', [
-                'roomsByStatus'   => $this->housekeeping->getRoomsByStatus(),
-                'stats'           => $this->housekeeping->getStats($this->housekeeping->getRoomsByStatus()),
-                'todayArrivals'   => $checkins,
+                'roomsByStatus' => $this->housekeeping->getRoomsByStatus(),
+                'stats' => $this->housekeeping->getStats($this->housekeeping->getRoomsByStatus()),
+                'todayArrivals' => $checkins,
                 'todayDepartures' => collect(),
             ]);
         } catch (\Throwable $e) {
@@ -376,11 +394,12 @@ class HousekeepingController extends Controller
     {
         try {
             $checkouts = $this->housekeeping->getTodayDepartures();
+
             return view('housekeeping.index', [
-                'roomsByStatus'   => $this->housekeeping->getRoomsByStatus(),
-                'stats'           => $this->housekeeping->getStats($this->housekeeping->getRoomsByStatus()),
+                'roomsByStatus' => $this->housekeeping->getRoomsByStatus(),
+                'stats' => $this->housekeeping->getStats($this->housekeeping->getRoomsByStatus()),
                 'todayDepartures' => $checkouts,
-                'todayArrivals'   => collect(),
+                'todayArrivals' => collect(),
             ]);
         } catch (\Throwable $e) {
             return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
@@ -390,10 +409,11 @@ class HousekeepingController extends Controller
     public function todaySchedule()
     {
         try {
-            $roomsByStatus   = $this->housekeeping->getRoomsByStatus();
-            $stats           = $this->housekeeping->getStats($roomsByStatus);
+            $roomsByStatus = $this->housekeeping->getRoomsByStatus();
+            $stats = $this->housekeeping->getStats($roomsByStatus);
             $todayDepartures = $this->housekeeping->getTodayDepartures();
-            $todayArrivals   = $this->housekeeping->getTodayArrivals();
+            $todayArrivals = $this->housekeeping->getTodayArrivals();
+
             return view('housekeeping.index', compact('roomsByStatus', 'stats', 'todayDepartures', 'todayArrivals'));
         } catch (\Throwable $e) {
             return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
@@ -404,11 +424,11 @@ class HousekeepingController extends Controller
     {
         return response()->json([
             'success' => true,
-            'data'    => [
-                'id'         => $room->id,
-                'number'     => $room->number,
-                'status_id'  => $room->room_status_id,
-                'status'     => optional($room->roomStatus)->name,
+            'data' => [
+                'id' => $room->id,
+                'number' => $room->number,
+                'status_id' => $room->room_status_id,
+                'status' => optional($room->roomStatus)->name,
                 'is_occupied' => $this->housekeeping->isRoomOccupied($room->id),
             ],
         ]);
@@ -420,10 +440,11 @@ class HousekeepingController extends Controller
             $rooms = Room::with(['type', 'roomStatus'])
                 ->where('room_status_id', RoomStatus::Occupied->value)
                 ->orderBy('number')->get();
-            $roomsByStatus   = $this->housekeeping->getRoomsByStatus();
-            $stats           = $this->housekeeping->getStats($roomsByStatus);
+            $roomsByStatus = $this->housekeeping->getRoomsByStatus();
+            $stats = $this->housekeeping->getStats($roomsByStatus);
             $todayDepartures = $this->housekeeping->getTodayDepartures();
-            $todayArrivals   = $this->housekeeping->getTodayArrivals();
+            $todayArrivals = $this->housekeeping->getTodayArrivals();
+
             return view('housekeeping.index', compact('roomsByStatus', 'stats', 'todayDepartures', 'todayArrivals'));
         } catch (\Throwable $e) {
             return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
@@ -434,6 +455,7 @@ class HousekeepingController extends Controller
     {
         $count = Transaction::whereIn('status', ['reservation', 'confirmed'])
             ->whereDate('check_in', Carbon::today())->count();
+
         return response()->json(['success' => true, 'count' => $count]);
     }
 
@@ -441,6 +463,7 @@ class HousekeepingController extends Controller
     {
         $count = Transaction::whereIn('status', ['active', 'checked_in'])
             ->whereDate('check_out', Carbon::today())->count();
+
         return response()->json(['success' => true, 'count' => $count]);
     }
 
@@ -448,7 +471,8 @@ class HousekeepingController extends Controller
     {
         try {
             $roomsByStatus = $this->housekeeping->getRoomsByStatus();
-            $stats         = $this->housekeeping->getStats($roomsByStatus);
+            $stats = $this->housekeeping->getStats($roomsByStatus);
+
             return redirect()->route('housekeeping.index')->with(compact('stats'));
         } catch (\Throwable $e) {
             return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
@@ -487,14 +511,15 @@ class HousekeepingController extends Controller
             }
 
             $stats = [
-                'cleaned_today'   => $cleanedToday->count(),
-                'to_clean'        => $toClean->count(),
+                'cleaned_today' => $cleanedToday->count(),
+                'to_clean' => $toClean->count(),
                 'cleaned_by_user' => $cleanedByUser,
             ];
 
             return view('housekeeping.daily-report', compact('today', 'stats', 'cleanedToday', 'toClean'));
         } catch (\Throwable $e) {
             Log::error('dailyReport: '.$e->getMessage());
+
             return back()->with('error', 'Erreur: '.$e->getMessage());
         }
     }
@@ -535,6 +560,7 @@ class HousekeepingController extends Controller
             return view('housekeeping.reports', compact('cleanedRooms', 'cleanedByUser', 'staff', 'types', 'availableDates', 'date', 'selectedDate'));
         } catch (\Throwable $e) {
             Log::error('reports: '.$e->getMessage());
+
             return back()->with('error', 'Erreur: '.$e->getMessage());
         }
     }
@@ -543,7 +569,7 @@ class HousekeepingController extends Controller
     {
         try {
             $selectedMonth = $request->filled('month')
-                ? Carbon::parse($request->month . '-01')
+                ? Carbon::parse($request->month.'-01')
                 : Carbon::now()->startOfMonth();
 
             $topCleaners = collect();
@@ -578,7 +604,7 @@ class HousekeepingController extends Controller
                 ->pluck('month');
 
             $monthlyStats = DB::table('rooms')->when($this->tenantId(), fn ($q) => $q->where('rooms.hotel_id', $this->tenantId()))
-                ->selectRaw("DATE(last_cleaned_at) as date, count(*) as cleaned_count")
+                ->selectRaw('DATE(last_cleaned_at) as date, count(*) as cleaned_count')
                 ->whereYear('last_cleaned_at', $selectedMonth->year)
                 ->whereMonth('last_cleaned_at', $selectedMonth->month)
                 ->groupByRaw('DATE(last_cleaned_at)')
@@ -593,6 +619,7 @@ class HousekeepingController extends Controller
             ));
         } catch (\Throwable $e) {
             Log::error('monthlyStats: '.$e->getMessage());
+
             return back()->with('error', 'Erreur: '.$e->getMessage());
         }
     }
@@ -601,7 +628,7 @@ class HousekeepingController extends Controller
     {
         $request->validate([
             'room_number' => 'required|string|max:10',
-            'action'      => 'required|in:start-cleaning,finish-cleaning,maintenance,clean',
+            'action' => 'required|in:start-cleaning,finish-cleaning,maintenance,clean',
         ]);
 
         $room = Room::where('number', $request->room_number)->first();
@@ -612,15 +639,15 @@ class HousekeepingController extends Controller
 
         try {
             match ($request->action) {
-                'start-cleaning'  => $this->housekeeping->startCleaning($room, Auth::id()),
+                'start-cleaning' => $this->housekeeping->startCleaning($room, Auth::id()),
                 'finish-cleaning', 'clean' => $this->housekeeping->finishCleaning($room, Auth::id()),
-                'maintenance'     => $room->update(['room_status_id' => RoomStatus::Maintenance->value]),
+                'maintenance' => $room->update(['room_status_id' => RoomStatus::Maintenance->value]),
             };
 
             return response()->json([
                 'success' => true,
                 'message' => "Action effectuée pour la chambre {$room->number}",
-                'room'    => ['id' => $room->id, 'number' => $room->number],
+                'room' => ['id' => $room->id, 'number' => $room->number],
             ]);
         } catch (\Throwable $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
@@ -630,7 +657,7 @@ class HousekeepingController extends Controller
     public function assignCleaner(Request $request)
     {
         $request->validate([
-            'room_id'    => 'required|exists:rooms,id',
+            'room_id' => 'required|exists:rooms,id',
             'cleaner_id' => 'required|exists:users,id',
         ]);
 
@@ -643,6 +670,7 @@ class HousekeepingController extends Controller
             if (! empty($data)) {
                 $room->update($data);
             }
+
             return back()->with('success', "Nettoyeur assigné à la chambre {$room->number}");
         } catch (\Throwable $e) {
             return back()->with('error', 'Erreur: '.$e->getMessage());
@@ -652,7 +680,7 @@ class HousekeepingController extends Controller
     public function updatePriority(Request $request)
     {
         $request->validate([
-            'room_id'  => 'required|exists:rooms,id',
+            'room_id' => 'required|exists:rooms,id',
             'priority' => 'required|in:high,medium,low',
         ]);
 
@@ -661,6 +689,7 @@ class HousekeepingController extends Controller
             if (Schema::hasColumn('rooms', 'cleaning_priority')) {
                 $room->update(['cleaning_priority' => $request->priority]);
             }
+
             return back()->with('success', "Priorité mise à jour pour la chambre {$room->number}");
         } catch (\Throwable $e) {
             return back()->with('error', 'Erreur: '.$e->getMessage());
@@ -670,12 +699,12 @@ class HousekeepingController extends Controller
     public function export(Request $request)
     {
         try {
-            $date  = $request->filled('date') ? Carbon::parse($request->date) : Carbon::today();
+            $date = $request->filled('date') ? Carbon::parse($request->date) : Carbon::today();
             $rooms = Room::with(['type', 'roomStatus'])
                 ->whereDate('last_cleaned_at', $date)
                 ->orderBy('number')->get();
 
-            $csv  = "Chambre,Type,Statut,Nettoyée le,Nettoyée par\n";
+            $csv = "Chambre,Type,Statut,Nettoyée le,Nettoyée par\n";
             foreach ($rooms as $room) {
                 $csv .= implode(',', [
                     $room->number,
@@ -687,7 +716,7 @@ class HousekeepingController extends Controller
             }
 
             return response($csv, 200, [
-                'Content-Type'        => 'text/csv',
+                'Content-Type' => 'text/csv',
                 'Content-Disposition' => 'attachment; filename="housekeeping-'.$date->format('Y-m-d').'.csv"',
             ]);
         } catch (\Throwable $e) {

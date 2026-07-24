@@ -23,9 +23,9 @@ class CashierSessionController extends Controller
 
     public function dashboard()
     {
-        $user          = Auth::user();
+        $user = Auth::user();
         $activeSession = $this->sessionService->getActiveSession($user);
-        $isAdmin       = $this->sessionService->isAdmin($user);
+        $isAdmin = $this->sessionService->isAdmin($user);
 
         if ($activeSession) {
             $activeSession->load(['payments' => function ($q) {
@@ -36,20 +36,20 @@ class CashierSessionController extends Controller
         }
 
         return view('cashier.dashboard', [
-            'user'              => $user,
-            'activeSession'     => $activeSession,
-            'todayStats'        => $this->sessionService->getTodayStats($user),
-            'pendingPayments'   => $this->sessionService->getPendingPayments($user),
-            'recentSessions'    => $this->sessionService->getRecentSessions($user),
+            'user' => $user,
+            'activeSession' => $activeSession,
+            'todayStats' => $this->sessionService->getTodayStats($user),
+            'pendingPayments' => $this->sessionService->getPendingPayments($user),
+            'recentSessions' => $this->sessionService->getRecentSessions($user),
             'allActiveSessions' => $isAdmin ? $this->sessionService->getAllActiveSessions() : [],
-            'canStartSession'   => $this->sessionService->canUserStartSession($user, $activeSession),
-            'currentTime'       => now()->format('d/m/Y H:i:s'),
-            'isReceptionist'    => $user->isReceptionist(),
-            'isAdmin'           => $isAdmin,
-            'isCashier'         => $user->isCashier() || $isAdmin,
-            'allReceptionists'  => $isAdmin ? User::whereIn('role', ['Receptionist', 'Cashier', 'Admin', 'Super'])->orderBy('name')->get() : [],
-            'allSessions'       => $isAdmin ? CashierSession::with('user')->orderByDesc('created_at')->paginate(10) : collect([]),
-            'allSessionsCount'  => $isAdmin ? CashierSession::count() : 0,
+            'canStartSession' => $this->sessionService->canUserStartSession($user, $activeSession),
+            'currentTime' => now()->format('d/m/Y H:i:s'),
+            'isReceptionist' => $user->isReceptionist(),
+            'isAdmin' => $isAdmin,
+            'isCashier' => $user->isCashier() || $isAdmin,
+            'allReceptionists' => $isAdmin ? User::whereIn('role', ['Receptionist', 'Cashier', 'Admin', 'Super'])->orderBy('name')->get() : [],
+            'allSessions' => $isAdmin ? CashierSession::with('user')->orderByDesc('created_at')->paginate(10) : collect([]),
+            'allSessionsCount' => $isAdmin ? CashierSession::count() : 0,
         ]);
     }
 
@@ -63,10 +63,11 @@ class CashierSessionController extends Controller
                 : CashierSession::where('user_id', $user->id)->orderByDesc('created_at')->paginate(20);
 
             $sessions->getCollection()->transform(function ($session) use ($user) {
-                $session->payments_count    = Payment::where('cashier_session_id', $session->id)->where('status', Payment::STATUS_COMPLETED)->count();
-                $session->payments_total    = Payment::where('cashier_session_id', $session->id)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0;
+                $session->payments_count = Payment::where('cashier_session_id', $session->id)->where('status', Payment::STATUS_COMPLETED)->count();
+                $session->payments_total = Payment::where('cashier_session_id', $session->id)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0;
                 $session->formatted_duration = $this->sessionService->formatDuration($session);
-                $session->can_view          = $this->sessionService->isAdmin($user) || $session->user_id === $user->id;
+                $session->can_view = $this->sessionService->isAdmin($user) || $session->user_id === $user->id;
+
                 return $session;
             });
 
@@ -78,7 +79,7 @@ class CashierSessionController extends Controller
 
     public function create()
     {
-        $user          = Auth::user();
+        $user = Auth::user();
         $activeSession = $this->sessionService->getActiveSession($user);
 
         if ($activeSession) {
@@ -91,7 +92,7 @@ class CashierSessionController extends Controller
 
         return view('cashier.sessions.create', [
             'paymentMethods' => Payment::getPaymentMethods(),
-            'user'           => $user,
+            'user' => $user,
             'defaultBalance' => 0,
         ]);
     }
@@ -100,7 +101,7 @@ class CashierSessionController extends Controller
     {
         $request->validate(['notes' => 'nullable|string|max:500']);
 
-        $user          = Auth::user();
+        $user = Auth::user();
         $activeSession = $this->sessionService->getActiveSession($user);
 
         if ($activeSession) {
@@ -108,17 +109,17 @@ class CashierSessionController extends Controller
         }
 
         try {
-            $now       = Carbon::now();
+            $now = Carbon::now();
             $shiftType = $this->sessionService->determineShiftType($now);
 
             $session = CashierSession::create([
-                'user_id'         => $user->id,
+                'user_id' => $user->id,
                 'initial_balance' => 0,
                 'current_balance' => 0,
-                'start_time'      => $now,
-                'status'          => 'active',
-                'notes'           => $request->notes,
-                'shift_type'      => $shiftType,
+                'start_time' => $now,
+                'status' => 'active',
+                'notes' => $request->notes,
+                'shift_type' => $shiftType,
             ]);
 
             return redirect()->route('cashier.dashboard')->with('success', "Session démarrée avec succès! ID: #{$session->id} à ".$now->format('H:i'));
@@ -142,10 +143,10 @@ class CashierSessionController extends Controller
                 ->paginate(15);
 
             $stats = [
-                'totalPayments'   => Payment::where('cashier_session_id', $cashierSession->id)->where('status', Payment::STATUS_COMPLETED)->count(),
-                'totalAmount'     => Payment::where('cashier_session_id', $cashierSession->id)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
+                'totalPayments' => Payment::where('cashier_session_id', $cashierSession->id)->where('status', Payment::STATUS_COMPLETED)->count(),
+                'totalAmount' => Payment::where('cashier_session_id', $cashierSession->id)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
                 'pendingPayments' => Payment::where('cashier_session_id', $cashierSession->id)->where('status', Payment::STATUS_PENDING)->count(),
-                'refundedAmount'  => Payment::where('cashier_session_id', $cashierSession->id)->where('payment_method', Payment::METHOD_REFUND)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
+                'refundedAmount' => Payment::where('cashier_session_id', $cashierSession->id)->where('payment_method', Payment::METHOD_REFUND)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
             ];
 
             $cashierSession->formatted_duration = $this->sessionService->formatDuration($cashierSession);
@@ -189,6 +190,7 @@ class CashierSessionController extends Controller
 
         try {
             $cashierSession->update(['notes' => $request->notes]);
+
             return redirect()->route('cashier.sessions.show', $cashierSession)->with('success', 'Session mise à jour avec succès.');
         } catch (\Throwable $e) {
             return redirect()->back()->with('error', 'Erreur lors de la mise à jour: '.$e->getMessage());
@@ -209,12 +211,12 @@ class CashierSessionController extends Controller
 
         try {
             $physicalBalance = (float) $request->input('final_balance', $cashierSession->current_balance);
-            $session         = $this->sessionService->closeSession($cashierSession, $user, $physicalBalance, $request->input('closing_notes'));
+            $session = $this->sessionService->closeSession($cashierSession, $user, $physicalBalance, $request->input('closing_notes'));
 
-            $endTime  = $session->end_time;
+            $endTime = $session->end_time;
             $duration = $cashierSession->start_time->diffInMinutes($endTime);
-            $hours    = (int) floor($duration / 60);
-            $minutes  = $duration % 60;
+            $hours = (int) floor($duration / 60);
+            $minutes = $duration % 60;
 
             $message = '✅ Session #'.$session->id.' clôturée. Durée: '.($hours > 0 ? "{$hours}h " : '')."{$minutes}min.";
 
@@ -230,17 +232,17 @@ class CashierSessionController extends Controller
 
     public function getLiveStats()
     {
-        $user  = Auth::user();
+        $user = Auth::user();
         $today = Carbon::today();
 
         try {
             return response()->json([
-                'success'   => true,
-                'stats'     => [
-                    'todayBookings'    => Booking::whereDate('created_at', $today)->count(),
-                    'todayRevenue'     => Payment::whereDate('created_at', $today)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
-                    'pendingPayments'  => Payment::where('status', Payment::STATUS_PENDING)->count(),
-                    'activeSessions'   => CashierSession::where('status', 'active')->count(),
+                'success' => true,
+                'stats' => [
+                    'todayBookings' => Booking::whereDate('created_at', $today)->count(),
+                    'todayRevenue' => Payment::whereDate('created_at', $today)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
+                    'pendingPayments' => Payment::where('status', Payment::STATUS_PENDING)->count(),
+                    'activeSessions' => CashierSession::where('status', 'active')->count(),
                     'userActiveSession' => ! is_null($this->sessionService->getActiveSession($user)),
                 ],
                 'timestamp' => now()->toDateTimeString(),
@@ -252,26 +254,26 @@ class CashierSessionController extends Controller
 
     public function checkActiveSession()
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $session = $this->sessionService->getActiveSession($user);
 
         return response()->json([
-            'success'         => true,
+            'success' => true,
             'hasActiveSession' => ! is_null($session),
-            'session'         => $session,
+            'session' => $session,
             'canStartSession' => $this->sessionService->canUserStartSession($user, $session),
         ]);
     }
 
     public function requireActiveSession()
     {
-        $user    = Auth::user();
+        $user = Auth::user();
         $session = $this->sessionService->getActiveSession($user);
 
         if (! $session) {
             return response()->json([
-                'success'  => false,
-                'message'  => 'Aucune session active. Veuillez démarrer une session.',
+                'success' => false,
+                'message' => 'Aucune session active. Veuillez démarrer une session.',
                 'redirect' => route('cashier.sessions.create'),
             ], 403);
         }
@@ -287,15 +289,15 @@ class CashierSessionController extends Controller
             return redirect()->route('cashier.dashboard')->with('error', 'Accès réservé aux administrateurs.');
         }
 
-        $date     = $request->get('date', Carbon::today()->format('Y-m-d'));
+        $date = $request->get('date', Carbon::today()->format('Y-m-d'));
         $sessions = CashierSession::whereDate('created_at', $date)->with('user')->orderByDesc('created_at')->get();
         $payments = Payment::whereDate('created_at', $date)->with(['cashierSession.user', 'transaction.booking'])->orderByDesc('created_at')->get();
 
         $stats = [
-            'totalSessions'  => $sessions->count(),
+            'totalSessions' => $sessions->count(),
             'activeSessions' => $sessions->where('status', 'active')->count(),
-            'totalRevenue'   => $payments->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
-            'totalRefunded'  => $payments->where('status', Payment::STATUS_REFUNDED)->sum('amount') ?? 0,
+            'totalRevenue' => $payments->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
+            'totalRefunded' => $payments->where('status', Payment::STATUS_REFUNDED)->sum('amount') ?? 0,
         ];
 
         return view('cashier.reports.daily', compact('sessions', 'payments', 'stats', 'date', 'user'));
@@ -312,8 +314,8 @@ class CashierSessionController extends Controller
         try {
             if ($userId) {
                 $receptionist = User::findOrFail($userId);
-                $sessions     = CashierSession::where('user_id', $userId)->orderByDesc('created_at')->paginate(20);
-                $stats        = $this->sessionService->getReceptionistStats($userId);
+                $sessions = CashierSession::where('user_id', $userId)->orderByDesc('created_at')->paginate(20);
+                $stats = $this->sessionService->getReceptionistStats($userId);
 
                 return view('cashier.reports.receptionist', compact('receptionist', 'sessions', 'stats', 'user'));
             }
@@ -354,20 +356,20 @@ class CashierSessionController extends Controller
         $paymentMethodsAnalysis = [];
         foreach ($payments->groupBy('payment_method') as $method => $group) {
             $completed = $group->where('status', Payment::STATUS_COMPLETED);
-            $refunded  = $group->where('status', Payment::STATUS_REFUNDED);
+            $refunded = $group->where('status', Payment::STATUS_REFUNDED);
 
             $paymentMethodsAnalysis[$method] = [
-                'total'        => $completed->sum('amount'),
-                'refunded'     => $refunded->sum('amount'),
-                'net'          => $completed->sum('amount') - abs($refunded->sum('amount')),
-                'count'        => $completed->count(),
+                'total' => $completed->sum('amount'),
+                'refunded' => $refunded->sum('amount'),
+                'net' => $completed->sum('amount') - abs($refunded->sum('amount')),
+                'count' => $completed->count(),
                 'refund_count' => $refunded->count(),
             ];
         }
 
         $transactionStatusAnalysis = [
-            'total'     => $transactions->count(),
-            'active'    => $transactions->where('status', 'active')->count(),
+            'total' => $transactions->count(),
+            'active' => $transactions->where('status', 'active')->count(),
             'completed' => $transactions->where('status', 'completed')->count(),
             'cancelled' => $transactions->where('status', 'cancelled')->count(),
         ];

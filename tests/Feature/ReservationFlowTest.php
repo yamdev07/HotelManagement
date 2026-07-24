@@ -29,11 +29,11 @@ class ReservationFlowTest extends TestCase
         Mail::fake();
 
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Flux Resa',
-            'slug'                    => Str::slug('Hotel Flux Resa '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Flux Resa',
+            'slug' => Str::slug('Hotel Flux Resa '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
@@ -46,10 +46,10 @@ class ReservationFlowTest extends TestCase
         $customer = Customer::create(['name' => 'Jean Resa', 'email' => 'jean@resa.test', 'gender' => 'Male']);
 
         $payload = [
-            'check_in'       => now()->addDays(2)->toDateString(),
-            'check_out'      => now()->addDays(4)->toDateString(),
-            'downPayment'    => 0,
-            'person_count'   => 2,
+            'check_in' => now()->addDays(2)->toDateString(),
+            'check_out' => now()->addDays(4)->toDateString(),
+            'downPayment' => 0,
+            'person_count' => 2,
             'payment_method' => 'cash',
         ];
 

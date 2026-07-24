@@ -20,8 +20,8 @@ class ResetPasswordNotification extends BaseResetPassword
             ->subject('Réinitialisation de votre mot de passe · '.config('app.name', 'checkinHub'))
             ->view(['emails.reset-password', 'emails.reset-password-text'], [
                 'resetUrl' => $url,
-                'email'    => $notifiable->getEmailForPasswordReset(),
-                'expire'   => $expire,
+                'email' => $notifiable->getEmailForPasswordReset(),
+                'expire' => $expire,
             ]);
     }
 }

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\Menu;
 use App\Models\RestaurantReservation;
 use App\Models\Room;
-use App\Models\Type;
 use App\Models\Transaction;
-use App\Models\Customer;
+use App\Models\Type;
 use App\Models\User;
 use App\Notifications\ReservationNotification;
 use App\Notifications\RestaurantReservationNotification;
@@ -56,229 +56,229 @@ class FrontendController extends Controller
         return view('frontend.pages.home', compact('featuredRooms'));
     }
 
-
-/**
- * Liste des chambres (AVEC DÉBOGAGE COMPLET)
- */
-public function rooms(Request $request)
-{
-    if ($redirect = $this->requireTenant()) {
-        return $redirect;
-    }
-
-    // ==================== DÉBOGAGE CHAMBRE 101 ====================
-    $this->debugRoom101($request);
-    // =============================================================
-
-    // Inclure les chambres sales (STATUS_DIRTY = 6) et disponibles (STATUS_AVAILABLE = 1)
-    $query = Room::with(['type', 'roomStatus', 'images', 'facilities'])
-        ->whereIn('room_status_id', [
-            Room::STATUS_AVAILABLE, // 1 - Disponible
-            Room::STATUS_DIRTY      // 6 - Sale (mais réservable)
-        ])
-        ->orderBy('number', 'asc'); // 👈 SEULE MODIFICATION : FORCER LE TRI PAR NUMÉRO
-
-    // --- DÉBOGAGE AVANT FILTRES ---
-    $beforeFilterCount = $query->count();
-    Log::info('📊 NOMBRE DE CHAMBRES AVANT FILTRES: ' . $beforeFilterCount);
-    
-    $beforeFilterNumbers = $query->pluck('number')->toArray();
-    Log::info('📋 CHAMBRES AVANT FILTRES:', $beforeFilterNumbers);
-    // -----------------------------
-
-    // Filtres
-    if ($request->filled('type')) {
-        $query->where('type_id', $request->type);
-        Log::info('🔍 FILTRE TYPE APPLIQUÉ: type_id = ' . $request->type);
-    }
-
-    if ($request->filled('capacity')) {
-        $query->where('capacity', $request->capacity);
-        Log::info('🔍 FILTRE CAPACITÉ APPLIQUÉ: capacity >= ' . $request->capacity);
-    }
-
-    if ($request->filled('price_range')) {
-        $range = $request->price_range;
-        if ($range === '200000+') {
-            $query->where('price', '>=', 200000);
-            Log::info('🔍 FILTRE PRIX APPLIQUÉ: price >= 200000');
-        } else {
-            [$min, $max] = explode('-', $range);
-            $query->whereBetween('price', [(int) $min, (int) $max]);
-            Log::info('🔍 FILTRE PRIX APPLIQUÉ: price entre ' . $min . ' et ' . $max);
+    /**
+     * Liste des chambres (AVEC DÉBOGAGE COMPLET)
+     */
+    public function rooms(Request $request)
+    {
+        if ($redirect = $this->requireTenant()) {
+            return $redirect;
         }
-    }
 
-    // Vérifier la disponibilité si des dates sont fournies
-    if ($request->filled('check_in') && $request->filled('check_out')) {
-        $checkIn = Carbon::parse($request->check_in)->startOfDay();
-        $checkOut = Carbon::parse($request->check_out)->startOfDay();
-        
-        Log::info('🔍 FILTRE DATES APPLIQUÉ: du ' . $checkIn->format('d/m/Y') . ' au ' . $checkOut->format('d/m/Y'));
-        
-        // Exclure les chambres qui ont des réservations pendant cette période
-        $bookedRoomIds = Transaction::whereIn('status', ['reservation', 'active'])
-            ->where(function ($q) use ($checkIn, $checkOut) {
-                $q->where('check_in', '<', $checkOut)
-                  ->where('check_out', '>', $checkIn);
-            })
-            ->pluck('room_id')
-            ->toArray();
-        
-        if (!empty($bookedRoomIds)) {
-            Log::info('🚫 CHAMBRES RÉSERVÉES EXCLUES:', $bookedRoomIds);
-            $query->whereNotIn('id', $bookedRoomIds);
-        } else {
-            Log::info('✅ Aucune chambre réservée pour ces dates');
+        // ==================== DÉBOGAGE CHAMBRE 101 ====================
+        $this->debugRoom101($request);
+        // =============================================================
+
+        // Inclure les chambres sales (STATUS_DIRTY = 6) et disponibles (STATUS_AVAILABLE = 1)
+        $query = Room::with(['type', 'roomStatus', 'images', 'facilities'])
+            ->whereIn('room_status_id', [
+                Room::STATUS_AVAILABLE, // 1 - Disponible
+                Room::STATUS_DIRTY,      // 6 - Sale (mais réservable)
+            ])
+            ->orderBy('number', 'asc'); // 👈 SEULE MODIFICATION : FORCER LE TRI PAR NUMÉRO
+
+        // --- DÉBOGAGE AVANT FILTRES ---
+        $beforeFilterCount = $query->count();
+        Log::info('📊 NOMBRE DE CHAMBRES AVANT FILTRES: '.$beforeFilterCount);
+
+        $beforeFilterNumbers = $query->pluck('number')->toArray();
+        Log::info('📋 CHAMBRES AVANT FILTRES:', $beforeFilterNumbers);
+        // -----------------------------
+
+        // Filtres
+        if ($request->filled('type')) {
+            $query->where('type_id', $request->type);
+            Log::info('🔍 FILTRE TYPE APPLIQUÉ: type_id = '.$request->type);
         }
-    }
 
-    // --- DÉBOGAGE APRÈS FILTRES ---
-    $afterFilterCount = $query->count();
-    Log::info('📊 NOMBRE DE CHAMBRES APRÈS FILTRES: ' . $afterFilterCount);
-    
-    $afterFilterNumbers = $query->pluck('number')->toArray();
-    Log::info('📋 CHAMBRES APRÈS FILTRES:', $afterFilterNumbers);
-    
-    // Vérification spécifique de la chambre 101
-    $has101 = in_array('101', $afterFilterNumbers);
-    Log::info('🔎 CHAMBRE 101 DANS LA LISTE APRÈS FILTRES? ' . ($has101 ? 'OUI ✅' : 'NON ❌'));
-    
-    if (!$has101) {
-        Log::info('🔍 RECHERCHE DES RAISONS POUR LA CHAMBRE 101:');
-        
-        $room101 = Room::where('number', '101')->first();
-        if ($room101) {
-            Log::info('📌 CHAMBRE 101 EN BASE:', [
-                'id' => $room101->id,
-                'status_id' => $room101->room_status_id,
-                'status_label' => $room101->status_label,
-                'type_id' => $room101->type_id,
-                'capacity' => $room101->capacity,
-                'price' => $room101->price
-            ]);
-            
-            // Vérifier le statut
-            $statusOk = in_array($room101->room_status_id, [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY]);
-            Log::info('- Statut autorisé (1 ou 6)? ' . ($statusOk ? 'OUI ✅' : 'NON ❌'));
-            
-            // Vérifier chaque filtre
-            if ($request->filled('type')) {
-                $typeOk = ($room101->type_id == $request->type);
-                Log::info('- Correspond au filtre type (type_id=' . $request->type . ')? ' . ($typeOk ? 'OUI ✅' : 'NON ❌'));
+        if ($request->filled('capacity')) {
+            $query->where('capacity', $request->capacity);
+            Log::info('🔍 FILTRE CAPACITÉ APPLIQUÉ: capacity >= '.$request->capacity);
+        }
+
+        if ($request->filled('price_range')) {
+            $range = $request->price_range;
+            if ($range === '200000+') {
+                $query->where('price', '>=', 200000);
+                Log::info('🔍 FILTRE PRIX APPLIQUÉ: price >= 200000');
+            } else {
+                [$min, $max] = explode('-', $range);
+                $query->whereBetween('price', [(int) $min, (int) $max]);
+                Log::info('🔍 FILTRE PRIX APPLIQUÉ: price entre '.$min.' et '.$max);
             }
-            
-            if ($request->filled('capacity')) {
-                $capacityOk = ($room101->capacity >= $request->capacity);
-                Log::info('- Correspond au filtre capacité (capacity>=' . $request->capacity . ')? ' . ($capacityOk ? 'OUI ✅' : 'NON ❌'));
+        }
+
+        // Vérifier la disponibilité si des dates sont fournies
+        if ($request->filled('check_in') && $request->filled('check_out')) {
+            $checkIn = Carbon::parse($request->check_in)->startOfDay();
+            $checkOut = Carbon::parse($request->check_out)->startOfDay();
+
+            Log::info('🔍 FILTRE DATES APPLIQUÉ: du '.$checkIn->format('d/m/Y').' au '.$checkOut->format('d/m/Y'));
+
+            // Exclure les chambres qui ont des réservations pendant cette période
+            $bookedRoomIds = Transaction::whereIn('status', ['reservation', 'active'])
+                ->where(function ($q) use ($checkIn, $checkOut) {
+                    $q->where('check_in', '<', $checkOut)
+                        ->where('check_out', '>', $checkIn);
+                })
+                ->pluck('room_id')
+                ->toArray();
+
+            if (! empty($bookedRoomIds)) {
+                Log::info('🚫 CHAMBRES RÉSERVÉES EXCLUES:', $bookedRoomIds);
+                $query->whereNotIn('id', $bookedRoomIds);
+            } else {
+                Log::info('✅ Aucune chambre réservée pour ces dates');
             }
-            
-            if ($request->filled('price_range')) {
-                $range = $request->price_range;
-                if ($range === '200000+') {
-                    $priceOk = ($room101->price >= 200000);
-                } else {
-                    [$min, $max] = explode('-', $range);
-                    $priceOk = ($room101->price >= (int)$min && $room101->price <= (int)$max);
+        }
+
+        // --- DÉBOGAGE APRÈS FILTRES ---
+        $afterFilterCount = $query->count();
+        Log::info('📊 NOMBRE DE CHAMBRES APRÈS FILTRES: '.$afterFilterCount);
+
+        $afterFilterNumbers = $query->pluck('number')->toArray();
+        Log::info('📋 CHAMBRES APRÈS FILTRES:', $afterFilterNumbers);
+
+        // Vérification spécifique de la chambre 101
+        $has101 = in_array('101', $afterFilterNumbers);
+        Log::info('🔎 CHAMBRE 101 DANS LA LISTE APRÈS FILTRES? '.($has101 ? 'OUI ✅' : 'NON ❌'));
+
+        if (! $has101) {
+            Log::info('🔍 RECHERCHE DES RAISONS POUR LA CHAMBRE 101:');
+
+            $room101 = Room::where('number', '101')->first();
+            if ($room101) {
+                Log::info('📌 CHAMBRE 101 EN BASE:', [
+                    'id' => $room101->id,
+                    'status_id' => $room101->room_status_id,
+                    'status_label' => $room101->status_label,
+                    'type_id' => $room101->type_id,
+                    'capacity' => $room101->capacity,
+                    'price' => $room101->price,
+                ]);
+
+                // Vérifier le statut
+                $statusOk = in_array($room101->room_status_id, [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY]);
+                Log::info('- Statut autorisé (1 ou 6)? '.($statusOk ? 'OUI ✅' : 'NON ❌'));
+
+                // Vérifier chaque filtre
+                if ($request->filled('type')) {
+                    $typeOk = ($room101->type_id == $request->type);
+                    Log::info('- Correspond au filtre type (type_id='.$request->type.')? '.($typeOk ? 'OUI ✅' : 'NON ❌'));
                 }
-                Log::info('- Correspond au filtre prix? ' . ($priceOk ? 'OUI ✅' : 'NON ❌'));
+
+                if ($request->filled('capacity')) {
+                    $capacityOk = ($room101->capacity >= $request->capacity);
+                    Log::info('- Correspond au filtre capacité (capacity>='.$request->capacity.')? '.($capacityOk ? 'OUI ✅' : 'NON ❌'));
+                }
+
+                if ($request->filled('price_range')) {
+                    $range = $request->price_range;
+                    if ($range === '200000+') {
+                        $priceOk = ($room101->price >= 200000);
+                    } else {
+                        [$min, $max] = explode('-', $range);
+                        $priceOk = ($room101->price >= (int) $min && $room101->price <= (int) $max);
+                    }
+                    Log::info('- Correspond au filtre prix? '.($priceOk ? 'OUI ✅' : 'NON ❌'));
+                }
+
+                if ($request->filled('check_in') && $request->filled('check_out')) {
+                    $checkIn = Carbon::parse($request->check_in)->startOfDay();
+                    $checkOut = Carbon::parse($request->check_out)->startOfDay();
+
+                    $hasConflict = Transaction::where('room_id', $room101->id)
+                        ->whereIn('status', ['reservation', 'active'])
+                        ->where(function ($q) use ($checkIn, $checkOut) {
+                            $q->where('check_in', '<', $checkOut)
+                                ->where('check_out', '>', $checkIn);
+                        })
+                        ->exists();
+
+                    Log::info('- Conflit de réservation sur ces dates? '.($hasConflict ? 'OUI ❌' : 'NON ✅'));
+                }
+
+                // Vérifier la relation avec le type
+                $typeExists = Type::find($room101->type_id);
+                Log::info('- Le type_id '.$room101->type_id.' existe dans la table types? '.($typeExists ? 'OUI ✅' : 'NON ❌'));
+
+                if (! $typeExists) {
+                    Log::info('  ⚠️  PROBLÈME: Le type_id '.$room101->type_id.' n\'existe pas dans la table types!');
+                    Log::info('  💡 SOLUTION: Mettez à jour le type_id de la chambre 101 avec UPDATE rooms SET type_id = 1 WHERE number = \'101\';');
+                }
+            } else {
+                Log::info('❌ CHAMBRE 101 INTROUVABLE EN BASE');
             }
-            
-            if ($request->filled('check_in') && $request->filled('check_out')) {
-                $checkIn = Carbon::parse($request->check_in)->startOfDay();
-                $checkOut = Carbon::parse($request->check_out)->startOfDay();
-                
-                $hasConflict = Transaction::where('room_id', $room101->id)
-                    ->whereIn('status', ['reservation', 'active'])
-                    ->where(function ($q) use ($checkIn, $checkOut) {
-                        $q->where('check_in', '<', $checkOut)
-                          ->where('check_out', '>', $checkIn);
-                    })
-                    ->exists();
-                
-                Log::info('- Conflit de réservation sur ces dates? ' . ($hasConflict ? 'OUI ❌' : 'NON ✅'));
-            }
-            
-            // Vérifier la relation avec le type
-            $typeExists = Type::find($room101->type_id);
-            Log::info('- Le type_id ' . $room101->type_id . ' existe dans la table types? ' . ($typeExists ? 'OUI ✅' : 'NON ❌'));
-            
-            if (!$typeExists) {
-                Log::info('  ⚠️  PROBLÈME: Le type_id ' . $room101->type_id . ' n\'existe pas dans la table types!');
-                Log::info('  💡 SOLUTION: Mettez à jour le type_id de la chambre 101 avec UPDATE rooms SET type_id = 1 WHERE number = \'101\';');
-            }
-        } else {
-            Log::info('❌ CHAMBRE 101 INTROUVABLE EN BASE');
         }
+        // -----------------------------
+
+        // Pagination
+        $rooms = $query->paginate(9)->appends($request->all());
+
+        // Vérification de la page actuelle
+        $currentPage = $rooms->currentPage();
+        $totalPages = $rooms->lastPage();
+        Log::info('📄 PAGE ACTUELLE: '.$currentPage.' / '.$totalPages);
+
+        // Vérifier si la 101 est dans la page actuelle
+        $room101InPage = $rooms->contains('number', '101');
+        Log::info('🔎 CHAMBRE 101 DANS LA PAGE ACTUELLE? '.($room101InPage ? 'OUI ✅' : 'NON ❌'));
+
+        // Transformer les chambres
+        $rooms->getCollection()->transform(function ($room) {
+            $room->loadMissing(['type', 'roomStatus', 'facilities']);
+            $room->is_dirty = ($room->room_status_id == Room::STATUS_DIRTY);
+            $room->is_clean = ($room->room_status_id == Room::STATUS_AVAILABLE);
+
+            return $room;
+        });
+
+        // Récupérer tous les types pour le filtre
+        $types = Type::withCount('rooms')->get();
+
+        // Statistiques pour les filtres
+        $roomsByCapacity = Room::select('capacity', DB::raw('count(*) as total'))
+            ->whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
+            ->groupBy('capacity')
+            ->pluck('total', 'capacity')
+            ->toArray();
+
+        $priceRanges = [
+            '0-50000' => Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
+                ->whereBetween('price', [0, 50000])->count(),
+            '50000-100000' => Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
+                ->whereBetween('price', [50000, 100000])->count(),
+            '100000-150000' => Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
+                ->whereBetween('price', [100000, 150000])->count(),
+            '150000-200000' => Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
+                ->whereBetween('price', [150000, 200000])->count(),
+            '200000+' => Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
+                ->where('price', '>=', 200000)->count(),
+        ];
+
+        $totalRooms = Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])->count();
+        $availableCount = Room::where('room_status_id', Room::STATUS_AVAILABLE)->count();
+        $dirtyCount = Room::where('room_status_id', Room::STATUS_DIRTY)->count();
+        $averageCapacity = Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])->avg('capacity');
+        $distinctTypes = Type::count();
+
+        // Résumé final
+        Log::info('=== RÉSUMÉ FINAL ===');
+        Log::info('Total chambres dans la page: '.$rooms->count());
+        Log::info('Numéros dans cette page: '.implode(', ', $rooms->pluck('number')->toArray()));
+
+        return view('frontend.pages.rooms', compact(
+            'rooms',
+            'types',
+            'roomsByCapacity',
+            'priceRanges',
+            'totalRooms',
+            'availableCount',
+            'dirtyCount',
+            'averageCapacity',
+            'distinctTypes'
+        ));
     }
-    // -----------------------------
-
-    // Pagination
-    $rooms = $query->paginate(9)->appends($request->all());
-
-    // Vérification de la page actuelle
-    $currentPage = $rooms->currentPage();
-    $totalPages = $rooms->lastPage();
-    Log::info('📄 PAGE ACTUELLE: ' . $currentPage . ' / ' . $totalPages);
-    
-    // Vérifier si la 101 est dans la page actuelle
-    $room101InPage = $rooms->contains('number', '101');
-    Log::info('🔎 CHAMBRE 101 DANS LA PAGE ACTUELLE? ' . ($room101InPage ? 'OUI ✅' : 'NON ❌'));
-
-    // Transformer les chambres
-    $rooms->getCollection()->transform(function ($room) {
-        $room->loadMissing(['type', 'roomStatus', 'facilities']);
-        $room->is_dirty = ($room->room_status_id == Room::STATUS_DIRTY);
-        $room->is_clean = ($room->room_status_id == Room::STATUS_AVAILABLE);
-        return $room;
-    });
-
-    // Récupérer tous les types pour le filtre
-    $types = Type::withCount('rooms')->get();
-
-    // Statistiques pour les filtres
-    $roomsByCapacity = Room::select('capacity', DB::raw('count(*) as total'))
-        ->whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
-        ->groupBy('capacity')
-        ->pluck('total', 'capacity')
-        ->toArray();
-
-    $priceRanges = [
-        '0-50000' => Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
-            ->whereBetween('price', [0, 50000])->count(),
-        '50000-100000' => Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
-            ->whereBetween('price', [50000, 100000])->count(),
-        '100000-150000' => Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
-            ->whereBetween('price', [100000, 150000])->count(),
-        '150000-200000' => Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
-            ->whereBetween('price', [150000, 200000])->count(),
-        '200000+' => Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
-            ->where('price', '>=', 200000)->count(),
-    ];
-
-    $totalRooms = Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])->count();
-    $availableCount = Room::where('room_status_id', Room::STATUS_AVAILABLE)->count();
-    $dirtyCount = Room::where('room_status_id', Room::STATUS_DIRTY)->count();
-    $averageCapacity = Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])->avg('capacity');
-    $distinctTypes = Type::count();
-
-    // Résumé final
-    Log::info('=== RÉSUMÉ FINAL ===');
-    Log::info('Total chambres dans la page: ' . $rooms->count());
-    Log::info('Numéros dans cette page: ' . implode(', ', $rooms->pluck('number')->toArray()));
-
-    return view('frontend.pages.rooms', compact(
-        'rooms',
-        'types',
-        'roomsByCapacity',
-        'priceRanges',
-        'totalRooms',
-        'availableCount',
-        'dirtyCount',
-        'averageCapacity',
-        'distinctTypes'
-    ));
-}
 
     /**
      * Fonction de débogage pour la chambre 101
@@ -286,16 +286,17 @@ public function rooms(Request $request)
     private function debugRoom101(Request $request)
     {
         Log::info('========== DÉBOGAGE CHAMBRE 101 ==========');
-        
+
         // 1. Vérifier si la chambre 101 existe en base
         $room101 = Room::where('number', '101')->first();
-        
-        if (!$room101) {
+
+        if (! $room101) {
             Log::error('❌ CHAMBRE 101 N\'EXISTE PAS EN BASE DE DONNÉES');
             session()->flash('debug_room101', [
                 'exists' => false,
-                'message' => 'Chambre 101 introuvable en base de données'
+                'message' => 'Chambre 101 introuvable en base de données',
             ]);
+
             return;
         }
 
@@ -307,32 +308,32 @@ public function rooms(Request $request)
             'capacite' => $room101->capacity,
             'prix' => $room101->price,
             'is_available_today' => $room101->is_available_today, // Maintenant booléen
-            'est_occupee' => $room101->isOccupied()
+            'est_occupee' => $room101->isOccupied(),
         ]);
 
         // 2. Vérifier si elle est dans les statuts autorisés
         $statusOk = in_array($room101->room_status_id, [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY]);
-        Log::info('Statut autorisé? ' . ($statusOk ? 'OUI' : 'NON'));
+        Log::info('Statut autorisé? '.($statusOk ? 'OUI' : 'NON'));
 
         // 3. Vérifier les filtres de la requête
         $filtres = [];
-        
+
         if ($request->filled('type')) {
             $filtres['type'] = [
                 'filtre' => $request->type,
                 'chambre' => $room101->type_id,
-                'ok' => $room101->type_id == $request->type
+                'ok' => $room101->type_id == $request->type,
             ];
         }
-        
+
         if ($request->filled('capacity')) {
             $filtres['capacity'] = [
                 'filtre' => $request->capacity,
                 'chambre' => $room101->capacity,
-                'ok' => $room101->capacity >= $request->capacity
+                'ok' => $room101->capacity >= $request->capacity,
             ];
         }
-        
+
         if ($request->filled('price_range')) {
             $range = $request->price_range;
             if ($range === '200000+') {
@@ -340,36 +341,36 @@ public function rooms(Request $request)
                 $filtres['price'] = [
                     'filtre' => '200000+',
                     'chambre' => $room101->price,
-                    'ok' => $ok
+                    'ok' => $ok,
                 ];
             } else {
                 [$min, $max] = explode('-', $range);
-                $ok = $room101->price >= (int)$min && $room101->price <= (int)$max;
+                $ok = $room101->price >= (int) $min && $room101->price <= (int) $max;
                 $filtres['price'] = [
                     'filtre' => "{$min}-{$max}",
                     'chambre' => $room101->price,
-                    'ok' => $ok
+                    'ok' => $ok,
                 ];
             }
         }
-        
+
         if ($request->filled('check_in') && $request->filled('check_out')) {
             $checkIn = Carbon::parse($request->check_in)->startOfDay();
             $checkOut = Carbon::parse($request->check_out)->startOfDay();
-            
+
             $hasConflict = Transaction::where('room_id', $room101->id)
                 ->whereIn('status', ['reservation', 'active'])
                 ->where(function ($q) use ($checkIn, $checkOut) {
                     $q->where('check_in', '<', $checkOut)
-                      ->where('check_out', '>', $checkIn);
+                        ->where('check_out', '>', $checkIn);
                 })
                 ->exists();
-            
+
             $filtres['disponibilite'] = [
                 'check_in' => $checkIn->format('Y-m-d'),
                 'check_out' => $checkOut->format('Y-m-d'),
                 'conflit' => $hasConflict,
-                'ok' => !$hasConflict
+                'ok' => ! $hasConflict,
             ];
         }
 
@@ -377,7 +378,7 @@ public function rooms(Request $request)
 
         // 4. Compter le nombre total de chambres après filtres
         $query = Room::whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY]);
-        
+
         if ($request->filled('type')) {
             $query->where('type_id', $request->type);
         }
@@ -396,15 +397,15 @@ public function rooms(Request $request)
         if ($request->filled('check_in') && $request->filled('check_out')) {
             $checkIn = Carbon::parse($request->check_in)->startOfDay();
             $checkOut = Carbon::parse($request->check_out)->startOfDay();
-            
+
             $bookedRoomIds = Transaction::whereIn('status', ['reservation', 'active'])
                 ->where(function ($q) use ($checkIn, $checkOut) {
                     $q->where('check_in', '<', $checkOut)
-                      ->where('check_out', '>', $checkIn);
+                        ->where('check_out', '>', $checkIn);
                 })
                 ->pluck('room_id')
                 ->toArray();
-            
+
             $query->whereNotIn('id', $bookedRoomIds);
         }
 
@@ -412,18 +413,18 @@ public function rooms(Request $request)
         $room101InList = $allRooms->firstWhere('id', $room101->id);
 
         if ($room101InList) {
-            $position = $allRooms->search(function($item) use ($room101) {
+            $position = $allRooms->search(function ($item) use ($room101) {
                 return $item->id === $room101->id;
             });
-            
+
             $page = floor($position / 9) + 1;
-            
+
             Log::info('✅ CHAMBRE 101 DANS LA LISTE', [
                 'position' => $position,
                 'page' => $page,
-                'total_chambres' => $allRooms->count()
+                'total_chambres' => $allRooms->count(),
             ]);
-            
+
             session()->flash('debug_room101', [
                 'exists' => true,
                 'in_list' => true,
@@ -431,55 +432,55 @@ public function rooms(Request $request)
                 'page' => $page,
                 'total' => $allRooms->count(),
                 'statut' => $room101->status_label,
-                'is_available_today' => $room101->is_available_today
+                'is_available_today' => $room101->is_available_today,
             ]);
         } else {
             Log::warning('❌ CHAMBRE 101 ABSENTE DE LA LISTE');
-            
+
             // Trouver la raison
             $raisons = [];
-            
-            if (!in_array($room101->room_status_id, [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])) {
+
+            if (! in_array($room101->room_status_id, [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])) {
                 $raisons[] = "Statut non autorisé: {$room101->room_status_id}";
             }
-            
+
             if ($request->filled('type') && $room101->type_id != $request->type) {
                 $raisons[] = "Filtre type: chambre type {$room101->type_id} ≠ filtre {$request->type}";
             }
-            
+
             if ($request->filled('capacity') && $room101->capacity < $request->capacity) {
                 $raisons[] = "Filtre capacité: chambre {$room101->capacity} < {$request->capacity}";
             }
-            
+
             if ($request->filled('price_range')) {
                 $range = $request->price_range;
                 if ($range === '200000+' && $room101->price < 200000) {
                     $raisons[] = "Filtre prix: chambre {$room101->price} < 200000";
                 } elseif (strpos($range, '-') !== false) {
                     [$min, $max] = explode('-', $range);
-                    if ($room101->price < (int)$min || $room101->price > (int)$max) {
+                    if ($room101->price < (int) $min || $room101->price > (int) $max) {
                         $raisons[] = "Filtre prix: chambre {$room101->price} hors intervalle {$min}-{$max}";
                     }
                 }
             }
-            
+
             if ($request->filled('check_in') && $request->filled('check_out')) {
                 $checkIn = Carbon::parse($request->check_in)->startOfDay();
                 $checkOut = Carbon::parse($request->check_out)->startOfDay();
-                
+
                 $hasConflict = Transaction::where('room_id', $room101->id)
                     ->whereIn('status', ['reservation', 'active'])
                     ->where(function ($q) use ($checkIn, $checkOut) {
                         $q->where('check_in', '<', $checkOut)
-                          ->where('check_out', '>', $checkIn);
+                            ->where('check_out', '>', $checkIn);
                     })
                     ->exists();
-                
+
                 if ($hasConflict) {
-                    $raisons[] = "Conflit de réservation sur ces dates";
+                    $raisons[] = 'Conflit de réservation sur ces dates';
                 }
             }
-            
+
             session()->flash('debug_room101', [
                 'exists' => true,
                 'in_list' => false,
@@ -491,18 +492,18 @@ public function rooms(Request $request)
                     'type' => $room101->type_id,
                     'capacite' => $room101->capacity,
                     'prix' => $room101->price,
-                    'is_available_today' => $room101->is_available_today
+                    'is_available_today' => $room101->is_available_today,
                 ],
                 'filtres_actifs' => [
                     'type' => $request->type,
                     'capacity' => $request->capacity,
                     'price_range' => $request->price_range,
                     'check_in' => $request->check_in,
-                    'check_out' => $request->check_out
-                ]
+                    'check_out' => $request->check_out,
+                ],
             ]);
         }
-        
+
         Log::info('========== FIN DÉBOGAGE CHAMBRE 101 ==========');
     }
 
@@ -523,8 +524,8 @@ public function rooms(Request $request)
             ->where('check_out', '>=', $today)
             ->whereIn('status', ['active', 'reservation'])
             ->exists();
-        
-        $room->is_available_today = !$isOccupied && in_array($room->room_status_id, [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY]);
+
+        $room->is_available_today = ! $isOccupied && in_array($room->room_status_id, [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY]);
         $room->is_dirty = ($room->room_status_id == Room::STATUS_DIRTY);
         $room->is_available = ($room->room_status_id == Room::STATUS_AVAILABLE);
         $room->can_check_in = $room->canCheckIn();
@@ -532,15 +533,15 @@ public function rooms(Request $request)
         $room->status_label = $room->status_label;
         $room->status_color = $room->status_color;
         $room->status_icon = $room->status_icon;
-        
+
         // Vérifier si la chambre a des réservations aujourd'hui
         $room->has_reservation_today = Transaction::where('room_id', $room->id)
             ->whereIn('status', ['reservation', 'active'])
             ->whereDate('check_in', $today)
             ->exists();
-        
+
         // Prochaine date disponible
-        if (!$room->is_available_today) {
+        if (! $room->is_available_today) {
             $nextTransaction = Transaction::where('room_id', $room->id)
                 ->where('check_out', '>', $today)
                 ->whereIn('status', ['active', 'reservation'])
@@ -561,10 +562,11 @@ public function rooms(Request $request)
             ->whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
             ->limit(3)
             ->get()
-            ->map(function($relatedRoom) {
+            ->map(function ($relatedRoom) {
                 $relatedRoom->is_dirty = ($relatedRoom->room_status_id == Room::STATUS_DIRTY);
                 $relatedRoom->status_label = $relatedRoom->status_label;
                 $relatedRoom->status_color = $relatedRoom->status_color;
+
                 return $relatedRoom;
             });
 
@@ -586,37 +588,37 @@ public function rooms(Request $request)
         $checkOut = Carbon::parse($request->check_out)->startOfDay();
         $adults = $request->adults ?? 1;
         $nights = $checkIn->diffInDays($checkOut);
-        
+
         // Chambres réservées
         $bookedRoomIds = Transaction::whereIn('status', ['reservation', 'active'])
             ->where(function ($q) use ($checkIn, $checkOut) {
                 $q->where('check_in', '<', $checkOut)
-                  ->where('check_out', '>', $checkIn);
+                    ->where('check_out', '>', $checkIn);
             })
             ->pluck('room_id')
             ->toArray();
-        
+
         // Chambres disponibles (incluant les chambres sales)
         $rooms = Room::with('type')
             ->whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY])
             ->whereNotIn('id', $bookedRoomIds)
             ->where('capacity', '>=', $adults)
-            ->when($request->room_type, function($q) use ($request) {
+            ->when($request->room_type, function ($q) use ($request) {
                 return $q->where('type_id', $request->room_type);
             })
-            ->when($request->max_price, function($q) use ($request) {
+            ->when($request->max_price, function ($q) use ($request) {
                 return $q->where('price', '<=', $request->max_price);
             })
             ->get()
-            ->map(function($room) use ($nights) {
+            ->map(function ($room) use ($nights) {
                 return [
                     'id' => $room->id,
                     'number' => $room->number,
                     'name' => $room->name,
                     'price' => $room->price,
                     'total_price' => $room->price * $nights,
-                    'formatted_price' => number_format($room->price, 0, ',', ' ') . ' FCFA',
-                    'formatted_total' => number_format($room->price * $nights, 0, ',', ' ') . ' FCFA',
+                    'formatted_price' => number_format($room->price, 0, ',', ' ').' FCFA',
+                    'formatted_total' => number_format($room->price * $nights, 0, ',', ' ').' FCFA',
                     'capacity' => $room->capacity,
                     'type_id' => $room->type_id,
                     'type_name' => $room->type->name ?? 'Standard',
@@ -629,7 +631,7 @@ public function rooms(Request $request)
                     'image' => $room->first_image_url,
                 ];
             });
-        
+
         return response()->json([
             'success' => true,
             'rooms' => $rooms,
@@ -640,7 +642,7 @@ public function rooms(Request $request)
                 'nights' => $nights,
                 'formatted_check_in' => $checkIn->format('d/m/Y'),
                 'formatted_check_out' => $checkOut->format('d/m/Y'),
-            ]
+            ],
         ]);
     }
 
@@ -672,12 +674,12 @@ public function rooms(Request $request)
 
         try {
             $room = Room::findOrFail($validated['room_id']);
-            
+
             Log::info('Chambre trouvée:', [
-                'room_id' => $room->id, 
+                'room_id' => $room->id,
                 'price' => $room->price,
                 'status' => $room->status_label,
-                'is_dirty' => ($room->room_status_id == Room::STATUS_DIRTY)
+                'is_dirty' => ($room->room_status_id == Room::STATUS_DIRTY),
             ]);
 
             $checkIn = Carbon::parse($validated['check_in'])->startOfDay();
@@ -686,21 +688,21 @@ public function rooms(Request $request)
             $totalPrice = $room->price * $nights;
 
             Log::info('Calculs:', [
-                'check_in' => $checkIn, 
-                'check_out' => $checkOut, 
-                'nights' => $nights, 
-                'total' => $totalPrice
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
+                'nights' => $nights,
+                'total' => $totalPrice,
             ]);
 
             // Vérifier la disponibilité (utilise la méthode du modèle)
             $isAvailable = $room->isAvailableForPeriod($checkIn, $checkOut);
-            
-            if (!$isAvailable) {
+
+            if (! $isAvailable) {
                 Log::warning('Chambre non disponible pour ces dates');
-                
+
                 return response()->json([
                     'success' => false,
-                    'message' => 'La chambre n\'est plus disponible pour les dates sélectionnées.'
+                    'message' => 'La chambre n\'est plus disponible pour les dates sélectionnées.',
                 ], 422);
             }
 
@@ -708,10 +710,10 @@ public function rooms(Request $request)
 
             // Vérifier si le client existe déjà
             $customer = Customer::where('email', $validated['email'])->first();
-            
-            if (!$customer) {
-                Log::info('Création nouveau client pour email: ' . $validated['email']);
-                
+
+            if (! $customer) {
+                Log::info('Création nouveau client pour email: '.$validated['email']);
+
                 // Créer un utilisateur pour le client
                 $user = User::create([
                     'name' => $validated['name'],
@@ -721,25 +723,25 @@ public function rooms(Request $request)
                     'random_key' => Str::random(60),
                 ]);
 
-                Log::info('Utilisateur créé avec ID: ' . $user->id);
+                Log::info('Utilisateur créé avec ID: '.$user->id);
 
                 // Formatage de la date de naissance
                 try {
                     $birthdate = Carbon::parse($validated['birthdate'])->format('Y-m-d');
-                    Log::info('Date naissance formatée: ' . $birthdate);
+                    Log::info('Date naissance formatée: '.$birthdate);
                 } catch (\Exception $e) {
-                    Log::error('Erreur formatage date: ' . $e->getMessage());
+                    Log::error('Erreur formatage date: '.$e->getMessage());
                     $birthdate = now()->subYears(30)->format('Y-m-d');
                 }
 
                 // Conversion du genre
-                $genderValue = match(strtolower($validated['gender'])) {
+                $genderValue = match (strtolower($validated['gender'])) {
                     'homme', 'masculin', 'm', 'male' => 'Male',
                     'femme', 'feminin', 'f', 'female' => 'Female',
                     default => 'Other'
                 };
-                
-                Log::info('Genre converti: ' . $validated['gender'] . ' -> ' . $genderValue);
+
+                Log::info('Genre converti: '.$validated['gender'].' -> '.$genderValue);
 
                 // Création du client
                 $customerData = [
@@ -754,25 +756,25 @@ public function rooms(Request $request)
                 ];
 
                 Log::info('Données client:', $customerData);
-                
+
                 $customer = Customer::create($customerData);
-                
-                Log::info('Nouveau client créé avec ID: ' . $customer->id);
+
+                Log::info('Nouveau client créé avec ID: '.$customer->id);
             } else {
-                Log::info('Client existant trouvé avec ID: ' . $customer->id);
+                Log::info('Client existant trouvé avec ID: '.$customer->id);
             }
 
             // Préparer les notes avec toutes les informations
-            $notes = "Réservation en ligne\n" .
-                    "Client: {$validated['name']}\n" .
-                    "Email: {$validated['email']}\n" .
-                    "Téléphone: {$validated['phone']}\n" .
-                    "Adresse: {$validated['address']}\n" .
-                    "Genre: {$validated['gender']}\n" .
-                    "Profession: {$validated['job']}\n" .
-                    "Date naissance: {$validated['birthdate']}\n" .
-                    "Adultes: {$validated['adults']}\n" .
-                    "Enfants: " . ($validated['children'] ?? 0) . "\n" .
+            $notes = "Réservation en ligne\n".
+                    "Client: {$validated['name']}\n".
+                    "Email: {$validated['email']}\n".
+                    "Téléphone: {$validated['phone']}\n".
+                    "Adresse: {$validated['address']}\n".
+                    "Genre: {$validated['gender']}\n".
+                    "Profession: {$validated['job']}\n".
+                    "Date naissance: {$validated['birthdate']}\n".
+                    "Adultes: {$validated['adults']}\n".
+                    'Enfants: '.($validated['children'] ?? 0)."\n".
                     ($validated['notes'] ?? '');
 
             // Ajouter une mention si la chambre est sale
@@ -794,7 +796,7 @@ public function rooms(Request $request)
             ];
 
             Log::info('Données transaction:', $transactionData);
-            
+
             $transaction = Transaction::create($transactionData);
 
             // Journaliser l'action
@@ -805,7 +807,7 @@ public function rooms(Request $request)
                     'customer' => $customer->name,
                     'check_in' => $checkIn->format('d/m/Y'),
                     'check_out' => $checkOut->format('d/m/Y'),
-                    'room_was_dirty' => ($room->room_status_id == Room::STATUS_DIRTY)
+                    'room_was_dirty' => ($room->room_status_id == Room::STATUS_DIRTY),
                 ])
                 ->log('réservation en ligne');
 
@@ -819,7 +821,7 @@ public function rooms(Request $request)
                     $staffUser->notify(new ReservationNotification($transaction));
                 }
             } catch (\Exception $notifException) {
-                Log::warning('Erreur envoi notification réservation: ' . $notifException->getMessage());
+                Log::warning('Erreur envoi notification réservation: '.$notifException->getMessage());
             }
 
             // Email de confirmation au CLIENT (issue #171) · tolérant aux pannes SMTP
@@ -836,11 +838,11 @@ public function rooms(Request $request)
             Log::info('Résumé:', [
                 'client_id' => $customer->id,
                 'client_nom' => $customer->name,
-                'chambre' => $room->name . ' (' . $room->number . ')',
-                'dates' => $checkIn->format('d/m/Y') . ' au ' . $checkOut->format('d/m/Y'),
+                'chambre' => $room->name.' ('.$room->number.')',
+                'dates' => $checkIn->format('d/m/Y').' au '.$checkOut->format('d/m/Y'),
                 'nuits' => $nights,
-                'total' => number_format($totalPrice, 0, ',', ' ') . ' FCFA',
-                'chambre_sale' => ($room->room_status_id == Room::STATUS_DIRTY) ? 'OUI' : 'NON'
+                'total' => number_format($totalPrice, 0, ',', ' ').' FCFA',
+                'chambre_sale' => ($room->room_status_id == Room::STATUS_DIRTY) ? 'OUI' : 'NON',
             ]);
 
             // Message personnalisé selon l'état de la chambre
@@ -859,44 +861,44 @@ public function rooms(Request $request)
                     'check_in' => $checkIn->format('d/m/Y'),
                     'check_out' => $checkOut->format('d/m/Y'),
                     'nights' => $nights,
-                    'total_price' => number_format($totalPrice, 0, ',', ' ') . ' FCFA',
+                    'total_price' => number_format($totalPrice, 0, ',', ' ').' FCFA',
                     'room_number' => $room->number,
                     'room_name' => $room->name,
-                ]
+                ],
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             DB::rollBack();
             Log::error('ERREUR DE VALIDATION:', ['errors' => $e->errors()]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Veuillez vérifier les informations fournies.',
-                'errors' => $e->errors()
+                'errors' => $e->errors(),
             ], 422);
-            
+
         } catch (\Illuminate\Database\QueryException $e) {
             DB::rollBack();
             Log::error('ERREUR SQL:', [
                 'code' => $e->getCode(),
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ]);
-            
+
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur de base de données. Veuillez réessayer.'
+                'message' => 'Erreur de base de données. Veuillez réessayer.',
             ], 500);
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            Log::error('ERREUR RÉSERVATION: ' . $e->getMessage());
-            Log::error('Type: ' . get_class($e));
-            Log::error('Fichier: ' . $e->getFile() . ' Ligne: ' . $e->getLine());
-            
+
+            Log::error('ERREUR RÉSERVATION: '.$e->getMessage());
+            Log::error('Type: '.get_class($e));
+            Log::error('Fichier: '.$e->getFile().' Ligne: '.$e->getLine());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue. Veuillez réessayer ou nous contacter.'
+                'message' => 'Une erreur est survenue. Veuillez réessayer ou nous contacter.',
             ], 500);
         }
     }
@@ -905,6 +907,7 @@ public function rooms(Request $request)
     public function reservationForm()
     {
         $roomTypes = Type::all();
+
         return view('frontend.pages.reservation', compact('roomTypes'));
     }
 
@@ -926,21 +929,21 @@ public function rooms(Request $request)
 
         try {
             Log::info('Demande de réservation simple reçue:', $validated);
-            
+
             // Ici vous pouvez envoyer un email ou sauvegarder dans une table
             // Mail::to('reservations@cactushotel.com')->send(new ReservationRequestMail($validated));
-            
+
             return response()->json([
                 'success' => true,
-                'message' => 'Votre demande de réservation a été envoyée avec succès. Nous vous contacterons dans les 24h pour confirmer votre séjour.'
+                'message' => 'Votre demande de réservation a été envoyée avec succès. Nous vous contacterons dans les 24h pour confirmer votre séjour.',
             ]);
-            
+
         } catch (\Exception $e) {
-            Log::error('Erreur réservation simple: ' . $e->getMessage());
-            
+            Log::error('Erreur réservation simple: '.$e->getMessage());
+
             return response()->json([
                 'success' => false,
-                'message' => 'Une erreur est survenue. Veuillez réessayer ou nous appeler directement.'
+                'message' => 'Une erreur est survenue. Veuillez réessayer ou nous appeler directement.',
             ], 500);
         }
     }
@@ -953,7 +956,7 @@ public function rooms(Request $request)
         }
 
         $currentDay = strtolower(now()->format('D')); // mon, tue, wed, thu, fri, sat, sun
-        
+
         $menus = Menu::with('category')->where('is_available', true)
             ->where(function ($q) use ($currentDay) {
                 $q->whereJsonContains('available_days', $currentDay)
@@ -963,6 +966,7 @@ public function rooms(Request $request)
             ->get()
             ->map(function ($m) {
                 $m->image = $m->image_url;
+
                 return $m;
             });
 
@@ -970,7 +974,6 @@ public function rooms(Request $request)
 
         return view('frontend.pages.restaurant', compact('menus', 'categories'));
     }
-
 
     // Services
     public function services()
@@ -998,7 +1001,7 @@ public function rooms(Request $request)
 
         try {
             Log::info('Message de contact reçu:', $validated);
-            
+
             // Ici vous pouvez envoyer un email ou sauvegarder dans une table
             // Mail::to('contact@luxurypalace.com')->send(new ContactFormMail($validated));
 
@@ -1008,8 +1011,8 @@ public function rooms(Request $request)
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Erreur contact: ' . $e->getMessage());
-            
+            Log::error('Erreur contact: '.$e->getMessage());
+
             return redirect()->back()->with([
                 'error' => 'Une erreur est survenue lors de l\'envoi de votre message. Veuillez réessayer.',
                 'status' => 'error',
@@ -1032,14 +1035,14 @@ public function rooms(Request $request)
 
         try {
             $reservation = RestaurantReservation::create([
-                'name'             => $validated['name'],
-                'phone'            => $validated['phone'],
+                'name' => $validated['name'],
+                'phone' => $validated['phone'],
                 'reservation_date' => $validated['date'],
                 'reservation_time' => $validated['time'],
-                'persons'          => $validated['persons'],
-                'table_type'       => $validated['table_type'] ?? null,
-                'notes'            => $validated['notes'] ?? null,
-                'status'           => 'pending',
+                'persons' => $validated['persons'],
+                'table_type' => $validated['table_type'] ?? null,
+                'notes' => $validated['notes'] ?? null,
+                'status' => 'pending',
             ]);
 
             // Notifier le personnel DE CET HÔTEL uniquement (isolation multi-tenant)
@@ -1049,7 +1052,7 @@ public function rooms(Request $request)
                     $staffUser->notify(new RestaurantReservationNotification($reservation));
                 }
             } catch (\Exception $notifException) {
-                Log::warning('Erreur envoi notification réservation restaurant: ' . $notifException->getMessage());
+                Log::warning('Erreur envoi notification réservation restaurant: '.$notifException->getMessage());
             }
 
             return response()->json([
@@ -1057,7 +1060,7 @@ public function rooms(Request $request)
                 'message' => 'Réservation envoyée avec succès ! Nous vous contacterons pour confirmer.',
             ]);
         } catch (\Exception $e) {
-            Log::error('Erreur réservation restaurant: ' . $e->getMessage());
+            Log::error('Erreur réservation restaurant: '.$e->getMessage());
 
             return response()->json([
                 'success' => false,
@@ -1065,6 +1068,7 @@ public function rooms(Request $request)
             ], 500);
         }
     }
+
     /**
      * Vue simplifiée du menu pour scan QR Code (Tablette Restaurant)
      */

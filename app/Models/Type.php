@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Type extends Model
 {
-    use HasFactory, \App\Models\Concerns\BelongsToHotel;
+    use \App\Models\Concerns\BelongsToHotel, HasFactory;
 
     // PROTECTION CONTRE L'ASSIGNATION EN MASSE
     protected $fillable = [
@@ -63,7 +63,8 @@ class Type extends Model
         } elseif (str_contains($name, 'suite')) {
             $base = 200000;
         }
-        return number_format($base, 0, ',', ' ') . ' FCFA';
+
+        return number_format($base, 0, ',', ' ').' FCFA';
     }
 
     /**
@@ -73,15 +74,16 @@ class Type extends Model
     {
         $name = strtolower($this->name);
         if (str_contains($name, 'standard')) {
-            return "Chambre Standard : Offrez-vous un confort moderne dans un espace élégant, équipé d’un lit queen-size, d’une salle de bain raffinée, climatisation, TV connectée, Wi-Fi haut débit et vue sur la ville. Idéale pour un séjour d’affaires ou de détente.";
+            return 'Chambre Standard : Offrez-vous un confort moderne dans un espace élégant, équipé d’un lit queen-size, d’une salle de bain raffinée, climatisation, TV connectée, Wi-Fi haut débit et vue sur la ville. Idéale pour un séjour d’affaires ou de détente.';
         } elseif (str_contains($name, 'sup')) {
-            return "Chambre Supérior : Profitez d’un espace généreux, d’une literie premium, d’un coin salon raffiné, salle de bain luxueuse avec douche à l’italienne, produits d’accueil de prestige, et balcon privatif avec vue panoramique.";
+            return 'Chambre Supérior : Profitez d’un espace généreux, d’une literie premium, d’un coin salon raffiné, salle de bain luxueuse avec douche à l’italienne, produits d’accueil de prestige, et balcon privatif avec vue panoramique.';
         } elseif (str_contains($name, 'deluxe')) {
-            return "Deluxe Room : Un écrin de luxe avec lit king-size, salon séparé, salle de bain en marbre avec baignoire, machine à café Nespresso, peignoirs et chaussons, et service de conciergerie personnalisé. Ambiance feutrée et prestations haut de gamme.";
+            return 'Deluxe Room : Un écrin de luxe avec lit king-size, salon séparé, salle de bain en marbre avec baignoire, machine à café Nespresso, peignoirs et chaussons, et service de conciergerie personnalisé. Ambiance feutrée et prestations haut de gamme.';
         } elseif (str_contains($name, 'suite')) {
-            return "Suite Présidentielle : Vivez l’exception avec un vaste salon, chambre indépendante, salle de bain spa, terrasse privée, jacuzzi, service majordome, et prestations exclusives. Le summum du raffinement pour une expérience inoubliable.";
+            return 'Suite Présidentielle : Vivez l’exception avec un vaste salon, chambre indépendante, salle de bain spa, terrasse privée, jacuzzi, service majordome, et prestations exclusives. Le summum du raffinement pour une expérience inoubliable.';
         }
-        return "Chambre élégante et parfaitement équipée pour un séjour d’exception à l’hôtel.";
+
+        return 'Chambre élégante et parfaitement équipée pour un séjour d’exception à l’hôtel.';
     }
 
     public function getAmenitiesListAttribute()

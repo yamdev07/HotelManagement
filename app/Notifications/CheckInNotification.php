@@ -37,14 +37,14 @@ class CheckInNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('✅ Check-in effectué - ' . $this->transaction->customer->name)
-            ->greeting('Bonjour ' . $notifiable->name)
+            ->subject('✅ Check-in effectué - '.$this->transaction->customer->name)
+            ->greeting('Bonjour '.$notifiable->name)
             ->line('Un client vient d\'effectuer son check-in.')
             ->line('**Détails :**')
-            ->line('• Client : **' . $this->transaction->customer->name . '**')
-            ->line('• Chambre : **' . $this->transaction->room->number . '**')
-            ->line('• Arrivée : **' . $this->transaction->check_in->format('d/m/Y H:i') . '**')
-            ->line('• Départ prévu : **' . $this->transaction->check_out->format('d/m/Y H:i') . '**')
+            ->line('• Client : **'.$this->transaction->customer->name.'**')
+            ->line('• Chambre : **'.$this->transaction->room->number.'**')
+            ->line('• Arrivée : **'.$this->transaction->check_in->format('d/m/Y H:i').'**')
+            ->line('• Départ prévu : **'.$this->transaction->check_out->format('d/m/Y H:i').'**')
             ->action('Voir la transaction', route('transaction.show', $this->transaction->id))
             ->line('Merci d\'utiliser notre système de gestion hôtelière !');
     }
@@ -57,7 +57,7 @@ class CheckInNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => 'Check-in effectué pour ' . $this->transaction->customer->name . ' en chambre ' . $this->transaction->room->number,
+            'message' => 'Check-in effectué pour '.$this->transaction->customer->name.' en chambre '.$this->transaction->room->number,
             'url' => route('transaction.show', $this->transaction->id),
             'type' => 'checkin',
             'transaction_id' => $this->transaction->id,

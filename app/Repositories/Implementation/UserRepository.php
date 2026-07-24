@@ -28,7 +28,7 @@ class UserRepository implements UserRepositoryInterface
             ->when($request->qu, function ($query) use ($request) {
                 $query->where(function ($q) use ($request) {
                     $q->where('email', 'LIKE', '%'.$request->qu.'%')
-                      ->orWhere('name', 'LIKE', '%'.$request->qu.'%'); // ✅ Ajout de la recherche par nom
+                        ->orWhere('name', 'LIKE', '%'.$request->qu.'%'); // ✅ Ajout de la recherche par nom
                 });
             })
             ->paginate(10, ['*'], 'users') // Passez à 10 par page pour plus de cohérence
@@ -42,7 +42,7 @@ class UserRepository implements UserRepositoryInterface
             ->when($request->qc, function ($query) use ($request) {
                 $query->where(function ($q) use ($request) {
                     $q->where('email', 'LIKE', '%'.$request->qc.'%')
-                      ->orWhere('name', 'LIKE', '%'.$request->qc.'%'); // ✅ Ajout de la recherche par nom
+                        ->orWhere('name', 'LIKE', '%'.$request->qc.'%'); // ✅ Ajout de la recherche par nom
                 });
             })
             ->paginate(10, ['*'], 'customers')
