@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Chambres à Inspecter')
+@section('title', __('housekeeping.inspections.title'))
 
 @section('content')
 <style>
@@ -475,7 +475,7 @@
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('housekeeping.index') }}">Housekeeping</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Inspections</span>
+        <span class="current">{{ __('housekeeping.inspections.breadcrumb_inspections') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -483,16 +483,16 @@
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-clipboard-check"></i></span>
-                <h1>Inspections <em>requises</em></h1>
+                <h1>{!! __('housekeeping.inspections.header') !!}</h1>
             </div>
-            <p class="header-subtitle">Chambres nécessitant une inspection de qualité</p>
+            <p class="header-subtitle">{{ __('housekeeping.inspections.header_subtitle') }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('housekeeping.index') }}" class="btn btn-gray">
-                <i class="fas fa-arrow-left"></i> Retour
+                <i class="fas fa-arrow-left"></i> {{ __('housekeeping.inspections.btn_back') }}
             </a>
             <button class="btn btn-red" onclick="markAllInspected()">
-                <i class="fas fa-check-double"></i> Tout marquer
+                <i class="fas fa-check-double"></i> {{ __('housekeeping.inspections.btn_mark_all') }}
             </button>
         </div>
     </div>
@@ -507,33 +507,33 @@
     <div class="stats-grid anim-3">
         <div class="stat-card">
             <div class="stat-left">
-                <h6>À inspecter</h6>
+                <h6>{{ __('housekeeping.inspections.stat_to_inspect') }}</h6>
                 <h2>{{ $inspectionRooms->count() }}</h2>
-                <small>En attente</small>
+                <small>{{ __('housekeeping.inspections.stat_waiting') }}</small>
             </div>
             <div class="stat-icon yellow"><i class="fas fa-clipboard-list"></i></div>
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Attente >24h</h6>
+                <h6>{{ __('housekeeping.inspections.stat_waiting_24h') }}</h6>
                 <h2>{{ $waiting24h }}</h2>
-                <small>Priorité haute</small>
+                <small>{{ __('housekeeping.inspections.stat_high_priority') }}</small>
             </div>
             <div class="stat-icon red"><i class="fas fa-clock"></i></div>
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Inspectées aujourd'hui</h6>
+                <h6>{{ __('housekeeping.inspections.stat_inspected_today') }}</h6>
                 <h2>{{ $inspectedToday }}</h2>
-                <small>Déjà traitées</small>
+                <small>{{ __('housekeeping.inspections.stat_already_done') }}</small>
             </div>
             <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Moyenne d'attente</h6>
+                <h6>{{ __('housekeeping.inspections.stat_avg_wait') }}</h6>
                 <h2>{{ round($avgHours) }}h</h2>
-                <small>Temps d'attente</small>
+                <small>{{ __('housekeeping.inspections.stat_wait_time') }}</small>
             </div>
             <div class="stat-icon blue"><i class="fas fa-hourglass-half"></i></div>
         </div>
@@ -542,8 +542,8 @@
     {{-- Tableau --}}
     <div class="card">
         <div class="card-header yellow">
-            <div><i class="fas fa-list"></i> Liste des chambres à inspecter</div>
-            <span class="badge badge-yellow">{{ $inspectionRooms->count() }} inspection(s)</span>
+            <div><i class="fas fa-list"></i> {{ __('housekeeping.inspections.card_list') }}</div>
+            <span class="badge badge-yellow">{{ $inspectionRooms->count() }} {{ __('housekeeping.inspections.inspection_count') }}</span>
         </div>
         <div class="card-body">
             @if($inspectionRooms->count() > 0)
@@ -552,13 +552,13 @@
                         <thead>
                             <tr>
                                 <th width="40"><input type="checkbox" id="selectAll" class="room-checkbox"></th>
-                                <th>Chambre</th>
-                                <th>Type</th>
-                                <th>Demandée le</th>
-                                <th>Demandée par</th>
-                                <th>Attente</th>
-                                <th>Priorité</th>
-                                <th class="text-end">Actions</th>
+                                <th>{{ __('housekeeping.inspections.th_room') }}</th>
+                                <th>{{ __('housekeeping.inspections.th_type') }}</th>
+                                <th>{{ __('housekeeping.inspections.th_requested_at') }}</th>
+                                <th>{{ __('housekeeping.inspections.th_requested_by') }}</th>
+                                <th>{{ __('housekeeping.inspections.th_wait') }}</th>
+                                <th>{{ __('housekeeping.inspections.th_priority') }}</th>
+                                <th class="text-end">{{ __('housekeeping.inspections.th_actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -566,7 +566,7 @@
                             @php
                                 $waitHours = $room->inspection_requested_at ? $room->inspection_requested_at->diffInHours(now()) : 0;
                                 $priority = $waitHours > 48 ? 'red' : ($waitHours > 24 ? 'yellow' : 'green');
-                                $priorityText = $waitHours > 48 ? 'Haute' : ($waitHours > 24 ? 'Moyenne' : 'Basse');
+                                $priorityText = $waitHours > 48 ? __('housekeeping.inspections.priority_high') : ($waitHours > 24 ? __('housekeeping.inspections.priority_medium') : __('housekeeping.inspections.priority_low'));
                             @endphp
                             <tr>
                                 <td><input type="checkbox" class="room-checkbox" value="{{ $room->id }}"></td>
@@ -575,7 +575,7 @@
                                         <div class="room-icon"><i class="fas fa-door-closed"></i></div>
                                         <div>
                                             <strong>{{ $room->number }}</strong>
-                                            <small class="d-block text-muted">Étage {{ substr($room->number, 0, 1) ?? '?' }}</small>
+                                            <small class="d-block text-muted">{{ __('housekeeping.inspections.floor') }} {{ substr($room->number, 0, 1) ?? '?' }}</small>
                                         </div>
                                     </div>
                                 </td>
@@ -605,7 +605,7 @@
                                     <div class="d-flex gap-1 justify-content-end">
                                         <form action="{{ route('housekeeping.complete-inspection', $room->id) }}" method="POST" class="d-inline">
                                             @csrf
-                                            <button class="btn btn-green btn-sm"><i class="fas fa-check"></i> Inspecter</button>
+                                            <button class="btn btn-green btn-sm"><i class="fas fa-check"></i> {{ __('housekeeping.inspections.btn_inspect') }}</button>
                                         </form>
                                         <button class="btn btn-gray btn-sm" onclick="showInspectionModal({{ $room->id }})">
                                             <i class="fas fa-eye"></i>
@@ -620,9 +620,9 @@
             @else
                 <div class="empty-state">
                     <div class="empty-icon"><i class="fas fa-check-circle"></i></div>
-                    <h4>Toutes les inspections sont terminées !</h4>
-                    <p>Aucune chambre ne nécessite d'inspection pour le moment.</p>
-                    <a href="{{ route('housekeeping.index') }}" class="btn btn-green">Retour au dashboard</a>
+                    <h4>{{ __('housekeeping.inspections.empty_title') }}</h4>
+                    <p>{{ __('housekeeping.inspections.empty_text') }}</p>
+                    <a href="{{ route('housekeeping.index') }}" class="btn btn-green">{{ __('housekeeping.inspections.empty_btn') }}</a>
                 </div>
             @endif
         </div>
@@ -630,14 +630,14 @@
         <div class="card-footer">
             <div class="d-flex justify-content-between align-items-center">
                 <button class="btn btn-sm btn-red" onclick="markSelectedInspected()">
-                    <i class="fas fa-check"></i> Marquer sélectionnées
+                    <i class="fas fa-check"></i> {{ __('housekeeping.inspections.btn_mark_selected') }}
                 </button>
                 <small class="text-muted">
                     <i class="fas fa-info-circle"></i>
-                    Priorité: 
-                    <span class="badge badge-red">Haute >48h</span>
-                    <span class="badge badge-yellow">Moyenne 24-48h</span>
-                    <span class="badge badge-green">Basse <24h</span>
+                    {{ __('housekeeping.inspections.priority_label') }}
+                    <span class="badge badge-red">{{ __('housekeeping.inspections.priority_high_48h') }}</span>
+                    <span class="badge badge-yellow">{{ __('housekeeping.inspections.priority_medium_24_48h') }}</span>
+                    <span class="badge badge-green">{{ __('housekeeping.inspections.priority_low_24h') }}</span>
                 </small>
             </div>
         </div>
@@ -648,22 +648,22 @@
     <div class="checklist-section">
         <div class="checklist-title">
             <i class="fas fa-clipboard-list"></i>
-            Checklist d'inspection standard
+            {{ __('housekeeping.inspections.checklist_title') }}
         </div>
         <div class="checklist-grid">
             <div class="checklist-col">
-                <h6><i class="fas fa-bath"></i> Salle de bain</h6>
-                <div class="checklist-item"><i class="fas fa-check-circle"></i> Propreté sanitaires</div>
-                <div class="checklist-item"><i class="fas fa-check-circle"></i> Robinetterie fonctionnelle</div>
-                <div class="checklist-item"><i class="fas fa-check-circle"></i> Sol propre et sec</div>
-                <div class="checklist-item"><i class="fas fa-check-circle"></i> Fournitures complètes</div>
+                <h6><i class="fas fa-bath"></i> {{ __('housekeeping.inspections.checklist_bathroom') }}</h6>
+                <div class="checklist-item"><i class="fas fa-check-circle"></i> {{ __('housekeeping.inspections.check_bathroom_cleanliness') }}</div>
+                <div class="checklist-item"><i class="fas fa-check-circle"></i> {{ __('housekeeping.inspections.check_bathroom_taps') }}</div>
+                <div class="checklist-item"><i class="fas fa-check-circle"></i> {{ __('housekeeping.inspections.check_bathroom_floor') }}</div>
+                <div class="checklist-item"><i class="fas fa-check-circle"></i> {{ __('housekeeping.inspections.check_bathroom_supplies') }}</div>
             </div>
             <div class="checklist-col">
-                <h6><i class="fas fa-bed"></i> Chambre</h6>
-                <div class="checklist-item"><i class="fas fa-check-circle"></i> Literie impeccable</div>
-                <div class="checklist-item"><i class="fas fa-check-circle"></i> Sol et surfaces propres</div>
-                <div class="checklist-item"><i class="fas fa-check-circle"></i> Équipements fonctionnels</div>
-                <div class="checklist-item"><i class="fas fa-check-circle"></i> Aération correcte</div>
+                <h6><i class="fas fa-bed"></i> {{ __('housekeeping.inspections.checklist_bedroom') }}</h6>
+                <div class="checklist-item"><i class="fas fa-check-circle"></i> {{ __('housekeeping.inspections.check_bedroom_linen') }}</div>
+                <div class="checklist-item"><i class="fas fa-check-circle"></i> {{ __('housekeeping.inspections.check_bedroom_surfaces') }}</div>
+                <div class="checklist-item"><i class="fas fa-check-circle"></i> {{ __('housekeeping.inspections.check_bedroom_equipment') }}</div>
+                <div class="checklist-item"><i class="fas fa-check-circle"></i> {{ __('housekeeping.inspections.check_bedroom_ventilation') }}</div>
             </div>
         </div>
     </div>
@@ -675,13 +675,13 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-clipboard-check"></i> Inspection détaillée</h5>
+                <h5 class="modal-title"><i class="fas fa-clipboard-check"></i> {{ __('housekeeping.inspections.modal_title') }}</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="inspectionModalBody">
                 <div class="text-center py-4">
                     <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--green-600);"></i>
-                    <p class="mt-2">Chargement...</p>
+                    <p class="mt-2">{{ __('housekeeping.inspections.modal_loading') }}</p>
                 </div>
             </div>
         </div>
@@ -696,7 +696,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function markAllInspected() {
-    if (!confirm('Marquer toutes les chambres comme inspectées ?')) return;
+    if (!confirm(@json(__('housekeeping.inspections.confirm_mark_all')))) return;
     fetch('{{ route("housekeeping.bulk-complete-inspections") }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
@@ -706,8 +706,8 @@ function markAllInspected() {
 
 function markSelectedInspected() {
     const ids = Array.from(document.querySelectorAll('.room-checkbox:checked')).map(cb => cb.value);
-    if(ids.length === 0) return alert('Sélectionnez au moins une chambre');
-    if(!confirm(`Marquer ${ids.length} chambre(s) comme inspectée(s) ?`)) return;
+    if(ids.length === 0) return alert(@json(__('housekeeping.inspections.alert_select_room')));
+    if(!confirm(@json(__('housekeeping.inspections.confirm_mark_selected')))) return;
     fetch('{{ route("housekeeping.bulk-complete-inspections") }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },

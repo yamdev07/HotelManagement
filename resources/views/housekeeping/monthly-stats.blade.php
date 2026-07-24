@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Statistiques Mensuelles - ' . $selectedMonth->format('F Y'))
+@section('title', __('housekeeping.monthlystats.title') . ' - ' . $selectedMonth->translatedFormat('F Y'))
 
 @section('content')
 <style>
@@ -445,7 +445,7 @@
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('housekeeping.index') }}">Housekeeping</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('housekeeping.reports') }}">Rapports</a>
+        <a href="{{ route('housekeeping.reports') }}">{{ __('housekeeping.monthlystats.breadcrumb_reports') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">{{ $selectedMonth->translatedFormat('F Y') }}</span>
     </div>
@@ -455,13 +455,13 @@
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-chart-line"></i></span>
-                <h1>Statistiques <em>mensuelles</em></h1>
+                <h1>{!! __('housekeeping.monthlystats.header') !!}</h1>
             </div>
             <p class="header-subtitle">{{ $selectedMonth->translatedFormat('F Y') }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('housekeeping.reports') }}" class="btn btn-gray">
-                <i class="fas fa-arrow-left"></i> Retour
+                <i class="fas fa-arrow-left"></i> {{ __('housekeeping.monthlystats.btn_back') }}
             </a>
             <div class="input-group">
                 <input type="month" class="form-control" id="monthSelector" value="{{ $selectedMonth->format('Y-m') }}">
@@ -473,24 +473,24 @@
     {{-- KPI --}}
     <div class="stats-grid anim-3">
         <div class="stat-card">
-            <div class="stat-label">Chambres nettoyées</div>
+            <div class="stat-label">{{ __('housekeeping.monthlystats.kpi_cleaned') }}</div>
             <div class="stat-value green">{{ $monthlyStats->sum('cleaned_count') }}</div>
-            <div class="stat-footer">total mensuel</div>
+            <div class="stat-footer">{{ __('housekeeping.monthlystats.kpi_total_monthly') }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Moyenne journalière</div>
+            <div class="stat-label">{{ __('housekeeping.monthlystats.kpi_daily_avg') }}</div>
             <div class="stat-value blue">{{ round($monthlyStats->avg('cleaned_count')) }}</div>
-            <div class="stat-footer">par jour</div>
+            <div class="stat-footer">{{ __('housekeeping.monthlystats.kpi_per_day') }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Temps moyen</div>
+            <div class="stat-label">{{ __('housekeeping.monthlystats.kpi_avg_time') }}</div>
             <div class="stat-value orange">{{ round($monthlyStats->avg('avg_time')) }} min</div>
-            <div class="stat-footer">par chambre</div>
+            <div class="stat-footer">{{ __('housekeeping.monthlystats.kpi_per_room') }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Jours actifs</div>
+            <div class="stat-label">{{ __('housekeeping.monthlystats.kpi_active_days') }}</div>
             <div class="stat-value">{{ $monthlyStats->count() }}</div>
-            <div class="stat-footer">jours avec activité</div>
+            <div class="stat-footer">{{ __('housekeeping.monthlystats.kpi_days_with_activity') }}</div>
         </div>
     </div>
 
@@ -501,7 +501,7 @@
             {{-- Graphique évolution --}}
             <div class="card">
                 <div class="card-header green">
-                    <i class="fas fa-chart-area"></i> Évolution quotidienne
+                    <i class="fas fa-chart-area"></i> {{ __('housekeeping.monthlystats.card_evolution') }}
                 </div>
                 <div class="card-body">
                     <canvas id="dailyEvolutionChart" height="300"></canvas>
@@ -511,7 +511,7 @@
             {{-- Top femmes de chambre --}}
             <div class="card">
                 <div class="card-header green">
-                    <i class="fas fa-trophy"></i> Top 10 - Femmes de chambre
+                    <i class="fas fa-trophy"></i> {{ __('housekeeping.monthlystats.card_top_cleaners') }}
                 </div>
                 <div class="card-body p-0">
                     @if($topCleaners->count() > 0)
@@ -519,11 +519,11 @@
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>#</th>
-                                        <th>Agent</th>
-                                        <th>Chambres</th>
-                                        <th>Moy/jour</th>
-                                        <th>Performance</th>
+                                        <th>{{ __('housekeeping.monthlystats.th_rank') }}</th>
+                                        <th>{{ __('housekeeping.monthlystats.th_agent') }}</th>
+                                        <th>{{ __('housekeeping.monthlystats.th_rooms') }}</th>
+                                        <th>{{ __('housekeeping.monthlystats.th_avg_day') }}</th>
+                                        <th>{{ __('housekeeping.monthlystats.th_performance') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -555,7 +555,7 @@
                             </table>
                         </div>
                     @else
-                        <div class="empty-state"><i class="fas fa-users-slash"></i><p>Aucune donnée</p></div>
+                        <div class="empty-state"><i class="fas fa-users-slash"></i><p>{{ __('housekeeping.monthlystats.empty_no_data') }}</p></div>
                     @endif
                 </div>
             </div>
@@ -567,7 +567,7 @@
             {{-- Chambres les plus actives --}}
             <div class="card">
                 <div class="card-header blue">
-                    <i class="fas fa-star"></i> Chambres les plus actives
+                    <i class="fas fa-star"></i> {{ __('housekeeping.monthlystats.card_most_active') }}
                 </div>
                 <div class="card-body p-0">
                     @if($mostCleanedRooms->count() > 0)
@@ -583,7 +583,7 @@
                             @endforeach
                         </div>
                     @else
-                        <div class="empty-state"><i class="fas fa-bed"></i><p>Aucune donnée</p></div>
+                        <div class="empty-state"><i class="fas fa-bed"></i><p>{{ __('housekeeping.monthlystats.empty_no_data') }}</p></div>
                     @endif
                 </div>
             </div>
@@ -591,7 +591,7 @@
             {{-- Répartition par jour --}}
             <div class="card">
                 <div class="card-header orange">
-                    <i class="fas fa-chart-pie"></i> Activité par jour
+                    <i class="fas fa-chart-pie"></i> {{ __('housekeeping.monthlystats.card_activity_day') }}
                 </div>
                 <div class="card-body">
                     <canvas id="dayOfWeekChart" height="200"></canvas>
@@ -601,7 +601,7 @@
             {{-- Historique des mois --}}
             <div class="card">
                 <div class="card-header dark">
-                    <i class="fas fa-history"></i> Historique des mois
+                    <i class="fas fa-history"></i> {{ __('housekeeping.monthlystats.card_month_history') }}
                 </div>
                 <div class="card-body p-0">
                     <div class="list-group">
@@ -624,39 +624,39 @@
     {{-- Résumé détaillé --}}
     <div class="card mt-4">
         <div class="card-header dark">
-            <i class="fas fa-file-alt"></i> Résumé mensuel détaillé
+            <i class="fas fa-file-alt"></i> {{ __('housekeeping.monthlystats.card_detailed_summary') }}
         </div>
         <div class="card-body">
             <div class="row g-4">
                 <div class="col-md-6">
-                    <h6 class="fw-semibold mb-3"><i class="fas fa-chart-bar me-2" style="color:var(--green-600);"></i> Statistiques clés</h6>
+                    <h6 class="fw-semibold mb-3"><i class="fas fa-chart-bar me-2" style="color:var(--green-600);"></i> {{ __('housekeeping.monthlystats.stats_key') }}</h6>
                     <table class="summary-table">
                         @php $bestDay = $monthlyStats->sortByDesc('cleaned_count')->first(); @endphp
-                        <tr><td>Total chambres nettoyées</td><td>{{ $monthlyStats->sum('cleaned_count') }}</td></tr>
-                        <tr><td>Moyenne par jour</td><td>{{ round($monthlyStats->avg('cleaned_count'), 1) }}</td></tr>
-                        <tr><td>Meilleur jour</td><td>@if($bestDay){{ \Carbon\Carbon::parse($bestDay->date)->format('d/m') }} ({{ $bestDay->cleaned_count }})@endif</td></tr>
-                        <tr><td>Jours sans activité</td><td>{{ $selectedMonth->daysInMonth - $monthlyStats->count() }}</td></tr>
+                        <tr><td>{{ __('housekeeping.monthlystats.summary_total_cleaned') }}</td><td>{{ $monthlyStats->sum('cleaned_count') }}</td></tr>
+                        <tr><td>{{ __('housekeeping.monthlystats.summary_avg_per_day') }}</td><td>{{ round($monthlyStats->avg('cleaned_count'), 1) }}</td></tr>
+                        <tr><td>{{ __('housekeeping.monthlystats.summary_best_day') }}</td><td>@if($bestDay){{ \Carbon\Carbon::parse($bestDay->date)->format('d/m') }} ({{ $bestDay->cleaned_count }})@endif</td></tr>
+                        <tr><td>{{ __('housekeeping.monthlystats.summary_no_activity_days') }}</td><td>{{ $selectedMonth->daysInMonth - $monthlyStats->count() }}</td></tr>
                     </table>
                 </div>
                 <div class="col-md-6">
-                    <h6 class="fw-semibold mb-3"><i class="fas fa-tachometer-alt me-2" style="color:var(--green-600);"></i> Performances</h6>
+                    <h6 class="fw-semibold mb-3"><i class="fas fa-tachometer-alt me-2" style="color:var(--green-600);"></i> {{ __('housekeeping.monthlystats.performances') }}</h6>
                     <table class="summary-table">
                         @php
                             $totalMins = $monthlyStats->sum(fn($d) => $d->cleaned_count * ($d->avg_time ?? 30));
                             $hours = round($totalMins/60);
                             $efficiency = $monthlyStats->count() > 0 ? round(($totalMins / ($monthlyStats->count() * 8 * 60)) * 100) : 0;
                         @endphp
-                        <tr><td>Temps moyen</td><td>{{ round($monthlyStats->avg('avg_time')) }} minutes</td></tr>
-                        <tr><td>Heures totales</td><td>{{ $hours }} heures</td></tr>
-                        <tr><td>Efficacité</td><td>{{ min(100, $efficiency) }}%</td></tr>
-                        <tr><td>Productivité</td>
+                        <tr><td>{{ __('housekeeping.monthlystats.perf_avg_time') }}</td><td>{{ round($monthlyStats->avg('avg_time')) }} minutes</td></tr>
+                        <tr><td>{{ __('housekeeping.monthlystats.perf_total_hours') }}</td><td>{{ $hours }} heures</td></tr>
+                        <tr><td>{{ __('housekeeping.monthlystats.perf_efficiency') }}</td><td>{{ min(100, $efficiency) }}%</td></tr>
+                        <tr><td>{{ __('housekeeping.monthlystats.perf_productivity') }}</td>
                             <td>
                                 @if($monthlyStats->avg('cleaned_count') > 15)
-                                    <span class="badge badge-green">Élevée</span>
+                                    <span class="badge badge-green">{{ __('housekeeping.monthlystats.badge_high') }}</span>
                                 @elseif($monthlyStats->avg('cleaned_count') > 10)
-                                    <span class="badge badge-green">Moyenne</span>
+                                    <span class="badge badge-green">{{ __('housekeeping.monthlystats.badge_medium') }}</span>
                                 @else
-                                    <span class="badge badge-gray">Faible</span>
+                                    <span class="badge badge-gray">{{ __('housekeeping.monthlystats.badge_low') }}</span>
                                 @endif
                             </td>
                         </tr>
@@ -665,7 +665,7 @@
             </div>
             <div class="text-center mt-4">
                 <button class="btn btn-green" onclick="exportMonthlyReport()">
-                    <i class="fas fa-file-excel"></i> Exporter
+                    <i class="fas fa-file-excel"></i> {{ __('housekeeping.monthlystats.btn_export') }}
                 </button>
             </div>
         </div>
@@ -686,8 +686,8 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels,
             datasets: [
-                { label: 'Chambres nettoyées', data: cleaned, borderColor: '#1e6b2e', backgroundColor: 'rgba(30,107,46,0.1)', tension:0.4, yAxisID:'y' },
-                { label: 'Temps moyen (min)', data: times, borderColor: '#b91c1c', backgroundColor: 'rgba(185,28,28,0.1)', tension:0.4, yAxisID:'y1' }
+                { label: @json(__('housekeeping.monthlystats.chart_cleaned')), data: cleaned, borderColor: '#1e6b2e', backgroundColor: 'rgba(30,107,46,0.1)', tension:0.4, yAxisID:'y' },
+                { label: @json(__('housekeeping.monthlystats.chart_avg_time')), data: times, borderColor: '#b91c1c', backgroundColor: 'rgba(185,28,28,0.1)', tension:0.4, yAxisID:'y1' }
             ]
         },
         options: {
@@ -708,7 +708,7 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels: days,
             datasets: [{
-                label: 'Chambres nettoyées',
+                label: @json(__('housekeeping.monthlystats.chart_cleaned')),
                 data: days.map(d => totals[d]),
                 backgroundColor: ['#1e6b2e','#1e6b2e','#1e6b2e','#1e6b2e','#1e6b2e','#1e6b2e','#1e6b2e']
             }]

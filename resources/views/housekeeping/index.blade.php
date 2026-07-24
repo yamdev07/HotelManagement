@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Housekeeping - Nettoyage des Chambres')
+@section('title', __('housekeeping.index.title'))
 
 @push('styles')
 <style>
@@ -566,13 +566,13 @@
             <div class="hk-header__title">
                 <div class="hk-header__icon"><i class="fas fa-broom"></i></div>
                 <div>
-                    <h1>Housekeeping • <em>Nettoyage</em></h1>
-                    <p>Gestion du nettoyage des chambres en un clic</p>
+                    <h1>Housekeeping • {!! __('housekeeping.index.header_cleaning') !!}</h1>
+                    <p>{{ __('housekeeping.index.header_desc') }}</p>
                 </div>
             </div>
             <div class="hk-header__actions">
-                <a href="{{ route('housekeeping.scan') }}" class="btn btn-gray"><i class="fas fa-qrcode"></i> Scanner</a>
-                <a href="{{ route('housekeeping.reports') }}" class="btn btn-green"><i class="fas fa-chart-bar"></i> Rapports</a>
+                <a href="{{ route('housekeeping.scan') }}" class="btn btn-gray"><i class="fas fa-qrcode"></i> {{ __('housekeeping.index.btn_scan') }}</a>
+                <a href="{{ route('housekeeping.reports') }}" class="btn btn-green"><i class="fas fa-chart-bar"></i> {{ __('housekeeping.index.btn_reports') }}</a>
             </div>
         </div>
     </div>
@@ -591,33 +591,33 @@
         <div class="stats-grid anim-3">
             <div class="stat-card red">
                 <div class="stat-value">{{ $stats['dirty_rooms'] ?? 0 }}</div>
-                <div class="stat-label">À nettoyer</div>
-                <div class="stat-footer"><i class="fas fa-broom"></i> Sales</div>
+                <div class="stat-label">{{ __('housekeeping.index.stat_to_clean') }}</div>
+                <div class="stat-footer"><i class="fas fa-broom"></i> {{ __('housekeeping.index.stat_dirty') }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{{ $stats['clean_rooms'] ?? 0 }}</div>
-                <div class="stat-label">Nettoyées</div>
-                <div class="stat-footer"><i class="fas fa-check-circle"></i> Prêtes</div>
+                <div class="stat-label">{{ __('housekeeping.index.stat_cleaned') }}</div>
+                <div class="stat-footer"><i class="fas fa-check-circle"></i> {{ __('housekeeping.index.stat_ready') }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{{ $stats['occupied_rooms'] ?? 0 }}</div>
-                <div class="stat-label">Occupées</div>
-                <div class="stat-footer"><i class="fas fa-user"></i> Clients</div>
+                <div class="stat-label">{{ __('housekeeping.index.stat_occupied') }}</div>
+                <div class="stat-footer"><i class="fas fa-user"></i> {{ __('housekeeping.index.stat_guests') }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{{ $stats['total_rooms'] ?? 0 }}</div>
-                <div class="stat-label">Total</div>
-                <div class="stat-footer"><i class="fas fa-building"></i> Chambres</div>
+                <div class="stat-label">{{ __('housekeeping.index.stat_total') }}</div>
+                <div class="stat-footer"><i class="fas fa-building"></i> {{ __('housekeeping.index.stat_rooms') }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{{ $stats['cleaned_today'] ?? 0 }}</div>
-                <div class="stat-label">Aujourd'hui</div>
-                <div class="stat-footer"><i class="fas fa-calendar-day"></i> Nettoyées</div>
+                <div class="stat-label">{{ __('housekeeping.index.stat_today') }}</div>
+                <div class="stat-footer"><i class="fas fa-calendar-day"></i> {{ __('housekeeping.index.stat_today_cleaned') }}</div>
             </div>
             <div class="stat-card">
                 <div class="stat-value">{{ $stats['maintenance_rooms'] ?? 0 }}</div>
-                <div class="stat-label">Maintenance</div>
-                <div class="stat-footer"><i class="fas fa-tools"></i> En réparation</div>
+                <div class="stat-label">{{ __('housekeeping.index.stat_maintenance') }}</div>
+                <div class="stat-footer"><i class="fas fa-tools"></i> {{ __('housekeeping.index.stat_repair') }}</div>
             </div>
         </div>
 
@@ -625,10 +625,10 @@
         @if(($stats['dirty_rooms'] ?? 0) > 0)
         <div class="action-banner anim-4">
             <div>
-                <h3><i class="fas fa-broom"></i> {{ $stats['dirty_rooms'] ?? 0 }} chambre(s) à nettoyer</h3>
-                <p>Cliquez sur le bouton vert pour marquer comme nettoyée</p>
+                <h3><i class="fas fa-broom"></i> {{ $stats['dirty_rooms'] ?? 0 }} {!! __('housekeeping.index.banner_title') !!}</h3>
+                <p>{{ __('housekeeping.index.banner_desc') }}</p>
             </div>
-            <a href="#dirty" class="btn"><i class="fas fa-arrow-down"></i> Voir</a>
+            <a href="#dirty" class="btn"><i class="fas fa-arrow-down"></i> {{ __('housekeeping.index.banner_btn') }}</a>
         </div>
         @endif
 
@@ -639,7 +639,7 @@
 
                 {{-- SECTION À NETTOYER --}}
                 <div class="section-title" id="dirty">
-                    <i class="fas fa-broom"></i> À nettoyer
+                    <i class="fas fa-broom"></i> {!! __('housekeeping.index.section_to_clean') !!}
                     <span class="section-badge">{{ $roomsByStatus['dirty']->count() }}</span>
                 </div>
 
@@ -654,10 +654,10 @@
                         <div class="room-body">
                             <div class="room-type">{{ $room->type->name ?? 'Standard' }}</div>
                             <div class="room-meta"><i class="fas fa-user"></i> {{ $room->capacity }} pers.</div>
-                            <div class="room-status red"><i class="fas fa-exclamation-circle"></i> À nettoyer</div>
+                            <div class="room-status red"><i class="fas fa-exclamation-circle"></i> {{ __('housekeeping.index.room_status_to_clean') }}</div>
                             <form action="{{ route('housekeeping.clean-room', $room->id) }}" method="POST">
                                 @csrf
-                                <button class="clean-btn red"><i class="fas fa-check-circle"></i> Marquer nettoyée</button>
+                                <button class="clean-btn red"><i class="fas fa-check-circle"></i> {{ __('housekeeping.index.room_btn_clean') }}</button>
                             </form>
                         </div>
                     </div>
@@ -666,14 +666,14 @@
                 @else
                 <div class="empty-state mb-4">
                     <i class="fas fa-check-circle" style="color:var(--green-500);"></i>
-                    <h4>Aucune chambre à nettoyer</h4>
-                    <p>Toutes les chambres sont propres</p>
+                    <h4>{{ __('housekeeping.index.empty_to_clean') }}</h4>
+                    <p>{{ __('housekeeping.index.empty_all_clean') }}</p>
                 </div>
                 @endif
 
                 {{-- SECTION NETTOYÉES AUJOURD'HUI --}}
                 <div class="section-title mt-4">
-                    <i class="fas fa-check-circle" style="color:var(--green-600);"></i> Nettoyées aujourd'hui
+                    <i class="fas fa-check-circle" style="color:var(--green-600);"></i> {!! __('housekeeping.index.section_cleaned_today') !!}
                     <span class="section-badge">{{ $stats['cleaned_today'] ?? 0 }}</span>
                 </div>
 
@@ -688,7 +688,7 @@
                         <div class="room-body">
                             <div class="room-type">{{ $room->type->name ?? 'Standard' }}</div>
                             <div class="room-meta"><i class="fas fa-clock"></i> {{ $room->last_cleaned_at ? \Carbon\Carbon::parse($room->last_cleaned_at)->format('H:i') : 'N/A' }}</div>
-                            <div class="room-status green"><i class="fas fa-check-circle"></i> Nettoyée</div>
+                            <div class="room-status green"><i class="fas fa-check-circle"></i> {{ __('housekeeping.index.room_status_cleaned') }}</div>
                         </div>
                     </div>
                     @endforeach
@@ -702,7 +702,7 @@
                 {{-- DÉPARTS --}}
                 <div class="side-card">
                     <div class="side-header">
-                        <h3><i class="fas fa-sign-out-alt"></i> Départs aujourd'hui</h3>
+                        <h3><i class="fas fa-sign-out-alt"></i> {!! __('housekeeping.index.departures') !!}</h3>
                         <span class="side-badge">{{ $todayDepartures->count() }}</span>
                     </div>
                     <div class="side-body">
@@ -714,11 +714,11 @@
                                     <div class="side-item-name">{{ $d->customer->name ?? 'Client' }}</div>
                                     <div class="side-item-meta"><i class="fas fa-clock"></i> 12h00</div>
                                 </div>
-                                <div class="side-item-status red">À nettoyer</div>
+                                <div class="side-item-status red">{{ __('housekeeping.index.room_status_to_clean') }}</div>
                             </div>
                             @endforeach
                         @else
-                        <div class="p-4 text-center text-muted">Aucun départ</div>
+                        <div class="p-4 text-center text-muted">{{ __('housekeeping.index.no_departures') }}</div>
                         @endif
                     </div>
                 </div>
@@ -726,7 +726,7 @@
                 {{-- ARRIVÉES --}}
                 <div class="side-card">
                     <div class="side-header">
-                        <h3><i class="fas fa-sign-in-alt"></i> Arrivées aujourd'hui</h3>
+                        <h3><i class="fas fa-sign-in-alt"></i> {!! __('housekeeping.index.arrivals') !!}</h3>
                         <span class="side-badge">{{ $todayArrivals->count() }}</span>
                     </div>
                     <div class="side-body">
@@ -738,11 +738,11 @@
                                     <div class="side-item-name">{{ $a->customer->name ?? 'Client' }}</div>
                                     <div class="side-item-meta"><i class="fas fa-clock"></i> 14h00</div>
                                 </div>
-                                <div class="side-item-status green">À préparer</div>
+                                <div class="side-item-status green">{{ __('housekeeping.index.status_to_prepare') }}</div>
                             </div>
                             @endforeach
                         @else
-                        <div class="p-4 text-center text-muted">Aucune arrivée</div>
+                        <div class="p-4 text-center text-muted">{{ __('housekeeping.index.no_arrivals') }}</div>
                         @endif
                     </div>
                 </div>
@@ -751,23 +751,23 @@
                 <div class="quick-actions">
                     <a href="{{ route('housekeeping.to-clean') }}" class="quick-btn">
                         <i class="fas fa-broom"></i>
-                        <span>À nettoyer</span>
+                        <span>{{ __('housekeeping.index.quick_clean') }}</span>
                         <small>{{ $stats['dirty_rooms'] ?? 0 }}</small>
                     </a>
                     <a href="{{ route('housekeeping.maintenance') }}" class="quick-btn">
                         <i class="fas fa-tools"></i>
-                        <span>Maintenance</span>
+                        <span>{{ __('housekeeping.index.quick_maintenance') }}</span>
                         <small>{{ $stats['maintenance_rooms'] ?? 0 }}</small>
                     </a>
                     <a href="{{ route('housekeeping.mobile') }}" class="quick-btn">
                         <i class="fas fa-mobile-alt"></i>
-                        <span>Mobile</span>
-                        <small>Scanner</small>
+                        <span>{{ __('housekeeping.index.quick_mobile') }}</span>
+                        <small>{{ __('housekeeping.index.quick_scan') }}</small>
                     </a>
                     <a href="{{ route('housekeeping.daily-report') }}" class="quick-btn">
                         <i class="fas fa-file-alt"></i>
-                        <span>Rapport</span>
-                        <small>Quotidien</small>
+                        <span>{{ __('housekeeping.index.quick_report') }}</span>
+                        <small>{{ __('housekeeping.index.quick_daily') }}</small>
                     </a>
                 </div>
             </div>
@@ -783,12 +783,12 @@ document.querySelectorAll('.clean-btn.red').forEach(btn => {
         const form = this.closest('form');
         const roomNum = form.closest('.room-card').querySelector('.room-number').textContent.trim();
         Swal.fire({
-            title: 'Chambre ' + roomNum,
-            text: 'Marquer cette chambre comme nettoyée et prête ?',
+            title: @json(__('housekeeping.index.swal_title')) + ' ' + roomNum,
+            text: @json(__('housekeeping.index.swal_text')),
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> Oui, nettoyée !',
-            cancelButtonText: 'Annuler',
+            confirmButtonText: '<i class="fas fa-check-circle me-1"></i> ' + @json(__('housekeeping.index.swal_confirm')),
+            cancelButtonText: @json(__('housekeeping.index.swal_cancel')),
             confirmButtonColor: '#1e6b2e',
             cancelButtonColor: '#6c757d',
             reverseButtons: true

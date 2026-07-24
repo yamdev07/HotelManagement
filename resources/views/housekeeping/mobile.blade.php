@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Housekeeping Mobile')
+@section('title', __('housekeeping.mobile.title'))
 
 @section('content')
 <style>
@@ -563,23 +563,23 @@
             </div>
         </div>
         <div class="search-bar">
-            <input type="text" class="search-input" id="searchRooms" placeholder="Rechercher une chambre...">
+            <input type="text" class="search-input" id="searchRooms" placeholder="{{ __('housekeeping.mobile.search') }}">
         </div>
     </div>
 
     {{-- Stats --}}
     <div class="stats-grid">
-        <div class="stat-card"><div class="stat-value red">{{ $stats['dirty'] ?? 0 }}</div><div class="stat-label">À nettoyer</div></div>
-        <div class="stat-card"><div class="stat-value red">{{ $stats['cleaning'] ?? 0 }}</div><div class="stat-label">En cours</div></div>
-        <div class="stat-card"><div class="stat-value green">{{ $stats['clean'] ?? 0 }}</div><div class="stat-label">Nettoyées</div></div>
-        <div class="stat-card"><div class="stat-value">{{ $stats['occupied'] ?? 0 }}</div><div class="stat-label">Occupées</div></div>
+        <div class="stat-card"><div class="stat-value red">{{ $stats['dirty'] ?? 0 }}</div><div class="stat-label">{{ __('housekeeping.mobile.stat_to_clean') }}</div></div>
+        <div class="stat-card"><div class="stat-value red">{{ $stats['cleaning'] ?? 0 }}</div><div class="stat-label">{{ __('housekeeping.mobile.stat_in_progress') }}</div></div>
+        <div class="stat-card"><div class="stat-value green">{{ $stats['clean'] ?? 0 }}</div><div class="stat-label">{{ __('housekeeping.mobile.stat_cleaned') }}</div></div>
+        <div class="stat-card"><div class="stat-value">{{ $stats['occupied'] ?? 0 }}</div><div class="stat-label">{{ __('housekeeping.mobile.stat_occupied') }}</div></div>
     </div>
 
     {{-- Départs --}}
     @if(($todayDepartures ?? collect())->count() > 0)
     <div class="section">
         <div class="section-header">
-            <div class="section-title"><i class="fas fa-sign-out-alt"></i> Départs aujourd'hui</div>
+            <div class="section-title"><i class="fas fa-sign-out-alt"></i> {!! __('housekeeping.mobile.section_departures') !!}</div>
             <span class="section-badge">{{ $todayDepartures->count() }}</span>
         </div>
         @foreach($todayDepartures->take(3) as $d)
@@ -600,7 +600,7 @@
     {{-- À nettoyer --}}
     <div class="section">
         <div class="section-header">
-            <div class="section-title"><i class="fas fa-broom"></i> À nettoyer</div>
+            <div class="section-title"><i class="fas fa-broom"></i> {!! __('housekeeping.mobile.section_to_clean') !!}</div>
             <span class="section-badge">{{ $dirtyRooms->count() }}</span>
         </div>
         @if($dirtyRooms->count() > 0)
@@ -616,11 +616,11 @@
                         <i class="fas fa-user"></i> {{ $room->capacity }} pers.
                         @if($room->floor)<i class="fas fa-layer-group"></i> Étage {{ $room->floor }}@endif
                     </div>
-                    <div class="room-status red"><i class="fas fa-exclamation-circle"></i> À nettoyer</div>
+                    <div class="room-status red"><i class="fas fa-exclamation-circle"></i> {{ __('housekeeping.mobile.section_to_clean') }}</div>
                     <div class="room-actions">
                         <form action="{{ route('housekeeping.start-cleaning', $room->id) }}" method="POST" style="flex:1">
                             @csrf
-                            <button class="btn-room btn-green"><i class="fas fa-play"></i> Commencer</button>
+                            <button class="btn-room btn-green"><i class="fas fa-play"></i> {{ __('housekeeping.mobile.btn_start') }}</button>
                         </form>
                         <button class="btn-room btn-outline" onclick="openMaintenanceModal('{{ $room->number }}')"><i class="fas fa-tools"></i></button>
                     </div>
@@ -630,8 +630,8 @@
         @else
         <div class="empty-state">
             <i class="fas fa-check-circle" style="color:var(--green-600);"></i>
-            <h4>Aucune chambre à nettoyer</h4>
-            <p>Toutes les chambres sont propres</p>
+            <h4>{{ __('housekeeping.mobile.empty_title') }}</h4>
+            <p>{{ __('housekeeping.mobile.empty_desc') }}</p>
         </div>
         @endif
     </div>
@@ -640,7 +640,7 @@
     @if($cleaningRooms->count() > 0)
     <div class="section">
         <div class="section-header">
-            <div class="section-title"><i class="fas fa-spinner"></i> En cours</div>
+            <div class="section-title"><i class="fas fa-spinner"></i> {!! __('housekeeping.mobile.section_in_progress') !!}</div>
             <span class="section-badge">{{ $cleaningRooms->count() }}</span>
         </div>
         @foreach($cleaningRooms as $room)
@@ -653,11 +653,11 @@
                 </div>
                 <div class="room-type">{{ $room->type->name ?? 'Standard' }}</div>
                 <div class="room-meta"><i class="fas fa-clock"></i> <span class="timer"><i class="fas fa-hourglass-half"></i> {{ $dur }}</span></div>
-                <div class="room-status yellow"><i class="fas fa-spinner fa-spin"></i> En nettoyage</div>
+                <div class="room-status yellow"><i class="fas fa-spinner fa-spin"></i> {{ __('housekeeping.mobile.status_cleaning') }}</div>
                 <div class="room-actions">
                     <form action="{{ route('housekeeping.mark-cleaned', $room->id) }}" method="POST" style="flex:1">
                         @csrf
-                        <button class="btn-room btn-green"><i class="fas fa-check"></i> Terminer</button>
+                        <button class="btn-room btn-green"><i class="fas fa-check"></i> {{ __('housekeeping.mobile.btn_finish') }}</button>
                     </form>
                 </div>
             </div>
@@ -670,7 +670,7 @@
     @if(($todayArrivals ?? collect())->count() > 0)
     <div class="section">
         <div class="section-header">
-            <div class="section-title"><i class="fas fa-sign-in-alt"></i> Arrivées aujourd'hui</div>
+            <div class="section-title"><i class="fas fa-sign-in-alt"></i> {!! __('housekeeping.mobile.section_arrivals') !!}</div>
             <span class="section-badge">{{ $todayArrivals->count() }}</span>
         </div>
         @foreach($todayArrivals->take(3) as $a)
@@ -691,7 +691,7 @@
     {{-- Raisons maintenance --}}
     @if(isset($stats['maintenance_by_reason']) && count($stats['maintenance_by_reason']) > 0)
     <div class="section-header" style="padding:0 20px 8px;">
-        <div class="section-title"><i class="fas fa-chart-pie"></i> Raisons</div>
+        <div class="section-title"><i class="fas fa-chart-pie"></i> {!! __('housekeeping.mobile.section_reasons') !!}</div>
     </div>
     <div class="reason-tags">
         @foreach($stats['maintenance_by_reason'] as $reason => $count)
@@ -702,10 +702,10 @@
 
     {{-- Actions rapides --}}
     <div class="quick-grid">
-        <a href="{{ route('housekeeping.to-clean') }}" class="quick-item"><i class="fas fa-list"></i><span>Liste</span><small>complète</small></a>
-        <button class="quick-item" onclick="openMaintenanceModal()"><i class="fas fa-tools"></i><span>Maintenance</span><small>signaler</small></button>
-        <a href="{{ route('housekeeping.scan') }}" class="quick-item"><i class="fas fa-qrcode"></i><span>Scanner</span><small>QR code</small></a>
-        <a href="{{ route('housekeeping.reports') }}" class="quick-item"><i class="fas fa-chart-bar"></i><span>Rapports</span><small>stats</small></a>
+        <a href="{{ route('housekeeping.to-clean') }}" class="quick-item"><i class="fas fa-list"></i><span>{{ __('housekeeping.mobile.quick_list') }}</span><small>{{ __('housekeeping.mobile.quick_complete') }}</small></a>
+        <button class="quick-item" onclick="openMaintenanceModal()"><i class="fas fa-tools"></i><span>{{ __('housekeeping.mobile.quick_maintenance') }}</span><small>{{ __('housekeeping.mobile.quick_report') }}</small></button>
+        <a href="{{ route('housekeeping.scan') }}" class="quick-item"><i class="fas fa-qrcode"></i><span>{{ __('housekeeping.mobile.quick_scan') }}</span><small>{{ __('housekeeping.mobile.quick_qr') }}</small></a>
+        <a href="{{ route('housekeeping.reports') }}" class="quick-item"><i class="fas fa-chart-bar"></i><span>{{ __('housekeeping.mobile.quick_reports') }}</span><small>{{ __('housekeeping.mobile.quick_stats') }}</small></a>
     </div>
 
     {{-- Résumé --}}
@@ -714,10 +714,10 @@
         $progress = $total > 0 ? round(($stats['clean'] ?? 0) / $total * 100) : 0;
     @endphp
     <div class="summary-card">
-        <div class="summary-header"><i class="fas fa-calendar-day"></i> Résumé du jour</div>
+        <div class="summary-header"><i class="fas fa-calendar-day"></i> {!! __('housekeeping.mobile.summary_title') !!}</div>
         <div class="summary-content">
             <div class="summary-icon"><i class="fas fa-trophy"></i></div>
-            <div class="summary-stats"><h3>{{ $stats['cleaned_today'] ?? 0 }}</h3><p>chambres nettoyées</p></div>
+            <div class="summary-stats"><h3>{{ $stats['cleaned_today'] ?? 0 }}</h3><p>{{ __('housekeeping.mobile.summary_rooms') }}</p></div>
         </div>
         <div class="summary-progress"><div class="summary-bar" style="width:{{ $progress }}%"></div></div>
     </div>
@@ -729,25 +729,25 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-tools"></i> Signaler maintenance</h5>
+                <h5 class="modal-title"><i class="fas fa-tools"></i> {!! __('housekeeping.mobile.modal_maintenance_title') !!}</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div class="mb-3"><label class="form-label">Chambre</label><input type="text" class="form-control" id="roomNumber" placeholder="Ex: 101"></div>
-                <div class="mb-3"><label class="form-label">Raison</label>
+                <div class="mb-3"><label class="form-label">{{ __('housekeeping.mobile.modal_room') }}</label><input type="text" class="form-control" id="roomNumber" placeholder="Ex: 101"></div>
+                <div class="mb-3"><label class="form-label">{{ __('housekeeping.mobile.modal_reason') }}</label>
                     <select class="form-select" id="maintenanceReason">
-                        <option value="Électricité">⚡ Électricité</option>
-                        <option value="Plomberie">💧 Plomberie</option>
-                        <option value="Climatisation">❄️ Climatisation</option>
-                        <option value="Meuble">🪑 Meuble</option>
-                        <option value="Sécurité">🔒 Sécurité</option>
+                        <option value="Électricité">⚡ {{ __('housekeeping.mobile.reason_electricity') }}</option>
+                        <option value="Plomberie">💧 {{ __('housekeeping.mobile.reason_plumbing') }}</option>
+                        <option value="Climatisation">❄️ {{ __('housekeeping.mobile.reason_ac') }}</option>
+                        <option value="Meuble">🪑 {{ __('housekeeping.mobile.reason_furniture') }}</option>
+                        <option value="Sécurité">🔒 {{ __('housekeeping.mobile.reason_security') }}</option>
                     </select>
                 </div>
-                <div class="mb-3"><label class="form-label">Durée (h)</label><input type="number" class="form-control" id="estimatedDuration" value="4"></div>
+                <div class="mb-3"><label class="form-label">{{ __('housekeeping.mobile.modal_duration') }}</label><input type="number" class="form-control" id="estimatedDuration" value="4"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-gray" data-bs-dismiss="modal">Annuler</button>
-                <button class="btn btn-green" onclick="submitMaintenance()">Signaler</button>
+                <button class="btn btn-gray" data-bs-dismiss="modal">{{ __('housekeeping.mobile.modal_cancel') }}</button>
+                <button class="btn btn-green" onclick="submitMaintenance()">{{ __('housekeeping.mobile.modal_submit') }}</button>
             </div>
         </div>
     </div>
@@ -761,7 +761,7 @@ function openMaintenanceModal(room = '') {
 
 function submitMaintenance() {
     const num = document.getElementById('roomNumber').value;
-    if (!num) return alert('Numéro de chambre requis');
+    if (!num) return alert('{{ __('housekeeping.mobile.error_room_required') }}');
     fetch(`/api/rooms/find-by-number/${num}`)
         .then(r => r.json())
         .then(d => {
@@ -772,7 +772,7 @@ function submitMaintenance() {
                 f.innerHTML = `<input type="hidden" name="_token" value="{{ csrf_token() }}"><input type="hidden" name="maintenance_reason" value="${document.getElementById('maintenanceReason').value}"><input type="hidden" name="estimated_duration" value="${document.getElementById('estimatedDuration').value}">`;
                 document.body.appendChild(f);
                 f.submit();
-            } else alert('Chambre non trouvée');
+            } else alert('{{ __('housekeeping.mobile.error_not_found') }}');
         });
 }
 
