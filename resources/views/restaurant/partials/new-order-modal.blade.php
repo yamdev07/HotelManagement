@@ -10,8 +10,8 @@
                 <div class="nom-header-left">
                     <div class="nom-icon-wrap"><i class="fas fa-utensils"></i></div>
                     <div>
-                        <div class="nom-title">Nouvelle Commande</div>
-                        <div class="nom-subtitle">Restaurant · Interface Administration</div>
+                        <div class="nom-title">{{ __('restaurant.modal.title') }}</div>
+                        <div class="nom-subtitle">{{ __('restaurant.modal.subtitle') }}</div>
                     </div>
                 </div>
                 <button type="button" class="nom-close" data-bs-dismiss="modal">✕</button>
@@ -19,11 +19,11 @@
 
             {{-- Barre de progression --}}
             <div class="nom-steps">
-                <div class="nom-step active" data-step="1"><div class="nom-dot">1</div><span>Plats</span></div>
+                <div class="nom-step active" data-step="1"><div class="nom-dot">1</div><span>{{ __('restaurant.modal.step_dishes') }}</span></div>
                 <div class="nom-step-line"></div>
-                <div class="nom-step" data-step="2"><div class="nom-dot">2</div><span>Client</span></div>
+                <div class="nom-step" data-step="2"><div class="nom-dot">2</div><span>{{ __('restaurant.modal.step_customer') }}</span></div>
                 <div class="nom-step-line"></div>
-                <div class="nom-step" data-step="3"><div class="nom-dot">3</div><span>Confirmation</span></div>
+                <div class="nom-step" data-step="3"><div class="nom-dot">3</div><span>{{ __('restaurant.modal.step_confirm') }}</span></div>
             </div>
 
             <form action="{{ route('restaurant.orders.store') }}" method="POST" id="newOrderForm">
@@ -45,14 +45,14 @@
 
                 {{-- ── ÉTAPE 1 : Récapitulatif du panier ── --}}
                 <div class="nom-panel active" id="nom-panel-1">
-                    <div class="nom-panel-title"><i class="fas fa-shopping-cart me-2"></i>Détail de la commande</div>
-                    <p class="nom-desc">Voici les plats sélectionnés. Ajustez les quantités ou supprimez un article avant de continuer.</p>
+                    <div class="nom-panel-title"><i class="fas fa-shopping-cart me-2"></i>{!! __('restaurant.modal.cart_detail') !!}</div>
+                    <p class="nom-desc">{{ __('restaurant.modal.cart_desc') }}</p>
 
                     {{-- Tableau récapitulatif du panier --}}
                     <div id="cart-review-empty" class="nom-cart-empty d-flex flex-column align-items-center">
                         <i class="fas fa-shopping-cart fa-2x mb-2 text-muted"></i>
-                        <p class="text-muted mb-3">Votre panier est vide.</p>
-                        <small class="text-muted">Ajoutez des plats depuis la page restaurant puis revenez ici.</small>
+                        <p class="text-muted mb-3">{{ __('restaurant.modal.cart_empty') }}</p>
+                        <small class="text-muted">{{ __('restaurant.modal.cart_empty_hint') }}</small>
                     </div>
 
                     <div id="cart-review-list">
@@ -61,10 +61,10 @@
 
                     <div id="cart-review-footer" class="nom-cart-footer d-none justify-content-between align-items-center mt-3 pt-3 border-top">
                         <button type="button" class="btn btn-sm btn-outline-danger" id="nom-clear-cart">
-                            <i class="fas fa-trash-alt me-1"></i> Vider le panier
+                            <i class="fas fa-trash-alt me-1"></i> {!! __('restaurant.modal.clear_cart') !!}
                         </button>
                         <div class="nom-cart-total-line m-0">
-                            <span class="text-muted">Total :</span>
+                            <span class="text-muted">{{ __('restaurant.modal.total') }}</span>
                             <strong id="cart-review-total" class="ms-2 fs-5" style="color: var(--g800);">0 CFA</strong>
                         </div>
                     </div>
@@ -94,29 +94,29 @@
                 </div>
                 {{-- ── ÉTAPE 2 : Identification & Lieu ── --}}
                 <div class="nom-panel" id="nom-panel-2">
-                    <div class="nom-panel-title"><i class="fas fa-user-tag me-2"></i>Identification & Lieu de service</div>
-                    <p class="nom-desc">Précisez où le client sera servi et identifiez-le.</p>
+                    <div class="nom-panel-title"><i class="fas fa-user-tag me-2"></i>{!! __('restaurant.modal.step2_title') !!}</div>
+                    <p class="nom-desc">{{ __('restaurant.modal.step2_desc') }}</p>
 
                     {{-- Choix Lieu de Service --}}
-                    <div class="nom-section-lbl mb-2">Lieu de service</div>
+                    <div class="nom-section-lbl mb-2">{{ __('restaurant.modal.location_label') }}</div>
                     <div class="nom-toggle-row mb-4">
-                        <button type="button" class="nom-toggle active" id="loc-room"><i class="fas fa-bed me-1"></i> En Chambre</button>
-                        <button type="button" class="nom-toggle" id="loc-table"><i class="fas fa-utensils me-1"></i> Au Restaurant</button>
+                        <button type="button" class="nom-toggle active" id="loc-room"><i class="fas fa-bed me-1"></i> {!! __('restaurant.modal.location_room') !!}</button>
+                        <button type="button" class="nom-toggle" id="loc-table"><i class="fas fa-utensils me-1"></i> {!! __('restaurant.modal.location_table') !!}</button>
                     </div>
 
                     <div id="section-table-only" style="display:none">
                         <div class="nom-field mb-3">
-                            <label class="nom-label">N° de Table <span class="nom-req">*</span></label>
+                            <label class="nom-label">{{ __('restaurant.modal.table_number') }} <span class="nom-req">*</span></label>
                             <input type="text" class="nom-input" id="n-table-number" placeholder="Ex: 5, 12, Terrasse 2">
                             <div class="nom-err" id="n-err-table"></div>
                         </div>
                     </div>
 
                     {{-- Type de client --}}
-                    <div class="nom-section-lbl mb-2">Type de client</div>
+                    <div class="nom-section-lbl mb-2">{{ __('restaurant.modal.customer_type') }}</div>
                     <div class="nom-toggle-row mb-4">
-                        <button type="button" class="nom-toggle active" id="tog-existing">Client Résident</button>
-                        <button type="button" class="nom-toggle" id="tog-new">Client Extérieur / Nouveau</button>
+                        <button type="button" class="nom-toggle active" id="tog-existing">{{ __('restaurant.modal.customer_resident') }}</button>
+                        <button type="button" class="nom-toggle" id="tog-new">{{ __('restaurant.modal.customer_outdoor') }}</button>
                     </div>
 
                     {{-- Client existant --}}
@@ -125,7 +125,7 @@
                             {{-- État : Sélection --}}
                             <div id="customer-selection-ui">
                                 <div class="nom-search-wrap">
-                                    <input type="text" class="nom-input" id="n-customer-search" placeholder="Nom, téléphone, n° de chambre...">
+                                    <input type="text" class="nom-input" id="n-customer-search" placeholder="{{ __('restaurant.modal.search_customer') }}">
                                     <i class="fas fa-search nom-search-icon"></i>
                                 </div>
 
@@ -154,8 +154,8 @@
                                     @empty
                                     <div class="p-5 text-center">
                                         <div class="mb-3"><i class="fas fa-user-slash fa-3x text-muted opacity-25"></i></div>
-                                        <div class="fw-bold text-muted">Aucun client résident actif</div>
-                                        <p class="small text-muted px-4">Tous les clients enregistrés sont actuellement libérés ou n'ont pas de séjour actif.</p>
+                                        <div class="fw-bold text-muted">{{ __('restaurant.modal.no_resident') }}</div>
+                                        <p class="small text-muted px-4">{{ __('restaurant.modal.no_resident_hint') }}</p>
                                     </div>
                                     @endforelse
                                 </div>
@@ -170,7 +170,7 @@
                                         <div class="nom-c-sub" id="sel-c-sub"></div>
                                     </div>
                                     <button type="button" class="nom-btn-change" id="change-customer-btn" title="Modifier le choix">
-                                        <i class="fas fa-sync-alt"></i> Modifier
+                                        <i class="fas fa-sync-alt"></i> {!! __('restaurant.modal.change') !!}
                                     </button>
                                 </div>
                             </div>
@@ -191,15 +191,15 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="nom-grid-2 mt-3" id="existing-info" style="display:none">
-                            <div class="nom-info-card"><span class="nom-ic-label">Chambre</span><span class="nom-ic-val" id="disp-room">·</span></div>
-                            <div class="nom-info-card"><span class="nom-ic-label">Statut</span><span class="nom-ic-val text-muted">Client enregistré</span></div>
+                            <div class="nom-grid-2 mt-3" id="existing-info" style="display:none">
+                            <div class="nom-info-card"><span class="nom-ic-label">{{ __('restaurant.modal.room') }}</span><span class="nom-ic-val" id="disp-room">·</span></div>
+                            <div class="nom-info-card"><span class="nom-ic-label">{{ __('restaurant.modal.status') }}</span><span class="nom-ic-val text-muted">{{ __('restaurant.modal.registered_guest') }}</span></div>
                         </div>
                     </div>
 
                     <div id="block-new" style="display:none">
                         <div class="nom-field">
-                            <label class="nom-label">Nom ou Référence (Optionnel)</label>
+                            <label class="nom-label">{{ __('restaurant.modal.name_ref') }}</label>
                             <input type="text" class="nom-input" id="n-fullname" placeholder="Ex: Client terrasse, Mr. X, etc.">
                             <div class="nom-err" id="n-err-fullname"></div>
                         </div>
@@ -208,8 +208,8 @@
 
                 {{-- ── ÉTAPE 3 : Notes, Facturation & Confirmation ── --}}
                 <div class="nom-panel" id="nom-panel-3">
-                    <div class="nom-panel-title"><i class="fas fa-check-circle me-2 text-success"></i>Confirmation & Facturation</div>
-                    <p class="nom-desc">Vérifiez la commande, ajoutez des notes et choisissez le mode de facturation.</p>
+                    <div class="nom-panel-title"><i class="fas fa-check-circle me-2 text-success"></i>{!! __('restaurant.modal.step3_title') !!}</div>
+                    <p class="nom-desc">{{ __('restaurant.modal.step3_desc') }}</p>
 
                     <div class="row gx-4">
                         <div class="col-md-6 mb-4 mb-md-0">
@@ -218,7 +218,7 @@
                                 <div class="d-flex align-items-center p-3 rounded" style="background:#f0f9ff; border:1px solid #bae6fd;">
                                     <i class="fas fa-hotel text-primary me-3" style="font-size:1.2rem"></i>
                                     <div>
-                                        <div class="fw-bold" style="font-size:0.85rem; color:#0369a1;">Facturation chambre active</div>
+                                        <div class="fw-bold" style="font-size:0.85rem; color:#0369a1;">{{ __('restaurant.modal.room_billing') }}</div>
                                         <div class="small" id="room-payment-text" style="color:#0ea5e9;"></div>
                                     </div>
                                 </div>
@@ -226,44 +226,44 @@
 
                             {{-- Bloc paiement direct --}}
                             <div id="block-direct-billing" style="display:none">
-                                <div class="nom-section-lbl mb-2">Choisir le règlement</div>
+                                <div class="nom-section-lbl mb-2">{{ __('restaurant.modal.payment_label') }}</div>
                                 <div class="nom-pay-grid">
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="cash" checked>
-                                        <div class="nom-pay-body"><i class="fas fa-money-bill-wave fa-lg mb-1 text-success"></i><span>Espèces</span></div></label>
+                                        <div class="nom-pay-body"><i class="fas fa-money-bill-wave fa-lg mb-1 text-success"></i><span>{{ __('restaurant.modal.pay_cash') }}</span></div></label>
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="card">
-                                        <div class="nom-pay-body"><i class="fas fa-credit-card fa-lg mb-1 text-primary"></i><span>Carte</span></div></label>
+                                        <div class="nom-pay-body"><i class="fas fa-credit-card fa-lg mb-1 text-primary"></i><span>{{ __('restaurant.modal.pay_card') }}</span></div></label>
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="mobile_money">
-                                        <div class="nom-pay-body"><i class="fas fa-mobile-alt fa-lg mb-1" style="color: #f59e0b;"></i><span>Mobile M.</span></div></label>
+                                        <div class="nom-pay-body"><i class="fas fa-mobile-alt fa-lg mb-1" style="color: #f59e0b;"></i><span>{{ __('restaurant.modal.pay_mobile') }}</span></div></label>
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="transfer">
-                                        <div class="nom-pay-body"><i class="fas fa-university fa-lg mb-1 text-info"></i><span>Virement</span></div></label>
+                                        <div class="nom-pay-body"><i class="fas fa-university fa-lg mb-1 text-info"></i><span>{{ __('restaurant.modal.pay_transfer') }}</span></div></label>
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="fedapay">
-                                        <div class="nom-pay-body"><i class="fas fa-wallet fa-lg mb-1 text-indigo"></i><span>Fedapay</span></div></label>
+                                        <div class="nom-pay-body"><i class="fas fa-wallet fa-lg mb-1 text-indigo"></i><span>{{ __('restaurant.modal.pay_fedapay') }}</span></div></label>
                                     <label class="nom-pay"><input type="radio" name="n_payment" value="check">
-                                        <div class="nom-pay-body"><i class="fas fa-file-invoice-dollar fa-lg mb-1 text-secondary"></i><span>Chèque</span></div></label>
+                                        <div class="nom-pay-body"><i class="fas fa-file-invoice-dollar fa-lg mb-1 text-secondary"></i><span>{{ __('restaurant.modal.pay_check') }}</span></div></label>
                                 </div>
                             </div>
 
                             <div class="nom-field mt-3">
-                                <label class="nom-label">Notes pour le chef</label>
+                                <label class="nom-label">{{ __('restaurant.modal.notes_chef') }}</label>
                                 <textarea class="nom-input nom-textarea" id="n-notes" rows="2" placeholder="Ex: sans oignons, cuisson à point..."></textarea>
                             </div>
                         </div>
 
                         <div class="col-md-6 ps-md-4">
-                            <div class="nom-section-lbl">Aperçu & Détails</div>
+                            <div class="nom-section-lbl">{{ __('restaurant.modal.preview') }}</div>
                             
                             <div class="nom-recap-block mb-3">
-                                <div class="nom-recap-title"><i class="fas fa-info-circle me-1"></i> Infos Client & Lieu</div>
+                                <div class="nom-recap-title"><i class="fas fa-info-circle me-1"></i> {!! __('restaurant.modal.info_client') !!}</div>
                                 <div id="nrecap-client" class="nom-recap-content"></div>
                             </div>
                             
                             <div class="nom-recap-block mb-3 d-none" id="nrecap-notes-block">
-                                <div class="nom-recap-title"><i class="fas fa-sticky-note me-1"></i> Préférences Chef</div>
+                                <div class="nom-recap-title"><i class="fas fa-sticky-note me-1"></i> {!! __('restaurant.modal.chef_prefs') !!}</div>
                                 <div id="nrecap-notes-content" class="nom-recap-content fst-italic"></div>
                             </div>
 
                             <div class="nom-recap-block">
-                                <div class="nom-recap-title"><i class="fas fa-shopping-cart me-1"></i> Plats sélectionnés (<span id="nrecap-total"></span>)</div>
+                                <div class="nom-recap-title"><i class="fas fa-shopping-cart me-1"></i> {!! __('restaurant.modal.selected_dishes') !!} (<span id="nrecap-total"></span>)</div>
                                 <div id="nrecap-items" style="max-height: 200px; overflow-y: auto;"></div>
                             </div>
                         </div>
@@ -275,15 +275,15 @@
             {{-- Pied --}}
             <div class="nom-footer">
                 <button type="button" class="nom-btn nom-btn-ghost" id="nom-prev" style="display:none">
-                    <i class="fas fa-arrow-left me-1"></i> Précédent
+                    <i class="fas fa-arrow-left me-1"></i> {!! __('restaurant.modal.prev') !!}
                 </button>
                 <div class="ms-auto d-flex gap-2">
-                    <button type="button" class="nom-btn nom-btn-outline" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="nom-btn nom-btn-outline" data-bs-dismiss="modal">{{ __('restaurant.modal.cancel') }}</button>
                     <button type="button" class="nom-btn nom-btn-primary" id="nom-next">
-                        Suivant <i class="fas fa-arrow-right ms-1"></i>
+                        {!! __('restaurant.modal.next') !!} <i class="fas fa-arrow-right ms-1"></i>
                     </button>
                     <button type="submit" class="nom-btn nom-btn-success" id="nom-submit" style="display:none">
-                        <i class="fas fa-check me-1"></i> Enregistrer la commande
+                        <i class="fas fa-check me-1"></i> {!! __('restaurant.modal.submit') !!}
                     </button>
                 </div>
             </div>
@@ -682,6 +682,26 @@
 
 @push('scripts')
 <script>
+const modalJs = {
+    loadingError: @json(__('restaurant.modal.js_loading_error')),
+    cancelOrderTitle: @json(__('restaurant.modal.js_cancel_order_title')),
+    cancelOrderYes: @json(__('restaurant.modal.js_cancel_order_yes')),
+    cancelOrderNo: @json(__('restaurant.modal.js_cancel_order_no')),
+    cancelled: @json(__('restaurant.modal.js_cancelled')),
+    error: @json(__('restaurant.modal.js_error')),
+    addDishRequired: @json(__('restaurant.modal.js_add_dish_required')),
+    tableNumberRequired: @json(__('restaurant.modal.js_table_number_required')),
+    selectCustomerRequired: @json(__('restaurant.modal.js_select_customer_required')),
+    clearCartTitle: @json(__('restaurant.modal.js_clear_cart_title')),
+    clearCartText: @json(__('restaurant.modal.js_clear_cart_text')),
+    clearCartYes: @json(__('restaurant.modal.js_clear_cart_yes')),
+    clearCartCancel: @json(__('restaurant.modal.js_clear_cart_cancel')),
+    emptySelection: @json(__('restaurant.modal.js_empty_selection')),
+    emptySelectionText: @json(__('restaurant.modal.js_empty_selection_text')),
+    orderSaved: @json(__('restaurant.modal.js_order_saved')),
+    saving: @json(__('restaurant.modal.js_saving')),
+    errorMsg: @json(__('restaurant.modal.js_error_msg'))
+};
 // Attente asynchrone de jQuery (app.js charge jQuery via Vite)
 function initNomModal() {
     if (!window.$) { setTimeout(initNomModal, 50); return; }
@@ -706,7 +726,7 @@ function initNomModal() {
         $.ajax({
             url: `{{ url('restaurant/orders') }}/${orderId}`,
             success: r => $('#orderDetailsContent').html(r.html),
-            error: () => $('#orderDetailsContent').html('<div class="alert alert-danger">Erreur de chargement.</div>')
+            error: () => $('#orderDetailsContent').html('<div class="alert alert-danger">' + modalJs.loadingError + '</div>')
         });
     });
 
@@ -733,7 +753,7 @@ function initNomModal() {
                 btn.prop('disabled', false);
                 const icons = { preparing: 'fa-play', delivered: 'fa-check', paid: 'fa-money-bill-wave' };
                 btn.html(`<i class="fas ${icons[newStatus] || 'fa-sync'}"></i>`);
-                Swal.fire('Erreur', xhr.responseJSON?.message || 'Action impossible.', 'error');
+                Swal.fire(modalJs.error, xhr.responseJSON?.message || modalJs.errorMsg, 'error');
             }
         });
     });
@@ -745,13 +765,13 @@ function initNomModal() {
         e.preventDefault();
         e.stopImmediatePropagation();
         const orderId = $(this).data('order-id');
-        Swal.fire({ title:'Annuler la commande ?', icon:'warning', showCancelButton:true, confirmButtonText:'Oui, annuler', cancelButtonText:'Non', reverseButtons:true })
+        Swal.fire({ title:modalJs.cancelOrderTitle, icon:'warning', showCancelButton:true, confirmButtonText:modalJs.cancelOrderYes, cancelButtonText:modalJs.cancelOrderNo, reverseButtons:true })
         .then(r => {
             if (!r.isConfirmed) return;
             $.ajax({ url:`{{ url('restaurant/orders') }}/${orderId}/cancel`, type:'PUT',
                 data:{ _token:'{{ csrf_token() }}' },
-                success:()=>Swal.fire('Annulé !','','success').then(()=>location.reload()),
-                error:()=>Swal.fire('Erreur !','','error')
+                success:()=>Swal.fire(modalJs.cancelled,'','success').then(()=>location.reload()),
+                error:()=>Swal.fire(modalJs.error,'','error')
             });
         });
     });
@@ -899,7 +919,7 @@ function initNomModal() {
         if (step === 1) {
             // Étape 1 : au moins un plat
             if (Object.keys(nomItems).length === 0) {
-                $('#n-err-items').text('Veuillez ajouter au moins un plat.');
+                $('#n-err-items').text(modalJs.addDishRequired);
                 return false;
             }
             $('#n-err-items').text('');
@@ -911,14 +931,14 @@ function initNomModal() {
             
             if (nomLocation === 'table') {
                 if (!$('#n-table-number').val().trim()) {
-                    $('#n-err-table').text('Veuillez indiquer le numéro de table.');
+                    $('#n-err-table').text(modalJs.tableNumberRequired);
                     return false;
                 }
             }
 
             if (nomMode === 'existing') {
                 if (!$('#n-customer-select').val()) {
-                    $('#n-err-client').text('Veuillez sélectionner un client.');
+                    $('#n-err-client').text(modalJs.selectCustomerRequired);
                     return false;
                 }
             } else {
@@ -983,14 +1003,14 @@ function initNomModal() {
 
     $(document).on('click', '#nom-clear-cart', function(){
         Swal.fire({
-            title: 'Vider le panier ?',
-            text: "Tous les plats sélectionnés seront retirés.",
+            title: modalJs.clearCartTitle,
+            text: modalJs.clearCartText,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Oui, vider',
-            cancelButtonText: 'Annuler'
+            confirmButtonText: modalJs.clearCartYes,
+            cancelButtonText: modalJs.clearCartCancel
         }).then((result) => {
             if (result.isConfirmed) {
                 const keys = Object.keys(nomItems);
@@ -1233,24 +1253,24 @@ function initNomModal() {
     $('#newOrderForm').submit(function(e) {
         e.preventDefault();
         if (Object.keys(nomItems).length === 0) {
-            Swal.fire({ icon:'warning', title:'Sélection vide', text:'Ajoutez au moins un plat.' });
+            Swal.fire({ icon:'warning', title:modalJs.emptySelection, text:modalJs.emptySelectionText });
             return;
         }
         // Forcer la mise à jour de la note juste avant l'envoi
         $('#h-notes').val($('#n-notes').val().trim());
-        const btn = $('#nom-submit').prop('disabled', true).text('Enregistrement…');
+        const btn = $('#nom-submit').prop('disabled', true).text(modalJs.saving);
         const fd = new FormData(this);
         $.ajax({
             url: $(this).attr('action'), type:'POST', data:fd, processData:false, contentType:false,
             success: function() {
                 localStorage.removeItem('restaurant_cart');
-                Swal.fire({ icon:'success', title:'Commande enregistrée !', confirmButtonColor:'#10b981' })
+                Swal.fire({ icon:'success', title:modalJs.orderSaved, confirmButtonColor:'#10b981' })
                 .then(() => { bootstrap.Modal.getInstance(document.getElementById('newOrderModal'))?.hide(); location.reload(); });
             },
             error: function(xhr) {
                 const msg = xhr.responseJSON?.message || 'Une erreur est survenue.';
                 Swal.fire({ icon:'error', title:'Erreur', text:msg });
-                btn.prop('disabled', false).html('<i class="fas fa-check me-1"></i> Enregistrer la commande');
+                btn.prop('disabled', false).html('<i class="fas fa-check me-1"></i> ' + @json(__('restaurant.modal.submit')));
             }
         });
     });

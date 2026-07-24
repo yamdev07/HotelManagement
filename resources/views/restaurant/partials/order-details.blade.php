@@ -3,30 +3,30 @@
         <div class="col-md-6">
             <div class="card mb-3">
                 <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-user me-2"></i> Informations client</h6>
+                    <h6 class="mb-0"><i class="fas fa-user me-2"></i> {!! __('restaurant.details.customer_info') !!}</h6>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm">
                         <tr>
-                            <th width="40%">Nom:</th>
+                            <th width="40%">{{ __('restaurant.details.name') }}</th>
                             <td>{{ $order->customer_name ?? 'Non spécifié' }}</td>
                         </tr>
                         @if($order->customer_phone)
                         <tr>
-                            <th>Téléphone:</th>
+                            <th>{{ __('restaurant.details.phone') }}</th>
                             <td>{{ $order->customer_phone }}</td>
                         </tr>
                         @endif
                         @if($order->room_number)
                         <tr>
-                            <th>Chambre:</th>
+                            <th>{{ __('restaurant.details.room') }}</th>
                             <td>
                                 <span class="badge bg-info">Chambre {{ $order->room_number }}</span>
                             </td>
                         </tr>
                         @endif
                         <tr>
-                            <th>Date commande:</th>
+                            <th>{{ __('restaurant.details.order_date') }}</th>
                             <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                         </tr>
                     </table>
@@ -37,26 +37,26 @@
         <div class="col-md-6">
             <div class="card mb-3">
                 <div class="card-header">
-                    <h6 class="mb-0"><i class="fas fa-file-invoice me-2"></i> Résumé de la commande</h6>
+                    <h6 class="mb-0"><i class="fas fa-file-invoice me-2"></i> {!! __('restaurant.details.order_summary') !!}</h6>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm">
                         <tr>
-                            <th width="40%">Numéro:</th>
+                            <th width="40%">{{ __('restaurant.details.number') }}</th>
                             <td><strong>#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</strong></td>
                         </tr>
                         <tr>
-                            <th>Statut:</th>
+                            <th>{{ __('restaurant.details.status') }}</th>
                             <td>
                                 @php
                                     $statusLabels = [
-                                        'pending' => 'En attente',
-                                        'validated' => 'Validée',
-                                        'preparing' => 'En préparation',
-                                        'ready' => 'Prêt',
-                                        'delivered' => 'Livré',
-                                        'paid' => 'Payé',
-                                        'cancelled' => 'Annulé'
+                                        'pending' => __('restaurant.orders.filter_pending'),
+                                        'validated' => __('restaurant.orders.filter_validated'),
+                                        'preparing' => __('restaurant.orders.filter_preparing'),
+                                        'ready' => __('restaurant.orders.filter_ready'),
+                                        'delivered' => __('restaurant.orders.filter_delivered'),
+                                        'paid' => __('restaurant.orders.filter_paid'),
+                                        'cancelled' => __('restaurant.orders.filter_cancelled')
                                     ];
                                     $statusColors = [
                                         'pending' => 'warning',
@@ -74,19 +74,19 @@
                             </td>
                         </tr>
                         <tr>
-                            <th>Total:</th>
+                            <th>{{ __('restaurant.details.total') }}</th>
                             <td class="h5 text-primary">{{ number_format($order->total, 0, ',', ' ') }} FCFA</td>
                         </tr>
                         @if($order->payment_method)
                         <tr>
-                            <th>Paiement:</th>
+                            <th>{{ __('restaurant.details.payment') }}</th>
                             <td>
                                 @php
                                     $paymentMethods = [
-                                        'cash' => 'Espèces',
-                                        'card' => 'Carte bancaire',
-                                        'room_charge' => 'Frais de chambre',
-                                        'online' => 'En ligne'
+                                        'cash' => __('restaurant.details.method_cash'),
+                                        'card' => __('restaurant.details.method_card'),
+                                        'room_charge' => __('restaurant.details.method_room'),
+                                        'online' => __('restaurant.details.method_online')
                                     ];
                                 @endphp
                                 {{ $paymentMethods[$order->payment_method] ?? $order->payment_method }}
@@ -101,17 +101,17 @@
 
     <div class="card">
         <div class="card-header">
-            <h6 class="mb-0"><i class="fas fa-list-alt me-2"></i> Détails des articles</h6>
+            <h6 class="mb-0"><i class="fas fa-list-alt me-2"></i> {!! __('restaurant.details.items_title') !!}</h6>
         </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead class="table-light">
                         <tr>
-                            <th>Menu</th>
-                            <th class="text-center">Prix unitaire</th>
-                            <th class="text-center">Quantité</th>
-                            <th class="text-center">Total</th>
+                            <th>{{ __('restaurant.details.th_menu') }}</th>
+                            <th class="text-center">{{ __('restaurant.details.th_unit_price') }}</th>
+                            <th class="text-center">{{ __('restaurant.details.th_quantity') }}</th>
+                            <th class="text-center">{{ __('restaurant.details.th_total') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -140,25 +140,25 @@
                     </tbody>
                     <tfoot>
                         <tr>
-                            <th colspan="3" class="text-end">Sous-total:</th>
+                            <th colspan="3" class="text-end">{{ __('restaurant.details.subtotal') }}</th>
                             <th class="text-center">{{ number_format($order->items->sum(function($item) {
                                 return $item->price * $item->quantity;
                             }), 0, ',', ' ') }} FCFA</th>
                         </tr>
                         @if($order->tax_rate > 0)
                         <tr>
-                            <th colspan="3" class="text-end">Taxes ({{ $order->tax_rate }}%):</th>
+                            <th colspan="3" class="text-end">{{ __('restaurant.details.tax') }} ({{ $order->tax_rate }}%):</th>
                             <th class="text-center">{{ number_format($order->total * $order->tax_rate / 100, 0, ',', ' ') }} FCFA</th>
                         </tr>
                         @endif
                         @if($order->discount > 0)
                         <tr>
-                            <th colspan="3" class="text-end">Réduction:</th>
+                            <th colspan="3" class="text-end">{{ __('restaurant.details.discount') }}</th>
                             <th class="text-center text-danger">-{{ number_format($order->discount, 0, ',', ' ') }} FCFA</th>
                         </tr>
                         @endif
                         <tr class="table-active">
-                            <th colspan="3" class="text-end">Total:</th>
+                            <th colspan="3" class="text-end">{{ __('restaurant.details.total') }}</th>
                             <th class="text-center h5">{{ number_format($order->total, 0, ',', ' ') }} FCFA</th>
                         </tr>
                     </tfoot>
@@ -170,7 +170,7 @@
     @if($order->notes)
     <div class="card mt-3">
         <div class="card-header">
-            <h6 class="mb-0"><i class="fas fa-sticky-note me-2"></i> Notes</h6>
+            <h6 class="mb-0"><i class="fas fa-sticky-note me-2"></i> {{ __('restaurant.details.notes_title') }}</h6>
         </div>
         <div class="card-body">
             <p class="mb-0">{{ $order->notes }}</p>
@@ -180,17 +180,17 @@
 
     <div class="card mt-3">
         <div class="card-header">
-            <h6 class="mb-0"><i class="fas fa-history me-2"></i> Historique</h6>
+            <h6 class="mb-0"><i class="fas fa-history me-2"></i> {!! __('restaurant.details.history_title') !!}</h6>
         </div>
         <div class="card-body">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>Commande créée</span>
+                    <span>{{ __('restaurant.details.order_created') }}</span>
                     <span class="text-muted">{{ $order->created_at->format('d/m/Y H:i') }}</span>
                 </li>
                 @if($order->updated_at != $order->created_at)
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>Dernière modification</span>
+                    <span>{{ __('restaurant.details.last_modified') }}</span>
                     <span class="text-muted">{{ $order->updated_at->format('d/m/Y H:i') }}</span>
                 </li>
                 @endif

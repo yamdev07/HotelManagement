@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Restaurant - Menus')
+@section('title', __('restaurant.index.page_title'))
 @section('content')
 
 @include('restaurant.partials.nav-tabs')
@@ -53,11 +53,11 @@
 <div class="db-page">
     <div class="db-header anim-1">
         <div>
-            <h1 class="db-title-h1">Gestion de la Carte</h1>
-            <p class="text-muted small">Configurez et gérez les menus de votre restaurant</p>
+            <h1 class="db-title-h1">{{ __('restaurant.index.header') }}</h1>
+            <p class="text-muted small">{{ __('restaurant.index.header_desc') }}</p>
         </div>
         <a href="{{ route('restaurant.create') }}" class="btn-db-primary">
-            <i class="fas fa-plus"></i> Nouveau Menu
+            <i class="fas fa-plus"></i> {{ __('restaurant.index.new_menu') }}
         </a>
     </div>
 
@@ -65,18 +65,18 @@
         <div class="filter-row">
             <div class="filter-group">
                 <select class="db-input" id="categoryFilter">
-                    <option value="">Toutes les catégories</option>
+                    <option value="">{{ __('restaurant.index.all_categories') }}</option>
                     @foreach($categories as $category)
                         <option value="{{ $category->slug }}">{{ $category->name }}</option>
                     @endforeach
                 </select>
                 <div class="search-box-wrap">
                     <i class="fas fa-search search-box-icon"></i>
-                    <input type="text" class="db-input w-100" id="searchMenu" placeholder="Rechercher une spécialité..." style="padding-left: 40px;">
+                    <input type="text" class="db-input w-100" id="searchMenu" placeholder="{{ __('restaurant.index.search_placeholder') }}" style="padding-left: 40px;">
                 </div>
             </div>
             <button class="btn-cart-pill open-cart-modal" type="button">
-                <i class="fas fa-shopping-basket"></i> Panier
+                <i class="fas fa-shopping-basket"></i> {{ __('restaurant.index.cart') }}
                 <span id="cart-counter-pill" style="display: none;">0</span>
             </button>
         </div>
@@ -87,13 +87,13 @@
                 <div class="db-item-card">
                     <div class="db-item-img">
                         <img src="{{ $menu->image_url }}" alt="{{ $menu->name }}" onerror="this.onerror=null; this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';">
-                        <span class="category-tag">{{ $menu->category?->name ?? 'Sans catégorie' }}</span>
+                        <span class="category-tag">{{ $menu->category?->name ?? __('restaurant.index.no_category') }}</span>
                         <div class="db-price-tag">{{ number_format($menu->price, 0, ',', ' ') }} CFA</div>
                     </div>
                     <div class="db-item-content">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <h3 class="menu-title mb-0">{{ $menu->name }}</h3>
-                            <div class="form-check form-switch" title="Disponibilité du plat">
+                            <div class="form-check form-switch" title="{{ __('restaurant.index.availability') }}">
                                 <input class="form-check-input toggle-availability" type="checkbox" role="switch"
                                        data-id="{{ $menu->id }}" {{ $menu->is_available ? 'checked' : '' }}>
                             </div>
@@ -103,7 +103,7 @@
 
                         <div class="d-flex flex-wrap gap-1 mb-3">
                             @php
-                                $daysMap = ['mon'=>'L','tue'=>'M','wed'=>'M','thu'=>'J','fri'=>'V','sat'=>'S','sun'=>'D'];
+                                $daysMap = ['mon'=>__('restaurant.index.monday'),'tue'=>__('restaurant.index.tuesday'),'wed'=>__('restaurant.index.wednesday'),'thu'=>__('restaurant.index.thursday'),'fri'=>__('restaurant.index.friday'),'sat'=>__('restaurant.index.saturday'),'sun'=>__('restaurant.index.sunday')];
                                 $menuDays = $menu->available_days ?? [];
                             @endphp
                             @foreach($daysMap as $code => $lbl)
@@ -122,7 +122,7 @@
                                         data-menu-id="{{ $menu->id }}" 
                                         data-menu-name="{{ $menu->name }}" 
                                         data-menu-price="{{ $menu->price }}">
-                                    <i class="fas fa-plus-circle"></i> Ajouter
+                                    <i class="fas fa-plus-circle"></i> {{ __('restaurant.index.add') }}
                                 </button>
                                 
                                 <div class="db-qty-pill d-none" id="main-qty-wrapper-{{ $menu->id }}">
@@ -133,8 +133,8 @@
                             </div>
                             
                             <div class="d-flex gap-2">
-                                <a href="{{ route('restaurant.menus.edit', $menu->id) }}" class="btn-icon-sm" title="Modifier"><i class="fas fa-pen"></i></a>
-                                <button class="btn-icon-sm btn-icon-danger delete-menu" data-id="{{ $menu->id }}" title="Supprimer">
+                                <a href="{{ route('restaurant.menus.edit', $menu->id) }}" class="btn-icon-sm" title="{{ __('restaurant.index.edit') }}"><i class="fas fa-pen"></i></a>
+                                <button class="btn-icon-sm btn-icon-danger delete-menu" data-id="{{ $menu->id }}" title="{{ __('restaurant.index.delete') }}">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
@@ -145,9 +145,9 @@
             @empty
             <div class="col-12 text-center py-5">
                 <div style="font-size: 4rem; color: var(--s200); margin-bottom: 20px;"><i class="fas fa-scroll"></i></div>
-                <h4 class="fw-bold">Carte vide</h4>
-                <p class="text-muted">Aucun menu n'a encore été ajouté.</p>
-                <a href="{{ route('restaurant.create') }}" class="btn-db-primary mt-3">Ajouter le premier menu</a>
+                <h4 class="fw-bold">{{ __('restaurant.index.empty') }}</h4>
+                <p class="text-muted">{{ __('restaurant.index.empty_desc') }}</p>
+                <a href="{{ route('restaurant.create') }}" class="btn-db-primary mt-3">{{ __('restaurant.index.add_first') }}</a>
             </div>
             @endforelse
         </div>
@@ -193,14 +193,14 @@
             e.preventDefault();
             const menuId = btnDelete.dataset.id;
             Swal.fire({
-                title: 'Êtes-vous sûr ?',
-                text: 'Ce menu sera supprimé !',
+                title: @json(__('restaurant.index.confirm_title')),
+                text: @json(__('restaurant.index.confirm_text')),
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
                 cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Oui, supprimer !',
-                cancelButtonText: 'Annuler'
+                confirmButtonText: @json(__('restaurant.index.confirm_yes')),
+                cancelButtonText: @json(__('restaurant.index.confirm_cancel'))
             }).then(r => {
                 if (r.isConfirmed) {
                     fetch('/restaurant/menus/' + menuId, {
@@ -213,7 +213,7 @@
                     })
                     .then(res => res.json())
                     .then(() => location.reload())
-                    .catch(() => alert('Erreur lors de la suppression'));
+                    .catch(() => alert(@json(__('restaurant.index.delete_error'))));
                 }
             });
         }

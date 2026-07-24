@@ -130,7 +130,7 @@
             <div class="hotel-sub">Restaurant</div>
         </div>
         <div class="inv-ref">
-            <h2>FACTURE</h2>
+            <h2>{{ __('restaurant.invoice.invoice') }}</h2>
             <p>N° {{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</p>
             <p>{{ $order->created_at->format('d/m/Y H:i') }}</p>
         </div>
@@ -139,46 +139,46 @@
     {{-- Méta --}}
     <div class="meta-grid">
         <div class="meta-box">
-            <h4>Client</h4>
+            <h4>{{ __('restaurant.invoice.client') }}</h4>
             <table>
                 <tr>
-                    <td>Nom</td>
+                    <td>{{ __('restaurant.invoice.name') }}</td>
                     <td><strong id="customer-name-display">{{ $order->customer_name ?? 'Client' }}</strong></td>
                 </tr>
                 @if($order->room_number)
                 <tr>
-                    <td>Chambre</td>
+                    <td>{{ __('restaurant.invoice.room') }}</td>
                     <td><strong>{{ $order->room_number }}</strong></td>
                 </tr>
                 @endif
             </table>
         </div>
         <div class="meta-box">
-            <h4>Commande</h4>
+            <h4>{{ __('restaurant.invoice.order') }}</h4>
             <table>
                 <tr>
-                    <td>Référence</td>
+                    <td>{{ __('restaurant.invoice.reference') }}</td>
                     <td><strong>#{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}</strong></td>
                 </tr>
                 <tr>
-                    <td>Date</td>
+                    <td>{{ __('restaurant.invoice.date') }}</td>
                     <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                 </tr>
                 <tr>
-                    <td>Paiement</td>
+                    <td>{{ __('restaurant.invoice.payment') }}</td>
                     <td>
                         @php
                             $methods = [
-                                'cash'        => 'Espèces',
-                                'card'        => 'Carte Bancaire',
+                                'cash'        => __('restaurant.invoice.method_cash'),
+                                'card'        => __('restaurant.invoice.method_card'),
                                 'mobile_money'=> 'Mobile Money',
                                 'fedapay'     => 'Fedapay',
-                                'transfer'    => 'Virement',
-                                'check'       => 'Chèque',
-                                'room_charge' => 'Facture de la chambre',
+                                'transfer'    => __('restaurant.invoice.method_transfer'),
+                                'check'       => __('restaurant.invoice.method_check'),
+                                'room_charge' => __('restaurant.invoice.method_room'),
                             ];
                         @endphp
-                        {{ $methods[$order->payment_method] ?? $order->payment_method ?? 'Non spécifié' }}
+                        {{ $methods[$order->payment_method] ?? $order->payment_method ?? __('restaurant.invoice.method_none') }}
                     </td>
                 </tr>
             </table>
@@ -189,9 +189,9 @@
     <table class="items-table">
         <thead>
             <tr>
-                <th>Désignation</th>
-                <th style="text-align:center;">Qté</th>
-                <th style="text-align:right;">Prix unit.</th>
+                <th>{{ __('restaurant.invoice.designation') }}</th>
+                <th style="text-align:center;">{{ __('restaurant.invoice.qty') }}</th>
+                <th style="text-align:right;">{{ __('restaurant.invoice.unit_price') }}</th>
                 <th style="text-align:right;">Total</th>
             </tr>
         </thead>
@@ -207,7 +207,7 @@
         </tbody>
         <tfoot>
             <tr>
-                <th colspan="3" style="text-align:right; padding:11px 8px;">TOTAL À RÉGLER</th>
+                <th colspan="3" style="text-align:right; padding:11px 8px;">{!! __('restaurant.invoice.total_due') !!}</th>
                 <th style="text-align:right; padding:11px 8px; font-size:1rem; color:#1a472a;">
                     {{ number_format($order->total, 0, ',', ' ') }} FCFA
                 </th>
@@ -218,18 +218,18 @@
     {{-- Notes --}}
     @if($order->notes)
     <div class="notes-block">
-        <strong>Notes :</strong> {{ $order->notes }}
+        <strong>{!! __('restaurant.invoice.notes') !!} </strong> {{ $order->notes }}
     </div>
     @endif
 
     {{-- Pied de page --}}
     <div class="inv-footer">
-        <p>Merci pour votre commande · Restaurant Cactus</p>
-        <p style="margin-top:4px;">Imprimé le {{ now()->format('d/m/Y H:i') }}</p>
+        <p>{!! __('restaurant.invoice.thank_you') !!} · Restaurant Cactus</p>
+        <p style="margin-top:4px;">{!! __('restaurant.invoice.printed_on') !!} {{ now()->format('d/m/Y H:i') }}</p>
     </div>
 
     <div class="actions">
-        <button class="btn-close" onclick="window.close()">✕&nbsp; Fermer</button>
+        <button class="btn-close" onclick="window.close()">✕&nbsp; {!! __('restaurant.invoice.close') !!}</button>
     </div>
 
     <script>
@@ -239,7 +239,7 @@
             let namePrompted = false;
 
             if (!currentName || currentName === "" || currentName.toLowerCase().includes('client table') || currentName.toLowerCase().includes('room service')) {
-                let name = prompt("Veuillez saisir le nom du client pour cette facture (Laisser vide pour ignorer) :", "");
+                let name = prompt("{{ __('restaurant.invoice.prompt_name') }}", "");
                 if (name && name.trim() !== "") {
                     document.getElementById('customer-name-display').innerText = name;
                     namePrompted = true;

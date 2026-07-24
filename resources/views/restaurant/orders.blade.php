@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Restaurant - Commandes')
+@section('title', __('restaurant.orders.page_title'))
 @section('content')
 
 @include('restaurant.partials.nav-tabs')
@@ -7,12 +7,12 @@
 <div class="db-page">
     <div class="db-header anim-1">
         <div>
-            <h1 class="db-title-h1">Gestion des Commandes</h1>
-            <p class="text-muted small">Suivez et traitez les commandes des clients en temps réel</p>
+            <h1 class="db-title-h1">{{ __('restaurant.orders.header') }}</h1>
+            <p class="text-muted small">{{ __('restaurant.orders.header_desc') }}</p>
         </div>
         @if(!auth()->user()->isCuisiner())
         <button class="btn-db-primary" data-bs-toggle="modal" data-bs-target="#newOrderModal">
-            <i class="fas fa-plus"></i> Nouvelle Commande
+            <i class="fas fa-plus"></i> {{ __('restaurant.orders.new_order') }}
         </button>
         @endif
     </div>
@@ -77,8 +77,8 @@
 
     <div class="qr-menu-card anim-1">
         <div class="qr-info">
-            <h3>Menu Digital Restaurant <span class="badge-qr">FLASH ORDER</span></h3>
-            <p>Ce QR Code permet aux clients de scanner et commander directement via leur mobile ou une tablette de table.</p>
+            <h3>{{ __('restaurant.orders.qr_title') }} <span class="badge-qr">FLASH ORDER</span></h3>
+            <p>{{ __('restaurant.orders.qr_desc') }}</p>
             <div class="qr-url">{{ rtrim(config('app.url'), '/') . '/menu' }}</div>
         </div>
         <div class="qr-download-container">
@@ -89,7 +89,7 @@
                 <img id="qrCodeImage" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode($qrUrl) }}" alt="QR Code Menu">
             </div>
             <button class="btn-download-qr" onclick="downloadQRCode()">
-                <i class="fas fa-download"></i> Télécharger
+                <i class="fas fa-download"></i> {{ __('restaurant.orders.download') }}
             </button>
         </div>
     </div>
@@ -99,7 +99,7 @@
         <div class="kpi-card">
             <div class="kpi-icon" style="background: var(--g50); color: var(--g600);"><i class="fas fa-coins"></i></div>
             <div class="kpi-data">
-                <div class="kpi-label">CA DU JOUR</div>
+                <div class="kpi-label">{{ __('restaurant.orders.kpi_revenue') }}</div>
                 <div class="kpi-value text-success">{{ number_format($todayRevenue ?? 0, 0, ',', ' ') }}</div>
             </div>
         </div>
@@ -107,7 +107,7 @@
         <div class="kpi-card">
             <div class="kpi-icon" style="background: #eff6ff; color: #2563eb;"><i class="fas fa-receipt"></i></div>
             <div class="kpi-data">
-                <div class="kpi-label">COMMANDES (AUJ.)</div>
+                <div class="kpi-label">{{ __('restaurant.orders.kpi_orders') }}</div>
                 <div class="kpi-value text-primary">{{ $todayOrdersTotal ?? 0 }}</div>
             </div>
         </div>
@@ -115,7 +115,7 @@
         <div class="kpi-card">
             <div class="kpi-icon" style="background: #fff1f2; color: #e11d48;"><i class="fas fa-fire"></i></div>
             <div class="kpi-data">
-                <div class="kpi-label">EN ATTENTE / PRÉP.</div>
+                <div class="kpi-label">{{ __('restaurant.orders.kpi_pending') }}</div>
                 <div class="kpi-value text-danger">{{ ($pendingOrders ?? 0) + ($validatedOrders ?? 0) + ($preparingOrders ?? 0) }}</div>
             </div>
         </div>
@@ -123,7 +123,7 @@
         <div class="kpi-card">
             <div class="kpi-icon" style="background: #f0fdf4; color: #10b981;"><i class="fas fa-hat-chef"></i></div>
             <div class="kpi-data">
-                <div class="kpi-label">PRÊTES</div>
+                <div class="kpi-label">{{ __('restaurant.orders.kpi_ready') }}</div>
                 <div class="kpi-value text-success">{{ $readyOrders ?? 0 }}</div>
             </div>
         </div>
@@ -131,7 +131,7 @@
         <div class="kpi-card">
             <div class="kpi-icon" style="background: #fdf4ff; color: #a855f7;"><i class="fas fa-check-double"></i></div>
             <div class="kpi-data">
-                <div class="kpi-label">LIVRÉES / PAYÉES</div>
+                <div class="kpi-label">{{ __('restaurant.orders.kpi_delivered') }}</div>
                 <div class="kpi-value text-purple">{{ ($deliveredOrders ?? 0) + ($paidOrders ?? 0) }}</div>
             </div>
         </div>
@@ -141,19 +141,19 @@
         <!-- Filtres -->
         <div class="filter-row mb-4">
             <select class="db-input" id="statusFilter" style="width: 200px;">
-                <option value="">Tous les statuts</option>
-                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>En attente</option>
-                <option value="validated" {{ request('status') == 'validated' ? 'selected' : '' }}>Validée</option>
-                <option value="preparing" {{ request('status') == 'preparing' ? 'selected' : '' }}>En préparation</option>
-                <option value="ready" {{ request('status') == 'ready' ? 'selected' : '' }}>Prêt</option>
-                <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>Livré</option>
-                <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>Payé</option>
-                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Annulé</option>
+                <option value="">{{ __('restaurant.orders.filter_all') }}</option>
+                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>{{ __('restaurant.orders.filter_pending') }}</option>
+                <option value="validated" {{ request('status') == 'validated' ? 'selected' : '' }}>{{ __('restaurant.orders.filter_validated') }}</option>
+                <option value="preparing" {{ request('status') == 'preparing' ? 'selected' : '' }}>{{ __('restaurant.orders.filter_preparing') }}</option>
+                <option value="ready" {{ request('status') == 'ready' ? 'selected' : '' }}>{{ __('restaurant.orders.filter_ready') }}</option>
+                <option value="delivered" {{ request('status') == 'delivered' ? 'selected' : '' }}>{{ __('restaurant.orders.filter_delivered') }}</option>
+                <option value="paid" {{ request('status') == 'paid' ? 'selected' : '' }}>{{ __('restaurant.orders.filter_paid') }}</option>
+                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>{{ __('restaurant.orders.filter_cancelled') }}</option>
             </select>
             <input type="date" class="db-input" id="dateFrom" value="{{ request('from') }}" title="Du">
             <input type="date" class="db-input" id="dateTo" value="{{ request('to') }}" title="Au">
             <button class="btn-db-primary" id="applyFilters" style="height:42px; padding:0 24px;">
-                <i class="fas fa-filter"></i> Filtrer
+                <i class="fas fa-filter"></i> {{ __('restaurant.orders.filter_btn') }}
             </button>
             @if(request()->hasAny(['status','from','to']))
                 <a href="{{ route('restaurant.orders') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="height:42px; width:42px; border-radius:10px;">
@@ -168,13 +168,13 @@
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Client</th>
-                        <th>Chambre</th>
-                        <th class="text-center">Menus</th>
-                        <th class="text-end">Total</th>
-                        <th>Statut</th>
-                        <th>Date</th>
-                        <th class="text-end">Actions</th>
+                        <th>{{ __('restaurant.orders.th_client') }}</th>
+                        <th>{{ __('restaurant.orders.th_room') }}</th>
+                        <th class="text-center">{{ __('restaurant.orders.th_menus') }}</th>
+                        <th class="text-end">{{ __('restaurant.orders.th_total') }}</th>
+                        <th>{{ __('restaurant.orders.th_status') }}</th>
+                        <th>{{ __('restaurant.orders.th_date') }}</th>
+                        <th class="text-end">{{ __('restaurant.orders.th_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -210,13 +210,13 @@
                         <td>
                             @php
                                 $statusLabels = [
-                                    'pending' => 'En attente',
-                                    'validated' => 'Validée',
-                                    'preparing' => 'Préparation',
-                                    'ready' => 'Prêt',
-                                    'delivered' => 'Livré',
-                                    'paid' => 'Payé',
-                                    'cancelled' => 'Annulé'
+                                    'pending' => __('restaurant.orders.filter_pending'),
+                                    'validated' => __('restaurant.orders.filter_validated'),
+                                    'preparing' => __('restaurant.orders.filter_preparing'),
+                                    'ready' => __('restaurant.orders.filter_ready'),
+                                    'delivered' => __('restaurant.orders.filter_delivered'),
+                                    'paid' => __('restaurant.orders.filter_paid'),
+                                    'cancelled' => __('restaurant.orders.filter_cancelled')
                                 ];
                                 $statusColors = [
                                     'pending' => 'bg-warning',
@@ -242,7 +242,7 @@
                             <div class="d-flex justify-content-end gap-2">
                                 {{-- Détails --}}
                                 <button class="btn btn-sm btn-light border p-2"
-                                        title="Voir"
+                                        title="{{ __('restaurant.orders.view') }}"
                                         data-order-id="{{ $order->id }}"
                                         data-bs-toggle="modal"
                                         data-bs-target="#orderDetailsModal">
@@ -252,7 +252,7 @@
                                 {{-- Valider (pending → validated) par le Servant ou Admin --}}
                                 @if($order->status == 'pending' && (auth()->user()->isSuper() || auth()->user()->role === 'Servant'))
                                 <button class="btn btn-sm btn-dark text-white p-2 change-status"
-                                        title="Valider la commande"
+                                        title="{{ __('restaurant.orders.validate') }}"
                                         data-order-id="{{ $order->id }}"
                                         data-status="validated">
                                     <i class="fas fa-check-double"></i>
@@ -262,7 +262,7 @@
                                 {{-- Préparer (validated → preparing) --}}
                                 @if($order->status == 'validated' && (auth()->user()->isSuper() || auth()->user()->isCuisiner()))
                                 <button class="btn btn-sm btn-info text-white p-2 change-status"
-                                        title="Lancer la préparation"
+                                        title="{{ __('restaurant.orders.start_prep') }}"
                                         data-order-id="{{ $order->id }}"
                                         data-status="preparing">
                                     <i class="fas fa-play"></i>
@@ -272,7 +272,7 @@
                                 {{-- Prêt (preparing → ready) --}}
                                 @if($order->status == 'preparing' && (auth()->user()->isSuper() || auth()->user()->isCuisiner()))
                                 <button class="btn btn-sm btn-success text-white p-2 change-status"
-                                        title="Marquer comme prêt"
+                                        title="{{ __('restaurant.orders.mark_ready') }}"
                                         data-order-id="{{ $order->id }}"
                                         data-status="ready">
                                     <i class="fas fa-check"></i>
@@ -282,7 +282,7 @@
                                 {{-- Livrer (ready → delivered ou preparing → delivered pour compatibilité) --}}
                                 @if(in_array($order->status, ['preparing', 'ready']) && (auth()->user()->isSuper() || auth()->user()->role === 'Servant'))
                                 <button class="btn btn-sm btn-primary text-white p-2 change-status"
-                                        title="Marquer comme livré"
+                                        title="{{ __('restaurant.orders.mark_delivered') }}"
                                         data-order-id="{{ $order->id }}"
                                         data-status="delivered">
                                     <i class="fas fa-truck"></i>
@@ -292,7 +292,7 @@
                                 {{-- Payer --}}
                                 @if(in_array($order->status, ['delivered', 'pending', 'ready']) && $order->payment_method !== 'room_charge' && (auth()->user()->isSuper() || auth()->user()->role === 'Servant'))
                                 <button class="btn btn-sm btn-dark text-white p-2 change-status"
-                                        title="Encaisser"
+                                        title="{{ __('restaurant.orders.collect') }}"
                                         data-order-id="{{ $order->id }}"
                                         data-status="paid">
                                     <i class="fas fa-cash-register"></i>
@@ -303,12 +303,12 @@
                                 <a href="{{ route('restaurant.orders.invoice', $order->id) }}"
                                    target="_blank"
                                    class="btn btn-sm btn-outline-secondary p-2"
-                                   title="Imprimer la facture">
+                                   title="{{ __('restaurant.orders.print_invoice') }}">
                                     <i class="fas fa-print"></i>
                                 </a>
 
                                 @if($order->payment_method === 'room_charge')
-                                <span class="badge bg-light text-primary border border-primary border-opacity-25 d-flex align-items-center" title="Sur facture chambre">
+                                <span class="badge bg-light text-primary border border-primary border-opacity-25 d-flex align-items-center" title="{{ __('restaurant.orders.room_charge') }}">
                                     <i class="fas fa-hotel"></i>
                                 </span>
                                 @endif
@@ -319,7 +319,7 @@
                     <tr>
                         <td colspan="8" class="text-center py-5">
                             <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
-                            <h5 class="text-muted">Aucune commande</h5>
+                            <h5 class="text-muted">{{ __('restaurant.orders.no_orders') }}</h5>
                         </td>
                     </tr>
                     @endforelse
@@ -341,7 +341,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content" style="border-radius: 20px; overflow: hidden; border: none; box-shadow: var(--shadow-lg);">
             <div class="modal-header" style="background: var(--g700); color: white; border: none;">
-                <h5 class="modal-title fw-bold">Détails de la commande #<span id="orderId"></span></h5>
+                <h5 class="modal-title fw-bold">{!! __('restaurant.orders.details_title') !!} #<span id="orderId"></span></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0">
@@ -350,9 +350,9 @@
                 </div>
             </div>
             <div class="modal-footer bg-light border-0">
-                <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-outline-secondary fw-bold" data-bs-dismiss="modal">{{ __('restaurant.orders.close') }}</button>
                 <button type="button" class="btn btn-primary fw-bold" id="printOrder">
-                    <i class="fas fa-print me-1"></i> Imprimer le ticket
+                    <i class="fas fa-print me-1"></i> {!! __('restaurant.orders.print_ticket') !!}
                 </button>
             </div>
         </div>
