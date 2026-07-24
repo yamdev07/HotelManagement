@@ -629,6 +629,10 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+    var btnView = @json(__('roomstatus.btn_view'));
+    var btnEdit = @json(__('roomstatus.btn_edit'));
+    var btnDelete = @json(__('roomstatus.btn_delete'));
+
 $(document).ready(function() {
     // Sample data for room statuses
     var statusData = [
@@ -700,13 +704,13 @@ $(document).ready(function() {
                 data: null,
                 render: function(data, type, row) {
                     return '<div class="action-group">' +
-                           '<button class="btn-db-icon btn-db-icon-view" onclick="viewStatus(' + row.id + ')" title="@lang(\'roomstatus.btn_view\')">' +
+                           '<button class="btn-db-icon btn-db-icon-view" onclick="viewStatus(' + row.id + ')" title="' + btnView + '">' +
                            '<i class="fas fa-eye"></i>' +
                            '</button>' +
-                           '<button class="btn-db-icon btn-db-icon-edit" onclick="editStatus(' + row.id + ')" title="@lang(\'roomstatus.btn_edit\')">' +
+                           '<button class="btn-db-icon btn-db-icon-edit" onclick="editStatus(' + row.id + ')" title="' + btnEdit + '">' +
                            '<i class="fas fa-edit"></i>' +
                            '</button>' +
-                           '<button class="btn-db-icon btn-db-icon-delete" onclick="deleteStatus(' + row.id + ', \'' + row.name + '\')" title="@lang(\'roomstatus.btn_delete\')">' +
+                           '<button class="btn-db-icon btn-db-icon-delete" onclick="deleteStatus(' + row.id + ', \'' + row.name + '\')" title="' + btnDelete + '">' +
                            '<i class="fas fa-trash"></i>' +
                            '</button>' +
                            '</div>';
