@@ -395,11 +395,13 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
             Route::put('/', [TransactionController::class, 'update'])->name('update')
                 ->middleware('checkrole:Super,Admin,Receptionist');
 
-            // Actions critiques nécessitant autorisation
-            Route::middleware('checkrole:Super,Admin')->group(function () {
-                Route::delete('/', [TransactionController::class, 'destroy'])->name('destroy');
-                Route::delete('/cancel', [TransactionController::class, 'cancel'])->name('cancel');
-            });
+            // Annulation : tout le personnel de l'hôtel
+            Route::delete('/cancel', [TransactionController::class, 'cancel'])->name('cancel')
+                ->middleware('checkrole:Super,Admin,Receptionist,Cashier,Housekeeping,Servant,Cuisiner');
+
+            // Suppression : admin uniquement
+            Route::delete('/', [TransactionController::class, 'destroy'])->name('destroy')
+                ->middleware('checkrole:Super,Admin');
 
             // Restauration seulement pour admins
             Route::post('/restore', [TransactionController::class, 'restore'])->name('restore')
