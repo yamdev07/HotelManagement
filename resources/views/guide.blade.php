@@ -116,8 +116,13 @@
     <button class="theme-btn" id="themeToggle" type="button" aria-label="Toggle theme"><i class="fas fa-moon"></i></button>
     <a href="{{ route('lang.switch', app()->getLocale() === 'fr' ? 'en' : 'fr') }}" class="btn-ghost" style="padding:.45rem .8rem;font-size:.85rem;">{{ __('landing.nav_switch_lang') }}</a>
     <a href="{{ route('landing') }}" class="btn btn-ghost"><i class="fas fa-arrow-left me-1"></i> {{ __('guide.nav_site') }}</a>
-    <a href="{{ route('login.index') }}" class="btn btn-ghost">{{ __('guide.nav_login') }}</a>
-    <a href="{{ route('hotel.register') }}" class="btn btn-glow">{{ __('guide.nav_trial') }}</a>
+    @auth
+        {{-- Déjà connecté : on ne propose pas de se reconnecter à un autre compte (issue #183) --}}
+        <a href="{{ url('/home') }}" class="btn btn-glow"><i class="fas fa-gauge-high me-1"></i> {{ __('guide.nav_dashboard') }}</a>
+    @else
+        <a href="{{ route('login.index') }}" class="btn btn-ghost">{{ __('guide.nav_login') }}</a>
+        <a href="{{ route('hotel.register') }}" class="btn btn-glow">{{ __('guide.nav_trial') }}</a>
+    @endauth
 </nav>
 
 @php

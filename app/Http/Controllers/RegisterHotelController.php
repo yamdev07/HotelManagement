@@ -39,21 +39,27 @@ class RegisterHotelController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'company_name' => ['required', 'string', 'max:255', new \App\Rules\NoEmoji],
-            'plan' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
-            'country' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.countries')))],
-            'contact_phone' => ['nullable', 'string', 'max:50'],
+            // SafeName (issue #192, plus strict que NoEmoji) + regex téléphone.
+            'company_name'  => ['required', 'string', 'max:255', new \App\Rules\SafeName],
+            'plan'          => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
+            'country'       => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.countries')))],
+            'contact_phone' => ['nullable', 'string', 'regex:/^[0-9+\s().\-]{6,20}$/'],
             // 'file' plutôt que 'image' : 'image' (getimagesize) rejette les SVG.
-            'logo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:4096'],
-            'admin_name' => ['required', 'string', 'max:255', new \App\Rules\NoEmoji],
-            'admin_email' => ['required', 'email', 'max:255'],
+            'logo'          => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:4096'],
+            'admin_name'    => ['required', 'string', 'max:255', new \App\Rules\SafeName],
+            // Pas d'unique : main autorise un même email à posséder plusieurs hôtels
+            // (l'existant est géré plus bas). Ne pas remettre unique ici.
+            'admin_email'   => ['required', 'email', 'max:255'],
         ], [
+            'contact_phone.regex' => 'Le téléphone ne doit contenir que des chiffres (6 à 20), espaces, +, -, ( ).',
             'logo.mimes' => __('flash.register_invalid_logo'),
-            'logo.max' => __('flash.register_logo_too_heavy'),
-            'logo.file' => __('flash.register_logo_unreadable'),
+            'logo.max'   => __('flash.register_logo_too_heavy'),
+            'logo.file'  => __('flash.register_logo_unreadable'),
         ], [
-            'company_name' => "nom de l'établissement",
-            'admin_name' => 'nom complet',
+            'company_name'  => "nom de l'établissement",
+            'admin_name'    => 'nom complet',
+            'admin_email'   => 'email',
+            'contact_phone' => 'téléphone',
         ]);
 
         // Si l'email existe déjà (l'utilisateur revient en arrière pour changer de plan),

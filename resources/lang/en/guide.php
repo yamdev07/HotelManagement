@@ -5,6 +5,7 @@ return [
     'nav_site' => 'Site',
     'nav_login' => 'Login',
     'nav_trial' => 'Free Trial',
+    'nav_dashboard' => 'My dashboard',
     'search_placeholder' => 'Search the guide…',
     'toc_title' => 'Contents',
     'toc_empty' => 'No results for this search.',

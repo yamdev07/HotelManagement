@@ -5,6 +5,7 @@ return [
     'nav_site' => 'Site',
     'nav_login' => 'Connexion',
     'nav_trial' => 'Essai gratuit',
+    'nav_dashboard' => 'Mon espace',
     'search_placeholder' => 'Rechercher dans le guide…',
     'toc_title' => 'Sommaire',
     'toc_empty' => 'Aucun résultat pour cette recherche.',

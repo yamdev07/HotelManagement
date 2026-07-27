@@ -377,7 +377,7 @@
     <div class="choose-breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.createIdentity') }}">{{ __('reservation.step_identity') }}</a>
+        <a href="{{ route('transaction.reservation.createIdentity', $customer->id) }}">{{ __('reservation.step_identity') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('transaction.reservation.viewCountPerson', $customer->id) }}">{{ __('reservation.step_dates') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>

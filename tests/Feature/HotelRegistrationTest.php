@@ -59,9 +59,9 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel Spam',
-            'plan' => 'starter',
-            'admin_name' => 'X',
-            'admin_email' => 'spam@notice.test',
+            'plan'         => 'starter',
+            'admin_name'   => 'Nom Valide',
+            'admin_email'  => 'spam@notice.test',
         ])->assertSessionHas('credentials_email', 'spam@notice.test');
 
         // Le bandeau "vérifiez vos spams" s'affiche sur l'onboarding
@@ -77,11 +77,43 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel 🏨 Cactus 😀',
-            'admin_name' => 'X',
-            'admin_email' => 'emoji@test.test',
+            'admin_name'   => 'Nom Valide',
+            'admin_email'  => 'emoji@test.test',
         ])->assertSessionHasErrors('company_name');
 
         $this->assertDatabaseMissing('hotels', ['name' => 'Hotel 🏨 Cactus 😀']);
+    }
+
+    public function test_signup_rejects_garbage_name_and_invalid_phone(): void
+    {
+        // Issue #192 : renforcement de la validation de l'essai gratuit.
+        Mail::fake();
+
+        // Nom sans vraie lettre (charabia) refusé
+        $this->post('/inscription', [
+            'company_name' => '***123***',
+            'admin_name'   => 'Vrai Nom',
+            'admin_email'  => 'garbage@test.test',
+        ])->assertSessionHasErrors('company_name');
+        $this->assertDatabaseMissing('hotels', ['name' => '***123***']);
+
+        // Téléphone avec des lettres refusé
+        $this->post('/inscription', [
+            'company_name'  => 'Hotel Valide',
+            'admin_name'    => 'Vrai Nom',
+            'admin_email'   => 'phone@test.test',
+            'contact_phone' => 'appelle-moi',
+        ])->assertSessionHasErrors('contact_phone');
+        $this->assertDatabaseMissing('hotels', ['name' => 'Hotel Valide']);
+
+        // Valeurs correctes : inscription OK
+        $this->post('/inscription', [
+            'company_name'  => 'Hotel Correct',
+            'admin_name'    => 'Vrai Nom',
+            'admin_email'   => 'ok@test.test',
+            'contact_phone' => '+229 01 02 03 04',
+        ]);
+        $this->assertDatabaseHas('hotels', ['name' => 'Hotel Correct']);
     }
 
     public function test_signup_accepts_accented_and_punctuated_name(): void
@@ -103,10 +135,10 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel Abidjan',
-            'plan' => 'pro',
-            'country' => 'CI',
-            'admin_name' => 'X',
-            'admin_email' => 'x@ci.test',
+            'plan'         => 'pro',
+            'country'      => 'CI',
+            'admin_name'   => 'Nom Valide',
+            'admin_email'  => 'x@ci.test',
         ]);
 
         $hotel = \App\Models\Hotel::where('name', 'Hotel Abidjan')->first();
@@ -124,8 +156,8 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel Defaut',
-            'admin_name' => 'X',
-            'admin_email' => 'x@defaut.test',
+            'admin_name'   => 'Nom Valide',
+            'admin_email'  => 'x@defaut.test',
         ]);
 
         $hotel = Hotel::where('name', 'Hotel Defaut')->first();
@@ -190,9 +222,9 @@ class HotelRegistrationTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel Bad Logo',
-            'admin_name' => 'X',
-            'admin_email' => 'bad@logo.test',
-            'logo' => UploadedFile::fake()->create('doc.pdf', 20, 'application/pdf'),
+            'admin_name'   => 'Nom Valide',
+            'admin_email'  => 'bad@logo.test',
+            'logo'         => UploadedFile::fake()->create('doc.pdf', 20, 'application/pdf'),
         ])->assertSessionHasErrors('logo');
 
         $this->assertDatabaseMissing('hotels', ['name' => 'Hotel Bad Logo']);
@@ -205,8 +237,8 @@ class HotelRegistrationTest extends TestCase
 
         $response = $this->post('/inscription', [
             'company_name' => 'Hotel Dup',
-            'admin_name' => 'X',
-            'admin_email' => 'taken@test.test',
+            'admin_name'   => 'Nom Valide',
+            'admin_email'  => 'taken@test.test',
         ]);
 
         $response->assertRedirectToRoute('onboarding.show');
