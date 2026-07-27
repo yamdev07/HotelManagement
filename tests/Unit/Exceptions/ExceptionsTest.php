@@ -5,7 +5,7 @@ namespace Tests\Unit\Exceptions;
 use App\Exceptions\PaymentException;
 use App\Exceptions\ReservationException;
 use App\Exceptions\TransactionException;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
 
 class ExceptionsTest extends TestCase
 {
