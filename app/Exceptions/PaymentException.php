@@ -6,7 +6,7 @@ class PaymentException extends HotelException
 {
     public static function noActiveSession(): self
     {
-        return new self('Aucune session de caisse active. Veuillez démarrer une session.');
+        return new self(__('flash.session_no_active'));
     }
 
     public static function amountExceedsBalance(float $remaining): self
@@ -18,7 +18,7 @@ class PaymentException extends HotelException
 
     public static function transactionAlreadyPaid(): self
     {
-        return new self('Cette transaction est déjà entièrement payée.');
+        return new self(__('flash.payment_already_paid'));
     }
 
     public static function cannotCancelCompletedPayment(): self

@@ -50,11 +50,11 @@ class BillingController extends Controller
 
         // Un compte suspendu par l'admin ne se réactive pas en payant.
         if (! $hotel->is_active) {
-            return back()->with('error', 'Votre compte a été suspendu par la plateforme. Le paiement en ligne est indisponible · contactez-nous.');
+            return back()->with('error', __('flash.billing_suspended'));
         }
 
         if (! $this->fedapay->isConfigured()) {
-            return back()->with('error', "Le paiement en ligne n'est pas encore configuré. Contactez la plateforme.");
+            return back()->with('error', __('flash.billing_not_configured'));
         }
 
         $months = (int) $data['months'];
@@ -79,7 +79,7 @@ class BillingController extends Controller
         } catch (\Throwable $e) {
             Log::error('FedaPay checkout: '.$e->getMessage());
 
-            return back()->with('error', 'Impossible de démarrer le paiement pour le moment. Réessayez plus tard.');
+            return back()->with('error', __('flash.billing_error'));
         }
 
         $request->session()->put(self::SESSION_KEY, [
@@ -103,7 +103,7 @@ class BillingController extends Controller
 
         if (! $pending || (int) ($pending['hotel_id'] ?? 0) !== $hotel->id) {
             return redirect()->route('billing.show')
-                ->with('error', 'Session de paiement introuvable. Si vous avez été débité, contactez-nous.');
+                ->with('error', __('flash.billing_session_not_found'));
         }
 
         $transactionId = (int) $pending['transaction_id'];
@@ -117,7 +117,7 @@ class BillingController extends Controller
 
         if (! $approved) {
             return redirect()->route('billing.show')
-                ->with('error', "Le paiement n'a pas abouti. Aucun montant n'a été prélevé si la transaction a échoué.");
+                ->with('error', __('flash.billing_payment_failed'));
         }
 
         $sub = $hotel->applyRenewal(
@@ -132,7 +132,7 @@ class BillingController extends Controller
 
         return redirect()->route('billing.show')->with(
             'success',
-            'Paiement confirmé ! Votre abonnement est actif jusqu\'au '.$sub->ends_at->format('d/m/Y').'.'
+            __('flash.billing_confirmed', ['date' => $sub->ends_at->format('d/m/Y')])
         );
     }
 }

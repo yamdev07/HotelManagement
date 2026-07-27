@@ -340,12 +340,12 @@ class ReportController extends Controller
         }
 
         $labels = [
-            'today' => 'Aujourd\'hui',
-            'yesterday' => 'Hier',
-            'week' => 'Cette semaine',
-            'month' => 'Ce mois',
-            'quarter' => 'Ce trimestre',
-            'year' => 'Cette année',
+            'today' => __('flash.report_today'),
+            'yesterday' => __('flash.report_yesterday'),
+            'week' => __('flash.report_this_week'),
+            'month' => __('flash.report_this_month'),
+            'quarter' => __('flash.report_this_quarter'),
+            'year' => __('flash.report_this_year'),
             'custom' => $startDate->format('d/m/Y').' - '.$endDate->format('d/m/Y'),
         ];
 

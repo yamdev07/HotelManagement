@@ -30,8 +30,7 @@ class EnsurePlanModule
 
         if ($hotel && ! $hotel->hasModule($module)) {
             $label = Hotel::moduleLabel($module);
-            $message = "Le module « {$label} » n'est pas inclus dans votre offre {$hotel->planName()}. "
-                ."Passez à une formule supérieure pour l'activer.";
+            $message = __('flash.middleware_plan_missing', ['label' => $label, 'plan' => $hotel->planName()]);
 
             if ($request->expectsJson()) {
                 abort(403, $message);

@@ -25,14 +25,14 @@ class ProfileController extends Controller
             // Téléphone : chiffres et séparateurs uniquement (pas de lettres/emoji)
             'phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\s().\-]{6,20}$/'],
         ], [
-            'phone.regex' => 'Le numéro de téléphone n\'est pas valide (chiffres et + - ( ) espaces uniquement).',
-            'email.unique' => 'Cette adresse email est déjà utilisée par un autre compte.',
+            'phone.regex' => __('flash.profile_invalid_phone'),
+            'email.unique' => __('flash.profile_email_taken'),
         ], ['name' => 'nom', 'email' => 'email', 'phone' => 'téléphone']);
 
         $user = Auth::user();
         $user->update($request->only('name', 'email', 'phone'));
 
-        return back()->with('success', 'Informations mises à jour avec succès.');
+        return back()->with('success', __('flash.profile_updated'));
     }
 
     public function updatePassword(Request $request)
@@ -43,14 +43,14 @@ class ProfileController extends Controller
         ]);
 
         if (! Hash::check($request->current_password, Auth::user()->password)) {
-            return back()->with('error', 'Le mot de passe actuel est incorrect.');
+            return back()->with('error', __('flash.profile_wrong_password'));
         }
 
         $user = Auth::user();
         $user->password = Hash::make($request->password);
         $user->save();
 
-        return back()->with('success', 'Mot de passe modifié avec succès.');
+        return back()->with('success', __('flash.profile_password_changed'));
     }
 
     public function updateAvatar(Request $request)
@@ -68,7 +68,7 @@ class ProfileController extends Controller
         } catch (\Throwable $e) {
             \Log::error('Upload avatar échoué: '.$e->getMessage());
 
-            return back()->with('error', 'Le téléversement de la photo a échoué. Réessayez avec une image JPG/PNG de moins de 2 Mo.');
+            return back()->with('error', __('flash.profile_avatar_error'));
         }
 
         // Supprime l'ancien avatar s'il était sur le disque public
@@ -79,7 +79,7 @@ class ProfileController extends Controller
         $user->avatar = $path;
         $user->save();
 
-        return back()->with('success', 'Photo de profil mise à jour.');
+        return back()->with('success', __('flash.profile_avatar_updated'));
     }
 
     public function update(Request $request)
@@ -91,7 +91,7 @@ class ProfileController extends Controller
             'email' => 'required|email|unique:users,email,'.$user->id,
             'password' => ['nullable', 'confirmed', new \App\Rules\StrongPassword],
         ], [
-            'email.unique' => 'Cette adresse email est déjà utilisée par un autre compte.',
+            'email.unique' => __('flash.profile_email_taken'),
         ], ['name' => 'nom', 'email' => 'email']);
 
         $user->name = $request->name;
@@ -103,6 +103,6 @@ class ProfileController extends Controller
 
         $user->save();
 
-        return back()->with('success', 'Profil mis à jour avec succès !');
+        return back()->with('success', __('flash.profile_updated_success'));
     }
 }

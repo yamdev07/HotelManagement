@@ -70,7 +70,7 @@ class CheckInController extends Controller
         // Vérifier si la réservation peut être checkée-in
         if ($transaction->status !== 'reservation') {
             return redirect()->route('checkin.index')
-                ->with('error', 'Cette réservation ne peut pas être checkée-in. Statut: '.$transaction->status_label);
+                ->with('error', __('flash.checkin_not_allowed', ['status' => $transaction->status_label]));
         }
 
         // Vérifier si la chambre permet le check-in
@@ -173,13 +173,13 @@ class CheckInController extends Controller
 
             // Vérifier que la nouvelle chambre permet le check-in
             if (! $newRoom->canCheckIn()) {
-                return back()->with('error', 'La chambre sélectionnée ne permet pas le check-in : '.$newRoom->getCheckInErrorMessage())
+                return back()->with('error', __('flash.checkin_room_error'))
                     ->withInput();
             }
 
             // Vérifier disponibilité
             if (! $newRoom->isAvailableForPeriod($transaction->check_in, $transaction->check_out, $transaction->id)) {
-                return back()->with('error', 'La chambre sélectionnée n\'est pas disponible pour cette période')
+                return back()->with('error', __('flash.checkin_room_unavailable'))
                     ->withInput();
             }
 
@@ -277,7 +277,7 @@ class CheckInController extends Controller
                 'request' => $request->all(),
             ]);
 
-            return back()->with('error', 'Erreur lors du check-in: '.$e->getMessage())
+            return back()->with('error', __('flash.checkin_error'))
                 ->withInput();
         }
     }
@@ -289,7 +289,7 @@ class CheckInController extends Controller
     {
         // Vérifier si la réservation peut être checkée-in
         if ($transaction->status !== 'reservation') {
-            return back()->with('error', 'Cette réservation ne peut pas être checkée-in. Statut: '.$transaction->status_label);
+            return back()->with('error', __('flash.checkin_not_allowed', ['status' => $transaction->status_label]));
         }
 
         // Vérifier que la chambre permet le check-in
@@ -300,7 +300,7 @@ class CheckInController extends Controller
 
         // Vérifier disponibilité de la chambre
         if (! $transaction->room->isAvailableForPeriod($transaction->check_in, $transaction->check_out, $transaction->id)) {
-            return back()->with('error', 'La chambre n\'est pas disponible. Veuillez utiliser le check-in normal pour sélectionner une autre chambre.');
+            return back()->with('error', __('flash.checkin_direct_room_unavailable'));
         }
 
         DB::beginTransaction();
@@ -349,7 +349,7 @@ class CheckInController extends Controller
                 'user_id' => auth()->id(),
             ]);
 
-            return back()->with('error', 'Erreur lors du check-in rapide: '.$e->getMessage());
+            return back()->with('error', __('flash.checkin_direct_error'));
         }
     }
 
@@ -579,7 +579,7 @@ class CheckInController extends Controller
 
             \Log::error('Erreur check-in direct: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur lors du check-in direct: '.$e->getMessage())
+            return back()->with('error', __('flash.checkin_direct_error2'))
                 ->withInput();
         }
     }

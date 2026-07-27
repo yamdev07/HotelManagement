@@ -366,7 +366,7 @@ class User extends Authenticatable
             'actions_done' => $actionsDone,
             'modifications_received' => $modificationsReceived,
             'last_activity' => $lastActivity ? $lastActivity->created_at : null,
-            'last_activity_description' => $lastActivity ? $lastActivity->description : 'Aucune activité',
+            'last_activity_description' => $lastActivity ? $lastActivity->description : __('flash.user_no_activity'),
         ];
     }
 

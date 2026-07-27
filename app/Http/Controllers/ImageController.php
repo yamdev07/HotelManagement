@@ -36,7 +36,7 @@ class ImageController extends Controller
 
         return redirect()
             ->route('room.show', ['room' => $room->id])
-            ->with('success', 'Image ajoutée !');
+            ->with('success', __('flash.image_created'));
     }
 
     public function destroy(Image $image)

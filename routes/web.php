@@ -1077,11 +1077,11 @@ Route::get('/storage/{path}', function (string $path) {
 Route::fallback(function () {
     if (auth()->check()) {
         if (auth()->user()->role === 'Customer') {
-            return redirect()->route('transaction.myReservations')->with('error', 'Page non trouvée.');
+            return redirect()->route('transaction.myReservations')->with('error', __('flash.page_not_found'));
         }
 
-        return redirect()->route('dashboard.index')->with('error', 'Page non trouvée.');
+        return redirect()->route('dashboard.index')->with('error', __('flash.page_not_found'));
     }
 
-    return redirect()->route('login.index')->with('error', 'Page non trouvée. Veuillez vous connecter.');
+    return redirect()->route('login.index')->with('error', __('flash.page_not_found_login'));
 });

@@ -73,7 +73,7 @@ class TransactionController extends Controller
 
         if ($transaction->check_out->isPast() || $transaction->status === 'cancelled') {
             return redirect()->route('transaction.show', $transaction)
-                ->with('error', 'Impossible de modifier une réservation terminée ou annulée.');
+                ->with('error', __('flash.transaction_edit_closed'));
         }
 
         $transaction->load(['customer.user', 'room.type', 'room.roomStatus']);
@@ -93,7 +93,7 @@ class TransactionController extends Controller
         try {
             $updated = $this->transactionService->update($transaction, $request->validated());
 
-            $message = "Réservation #{$updated->id} mise à jour avec succès.";
+            $message = __('flash.transaction_updated', ['id' => $updated->id]);
 
             return redirect()->route('transaction.show', $updated)->with('success', $message);
 
@@ -102,7 +102,7 @@ class TransactionController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur modification transaction', ['id' => $transaction->id, 'error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'Erreur interne lors de la modification.')->withInput();
+            return redirect()->back()->with('error', __('flash.transaction_update_error'))->withInput();
         }
     }
 
@@ -117,13 +117,13 @@ class TransactionController extends Controller
             $this->transactionService->destroy($transaction);
 
             return redirect()->route('transaction.index')
-                ->with('success', "Réservation #{$id} ({$customerName}) supprimée définitivement.");
+                ->with('success', __('flash.transaction_deleted', ['id' => $id, 'name' => $customerName]));
 
         } catch (\Exception $e) {
             Log::error('Erreur suppression transaction', ['id' => $transaction->id, 'error' => $e->getMessage()]);
 
             return redirect()->route('transaction.index')
-                ->with('error', 'Erreur lors de la suppression.');
+                ->with('error', __('flash.transaction_delete_error'));
         }
     }
 
@@ -136,7 +136,7 @@ class TransactionController extends Controller
                 $request->validated('cancel_reason')
             );
 
-            $message = "Statut mis à jour : {$updated->status_label}.";
+            $message = __('flash.transaction_status_updated', ['status' => $updated->status_label]);
 
             if ($request->ajax()) {
                 return response()->json([
@@ -158,10 +158,10 @@ class TransactionController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur statut transaction', ['id' => $transaction->id, 'error' => $e->getMessage()]);
             if ($request->ajax()) {
-                return response()->json(['error' => 'Erreur interne.'], 500);
+                return response()->json(['error' => __('flash.transaction_status_error')], 500);
             }
 
-            return redirect()->back()->with('error', 'Erreur interne.');
+            return redirect()->back()->with('error', __('flash.transaction_status_error'));
         }
     }
 
@@ -178,7 +178,7 @@ class TransactionController extends Controller
             $this->transactionService->cancel($transaction, $request->cancel_reason ?? '', $force);
 
             return redirect()->route('transaction.show', $transaction)
-                ->with('success', 'Réservation annulée avec succès.');
+                ->with('success', __('flash.transaction_cancelled'));
 
         } catch (HotelException $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -195,7 +195,7 @@ class TransactionController extends Controller
             $this->transactionService->markAsNoShow($transaction, $request->reason ?? '');
 
             return redirect()->route('transaction.show', $transaction)
-                ->with('success', 'Réservation marquée comme No Show.');
+                ->with('success', __('flash.transaction_no_show'));
 
         } catch (HotelException $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -210,7 +210,7 @@ class TransactionController extends Controller
             $this->transactionService->restore($transaction);
 
             return redirect()->route('transaction.show', $transaction)
-                ->with('success', 'Réservation restaurée avec succès.');
+                ->with('success', __('flash.transaction_restored'));
 
         } catch (HotelException $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -257,12 +257,12 @@ class TransactionController extends Controller
             ]);
 
             return redirect()->route('transaction.show', $transaction)
-                ->with('success', "Séjour prolongé de {$extraNights} nuit(s). Nouveau départ : {$newCheckOut->format('d/m/Y')}.");
+                ->with('success', __('flash.transaction_extended', ['nights' => $extraNights, 'date' => $newCheckOut->format('d/m/Y')]));
 
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Erreur prolongation', ['id' => $transaction->id, 'error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'Erreur lors de la prolongation.')->withInput();
+            return redirect()->back()->with('error', __('flash.transaction_extend_error'))->withInput();
         }
     }
 
@@ -415,10 +415,10 @@ class TransactionController extends Controller
         }
 
         if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'message' => 'Late checkout enregistré et paiement créé.']);
+            return response()->json(['success' => true, 'message' => __('flash.transaction_late_checkout_created')]);
         }
 
-        return redirect()->back()->with('success', 'Late checkout enregistré et paiement encaissé.');
+        return redirect()->back()->with('success', __('flash.transaction_late_checkout_paid'));
     }
 
     // -----------------------------------------------------------------------
@@ -466,7 +466,7 @@ class TransactionController extends Controller
                     'payment_method' => $request->payment_method,
                     'status' => \App\Models\Payment::STATUS_REFUNDED,
                     'reference' => 'EARLY-'.$transaction->id.'-'.time(),
-                    'description' => 'Remboursement early checkout',
+                    'description' => __('flash.payment_refund'),
                     'payment_date' => now(),
                 ]);
             }
@@ -477,7 +477,7 @@ class TransactionController extends Controller
         });
 
         return redirect()->route('transaction.show', $transaction)
-            ->with('success', 'Early checkout enregistré.'.($refundAmount > 0 ? ' Remboursement : '.number_format($refundAmount, 0, ',', ' ').' FCFA.' : ''));
+            ->with('success', __('flash.transaction_early_checkout').($refundAmount > 0 ? ' Remboursement : '.number_format($refundAmount, 0, ',', ' ').' FCFA.' : ''));
     }
 
     // -----------------------------------------------------------------------
@@ -608,7 +608,7 @@ class TransactionController extends Controller
             $this->checkInService->checkIn($transaction);
 
             return redirect()->back()->with('success',
-                "Client marqué comme arrivé. Chambre {$transaction->room->number} maintenant occupée."
+                __('flash.transaction_checkin_done', ['room' => $transaction->room->number])
             );
         } catch (HotelException $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -623,14 +623,14 @@ class TransactionController extends Controller
             $this->checkInService->checkOut($transaction);
 
             session()->flash('departure_success', [
-                'title' => 'Départ enregistré - Chambre à nettoyer',
-                'message' => 'Client parti. Chambre marquée "À NETTOYER".',
+                'title' => __('flash.transaction_checkout_cleaning'),
+                'message' => __('flash.transaction_checkout_cleaning_detail'),
                 'transaction_id' => $transaction->id,
                 'room_number' => optional($transaction->room)->number,
                 'customer_name' => optional($transaction->customer)->name,
             ]);
 
-            return redirect()->back()->with('success', 'Check-out effectué avec succès.');
+            return redirect()->back()->with('success', __('flash.transaction_checkout_done'));
 
         } catch (HotelException $e) {
             return redirect()->back()->with('error', $e->getMessage());

@@ -95,26 +95,26 @@ class CheckReceptionistRestriction
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Action non autorisée pour le personnel de réception.',
+                'message' => __('flash.middleware_receptionist_unauthorized'),
                 'requires_authorization' => in_array($routeName, $this->requiresAuthorization),
             ], 403);
         }
 
         // Message d'erreur selon le type d'action
         $messages = [
-            'transaction.cancel' => '❌ L\'annulation des réservations est réservée aux administrateurs.',
-            'transaction.destroy' => '❌ La suppression des réservations est réservée aux administrateurs.',
-            'customer.destroy' => '❌ La suppression des clients est réservée aux administrateurs.',
-            'room.destroy' => '❌ La suppression des chambres est réservée aux administrateurs.',
-            'payments.cancel' => '❌ L\'annulation des paiements est réservée aux administrateurs.',
-            'housekeeping.assign-cleaner' => '❌ L\'assignation du personnel de ménage est réservée aux administrateurs.',
-            'housekeeping.start-cleaning' => '❌ Le démarrage du nettoyage est réservé au personnel housekeeping.',
+            'transaction.cancel' => '❌ '.__('flash.middleware_receptionist_no_cancel'),
+            'transaction.destroy' => '❌ '.__('flash.middleware_receptionist_no_delete'),
+            'customer.destroy' => '❌ '.__('flash.middleware_receptionist_no_delete_customer'),
+            'room.destroy' => '❌ '.__('flash.middleware_receptionist_no_delete_room'),
+            'payments.cancel' => '❌ '.__('flash.middleware_receptionist_no_cancel_payment'),
+            'housekeeping.assign-cleaner' => '❌ '.__('flash.middleware_receptionist_no_assign_housekeeping'),
+            'housekeeping.start-cleaning' => '❌ '.__('flash.middleware_receptionist_no_start_cleaning'),
         ];
 
-        $message = $messages[$routeName] ?? '❌ Action non autorisée pour le personnel de réception.';
+        $message = $messages[$routeName] ?? '❌ '.__('flash.middleware_receptionist_action_denied');
 
         if (in_array($routeName, $this->requiresAuthorization)) {
-            $message .= ' Cette action nécessite une autorisation spéciale.';
+            $message .= ' '.__('flash.middleware_receptionist_needs_auth');
         }
 
         return redirect()->back()

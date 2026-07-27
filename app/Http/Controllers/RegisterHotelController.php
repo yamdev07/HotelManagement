@@ -48,9 +48,9 @@ class RegisterHotelController extends Controller
             'admin_name' => ['required', 'string', 'max:255', new \App\Rules\NoEmoji],
             'admin_email' => ['required', 'email', 'max:255'],
         ], [
-            'logo.mimes' => 'Le logo doit être une image JPG, PNG, WEBP ou SVG.',
-            'logo.max' => 'Le logo est trop lourd (4 Mo maximum). Réduisez sa taille et réessayez.',
-            'logo.file' => "Le logo n'a pas pu être lu. Réessayez avec une image JPG ou PNG.",
+            'logo.mimes' => __('flash.register_invalid_logo'),
+            'logo.max' => __('flash.register_logo_too_heavy'),
+            'logo.file' => __('flash.register_logo_unreadable'),
         ], [
             'company_name' => "nom de l'établissement",
             'admin_name' => 'nom complet',
@@ -84,7 +84,7 @@ class RegisterHotelController extends Controller
             Auth::login($existingUser);
 
             return redirect()->route('onboarding.show')
-                ->with('success', 'Compte existant détecté. Plan mis à jour : '.$tier['name'].'.')
+                ->with('success', __('flash.register_existing_account', ['plan' => $tier['name']]))
                 ->with('credentials_email', $existingUser->email);
         }
 
@@ -149,7 +149,7 @@ class RegisterHotelController extends Controller
 
         // Direction l'onboarding : choix des couleurs, du nom du site et du logo
         return redirect()->route('onboarding.show')
-            ->with('success', 'Bienvenue ! Votre essai gratuit de '.config('plans.trial_days', 14).' jours a démarré.')
+            ->with('success', __('flash.register_trial_started', ['days' => config('plans.trial_days', 14)]))
             ->with('credentials_email', $admin->email);
     }
 

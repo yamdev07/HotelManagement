@@ -21,13 +21,13 @@ class CheckAdminRestriction
                 str_contains($request->path(), 'transaction/') && $request->isMethod('delete')) {
 
                 return redirect()->back()
-                    ->with('error', 'Les administrateurs ne peuvent pas supprimer les réservations.');
+                    ->with('error', __('flash.middleware_admin_no_delete'));
             }
 
             // Empêche aussi l'annulation si c'est une suppression
             if (str_contains($routeName, 'transaction.cancel') && $request->isMethod('delete')) {
                 return redirect()->back()
-                    ->with('error', 'Les administrateurs ne peuvent pas annuler les réservations.');
+                    ->with('error', __('flash.middleware_admin_no_cancel'));
             }
         }
 

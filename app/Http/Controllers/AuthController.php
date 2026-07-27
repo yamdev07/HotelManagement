@@ -24,22 +24,22 @@ class AuthController extends Controller
 
             // Super-Admin plateforme (sans hôtel) -> dashboard de gestion des hôtels
             if (auth()->user()->hotel_id === null && auth()->user()->role === 'Super') {
-                return redirect()->route('platform.hotels.index')->with('success', 'Bienvenue '.auth()->user()->name);
+                return redirect()->route('platform.hotels.index')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
             }
 
             // Redirection intelligente selon le rôle
             if (auth()->user()->role === 'Customer') {
-                return redirect()->route('transaction.myReservations')->with('success', 'Bienvenue '.auth()->user()->name);
+                return redirect()->route('transaction.myReservations')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
             }
 
             if (in_array(auth()->user()->role, ['Servant', 'Cuisiner'])) {
-                return redirect()->route('restaurant.orders')->with('success', 'Bienvenue '.auth()->user()->name);
+                return redirect()->route('restaurant.orders')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
             }
 
-            return redirect('/home')->with('success', 'Bienvenue '.auth()->user()->name);
+            return redirect('/home')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
         }
 
-        return redirect('login')->with('failed', 'Identifiants incorrects. Vérifiez votre email et votre mot de passe.');
+        return redirect('login')->with('failed', __('flash.login_invalid'));
     }
 
     public function register(Request $request)
@@ -56,7 +56,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('login.index')->with('success', 'Votre compte a bien été créé. Vous pouvez maintenant vous connecter.');
+        return redirect()->route('login.index')->with('success', __('flash.register_success'));
     }
 
     public function logout()
@@ -73,7 +73,7 @@ class AuthController extends Controller
         // Régénère le token CSRF
         session()->regenerateToken();
 
-        return redirect('login')->with('success', 'Déconnexion réussie. Au revoir '.$name.' !');
+        return redirect('login')->with('success', __('flash.logout_success').' '.$name.' !');
     }
 
     public function forgotPassword(ForgotPasswordRequest $request)

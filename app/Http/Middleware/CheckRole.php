@@ -12,7 +12,7 @@ class CheckRole
     public function handle(Request $request, Closure $next, string ...$roles): mixed
     {
         if (! Auth::check()) {
-            return redirect()->route('login')->with('error', 'Veuillez vous connecter.');
+            return redirect()->route('login')->with('error', __('flash.middleware_login_required'));
         }
 
         $user = Auth::user();
@@ -44,7 +44,7 @@ class CheckRole
         }
 
         return redirect()->back()
-            ->with('failed', 'Vous n\'êtes pas autorisé à accéder à cette page.')
+            ->with('failed', __('flash.middleware_unauthorized'))
             ->with('error_type', 'role_denied');
     }
 }

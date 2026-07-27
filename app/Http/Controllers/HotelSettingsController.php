@@ -86,14 +86,14 @@ class HotelSettingsController extends Controller
         $hotel->update($data);
 
         return redirect()->route('hotel.settings.edit')
-            ->with('success', 'Les informations de votre établissement ont été mises à jour.');
+            ->with('success', __('flash.hotel_settings_updated'));
     }
 
     private function currentHotel(): Hotel
     {
         $hotel = auth()->user()->hotel;
 
-        abort_unless($hotel !== null, 404, 'Aucun établissement associé à ce compte.');
+        abort_unless($hotel !== null, 404, __('flash.hotel_settings_no_hotel'));
 
         return $hotel;
     }

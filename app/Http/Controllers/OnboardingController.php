@@ -43,14 +43,14 @@ class OnboardingController extends Controller
         $hotel->update($data);
 
         return redirect('/home')
-            ->with('success', 'Votre site est configuré ! Bienvenue dans votre espace.');
+            ->with('success', __('flash.onboarding_complete'));
     }
 
     private function currentHotel(): Hotel
     {
         $hotel = auth()->user()->hotel;
 
-        abort_unless($hotel !== null, 404, 'Aucun établissement associé à ce compte.');
+        abort_unless($hotel !== null, 404, __('flash.hotel_settings_no_hotel'));
 
         return $hotel;
     }
