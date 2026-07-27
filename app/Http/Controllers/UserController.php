@@ -138,7 +138,7 @@ class UserController extends Controller
             ]);
         }
 
-        return redirect()->route('user.index')->with('success', 'User '.$user->name.' updated!');
+        return redirect()->route('user.index')->with('success', __('flash.user_updated'));
     }
 
     public function destroy(User $user)

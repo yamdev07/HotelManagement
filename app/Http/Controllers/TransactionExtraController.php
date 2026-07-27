@@ -31,7 +31,7 @@ class TransactionExtraController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Extra ajouté avec succès',
+                'message' => __('flash.extra_created'),
                 'extra' => [
                     'id' => $extra->id,
                     'category' => $extra->category_label,
@@ -44,7 +44,7 @@ class TransactionExtraController extends Controller
             ]);
         }
 
-        return back()->with('success', 'Extra "'.$extra->description.'" ajouté à la facture.');
+        return back()->with('success', __('flash.extra_add_detail', ['description' => $extra->description]));
     }
 
     public function destroy(Transaction $transaction, TransactionExtra $extra)
@@ -58,11 +58,11 @@ class TransactionExtraController extends Controller
         if (request()->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Extra supprimé',
+                'message' => __('flash.extra_deleted'),
                 'new_total' => $transaction->fresh()->getTotalPrice(),
             ]);
         }
 
-        return back()->with('success', 'Extra supprimé de la facture.');
+        return back()->with('success', __('flash.extra_remove_detail'));
     }
 }

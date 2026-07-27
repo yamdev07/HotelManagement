@@ -38,7 +38,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('Housekeeping index: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur lors du chargement: '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_load_error').': '.$e->getMessage());
         }
     }
 
@@ -65,7 +65,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('Housekeeping mobile: '.$e->getMessage());
 
-            return back()->with('error', "Erreur lors du chargement de l'interface mobile");
+            return back()->with('error', __('flash.housekeeping_load_error'));
         }
     }
 
@@ -100,7 +100,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('Housekeeping quickList: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur lors du chargement de la liste');
+            return back()->with('error', __('flash.housekeeping_load_error'));
         }
     }
 
@@ -119,14 +119,14 @@ class HousekeepingController extends Controller
         $room = Room::where('number', $request->room_number)->first();
 
         if (! $room) {
-            return back()->with('error', 'Chambre '.$request->room_number.' non trouvée');
+            return back()->with('error', __('flash.housekeeping_room_not_found', ['number' => $request->room_number]));
         }
 
         return match ($request->action) {
             'start-cleaning' => $this->startCleaning($room),
             'finish-cleaning' => $this->finishCleaning($room),
             'maintenance' => redirect()->route('housekeeping.maintenance-form', $room),
-            default => back()->with('error', 'Action non reconnue'),
+            default => back()->with('error', __('flash.housekeeping_unknown_action')),
         };
     }
 
@@ -165,7 +165,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('Housekeeping toClean: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur lors du chargement des chambres à nettoyer');
+            return back()->with('error', __('flash.housekeeping_rooms_list_error'));
         }
     }
 
@@ -174,11 +174,11 @@ class HousekeepingController extends Controller
         try {
             $this->housekeeping->startCleaning($room, Auth::id());
 
-            return back()->with('success', 'Nettoyage démarré pour la chambre '.$room->number);
+            return back()->with('success', __('flash.housekeeping_cleaning_started'));
         } catch (\Throwable $e) {
             Log::error('startCleaning: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur lors du démarrage du nettoyage: '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_cleaning_start_error').': '.$e->getMessage());
         }
     }
 
@@ -188,11 +188,11 @@ class HousekeepingController extends Controller
             $newStatus = $this->housekeeping->finishCleaning($room, Auth::id());
             $statusText = $newStatus === RoomStatus::Available ? 'Disponible' : 'Occupée';
 
-            return back()->with('success', "Chambre {$room->number} nettoyée. Statut: {$statusText}");
+            return back()->with('success', __('flash.housekeeping_room_cleaned'));
         } catch (\Throwable $e) {
             Log::error('finishCleaning: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur lors du marquage comme nettoyée: '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_mark_clean_error').': '.$e->getMessage());
         }
     }
 
@@ -227,11 +227,11 @@ class HousekeepingController extends Controller
             $room->update($data);
 
             return redirect()->route('housekeeping.index')
-                ->with('success', "Chambre {$room->number} marquée comme en maintenance");
+                ->with('success', __('flash.housekeeping_maintenance_requested'));
         } catch (\Throwable $e) {
             Log::error('markMaintenance: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur lors du marquage en maintenance: '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_maintenance_error').': '.$e->getMessage());
         }
     }
 
@@ -254,7 +254,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('maintenance page: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur: '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_error'));
         }
     }
 
@@ -277,11 +277,11 @@ class HousekeepingController extends Controller
 
             $statusText = $newStatus === RoomStatus::Available ? 'Disponible' : 'Occupée';
 
-            return back()->with('success', "Maintenance terminée · chambre {$room->number}: {$statusText}");
+            return back()->with('success', __('flash.housekeeping_room_available'));
         } catch (\Throwable $e) {
             Log::error('endMaintenance: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur: '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_error'));
         }
     }
 
@@ -300,11 +300,11 @@ class HousekeepingController extends Controller
             }
             $room->update($data);
 
-            return back()->with('success', "Inspection demandée pour la chambre {$room->number}");
+            return back()->with('success', __('flash.housekeeping_inspection_requested'));
         } catch (\Throwable $e) {
             Log::error('markInspection: '.$e->getMessage());
 
-            return back()->with('error', "Erreur lors de la demande d'inspection: ".$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_inspection_start_error').': '.$e->getMessage());
         }
     }
 
@@ -328,7 +328,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('inspections page: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur: '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_error'));
         }
     }
 
@@ -347,11 +347,11 @@ class HousekeepingController extends Controller
             }
             $room->update($data);
 
-            return back()->with('success', "Inspection terminée pour la chambre {$room->number}");
+            return back()->with('success', __('flash.housekeeping_task_completed'));
         } catch (\Throwable $e) {
             Log::error('completeInspection: '.$e->getMessage());
 
-            return back()->with('error', "Erreur lors de la fin d'inspection: ".$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_inspection_end_error').': '.$e->getMessage());
         }
     }
 
@@ -361,11 +361,11 @@ class HousekeepingController extends Controller
             $newStatus = $this->housekeeping->finishCleaning($room, Auth::id());
             $statusText = $newStatus === RoomStatus::Available ? 'Disponible' : 'Occupée';
 
-            return back()->with('success', "Chambre {$room->number} marquée comme propre. Statut: {$statusText}");
+            return back()->with('success', __('flash.room_marked_clean', ['number' => $room->number]));
         } catch (\Throwable $e) {
             Log::error('cleanRoom: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur: '.$e->getMessage());
+            return back()->with('error', __('flash.room_mark_error'));
         }
     }
 
@@ -634,7 +634,7 @@ class HousekeepingController extends Controller
         $room = Room::where('number', $request->room_number)->first();
 
         if (! $room) {
-            return response()->json(['success' => false, 'message' => 'Chambre '.$request->room_number.' non trouvée'], 404);
+            return response()->json(['success' => false, 'message' => __('flash.housekeeping_room_not_found', ['number' => $request->room_number])], 404);
         }
 
         try {
@@ -646,7 +646,7 @@ class HousekeepingController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => "Action effectuée pour la chambre {$room->number}",
+                'message' => __('flash.housekeeping_task_completed'),
                 'room' => ['id' => $room->id, 'number' => $room->number],
             ]);
         } catch (\Throwable $e) {
@@ -671,7 +671,7 @@ class HousekeepingController extends Controller
                 $room->update($data);
             }
 
-            return back()->with('success', "Nettoyeur assigné à la chambre {$room->number}");
+            return back()->with('success', __('flash.housekeeping_assignment_saved'));
         } catch (\Throwable $e) {
             return back()->with('error', 'Erreur: '.$e->getMessage());
         }
@@ -690,7 +690,7 @@ class HousekeepingController extends Controller
                 $room->update(['cleaning_priority' => $request->priority]);
             }
 
-            return back()->with('success', "Priorité mise à jour pour la chambre {$room->number}");
+            return back()->with('success', __('flash.housekeeping_status_updated'));
         } catch (\Throwable $e) {
             return back()->with('error', 'Erreur: '.$e->getMessage());
         }
@@ -720,7 +720,7 @@ class HousekeepingController extends Controller
                 'Content-Disposition' => 'attachment; filename="housekeeping-'.$date->format('Y-m-d').'.csv"',
             ]);
         } catch (\Throwable $e) {
-            return back()->with('error', 'Erreur export: '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_export_error').': '.$e->getMessage());
         }
     }
 }

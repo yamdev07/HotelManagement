@@ -10,6 +10,8 @@ return [
     'login_invalid' => 'Identifiants incorrects. Vérifiez votre email et votre mot de passe.',
     'register_success' => 'Votre compte a bien été créé. Vous pouvez maintenant vous connecter.',
     'logout_success' => 'Déconnexion réussie. Au revoir',
+    'logout_success_route' => 'Déconnexion réussie. Au revoir',
+    'logout_forced' => 'Déconnexion forcée réussie.',
 
     // ─── MIDDLEWARE ─────────────────────────────────────
     'middleware_login_required' => 'Veuillez vous connecter.',
@@ -106,10 +108,27 @@ return [
     'user_cannot_disable_self' => 'Vous ne pouvez pas désactiver votre propre compte.',
     'user_status_changed' => 'Utilisateur :label avec succès.',
     'user_status_error' => 'Erreur lors du changement de statut.',
+    'user_updated' => 'Utilisateur mis à jour',
 
     // ─── PAYMENT ────────────────────────────────────────
     'payment_already_paid' => 'Cette transaction est déjà entièrement payée.',
     'payment_cancelled_no_show' => 'Impossible d\'effectuer un paiement sur une transaction annulée ou no show.',
+    'payment_internal_error' => 'Erreur interne lors du paiement.',
+    'payment_not_cancellable' => 'Ce paiement ne peut pas être annulé.',
+    'payment_cancel_error' => 'Erreur lors de l\'annulation.',
+    'payment_not_refundable' => 'Ce paiement ne peut pas être remboursé.',
+    'payment_refund_error' => 'Erreur lors du remboursement.',
+    'payment_transaction_not_found' => 'Transaction non trouvée pour ce paiement.',
+    'payment_only_pending_can_pay' => 'Seuls les paiements en attente peuvent être marqués comme payés.',
+    'payment_update_error' => 'Erreur lors de la mise à jour du paiement.',
+    'payment_only_cancelled_can_restore' => 'Seuls les paiements annulés ou expirés peuvent être restaurés.',
+    'payment_restore_error' => 'Erreur lors de la restauration du paiement.',
+    'payment_only_pending_can_expire' => 'Seuls les paiements en attente peuvent être marqués comme expirés.',
+    'payment_cancelled_success' => 'Paiement annulé avec succès.',
+    'payment_refunded_success' => 'Paiement remboursé avec succès.',
+    'payment_marked_paid' => 'Paiement marqué comme payé avec succès.',
+    'payment_restored_success' => 'Paiement restauré avec succès.',
+    'payment_marked_expired' => 'Paiement marqué comme expiré.',
     'payment_refund' => 'Remboursement early checkout',
 
     // ─── BILLING ────────────────────────────────────────
@@ -148,6 +167,13 @@ return [
     'restaurant_menu_updated' => 'Menu modifié avec succès!',
     'restaurant_room_number_missing' => 'Numéro de chambre manquant.',
     'restaurant_no_active_guest' => 'Aucun client actif dans la chambre :room. Veuillez vérifier le numéro.',
+    'customer_exists' => 'Ce client existe déjà (:name) : aucun doublon créé.',
+    'customer_created' => 'Client :name créé',
+    'customer_updated' => 'Client :name mis à jour',
+    'customer_deleted' => 'Client :name supprimé !',
+    'customer_delete_error' => 'Impossible de supprimer le client',
+    'extra_add_detail' => 'Extra ":description" ajouté à la facture.',
+    'extra_remove_detail' => 'Extra supprimé de la facture.',
 
     // ─── IMAGE ──────────────────────────────────────────
     'image_created' => 'Image ajoutée !',
@@ -156,6 +182,11 @@ return [
     'room_cannot_mark_dirty_occupied' => 'Impossible de marquer une chambre occupée comme sale. Le client est toujours présent.',
     'room_cannot_mark_dirty_maintenance' => 'Impossible de marquer une chambre en maintenance comme sale. Terminez d\'abord la maintenance.',
     'room_marked_dirty' => 'Chambre :number marquée comme sale avec succès.',
+    'room_cannot_clean_occupied' => 'Impossible de marquer une chambre occupée comme propre. Le client est toujours présent.',
+    'room_cannot_clean_maintenance' => 'Impossible de marquer une chambre en maintenance comme propre. Terminez d\'abord la maintenance.',
+    'room_marked_clean' => 'Chambre :number marquée comme propre.',
+    'room_mark_error' => 'Erreur lors du marquage de la chambre',
+    'rooms_marked_dirty' => ':count chambres marquées comme sales',
 
     // ─── CASHIER SESSION ────────────────────────────────
     'session_load_error' => 'Erreur lors du chargement des sessions.',
@@ -174,6 +205,10 @@ return [
     'session_admin_only' => 'Accès réservé aux administrateurs.',
     'session_access_denied' => 'Accès non autorisé.',
     'session_must_be_closed' => 'La session doit être fermée pour générer le rapport.',
+    'session_start_error' => 'Erreur lors du démarrage de la session.',
+    'session_load_detail_error' => 'Erreur lors du chargement de la session.',
+    'session_update_error' => 'Erreur lors de la mise à jour.',
+    'session_report_error' => 'Erreur',
 
     // ─── RECEPTIONIST SESSION ───────────────────────────
     'receptionist_session_unauthorized' => 'Accès non autorisé',
@@ -200,6 +235,15 @@ return [
     'housekeeping_error' => 'Une erreur est survenue.',
     'housekeeping_not_found' => 'Élément non trouvé.',
     'housekeeping_unauthorized' => 'Action non autorisée.',
+    'housekeeping_room_not_found' => 'Chambre :number non trouvée',
+    'housekeeping_unknown_action' => 'Action non reconnue',
+    'housekeeping_rooms_list_error' => 'Erreur lors du chargement des chambres à nettoyer',
+    'housekeeping_cleaning_start_error' => 'Erreur lors du démarrage du nettoyage',
+    'housekeeping_mark_clean_error' => 'Erreur lors du marquage comme nettoyée',
+    'housekeeping_maintenance_error' => 'Erreur lors du marquage en maintenance',
+    'housekeeping_inspection_start_error' => 'Erreur lors de la demande d\'inspection',
+    'housekeeping_inspection_end_error' => 'Erreur lors de la fin d\'inspection',
+    'housekeeping_export_error' => 'Erreur export',
 
     // ─── REPORT ─────────────────────────────────────────
     'report_today' => 'Aujourd\'hui',

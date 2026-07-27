@@ -37,12 +37,12 @@ class CustomerController extends Controller
 
         if ($existing) {
             return redirect('customer')
-                ->with('success', 'Ce client existe déjà ('.$existing->name.') : aucun doublon créé.');
+                ->with('success', __('flash.customer_exists', ['name' => $existing->name]));
         }
 
         $customer = $this->customerRepository->store($request);
 
-        return redirect('customer')->with('success', 'Client '.$customer->name.' créé');
+        return redirect('customer')->with('success', __('flash.customer_created', ['name' => $customer->name]));
     }
 
     public function show(Customer $customer)
@@ -59,7 +59,7 @@ class CustomerController extends Controller
     {
         $customer->update($request->all());
 
-        return redirect('customer')->with('success', 'customer '.$customer->name.' udpated!');
+        return redirect('customer')->with('success', __('flash.customer_updated', ['name' => $customer->name]));
     }
 
     public function destroy(Customer $customer, ImageRepositoryInterface $imageRepository)
@@ -89,7 +89,7 @@ class CustomerController extends Controller
             // Supprimez le customer
             $customer->delete();
 
-            return redirect('customer')->with('success', 'Client '.$customerName.' supprimé !');
+            return redirect('customer')->with('success', __('flash.customer_deleted', ['name' => $customerName]));
 
         } catch (\Exception $e) {
             \Log::error('Delete customer error: '.$e->getMessage());
@@ -105,7 +105,7 @@ class CustomerController extends Controller
                 $errorDetails = $e->getMessage();
             }
 
-            return redirect('customer')->with('failed', 'Cannot delete customer! '.$errorDetails);
+            return redirect('customer')->with('failed', __('flash.customer_delete_error').': '.$errorDetails);
         }
     }
 

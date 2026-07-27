@@ -459,7 +459,7 @@ class RoomController extends Controller
             // Vérifier si la chambre est occupée
             if ($room->isOccupied()) {
                 return redirect()->back()
-                    ->with('error', 'Impossible de marquer une chambre occupée comme propre. Le client est toujours présent.');
+                    ->with('error', __('flash.room_cannot_clean_occupied'));
             }
 
             // Vérifier si la chambre est déjà propre
@@ -471,7 +471,7 @@ class RoomController extends Controller
             // Vérifier si la chambre est en maintenance
             if ($room->room_status_id == Room::STATUS_MAINTENANCE) {
                 return redirect()->back()
-                    ->with('error', "Impossible de marquer une chambre en maintenance comme propre. Terminez d'abord la maintenance.");
+                    ->with('error', __('flash.room_cannot_clean_maintenance'));
             }
 
             // Déterminer le nouveau statut
@@ -500,7 +500,7 @@ class RoomController extends Controller
             Log::info("✅ Chambre #{$room->id} marquée comme propre avec succès");
 
             return redirect()->back()
-                ->with('success', "✅ Chambre {$room->number} marquée comme propre.");
+                ->with('success', __('flash.room_marked_clean', ['number' => $room->number]));
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -511,7 +511,7 @@ class RoomController extends Controller
             ]);
 
             return redirect()->back()
-                ->with('error', 'Erreur: '.$e->getMessage());
+                ->with('error', __('flash.room_mark_error').': '.$e->getMessage());
         }
     }
 

@@ -78,12 +78,12 @@ class PaymentController extends Controller
 
         if ($remaining <= 0) {
             return redirect()->route('transaction.show', $transaction)
-                ->with('info', 'Cette transaction est déjà entièrement payée.');
+                ->with('info', __('flash.payment_already_paid'));
         }
 
         if (in_array($transaction->status, ['cancelled', 'no_show'])) {
             return redirect()->route('transaction.show', $transaction)
-                ->with('error', 'Impossible d\'effectuer un paiement sur une transaction annulée ou no show.');
+                ->with('error', __('flash.payment_cancelled_no_show'));
         }
 
         return view('transaction.payment.create', [
@@ -138,10 +138,10 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             Log::error('Erreur paiement', ['transaction_id' => $transaction->id, 'error' => $e->getMessage()]);
             if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'message' => 'Erreur interne lors du paiement.'], 500);
+                return response()->json(['success' => false, 'message' => __('flash.payment_internal_error')], 500);
             }
 
-            return redirect()->back()->with('error', 'Erreur interne lors du paiement.')->withInput();
+            return redirect()->back()->with('error', __('flash.payment_internal_error'))->withInput();
         }
     }
 
@@ -165,20 +165,20 @@ class PaymentController extends Controller
         $request->validate(['cancel_reason' => ['required', 'string', 'max:500']]);
 
         if (! $payment->canBeCancelled()) {
-            return redirect()->back()->with('error', 'Ce paiement ne peut pas être annulé.');
+            return redirect()->back()->with('error', __('flash.payment_not_cancellable'));
         }
 
         try {
             $this->paymentService->cancel($payment, $request->cancel_reason);
 
-            return redirect()->route('payments.index')->with('success', 'Paiement annulé avec succès.');
+            return redirect()->route('payments.index')->with('success', __('flash.payment_cancelled_success'));
 
         } catch (HotelException $e) {
             return redirect()->back()->with('error', $e->getMessage());
         } catch (\Exception $e) {
             Log::error('Erreur annulation paiement', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'Erreur lors de l\'annulation.');
+            return redirect()->back()->with('error', __('flash.payment_cancel_error'));
         }
     }
 
@@ -189,7 +189,7 @@ class PaymentController extends Controller
         $request->validate(['cancel_reason' => ['required', 'string', 'max:500']]);
 
         if (! $payment->canBeRefunded()) {
-            return redirect()->back()->with('error', 'Ce paiement ne peut pas être remboursé.');
+            return redirect()->back()->with('error', __('flash.payment_not_refundable'));
         }
 
         try {
@@ -217,12 +217,12 @@ class PaymentController extends Controller
                     ->log('Paiement remboursé');
             });
 
-            return redirect()->route('payments.index')->with('success', 'Paiement remboursé avec succès.');
+            return redirect()->route('payments.index')->with('success', __('flash.payment_refunded_success'));
 
         } catch (\Exception $e) {
             Log::error('Erreur remboursement', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'Erreur lors du remboursement.');
+            return redirect()->back()->with('error', __('flash.payment_refund_error'));
         }
     }
 
@@ -233,7 +233,7 @@ class PaymentController extends Controller
         $payment->load(['transaction.customer', 'transaction.room.type', 'transaction.payments', 'user', 'createdBy']);
 
         if (! $payment->transaction) {
-            return redirect()->back()->with('error', 'Transaction non trouvée pour ce paiement.');
+            return redirect()->back()->with('error', __('flash.payment_transaction_not_found'));
         }
 
         $payment->transaction->updatePaymentStatus();
@@ -314,18 +314,18 @@ class PaymentController extends Controller
         $this->authorize('update', $payment);
 
         if ($payment->status !== Payment::STATUS_PENDING) {
-            return redirect()->back()->with('error', 'Seuls les paiements en attente peuvent être marqués comme payés.');
+            return redirect()->back()->with('error', __('flash.payment_only_pending_can_pay'));
         }
 
         try {
             $payment->markAsCompleted(auth()->id());
 
-            return redirect()->back()->with('success', 'Paiement marqué comme payé avec succès.');
+            return redirect()->back()->with('success', __('flash.payment_marked_paid'));
 
         } catch (\Exception $e) {
             Log::error('Erreur markAsPaid', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'Erreur lors de la mise à jour du paiement.');
+            return redirect()->back()->with('error', __('flash.payment_update_error'));
         }
     }
 
@@ -371,7 +371,7 @@ class PaymentController extends Controller
         $this->authorize('update', $payment);
 
         if (! in_array($payment->status, [Payment::STATUS_CANCELLED, Payment::STATUS_EXPIRED])) {
-            return redirect()->back()->with('error', 'Seuls les paiements annulés ou expirés peuvent être restaurés.');
+            return redirect()->back()->with('error', __('flash.payment_only_cancelled_can_restore'));
         }
 
         try {
@@ -389,12 +389,12 @@ class PaymentController extends Controller
             activity()->causedBy(auth()->user())->performedOn($payment)
                 ->log('Paiement restauré');
 
-            return redirect()->back()->with('success', 'Paiement restauré avec succès.');
+            return redirect()->back()->with('success', __('flash.payment_restored_success'));
 
         } catch (\Exception $e) {
             Log::error('Erreur restore payment', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'Erreur lors de la restauration du paiement.');
+            return redirect()->back()->with('error', __('flash.payment_restore_error'));
         }
     }
 
@@ -403,7 +403,7 @@ class PaymentController extends Controller
         $this->authorize('update', $payment);
 
         if ($payment->status !== Payment::STATUS_PENDING) {
-            return redirect()->back()->with('error', 'Seuls les paiements en attente peuvent être marqués comme expirés.');
+            return redirect()->back()->with('error', __('flash.payment_only_pending_can_expire'));
         }
 
         try {
@@ -418,12 +418,12 @@ class PaymentController extends Controller
             activity()->causedBy(auth()->user())->performedOn($payment)
                 ->log('Paiement marqué comme expiré');
 
-            return redirect()->back()->with('success', 'Paiement marqué comme expiré.');
+            return redirect()->back()->with('success', __('flash.payment_marked_expired'));
 
         } catch (\Exception $e) {
             Log::error('Erreur markAsExpired', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
 
-            return redirect()->back()->with('error', 'Erreur lors de la mise à jour du paiement.');
+            return redirect()->back()->with('error', __('flash.payment_update_error'));
         }
     }
 

@@ -73,7 +73,7 @@ class CashierSessionController extends Controller
 
             return view('cashier.sessions.index', compact('sessions', 'user'));
         } catch (\Throwable $e) {
-            return redirect()->route('cashier.dashboard')->with('error', 'Erreur lors du chargement des sessions: '.$e->getMessage());
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_load_error').': '.$e->getMessage());
         }
     }
 
@@ -83,11 +83,11 @@ class CashierSessionController extends Controller
         $activeSession = $this->sessionService->getActiveSession($user);
 
         if ($activeSession) {
-            return redirect()->route('cashier.dashboard')->with('warning', "Vous avez déjà une session active. Veuillez la clôturer avant d'en démarrer une nouvelle.");
+            return redirect()->route('cashier.dashboard')->with('warning', __('flash.session_already_active'));
         }
 
         if (! $this->sessionService->canUserStartSession($user, $activeSession)) {
-            return redirect()->route('cashier.dashboard')->with('error', "Vous n'avez pas les permissions nécessaires pour démarrer une session.");
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_no_permission'));
         }
 
         return view('cashier.sessions.create', [
@@ -105,7 +105,7 @@ class CashierSessionController extends Controller
         $activeSession = $this->sessionService->getActiveSession($user);
 
         if ($activeSession) {
-            return redirect()->back()->with('error', 'Vous avez déjà une session active. ID: #'.$activeSession->id);
+            return redirect()->back()->with('error', __('flash.session_active_id', ['id' => $activeSession->id]));
         }
 
         try {
@@ -122,9 +122,9 @@ class CashierSessionController extends Controller
                 'shift_type' => $shiftType,
             ]);
 
-            return redirect()->route('cashier.dashboard')->with('success', "Session démarrée avec succès! ID: #{$session->id} à ".$now->format('H:i'));
+            return redirect()->route('cashier.dashboard')->with('success', __('flash.session_started', ['id' => $session->id, 'time' => $now->format('H:i')]));
         } catch (\Throwable $e) {
-            return redirect()->back()->with('error', 'Erreur lors du démarrage de la session: '.$e->getMessage())->withInput();
+            return redirect()->back()->with('error', __('flash.session_start_error').': '.$e->getMessage())->withInput();
         }
     }
 
@@ -133,7 +133,7 @@ class CashierSessionController extends Controller
         $user = Auth::user();
 
         if (! $this->sessionService->isAdmin($user) && $cashierSession->user_id !== $user->id) {
-            return redirect()->route('cashier.dashboard')->with('error', "Vous n'avez pas accès à cette session.");
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_no_access'));
         }
 
         try {
@@ -159,7 +159,7 @@ class CashierSessionController extends Controller
 
             return view('cashier.sessions.show', compact('cashierSession', 'payments', 'stats', 'paymentMethods', 'user'));
         } catch (\Throwable $e) {
-            return redirect()->route('cashier.sessions.index')->with('error', 'Erreur lors du chargement de la session: '.$e->getMessage());
+            return redirect()->route('cashier.sessions.index')->with('error', __('flash.session_load_detail_error').': '.$e->getMessage());
         }
     }
 
@@ -168,11 +168,11 @@ class CashierSessionController extends Controller
         $user = Auth::user();
 
         if (! $this->sessionService->isAdmin($user) && $cashierSession->user_id !== $user->id) {
-            return redirect()->route('cashier.dashboard')->with('error', 'Action non autorisée.');
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_unauthorized'));
         }
 
         if ($cashierSession->status === 'closed') {
-            return redirect()->route('cashier.sessions.show', $cashierSession)->with('error', 'Les sessions clôturées ne peuvent pas être modifiées.');
+            return redirect()->route('cashier.sessions.show', $cashierSession)->with('error', __('flash.session_closed_error'));
         }
 
         return view('cashier.sessions.edit', compact('cashierSession', 'user'));
@@ -183,7 +183,7 @@ class CashierSessionController extends Controller
         $user = Auth::user();
 
         if (! $this->sessionService->isAdmin($user) && $cashierSession->user_id !== $user->id) {
-            return redirect()->route('cashier.dashboard')->with('error', 'Action non autorisée.');
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_unauthorized'));
         }
 
         $request->validate(['notes' => 'nullable|string|max:500']);
@@ -191,9 +191,9 @@ class CashierSessionController extends Controller
         try {
             $cashierSession->update(['notes' => $request->notes]);
 
-            return redirect()->route('cashier.sessions.show', $cashierSession)->with('success', 'Session mise à jour avec succès.');
+            return redirect()->route('cashier.sessions.show', $cashierSession)->with('success', __('flash.session_updated'));
         } catch (\Throwable $e) {
-            return redirect()->back()->with('error', 'Erreur lors de la mise à jour: '.$e->getMessage());
+            return redirect()->back()->with('error', __('flash.session_update_error').': '.$e->getMessage());
         }
     }
 
@@ -202,11 +202,11 @@ class CashierSessionController extends Controller
         $user = Auth::user();
 
         if (! $this->sessionService->isAdmin($user) && $cashierSession->user_id !== $user->id) {
-            return redirect()->route('cashier.dashboard')->with('error', 'Action non autorisée.');
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_unauthorized'));
         }
 
         if ($cashierSession->status !== 'active') {
-            return redirect()->back()->with('error', "Cette session n'est pas active.");
+            return redirect()->back()->with('error', __('flash.session_not_active'));
         }
 
         try {
@@ -226,7 +226,7 @@ class CashierSessionController extends Controller
 
             return redirect()->route('cashier.dashboard')->with('success', $message);
         } catch (\Throwable $e) {
-            return redirect()->back()->with('error', 'Erreur lors de la clôture: '.$e->getMessage());
+            return redirect()->back()->with('error', __('flash.session_close_error').': '.$e->getMessage());
         }
     }
 
@@ -273,7 +273,7 @@ class CashierSessionController extends Controller
         if (! $session) {
             return response()->json([
                 'success' => false,
-                'message' => 'Aucune session active. Veuillez démarrer une session.',
+                'message' => __('flash.session_no_active'),
                 'redirect' => route('cashier.sessions.create'),
             ], 403);
         }
@@ -286,7 +286,7 @@ class CashierSessionController extends Controller
         $user = Auth::user();
 
         if (! $this->sessionService->isAdmin($user)) {
-            return redirect()->route('cashier.dashboard')->with('error', 'Accès réservé aux administrateurs.');
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_admin_only'));
         }
 
         $date = $request->get('date', Carbon::today()->format('Y-m-d'));
@@ -308,7 +308,7 @@ class CashierSessionController extends Controller
         $user = Auth::user();
 
         if (! $this->sessionService->isAdmin($user)) {
-            return redirect()->route('cashier.dashboard')->with('error', 'Accès réservé aux administrateurs.');
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_admin_only'));
         }
 
         try {
@@ -329,7 +329,7 @@ class CashierSessionController extends Controller
 
             return view('cashier.reports.index', compact('receptionists', 'user'));
         } catch (\Throwable $e) {
-            return redirect()->route('cashier.dashboard')->with('error', 'Erreur: '.$e->getMessage());
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_report_error').': '.$e->getMessage());
         }
     }
 
@@ -338,11 +338,11 @@ class CashierSessionController extends Controller
         $user = Auth::user();
 
         if (! $this->sessionService->isAdmin($user) && $cashierSession->user_id !== $user->id) {
-            return redirect()->route('cashier.dashboard')->with('error', 'Accès non autorisé.');
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_access_denied'));
         }
 
         if ($cashierSession->status !== 'closed') {
-            return redirect()->route('cashier.sessions.show', $cashierSession)->with('error', 'La session doit être fermée pour générer le rapport.');
+            return redirect()->route('cashier.sessions.show', $cashierSession)->with('error', __('flash.session_must_be_closed'));
         }
 
         $transactions = Transaction::where('cashier_session_id', $cashierSession->id)

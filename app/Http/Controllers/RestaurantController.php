@@ -80,7 +80,7 @@ class RestaurantController extends Controller
         Menu::create($validated);
 
         return redirect()->route('restaurant.index')
-            ->with('success', 'Menu ajouté avec succès!');
+            ->with('success', __('flash.restaurant_menu_created'));
     }
 
     // Afficher le formulaire de modification
@@ -116,7 +116,7 @@ class RestaurantController extends Controller
         $menu->update($validated);
 
         return redirect()->route('restaurant.index')
-            ->with('success', 'Menu modifié avec succès!');
+            ->with('success', __('flash.restaurant_menu_updated'));
     }
 
     // Afficher toutes les commandes

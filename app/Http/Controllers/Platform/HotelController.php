@@ -131,7 +131,7 @@ class HotelController extends Controller
         }
 
         return redirect()->route('platform.hotels.index')
-            ->with('success', "Hôtel « {$data['name']} » créé. Les identifiants ont été envoyés à {$admin->email}.");
+            ->with('success', __('flash.register_existing_account', ['plan' => $data['name']]));
     }
 
     public function edit(Hotel $hotel)
@@ -152,7 +152,7 @@ class HotelController extends Controller
         $hotel->update($data);
 
         return redirect()->route('platform.hotels.index')
-            ->with('success', "Hôtel « {$hotel->name} » mis à jour.");
+            ->with('success', __('flash.hotel_settings_updated'));
     }
 
     public function toggleActive(Request $request, Hotel $hotel)
@@ -168,7 +168,7 @@ class HotelController extends Controller
         $state = $nowActive ? 'réactivé' : 'suspendu';
 
         return redirect()->back()
-            ->with('success', "Hôtel « {$hotel->name} » {$state}.");
+            ->with('success', __('flash.hotel_settings_updated'));
     }
 
     /**
@@ -196,7 +196,7 @@ class HotelController extends Controller
         ]);
 
         return redirect()->route('platform.hotels.show', $hotel)
-            ->with('success', "Abonnement de « {$hotel->name} » renouvelé jusqu'au ".$newEnd->format('d/m/Y').'.');
+            ->with('success', __('flash.billing_confirmed', ['date' => $newEnd->format('d/m/Y')]));
     }
 
     /**
@@ -213,7 +213,7 @@ class HotelController extends Controller
         });
 
         return redirect()->route('platform.hotels.index')
-            ->with('success', "Hôtel « {$name} » supprimé.");
+            ->with('success', __('flash.hotel_settings_updated'));
     }
 
     private function uniqueSlug(string $name): string

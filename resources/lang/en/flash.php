@@ -10,6 +10,8 @@ return [
     'login_invalid' => 'Invalid credentials. Check your email and password.',
     'register_success' => 'Your account has been created. You can now log in.',
     'logout_success' => 'Logged out successfully. Goodbye',
+    'logout_success_route' => 'Logged out successfully. Goodbye',
+    'logout_forced' => 'Forced logout successful.',
 
     // ─── MIDDLEWARE ─────────────────────────────────────
     'middleware_login_required' => 'Please log in.',
@@ -106,10 +108,27 @@ return [
     'user_cannot_disable_self' => 'You cannot disable your own account.',
     'user_status_changed' => 'User :label successfully.',
     'user_status_error' => 'Error while changing status.',
+    'user_updated' => 'User updated',
 
     // ─── PAYMENT ────────────────────────────────────────
     'payment_already_paid' => 'This transaction is already fully paid.',
     'payment_cancelled_no_show' => 'Cannot process payment on a cancelled or no-show transaction.',
+    'payment_internal_error' => 'Internal payment error.',
+    'payment_not_cancellable' => 'This payment cannot be cancelled.',
+    'payment_cancel_error' => 'Error while cancelling payment.',
+    'payment_not_refundable' => 'This payment cannot be refunded.',
+    'payment_refund_error' => 'Error while refunding payment.',
+    'payment_transaction_not_found' => 'Transaction not found for this payment.',
+    'payment_only_pending_can_pay' => 'Only pending payments can be marked as paid.',
+    'payment_update_error' => 'Error while updating payment.',
+    'payment_only_cancelled_can_restore' => 'Only cancelled or expired payments can be restored.',
+    'payment_restore_error' => 'Error while restoring payment.',
+    'payment_only_pending_can_expire' => 'Only pending payments can be marked as expired.',
+    'payment_cancelled_success' => 'Payment cancelled successfully.',
+    'payment_refunded_success' => 'Payment refunded successfully.',
+    'payment_marked_paid' => 'Payment marked as paid successfully.',
+    'payment_restored_success' => 'Payment restored successfully.',
+    'payment_marked_expired' => 'Payment marked as expired.',
     'payment_refund' => 'Early checkout refund',
 
     // ─── BILLING ────────────────────────────────────────
@@ -148,6 +167,13 @@ return [
     'restaurant_menu_updated' => 'Menu updated successfully!',
     'restaurant_room_number_missing' => 'Room number is missing.',
     'restaurant_no_active_guest' => 'No active guest in room :room. Please verify the number.',
+    'customer_exists' => 'This customer already exists (:name): no duplicate created.',
+    'customer_created' => 'Customer :name created',
+    'customer_updated' => 'Customer :name updated',
+    'customer_deleted' => 'Customer :name deleted!',
+    'customer_delete_error' => 'Cannot delete customer',
+    'extra_add_detail' => 'Extra ":description" added to the invoice.',
+    'extra_remove_detail' => 'Extra removed from the invoice.',
 
     // ─── IMAGE ──────────────────────────────────────────
     'image_created' => 'Image added!',
@@ -156,6 +182,11 @@ return [
     'room_cannot_mark_dirty_occupied' => 'Cannot mark an occupied room as dirty. The guest is still present.',
     'room_cannot_mark_dirty_maintenance' => 'Cannot mark a maintenance room as dirty. Complete maintenance first.',
     'room_marked_dirty' => 'Room :number marked as dirty successfully.',
+    'room_cannot_clean_occupied' => 'Cannot mark an occupied room as clean. The guest is still present.',
+    'room_cannot_clean_maintenance' => 'Cannot mark a maintenance room as clean. Complete maintenance first.',
+    'room_marked_clean' => 'Room :number marked as clean.',
+    'room_mark_error' => 'Error marking room',
+    'rooms_marked_dirty' => ':count rooms marked as dirty',
 
     // ─── CASHIER SESSION ────────────────────────────────
     'session_load_error' => 'Error loading sessions.',
@@ -174,6 +205,10 @@ return [
     'session_admin_only' => 'Access restricted to administrators.',
     'session_access_denied' => 'Access denied.',
     'session_must_be_closed' => 'The session must be closed to generate the report.',
+    'session_start_error' => 'Error starting session.',
+    'session_load_detail_error' => 'Error loading session.',
+    'session_update_error' => 'Error updating session.',
+    'session_report_error' => 'Error',
 
     // ─── RECEPTIONIST SESSION ───────────────────────────
     'receptionist_session_unauthorized' => 'Access denied',
@@ -200,6 +235,15 @@ return [
     'housekeeping_error' => 'An error occurred.',
     'housekeeping_not_found' => 'Item not found.',
     'housekeeping_unauthorized' => 'Unauthorized action.',
+    'housekeeping_room_not_found' => 'Room :number not found',
+    'housekeeping_unknown_action' => 'Unknown action',
+    'housekeeping_rooms_list_error' => 'Error loading rooms to clean',
+    'housekeeping_cleaning_start_error' => 'Error starting cleaning',
+    'housekeeping_mark_clean_error' => 'Error marking as cleaned',
+    'housekeeping_maintenance_error' => 'Error marking as maintenance',
+    'housekeeping_inspection_start_error' => 'Error requesting inspection',
+    'housekeeping_inspection_end_error' => 'Error finishing inspection',
+    'housekeeping_export_error' => 'Export error',
 
     // ─── REPORT ─────────────────────────────────────────
     'report_today' => 'Today',

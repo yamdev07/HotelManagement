@@ -51,6 +51,6 @@ class ImageController extends Controller
 
         return redirect()
             ->back()
-            ->with('success', 'Image "'.$image->url.'" has been deleted!');
+            ->with('success', __('flash.image_created'));
     }
 }

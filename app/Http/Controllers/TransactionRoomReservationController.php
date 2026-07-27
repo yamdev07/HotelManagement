@@ -81,13 +81,13 @@ class TransactionRoomReservationController extends Controller
             $existingCustomer->update($updateData);
             $customer = $existingCustomer;
 
-            $message = 'Informations client mises à jour : '.$customer->name;
+            $message = __('flash.reservation_customer_updated', ['name' => $customer->name]);
         } else {
             // Récupérer l'utilisateur connecté
             $user = auth()->user();
             if (! $user) {
                 return redirect()->route('login')
-                    ->with('error', 'Vous devez être connecté pour créer un client');
+                    ->with('error', __('flash.reservation_login_required'));
             }
 
             // Créer un nouveau client - seulement les champs nécessaires
@@ -108,7 +108,7 @@ class TransactionRoomReservationController extends Controller
             }
 
             $customer = Customer::create($customerData);
-            $message = 'Nouveau client créé par '.$user->name.' : '.$customer->name;
+            $message = __('flash.reservation_customer_created', ['agent' => $user->name, 'name' => $customer->name]);
         }
 
         return redirect()
@@ -205,7 +205,7 @@ class TransactionRoomReservationController extends Controller
                     $user = $firstUser;
                 } else {
                     return redirect()->route('login')
-                        ->with('error', 'Erreur système: Aucun utilisateur trouvé dans la base de données. Veuillez contacter l\'administrateur.');
+                        ->with('error', __('flash.reservation_system_error'));
                 }
             }
         }
@@ -251,7 +251,7 @@ class TransactionRoomReservationController extends Controller
             // Vérifier l'acompte
             if ($downPayment > $totalPrice) {
                 return redirect()->back()
-                    ->with('error', 'L\'acompte ne peut pas dépasser le prix total')
+                    ->with('error', __('flash.reservation_deposit_exceeded'))
                     ->withInput();
             }
 
@@ -267,14 +267,14 @@ class TransactionRoomReservationController extends Controller
 
             if ($existing) {
                 return redirect()->route('transaction.index')
-                    ->with('success', 'Cette réservation existe déjà (n°'.$existing->id.' · '.$customer->name.' · chambre '.$room->number.') : aucun doublon créé.');
+                    ->with('success', __('flash.reservation_duplicate'));
             }
 
             $isOccupied = $this->isRoomOccupied($room->id, $checkIn, $checkOut);
 
             if ($isOccupied) {
                 return redirect()->back()
-                    ->with('error', 'Cette chambre n\'est plus disponible pour les dates sélectionnées. Veuillez choisir d\'autres dates ou une autre chambre.')
+                    ->with('error', __('flash.reservation_room_unavailable'))
                     ->withInput();
             }
 
@@ -430,7 +430,7 @@ class TransactionRoomReservationController extends Controller
                 ]);
 
                 return redirect()->back()
-                    ->with('error', 'Erreur lors de la création de la réservation: '.$e->getMessage())
+                    ->with('error', __('flash.reservation_error').': '.$e->getMessage())
                     ->withInput();
             }
 
@@ -440,7 +440,7 @@ class TransactionRoomReservationController extends Controller
                 'bindings' => $e->getBindings(),
             ]);
 
-            $errorMessage = 'Erreur de base de données lors de la réservation.';
+            $errorMessage = __('flash.reservation_db_error');
 
             if (strpos($e->getMessage(), 'Column not found') !== false) {
                 preg_match("/Column not found.*'([^']+)'/", $e->getMessage(), $matches);
@@ -459,7 +459,7 @@ class TransactionRoomReservationController extends Controller
             \Log::error('Erreur générale réservation: '.$e->getMessage());
 
             return redirect()->back()
-                ->with('error', 'Erreur lors de la réservation: '.$e->getMessage())
+                ->with('error', __('flash.reservation_error').': '.$e->getMessage())
                 ->withInput();
         }
     }

@@ -179,7 +179,7 @@ Route::get('/logout-now', function () {
         \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('laravel_session'));
         \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('XSRF-TOKEN'));
 
-        return redirect('/login')->with('success', '✅ Déconnexion réussie. Au revoir '.$userName.' !');
+        return redirect('/login')->with('success', __('flash.logout_success_route').' '.$userName.' !');
 
     } catch (\Exception $e) {
         return redirect('/login')->with('error', 'Erreur de déconnexion: '.$e->getMessage());
@@ -792,7 +792,7 @@ Route::middleware(['auth', 'checkrole:Super,Admin,Housekeeping,Receptionist'])->
         $controller = new HousekeepingController;
         $count = $controller->autoMarkDirtyRooms();
 
-        return back()->with('success', "{$count} chambres marquées comme sales");
+        return back()->with('success', __('flash.rooms_marked_dirty', ['count' => $count]));
     })->name('housekeeping.test.auto-mark')
         ->middleware('checkrole:Super,Admin');
 });
@@ -1049,7 +1049,7 @@ Route::get('/force-logout-all', function () {
     \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('laravel_session'));
     \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('XSRF-TOKEN'));
 
-    return redirect('/login')->with('success', 'Déconnexion forcée réussie.');
+    return redirect('/login')->with('success', __('flash.logout_forced'));
 });
 
 // ==================== API POUR RECHERCHE DE CLIENTS ====================
