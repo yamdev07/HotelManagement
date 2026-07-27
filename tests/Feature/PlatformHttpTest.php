@@ -5,9 +5,7 @@ namespace Tests\Feature;
 use App\Mail\HotelCredentialsMail;
 use App\Models\Hotel;
 use App\Models\User;
-use App\Support\TenantManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
@@ -18,8 +16,8 @@ class PlatformHttpTest extends TestCase
     private function makeHotel(string $name, array $attrs = []): Hotel
     {
         return Hotel::create(array_merge([
-            'name'      => $name,
-            'slug'      => \Illuminate\Support\Str::slug($name),
+            'name' => $name,
+            'slug' => \Illuminate\Support\Str::slug($name),
             'is_active' => true,
         ], $attrs));
     }
@@ -27,7 +25,7 @@ class PlatformHttpTest extends TestCase
     private function superAdmin(): User
     {
         return User::factory()->create([
-            'role'     => 'Super',
+            'role' => 'Super',
             'hotel_id' => null,
         ]);
     }
@@ -35,7 +33,7 @@ class PlatformHttpTest extends TestCase
     private function hotelAdmin(Hotel $hotel): User
     {
         return User::factory()->create([
-            'role'     => 'Admin',
+            'role' => 'Admin',
             'hotel_id' => $hotel->id,
         ]);
     }
@@ -55,10 +53,10 @@ class PlatformHttpTest extends TestCase
         Mail::fake();
 
         $response = $this->actingAs($this->superAdmin())->post('/platform/hotels', [
-            'name'           => 'Hotel Ibis',
-            'currency'       => 'CFA',
-            'admin_name'     => 'Admin Ibis',
-            'admin_email'    => 'admin@ibis.test',
+            'name' => 'Hotel Ibis',
+            'currency' => 'CFA',
+            'admin_name' => 'Admin Ibis',
+            'admin_email' => 'admin@ibis.test',
             'admin_password' => 'secret123',
         ]);
 
@@ -81,8 +79,8 @@ class PlatformHttpTest extends TestCase
         Mail::fake();
 
         $this->actingAs($this->superAdmin())->post('/platform/hotels', [
-            'name'        => 'Hotel Sans MDP',
-            'admin_name'  => 'Boss',
+            'name' => 'Hotel Sans MDP',
+            'admin_name' => 'Boss',
             'admin_email' => 'boss@sansmdp.test',
         ])->assertRedirectToRoute('platform.hotels.index');
 

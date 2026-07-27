@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TransactionExtra extends Model
 {
-    use HasFactory, \App\Models\Concerns\BelongsToHotel;
+    use \App\Models\Concerns\BelongsToHotel, HasFactory;
 
     protected $fillable = [
         'transaction_id',
@@ -23,10 +23,13 @@ class TransactionExtra extends Model
         'quantity' => 'integer',
     ];
 
-    const CATEGORY_MINIBAR  = 'minibar';
-    const CATEGORY_LAUNDRY  = 'laundry';
-    const CATEGORY_SERVICE  = 'service';
-    const CATEGORY_OTHER    = 'other';
+    const CATEGORY_MINIBAR = 'minibar';
+
+    const CATEGORY_LAUNDRY = 'laundry';
+
+    const CATEGORY_SERVICE = 'service';
+
+    const CATEGORY_OTHER = 'other';
 
     public static function getCategories(): array
     {
@@ -34,7 +37,7 @@ class TransactionExtra extends Model
             self::CATEGORY_MINIBAR => 'Minibar / Boissons',
             self::CATEGORY_LAUNDRY => 'Lessive / Blanchisserie',
             self::CATEGORY_SERVICE => 'Service (spa, navette…)',
-            self::CATEGORY_OTHER   => 'Autre',
+            self::CATEGORY_OTHER => 'Autre',
         ];
     }
 
@@ -44,7 +47,7 @@ class TransactionExtra extends Model
             self::CATEGORY_MINIBAR => 'fa-wine-glass-alt',
             self::CATEGORY_LAUNDRY => 'fa-tshirt',
             self::CATEGORY_SERVICE => 'fa-concierge-bell',
-            self::CATEGORY_OTHER   => 'fa-box',
+            self::CATEGORY_OTHER => 'fa-box',
         ];
     }
 

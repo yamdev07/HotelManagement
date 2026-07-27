@@ -1,4 +1,5 @@
 <?php
+
 /*
 |--------------------------------------------------------------------------
 | checkinHub — Nettoyage (garde uniquement Cactus Hotel)
@@ -13,10 +14,13 @@
 |--------------------------------------------------------------------------
 */
 
-$SECRET      = 'checkinhub-cleanup-2026';
+$SECRET = 'checkinhub-cleanup-2026';
 $ROOM_TARGET = 14;     // nombre de chambres voulu pour Cactus
 
-if (($_GET['key'] ?? '') !== $SECRET) { http_response_code(403); exit('Forbidden'); }
+if (($_GET['key'] ?? '') !== $SECRET) {
+    http_response_code(403);
+    exit('Forbidden');
+}
 header('Content-Type: text/plain; charset=utf-8');
 
 require __DIR__.'/../private/vendor/autoload.php';
@@ -45,13 +49,13 @@ if (! $keep) {
 echo "Hôtel conservé : {$keep->name} (id={$keep->id})\n\n";
 
 // 2) Supprimer tous les autres hôtels + données
-$scoped = ['rooms','types','facilities','images','transactions','customers','payments',
-           'transaction_extras','bookings','cashier_sessions','cashier_transactions',
-           'restaurant_orders','restaurant_order_items','restaurant_reservations',
-           'menus','categories','floor_plans'];
+$scoped = ['rooms', 'types', 'facilities', 'images', 'transactions', 'customers', 'payments',
+    'transaction_extras', 'bookings', 'cashier_sessions', 'cashier_transactions',
+    'restaurant_orders', 'restaurant_order_items', 'restaurant_reservations',
+    'menus', 'categories', 'floor_plans'];
 
 $others = Hotel::withoutGlobalScopes()->where('id', '!=', $keep->id)->get();
-echo "Hôtels à supprimer : ".$others->count()."\n";
+echo 'Hôtels à supprimer : '.$others->count()."\n";
 
 foreach ($others as $h) {
     DB::transaction(function () use ($h, $scoped) {
@@ -70,11 +74,11 @@ echo "\n";
 
 // 3) Cactus : abonnement illimité + réactivé
 $keep->update([
-    'is_active'            => true,
-    'suspension_reason'    => null,
+    'is_active' => true,
+    'suspension_reason' => null,
     'subscription_ends_at' => null,   // illimité
-    'plan'                 => 'pro',
-    'room_limit'           => null,   // chambres illimitées
+    'plan' => 'pro',
+    'room_limit' => null,   // chambres illimitées
 ]);
 echo "Cactus : abonnement ILLIMITÉ, réactivé.\n";
 
@@ -88,8 +92,10 @@ echo "Chambres actuelles : {$current}\n";
 $n = 100;
 while (Room::count() < $ROOM_TARGET) {
     // trouver un numéro libre
-    do { $n++; } while (Room::where('number', (string) $n)->exists());
-    $r = new Room();
+    do {
+        $n++;
+    } while (Room::where('number', (string) $n)->exists());
+    $r = new Room;
     $r->number = (string) $n;
     $r->name = 'Chambre '.$n;
     $r->type_id = $type->id;
@@ -99,7 +105,7 @@ while (Room::count() < $ROOM_TARGET) {
     $r->view = 'Standard';
     $r->save();
 }
-echo "Chambres après : ".Room::count()."\n\n";
+echo 'Chambres après : '.Room::count()."\n\n";
 
 echo "===== TERMINÉ =====\n";
 echo "⚠️  SUPPRIME MAINTENANT web/cleanup.php !\n";

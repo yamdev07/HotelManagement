@@ -28,10 +28,9 @@ use App\Services\PaymentService;
 use App\Services\SessionActivityService;
 use App\Services\TransactionService;
 use App\Support\TenantManager;
-use Illuminate\Support\ServiceProvider;
-
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {

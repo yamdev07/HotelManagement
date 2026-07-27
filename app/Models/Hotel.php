@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Carbon;
 
 class Hotel extends Model
 {
@@ -45,17 +44,17 @@ class Hotel extends Model
     ];
 
     protected $casts = [
-        'is_active'            => 'boolean',
-        'show_rooms'           => 'boolean',
-        'show_restaurant'      => 'boolean',
-        'show_services'        => 'boolean',
-        'show_contact'         => 'boolean',
-        'subscription_ends_at'    => 'datetime',
+        'is_active' => 'boolean',
+        'show_rooms' => 'boolean',
+        'show_restaurant' => 'boolean',
+        'show_services' => 'boolean',
+        'show_contact' => 'boolean',
+        'subscription_ends_at' => 'datetime',
         'onboarding_completed_at' => 'datetime',
-        'room_limit'              => 'integer',
-        'services'                => 'array',
-        'socials'                 => 'array',
-        'metadata'                => 'array',
+        'room_limit' => 'integer',
+        'services' => 'array',
+        'socials' => 'array',
+        'metadata' => 'array',
     ];
 
     /** Services par défaut si l'hôtelier n'en a pas défini. */
@@ -65,7 +64,7 @@ class Hotel extends Model
         ['icon' => 'fa-mug-saucer', 'title' => 'Petit-déjeuner', 'description' => 'Une table généreuse pour bien commencer la journée.'],
         ['icon' => 'fa-car', 'title' => 'Voiturier & parking', 'description' => 'Stationnement sécurisé et service voiturier.'],
         ['icon' => 'fa-spa', 'title' => 'Bien-être', 'description' => 'Des moments de détente pensés pour vous.'],
-        ['icon' => 'fa-location-dot', 'title' => 'Emplacement', "description" => "Au cœur des points d'intérêt incontournables."],
+        ['icon' => 'fa-location-dot', 'title' => 'Emplacement', 'description' => "Au cœur des points d'intérêt incontournables."],
     ];
 
     /** Liste des services de la vitrine (personnalisés ou défaut). */
@@ -134,9 +133,9 @@ class Hotel extends Model
 
     /** Libellés des modules premium (pour les messages d'upgrade). */
     public const MODULE_LABELS = [
-        'restaurant'   => 'Restaurant',
+        'restaurant' => 'Restaurant',
         'housekeeping' => 'Housekeeping',
-        'reports'      => 'Rapports avancés',
+        'reports' => 'Rapports avancés',
     ];
 
     /**
@@ -162,11 +161,11 @@ class Hotel extends Model
     public static function priceFor(string $plan, ?string $country = null): int
     {
         $tiers = config('plans.tiers');
-        $base  = $tiers[$plan]['price'] ?? $tiers[config('plans.default', 'starter')]['price'];
+        $base = $tiers[$plan]['price'] ?? $tiers[config('plans.default', 'starter')]['price'];
 
-        $code  = $country ?: config('plans.default_country', 'BJ');
-        $conf  = config('plans.countries.'.$code, config('plans.countries.'.config('plans.default_country', 'BJ')));
-        $coef  = $conf['coef'] ?? 1.0;
+        $code = $country ?: config('plans.default_country', 'BJ');
+        $conf = config('plans.countries.'.$code, config('plans.countries.'.config('plans.default_country', 'BJ')));
+        $coef = $conf['coef'] ?? 1.0;
         $round = $conf['round'] ?? 100;
 
         return (int) (round(($base * $coef) / $round) * $round);
@@ -254,13 +253,13 @@ class Hotel extends Model
     public function recordSubscription(array $attrs = []): Subscription
     {
         return $this->subscriptions()->create(array_merge([
-            'plan'       => $this->plan ?: config('plans.default', 'starter'),
-            'amount'     => 0,
-            'currency'   => $this->currency ?: 'CFA',
-            'status'     => 'active',
+            'plan' => $this->plan ?: config('plans.default', 'starter'),
+            'amount' => 0,
+            'currency' => $this->currency ?: 'CFA',
+            'status' => 'active',
             'is_renewal' => false,
-            'starts_at'  => now(),
-            'ends_at'    => $this->subscription_ends_at,
+            'starts_at' => now(),
+            'ends_at' => $this->subscription_ends_at,
             'created_by' => auth()->id(),
         ], $attrs));
     }
@@ -281,8 +280,8 @@ class Hotel extends Model
 
         $updates = [
             'subscription_ends_at' => $newEnd,
-            'is_active'            => true,
-            'suspension_reason'    => null,
+            'is_active' => true,
+            'suspension_reason' => null,
         ];
         if ($plan && array_key_exists($plan, config('plans.tiers'))) {
             $updates['plan'] = $plan;
@@ -291,12 +290,12 @@ class Hotel extends Model
         $this->update($updates);
 
         return $this->recordSubscription(array_merge([
-            'plan'       => $plan ?: $this->plan,
-            'status'     => 'active',
+            'plan' => $plan ?: $this->plan,
+            'status' => 'active',
             'is_renewal' => true,
-            'amount'     => $amount,
-            'starts_at'  => $start,
-            'ends_at'    => $newEnd,
+            'amount' => $amount,
+            'starts_at' => $start,
+            'ends_at' => $newEnd,
         ], $extra));
     }
 

@@ -1,0 +1,103 @@
+<?php
+
+return [
+    // Header
+    'greeting' => 'Hello',
+    'overview' => 'Operations overview',
+    'website' => 'Website',
+
+    // Stat cards
+    'today_badge' => 'Today',
+    'active_guests' => 'Active guests',
+    'new_arrivals' => ':count new arrival(s)',
+    'completed_badge' => 'Completed',
+    'checkouts_today' => 'Check-outs today',
+    'payments_settled' => 'Payments settled',
+    'attention_badge' => 'Attention',
+    'pending_payments' => 'Pending payments',
+    'follow_up_required' => 'Follow-up required',
+    'urgent_badge' => 'Urgent',
+    'due_under_24h' => 'Due < 24h',
+    'immediate_action' => 'Immediate action',
+
+    // Arrivals & departures panel
+    'arrivals_departures' => 'Arrivals & Departures',
+    'forecast' => 'Forecast',
+    'today' => 'Today',
+    'tomorrow' => 'Tomorrow',
+    'day_2' => 'D+2',
+    'arrivals' => 'Arrivals',
+    'departures' => 'Departures',
+    'room_occupancy' => 'Room occupancy',
+    'free_rooms' => 'Available rooms',
+    'vacant' => 'Vacant',
+    'out_of_rooms' => 'of :count rooms',
+    'occupied_rooms' => 'Occupied rooms',
+    'occupied' => 'Occupied',
+    'right_now' => 'right now',
+    'occupancy_rate' => 'Occupancy rate',
+
+    // Active guests table
+    'active_guests_title' => 'Active guests',
+    'guests_count' => ':count guest(s) right now',
+    'refresh' => 'Refresh',
+    'filter' => 'Filter',
+    'filter_active_only' => 'Active only',
+    'filter_reservations' => 'Reservations',
+    'filter_pending_payments' => 'Pending payments',
+    'filter_today' => 'Today',
+    'filter_tomorrow' => 'Tomorrow',
+    'filter_this_week' => 'This week',
+    'filter_all_dates' => 'All dates',
+    'new_client' => 'New guest',
+    'col_guest' => 'Guest',
+    'col_room' => 'Room',
+    'col_dates' => 'Dates',
+    'col_balance' => 'Balance',
+    'col_actions' => 'Actions',
+    'new_tag' => 'New',
+    'departure_today' => 'Departure today',
+    'settled' => 'Settled',
+    'total_label' => 'Total: :amount',
+    'collect' => 'Collect',
+    'edit' => 'Edit',
+    'invoice' => 'Invoice',
+    'cancel' => 'Cancel',
+    'no_active_guests' => 'No active guests',
+    'no_guests_recorded' => 'No guests registered yet',
+    'add_guest' => 'Add a guest',
+
+    // Quick check-in sidebar
+    'quick_checkin' => 'Quick check-in',
+    'check_existing' => 'Check an existing reservation',
+    'search_placeholder' => 'Name, room, ID…',
+    'all_arrivals' => 'All arrivals',
+    'direct_checkin' => 'Direct check-in',
+
+    // Quick actions
+    'quick_actions' => 'Quick actions',
+    'manage_rooms' => 'Manage rooms',
+    'guests_link' => 'Guests',
+    'checkin_dashboard' => 'Check-in dashboard',
+    'payments_link' => 'Payments',
+    'reports_link' => 'Reports',
+    'cashier_link' => 'Cashier',
+    'visit_website' => 'Visit website',
+
+    // System status
+    'system_status' => 'System status',
+    'last_updated' => 'Last updated',
+    'active_sessions' => 'Active sessions',
+    'database' => 'Database',
+    'online' => 'Online',
+    'memory' => 'Memory',
+    'normal' => 'Normal',
+    'refresh_dashboard' => 'Refresh dashboard',
+
+    // SweetAlert
+    'cancel_reservation_title' => 'Cancel reservation?',
+    'cancel_reservation_text' => 'Cancel the reservation of <strong>:name</strong>.<br><small style="color:#9ba09b">This action cannot be undone.</small>',
+    'confirm_cancel' => 'Yes, cancel',
+    'keep_reservation' => 'Keep',
+    'loading' => 'Loading…',
+];

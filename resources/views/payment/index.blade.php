@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Gestion des Paiements')
+@section('title', __('payment.page_title'))
 @section('content')
 
 <style>
@@ -557,9 +557,9 @@
 
     {{-- Breadcrumb --}}
     <div class="breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> {{ __('payment.breadcrumb_dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Paiements</span>
+        <span class="current">{{ __('payment.breadcrumb_payments') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -567,23 +567,23 @@
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-money-bill-wave"></i></span>
-                <h1>Gestion des <em>paiements</em></h1>
+                <h1>{!! __('payment.header_title') !!}</h1>
             </div>
-            <p class="header-subtitle">{{ $payments->total() }} paiement(s) enregistré(s)</p>
+            <p class="header-subtitle">{{ __('payment.header_sub', ['count' => $payments->total()]) }}</p>
         </div>
         <div class="d-flex gap-2">
             <div class="dropdown">
                 <button class="btn btn-outline dropdown-toggle" data-bs-toggle="dropdown">
-                    <i class="fas fa-filter"></i> Filtrer
+                    <i class="fas fa-filter"></i> {{ __('payment.filter') }}
                 </button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="?status=all"><i class="fas fa-list"></i> Tous</a></li>
-                    <li><a class="dropdown-item" href="?status=completed"><i class="fas fa-check-circle" style="color:var(--green-600);"></i> Complétés</a></li>
-                    <li><a class="dropdown-item" href="?status=pending"><i class="fas fa-clock" style="color:var(--red-500);"></i> En attente</a></li>
-                    <li><a class="dropdown-item" href="?period=today"><i class="fas fa-calendar-day"></i> Aujourd'hui</a></li>
+                    <li><a class="dropdown-item" href="?status=all"><i class="fas fa-list"></i> {{ __('payment.filter_all') }}</a></li>
+                    <li><a class="dropdown-item" href="?status=completed"><i class="fas fa-check-circle" style="color:var(--green-600);"></i> {{ __('payment.filter_completed') }}</a></li>
+                    <li><a class="dropdown-item" href="?status=pending"><i class="fas fa-clock" style="color:var(--red-500);"></i> {{ __('payment.filter_pending') }}</a></li>
+                    <li><a class="dropdown-item" href="?period=today"><i class="fas fa-calendar-day"></i> {{ __('payment.filter_today') }}</a></li>
                 </ul>
             </div>
-            <button class="btn btn-outline" onclick="exportPayments()"><i class="fas fa-file-export"></i> Exporter</button>
+            <button class="btn btn-outline" onclick="exportPayments()"><i class="fas fa-file-export"></i> {{ __('payment.export') }}</button>
             <button class="btn btn-outline" onclick="location.reload()"><i class="fas fa-sync-alt"></i></button>
         </div>
     </div>
@@ -598,15 +598,15 @@
             <div class="stat-icon"><i class="fas fa-coins"></i></div>
             <div class="stat-content">
                 <div class="stat-number">{{ number_format($total, 0, ',', ' ') }}</div>
-                <div class="stat-label">Total</div>
-                <span class="stat-badge">Global</span>
+                <div class="stat-label">{{ __('payment.stat_total') }}</div>
+                <span class="stat-badge">{{ __('payment.stat_total_badge') }}</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
             <div class="stat-content">
                 <div class="stat-number">{{ number_format($today, 0, ',', ' ') }}</div>
-                <div class="stat-label">Aujourd'hui</div>
+                <div class="stat-label">{{ __('payment.stat_today') }}</div>
                 <span class="stat-badge">{{ now()->format('d/m') }}</span>
             </div>
         </div>
@@ -614,16 +614,16 @@
             <div class="stat-icon"><i class="fas fa-users"></i></div>
             <div class="stat-content">
                 <div class="stat-number">{{ $payments->unique('transaction.customer_id')->count() }}</div>
-                <div class="stat-label">Clients</div>
-                <span class="stat-badge">Uniques</span>
+                <div class="stat-label">{{ __('payment.stat_clients') }}</div>
+                <span class="stat-badge">{{ __('payment.stat_clients_badge') }}</span>
             </div>
         </div>
         <div class="stat-card">
             <div class="stat-icon"><i class="fas fa-bed"></i></div>
             <div class="stat-content">
                 <div class="stat-number">{{ $payments->unique('transaction.room_id')->count() }}</div>
-                <div class="stat-label">Chambres</div>
-                <span class="stat-badge">Réservations</span>
+                <div class="stat-label">{{ __('payment.stat_rooms') }}</div>
+                <span class="stat-badge">{{ __('payment.stat_rooms_badge') }}</span>
             </div>
         </div>
     </div>
@@ -631,10 +631,10 @@
     {{-- Tableau --}}
     <div class="card">
         <div class="card-header">
-            <h5><i class="fas fa-credit-card"></i> Historique des paiements</h5>
+            <h5><i class="fas fa-credit-card"></i> {{ __('payment.card_title') }}</h5>
             <div class="search-wrapper">
                 <i class="fas fa-search"></i>
-                <input type="text" id="searchInput" placeholder="Rechercher..." onkeyup="filterPayments()">
+                <input type="text" id="searchInput" placeholder="{{ __('payment.search_placeholder') }}" onkeyup="filterPayments()">
             </div>
         </div>
         <div class="card-body">
@@ -643,13 +643,13 @@
                     <table class="table" id="paymentsTable">
                         <thead>
                             <tr>
-                                <th>ID</th>
-                                <th>Client & Chambre</th>
-                                <th>Détails</th>
-                                <th>Date</th>
-                                <th>Statut</th>
-                                <th>Par</th>
-                                <th class="text-center">Actions</th>
+                                <th>{{ __('payment.col_id') }}</th>
+                                <th>{{ __('payment.col_client_room') }}</th>
+                                <th>{{ __('payment.col_details') }}</th>
+                                <th>{{ __('payment.col_date') }}</th>
+                                <th>{{ __('payment.col_status') }}</th>
+                                <th>{{ __('payment.col_by') }}</th>
+                                <th class="text-center">{{ __('payment.col_actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -663,10 +663,10 @@
                                     default => 'badge-gray'
                                 };
                                 $text = match($payment->status) {
-                                    'completed' => 'Complété',
-                                    'pending' => 'En attente',
-                                    'failed' => 'Échoué',
-                                    'refunded' => 'Remboursé',
+                                    'completed' => __('payment.status_completed'),
+                                    'pending' => __('payment.status_pending'),
+                                    'failed' => __('payment.status_failed'),
+                                    'refunded' => __('payment.status_refunded'),
                                     default => $payment->status
                                 };
                                 $isToday = $payment->created_at->isToday();
@@ -678,7 +678,7 @@
                                         <div class="avatar"><i class="fas fa-user"></i></div>
                                         <div>
                                             <div class="fw-semibold">{{ $payment->transaction->customer->name ?? 'N/A' }}</div>
-                                            <small class="text-muted"><i class="fas fa-bed"></i> Ch. {{ $payment->transaction->room->number ?? 'N/A' }}</small>
+                                            <small class="text-muted"><i class="fas fa-bed"></i> {{ __('payment.room_prefix') }} {{ $payment->transaction->room->number ?? 'N/A' }}</small>
                                         </div>
                                     </div>
                                 </td>
@@ -697,13 +697,13 @@
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
                                         <div class="avatar avatar-sm"><i class="fas fa-user-tie"></i></div>
-                                        <span>{{ $payment->user->name ?? 'Système' }}</span>
+                                            <span>{{ $payment->user->name ?? __('payment.modal_system') }}</span>
                                     </div>
                                 </td>
                                 <td>
                                     <div class="actions-group">
-                                        <a href="{{ route('payment.invoice', $payment->id) }}" class="btn-icon" title="Facture"><i class="fas fa-file-invoice"></i></a>
-                                        <a href="{{ route('transaction.show', $payment->transaction_id) }}" class="btn-icon" title="Transaction"><i class="fas fa-external-link-alt"></i></a>
+                                        <a href="{{ route('payment.invoice', $payment->id) }}" class="btn-icon" title="{{ __('payment.tooltip_invoice') }}"><i class="fas fa-file-invoice"></i></a>
+                                        <a href="{{ route('transaction.show', $payment->transaction_id) }}" class="btn-icon" title="{{ __('payment.tooltip_transaction') }}"><i class="fas fa-external-link-alt"></i></a>
                                         <button class="btn-icon" onclick="showPaymentDetails({{ $payment->id }})"><i class="fas fa-info-circle"></i></button>
                                     </div>
                                 </td>
@@ -717,7 +717,7 @@
                 @if($payments->hasPages())
                 <div class="p-3 border-top">
                     <div class="d-flex justify-content-between align-items-center">
-                        <small class="text-muted">{{ $payments->firstItem() }}-{{ $payments->lastItem() }} sur {{ $payments->total() }}</small>
+                        <small class="text-muted">{{ $payments->firstItem() }}-{{ $payments->lastItem() }} {{ __('payment.pagination_of') }} {{ $payments->total() }}</small>
                         <ul class="pagination-modern">
                             @if($payments->onFirstPage())
                                 <li class="page-item disabled"><span class="page-link">‹</span></li>
@@ -741,9 +741,9 @@
             @else
                 <div class="empty-state">
                     <div class="empty-icon"><i class="fas fa-money-bill-wave"></i></div>
-                    <h3>Aucun paiement</h3>
-                    <p>Aucun paiement trouvé dans la base</p>
-                    <a href="{{ route('dashboard.index') }}" class="btn btn-gray">Retour</a>
+                    <h3>{{ __('payment.empty_title') }}</h3>
+                    <p>{{ __('payment.empty_text') }}</p>
+                    <a href="{{ route('dashboard.index') }}" class="btn btn-gray">{{ __('payment.empty_back') }}</a>
                 </div>
             @endif
         </div>
@@ -756,12 +756,12 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-info-circle" style="color:var(--green-600);"></i> Détails du paiement</h5>
+                <h5 class="modal-title"><i class="fas fa-info-circle" style="color:var(--green-600);"></i> {{ __('payment.modal_title') }}</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="modalBody"></div>
             <div class="modal-footer">
-                <button class="btn btn-gray" data-bs-dismiss="modal">Fermer</button>
+                <button class="btn btn-gray" data-bs-dismiss="modal">{{ __('payment.modal_close') }}</button>
             </div>
         </div>
     </div>
@@ -776,44 +776,44 @@ function filterPayments() {
 }
 
 function exportPayments() {
-    if (confirm('Exporter en CSV ?')) window.location.href = '{{ route("transaction.export", "payments") }}';
+    if (confirm('{{ __("payment.js_export_confirm") }}')) window.location.href = '{{ route("transaction.export", "payments") }}';
 }
 
 function showPaymentDetails(id) {
     fetch(`/payments/${id}/details`)
         .then(r => r.json())
         .then(d => {
-            if (!d.success) return alert('Erreur');
+            if (!d.success) return alert('{{ __("payment.js_error") }}');
             const p = d.payment;
             document.getElementById('modalBody').innerHTML = `
                 <div class="row">
                     <div class="col-md-6">
                         <div class="modal-card">
-                            <div class="modal-card-title">Paiement</div>
+                            <div class="modal-card-title">{{ __('payment.modal_payment') }}</div>
                             <div class="fs-3 fw-bold" style="color:var(--green-600);">${p.amount_formatted}</div>
                             <div class="ref-badge mt-2"><i class="fas fa-fingerprint"></i> ${p.reference}</div>
                             <div class="mt-2"><span class="badge ${p.status_color == 'success' ? 'badge-green' : 'badge-orange'}">${p.status}</span></div>
-                            <div class="mt-2"><small class="text-muted">Méthode: ${p.method}</small></div>
+                            <div class="mt-2"><small class="text-muted">{{ __('payment.modal_method') }} ${p.method}</small></div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="modal-card">
-                            <div class="modal-card-title">Client & Chambre</div>
+                            <div class="modal-card-title">{{ __('payment.modal_client_room') }}</div>
                             <div class="fw-semibold">${p.guest_name}</div>
-                            <div class="mt-2"><span class="badge badge-green">Chambre ${p.room_number}</span></div>
-                            <div class="mt-2"><small class="text-muted">Transaction #${p.transaction_id}</small></div>
+                            <div class="mt-2"><span class="badge badge-green">{{ __('payment.modal_room') }} ${p.room_number}</span></div>
+                            <div class="mt-2"><small class="text-muted">{{ __('payment.modal_transaction') }} #${p.transaction_id}</small></div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-card">
-                    <div class="modal-card-title">Traitement</div>
-                    <div class="row">
-                        <div class="col-sm-6"><small class="text-muted">Date: </small>${p.date_formatted}</div>
-                        <div class="col-sm-6"><small class="text-muted">Par: </small>${p.processed_by}</div>
-                        <div class="col-sm-6 mt-2"><small class="text-muted">Créé: </small>${p.created_at}</div>
+                            <div class="modal-card-title">{{ __('payment.modal_processing') }}</div>
+                            <div class="row">
+                                <div class="col-sm-6"><small class="text-muted">{{ __('payment.modal_date') }} </small>${p.date_formatted}</div>
+                                <div class="col-sm-6"><small class="text-muted">{{ __('payment.modal_by') }} </small>${p.processed_by}</div>
+                                <div class="col-sm-6 mt-2"><small class="text-muted">{{ __('payment.modal_created') }} </small>${p.created_at}</div>
                     </div>
                 </div>
-                ${p.notes ? `<div class="modal-card"><div class="modal-card-title">Notes</div>${p.notes}</div>` : ''}
+                ${p.notes ? `<div class="modal-card"><div class="modal-card-title">{{ __("payment.modal_notes") }}</div>${p.notes}</div>` : ''}
             `;
             new bootstrap.Modal(document.getElementById('paymentModal')).show();
         });

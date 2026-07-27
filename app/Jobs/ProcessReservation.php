@@ -2,8 +2,8 @@
 
 namespace App\Jobs;
 
-use App\Models\Reservation;
 use App\Mail\ReservationConfirmed;
+use App\Models\Reservation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Scanner QR Code')
+@section('title', __('housekeeping.scan.title'))
 
 @section('content')
 <style>
@@ -376,7 +376,7 @@ code {
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('housekeeping.index') }}">Housekeeping</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Scanner</span>
+        <span class="current">{{ __('housekeeping.scan.breadcrumb_scan') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -384,12 +384,12 @@ code {
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-qrcode"></i></span>
-                <h1>Scanner <em>QR Code</em></h1>
+                <h1>{!! __('housekeeping.scan.header') !!}</h1>
             </div>
-            <p class="header-subtitle">Scannez le QR code d'une chambre</p>
+            <p class="header-subtitle">{{ __('housekeeping.scan.header_desc') }}</p>
         </div>
         <a href="{{ route('housekeeping.index') }}" class="btn btn-gray">
-            <i class="fas fa-arrow-left"></i> Retour
+            <i class="fas fa-arrow-left"></i> {{ __('housekeeping.scan.btn_back') }}
         </a>
     </div>
 
@@ -398,7 +398,7 @@ code {
         <div class="col-lg-8 col-xl-6">
             <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-camera"></i> Scanner une chambre
+                    <i class="fas fa-camera"></i> {!! __('housekeeping.scan.card_scan') !!}
                 </div>
                 <div class="card-body">
                     <div class="scan-area">
@@ -407,26 +407,26 @@ code {
                         </div>
                         <div class="alert alert-green">
                             <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
-                            <div>Pointez la caméra vers le QR code de la chambre</div>
+                            <div>{{ __('housekeeping.scan.scan_alert') }}</div>
                         </div>
                     </div>
 
                     <hr>
 
                     {{-- Saisie manuelle --}}
-                    <h6 class="fw-semibold mb-3"><i class="fas fa-keyboard me-2" style="color:var(--green-600);"></i> Saisie manuelle</h6>
+                    <h6 class="fw-semibold mb-3"><i class="fas fa-keyboard me-2" style="color:var(--green-600);"></i> {!! __('housekeeping.scan.manual_title') !!}</h6>
                     <form id="manualForm" action="{{ route('housekeeping.scan.process') }}" method="POST">
                         @csrf
                         <div class="row g-2">
                             <div class="col-md-8">
-                                <input type="text" class="form-control form-control-lg" name="room_number" placeholder="Numéro de chambre" required>
+                                <input type="text" class="form-control form-control-lg" name="room_number" placeholder="{{ __('housekeeping.scan.placeholder_room') }}" required>
                             </div>
                             <div class="col-md-4">
                                 <select class="form-select form-select-lg" name="action" required>
                                     <option value="">Action</option>
-                                    <option value="start-cleaning">Démarrer</option>
-                                    <option value="finish-cleaning">Terminer</option>
-                                    <option value="maintenance">Maintenance</option>
+                                    <option value="start-cleaning">{{ __('housekeeping.scan.action_start') }}</option>
+                                    <option value="finish-cleaning">{{ __('housekeeping.scan.action_finish') }}</option>
+                                    <option value="maintenance">{{ __('housekeeping.scan.action_maintenance') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -434,7 +434,7 @@ code {
                 </div>
                 <div class="card-footer">
                     <button type="submit" form="manualForm" class="btn btn-green btn-lg w-100">
-                        <i class="fas fa-paper-plane"></i> Valider
+                        <i class="fas fa-paper-plane"></i> {{ __('housekeeping.scan.btn_validate') }}
                     </button>
                 </div>
             </div>
@@ -442,21 +442,21 @@ code {
             {{-- Dernières actions --}}
             <div class="card mt-4">
                 <div class="card-header light">
-                    <i class="fas fa-history"></i> Dernières actions
+                    <i class="fas fa-history"></i> {!! __('housekeeping.scan.recent_actions') !!}
                 </div>
                 <div class="card-body p-0">
                     <div class="list-group">
                         <div class="list-item">
                             <div><i class="fas fa-door-closed"></i> Chambre 101</div>
-                            <span class="badge badge-green">Nettoyée 09:30</span>
+                            <span class="badge badge-green">{{ __('housekeeping.scan.status_cleaned') }} 09:30</span>
                         </div>
                         <div class="list-item">
                             <div><i class="fas fa-door-closed"></i> Chambre 205</div>
-                            <span class="badge badge-gray">En nettoyage</span>
+                            <span class="badge badge-gray">{{ __('housekeeping.scan.status_cleaning') }}</span>
                         </div>
                         <div class="list-item">
                             <div><i class="fas fa-door-closed"></i> Chambre 308</div>
-                            <span class="badge badge-red">À nettoyer</span>
+                            <span class="badge badge-red">{{ __('housekeeping.scan.status_to_clean') }}</span>
                         </div>
                     </div>
                 </div>
@@ -485,7 +485,7 @@ function onScanSuccess(decodedText) {
     html5QrCode.stop();
     const num = extractRoomNumber(decodedText);
     if (num) showActionModal(num, decodedText);
-    else { alert("QR non reconnu"); restartScan(); }
+    else { alert("{{ __('housekeeping.scan.error_qr') }}"); restartScan(); }
 }
 
 function onScanError(err) { console.warn(err); }
@@ -515,19 +515,19 @@ function showActionModal(room, qr) {
                             <div class="mb-3">
                                 <select class="form-select" name="action" required>
                                     <option value="">Action</option>
-                                    <option value="start-cleaning">Démarrer</option>
-                                    <option value="finish-cleaning">Terminer</option>
-                                    <option value="maintenance">Maintenance</option>
+                                    <option value="start-cleaning">{{ __('housekeeping.scan.action_start') }}</option>
+                                    <option value="finish-cleaning">{{ __('housekeeping.scan.action_finish') }}</option>
+                                    <option value="maintenance">{{ __('housekeeping.scan.action_maintenance') }}</option>
                                 </select>
                             </div>
                             <div id="maintenanceFields" class="d-none">
-                                <input type="text" class="form-control" name="maintenance_reason" placeholder="Raison">
+                                <input type="text" class="form-control" name="maintenance_reason" placeholder="{{ __('housekeeping.scan.reason_placeholder') }}">
                             </div>
                         </form>
                     </div>
                     <div class="modal-footer">
-                        <button class="btn btn-gray" data-bs-dismiss="modal" id="rescanBtn">Rescanner</button>
-                        <button class="btn btn-green" form="scanForm">Valider</button>
+                        <button class="btn btn-gray" data-bs-dismiss="modal" id="rescanBtn">{{ __('housekeeping.scan.btn_rescan') }}</button>
+                        <button class="btn btn-green" form="scanForm">{{ __('housekeeping.scan.btn_validate') }}</button>
                     </div>
                 </div>
             </div>
@@ -565,8 +565,8 @@ function showCameraError() {
     document.getElementById('reader').innerHTML = `
         <div class="alert alert-green text-center p-4">
             <i class="fas fa-video-slash fa-2x mb-2"></i>
-            <p>Caméra non accessible</p>
-            <small>Utilisez la saisie manuelle</small>
+            <p>{{ __('housekeeping.scan.error_camera') }}</p>
+            <small>{{ __('housekeeping.scan.error_manual') }}</small>
         </div>
     `;
 }

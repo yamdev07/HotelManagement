@@ -19,9 +19,9 @@ abstract class HotelException extends RuntimeException
     public function toArray(): array
     {
         return [
-            'error'   => class_basename($this),
+            'error' => class_basename($this),
             'message' => $this->getMessage(),
-            'code'    => $this->getCode(),
+            'code' => $this->getCode(),
         ];
     }
 }

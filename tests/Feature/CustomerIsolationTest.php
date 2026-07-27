@@ -19,8 +19,8 @@ class CustomerIsolationTest extends TestCase
     private function hotel(): Hotel
     {
         return Hotel::create([
-            'name'      => 'Hotel '.Str::random(5),
-            'slug'      => Str::slug('Hotel '.Str::random(6)),
+            'name' => 'Hotel '.Str::random(5),
+            'slug' => Str::slug('Hotel '.Str::random(6)),
             'is_active' => true,
         ]);
     }
@@ -30,12 +30,12 @@ class CustomerIsolationTest extends TestCase
         app(TenantManager::class)->setHotelId($hotelId);
 
         $request = new Request([
-            'name'      => 'Client Test',
-            'email'     => $email,
-            'address'   => 'Rue 1',
-            'job'       => 'Ingénieur',
+            'name' => 'Client Test',
+            'email' => $email,
+            'address' => 'Rue 1',
+            'job' => 'Ingénieur',
             'birthdate' => '1990-01-01',
-            'gender'    => 'Male',
+            'gender' => 'Male',
         ]);
 
         return CustomerRepository::store($request);

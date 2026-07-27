@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Rapport Quotidien - ' . $today->format('d/m/Y'))
+@section('title', __('housekeeping.dailyreport.title') . ' - ' . $today->format('d/m/Y'))
 
 @section('content')
 <style>
@@ -425,7 +425,7 @@ textarea.form-control {
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('housekeeping.index') }}">Housekeeping</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Rapport du {{ $today->format('d/m/Y') }}</span>
+        <span class="current">{!! __('housekeeping.dailyreport.breadcrumb_report') !!} {{ $today->format('d/m/Y') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -433,16 +433,16 @@ textarea.form-control {
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-file-alt"></i></span>
-                <h1>Rapport <em>quotidien</em></h1>
+                <h1>{!! __('housekeeping.dailyreport.header') !!}</h1>
             </div>
-            <p class="header-subtitle">Activités de nettoyage du {{ $today->format('d/m/Y') }}</p>
+            <p class="header-subtitle">{{ __('housekeeping.dailyreport.header_desc') }} {{ $today->format('d/m/Y') }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('housekeeping.index') }}" class="btn btn-gray">
-                <i class="fas fa-arrow-left"></i> Retour
+                <i class="fas fa-arrow-left"></i> {{ __('housekeeping.dailyreport.btn_back') }}
             </a>
             <button class="btn btn-green" onclick="window.print()">
-                <i class="fas fa-print"></i> Imprimer
+                <i class="fas fa-print"></i> {{ __('housekeeping.dailyreport.btn_print') }}
             </button>
         </div>
     </div>
@@ -450,17 +450,17 @@ textarea.form-control {
     {{-- Statistiques --}}
     <div class="stats-grid anim-3">
         <div class="stat-card">
-            <div class="stat-label">Nettoyées</div>
+            <div class="stat-label">{{ __('housekeeping.dailyreport.stat_cleaned') }}</div>
             <div class="stat-value green">{{ $stats['cleaned_today'] }}</div>
-            <div class="stat-footer"><i class="fas fa-check-circle"></i> aujourd'hui</div>
+            <div class="stat-footer"><i class="fas fa-check-circle"></i> {{ __('housekeeping.index.stat_today') }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Restantes</div>
+            <div class="stat-label">{{ __('housekeeping.dailyreport.stat_remaining') }}</div>
             <div class="stat-value red">{{ $stats['to_clean'] }}</div>
-            <div class="stat-footer"><i class="fas fa-broom"></i> en attente</div>
+            <div class="stat-footer"><i class="fas fa-broom"></i> {{ __('housekeeping.toclean.stat_today') }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Taux</div>
+            <div class="stat-label">{{ __('housekeeping.dailyreport.stat_rate') }}</div>
             <div class="stat-value">
                 @if($stats['cleaned_today'] + $stats['to_clean'] > 0)
                     {{ round(($stats['cleaned_today'] / ($stats['cleaned_today'] + $stats['to_clean'])) * 100) }}%
@@ -468,12 +468,12 @@ textarea.form-control {
                     100%
                 @endif
             </div>
-            <div class="stat-footer"><i class="fas fa-chart-line"></i> achèvement</div>
+            <div class="stat-footer"><i class="fas fa-chart-line"></i> {{ __('housekeeping.dailyreport.stat_completion') }}</div>
         </div>
         <div class="stat-card">
-            <div class="stat-label">Temps moyen</div>
+            <div class="stat-label">{{ __('housekeeping.dailyreport.stat_avg_time') }}</div>
             <div class="stat-value">25m</div>
-            <div class="stat-footer"><i class="fas fa-clock"></i> par chambre</div>
+            <div class="stat-footer"><i class="fas fa-clock"></i> {{ __('housekeeping.dailyreport.stat_per_room') }}</div>
         </div>
     </div>
 
@@ -482,7 +482,7 @@ textarea.form-control {
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header green">
-                    <div><i class="fas fa-check-circle"></i> Chambres nettoyées aujourd'hui ({{ $cleanedToday->count() }})</div>
+                    <div><i class="fas fa-check-circle"></i> {!! __('housekeeping.dailyreport.card_cleaned') !!} ({{ $cleanedToday->count() }})</div>
                     <span class="badge badge-green">{{ $today->format('d/m/Y') }}</span>
                 </div>
                 <div class="card-body p-0">
@@ -492,11 +492,11 @@ textarea.form-control {
                             <thead>
                                 <tr>
                                     <th>Chambre</th>
-                                    <th>Type</th>
-                                    <th>Nettoyée à</th>
-                                    <th>Durée</th>
-                                    <th>Femme de chambre</th>
-                                    <th>Statut</th>
+                                    <th>{{ __('housekeeping.dailyreport.th_type') }}</th>
+                                    <th>{{ __('housekeeping.dailyreport.th_cleaned_at') }}</th>
+                                    <th>{{ __('housekeeping.dailyreport.th_duration') }}</th>
+                                    <th>{{ __('housekeeping.dailyreport.th_cleaner') }}</th>
+                                    <th>{{ __('housekeeping.dailyreport.th_status') }}</th>
                                     <th class="no-print"></th>
                                 </tr>
                             </thead>
@@ -539,16 +539,16 @@ textarea.form-control {
                     @else
                     <div class="empty-state">
                         <i class="fas fa-clipboard-list"></i>
-                        <h5>Aucune chambre nettoyée</h5>
-                        <p>Commencez par nettoyer les chambres à nettoyer.</p>
+                        <h5>{{ __('housekeeping.dailyreport.empty_cleaned') }}</h5>
+                        <p>{{ __('housekeeping.dailyreport.empty_cleaned_desc') }}</p>
                     </div>
                     @endif
                 </div>
                 @if($cleanedToday->count() > 0)
                 <div class="card-footer no-print">
                     <div class="d-flex justify-content-between">
-                        <small class="text-muted"><i class="fas fa-info-circle"></i> {{ $cleanedToday->count() }} chambres nettoyées</small>
-                        <small class="text-muted">Dernière mise à jour: {{ now()->format('H:i') }}</small>
+                        <small class="text-muted"><i class="fas fa-info-circle"></i> {{ $cleanedToday->count() }} {{ __('housekeeping.dailyreport.rooms_cleaned') }}</small>
+                        <small class="text-muted">{{ __('housekeeping.dailyreport.last_update') }}: {{ now()->format('H:i') }}</small>
                     </div>
                 </div>
                 @endif
@@ -561,7 +561,7 @@ textarea.form-control {
             {{-- Performance par agent --}}
             <div class="card">
                 <div class="card-header blue">
-                    <i class="fas fa-chart-bar"></i> Performance par agent
+                    <i class="fas fa-chart-bar"></i> {!! __('housekeeping.dailyreport.card_performance') !!}
                 </div>
                 <div class="card-body p-0">
                     @if(count($stats['cleaned_by_user']) > 0)
@@ -580,7 +580,7 @@ textarea.form-control {
                     @else
                         <div class="empty-state">
                             <i class="fas fa-user-slash"></i>
-                            <p>Aucune donnée disponible</p>
+                            <p>{{ __('housekeeping.dailyreport.no_data') }}</p>
                         </div>
                     @endif
                 </div>
@@ -589,7 +589,7 @@ textarea.form-control {
             {{-- Chambres restantes --}}
             <div class="card">
                 <div class="card-header red">
-                    <i class="fas fa-broom"></i> Chambres restantes ({{ $toClean->count() }})
+                    <i class="fas fa-broom"></i> {!! __('housekeeping.dailyreport.card_remaining') !!} ({{ $toClean->count() }})
                 </div>
                 <div class="card-body p-0">
                     @if($toClean->count() > 0)
@@ -597,7 +597,7 @@ textarea.form-control {
                             <table class="table">
                                 <thead>
                                     <tr>
-                                        <th>Chambre</th>
+<th>{{ __('housekeeping.dailyreport.th_room') }}</th>
                                         <th>Priorité</th>
                                         <th class="no-print"></th>
                                     </tr>
@@ -608,9 +608,9 @@ textarea.form-control {
                                         <td><span class="badge badge-red">#{{ $room->number }}</span></td>
                                         <td>
                                             @if($room->activeTransactions->where('check_out', '<=', now())->count() > 0)
-                                                <span class="badge badge-red">Haute</span>
+                                                <span class="badge badge-red">{{ __('housekeeping.dailyreport.priority_high') }}</span>
                                             @else
-                                                <span class="badge badge-gray">Normale</span>
+                                                <span class="badge badge-gray">{{ __('housekeeping.dailyreport.priority_normal') }}</span>
                                             @endif
                                         </td>
                                         <td class="no-print">
@@ -627,14 +627,14 @@ textarea.form-control {
                         @if($toClean->count() > 5)
                         <div class="p-3 text-center no-print">
                             <a href="{{ route('housekeeping.to-clean') }}" class="btn btn-outline btn-sm">
-                                Voir les {{ $toClean->count() - 5 }} autres
+                                {{ __('housekeeping.dailyreport.view_others') }} {{ $toClean->count() - 5 }} {{ __('housekeeping.dailyreport.others') }}
                             </a>
                         </div>
                         @endif
                     @else
                         <div class="empty-state">
                             <i class="fas fa-trophy" style="color:var(--green-600);"></i>
-                            <h5>Tout est nettoyé !</h5>
+                            <h5>{{ __('housekeeping.dailyreport.all_clean') }}</h5>
                         </div>
                     @endif
                 </div>
@@ -645,26 +645,26 @@ textarea.form-control {
     {{-- Notes --}}
     <div class="card mt-4 no-print">
         <div class="card-header gray">
-            <i class="fas fa-sticky-note"></i> Notes du jour
+            <i class="fas fa-sticky-note"></i> {!! __('housekeeping.dailyreport.notes_title') !!}
         </div>
         <div class="card-body">
             <div class="row g-4">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label">Observations générales</label>
-                        <textarea class="form-control" rows="3" placeholder="Déroulement de la journée, problèmes..."></textarea>
+                        <label class="form-label">{{ __('housekeeping.dailyreport.observations_label') }}</label>
+                        <textarea class="form-control" rows="3" placeholder="{{ __('housekeeping.dailyreport.observations_placeholder') }}"></textarea>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label">Suggestions</label>
-                        <textarea class="form-control" rows="3" placeholder="Idées d'amélioration..."></textarea>
+                        <label class="form-label">{{ __('housekeeping.dailyreport.suggestions_label') }}</label>
+                        <textarea class="form-control" rows="3" placeholder="{{ __('housekeeping.dailyreport.suggestions_placeholder') }}"></textarea>
                     </div>
                 </div>
             </div>
             <div class="d-flex justify-content-between mt-3">
-                <button class="btn btn-outline"><i class="fas fa-save"></i> Enregistrer</button>
-                <button class="btn btn-green"><i class="fas fa-file-pdf"></i> Générer PDF</button>
+                <button class="btn btn-outline"><i class="fas fa-save"></i> {!! __('housekeeping.dailyreport.btn_save') !!}</button>
+                <button class="btn btn-green"><i class="fas fa-file-pdf"></i> {!! __('housekeeping.dailyreport.btn_pdf') !!}</button>
             </div>
         </div>
     </div>

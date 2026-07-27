@@ -4,39 +4,39 @@ namespace App\Enums;
 
 enum PaymentStatus: string
 {
-    case Pending           = 'pending';
-    case Completed         = 'completed';
-    case Cancelled         = 'cancelled';
-    case Expired           = 'expired';
-    case Failed            = 'failed';
-    case Refunded          = 'refunded';
-    case Processing        = 'processing';
+    case Pending = 'pending';
+    case Completed = 'completed';
+    case Cancelled = 'cancelled';
+    case Expired = 'expired';
+    case Failed = 'failed';
+    case Refunded = 'refunded';
+    case Processing = 'processing';
     case PartiallyRefunded = 'partially_refunded';
 
     public function label(): string
     {
-        return match($this) {
-            self::Pending           => 'En attente',
-            self::Completed         => 'Complété',
-            self::Cancelled         => 'Annulé',
-            self::Expired           => 'Expiré',
-            self::Failed            => 'Échoué',
-            self::Refunded          => 'Remboursé',
-            self::Processing        => 'En cours',
+        return match ($this) {
+            self::Pending => 'En attente',
+            self::Completed => 'Complété',
+            self::Cancelled => 'Annulé',
+            self::Expired => 'Expiré',
+            self::Failed => 'Échoué',
+            self::Refunded => 'Remboursé',
+            self::Processing => 'En cours',
             self::PartiallyRefunded => 'Partiellement remboursé',
         };
     }
 
     public function color(): string
     {
-        return match($this) {
-            self::Pending           => 'warning',
-            self::Completed         => 'success',
-            self::Cancelled         => 'danger',
-            self::Expired           => 'secondary',
-            self::Failed            => 'danger',
-            self::Refunded          => 'info',
-            self::Processing        => 'primary',
+        return match ($this) {
+            self::Pending => 'warning',
+            self::Completed => 'success',
+            self::Cancelled => 'danger',
+            self::Expired => 'secondary',
+            self::Failed => 'danger',
+            self::Refunded => 'info',
+            self::Processing => 'primary',
             self::PartiallyRefunded => 'warning',
         };
     }

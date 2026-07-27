@@ -13,6 +13,7 @@ class PaymentNotification extends Notification
     use Queueable;
 
     public $payment;
+
     public $transaction;
 
     /**
@@ -41,24 +42,24 @@ class PaymentNotification extends Notification
     {
         $remaining = $this->transaction->getRemainingPayment();
         $isFullyPaid = $remaining <= 0;
-        
+
         return (new MailMessage)
-            ->subject('💰 Paiement enregistré - ' . number_format($this->payment->amount, 0, ',', ' ') . ' FCFA')
-            ->greeting('Bonjour ' . $notifiable->name)
+            ->subject('💰 Paiement enregistré - '.number_format($this->payment->amount, 0, ',', ' ').' FCFA')
+            ->greeting('Bonjour '.$notifiable->name)
             ->line('Un nouveau paiement a été enregistré dans le système.')
             ->line('**Détails du paiement :**')
-            ->line('• Client : **' . $this->transaction->customer->name . '**')
-            ->line('• Montant : **' . number_format($this->payment->amount, 0, ',', ' ') . ' FCFA**')
-            ->line('• Méthode : **' . ucfirst(str_replace('_', ' ', $this->payment->payment_method)) . '**')
-            ->line('• Transaction # : **' . $this->transaction->id . '**')
-            ->line('• Référence : **' . $this->payment->reference . '**')
-            ->line('• Date : **' . $this->payment->created_at->format('d/m/Y H:i') . '**')
+            ->line('• Client : **'.$this->transaction->customer->name.'**')
+            ->line('• Montant : **'.number_format($this->payment->amount, 0, ',', ' ').' FCFA**')
+            ->line('• Méthode : **'.ucfirst(str_replace('_', ' ', $this->payment->payment_method)).'**')
+            ->line('• Transaction # : **'.$this->transaction->id.'**')
+            ->line('• Référence : **'.$this->payment->reference.'**')
+            ->line('• Date : **'.$this->payment->created_at->format('d/m/Y H:i').'**')
             ->line('')
             ->line('**Récapitulatif de la transaction :**')
-            ->line('• Total séjour : **' . number_format($this->transaction->getTotalPrice(), 0, ',', ' ') . ' FCFA**')
-            ->line('• Total payé : **' . number_format($this->transaction->getTotalPayment(), 0, ',', ' ') . ' FCFA**')
-            ->line('• Solde restant : **' . number_format($remaining, 0, ',', ' ') . ' FCFA**')
-            ->line('• Statut : **' . ($isFullyPaid ? '✅ Entièrement payé' : '⚠️ Paiement partiel') . '**')
+            ->line('• Total séjour : **'.number_format($this->transaction->getTotalPrice(), 0, ',', ' ').' FCFA**')
+            ->line('• Total payé : **'.number_format($this->transaction->getTotalPayment(), 0, ',', ' ').' FCFA**')
+            ->line('• Solde restant : **'.number_format($remaining, 0, ',', ' ').' FCFA**')
+            ->line('• Statut : **'.($isFullyPaid ? '✅ Entièrement payé' : '⚠️ Paiement partiel').'**')
             ->action('Voir la facture', route('payment.invoice', $this->payment->id))
             ->line('Merci d\'utiliser notre système de gestion hôtelière !');
     }
@@ -72,9 +73,9 @@ class PaymentNotification extends Notification
     {
         $remaining = $this->transaction->getRemainingPayment();
         $isFullyPaid = $remaining <= 0;
-        
+
         return [
-            'message' => '💰 Paiement de ' . number_format($this->payment->amount, 0, ',', ' ') . ' FCFA - ' . $this->transaction->customer->name,
+            'message' => '💰 Paiement de '.number_format($this->payment->amount, 0, ',', ' ').' FCFA - '.$this->transaction->customer->name,
             'url' => route('payment.invoice', $this->payment->id),
             'type' => 'payment',
             'payment_id' => $this->payment->id,
@@ -82,7 +83,7 @@ class PaymentNotification extends Notification
             'customer_name' => $this->transaction->customer->name,
             'room_number' => $this->transaction->room->number,
             'amount' => $this->payment->amount,
-            'formatted_amount' => number_format($this->payment->amount, 0, ',', ' ') . ' FCFA',
+            'formatted_amount' => number_format($this->payment->amount, 0, ',', ' ').' FCFA',
             'method' => $this->payment->payment_method,
             'method_label' => ucfirst(str_replace('_', ' ', $this->payment->payment_method)),
             'reference' => $this->payment->reference,

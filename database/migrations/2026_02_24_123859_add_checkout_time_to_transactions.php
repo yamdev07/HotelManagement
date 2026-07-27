@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -14,28 +14,30 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             // Vérifier et ajouter check_in_time si inexistant
-            if (!Schema::hasColumn('transactions', 'check_in_time')) {
+            if (! Schema::hasColumn('transactions', 'check_in_time')) {
                 $table->time('check_in_time')->nullable()->after('check_in');
             }
-            
+
             // Vérifier et ajouter check_out_time si inexistant
-            if (!Schema::hasColumn('transactions', 'check_out_time')) {
+            if (! Schema::hasColumn('transactions', 'check_out_time')) {
                 $table->time('check_out_time')->nullable()->after('check_out');
             }
-            
+
             // Vérifier et ajouter expected_checkout_time si inexistant
-            if (!Schema::hasColumn('transactions', 'expected_checkout_time')) {
+            if (! Schema::hasColumn('transactions', 'expected_checkout_time')) {
                 $table->time('expected_checkout_time')->default('12:00:00')->after('check_out_time');
             }
         });
 
         // Modifier le commentaire du statut (optionnel)
-        try {
-            DB::statement("ALTER TABLE transactions MODIFY COLUMN status 
-                          VARCHAR(255) NOT NULL DEFAULT 'reservation' 
-                          COMMENT 'reservation, active, completed, cancelled, no_show, pending_checkout, reserved_waiting'");
-        } catch (\Exception $e) {
-            // Ignorer si la modification échoue
+        if (DB::getDriverName() === 'mysql') {
+            try {
+                DB::statement("ALTER TABLE transactions MODIFY COLUMN status 
+                              VARCHAR(255) NOT NULL DEFAULT 'reservation' 
+                              COMMENT 'reservation, active, completed, cancelled, no_show, pending_checkout, reserved_waiting'");
+            } catch (\Exception $e) {
+                // Ignorer si la modification échoue
+            }
         }
     }
 

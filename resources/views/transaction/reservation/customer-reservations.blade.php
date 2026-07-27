@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Réservations Client')
+@section('title', __('customer-reservations.page_title'))
 
 @section('content')
 <style>
@@ -399,7 +399,7 @@
         <div class="history-brand">
             <div class="history-brand-icon"><i class="fas fa-history"></i></div>
             <div>
-                <h1 class="history-header-title">Historique des <em>réservations</em></h1>
+                <h1 class="history-header-title">{!! __('customer-reservations.reservations_history') !!}</h1>
                 <p class="history-header-sub">
                     <i class="fas fa-user me-1"></i> {{ $customer->name }} 
                     <i class="fas fa-circle fa-xs" style="color:var(--s300); font-size:4px;"></i>
@@ -410,7 +410,7 @@
         </div>
         <div class="history-header-actions">
             <a href="{{ route('transaction.reservation.pickFromCustomer') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-arrow-left me-2"></i> Retour
+                <i class="fas fa-arrow-left me-2"></i> {{ __('customer-reservations.back') }}
             </a>
         </div>
     </div>
@@ -422,7 +422,7 @@
                 <div class="stat-card-icon"><i class="fas fa-calendar-alt"></i></div>
             </div>
             <div class="stat-card-value">{{ $reservations->total() }}</div>
-            <div class="stat-card-label">Total réservations</div>
+            <div class="stat-card-label">{{ __('customer-reservations.total_reservations') }}</div>
         </div>
 
         <div class="stat-card stat-card--active">
@@ -430,7 +430,7 @@
                 <div class="stat-card-icon"><i class="fas fa-check-circle"></i></div>
             </div>
             <div class="stat-card-value">{{ $customer->transactions()->where('status', 'active')->count() }}</div>
-            <div class="stat-card-label">Actives</div>
+            <div class="stat-card-label">{{ __('customer-reservations.active') }}</div>
         </div>
 
         <div class="stat-card stat-card--completed">
@@ -438,7 +438,7 @@
                 <div class="stat-card-icon"><i class="fas fa-flag-checkered"></i></div>
             </div>
             <div class="stat-card-value">{{ $customer->transactions()->where('status', 'completed')->count() }}</div>
-            <div class="stat-card-label">Terminées</div>
+            <div class="stat-card-label">{{ __('customer-reservations.completed') }}</div>
         </div>
 
         <div class="stat-card stat-card--cancelled">
@@ -446,7 +446,7 @@
                 <div class="stat-card-icon"><i class="fas fa-times-circle"></i></div>
             </div>
             <div class="stat-card-value">{{ $customer->transactions()->where('status', 'cancelled')->count() }}</div>
-            <div class="stat-card-label">Annulées</div>
+            <div class="stat-card-label">{{ __('customer-reservations.cancelled') }}</div>
         </div>
     </div>
 
@@ -456,8 +456,8 @@
             <div class="history-card-header">
                 <h5>
                     <i class="fas fa-list"></i>
-                    Historique des réservations
-                    <span class="badge ms-auto">{{ $reservations->total() }} réservation(s)</span>
+                    {{ __('customer-reservations.reservation_history') }}
+                    <span class="badge ms-auto">{{ __('customer-reservations.reservations_count', ['count' => $reservations->total()]) }}</span>
                 </h5>
             </div>
             <div class="history-card-body">
@@ -467,13 +467,13 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Chambre</th>
-                                    <th>Dates</th>
-                                    <th>Statut</th>
-                                    <th>Montant</th>
-                                    <th>Paiement</th>
-                                    <th>Créé le</th>
-                                    <th style="text-align:right">Actions</th>
+                                    <th>{{ __('customer-reservations.room') }}</th>
+                                    <th>{{ __('customer-reservations.dates') }}</th>
+                                    <th>{{ __('customer-reservations.status') }}</th>
+                                    <th>{{ __('customer-reservations.amount') }}</th>
+                                    <th>{{ __('customer-reservations.payment') }}</th>
+                                    <th>{{ __('customer-reservations.created_on') }}</th>
+                                    <th style="text-align:right">{{ __('customer-reservations.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -497,7 +497,7 @@
                                             <div class="room-badge">{{ $reservation->room->number }}</div>
                                             <div class="room-details">
                                                 <a href="{{ route('room.show', $reservation->room->id) }}" class="room-name">
-                                                    {{ $reservation->room->name ?? 'Chambre' }}
+                                                    {{ $reservation->room->name ?? __('customer-reservations.room') }}
                                                 </a>
                                                 <span class="room-type">{{ $reservation->room->type->name ?? 'Standard' }}</span>
                                             </div>
@@ -508,7 +508,7 @@
                                             <span class="date-main">{{ $reservation->check_in->format('d/m/Y') }} → {{ $reservation->check_out->format('d/m/Y') }}</span>
                                             <span class="date-range">{{ $reservation->check_in->format('d M') }} - {{ $reservation->check_out->format('d M Y') }}</span>
                                             <span class="nights-badge">
-                                                <i class="fas fa-moon"></i> {{ $reservation->check_in->diffInDays($reservation->check_out) }} nuits
+                                                <i class="fas fa-moon"></i> {{ __('customer-reservations.nights_count', ['count' => $reservation->check_in->diffInDays($reservation->check_out)]) }}
                                             </span>
                                         </div>
                                     </td>
@@ -522,7 +522,7 @@
                                         <div class="amount-info">
                                             <span class="amount-total">{{ number_format($totalPrice, 0, ',', ' ') }} FCFA</span>
                                             @if($reservation->down_payment > 0)
-                                                <span class="amount-down">Acompte: {{ number_format($reservation->down_payment, 0, ',', ' ') }} FCFA</span>
+                                                <span class="amount-down">{{ __('customer-reservations.down_payment', ['amount' => number_format($reservation->down_payment, 0, ',', ' ')]) }}</span>
                                             @endif
                                         </div>
                                     </td>
@@ -544,16 +544,16 @@
                                     <td>
                                         <div class="action-group">
                                             <a href="{{ route('transaction.show', $reservation->id) }}" 
-                                               class="btn-db-icon" title="Voir détails">
+                                               class="btn-db-icon" title="{{ __('customer-reservations.view_details') }}">
                                                 <i class="fas fa-eye"></i>
                                             </a>
                                             <a href="{{ route('transaction.invoice', $reservation->id) }}" 
-                                               class="btn-db-icon" title="Facture">
+                                               class="btn-db-icon" title="{{ __('customer-reservations.invoice') }}">
                                                 <i class="fas fa-file-invoice"></i>
                                             </a>
                                             @if($reservation->status == 'active')
                                             <a href="{{ route('transaction.extend', $reservation->id) }}" 
-                                               class="btn-db-icon" title="Prolonger">
+                                               class="btn-db-icon" title="{{ __('customer-reservations.extend') }}">
                                                 <i class="fas fa-calendar-plus"></i>
                                             </a>
                                             @endif
@@ -568,8 +568,7 @@
                     <!-- Pagination -->
                     <div class="pagination-wrapper">
                         <div class="pagination-info">
-                            Affichage de {{ $reservations->firstItem() }} à {{ $reservations->lastItem() }} 
-                            sur {{ $reservations->total() }} réservations
+                            {{ __('customer-reservations.showing', ['from' => $reservations->firstItem(), 'to' => $reservations->lastItem(), 'total' => $reservations->total()]) }}
                         </div>
                         <div class="pagination-links">
                             {{ $reservations->onEachSide(1)->links('pagination::bootstrap-4') }}
@@ -580,11 +579,11 @@
                         <div class="empty-icon">
                             <i class="fas fa-calendar-times"></i>
                         </div>
-                        <p class="empty-title">Aucune réservation</p>
-                        <p class="empty-text">Ce client n'a pas encore effectué de réservation</p>
+                        <p class="empty-title">{{ __('customer-reservations.no_reservations') }}</p>
+                        <p class="empty-text">{{ __('customer-reservations.no_reservations_text') }}</p>
                         <a href="{{ route('transaction.reservation.createIdentity') }}" class="btn-db btn-db-primary">
                             <i class="fas fa-plus-circle me-2"></i>
-                            Créer une nouvelle réservation
+                            {{ __('customer-reservations.create_new') }}
                         </a>
                     </div>
                 @endif

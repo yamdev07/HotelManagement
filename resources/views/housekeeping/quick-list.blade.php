@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', $statusLabel . ' - Liste rapide')
+@section('title', $statusLabel . ' - ' . __('housekeeping.quicklist.breadcrumb_list'))
 
 @section('content')
 <style>
@@ -463,14 +463,14 @@
                 </span>
                 <h1>{{ $statusLabel }} <em>({{ $rooms->count() }})</em></h1>
             </div>
-            <p class="header-subtitle">Liste rapide des chambres</p>
+            <p class="header-subtitle">{{ __('housekeeping.quicklist.header_desc') }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('housekeeping.index') }}" class="btn btn-gray">
-                <i class="fas fa-arrow-left"></i> Retour
+                <i class="fas fa-arrow-left"></i> {{ __('housekeeping.quicklist.btn_back') }}
             </a>
             <button class="btn btn-green" onclick="window.print()">
-                <i class="fas fa-print"></i> Imprimer
+                <i class="fas fa-print"></i> {{ __('housekeeping.quicklist.btn_print') }}
             </button>
         </div>
     </div>
@@ -479,7 +479,7 @@
     <div class="stats-grid anim-3">
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Total chambres</h6>
+                <h6>{{ __('housekeeping.quicklist.stat_total') }}</h6>
                 <h3>{{ $rooms->count() }}</h3>
             </div>
             <div class="stat-icon {{ $status == 'dirty' ? 'red' : 'green' }}">
@@ -494,14 +494,14 @@
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Par type</h6>
+                <h6>{{ __('housekeeping.quicklist.stat_by_type') }}</h6>
                 <h3>{{ $rooms->groupBy('type.name')->count() }}</h3>
             </div>
             <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Mis à jour</h6>
+                <h6>{{ __('housekeeping.quicklist.stat_updated') }}</h6>
                 <h3>{{ now()->format('H:i') }}</h3>
             </div>
             <div class="stat-icon"><i class="fas fa-clock"></i></div>
@@ -520,13 +520,13 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Chambre</th>
-                                <th>Type</th>
-                                <th>Capacité</th>
-                                <th>Prix</th>
-                                <th>Dernière activité</th>
-                                <th>Client actuel</th>
-                                <th class="text-center">Actions</th>
+                                <th>{{ __('housekeeping.quicklist.th_room') }}</th>
+                                <th>{{ __('housekeeping.quicklist.th_type') }}</th>
+                                <th>{{ __('housekeeping.quicklist.th_capacity') }}</th>
+                                <th>{{ __('housekeeping.quicklist.th_price') }}</th>
+                                <th>{{ __('housekeeping.quicklist.th_last_activity') }}</th>
+                                <th>{{ __('housekeeping.quicklist.th_current_guest') }}</th>
+                                <th class="text-center">{{ __('housekeeping.quicklist.th_actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -539,7 +539,7 @@
                                         </div>
                                         <div>
                                             <span class="fw-semibold">{{ $room->type->name ?? 'Standard' }}</span>
-                                            <small class="d-block text-muted">Étage {{ $room->floor ?? '?' }}</small>
+                                            <small class="d-block text-muted">{{ __('housekeeping.quicklist.floor') }} {{ $room->floor ?? '?' }}</small>
                                         </div>
                                     </div>
                                 </td>
@@ -601,14 +601,14 @@
                     </div>
                     <h4>
                         @switch($status)
-                            @case('dirty') Aucune chambre à nettoyer @break
-                            @case('cleaning') Aucune chambre en nettoyage @break
-                            @case('clean') Aucune chambre nettoyée @break
-                            @case('occupied') Aucune chambre occupée @break
-                            @case('maintenance') Aucune chambre en maintenance @break
+                            @case('dirty') {{ __('housekeeping.quicklist.empty_dirty') }} @break
+                            @case('cleaning') {{ __('housekeeping.quicklist.empty_cleaning') }} @break
+                            @case('clean') {{ __('housekeeping.quicklist.empty_clean') }} @break
+                            @case('occupied') {{ __('housekeeping.quicklist.empty_occupied') }} @break
+                            @case('maintenance') {{ __('housekeeping.quicklist.empty_maintenance') }} @break
                         @endswitch
                     </h4>
-                    <p>Toutes les chambres sont en ordre</p>
+                    <p>{{ __('housekeeping.quicklist.empty_desc') }}</p>
                     <a href="{{ route('housekeeping.index') }}" class="btn btn-green">Retour</a>
                 </div>
             @endif
@@ -619,7 +619,7 @@
     @if($rooms->count() > 0)
     <div class="card mt-4">
         <div class="card-header blue">
-            <i class="fas fa-th"></i> Vue par tuiles ({{ $rooms->count() }})
+            <i class="fas fa-th"></i> {!! __('housekeeping.quicklist.tile_view') !!} ({{ $rooms->count() }})
         </div>
         <div class="card-body p-3">
             <div class="tile-grid">
@@ -634,7 +634,7 @@
                         <div class="tile-meta"><i class="fas fa-money-bill"></i> {{ number_format($room->price, 0, ',', ' ') }} FCFA</div>
                         @if($room->last_cleaned_at)<div class="tile-meta"><i class="fas fa-clock"></i> {{ $room->last_cleaned_at->diffForHumans() }}</div>@endif
                         <div class="tile-actions">
-                            <a href="{{ route('availability.room.detail', $room->id) }}" class="btn btn-gray btn-sm flex-grow-1">Détails</a>
+                            <a href="{{ route('availability.room.detail', $room->id) }}" class="btn btn-gray btn-sm flex-grow-1">{{ __('housekeeping.quicklist.btn_details') }}</a>
                             @switch($status)
                                 @case('dirty')
                                     <form action="{{ route('housekeeping.start-cleaning', $room->id) }}" method="POST">

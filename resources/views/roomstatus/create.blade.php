@@ -6,14 +6,14 @@
         <div style="display: flex; flex-direction: column;">
             <label for="name" style="font-size: .75rem; font-weight: 600; color: var(--s600); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: .5px;">
                 <i class="fas fa-tag" style="font-size: .7rem; color: var(--g500);"></i>
-                Nom du statut <span style="color: #b91c1c; margin-left: 4px;">*</span>
+                {{ __('roomstatus.create_name_label') }} <span style="color: #b91c1c; margin-left: 4px;">*</span>
             </label>
             <input type="text" 
                    class="form-control-db @error('name') is-invalid @enderror" 
                    id="name"
                    name="name" 
                    value="{{ old('name') }}"
-                   placeholder="Ex: Disponible, Occupée, Maintenance"
+                   placeholder="{{ __('roomstatus.create_name_placeholder') }}"
                    style="padding: 10px 14px; border-radius: var(--r); border: 1.5px solid var(--s200); font-size: .875rem; font-family: var(--font); transition: var(--transition); background: var(--white); width: 100%;"
                    onfocus="this.style.outline='none'; this.style.borderColor='var(--g400)'; this.style.boxShadow='0 0 0 3px var(--g100)'"
                    onblur="this.style.borderColor='var(--s200)'; this.style.boxShadow='none'"
@@ -26,7 +26,7 @@
             @enderror
             <div id="error_name" style="display: flex; align-items: center; gap: 4px; font-size: .7rem; color: #b91c1c; margin-top: 4px;"></div>
             <div style="font-size: .65rem; color: var(--s400); margin-top: 4px;">
-                <i class="fas fa-info-circle"></i> Nom descriptif du statut
+                <i class="fas fa-info-circle"></i> {{ __('roomstatus.create_name_hint') }}
             </div>
         </div>
 
@@ -34,14 +34,14 @@
         <div style="display: flex; flex-direction: column;">
             <label for="code" style="font-size: .75rem; font-weight: 600; color: var(--s600); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: .5px;">
                 <i class="fas fa-code" style="font-size: .7rem; color: var(--g500);"></i>
-                Code <span style="color: #b91c1c; margin-left: 4px;">*</span>
+                {{ __('roomstatus.create_code_label') }} <span style="color: #b91c1c; margin-left: 4px;">*</span>
             </label>
             <input type="text" 
                    class="form-control-db @error('code') is-invalid @enderror"
                    id="code" 
                    name="code" 
                    value="{{ old('code') }}"
-                   placeholder="Ex: AVBL, OCC, MNT"
+                   placeholder="{{ __('roomstatus.create_code_placeholder') }}"
                    style="padding: 10px 14px; border-radius: var(--r); border: 1.5px solid var(--s200); font-size: .875rem; font-family: var(--mono); transition: var(--transition); background: var(--white); width: 100%; text-transform: uppercase;"
                    onfocus="this.style.outline='none'; this.style.borderColor='var(--g400)'; this.style.boxShadow='0 0 0 3px var(--g100)'"
                    onblur="this.style.borderColor='var(--s200)'; this.style.boxShadow='none'"
@@ -54,7 +54,7 @@
             @enderror
             <div id="error_code" style="display: flex; align-items: center; gap: 4px; font-size: .7rem; color: #b91c1c; margin-top: 4px;"></div>
             <div style="font-size: .65rem; color: var(--s400); margin-top: 4px;">
-                <i class="fas fa-info-circle"></i> Code unique (2-10 caractères majuscules)
+                <i class="fas fa-info-circle"></i> {{ __('roomstatus.create_code_hint') }}
             </div>
         </div>
 
@@ -62,14 +62,14 @@
         <div style="display: flex; flex-direction: column;">
             <label for="information" style="font-size: .75rem; font-weight: 600; color: var(--s600); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: .5px;">
                 <i class="fas fa-info-circle" style="font-size: .7rem; color: var(--g500);"></i>
-                Information
+                {{ __('roomstatus.create_info_label') }}
             </label>
             <textarea 
                 class="form-control-db" 
                 id="information" 
                 name="information" 
                 rows="3"
-                placeholder="Description détaillée du statut..."
+                placeholder="{{ __('roomstatus.create_info_placeholder') }}"
                 style="padding: 10px 14px; border-radius: var(--r); border: 1.5px solid var(--s200); font-size: .875rem; font-family: var(--font); transition: var(--transition); background: var(--white); width: 100%; resize: vertical;"
                 onfocus="this.style.outline='none'; this.style.borderColor='var(--g400)'; this.style.boxShadow='0 0 0 3px var(--g100)'"
                 onblur="this.style.borderColor='var(--s200)'; this.style.boxShadow='none'">{{ old('information') }}</textarea>
@@ -81,7 +81,7 @@
             @enderror
             <div id="error_information" style="display: flex; align-items: center; gap: 4px; font-size: .7rem; color: #b91c1c; margin-top: 4px;"></div>
             <div style="font-size: .65rem; color: var(--s400); margin-top: 4px;">
-                <i class="fas fa-info-circle"></i> Description optionnelle du statut
+                <i class="fas fa-info-circle"></i> {{ __('roomstatus.create_info_hint') }}
             </div>
         </div>
     </div>
@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Validation du nom
     nameInput.addEventListener('input', function() {
         if (this.value.trim().length < 2) {
-            errorName.innerHTML = '<i class="fas fa-exclamation-circle"></i> Le nom doit contenir au moins 2 caractères';
+            errorName.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + @json(__('roomstatus.create_err_name_min'));
             this.classList.add('is-invalid');
         } else {
             errorName.innerHTML = '';
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
     codeInput.addEventListener('input', function() {
         const codeRegex = /^[A-Z0-9]{2,10}$/;
         if (!codeRegex.test(this.value.trim())) {
-            errorCode.innerHTML = '<i class="fas fa-exclamation-circle"></i> Le code doit contenir 2-10 caractères majuscules ou chiffres';
+            errorCode.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + @json(__('roomstatus.create_err_code_format'));
             this.classList.add('is-invalid');
         } else {
             errorCode.innerHTML = '';
@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Validation de l'information (optionnel)
     infoInput.addEventListener('input', function() {
         if (this.value.trim().length > 0 && this.value.trim().length < 5) {
-            errorInfo.innerHTML = '<i class="fas fa-exclamation-circle"></i> L\'information est trop courte (minimum 5 caractères)';
+            errorInfo.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + @json(__('roomstatus.create_err_info_min'));
             this.classList.add('is-invalid');
         } else {
             errorInfo.innerHTML = '';
@@ -190,20 +190,20 @@ document.addEventListener('DOMContentLoaded', function() {
         let isValid = true;
         
         if (nameInput.value.trim().length < 2) {
-            errorName.innerHTML = '<i class="fas fa-exclamation-circle"></i> Le nom est requis (minimum 2 caractères)';
+            errorName.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + @json(__('roomstatus.create_err_name_required'));
             nameInput.classList.add('is-invalid');
             isValid = false;
         }
         
         const codeRegex = /^[A-Z0-9]{2,10}$/;
         if (!codeRegex.test(codeInput.value.trim())) {
-            errorCode.innerHTML = '<i class="fas fa-exclamation-circle"></i> Le code est requis (2-10 caractères majuscules ou chiffres)';
+            errorCode.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + @json(__('roomstatus.create_err_code_required'));
             codeInput.classList.add('is-invalid');
             isValid = false;
         }
         
         if (infoInput.value.trim().length > 0 && infoInput.value.trim().length < 5) {
-            errorInfo.innerHTML = '<i class="fas fa-exclamation-circle"></i> L\'information est trop courte';
+            errorInfo.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + @json(__('roomstatus.create_err_info_short'));
             infoInput.classList.add('is-invalid');
             isValid = false;
         }

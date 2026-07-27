@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Détails de la Réservation #' . $transaction->id)
+@section('title', __('show.page_title', ['id' => $transaction->id]))
 @section('content')
 
 <style>
@@ -628,7 +628,7 @@
     <div class="breadcrumb-custom">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs me-1"></i>Dashboard</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.index') }}">Réservations</a>
+        <a href="{{ route('transaction.index') }}">{{ __('show.reservations') }}</a>
         <span class="separator"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">#{{ $transaction->id }}</span>
     </div>
@@ -639,9 +639,9 @@
             <span class="header-icon">
                 <i class="fas fa-calendar-check"></i>
             </span>
-            <h1>Réservation #{{ $transaction->id }}</h1>
+            <h1>{{ __('show.reservation_title', ['id' => $transaction->id]) }}</h1>
             <span class="info-badge">
-                <i class="fas fa-clock"></i> Check-in 12h | Check-out 12h (largesse 14h)
+                <i class="fas fa-clock"></i> {{ __('show.check_in_out_badge') }}
             </span>
             
             {{-- Affichage si late checkout --}}
@@ -657,9 +657,9 @@
             {{-- Affichage si early checkout --}}
             @if($transaction->early_checkout)
                 <span class="badge-early">
-                    <i class="fas fa-clock"></i> Early checkout - Départ anticipé
+                    <i class="fas fa-clock"></i> {{ __('show.early_checkout') }} - {{ __('show.early_checkout_departure') }}
                     @if($transaction->early_checkout_refund)
-                        (Remboursé: {{ number_format($transaction->early_checkout_refund, 0, ',', ' ') }} FCFA)
+                        ({{ __('show.refunded', ['amount' => number_format($transaction->early_checkout_refund, 0, ',', ' ')]) }})
                     @endif
                 </span>
             @endif
@@ -671,17 +671,17 @@
                 @csrf
                 @method('PUT')
                 <select name="status" class="status-select" onchange="this.form.submit()">
-                    <option value="reservation" {{ $transaction->status == 'reservation' ? 'selected' : '' }}>📅 Réservation</option>
-                    <option value="active" {{ $transaction->status == 'active' ? 'selected' : '' }}>🏨 Dans l'hôtel</option>
-                    <option value="completed" {{ $transaction->status == 'completed' ? 'selected' : '' }}>✅ Terminé</option>
-                    <option value="cancelled" {{ $transaction->status == 'cancelled' ? 'selected' : '' }}>❌ Annulée</option>
-                    <option value="no_show" {{ $transaction->status == 'no_show' ? 'selected' : '' }}>👤 No Show</option>
+                    <option value="reservation" {{ $transaction->status == 'reservation' ? 'selected' : '' }}>{{ __('show.status_reservation') }}</option>
+                    <option value="active" {{ $transaction->status == 'active' ? 'selected' : '' }}>{{ __('show.status_active') }}</option>
+                    <option value="completed" {{ $transaction->status == 'completed' ? 'selected' : '' }}>{{ __('show.status_completed') }}</option>
+                    <option value="cancelled" {{ $transaction->status == 'cancelled' ? 'selected' : '' }}>{{ __('show.status_cancelled') }}</option>
+                    <option value="no_show" {{ $transaction->status == 'no_show' ? 'selected' : '' }}>{{ __('show.status_no_show') }}</option>
                 </select>
             </form>
             @endif
             
             <a href="{{ route('transaction.index') }}" class="btn-modern btn-outline-modern">
-                <i class="fas fa-arrow-left me-2"></i>Retour
+                <i class="fas fa-arrow-left me-2"></i>{{ __('show.back') }}
             </a>
         </div>
     </div>
@@ -720,17 +720,17 @@
     <div class="alert-status alert-status-reservation">
         <i class="fas fa-calendar-check fa-2x" style="color: var(--amber-600);"></i>
         <div>
-            <strong class="d-block mb-1">📅 RÉSERVATION</strong>
-            <p class="mb-0 small">Arrivée prévue : <strong>{{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }} à 12h00</strong></p>
+            <strong class="d-block mb-1">{{ __('show.reservation_heading') }}</strong>
+            <p class="mb-0 small">{{ __('show.expected_arrival', ['date' => \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y')]) }}</p>
         </div>
     </div>
     @elseif($transaction->status == 'active')
     <div class="alert-status alert-status-active">
         <i class="fas fa-bed fa-2x" style="color: var(--primary-600);"></i>
         <div>
-            <strong class="d-block mb-1">🏨 DANS L'HÔTEL</strong>
+            <strong class="d-block mb-1">{{ __('show.active_heading') }}</strong>
             <p class="mb-0 small">
-                Départ prévu : 
+                {{ __('show.expected_departure') }}
                 <strong>
                     {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }} 
                     @if($transaction->late_checkout)
@@ -739,7 +739,7 @@
                             <span class="badge-late" style="margin-left: 8px;">+{{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA</span>
                         @endif
                     @elseif($transaction->early_checkout)
-                        <span class="badge-early" style="margin-left: 8px;">Départ anticipé</span>
+                        <span class="badge-early" style="margin-left: 8px;">{{ __('show.early_checkout_abbrev') }}</span>
                     @else
                         à 12h00
                     @endif
@@ -751,16 +751,16 @@
     <div class="alert-status alert-status-completed">
         <i class="fas fa-check-circle fa-2x" style="color: var(--blue-600);"></i>
         <div>
-            <strong class="d-block mb-1">✅ SÉJOUR TERMINÉ</strong>
+            <strong class="d-block mb-1">{{ __('show.completed_heading') }}</strong>
             <p class="mb-0 small">
-                Client parti le <strong>{{ \Carbon\Carbon::parse($transaction->check_out_actual ?? $transaction->check_out)->format('d/m/Y à H:i') }}</strong>
+                {{ __('show.client_left_on', ['date' => \Carbon\Carbon::parse($transaction->check_out_actual ?? $transaction->check_out)->translatedFormat('d/m/Y H:i')]) }}
                 @if($transaction->late_checkout)
-                    <br><span class="badge-late"><i class="fas fa-clock"></i> Late checkout: {{ $transaction->expected_checkout_time }} ({{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA)</span>
+                    <br><span class="badge-late"><i class="fas fa-clock"></i> {{ __('show.late_checkout_label', ['time' => $transaction->expected_checkout_time]) }} ({{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA)</span>
                 @endif
                 @if($transaction->early_checkout)
-                    <br><span class="badge-early"><i class="fas fa-clock"></i> Early checkout - Départ anticipé</span>
+                    <br><span class="badge-early"><i class="fas fa-clock"></i> {{ __('show.early_checkout') }} - {{ __('show.early_checkout_departure') }}</span>
                     @if($transaction->early_checkout_refund)
-                        <br><small>Remboursé: {{ number_format($transaction->early_checkout_refund, 0, ',', ' ') }} FCFA</small>
+                        <br><small>{{ __('show.refunded', ['amount' => number_format($transaction->early_checkout_refund, 0, ',', ' ')]) }}</small>
                     @endif
                 @endif
             </p>
@@ -770,11 +770,11 @@
     <div class="alert-status alert-status-cancelled">
         <i class="fas fa-ban fa-2x" style="color: #b91c1c;"></i>
         <div>
-            <strong class="d-block mb-1">❌ ANNULÉE</strong>
+            <strong class="d-block mb-1">{{ __('show.cancelled_heading') }}</strong>
             @if($transaction->cancelled_at)
-            <p class="mb-0 small">Annulée le <strong>{{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y à H:i') }}</strong>
+            <p class="mb-0 small">{{ __('show.cancelled_on', ['date' => \Carbon\Carbon::parse($transaction->cancelled_at)->translatedFormat('d/m/Y H:i')]) }}
                 @if($transaction->cancel_reason)
-                <br>Raison : {{ $transaction->cancel_reason }}
+                <br>{{ __('show.cancel_reason', ['reason' => $transaction->cancel_reason]) }}
                 @endif
             </p>
             @endif
@@ -784,8 +784,8 @@
     <div class="alert-status alert-status-no_show">
         <i class="fas fa-user-slash fa-2x" style="color: var(--gray-500);"></i>
         <div>
-            <strong class="d-block mb-1">👤 NO SHOW</strong>
-            <p class="mb-0 small">Client ne s'est pas présenté</p>
+            <strong class="d-block mb-1">{{ __('show.no_show_heading') }}</strong>
+            <p class="mb-0 small">{{ __('show.no_show_text') }}</p>
         </div>
     </div>
     @endif
@@ -802,12 +802,12 @@
                 <form action="{{ route('transaction.mark-arrived', $transaction) }}" method="POST" class="d-inline">
                     @csrf
                     <button type="submit" class="btn-modern btn-success-modern">
-                        <i class="fas fa-sign-in-alt me-1"></i>Arrivée
+                        <i class="fas fa-sign-in-alt me-1"></i>{{ __('show.arrival') }}
                     </button>
                 </form>
             @else
                 <button type="button" class="btn-modern btn-outline-modern" disabled>
-                    <i class="fas fa-clock me-1"></i>Arrivée à 12h
+                    <i class="fas fa-clock me-1"></i>{{ __('show.arrival_at_12h') }}
                 </button>
             @endif
         @endif
@@ -860,7 +860,7 @@
                 <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
                     @csrf
                     <button type="submit" class="btn-modern btn-success-modern">
-                        <i class="fas fa-sign-out-alt me-1"></i>Départ (largesse)
+                        <i class="fas fa-sign-out-alt me-1"></i>{{ __('show.departure_largesse') }}
                     </button>
                 </form>
             
@@ -878,23 +878,23 @@
                         <form action="{{ route('transaction.mark-departed', $transaction) }}" method="POST" class="d-inline">
                             @csrf
                             <button type="submit" class="btn-modern btn-success-modern">
-                                <i class="fas fa-sign-out-alt me-1"></i>Départ (late checkout)
+                                <i class="fas fa-sign-out-alt me-1"></i>{{ __('show.departure_late_checkout') }}
                             </button>
                         </form>
                     @elseif($hasPendingLatePayment)
                         {{-- ⏳ Late checkout en attente de paiement --}}
                         <div class="d-inline-block" data-bs-toggle="tooltip" 
-                             title="Paiement en attente - Cliquez sur 'Marquer payé' dans la liste des paiements">
+                             title="{{ __('show.late_checkout_tooltip') }}">
                             <span class="btn-modern btn-outline-modern disabled">
-                                <i class="fas fa-clock me-1"></i>Départ (paiement en attente)
+                                <i class="fas fa-clock me-1"></i>{{ __('show.departure_pending_payment') }}
                             </span>
                         </div>
                     @else
                         {{-- ❌ Late checkout non payé --}}
                         <div class="d-inline-block" data-bs-toggle="tooltip" 
-                             title="Supplément late checkout de {{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA non payé">
+                             title="{{ __('show.late_fee_unpaid_tooltip', ['amount' => number_format($transaction->late_checkout_fee, 0, ',', ' ')]) }}">
                             <span class="btn-modern btn-outline-modern disabled">
-                                <i class="fas fa-ban me-1"></i>Départ bloqué
+                                <i class="fas fa-ban me-1"></i>{{ __('show.departure_blocked') }}
                             </span>
                         </div>
                     @endif
@@ -903,55 +903,55 @@
             {{-- Après 20h : Forcer prolongation --}}
             @elseif($now->gte($lateCheckoutEnd) && !$transaction->late_checkout)
                 <a href="{{ route('transaction.extend', $transaction) }}" class="btn-modern btn-warning-modern">
-                    <i class="fas fa-calendar-plus me-1"></i>Prolonger d'une nuit
+                    <i class="fas fa-calendar-plus me-1"></i>{{ __('show.extend_one_night') }}
                 </a>
             
             {{-- Après 20h avec late checkout --}}
             @elseif($now->gte($lateCheckoutEnd) && $transaction->late_checkout)
                 <span class="btn-modern btn-outline-modern disabled" 
                       data-bs-toggle="tooltip" 
-                      title="Départ après 20h - Prolongation nécessaire">
-                    <i class="fas fa-clock me-1"></i>Départ impossible
+                      title="{{ __('show.departure_after_20h_tooltip') }}">
+                    <i class="fas fa-clock me-1"></i>{{ __('show.departure_impossible') }}
                 </span>
             
             {{-- Déjà en late checkout mais avant 14h (cas normal) --}}
             @elseif($transaction->late_checkout && $now->lt($checkOutLargess))
                 <span class="btn-modern btn-outline-modern disabled" 
                       data-bs-toggle="tooltip" 
-                      title="Départ prévu à {{ $transaction->expected_checkout_time }}">
-                    <i class="fas fa-clock me-1"></i>Départ à {{ $transaction->expected_checkout_time }}
+                      title="{{ __('show.departure_at_time_tooltip', ['time' => $transaction->expected_checkout_time]) }}">
+                    <i class="fas fa-clock me-1"></i>{{ __('show.departure_at', ['time' => $transaction->expected_checkout_time]) }}
                 </span>
             
             {{-- Autres cas --}}
             @else
                 <button type="button" class="btn-modern btn-outline-modern" disabled>
-                    <i class="fas fa-clock me-1"></i>Départ à 12h
+                    <i class="fas fa-clock me-1"></i>{{ __('show.departure_at_12h') }}
                 </button>
             @endif
         @endif
         
         @if(in_array($transaction->status, ['reservation', 'active']))
         <a href="{{ route('transaction.extend', $transaction) }}" class="btn-modern btn-warning-modern">
-            <i class="fas fa-calendar-plus me-1"></i>Prolonger
+            <i class="fas fa-calendar-plus me-1"></i>{{ __('show.extend') }}
         </a>
         @endif
         
         @if(!in_array($transaction->status, ['cancelled', 'no_show', 'completed']))
         <a href="{{ route('transaction.edit', $transaction) }}" class="btn-modern btn-outline-modern">
-            <i class="fas fa-edit me-1"></i>Modifier
+            <i class="fas fa-edit me-1"></i>{{ __('show.edit') }}
         </a>
         @endif
         
         @if($remaining > 0 && !in_array($transaction->status, ['cancelled', 'no_show']))
         <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-modern btn-primary-modern">
-            <i class="fas fa-money-bill-wave me-1"></i>Paiement
+            <i class="fas fa-money-bill-wave me-1"></i>{{ __('show.payment') }}
         </a>
         @endif
         
         @if(!in_array($transaction->status, ['cancelled', 'no_show', 'completed']))
         <button type="button" class="btn-modern btn-outline-danger-modern" 
                 data-bs-toggle="modal" data-bs-target="#cancelModal">
-            <i class="fas fa-ban me-1"></i>Annuler
+            <i class="fas fa-ban me-1"></i>{{ __('show.cancel') }}
         </button>
         @endif
     </div>
@@ -963,7 +963,7 @@
             <!-- Client -->
             <div class="detail-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-user"></i>Informations Client</h5>
+                    <h5><i class="fas fa-user"></i>{{ __('show.customer_info') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-flex align-items-center gap-4 mb-4">
@@ -976,27 +976,27 @@
                         </div>
                         <div>
                             <h4 class="mb-1" style="color: var(--gray-800); font-weight: 600;">{{ $transaction->customer->name }}</h4>
-                            <p class="text-muted small mb-0">{{ $transaction->customer->email ?? 'Email non renseigné' }}</p>
+                            <p class="text-muted small mb-0">{{ $transaction->customer->email ?? __('show.email_not_set') }}</p>
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-6">
-                            <p class="detail-label">Téléphone</p>
-                            <p class="detail-value">{{ $transaction->customer->phone ?? 'Non renseigné' }}</p>
+                            <p class="detail-label">{{ __('show.phone') }}</p>
+                            <p class="detail-value">{{ $transaction->customer->phone ?? __('show.not_specified') }}</p>
                         </div>
                         <div class="col-md-6">
-                            <p class="detail-label">NIC/ID</p>
-                            <p class="detail-value">{{ $transaction->customer->nik ?? 'Non renseigné' }}</p>
+                            <p class="detail-label">{{ __('show.nic_id') }}</p>
+                            <p class="detail-value">{{ $transaction->customer->nik ?? __('show.not_specified') }}</p>
                         </div>
                     </div>
                     
                     <div class="d-flex gap-2 mt-2">
                         <a href="{{ route('customer.show', $transaction->customer) }}" class="btn-modern btn-outline-modern btn-sm">
-                            <i class="fas fa-eye me-1"></i>Voir profil
+                            <i class="fas fa-eye me-1"></i>{{ __('show.view_profile') }}
                         </a>
                         <a href="{{ route('transaction.reservation.customerReservations', $transaction->customer) }}" class="btn-modern btn-outline-modern btn-sm">
-                            <i class="fas fa-history me-1"></i>Historique
+                            <i class="fas fa-history me-1"></i>{{ __('show.history') }}
                         </a>
                     </div>
                 </div>
@@ -1005,23 +1005,23 @@
             <!-- Chambre et dates avec heure mise à jour -->
             <div class="detail-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-bed"></i>Informations Séjour</h5>
+                    <h5><i class="fas fa-bed"></i>{{ __('show.stay_info') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-6 text-center mb-3 mb-md-0">
-                            <p class="detail-label">Chambre</p>
+                            <p class="detail-label">{{ __('show.room') }}</p>
                             <span class="room-badge-large">{{ $transaction->room->number }}</span>
-                            <p class="text-muted small mt-2">{{ $transaction->room->type->name ?? 'Type non spécifié' }}</p>
+                            <p class="text-muted small mt-2">{{ $transaction->room->type->name ?? __('show.type_not_specified') }}</p>
                         </div>
                         <div class="col-md-6 text-center">
-                            <p class="detail-label">Durée du séjour</p>
+                            <p class="detail-label">{{ __('show.stay_duration') }}</p>
                             <span class="room-badge-large" style="background: var(--gray-100); color: var(--gray-700); border-color: var(--gray-200);">
-                                {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}
+                                {{ $nights }} {{ __('show.nights') }}
                                 @if($transaction->late_checkout)
-                                    <br><small class="text-warning">(dont late checkout)</small>
+                                    <br><small class="text-warning">({{ __('show.in_late_checkout') }})</small>
                                 @elseif($transaction->early_checkout)
-                                    <br><small class="text-info">(early checkout)</small>
+                                    <br><small class="text-info">({{ __('show.with_early_checkout') }})</small>
                                 @endif
                             </span>
                         </div>
@@ -1029,7 +1029,7 @@
                     
                     <div class="row">
                         <div class="col-md-6">
-                            <p class="detail-label">Arrivée</p>
+                            <p class="detail-label">{{ __('show.arrival_date') }}</p>
                             <p class="detail-value">
                                 <i class="fas fa-calendar-check me-2" style="color: var(--primary-500);"></i>
                                 {{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y') }}
@@ -1037,7 +1037,7 @@
                             </p>
                         </div>
                         <div class="col-md-6">
-                            <p class="detail-label">Départ</p>
+                            <p class="detail-label">{{ __('show.departure_date') }}</p>
                             <p class="detail-value">
                                 <i class="fas fa-calendar-times me-2" style="color: #ef4444;"></i>
                                 {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }}
@@ -1058,7 +1058,7 @@
                     
                     <div class="row">
                         <div class="col-md-6">
-                            <p class="detail-label">Statut chambre</p>
+                            <p class="detail-label">{{ __('show.room_status') }}</p>
                             <p class="detail-value">
                                 @if($transaction->room->roomStatus)
                                 <span class="status-badge {{ $transaction->room->roomStatus->name == 'Occupée' ? 'status-active' : ($transaction->room->roomStatus->name == 'Disponible' ? 'status-completed' : 'status-reservation') }}">
@@ -1068,7 +1068,7 @@
                             </p>
                         </div>
                         <div class="col-md-6">
-                            <p class="detail-label">Statut réservation</p>
+                            <p class="detail-label">{{ __('show.reservation_status') }}</p>
                             <p class="detail-value">
                                 <span class="status-badge status-{{ $transaction->status }}">
                                     {{ $transaction->status_label }}
@@ -1082,9 +1082,9 @@
             <!-- Paiements avec affichage du supplément late checkout -->
             <div class="detail-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5><i class="fas fa-money-bill-wave"></i>Paiements</h5>
+                    <h5><i class="fas fa-money-bill-wave"></i>{{ __('show.payments') }}</h5>
                     <span class="status-badge {{ $isFullyPaid ? 'status-active' : ($remaining > 0 ? 'status-reservation' : 'status-completed') }}">
-                        {{ $isFullyPaid ? 'Soldé' : ($remaining > 0 ? 'En attente' : 'Aucune dette') }}
+                        {{ $isFullyPaid ? __('show.settled') : ($remaining > 0 ? __('show.pending') : __('show.no_debt')) }}
                     </span>
                 </div>
                 <div class="card-body">
@@ -1096,7 +1096,7 @@
                         
                         <div class="col-md-3">
                             <div class="stat-box">
-                                <p class="stat-label">Total initial</p>
+                                <p class="stat-label">{{ __('show.initial_total') }}</p>
                                 <p class="stat-value">{{ number_format($totalInitial, 0, ',', ' ') }} CFA</p>
                             </div>
                         </div>
@@ -1104,7 +1104,7 @@
                         @if($transaction->late_checkout_fee > 0)
                         <div class="col-md-3">
                             <div class="stat-box" style="background: var(--amber-50); border-color: var(--amber-200);">
-                                <p class="stat-label">Supplément late</p>
+                                <p class="stat-label">{{ __('show.late_supplement') }}</p>
                                 <p class="stat-value" style="color: var(--amber-600);">+ {{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} CFA</p>
                                 <small class="text-muted">{{ $transaction->expected_checkout_time ?? 'N/A' }}</small>
                             </div>
@@ -1114,7 +1114,7 @@
                         @if($transaction->early_checkout_refund > 0)
                         <div class="col-md-3">
                             <div class="stat-box" style="background: var(--blue-50); border-color: var(--blue-200);">
-                                <p class="stat-label">Remboursement</p>
+                                <p class="stat-label">{{ __('show.refund') }}</p>
                                 <p class="stat-value" style="color: var(--blue-600);">- {{ number_format($transaction->early_checkout_refund, 0, ',', ' ') }} CFA</p>
                                 <small class="text-muted">Early checkout</small>
                             </div>
@@ -1123,21 +1123,21 @@
                         
                         <div class="col-md-3">
                             <div class="stat-box">
-                                <p class="stat-label">Total final</p>
+                                <p class="stat-label">{{ __('show.final_total') }}</p>
                                 <p class="stat-value stat-value-primary">{{ number_format($totalPrice, 0, ',', ' ') }} CFA</p>
                             </div>
                         </div>
                         
                         <div class="col-md-3">
                             <div class="stat-box">
-                                <p class="stat-label">Payé</p>
+                                <p class="stat-label">{{ __('show.paid') }}</p>
                                 <p class="stat-value stat-value-success">{{ number_format($totalPayment, 0, ',', ' ') }} CFA</p>
                             </div>
                         </div>
                         
                         <div class="col-md-3">
                             <div class="stat-box">
-                                <p class="stat-label">Reste</p>
+                                <p class="stat-label">{{ __('show.remaining') }}</p>
                                 <p class="stat-value {{ $remaining > 0 ? 'stat-value-danger' : 'stat-value-success' }}">
                                     @if($remaining > 0)
                                         {{ number_format($remaining, 0, ',', ' ') }} CFA
@@ -1160,16 +1160,16 @@
                     <div class="row mb-4">
                         <div class="col-12">
                             <h6 class="mb-3" style="font-weight: 600; color: var(--gray-700);">
-                                <i class="fas fa-utensils me-2 text-primary"></i>Consommations Restaurant (Facture Chambre)
+                                <i class="fas fa-utensils me-2 text-primary"></i>{{ __('show.restaurant_consumptions') }}
                             </h6>
                             <div class="table-responsive">
                                 <table class="table table-sm table-hover border-0">
                                     <thead class="bg-light">
                                         <tr>
-                                            <th class="border-0 small text-muted">ID</th>
-                                            <th class="border-0 small text-muted">Date</th>
-                                            <th class="border-0 small text-muted">Statut</th>
-                                            <th class="border-0 small text-muted text-end">Montant</th>
+                                            <th class="border-0 small text-muted">{{ __('show.id') }}</th>
+                                            <th class="border-0 small text-muted">{{ __('show.date') }}</th>
+                                            <th class="border-0 small text-muted">{{ __('show.status') }}</th>
+                                            <th class="border-0 small text-muted text-end">{{ __('show.amount') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1179,13 +1179,13 @@
                                             <td class="align-middle">{{ $ro->created_at->format('d/m/H:i') }}</td>
                                             <td class="align-middle">
                                                 @if($ro->status === 'delivered')
-                                                    <span class="badge bg-success-subtle text-success px-2 py-1">Livré (Sur facture)</span>
+                                                    <span class="badge bg-success-subtle text-success px-2 py-1">{{ __('show.delivered_on_bill') }}</span>
                                                 @elseif($ro->status === 'paid')
-                                                    <span class="badge bg-primary-subtle text-primary px-2 py-1">Payé</span>
+                                                    <span class="badge bg-primary-subtle text-primary px-2 py-1">{{ __('show.paid') }}</span>
                                                 @elseif($ro->status === 'cancelled')
-                                                    <span class="badge bg-danger-subtle text-danger px-2 py-1">Annulé</span>
+                                                    <span class="badge bg-danger-subtle text-danger px-2 py-1">{{ __('show.status_cancelled') }}</span>
                                                 @else
-                                                    <span class="badge bg-warning-subtle text-warning px-2 py-1">{{ $ro->status }} (Non facturé)</span>
+                                                    <span class="badge bg-warning-subtle text-warning px-2 py-1">{{ $ro->status }} ({{ __('show.not_invoiced') }})</span>
                                                 @endif
                                             </td>
                                             <td class="align-middle text-end fw-bold text-dark">{{ number_format($ro->total, 0, ',', ' ') }} CFA</td>
@@ -1194,7 +1194,7 @@
                                     </tbody>
                                     <tfoot class="border-top">
                                         <tr>
-                                            <td colspan="3" class="text-end small text-muted">Total ajouté à la facture :</td>
+                                            <td colspan="3" class="text-end small text-muted">{{ __('show.total_added_to_bill') }}</td>
                                             <td class="text-end fw-bold text-primary">{{ number_format($restTotal, 0, ',', ' ') }} CFA</td>
                                         </tr>
                                     </tfoot>
@@ -1206,7 +1206,7 @@
 
                     <!-- Liste des paiements -->
                     @if($payments && $payments->count() > 0)
-                        <p class="detail-label mb-3">Historique des paiements</p>
+                        <p class="detail-label mb-3">{{ __('show.payment_history') }}</p>
                         <div class="timeline">
                             @foreach($payments as $payment)
                                 @php
@@ -1224,24 +1224,24 @@
                                             <h6 class="mb-1" style="font-weight: 600;">
                                                 Paiement #{{ $payment->id }}
                                                 @if($isLatePayment)
-                                                    <span class="badge-late" style="margin-left: 8px;">Late checkout</span>
+                                                    <span class="badge-late" style="margin-left: 8px;">{{ __('show.late_checkout') }}</span>
                                                 @endif
                                                 @if($isRefundPayment)
-                                                    <span class="badge-early" style="margin-left: 8px;">Remboursement</span>
+                                                    <span class="badge-early" style="margin-left: 8px;">{{ __('show.refund_badge') }}</span>
                                                 @endif
                                                 @if($payment->status == 'pending')
                                                     <span class="badge-pending" style="margin-left: 8px;">
-                                                        <i class="fas fa-clock me-1"></i>En attente
+                                                        <i class="fas fa-clock me-1"></i>{{ __('show.pending') }}
                                                     </span>
                                                 @elseif($payment->status == 'completed')
                                                     <span class="badge-late" style="background: var(--primary-100); color: var(--primary-700); margin-left: 8px;">
-                                                        <i class="fas fa-check-circle me-1"></i>Payé
+                                                        <i class="fas fa-check-circle me-1"></i>{{ __('show.paid') }}
                                                     </span>
                                                 @endif
                                             </h6>
                                             <p class="text-muted small mb-1">
                                                 <i class="fas fa-calendar me-1"></i>
-                                                {{ \Carbon\Carbon::parse($payment->created_at)->format('d/m/Y à H:i') }}
+                                                {{ \Carbon\Carbon::parse($payment->created_at)->translatedFormat('d/m/Y H:i') }}
                                             </p>
                                             @if($payment->payment_method)
                                                 <p class="text-muted small mb-1">
@@ -1250,7 +1250,7 @@
                                                 </p>
                                             @endif
                                             @if($payment->description)
-                                                <p class="text-muted small mb-0">Note: {{ $payment->description }}</p>
+                                                <p class="text-muted small mb-0">{{ __('show.note') }} {{ $payment->description }}</p>
                                             @endif
                                         </div>
                                         <div class="text-end">
@@ -1258,11 +1258,11 @@
                                                 {{ $payment->amount > 0 ? '+' : '-' }} {{ number_format(abs($payment->amount), 0, ',', ' ') }} CFA
                                             </p>
                                             <a href="{{ route('payment.invoice', $payment) }}" class="btn-modern btn-outline-modern btn-sm" target="_blank">
-                                                <i class="fas fa-receipt"></i> Reçu
+                                                <i class="fas fa-receipt"></i> {{ __('show.receipt') }}
                                             </a>
                                             @if($payment->status == 'pending')
                                                 <button onclick="markPaymentAsPaid({{ $payment->id }})" class="btn btn-sm btn-success mt-1">
-                                                    <i class="fas fa-check"></i> Marquer payé
+                                                    <i class="fas fa-check"></i> {{ __('show.mark_as_paid') }}
                                                 </button>
                                             @endif
                                         </div>
@@ -1273,11 +1273,11 @@
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-money-bill-wave fa-3x mb-3" style="color: var(--gray-300);"></i>
-                            <h5 style="color: var(--gray-600);">Aucun paiement</h5>
-                            <p class="text-muted small">Aucun paiement n'a été effectué pour cette réservation.</p>
+                            <h5 style="color: var(--gray-600);">{{ __('show.no_payment') }}</h5>
+                            <p class="text-muted small">{{ __('show.no_payment_text') }}</p>
                             @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']) && $remaining > 0 && !in_array($transaction->status, ['cancelled', 'no_show']))
                                 <a href="{{ route('transaction.payment.create', $transaction) }}" class="btn-modern btn-primary-modern mt-2">
-                                    <i class="fas fa-plus me-1"></i>Ajouter un paiement
+                                    <i class="fas fa-plus me-1"></i>{{ __('show.add_payment') }}
                                 </a>
                             @endif
                         </div>
@@ -1297,21 +1297,21 @@
                                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                     <div>
                                         <i class="fas fa-clock me-2" style="color: var(--amber-600);"></i>
-                                        <strong>Late checkout enregistré</strong><br>
+                                        <strong>{{ __('show.late_checkout_registered') }}</strong><br>
                                         <span class="small">
-                                            Départ à <strong>{{ $transaction->expected_checkout_time }}</strong> - 
-                                            Supplément de <strong>{{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA</strong>
+                                            {{ __('show.departure_at', ['time' => $transaction->expected_checkout_time]) }} - 
+                                            {{ __('show.late_supplement') }} {{ __('show.total') }}: <strong>{{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} FCFA</strong>
                                             @if($latePayment && $latePayment->status == 'pending')
-                                                <br><span class="text-info"><i class="fas fa-info-circle me-1"></i>Paiement en attente - Cliquez sur "Marquer payé"</span>
+                                                <br><span class="text-info"><i class="fas fa-info-circle me-1"></i>{{ __('show.late_checkout_pending_info') }}</span>
                                             @elseif(!$latePayment)
-                                                <br><span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>Aucun paiement créé</span>
+                                                <br><span class="text-warning"><i class="fas fa-exclamation-triangle me-1"></i>{{ __('show.no_payment_created') }}</span>
                                             @endif
                                         </span>
                                     </div>
                                     @if(!$latePayment)
                                         <a href="{{ route('transaction.payment.create', $transaction) }}?amount={{ $transaction->late_checkout_fee }}" 
                                            class="btn btn-sm btn-warning">
-                                            <i class="fas fa-money-bill-wave me-1"></i>Créer un paiement
+                                            <i class="fas fa-money-bill-wave me-1"></i>{{ __('show.create_payment') }}
                                         </a>
                                     @endif
                                 </div>
@@ -1325,11 +1325,11 @@
                             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                                 <div>
                                     <i class="fas fa-clock me-2" style="color: var(--blue-600);"></i>
-                                    <strong>Early checkout enregistré</strong><br>
+                                    <strong>{{ __('show.early_checkout_registered') }}</strong><br>
                                     <span class="small">
-                                        Départ anticipé - Remboursement de <strong>{{ number_format($transaction->early_checkout_refund, 0, ',', ' ') }} FCFA</strong>
+                                        {{ __('show.early_checkout_refund_text', ['amount' => number_format($transaction->early_checkout_refund, 0, ',', ' ')]) }}
                                         @if($transaction->early_checkout_reason)
-                                            <br>Raison: {{ $transaction->early_checkout_reason }}
+                                            <br>{{ __('show.cancel_reason', ['reason' => $transaction->early_checkout_reason]) }}
                                         @endif
                                     </span>
                                 </div>
@@ -1345,25 +1345,25 @@
             <!-- Actions rapides compactes -->
             <div class="detail-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-bolt"></i>Actions rapides</h5>
+                    <h5><i class="fas fa-bolt"></i>{{ __('show.quick_actions') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         <a href="{{ route('transaction.history', $transaction) }}" class="btn-modern btn-outline-modern w-100">
-                            <i class="fas fa-history me-1"></i>Historique
+                            <i class="fas fa-history me-1"></i>{{ __('show.history') }}
                         </a>
                         
                         @if($payments && $payments->count() > 0)
                         <a href="{{ route('transaction.invoice', $transaction) }}" class="btn-modern btn-outline-modern w-100" target="_blank">
-                            <i class="fas fa-file-invoice me-1"></i>Facture
+                            <i class="fas fa-file-invoice me-1"></i>{{ __('show.invoice') }}
                         </a>
                         @endif
                         
                         @if($transaction->status == 'cancelled' && in_array(auth()->user()->role, ['Super', 'Admin']))
                         <form action="{{ route('transaction.restore', $transaction) }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn-modern btn-warning-modern w-100" onclick="return confirm('Restaurer cette réservation ?')">
-                                <i class="fas fa-undo me-1"></i>Restaurer
+                            <button type="submit" class="btn-modern btn-warning-modern w-100" onclick="return confirm('{{ __('show.restore_confirm') }}')">
+                                <i class="fas fa-undo me-1"></i>{{ __('show.restore') }}
                             </button>
                         </form>
                         @endif
@@ -1374,61 +1374,61 @@
             <!-- Informations supplémentaires avec heure de départ -->
             <div class="detail-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-info-circle"></i>Détails</h5>
+                    <h5><i class="fas fa-info-circle"></i>{{ __('show.details') }}</h5>
                 </div>
                 <div class="card-body">
-                    <p class="detail-label">Nombre de personnes</p>
-                    <p class="detail-value">{{ $transaction->person_count ?? 1 }} personne{{ ($transaction->person_count ?? 1) > 1 ? 's' : '' }}</p>
+                    <p class="detail-label">{{ __('show.number_of_guests') }}</p>
+                    <p class="detail-value">{{ $transaction->person_count ?? 1 }} {{ __('show.persons') }}</p>
                     
-                    <p class="detail-label">Prix par nuit</p>
+                    <p class="detail-label">{{ __('show.price_per_night') }}</p>
                     <p class="detail-value">{{ number_format($transaction->room->price, 0, ',', ' ') }} CFA</p>
                     
                     @if($transaction->late_checkout_fee)
-                    <p class="detail-label">Supplément late checkout</p>
+                    <p class="detail-label">{{ __('show.late_checkout_supplement') }}</p>
                     <p class="detail-value" style="color: var(--amber-600);">+ {{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} CFA</p>
                     @endif
                     
                     @if($transaction->early_checkout_refund)
-                    <p class="detail-label">Remboursement early checkout</p>
+                    <p class="detail-label">{{ __('show.early_checkout_refund_label') }}</p>
                     <p class="detail-value" style="color: var(--blue-600);">- {{ number_format($transaction->early_checkout_refund, 0, ',', ' ') }} CFA</p>
                     @endif
                     
                     {{-- Heure de départ effective --}}
                     @if($transaction->expected_checkout_time && $transaction->late_checkout)
-                    <p class="detail-label">Heure de départ</p>
+                    <p class="detail-label">{{ __('show.departure_time') }}</p>
                     <p class="detail-value" style="color: var(--amber-600);">
                         <i class="fas fa-clock me-1"></i> {{ $transaction->expected_checkout_time }}
                     </p>
                     @endif
                     
-                    <p class="detail-label">Créée le</p>
-                    <p class="detail-value">{{ \Carbon\Carbon::parse($transaction->created_at)->format('d/m/Y à H:i') }}</p>
+                    <p class="detail-label">{{ __('show.created_on') }}</p>
+                    <p class="detail-value">{{ \Carbon\Carbon::parse($transaction->created_at)->translatedFormat('d/m/Y H:i') }}</p>
                     
                     @if($transaction->user)
-                    <p class="detail-label">Créée par</p>
+                    <p class="detail-label">{{ __('show.created_by') }}</p>
                     <p class="detail-value">{{ $transaction->user->name }}</p>
                     @endif
                     
                     @if($transaction->updated_at != $transaction->created_at)
-                    <p class="detail-label">Dernière modification</p>
-                    <p class="detail-value">{{ \Carbon\Carbon::parse($transaction->updated_at)->format('d/m/Y à H:i') }}</p>
+                    <p class="detail-label">{{ __('show.last_modified') }}</p>
+                    <p class="detail-value">{{ \Carbon\Carbon::parse($transaction->updated_at)->translatedFormat('d/m/Y H:i') }}</p>
                     @endif
                     
                     @if($transaction->notes)
                     <div class="divider"></div>
-                    <p class="detail-label">Notes</p>
+                    <p class="detail-label">{{ __('show.notes') }}</p>
                     <p class="detail-value" style="white-space: pre-line;">{{ $transaction->notes }}</p>
                     @endif
                     
                     @if($transaction->early_checkout_reason)
                     <div class="divider"></div>
-                    <p class="detail-label">Raison early checkout</p>
+                    <p class="detail-label">{{ __('show.early_checkout_reason') }}</p>
                     <p class="detail-value" style="color: var(--blue-700);">{{ $transaction->early_checkout_reason }}</p>
                     @endif
                     
                     @if($transaction->checkout_notes && $transaction->late_checkout)
                     <div class="divider"></div>
-                    <p class="detail-label">Notes départ</p>
+                    <p class="detail-label">{{ __('show.departure_notes') }}</p>
                     <p class="detail-value" style="white-space: pre-line; color: var(--amber-700);">📝 {{ $transaction->checkout_notes }}</p>
                     @endif
                 </div>
@@ -1437,13 +1437,13 @@
             <!-- Statistiques -->
             <div class="detail-card">
                 <div class="card-header">
-                    <h5><i class="fas fa-chart-bar"></i>Statistiques</h5>
+                    <h5><i class="fas fa-chart-bar"></i>{{ __('show.statistics') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
                         <div class="col-6">
                             <div class="stat-box p-3">
-                                <p class="stat-label">Nuits</p>
+                                <p class="stat-label">{{ __('show.nights_label') }}</p>
                                 <p class="stat-value">{{ $nights }}</p>
                                 @if($transaction->late_checkout)
                                     <small class="text-warning">+ late checkout</small>
@@ -1454,19 +1454,19 @@
                         </div>
                         <div class="col-6">
                             <div class="stat-box p-3">
-                                <p class="stat-label">Paiements</p>
+                                <p class="stat-label">{{ __('show.payments') }}</p>
                                 <p class="stat-value">{{ $payments ? $payments->count() : 0 }}</p>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="stat-box p-3">
-                                <p class="stat-label">Total</p>
+                                <p class="stat-label">{{ __('show.total') }}</p>
                                 <p class="stat-value stat-value-primary">{{ number_format($totalPrice, 0, ',', ' ') }} CFA</p>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="stat-box p-3">
-                                <p class="stat-label">Payé</p>
+                                <p class="stat-label">{{ __('show.paid') }}</p>
                                 <p class="stat-value stat-value-success">{{ number_format($totalPayment, 0, ',', ' ') }} CFA</p>
                             </div>
                         </div>
@@ -1475,10 +1475,10 @@
                     @if($remaining > 0)
                     <div class="divider"></div>
                     <div class="text-center">
-                        <p class="detail-label mb-1">Reste à payer</p>
+                        <p class="detail-label mb-1">{{ __('show.remaining_to_pay') }}</p>
                         <p class="stat-value stat-value-danger h4">{{ number_format($remaining, 0, ',', ' ') }} CFA</p>
                         @if($transaction->late_checkout_fee > 0)
-                            <small class="text-muted">dont {{ number_format($transaction->late_checkout_fee, 0, ',', ' ') }} CFA de late checkout</small>
+                            <small class="text-muted">{{ __('show.remaining_with_late', ['amount' => number_format($transaction->late_checkout_fee, 0, ',', ' ')]) }}</small>
                         @endif
                     </div>
                     @endif
@@ -1496,7 +1496,7 @@
             <div class="modal-header" style="background: linear-gradient(135deg, var(--blue-500), var(--blue-400)); color: white;">
                 <h5 class="modal-title">
                     <i class="fas fa-clock me-2"></i>
-                    Early checkout - Départ anticipé
+                    {{ __('show.early_checkout_title') }}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -1517,9 +1517,9 @@
                         <div class="d-flex align-items-center gap-3">
                             <i class="fas fa-info-circle fa-2x text-info"></i>
                             <div>
-                                <strong>Résumé du séjour</strong><br>
-                                Client: <strong>{{ $transaction->customer->name }}</strong><br>
-                                Chambre: <strong>{{ $transaction->room->number }}</strong>
+                                <strong>{{ __('show.stay_summary') }}</strong><br>
+                                {{ __('show.client_label', ['name' => $transaction->customer->name]) }}<br>
+                                {{ __('show.room_label', ['number' => $transaction->room->number ]) }}
                             </div>
                         </div>
                     </div>
@@ -1527,25 +1527,25 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="stat-box">
-                                <p class="stat-label">Nuités prévues</p>
+                                <p class="stat-label">{{ __('show.planned_nights') }}</p>
                                 <p class="stat-value">{{ $plannedNights }}</p>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="stat-box">
-                                <p class="stat-label">Nuités effectuées</p>
+                                <p class="stat-label">{{ __('show.actual_nights') }}</p>
                                 <p class="stat-value">{{ $actualNights }}</p>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="stat-box">
-                                <p class="stat-label">Nuités non utilisées</p>
+                                <p class="stat-label">{{ __('show.unused_nights') }}</p>
                                 <p class="stat-value">{{ $nightsShort }}</p>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="stat-box">
-                                <p class="stat-label">Total payé</p>
+                                <p class="stat-label">{{ __('show.total_paid') }}</p>
                                 <p class="stat-value stat-value-success">{{ number_format($totalPaid, 0, ',', ' ') }} FCFA</p>
                             </div>
                         </div>
@@ -1553,28 +1553,28 @@
                     
                     <div class="alert alert-warning">
                         <i class="fas fa-calculator me-2"></i>
-                        <strong>Calcul du remboursement potentiel:</strong><br>
-                        - Nouveau total ({{ $actualNights }} nuits): {{ number_format($newTotalPrice, 0, ',', ' ') }} FCFA<br>
-                        - Déjà payé: {{ number_format($totalPaid, 0, ',', ' ') }} FCFA<br>
-                        - Remboursement maximum: <strong class="text-success">{{ number_format($potentialRefund, 0, ',', ' ') }} FCFA</strong>
+                        <strong>{{ __('show.potential_refund_calc') }}</strong><br>
+                        - {{ __('show.new_total') }} ({{ $actualNights }} {{ __('show.nights') }}): {{ number_format($newTotalPrice, 0, ',', ' ') }} FCFA<br>
+                        - {{ __('show.already_paid') }}: {{ number_format($totalPaid, 0, ',', ' ') }} FCFA<br>
+                        - {{ __('show.max_refund') }}: <strong class="text-success">{{ number_format($potentialRefund, 0, ',', ' ') }} FCFA</strong>
                     </div>
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold">
                             <i class="fas fa-hand-holding-usd text-info me-1"></i>
-                            Politique de remboursement
+                            {{ __('show.refund_policy') }}
                         </label>
                         <select name="refund_policy" class="form-select form-select-lg" id="refundPolicy" required>
-                            <option value="full">Remboursement intégral ({{ number_format($potentialRefund, 0, ',', ' ') }} FCFA)</option>
-                            <option value="partial">Remboursement partiel</option>
-                            <option value="none">Aucun remboursement</option>
+                            <option value="full">{{ __('show.full_refund', ['amount' => number_format($potentialRefund, 0, ',', ' ')]) }}</option>
+                            <option value="partial">{{ __('show.partial_refund') }}</option>
+                            <option value="none">{{ __('show.no_refund') }}</option>
                         </select>
                     </div>
                     
                     <div class="mb-3" id="refundAmountSection">
                         <label class="form-label fw-bold">
                             <i class="fas fa-money-bill-wave text-success me-1"></i>
-                            Montant du remboursement (FCFA)
+                            {{ __('show.refund_amount') }}
                         </label>
                         <div class="input-group input-group-lg">
                             <span class="input-group-text bg-light">FCFA</span>
@@ -1587,23 +1587,23 @@
                     <div class="mb-3">
                         <label class="form-label fw-bold">
                             <i class="fas fa-credit-card text-primary me-1"></i>
-                            Méthode de remboursement
+                            {{ __('show.refund_method') }}
                         </label>
                         <select name="payment_method" class="form-select form-select-lg" required>
-                            <option value="cash">Espèces</option>
-                            <option value="card">Carte bancaire</option>
-                            <option value="mobile_money">Mobile Money</option>
-                            <option value="bank_transfer">Virement</option>
+                            <option value="cash">{{ __('show.cash') }}</option>
+                            <option value="card">{{ __('show.credit_card') }}</option>
+                            <option value="mobile_money">{{ __('show.mobile_money') }}</option>
+                            <option value="bank_transfer">{{ __('show.bank_transfer') }}</option>
                         </select>
                     </div>
                     
                     <div class="mb-3">
                         <label class="form-label fw-bold">
                             <i class="fas fa-pen text-secondary me-1"></i>
-                            Raison du départ anticipé
+                            {{ __('show.early_departure_reason') }}
                         </label>
                         <textarea name="early_checkout_reason" class="form-control" rows="3" 
-                                  placeholder="Ex: Urgence, Changement de programme, Insatisfaction..."></textarea>
+                                  placeholder="{{ __('show.early_departure_placeholder') }}"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1642,7 +1642,7 @@ if (document.getElementById('refundPolicy')?.value !== 'partial') {
             <div class="modal-header" style="background: linear-gradient(135deg, var(--amber-500), var(--amber-400)); color: white;">
                 <h5 class="modal-title">
                     <i class="fas fa-clock me-2"></i>
-                    Late checkout - Chambre {{ $transaction->room->number }}
+                    {{ __('show.late_checkout_title', ['room' => $transaction->room->number]) }}
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
@@ -1651,8 +1651,8 @@ if (document.getElementById('refundPolicy')?.value !== 'partial') {
                 <div class="modal-body">
                     <div class="alert alert-info mb-4" style="background: var(--blue-50); border-color: var(--blue-200);">
                         <i class="fas fa-info-circle me-2 text-info"></i>
-                        <strong>Client: {{ $transaction->customer->name }}</strong><br>
-                        Départ normal: {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }} à 12h00
+                        <strong>{{ __('show.client_label', ['name' => $transaction->customer->name]) }}</strong><br>
+                        {{ __('show.normal_departure') }} {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y') }} à 12h00
                     </div>
                     
                     <div class="row">
@@ -1660,10 +1660,10 @@ if (document.getElementById('refundPolicy')?.value !== 'partial') {
                             <div class="mb-3">
                                 <label class="form-label fw-bold">
                                     <i class="fas fa-clock text-warning me-1"></i>
-                                    Nouvelle heure de départ
+                                    {{ __('show.new_departure_time') }}
                                 </label>
                                 <select name="expected_checkout_time" class="form-select form-select-lg" id="lateTimeSelect" required>
-                                    <option value="">Choisir une heure</option>
+                                    <option value="">{{ __('show.choose_time') }}</option>
                                     <option value="15:00">15h00</option>
                                     <option value="16:00">16h00</option>
                                     <option value="17:00">17h00</option>
@@ -1678,13 +1678,13 @@ if (document.getElementById('refundPolicy')?.value !== 'partial') {
                             <div class="mb-3">
                                 <label class="form-label fw-bold">
                                     <i class="fas fa-money-bill-wave text-success me-1"></i>
-                                    Méthode de paiement
+                                    {{ __('show.payment_method') }}
                                 </label>
                                 <select name="payment_method" class="form-select form-select-lg" required>
-                                    <option value="cash">Espèces</option>
-                                    <option value="card">Carte bancaire</option>
-                                    <option value="mobile_money">Mobile Money</option>
-                                    <option value="transfer">Virement</option>
+                                    <option value="cash">{{ __('show.cash') }}</option>
+                                    <option value="card">{{ __('show.credit_card') }}</option>
+                                    <option value="mobile_money">{{ __('show.mobile_money') }}</option>
+                                    <option value="transfer">{{ __('show.transfer') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -1692,12 +1692,12 @@ if (document.getElementById('refundPolicy')?.value !== 'partial') {
                     
                     {{-- BOUTONS DE SUGGESTION RAPIDE --}}
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Suggestions de montant</label>
+                        <label class="form-label fw-bold">{{ __('show.amount_suggestions') }}</label>
                         <div class="d-flex flex-wrap gap-2 mb-2">
                             @php
                                 $prixNuit = $transaction->room->price;
                                 $suggestions = [
-                                    '0' => 'Gratuit',
+                                    '0' => __('show.free'),
                                     round($prixNuit * 0.25) => '25%',
                                     round($prixNuit * 0.5) => '50%',
                                     round($prixNuit * 0.75) => '75%',
@@ -1718,7 +1718,7 @@ if (document.getElementById('refundPolicy')?.value !== 'partial') {
                     {{-- CHAMP DE SAISIE LIBRE --}}
                     <div class="mb-3">
                         <label class="form-label fw-bold">
-                            Supplément (FCFA) - <span class="text-primary">LIBRE</span>
+                            {{ __('show.supplement_label') }} - <span class="text-primary">{{ __('show.free_label') }}</span>
                         </label>
                         <div class="input-group input-group-lg">
                             <span class="input-group-text bg-light">FCFA</span>
@@ -1727,20 +1727,20 @@ if (document.getElementById('refundPolicy')?.value !== 'partial') {
                                    style="font-size: 1.2rem; font-weight: 600;" required>
                         </div>
                         <small class="text-muted">
-                            Prix nuit: {{ number_format($prixNuit, 0, ',', ' ') }} FCFA
+                            {{ __('show.night_price') }} {{ number_format($prixNuit, 0, ',', ' ') }} FCFA
                         </small>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Notes (optionnel)</label>
+                        <label class="form-label fw-bold">{{ __('show.notes_optional') }}</label>
                         <textarea name="notes" class="form-control" rows="2" 
-                                  placeholder="Raison du late checkout..."></textarea>
+                                  placeholder="{{ __('show.late_checkout_reason_placeholder') }}"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">{{ __('show.cancel') }}</button>
                     <button type="submit" class="btn-modern btn-warning-modern">
-                        <i class="fas fa-check me-2"></i>Confirmer late checkout
+                        <i class="fas fa-check me-2"></i>{{ __('show.confirm_late_checkout') }}
                     </button>
                 </div>
             </form>
@@ -1795,7 +1795,7 @@ document.addEventListener('DOMContentLoaded', function () {
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="fas fa-ban text-danger me-2"></i>
-                    Annuler la réservation
+                    {{ __('show.cancel_title') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -1806,16 +1806,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     @if($errors->any())
                     <div class="alert alert-danger">{{ $errors->first() }}</div>
                     @endif
-                    <p class="mb-3">Êtes-vous sûr de vouloir annuler cette réservation ?</p>
+                    <p class="mb-3">{{ __('show.cancel_confirm_text') }}</p>
                     <div class="mb-3">
-                        <label class="form-label">Raison (optionnelle)</label>
-                        <textarea name="cancel_reason" class="form-control" rows="3" placeholder="Pourquoi annuler ?">{{ old('cancel_reason') }}</textarea>
+                        <label class="form-label">{{ __('show.cancel_reason_label') }}</label>
+                        <textarea name="cancel_reason" class="form-control" rows="3" placeholder="{{ __('show.cancel_reason_placeholder') }}">{{ old('cancel_reason') }}</textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">Fermer</button>
-                    <button type="submit" class="btn-modern btn-outline-danger-modern">
-                        <i class="fas fa-ban me-1"></i>Confirmer l'annulation
+                    <button type="button" class="btn-modern btn-outline-modern" data-bs-dismiss="modal">{{ __('show.cancel') }}</button>
+                    <button type="submit" class="btn-modern btn-info-modern">
+                        <i class="fas fa-check me-2"></i>{{ __('show.confirm_cancellation') }}
                     </button>
                 </div>
             </form>
@@ -1834,14 +1834,14 @@ document.addEventListener('DOMContentLoaded', function () {
 {{-- Script pour marquer un paiement comme payé --}}
 <script>
 function markPaymentAsPaid(paymentId) {
-    if (!confirm('Confirmer le paiement de ce supplément ?')) {
+    if (!confirm('{{ __("show.confirm_payment") }}')) {
         return;
     }
     
     // Afficher un indicateur de chargement
     const btn = event.target;
     const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __("show.processing") }}';
     btn.disabled = true;
     
     console.log('Tentative de paiement pour:', paymentId);
@@ -1863,7 +1863,7 @@ function markPaymentAsPaid(paymentId) {
         
         if (data.success) {
             // Toast de succès
-            showToast('success', 'Paiement confirmé !', 'Le paiement a été marqué comme payé avec succès.');
+            showToast('success', '{{ __("show.payment_confirmed_title") }}', '{{ __("show.payment_confirmed_message") }}');
             
             // Recharger après un délai
             setTimeout(() => {
@@ -1875,7 +1875,7 @@ function markPaymentAsPaid(paymentId) {
             btn.disabled = false;
             
             // Afficher l'erreur
-            showToast('error', 'Erreur', data.error || data.message || 'Erreur inconnue');
+            showToast('error', '{{ __("show.error_title") }}', data.error || data.message || '{{ __("show.unknown_error") }}');
         }
     })
     .catch(error => {
@@ -1885,7 +1885,7 @@ function markPaymentAsPaid(paymentId) {
         btn.innerHTML = originalText;
         btn.disabled = false;
         
-        showToast('error', 'Erreur de communication', error.toString());
+        showToast('error', '{{ __("show.communication_error") }}', error.toString());
     });
 }
 
@@ -1943,14 +1943,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const oldStatus = this.options[this.selectedIndex].dataset.oldStatus || this.value;
             
             if (newStatus === 'cancelled') {
-                if (!confirm('⚠️ Êtes-vous sûr de vouloir annuler cette réservation ?')) {
+                if (!confirm('{{ __("show.confirm_cancel_status") }}')) {
                     this.value = oldStatus;
                     return false;
                 }
             }
             
             if (newStatus === 'no_show') {
-                if (!confirm('⚠️ Marquer comme "No Show" ?')) {
+                if (!confirm('{{ __("show.confirm_no_show_status") }}')) {
                     this.value = oldStatus;
                     return false;
                 }

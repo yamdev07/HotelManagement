@@ -286,20 +286,20 @@
 
     {{-- Breadcrumb --}}
     <div class="breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> {{ __('customer.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('customer.index') }}">Clients</a>
+        <a href="{{ route('customer.index') }}">{{ __('customer.clients') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Nouveau client</span>
+        <span class="current">{{ __('customer.breadcrumb_new_customer') }}</span>
     </div>
 
     {{-- En-tête --}}
     <div class="page-header anim-2">
         <div class="header-title">
             <span class="header-icon"><i class="fas fa-user-plus"></i></span>
-            <h1>Ajouter un <em>client</em></h1>
+            <h1>{!! __('customer.header_add_customer') !!}</h1>
         </div>
-        <p class="header-subtitle">Créez un nouveau compte client</p>
+        <p class="header-subtitle">{{ __('customer.header_create_account') }}</p>
     </div>
 
     {{-- Formulaire --}}
@@ -307,7 +307,7 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fas fa-user-plus"></i> Nouveau client</h2>
+                    <h2><i class="fas fa-user-plus"></i> {{ __('customer.breadcrumb_new_customer') }}</h2>
                 </div>
                 <div class="card-body">
                     <form class="row g-4" method="POST" action="{{ route('customer.store') }}" enctype="multipart/form-data">
@@ -316,14 +316,14 @@
                         {{-- Nom --}}
                         <div class="col-md-12">
                             <label for="name" class="form-label">
-                                <i class="fas fa-user"></i> Nom complet
+                                <i class="fas fa-user"></i> {{ __('customer.full_name') }}
                             </label>
                             <input type="text" 
                                    class="form-control @error('name') is-invalid @enderror" 
                                    id="name"
                                    name="name" 
                                    value="{{ old('name') }}"
-                                   placeholder="Ex: Jean Dupont">
+                                   placeholder="{{ __('customer.name_placeholder') }}">
                             @error('name')
                                 <div class="invalid-feedback">
                                     <i class="fas fa-exclamation-circle"></i> {{ $message }}
@@ -352,7 +352,7 @@
                         {{-- Date de naissance --}}
                         <div class="col-md-12">
                             <label for="birthdate" class="form-label">
-                                <i class="fas fa-cake-candles"></i> Date de naissance
+                                <i class="fas fa-cake-candles"></i> {{ __('customer.date_of_birth') }}
                             </label>
                             <input type="date"
                                    class="form-control @error('birthdate') is-invalid @enderror"
@@ -370,14 +370,14 @@
                         {{-- Genre --}}
                         <div class="col-md-12">
                             <label for="gender" class="form-label">
-                                <i class="fas fa-venus-mars"></i> Genre
+                                <i class="fas fa-venus-mars"></i> {{ __('customer.gender') }}
                             </label>
                             <select class="form-select @error('gender') is-invalid @enderror" 
                                     id="gender" 
                                     name="gender">
-                                <option value="" selected disabled>-- Sélectionnez --</option>
-                                <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>Masculin</option>
-                                <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>Féminin</option>
+                                <option value="" selected disabled>{{ __('customer.gender_select') }}</option>
+                                <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>{{ __('customer.gender_male') }}</option>
+                                <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>{{ __('customer.gender_female') }}</option>
                             </select>
                             @error('gender')
                                 <div class="invalid-feedback">
@@ -389,14 +389,14 @@
                         {{-- Profession --}}
                         <div class="col-md-12">
                             <label for="job" class="form-label">
-                                <i class="fas fa-briefcase"></i> Profession
+                                <i class="fas fa-briefcase"></i> {{ __('customer.profession') }}
                             </label>
                             <input type="text" 
                                    class="form-control @error('job') is-invalid @enderror" 
                                    id="job" 
                                    name="job"
                                    value="{{ old('job') }}"
-                                   placeholder="Ex: Ingénieur, Enseignant...">
+                                   placeholder="{{ __('customer.job_placeholder') }}">
                             @error('job')
                                 <div class="invalid-feedback">
                                     <i class="fas fa-exclamation-circle"></i> {{ $message }}
@@ -407,13 +407,13 @@
                         {{-- Adresse --}}
                         <div class="col-md-12">
                             <label for="address" class="form-label">
-                                <i class="fas fa-map-marker-alt"></i> Adresse
+                                <i class="fas fa-map-marker-alt"></i> {{ __('customer.address') }}
                             </label>
                             <textarea class="form-control @error('address') is-invalid @enderror" 
                                       id="address" 
                                       name="address"
                                       rows="3"
-                                      placeholder="Adresse complète...">{{ old('address') }}</textarea>
+                                       placeholder="{{ __('customer.address_placeholder') }}">{{ old('address') }}</textarea>
                             @error('address')
                                 <div class="invalid-feedback">
                                     <i class="fas fa-exclamation-circle"></i> {{ $message }}
@@ -424,7 +424,7 @@
                         {{-- Avatar --}}
                         <div class="col-md-12">
                             <label for="avatar" class="form-label">
-                                <i class="fas fa-camera"></i> Photo de profil
+                                <i class="fas fa-camera"></i> {{ __('customer.profile_photo') }}
                             </label>
                             <input class="form-control @error('avatar') is-invalid @enderror" 
                                    type="file" 
@@ -432,7 +432,7 @@
                                    id="avatar"
                                    accept="image/*">
                             <small class="text-muted d-block mt-1">
-                                <i class="fas fa-info-circle"></i> Formats acceptés: JPG, PNG, GIF (max 2MB)
+                                <i class="fas fa-info-circle"></i> {{ __('customer.avatar_hint') }}
                             </small>
                             @error('avatar')
                                 <div class="invalid-feedback">
@@ -445,10 +445,10 @@
                         <div class="col-12">
                             <div class="form-actions">
                                 <a href="{{ route('customer.index') }}" class="btn btn-gray">
-                                    <i class="fas fa-times"></i> Annuler
+                                    <i class="fas fa-times"></i> {{ __('customer.cancel') }}
                                 </a>
                                 <button type="submit" class="btn btn-green">
-                                    <i class="fas fa-save"></i> Enregistrer
+                                    <i class="fas fa-save"></i> {{ __('customer.save') }}
                                 </button>
                             </div>
                         </div>
@@ -468,9 +468,9 @@
                             <i class="fas fa-user fa-2x"></i>
                         </div>
                         <div>
-                            <small class="text-muted d-block">Astuce</small>
+                            <small class="text-muted d-block">{{ __('customer.tip') }}</small>
                             <span style="color:var(--gray-600); font-size:.85rem;">
-                                Vous pourrez modifier la photo plus tard depuis le profil du client.
+                                {{ __('customer.tip_text') }}
                             </span>
                         </div>
                     </div>

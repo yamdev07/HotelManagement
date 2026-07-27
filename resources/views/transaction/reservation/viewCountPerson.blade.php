@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Nombre de personnes')
+@section('title', __('reservation.step2_page_title'))
 @section('content')
 
 <style>
@@ -281,9 +281,9 @@
     <div class="count-breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.createIdentity') }}">Création client</a>
+        <a href="{{ route('transaction.reservation.createIdentity') }}">{{ __('reservation.step_identity') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Dates et personnes</span>
+        <span class="current">{{ __('reservation.step2_breadcrumb') }}</span>
     </div>
 
     <!-- Header -->
@@ -291,15 +291,15 @@
         <div class="count-brand">
             <div class="count-brand-icon"><i class="fas fa-calendar-alt"></i></div>
             <div>
-                <h1 class="count-header-title">Dates et <em>personnes</em></h1>
+                <h1 class="count-header-title">{{ __('reservation.step2_title_1') }} <em>{{ __('reservation.step2_title_2') }}</em></h1>
                 <p class="count-header-sub">
-                    <i class="fas fa-user me-1"></i> Étape 2/4 · Sélection des dates
+                    <i class="fas fa-user me-1"></i> {{ __('reservation.step2_subtitle') }}
                 </p>
             </div>
         </div>
         <div class="count-header-actions">
             <a href="{{ route('transaction.reservation.createIdentity') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-arrow-left me-2"></i> Retour
+                <i class="fas fa-arrow-left me-2"></i> {{ __('reservation.back') }}
             </a>
         </div>
     </div>
@@ -309,19 +309,19 @@
         <div class="progress-steps">
             <div class="progress-step step-completed">
                 <div class="step-circle"><i class="fas fa-check"></i></div>
-                <div class="step-label">Identité</div>
+                <div class="step-label">{{ __('reservation.step_identity') }}</div>
             </div>
             <div class="progress-step step-active">
                 <div class="step-circle">2</div>
-                <div class="step-label">Dates</div>
+                <div class="step-label">{{ __('reservation.step_dates') }}</div>
             </div>
             <div class="progress-step">
                 <div class="step-circle">3</div>
-                <div class="step-label">Chambre</div>
+                <div class="step-label">{{ __('reservation.step_room') }}</div>
             </div>
             <div class="progress-step">
                 <div class="step-circle">4</div>
-                <div class="step-label">Confirmation</div>
+                <div class="step-label">{{ __('reservation.step_confirmation') }}</div>
             </div>
         </div>
     </div>
@@ -337,7 +337,7 @@
                         <div class="form-group">
                             <label for="count_person" class="form-label">
                                 <i class="fas fa-users"></i>
-                                Nombre de personnes
+                                {{ __('reservation.count_person') }}
                             </label>
                             <input type="number" 
                                    class="form-control @error('count_person') is-invalid @enderror"
@@ -354,7 +354,7 @@
                                 </div>
                             @enderror
                             <div class="form-text" style="font-size:.7rem; color:var(--s400); margin-top:4px;">
-                                <i class="fas fa-info-circle"></i> Maximum 10 personnes
+                                <i class="fas fa-info-circle"></i> {{ __('reservation.max_persons') }}
                             </div>
                         </div>
 
@@ -362,7 +362,7 @@
                         <div class="form-group">
                             <label for="check_in" class="form-label">
                                 <i class="fas fa-sign-in-alt"></i>
-                                Date d'arrivée
+                                {{ __('reservation.arrival_date') }}
                             </label>
                             {{-- Saisie libre (issue #174) : pas de bornes bloquantes, la validation
                                  se fait au clic sur "Suivant" avec un message clair. --}}
@@ -383,7 +383,7 @@
                         <div class="form-group">
                             <label for="check_out" class="form-label">
                                 <i class="fas fa-sign-out-alt"></i>
-                                Date de départ
+                                {{ __('reservation.departure_date') }}
                             </label>
                             <input type="date"
                                    class="form-control @error('check_out') is-invalid @enderror"
@@ -406,7 +406,7 @@
                         <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
                             <button type="submit" class="btn-db btn-db-primary">
                                 <i class="fas fa-arrow-right me-2"></i>
-                                Voir les chambres disponibles
+                                {{ __('reservation.see_available_rooms') }}
                             </button>
                         </div>
                     </form>
@@ -427,7 +427,7 @@
                     <table class="profile-table">
                         <tr>
                             <td class="profile-icon"><i class="fas {{ $customer->gender == 'Male' ? 'fa-male' : 'fa-female' }}"></i></td>
-                            <td>{{ $customer->gender == 'Male' ? 'Masculin' : ($customer->gender == 'Female' ? 'Féminin' : 'Autre') }}</td>
+                            <td>{{ $customer->gender == 'Male' ? __('reservation.man') : ($customer->gender == 'Female' ? __('reservation.woman') : __('reservation.other')) }}</td>
                         </tr>
                         @if($customer->job)
                         <tr>
@@ -464,7 +464,7 @@
                     <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--s100);">
                         <small class="text-muted" style="color:var(--s400);">
                             <i class="fas fa-clock me-1"></i>
-                            Créé le {{ $customer->created_at->format('d/m/Y') }}
+                            {{ __('reservation.created_on') }} {{ $customer->created_at->format('d/m/Y') }}
                         </small>
                     </div>
                 </div>
@@ -491,9 +491,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const today = new Date().toISOString().slice(0, 10);
         let msg = '';
         if (checkIn.value && checkIn.value < today) {
-            msg = "La date d'arrivée est dans le passé : elle sera refusée à l'étape suivante.";
+            msg = "{{ __('reservation.js_past_arrival') }}";
         } else if (checkIn.value && checkOut.value && checkOut.value <= checkIn.value) {
-            msg = "La date de départ doit être après la date d'arrivée.";
+            msg = "{{ __('reservation.js_departure_before_arrival') }}";
         }
         hintText.textContent = msg;
         hint.style.display = msg ? 'flex' : 'none';

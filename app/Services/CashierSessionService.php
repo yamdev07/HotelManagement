@@ -36,20 +36,21 @@ class CashierSessionService
 
     public function getTodayStats(User $user): array
     {
-        $today         = Carbon::today();
+        $today = Carbon::today();
         $activeSession = $this->getActiveSession($user);
 
         try {
             return [
-                'totalBookings'     => Transaction::where('user_id', $user->id)->whereDate('created_at', $today)->count(),
-                'checkins'          => Transaction::where('checked_in_by', $user->id)->whereDate('actual_check_in', $today)->where('status', 'active')->count(),
-                'checkouts'         => Transaction::where('checked_out_by', $user->id)->whereDate('actual_check_out', $today)->where('status', 'completed')->count(),
+                'totalBookings' => Transaction::where('user_id', $user->id)->whereDate('created_at', $today)->count(),
+                'checkins' => Transaction::where('checked_in_by', $user->id)->whereDate('actual_check_in', $today)->where('status', 'active')->count(),
+                'checkouts' => Transaction::where('checked_out_by', $user->id)->whereDate('actual_check_out', $today)->where('status', 'completed')->count(),
                 'completedPayments' => Payment::where('user_id', $user->id)->whereDate('created_at', $today)->where('status', Payment::STATUS_COMPLETED)->count(),
-                'revenue'           => $activeSession?->current_balance ?? 0,
-                'pendingPayments'   => Payment::where('status', Payment::STATUS_PENDING)->count(),
+                'revenue' => $activeSession?->current_balance ?? 0,
+                'pendingPayments' => Payment::where('status', Payment::STATUS_PENDING)->count(),
             ];
         } catch (\Throwable $e) {
             Log::error('getTodayStats: '.$e->getMessage());
+
             return ['totalBookings' => 0, 'checkins' => 0, 'checkouts' => 0, 'completedPayments' => 0, 'revenue' => 0, 'pendingPayments' => 0];
         }
     }
@@ -90,8 +91,8 @@ class CashierSessionService
             return 'En cours';
         }
 
-        $minutes          = $session->start_time->diffInMinutes($session->end_time);
-        $hours            = (int) floor($minutes / 60);
+        $minutes = $session->start_time->diffInMinutes($session->end_time);
+        $hours = (int) floor($minutes / 60);
         $remainingMinutes = $minutes % 60;
 
         return $hours > 0 ? "{$hours}h {$remainingMinutes}min" : "{$remainingMinutes} min";
@@ -100,10 +101,10 @@ class CashierSessionService
     public function getReceptionistStats(int $userId): array
     {
         return [
-            'totalSessions'       => CashierSession::where('user_id', $userId)->count(),
-            'activeSessions'      => CashierSession::where('user_id', $userId)->where('status', 'active')->count(),
-            'totalRevenue'        => Payment::where('user_id', $userId)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
-            'avgSessionDuration'  => $this->calculateAverageDuration($userId),
+            'totalSessions' => CashierSession::where('user_id', $userId)->count(),
+            'activeSessions' => CashierSession::where('user_id', $userId)->where('status', 'active')->count(),
+            'totalRevenue' => Payment::where('user_id', $userId)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0,
+            'avgSessionDuration' => $this->calculateAverageDuration($userId),
         ];
     }
 
@@ -128,10 +129,10 @@ class CashierSessionService
         $hour = (int) $now->format('H');
 
         return match (true) {
-            $hour >= 5  && $hour < 12 => 'morning',
+            $hour >= 5 && $hour < 12 => 'morning',
             $hour >= 12 && $hour < 17 => 'afternoon',
             $hour >= 17 && $hour < 22 => 'evening',
-            default                   => 'night',
+            default => 'night',
         };
     }
 
@@ -139,35 +140,35 @@ class CashierSessionService
     {
         return DB::transaction(function () use ($session, $user, $physicalBalance, $closingNotes) {
             $completedPayments = Payment::where('cashier_session_id', $session->id)->where('status', Payment::STATUS_COMPLETED)->sum('amount') ?? 0;
-            $refundedPayments  = Payment::where('cashier_session_id', $session->id)->where('status', Payment::STATUS_REFUNDED)->sum('amount') ?? 0;
+            $refundedPayments = Payment::where('cashier_session_id', $session->id)->where('status', Payment::STATUS_REFUNDED)->sum('amount') ?? 0;
             $theoreticalBalance = $session->initial_balance + $completedPayments - $refundedPayments;
-            $difference        = $physicalBalance - $theoreticalBalance;
-            $endTime           = Carbon::now();
+            $difference = $physicalBalance - $theoreticalBalance;
+            $endTime = Carbon::now();
 
             $notes = ($session->notes ? $session->notes."\n" : '')
                 ."Clôturée le {$endTime->format('d/m/Y H:i')} par {$user->name}";
 
             $session->update([
-                'final_balance'       => $physicalBalance,
+                'final_balance' => $physicalBalance,
                 'theoretical_balance' => $theoreticalBalance,
-                'balance_difference'  => $difference,
-                'end_time'            => $endTime,
-                'status'              => 'closed',
-                'closing_notes'       => $closingNotes,
-                'notes'               => $notes,
+                'balance_difference' => $difference,
+                'end_time' => $endTime,
+                'status' => 'closed',
+                'closing_notes' => $closingNotes,
+                'notes' => $notes,
             ]);
 
             if (abs($difference) > 0.01) {
                 Payment::create([
-                    'user_id'            => $user->id,
-                    'created_by'         => $user->id,
-                    'transaction_id'     => null,
+                    'user_id' => $user->id,
+                    'created_by' => $user->id,
+                    'transaction_id' => null,
                     'cashier_session_id' => $session->id,
-                    'amount'             => abs($difference),
-                    'payment_method'     => 'cash',
-                    'status'             => Payment::STATUS_COMPLETED,
-                    'description'        => $difference > 0 ? 'Excédent à la clôture' : 'Manquant à la clôture',
-                    'reference'          => 'ADJ-'.$session->id.'-'.time(),
+                    'amount' => abs($difference),
+                    'payment_method' => 'cash',
+                    'status' => Payment::STATUS_COMPLETED,
+                    'description' => $difference > 0 ? 'Excédent à la clôture' : 'Manquant à la clôture',
+                    'reference' => 'ADJ-'.$session->id.'-'.time(),
                 ]);
             }
 

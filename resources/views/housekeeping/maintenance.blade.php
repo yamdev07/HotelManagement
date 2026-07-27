@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Chambres en Maintenance')
+@section('title', __('housekeeping.maintenance.title'))
 
 @section('content')
 <style>
@@ -552,7 +552,7 @@
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('housekeeping.index') }}">Housekeeping</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Maintenance</span>
+        <span class="current">{{ __('housekeeping.maintenance.breadcrumb_maintenance') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -560,16 +560,16 @@
         <div class="header-title">
             <span class="header-icon"><i class="fas fa-tools"></i></span>
             <div>
-                <h1>Chambres en <em>maintenance</em></h1>
-                <p class="header-subtitle">Gestion des chambres en réparation</p>
+                <h1>{!! __('housekeeping.maintenance.header') !!}</h1>
+                <p class="header-subtitle">{{ __('housekeeping.maintenance.header_subtitle') }}</p>
             </div>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('housekeeping.index') }}" class="btn btn-gray">
-                <i class="fas fa-arrow-left"></i> Retour
+                <i class="fas fa-arrow-left"></i> {{ __('housekeeping.maintenance.btn_back') }}
             </a>
             <button class="btn btn-green" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
-                <i class="fas fa-plus-circle"></i> Nouvelle maintenance
+                <i class="fas fa-plus-circle"></i> {{ __('housekeeping.maintenance.btn_new') }}
             </button>
         </div>
     </div>
@@ -578,28 +578,28 @@
     <div class="stats-grid anim-3">
         <div class="stat-card">
             <div class="stat-left">
-                <div class="stat-label">Total maintenance</div>
+                <div class="stat-label">{{ __('housekeeping.maintenance.stat_total') }}</div>
                 <div class="stat-number">{{ $stats['total_maintenance'] ?? 0 }}</div>
             </div>
             <div class="stat-icon"><i class="fas fa-tools"></i></div>
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <div class="stat-label">En cours</div>
+                <div class="stat-label">{{ __('housekeeping.maintenance.stat_in_progress') }}</div>
                 <div class="stat-number">{{ $stats['in_progress'] ?? 0 }}</div>
             </div>
             <div class="stat-icon"><i class="fas fa-spinner"></i></div>
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <div class="stat-label">Planifiées</div>
+                <div class="stat-label">{{ __('housekeeping.maintenance.stat_scheduled') }}</div>
                 <div class="stat-number">{{ $stats['scheduled'] ?? 0 }}</div>
             </div>
             <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <div class="stat-label">Plus ancienne</div>
+                <div class="stat-label">{{ __('housekeeping.maintenance.stat_oldest') }}</div>
                 <div class="stat-number" style="font-size:1rem;">
                     @if(isset($stats['longest_maintenance']) && $stats['longest_maintenance'])
                         {{ \Carbon\Carbon::parse($stats['longest_maintenance'])->diffForHumans(['parts' => 1]) }}
@@ -619,7 +619,7 @@
             <div class="secondary-card">
                 <div class="secondary-header">
                     <i class="fas fa-chart-pie"></i>
-                    <strong>Répartition par raison</strong>
+                    <strong>{{ __('housekeeping.maintenance.reason_distribution') }}</strong>
                 </div>
                 <div class="card-body p-3">
                     <div class="d-flex flex-wrap gap-2">
@@ -638,7 +638,7 @@
     {{-- Liste des chambres --}}
     <div class="card">
         <div class="card-header">
-            <div><i class="fas fa-tools"></i> Chambres en maintenance ({{ $maintenanceRooms->count() }})</div>
+            <div><i class="fas fa-tools"></i> {{ __('housekeeping.maintenance.card_list') }} ({{ $maintenanceRooms->count() }})</div>
             <span class="badge badge-green">{{ now()->format('H:i') }}</span>
         </div>
         <div class="card-body p-0">
@@ -647,13 +647,13 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Chambre</th>
-                                <th>Type</th>
-                                <th>Raison</th>
-                                <th>Début</th>
-                                <th>Durée</th>
-                                <th>Demandé par</th>
-                                <th class="text-center">Actions</th>
+                                <th>{{ __('housekeeping.maintenance.th_room') }}</th>
+                                <th>{{ __('housekeeping.maintenance.th_type') }}</th>
+                                <th>{{ __('housekeeping.maintenance.th_reason') }}</th>
+                                <th>{{ __('housekeeping.maintenance.th_start') }}</th>
+                                <th>{{ __('housekeeping.maintenance.th_duration') }}</th>
+                                <th>{{ __('housekeeping.maintenance.th_requested_by') }}</th>
+                                <th class="text-center">{{ __('housekeeping.maintenance.th_actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -668,7 +668,7 @@
                                         <div class="room-badge">{{ $room->number }}</div>
                                         <div class="room-info">
                                             <div class="room-number">{{ $room->type->name ?? 'Standard' }}</div>
-                                            <div class="room-type">Étage {{ $room->floor ?? '?' }}</div>
+                                            <div class="room-type">{{ __('housekeeping.maintenance.floor') }} {{ $room->floor ?? '?' }}</div>
                                         </div>
                                     </div>
                                 </td>
@@ -718,10 +718,10 @@
             @else
                 <div class="empty-state">
                     <i class="fas fa-check-circle" style="color:var(--green-600);"></i>
-                    <h4>Aucune chambre en maintenance</h4>
-                    <p>Toutes les chambres sont opérationnelles</p>
+                    <h4>{{ __('housekeeping.maintenance.empty_title') }}</h4>
+                    <p>{{ __('housekeeping.maintenance.empty_desc') }}</p>
                     <button class="btn btn-green" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
-                        <i class="fas fa-plus-circle"></i> Ajouter
+                        <i class="fas fa-plus-circle"></i> {{ __('housekeeping.maintenance.btn_add') }}
                     </button>
                 </div>
             @endif
@@ -735,7 +735,7 @@
             <div class="secondary-card">
                 <div class="secondary-header">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Maintenance longue durée (>3 jours)</strong>
+                    <strong>{{ __('housekeeping.maintenance.long_maintenance') }}</strong>
                 </div>
                 <div class="list-group">
                     @php $long = $maintenanceRooms->filter(fn($r) => \Carbon\Carbon::parse($r->maintenance_started_at)->diffInDays(now()) > 3); @endphp
@@ -754,7 +754,7 @@
             <div class="secondary-card">
                 <div class="secondary-header">
                     <i class="fas fa-chart-pie"></i>
-                    <strong>Répartition par type</strong>
+                    <strong>{{ __('housekeeping.maintenance.type_distribution') }}</strong>
                 </div>
                 <div class="card-body p-3">
                     @php $byType = $maintenanceRooms->groupBy(fn($r) => $r->type->name ?? 'Inconnu')->map->count(); @endphp
@@ -781,16 +781,16 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-plus-circle" style="color:var(--green-600);"></i> Nouvelle maintenance</h5>
+                <h5 class="modal-title"><i class="fas fa-plus-circle" style="color:var(--green-600);"></i> {{ __('housekeeping.maintenance.modal_new_title') }}</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form action="" method="POST" id="addMaintenanceForm">
                 @csrf
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label class="form-label">Chambre</label>
+                        <label class="form-label">{{ __('housekeeping.maintenance.form_room') }}</label>
                         <select class="form-select" name="room_id" required>
-                            <option value="">-- Sélectionner --</option>
+                            <option value="">{{ __('housekeeping.maintenance.form_select') }}</option>
                             @php $rooms = \App\Models\Room::where('room_status_id', '!=', 2)->orderBy('number')->get(); @endphp
                             @foreach($rooms as $r)
                                 <option value="{{ $r->id }}">Chambre {{ $r->number }} - {{ $r->type->name ?? 'Standard' }}</option>
@@ -798,9 +798,9 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Raison</label>
+                        <label class="form-label">{{ __('housekeeping.maintenance.form_reason') }}</label>
                         <select class="form-select" name="maintenance_reason" required>
-                            <option value="">-- Sélectionner --</option>
+                            <option value="">{{ __('housekeeping.maintenance.form_select') }}</option>
                             <option value="Électricité">Électricité</option>
                             <option value="Plomberie">Plomberie</option>
                             <option value="Climatisation">Climatisation</option>
@@ -813,17 +813,17 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Durée estimée (heures)</label>
+                        <label class="form-label">{{ __('housekeeping.maintenance.form_duration') }}</label>
                         <input type="number" class="form-control" name="estimated_duration" min="1" max="168" value="4">
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Notes</label>
+                        <label class="form-label">{{ __('housekeeping.maintenance.form_notes') }}</label>
                         <textarea class="form-control" name="additional_notes" rows="2"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-gray" data-bs-dismiss="modal">Annuler</button>
-                    <button class="btn btn-green" type="submit">Ajouter</button>
+                    <button class="btn btn-gray" data-bs-dismiss="modal">{{ __('housekeeping.maintenance.btn_cancel') }}</button>
+                    <button class="btn btn-green" type="submit">{{ __('housekeeping.maintenance.btn_add_confirm') }}</button>
                 </div>
             </form>
         </div>
@@ -836,7 +836,7 @@
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-info-circle" style="color:var(--green-600);"></i> Détails - Chambre {{ $room->number }}</h5>
+                <h5 class="modal-title"><i class="fas fa-info-circle" style="color:var(--green-600);"></i> {{ __('housekeeping.maintenance.modal_details_title') }} {{ $room->number }}</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -846,35 +846,35 @@
                             <div class="room-badge">{{ $room->number }}</div>
                             <div>
                                 <h6>{{ $room->type->name ?? 'Standard' }}</h6>
-                                <small class="text-muted">Étage {{ $room->floor ?? '?' }}</small>
+                                <small class="text-muted">{{ __('housekeeping.maintenance.floor') }} {{ $room->floor ?? '?' }}</small>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <span class="badge badge-red"><i class="fas fa-tools"></i> EN MAINTENANCE</span>
+                        <span class="badge badge-red"><i class="fas fa-tools"></i> {{ __('housekeeping.maintenance.badge_in_maintenance') }}</span>
                     </div>
                 </div>
                 <div class="row g-3">
                     <div class="col-sm-6">
-                        <small class="text-muted">Début</small>
+                        <small class="text-muted">{{ __('housekeeping.maintenance.detail_start') }}</small>
                         <div class="fw-bold">{{ \Carbon\Carbon::parse($room->maintenance_started_at)->format('d/m/Y H:i') }}</div>
                     </div>
                     <div class="col-sm-6">
-                        <small class="text-muted">Durée</small>
+                        <small class="text-muted">{{ __('housekeeping.maintenance.detail_duration') }}</small>
                         <div class="fw-bold">{{ \Carbon\Carbon::parse($room->maintenance_started_at)->diffForHumans(now(), true) }}</div>
                     </div>
                     <div class="col-12">
-                        <small class="text-muted">Raison</small>
+                        <small class="text-muted">{{ __('housekeeping.maintenance.detail_reason') }}</small>
                         <div class="alert alert-green mt-1">{{ $room->maintenance_reason }}</div>
                     </div>
                     @if($room->additional_notes)
                     <div class="col-12">
-                        <small class="text-muted">Notes</small>
+                        <small class="text-muted">{{ __('housekeeping.maintenance.detail_notes') }}</small>
                         <div class="bg-light p-3 rounded">{{ $room->additional_notes }}</div>
                     </div>
                     @endif
                     <div class="col-sm-6">
-                        <small class="text-muted">Demandé par</small>
+                        <small class="text-muted">{{ __('housekeeping.maintenance.detail_requested_by') }}</small>
                         @php $req = \App\Models\User::find($room->maintenance_requested_by); @endphp
                         @if($req)
                         <div class="d-flex align-items-center gap-2 mt-1">
@@ -886,11 +886,11 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-gray" data-bs-dismiss="modal">Fermer</button>
-                <a href="{{ route('housekeeping.maintenance-form', $room->id) }}" class="btn btn-green">Modifier</a>
+                <button class="btn btn-gray" data-bs-dismiss="modal">{{ __('housekeeping.maintenance.btn_close') }}</button>
+                <a href="{{ route('housekeeping.maintenance-form', $room->id) }}" class="btn btn-green">{{ __('housekeeping.maintenance.btn_edit') }}</a>
                 <form action="{{ route('housekeeping.end-maintenance', $room->id) }}" method="POST" class="d-inline">
                     @csrf
-                    <button class="btn btn-red" onclick="return confirm('Terminer la maintenance ?')">Terminer</button>
+                    <button class="btn btn-red" onclick="return confirm(@json(__('housekeeping.maintenance.confirm_end')))">{{ __('housekeeping.maintenance.btn_end') }}</button>
                 </form>
             </div>
         </div>
@@ -904,7 +904,7 @@ document.getElementById('addMaintenanceForm')?.addEventListener('submit', functi
     const reason = this.querySelector('[name="maintenance_reason"]').value;
     if (!room || !reason) {
         e.preventDefault();
-        alert('Veuillez remplir tous les champs');
+        alert(@json(__('housekeeping.maintenance.confirm_fill_fields')));
     } else {
         const action = "{{ route('housekeeping.mark-maintenance', ':roomId') }}".replace(':roomId', room);
         this.setAttribute('action', action);

@@ -7,16 +7,20 @@ return new class extends Migration
 {
     public function up()
     {
-        // Ajoute les nouveaux rôles à l'ENUM
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Cashier','Manager') NULL");
+        if (DB::getDriverName() === 'mysql') {
+            // Ajoute les nouveaux rôles à l'ENUM
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Cashier','Manager') NULL");
 
-        // Optionnel : Mettre 'Customer' comme valeur par défaut
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Cashier','Manager') DEFAULT 'Customer'");
+            // Optionnel : Mettre 'Customer' comme valeur par défaut
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer','Receptionist','Cashier','Manager') DEFAULT 'Customer'");
+        }
     }
 
     public function down()
     {
-        // Retour aux valeurs originales
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer') DEFAULT NULL");
+        if (DB::getDriverName() === 'mysql') {
+            // Retour aux valeurs originales
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('Super','Admin','Customer') DEFAULT NULL");
+        }
     }
 };

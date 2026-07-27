@@ -1,13 +1,13 @@
 @extends('template.master')
 
-@section('title', 'Mon établissement')
+@section('title', __('hotel-settings.page_title'))
 
 @section('content')
 <div class="container-fluid py-4">
     <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
-        <h3 class="mb-0"><i class="fas fa-palette me-2"></i> Personnalisation de l'établissement</h3>
+        <h3 class="mb-0"><i class="fas fa-palette me-2"></i> {{ __('hotel-settings.header') }}</h3>
         <a href="{{ $hotel->publicUrl() }}" target="_blank" class="btn btn-outline-primary">
-            <i class="fas fa-up-right-from-square me-1"></i> Voir mon site
+            <i class="fas fa-up-right-from-square me-1"></i> {{ __('hotel-settings.view_site') }}
         </a>
     </div>
 
@@ -30,27 +30,27 @@
             {{-- Identité & infos --}}
             <div class="col-lg-7">
                 <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-header bg-white fw-semibold"><i class="fas fa-circle-info me-2"></i>Informations</div>
+                    <div class="card-header bg-white fw-semibold"><i class="fas fa-circle-info me-2"></i>{{ __('hotel-settings.card_info') }}</div>
                     <div class="card-body">
                         <div class="row g-3">
                             <div class="col-md-8">
-                                <label class="form-label">Nom de l'établissement *</label>
+                                <label class="form-label">{{ __('hotel-settings.label_name') }}</label>
                                 <input type="text" name="name" class="form-control" value="{{ old('name', $hotel->name) }}" required>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label">Devise</label>
+                                <label class="form-label">{{ __('hotel-settings.label_currency') }}</label>
                                 <input type="text" name="currency" class="form-control" value="{{ old('currency', $hotel->currency) }}">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Email de contact</label>
+                                <label class="form-label">{{ __('hotel-settings.label_email') }}</label>
                                 <input type="email" name="contact_email" class="form-control" value="{{ old('contact_email', $hotel->contact_email) }}">
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Téléphone</label>
+                                <label class="form-label">{{ __('hotel-settings.label_phone') }}</label>
                                 <input type="text" name="contact_phone" class="form-control" value="{{ old('contact_phone', $hotel->contact_phone) }}">
                             </div>
                             <div class="col-12">
-                                <label class="form-label">Adresse</label>
+                                <label class="form-label">{{ __('hotel-settings.label_address') }}</label>
                                 <input type="text" name="address" class="form-control" value="{{ old('address', $hotel->address) }}">
                             </div>
                         </div>
@@ -59,28 +59,28 @@
 
                 {{-- Couleurs --}}
                 <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white fw-semibold"><i class="fas fa-palette me-2"></i>Couleurs de la marque</div>
+                    <div class="card-header bg-white fw-semibold"><i class="fas fa-palette me-2"></i>{{ __('hotel-settings.card_colors') }}</div>
                     <div class="card-body">
                         <div class="row g-4">
                             <div class="col-md-6">
-                                <label class="form-label">Couleur principale</label>
+                                <label class="form-label">{{ __('hotel-settings.label_primary_color') }}</label>
                                 <div class="input-group">
                                     <input type="color" name="primary_color" class="form-control form-control-color"
                                            value="{{ old('primary_color', $hotel->primaryColor()) }}"
                                            oninput="document.getElementById('pc').value=this.value">
                                     <input type="text" id="pc" class="form-control" value="{{ old('primary_color', $hotel->primaryColor()) }}" readonly>
                                 </div>
-                                <small class="text-muted">Boutons, liens et accents.</small>
+                                <small class="text-muted">{{ __('hotel-settings.label_primary_hint') }}</small>
                             </div>
                             <div class="col-md-6">
-                                <label class="form-label">Couleur secondaire</label>
+                                <label class="form-label">{{ __('hotel-settings.label_secondary_color') }}</label>
                                 <div class="input-group">
                                     <input type="color" name="secondary_color" class="form-control form-control-color"
                                            value="{{ old('secondary_color', $hotel->secondaryColor()) }}"
                                            oninput="document.getElementById('sc').value=this.value">
                                     <input type="text" id="sc" class="form-control" value="{{ old('secondary_color', $hotel->secondaryColor()) }}" readonly>
                                 </div>
-                                <small class="text-muted">Fond de la barre latérale.</small>
+                                <small class="text-muted">{{ __('hotel-settings.label_secondary_hint') }}</small>
                             </div>
                         </div>
                     </div>
@@ -90,7 +90,7 @@
             {{-- Logo --}}
             <div class="col-lg-5">
                 <div class="card shadow-sm border-0">
-                    <div class="card-header bg-white fw-semibold"><i class="fas fa-image me-2"></i>Logo</div>
+                    <div class="card-header bg-white fw-semibold"><i class="fas fa-image me-2"></i>{{ __('hotel-settings.card_logo') }}</div>
                     <div class="card-body text-center">
                         <div class="mb-3 p-4 rounded-3 bg-light d-flex align-items-center justify-content-center" style="min-height:140px;">
                             @if ($hotel->logoUrl())
@@ -100,7 +100,7 @@
                             @endif
                         </div>
                         <input type="file" name="logo" class="form-control" accept="image/*">
-                        <small class="text-muted d-block mt-2">PNG, JPG, SVG ou WEBP · max 2 Mo.</small>
+                        <small class="text-muted d-block mt-2">{{ __('hotel-settings.logo_formats') }}</small>
                     </div>
                 </div>
             </div>
@@ -108,23 +108,23 @@
 
         {{-- Contenu de la vitrine publique --}}
         <div class="card shadow-sm border-0 mt-4">
-            <div class="card-header bg-white fw-semibold"><i class="fas fa-globe me-2"></i>Contenu de la vitrine</div>
+            <div class="card-header bg-white fw-semibold"><i class="fas fa-globe me-2"></i>{{ __('hotel-settings.card_showcase') }}</div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-12">
-                        <label class="form-label">Slogan</label>
+                        <label class="form-label">{{ __('hotel-settings.label_tagline') }}</label>
                         <input type="text" name="tagline" class="form-control" value="{{ old('tagline', $hotel->tagline) }}"
                                placeholder="Ex : Votre confort, notre priorité">
                     </div>
                     <div class="col-12">
-                        <label class="form-label">Description</label>
+                        <label class="form-label">{{ __('hotel-settings.label_description') }}</label>
                         <textarea name="description" class="form-control" rows="3"
                                   placeholder="Présentez votre établissement…">{{ old('description', $hotel->description) }}</textarea>
                     </div>
                     <div class="col-md-7">
-                        <label class="form-label">Image de couverture</label>
+                        <label class="form-label">{{ __('hotel-settings.label_cover') }}</label>
                         <input type="file" name="cover_image" class="form-control" accept="image/*">
-                        <small class="text-muted">Affichée en bandeau de la vitrine · max 4 Mo.</small>
+                        <small class="text-muted">{{ __('hotel-settings.cover_hint') }}</small>
                     </div>
                     <div class="col-md-5">
                         @if ($hotel->coverUrl())
@@ -137,15 +137,15 @@
 
         {{-- Bloc "À propos" --}}
         <div class="card shadow-sm border-0 mt-4">
-            <div class="card-header bg-white fw-semibold"><i class="fas fa-circle-info me-2"></i>Bloc « À propos »</div>
+            <div class="card-header bg-white fw-semibold"><i class="fas fa-circle-info me-2"></i>{{ __('hotel-settings.card_about') }}</div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-5">
-                        <label class="form-label">Titre</label>
+                        <label class="form-label">{{ __('hotel-settings.label_about_title') }}</label>
                         <input type="text" name="about_title" class="form-control" value="{{ old('about_title', $hotel->about_title) }}" placeholder="Une expérience d'exception">
                     </div>
                     <div class="col-md-7">
-                        <label class="form-label">Texte de présentation</label>
+                        <label class="form-label">{{ __('hotel-settings.label_about_text') }}</label>
                         <textarea name="about_text" class="form-control" rows="2" placeholder="Décrivez votre établissement…">{{ old('about_text', $hotel->about_text) }}</textarea>
                     </div>
                 </div>
@@ -155,11 +155,11 @@
         {{-- Services personnalisés (répéteur dynamique) --}}
         <div class="card shadow-sm border-0 mt-4">
             <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
-                <span><i class="fas fa-concierge-bell me-2"></i>Services de la vitrine</span>
-                <button type="button" class="btn btn-sm btn-outline-primary" id="add-service"><i class="fas fa-plus me-1"></i>Ajouter</button>
+                <span><i class="fas fa-concierge-bell me-2"></i>{{ __('hotel-settings.card_services') }}</span>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="add-service"><i class="fas fa-plus me-1"></i>{{ __('hotel-settings.btn_add') }}</button>
             </div>
             <div class="card-body">
-                <p class="text-muted small">Laissez vide pour afficher les services par défaut. Icône = nom Font Awesome (ex. <code>fa-wifi</code>, <code>fa-spa</code>).</p>
+                <p class="text-muted small">{{ __('hotel-settings.services_hint') }}</p>
                 <div id="services-list">
                     @php $svcRows = old('services', $hotel->services ?: []); @endphp
                     @forelse ($svcRows as $i => $svc)
@@ -177,7 +177,7 @@
 
         {{-- Réseaux sociaux --}}
         <div class="card shadow-sm border-0 mt-4">
-            <div class="card-header bg-white fw-semibold"><i class="fas fa-share-nodes me-2"></i>Réseaux sociaux</div>
+            <div class="card-header bg-white fw-semibold"><i class="fas fa-share-nodes me-2"></i>{{ __('hotel-settings.card_social') }}</div>
             <div class="card-body">
                 <div class="row g-3">
                     @php $soc = old('socials', $hotel->socials ?: []); @endphp
@@ -203,15 +203,15 @@
 
         {{-- Sections affichées sur la vitrine --}}
         <div class="card shadow-sm border-0 mt-4">
-            <div class="card-header bg-white fw-semibold"><i class="fas fa-toggle-on me-2"></i>Sections de la vitrine</div>
+            <div class="card-header bg-white fw-semibold"><i class="fas fa-toggle-on me-2"></i>{{ __('hotel-settings.card_sections') }}</div>
             <div class="card-body">
                 <div class="row g-3">
                     @php
                         $sections = [
-                            'show_rooms'      => 'Chambres',
-                            'show_restaurant' => 'Restaurant',
-                            'show_services'   => 'Services',
-                            'show_contact'    => 'Contact',
+                            'show_rooms'      => __('hotel-settings.section_rooms'),
+                            'show_restaurant' => __('hotel-settings.section_restaurant'),
+                            'show_services'   => __('hotel-settings.section_services'),
+                            'show_contact'    => __('hotel-settings.section_contact'),
                         ];
                     @endphp
                     @foreach ($sections as $field => $label)
@@ -230,7 +230,7 @@
         </div>
 
         <div class="mt-4">
-            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> Enregistrer</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i> {{ __('hotel-settings.btn_save') }}</button>
         </div>
     </form>
 </div>
@@ -243,8 +243,8 @@
         const rowHtml = (i) => `
             <div class="row g-2 mb-2 align-items-center service-row">
                 <div class="col-md-3"><input type="text" name="services[${i}][icon]" class="form-control" placeholder="fa-star"></div>
-                <div class="col-md-3"><input type="text" name="services[${i}][title]" class="form-control" placeholder="Titre"></div>
-                <div class="col-md-5"><input type="text" name="services[${i}][description]" class="form-control" placeholder="Description"></div>
+                <div class="col-md-3"><input type="text" name="services[${i}][title]" class="form-control" placeholder="{{ __('hotel-settings.service_placeholder_title') }}"></div>
+                <div class="col-md-5"><input type="text" name="services[${i}][description]" class="form-control" placeholder="{{ __('hotel-settings.service_placeholder_description') }}"></div>
                 <div class="col-md-1 text-end"><button type="button" class="btn btn-sm btn-outline-danger remove-service"><i class="fas fa-trash"></i></button></div>
             </div>`;
 

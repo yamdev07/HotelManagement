@@ -48,7 +48,7 @@ class TransactionPolicy
 
     public function cancel(User $user, Transaction $transaction): bool
     {
-        if (! $user->roleEnum->canManageReservations()) {
+        if (! $user->roleEnum->isStaff()) {
             return false;
         }
 

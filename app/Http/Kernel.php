@@ -44,8 +44,10 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\EnsureHotelActive::class,
             \App\Http\Middleware\EnsureOnboarded::class,
+            \App\Http\Middleware\SetLocale::class,
 
             // SUPPRIMEZ CETTE LIGNE TEMPORAIREMENT POUR DÉBOGUER
             // \App\Http\Middleware\TrackUserActivity::class,
@@ -83,7 +85,7 @@ class Kernel extends HttpKernel
         'admin.restrict' => CheckAdminRestriction::class,
         'receptionist.restrict' => CheckReceptionistRestriction::class,
         'housekeeping.readonly' => CheckHousekeepingReadOnly::class,
-        
+
         // SUPPRIMEZ CES LIGNES TEMPORAIREMENT POUR DÉBOGUER
         // 'activity' => TrackUserActivity::class,
         // 'activity.withparams' => \App\Http\Middleware\TrackUserActivity::class,

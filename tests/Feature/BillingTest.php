@@ -17,15 +17,15 @@ class BillingTest extends TestCase
     private function hotelWithAdmin(array $attrs = []): array
     {
         $hotel = Hotel::create(array_merge([
-            'name'                    => 'Hotel Billing',
-            'slug'                    => Str::slug('Hotel Billing '.Str::random(4)),
-            'country'                 => 'BJ',
-            'currency'                => 'XOF',
-            'is_active'               => true,
-            'plan'                    => 'pro',
-            'room_limit'              => 20,
+            'name' => 'Hotel Billing',
+            'slug' => Str::slug('Hotel Billing '.Str::random(4)),
+            'country' => 'BJ',
+            'currency' => 'XOF',
+            'is_active' => true,
+            'plan' => 'pro',
+            'room_limit' => 20,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addDays(3),
+            'subscription_ends_at' => now()->addDays(3),
         ], $attrs));
 
         $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
@@ -39,8 +39,8 @@ class BillingTest extends TestCase
 
         Http::fake([
             '*/transactions/999/token' => Http::response(['token' => 'tok', 'url' => 'https://sandbox-checkout.fedapay.com/tok'], 200),
-            '*/transactions/999'       => Http::response(['v1/transaction' => ['id' => 999, 'status' => $status]], 200),
-            '*/transactions'           => Http::response(['v1/transaction' => ['id' => 999, 'status' => 'pending']], 200),
+            '*/transactions/999' => Http::response(['v1/transaction' => ['id' => 999, 'status' => $status]], 200),
+            '*/transactions' => Http::response(['v1/transaction' => ['id' => 999, 'status' => 'pending']], 200),
         ]);
     }
 

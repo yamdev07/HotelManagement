@@ -153,7 +153,7 @@ class ReceptionistSessionController extends Controller
         if (Auth::user()->role !== 'Super' &&
             Auth::user()->role !== 'Admin' &&
             Auth::user()->id !== $session->user_id) {
-            abort(403, 'Accès non autorisé');
+            abort(403, __('flash.receptionist_session_unauthorized'));
         }
 
         $actions = $session->actions()

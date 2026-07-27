@@ -14,10 +14,10 @@
             </div>
             <div class="brand-text ms-2">
                 <span class="brand-name">{{ $currentHotel->name ?? 'Hotel Management' }}</span>
-                <small class="brand-subtitle d-block">Gestion Hôtelière</small>
+                <small class="brand-subtitle d-block">{{ __('sidebar.brand_subtitle') }}</small>
             </div>
         </div>
-        <button id="toggle-sidebar" class="btn-icon-toggle" title="Réduire">
+        <button id="toggle-sidebar" class="btn-icon-toggle" title="{{ __('sidebar.toggle_title') }}">
             <i class="fas fa-bars"></i>
         </button>
     </a>
@@ -27,7 +27,7 @@
 
         <!-- Sidebar Header (mobile only) -->
         <div class="sidebar-header-mobile">
-            <span class="header-title-mobile"><i class="fas fa-bars me-2"></i>Menu</span>
+            <span class="header-title-mobile"><i class="fas fa-bars me-2"></i>{{ __('sidebar.mobile_menu') }}</span>
             <button id="toggle-sidebar-sm" class="btn-icon-toggle">
                 <i class="fas fa-times"></i>
             </button>
@@ -51,14 +51,14 @@
                 <!-- TABLEAU DE BORD -->
                 @if (!in_array(auth()->user()->role, ['Customer', 'Servant', 'Cuisiner']))
                 <div class="nav-section">
-                    <div class="nav-section-title">Tableau de Bord</div>
+                    <div class="nav-section-title">{{ __('sidebar.section_dashboard') }}</div>
 
                     <a href="{{ route('dashboard.index') }}" class="nav-item {{ $activeClass('dashboard.index') }}"
-                        data-tooltip="Dashboard">
+                        data-tooltip="{{ __('sidebar.dashboard_title') }}">
                         <div class="nav-icon"><i class="fas fa-chart-pie"></i></div>
                         <div class="nav-content">
-                            <div class="nav-title">Dashboard</div>
-                            <div class="nav-subtitle">Vue d'ensemble</div>
+                            <div class="nav-title">{{ __('sidebar.dashboard_title') }}</div>
+                            <div class="nav-subtitle">{{ __('sidebar.dashboard_subtitle') }}</div>
                         </div>
                     </a>
 
@@ -66,11 +66,11 @@
                         @if (Route::has('availability.dashboard'))
                             <a href="{{ route('availability.dashboard') }}"
                                 class="nav-item {{ $activeClass('availability.', false) }}"
-                                data-tooltip="Disponibilité">
+                                data-tooltip="{{ __('sidebar.availability_title') }}">
                                 <div class="nav-icon"><i class="fas fa-th-large"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Disponibilité</div>
-                                    <div class="nav-subtitle">Inventaire en temps réel</div>
+                                    <div class="nav-title">{{ __('sidebar.availability_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.availability_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -81,7 +81,7 @@
                 <!-- ACTIONS RAPIDES -->
                 @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                     <div class="nav-section">
-                        <div class="nav-section-title">Actions Rapides</div>
+                        <div class="nav-section-title">{{ __('sidebar.section_quick_actions') }}</div>
 
                         @php
                             $isCheckinActive = in_array($currentRoute, [
@@ -98,11 +98,11 @@
                         @if (Route::has('checkin.index'))
                             <a href="{{ route('checkin.index') }}"
                                 class="nav-item nav-item--highlight {{ $isCheckinActive ? 'active' : '' }}"
-                                data-tooltip="Check-in/out">
+                                data-tooltip="{{ __('sidebar.checkin_title') }}">
                                 <div class="nav-icon"><i class="fas fa-door-open"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Check-in/Check-out</div>
-                                    <div class="nav-subtitle">Enregistrement clients</div>
+                                    <div class="nav-title">{{ __('sidebar.checkin_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.checkin_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -110,11 +110,11 @@
                         @if (Route::has('transaction.reservation.createIdentity'))
                             <a href="{{ route('transaction.reservation.createIdentity') }}"
                                 class="nav-item nav-item--highlight {{ $activeClass('transaction.reservation.createIdentity') }}"
-                                data-tooltip="Nouvelle Réservation">
+                                data-tooltip="{{ __('sidebar.new_reservation_title') }}">
                                 <div class="nav-icon"><i class="fas fa-calendar-plus"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Nouvelle Réservation</div>
-                                    <div class="nav-subtitle">Créer rapidement</div>
+                                    <div class="nav-title">{{ __('sidebar.new_reservation_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.new_reservation_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -124,27 +124,27 @@
                 <!-- OPÉRATIONS -->
                 @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist', 'Cashier', 'Servant', 'Cuisiner']))
                     <div class="nav-section">
-                        <div class="nav-section-title">Opérations</div>
+                        <div class="nav-section-title">{{ __('sidebar.section_operations') }}</div>
 
                         @if (Route::has('transaction.index') && !in_array(auth()->user()->role, ['Servant', 'Cuisiner']))
                             <a href="{{ route('transaction.index') }}"
                                 class="nav-item {{ $activeClass('transaction.', false) && !str_contains($currentRoute, 'transaction.reservation.') ? 'active' : '' }}"
-                                data-tooltip="Liste Clients">
+                                data-tooltip="{{ __('sidebar.client_list_title') }}">
                                 <div class="nav-icon"><i class="fas fa-shopping-bag"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Liste des Clients</div>
-                                    <div class="nav-subtitle">Réservations & Séjours</div>
+                                    <div class="nav-title">{{ __('sidebar.client_list_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.client_list_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
 
                         @if (Route::has('cashier.dashboard') && !in_array(auth()->user()->role, ['Servant', 'Cuisiner']))
                             <a href="{{ route('cashier.dashboard') }}"
-                                class="nav-item {{ $activeClass('cashier.', false) }}" data-tooltip="Caisse">
+                                class="nav-item {{ $activeClass('cashier.', false) }}" data-tooltip="{{ __('sidebar.cashier_title') }}">
                                 <div class="nav-icon"><i class="fas fa-cash-register"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Caisse</div>
-                                    <div class="nav-subtitle">Sessions & Encaissements</div>
+                                    <div class="nav-title">{{ __('sidebar.cashier_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.cashier_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -152,12 +152,12 @@
                         @if (Route::has('restaurant.index') && (($currentHotel ?? null)?->hasModule('restaurant') ?? true))
                             @php $pendingOrdersCount = \App\Models\RestaurantOrder::where('status', 'pending')->count(); @endphp
                             <a href="{{ route('restaurant.index') }}"
-                                class="nav-item {{ $activeClass('restaurant.', false) }}" data-tooltip="Restaurant">
+                                class="nav-item {{ $activeClass('restaurant.', false) }}" data-tooltip="{{ __('sidebar.restaurant_title') }}">
                                 <div class="nav-icon"><i class="fas fa-utensils"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Restaurant</div>
+                                    <div class="nav-title">{{ __('sidebar.restaurant_title') }}</div>
                                     <div class="nav-subtitle">
-                                        {{ $pendingOrdersCount }} commande{{ $pendingOrdersCount > 1 ? 's' : '' }} en attente
+                                        {{ __('sidebar.restaurant_pending', ['count' => $pendingOrdersCount]) }}
                                     </div>
                                 </div>
                                 @if ($pendingOrdersCount > 0)
@@ -173,30 +173,30 @@
                 <!-- GESTION -->
                 @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
                     <div class="nav-section">
-                        <div class="nav-section-title">Gestion</div>
+                        <div class="nav-section-title">{{ __('sidebar.section_management') }}</div>
 
                         @if (Route::has('customer.index'))
                             <a href="{{ route('customer.index') }}"
-                                class="nav-item {{ $activeClass('customer.index') }}" data-tooltip="Clients">
+                                class="nav-item {{ $activeClass('customer.index') }}" data-tooltip="{{ __('sidebar.customers_title') }}">
                                 <div class="nav-icon"><i class="fas fa-users"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Clients</div>
-                                    <div class="nav-subtitle">Gestion des clients</div>
+                                    <div class="nav-title">{{ __('sidebar.customers_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.customers_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
 
                         @if (Route::has('room.index'))
                             <a href="{{ route('room.index') }}" class="nav-item {{ $activeClass('room.index') }}"
-                                data-tooltip="Chambres">
+                                data-tooltip="{{ __('sidebar.rooms_title') }}">
                                 <div class="nav-icon"><i class="fas fa-bed"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Chambres</div>
+                                    <div class="nav-title">{{ __('sidebar.rooms_title') }}</div>
                                     <div class="nav-subtitle">
                                         @if (auth()->user()->role == 'Receptionist')
-                                            Vue & État
+                                            {{ __('sidebar.rooms_subtitle_view') }}
                                         @else
-                                            Gestion complète
+                                            {{ __('sidebar.rooms_subtitle_full') }}
                                         @endif
                                     </div>
                                 </div>
@@ -206,11 +206,11 @@
                         @if (Route::has('type.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
                             <a href="{{ route('type.index') }}"
                                 class="nav-item restricted {{ $activeClass('type.index') }}"
-                                data-tooltip="Types Chambres">
+                                data-tooltip="{{ __('sidebar.room_types_title') }}">
                                 <div class="nav-icon"><i class="fas fa-layer-group"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Types de Chambres</div>
-                                    <div class="nav-subtitle">Catégories & Tarifs</div>
+                                    <div class="nav-title">{{ __('sidebar.room_types_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.room_types_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -218,33 +218,33 @@
                         @if (Route::has('payments.index'))
                             @php $isPaymentActive = $activeClass('payments.', false) || $activeClass('payment.', false); @endphp
                             <a href="{{ route('payments.index') }}"
-                                class="nav-item {{ $isPaymentActive ? 'active' : '' }}" data-tooltip="Paiements">
+                                class="nav-item {{ $isPaymentActive ? 'active' : '' }}" data-tooltip="{{ __('sidebar.payments_title') }}">
                                 <div class="nav-icon"><i class="fas fa-credit-card"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Paiements</div>
-                                    <div class="nav-subtitle">Transactions financières</div>
+                                    <div class="nav-title">{{ __('sidebar.payments_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.payments_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
 
                         @if (Route::has('hotel.settings.edit') && in_array(auth()->user()->role, ['Super', 'Admin']))
                             <a href="{{ route('hotel.settings.edit') }}"
-                                class="nav-item {{ $activeClass('hotel.settings.') }}" data-tooltip="Mon établissement">
+                                class="nav-item {{ $activeClass('hotel.settings.') }}" data-tooltip="{{ __('sidebar.establishment_title') }}">
                                 <div class="nav-icon"><i class="fas fa-palette"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Mon établissement</div>
-                                    <div class="nav-subtitle">Couleurs, logo & site</div>
+                                    <div class="nav-title">{{ __('sidebar.establishment_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.establishment_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
 
                         @if (Route::has('billing.show') && in_array(auth()->user()->role, ['Super', 'Admin']))
                             <a href="{{ route('billing.show') }}"
-                                class="nav-item {{ $activeClass('billing.') }}" data-tooltip="Mon abonnement">
+                                class="nav-item {{ $activeClass('billing.') }}" data-tooltip="{{ __('sidebar.billing_title') }}">
                                 <div class="nav-icon"><i class="fas fa-credit-card"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Mon abonnement</div>
-                                    <div class="nav-subtitle">Paiement & renouvellement</div>
+                                    <div class="nav-title">{{ __('sidebar.billing_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.billing_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -255,11 +255,11 @@
                 @if (Route::has('guide'))
                     <div class="nav-section">
                         <a href="{{ route('guide') }}" target="_blank" rel="noopener"
-                            class="nav-item" data-tooltip="Guide d'utilisation">
+                            class="nav-item"                         data-tooltip="{{ __('sidebar.guide_title') }}">
                             <div class="nav-icon"><i class="fas fa-book-open"></i></div>
                             <div class="nav-content">
-                                <div class="nav-title">Guide / Aide</div>
-                                <div class="nav-subtitle">Documentation d'utilisation</div>
+                                <div class="nav-title">{{ __('sidebar.guide_title') }}</div>
+                                <div class="nav-subtitle">{{ __('sidebar.guide_subtitle') }}</div>
                             </div>
                         </a>
                     </div>
@@ -268,16 +268,16 @@
                 <!-- NETTOYAGE -->
                 @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']) && (($currentHotel ?? null)?->hasModule('housekeeping') ?? true))
                     <div class="nav-section">
-                        <div class="nav-section-title">Nettoyage</div>
+                        <div class="nav-section-title">{{ __('sidebar.section_housekeeping') }}</div>
 
                         @if (Route::has('housekeeping.dashboard'))
                             <a href="{{ route('housekeeping.dashboard') }}"
                                 class="nav-item {{ $activeClass('housekeeping.', false) }}"
-                                data-tooltip="Housekeeping">
+                                data-tooltip="{{ __('sidebar.housekeeping_title') }}">
                                 <div class="nav-icon"><i class="fas fa-broom"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Housekeeping</div>
-                                    <div class="nav-subtitle">Nettoyage & Maintenance</div>
+                                    <div class="nav-title">{{ __('sidebar.housekeeping_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.housekeeping_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -296,11 +296,11 @@
                             @endphp
                             <a href="{{ route('checkin.index') }}"
                                 class="nav-item nav-item--readonly {{ $isCheckinActive ? 'active' : '' }}"
-                                title="Mode lecture seule" data-tooltip="Check-in (lecture)">
+                                title="{{ __('sidebar.checkin_readonly_subtitle') }}" data-tooltip="{{ __('sidebar.checkin_title') }}">
                                 <div class="nav-icon"><i class="fas fa-door-open"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Check-in/Check-out</div>
-                                    <div class="nav-subtitle">Visualisation</div>
+                                    <div class="nav-title">{{ __('sidebar.checkin_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.checkin_readonly_subtitle') }}</div>
                                 </div>
                                 <span class="readonly-tag">👁️</span>
                             </a>
@@ -308,22 +308,22 @@
 
                         @if (Route::has('roomstatus.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
                             <a href="{{ route('roomstatus.index') }}"
-                                class="nav-item {{ $activeClass('roomstatus.index') }}" data-tooltip="Statuts">
+                                class="nav-item {{ $activeClass('roomstatus.index') }}" data-tooltip="{{ __('sidebar.room_status_title') }}">
                                 <div class="nav-icon"><i class="fas fa-flag"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Statuts Chambres</div>
-                                    <div class="nav-subtitle">États & Couleurs</div>
+                                    <div class="nav-title">{{ __('sidebar.room_status_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.room_status_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
 
                         @if (Route::has('facility.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
                             <a href="{{ route('facility.index') }}"
-                                class="nav-item {{ $activeClass('facility.index') }}" data-tooltip="Équipements">
+                                class="nav-item {{ $activeClass('facility.index') }}" data-tooltip="{{ __('sidebar.equipment_title') }}">
                                 <div class="nav-icon"><i class="fas fa-tools"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Équipements</div>
-                                    <div class="nav-subtitle">Services & Commodités</div>
+                                    <div class="nav-title">{{ __('sidebar.equipment_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.equipment_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -333,16 +333,16 @@
                 <!-- ADMINISTRATION -->
                 @if (in_array(auth()->user()->role, ['Super', 'Admin']))
                     <div class="nav-section">
-                        <div class="nav-section-title">Administration</div>
+                        <div class="nav-section-title">{{ __('sidebar.section_administration') }}</div>
 
                         {{-- Personnel : l'hôtelier gère son équipe (issue #180) --}}
                         @if (Route::has('staff.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
                             <a href="{{ route('staff.index') }}"
-                                class="nav-item {{ $activeClass('staff.', false) }}" data-tooltip="Personnel">
+                                class="nav-item {{ $activeClass('staff.', false) }}" data-tooltip="{{ __('sidebar.staff_title') }}">
                                 <div class="nav-icon"><i class="fas fa-user-tie"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Personnel</div>
-                                    <div class="nav-subtitle">Réception, ménage, service…</div>
+                                    <div class="nav-title">{{ __('sidebar.staff_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.staff_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -350,33 +350,33 @@
                         @if (Route::has('user.index') && auth()->user()->role == 'Super')
                             <a href="{{ route('user.index') }}"
                                 class="nav-item restricted {{ $activeClass('user.index') }}"
-                                data-tooltip="Utilisateurs (plateforme)">
+                                data-tooltip="{{ __('sidebar.users_title') }}">
                                 <div class="nav-icon"><i class="fas fa-user-cog"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Utilisateurs</div>
-                                    <div class="nav-subtitle">Comptes plateforme</div>
+                                    <div class="nav-title">{{ __('sidebar.users_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.users_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
 
                         @if (Route::has('reports.index') && (($currentHotel ?? null)?->hasModule('reports') ?? true))
                             <a href="{{ route('reports.index') }}"
-                                class="nav-item {{ $activeClass('reports.index') }}" data-tooltip="Rapports">
+                                class="nav-item {{ $activeClass('reports.index') }}" data-tooltip="{{ __('sidebar.reports_title') }}">
                                 <div class="nav-icon"><i class="fas fa-file-alt"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Rapports</div>
-                                    <div class="nav-subtitle">Analyses & Statistiques</div>
+                                    <div class="nav-title">{{ __('sidebar.reports_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.reports_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
 
                         @if (Route::has('activity.index'))
                             <a href="{{ route('activity.index') }}"
-                                class="nav-item {{ $activeClass('activity.index') }}" data-tooltip="Journal">
+                                class="nav-item {{ $activeClass('activity.index') }}" data-tooltip="{{ __('sidebar.activity_title') }}">
                                 <div class="nav-icon"><i class="fas fa-history"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Journal</div>
-                                    <div class="nav-subtitle">Activités système</div>
+                                    <div class="nav-title">{{ __('sidebar.activity_title') }}</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.activity_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -385,15 +385,15 @@
 
                 <!-- MON COMPTE -->
                 <div class="nav-section">
-                    <div class="nav-section-title">Mon Compte</div>
+                    <div class="nav-section-title">{{ __('sidebar.section_my_account') }}</div>
 
                     @if (Route::has('profile.index'))
                         <a href="{{ route('profile.index') }}"
-                            class="nav-item {{ $activeClass('profile.', false) }}" data-tooltip="Profil">
+                            class="nav-item {{ $activeClass('profile.', false) }}" data-tooltip="{{ __('sidebar.profile_title') }}">
                             <div class="nav-icon"><i class="fas fa-user"></i></div>
                             <div class="nav-content">
-                                <div class="nav-title">Profil</div>
-                                <div class="nav-subtitle">Mes informations</div>
+                                <div class="nav-title">{{ __('sidebar.profile_title') }}</div>
+                                <div class="nav-subtitle">{{ __('sidebar.profile_subtitle') }}</div>
                             </div>
                         </a>
                     @endif
@@ -401,18 +401,18 @@
                     @if (auth()->user()->role == 'Customer' && Route::has('transaction.myReservations'))
                         <a href="{{ route('transaction.myReservations') }}"
                             class="nav-item {{ $activeClass('transaction.myReservations') }}"
-                            data-tooltip="Mes Réservations">
+                            data-tooltip="{{ __('sidebar.my_reservations_title') }}">
                             <div class="nav-icon"><i class="fas fa-book"></i></div>
                             <div class="nav-content">
-                                <div class="nav-title">Mes Réservations</div>
-                                <div class="nav-subtitle">Historique</div>
+                                <div class="nav-title">{{ __('sidebar.my_reservations_title') }}</div>
+                                <div class="nav-subtitle">{{ __('sidebar.my_reservations_subtitle') }}</div>
                             </div>
                         </a>
                     @endif
 
                     @if (Route::has('notification.index'))
                         <a href="{{ route('notification.index') }}"
-                            class="nav-item {{ $activeClass('notification.index') }}" data-tooltip="Notifications">
+                            class="nav-item {{ $activeClass('notification.index') }}" data-tooltip="{{ __('sidebar.notifications_title') }}">
                             <div class="nav-icon">
                                 <i class="fas fa-bell"></i>
                                 @if (auth()->user()->unreadNotifications->count() > 0)
@@ -420,8 +420,8 @@
                                 @endif
                             </div>
                             <div class="nav-content">
-                                <div class="nav-title">Notifications</div>
-                                <div class="nav-subtitle">Alertes & Messages</div>
+                                <div class="nav-title">{{ __('sidebar.notifications_title') }}</div>
+                                <div class="nav-subtitle">{{ __('sidebar.notifications_subtitle') }}</div>
                             </div>
                         </a>
                     @endif
@@ -429,11 +429,11 @@
                     @if (auth()->user()->role == 'Receptionist' && Route::has('receptionist.session.active'))
                         <a href="{{ route('receptionist.session.active') }}"
                             class="nav-item {{ $activeClass('receptionist.session.', false) }}"
-                            data-tooltip="Ma Session">
+                            data-tooltip="{{ __('sidebar.session_title') }}">
                             <div class="nav-icon"><i class="fas fa-user-clock"></i></div>
                             <div class="nav-content">
-                                <div class="nav-title">Ma Session</div>
-                                <div class="nav-subtitle">Suivi d'activité</div>
+                                <div class="nav-title">{{ __('sidebar.session_title') }}</div>
+                                <div class="nav-subtitle">{{ __('sidebar.session_subtitle') }}</div>
                             </div>
                         </a>
                     @endif
@@ -441,24 +441,24 @@
                     <!-- DÉCONNEXION -->
                     @if ($hasActiveSession)
                         <div class="nav-item nav-item--logout"
-                            onclick="if(typeof Swal!=='undefined'){Swal.fire({title:'⚠️ Session Active',html:'Vous avez une session active <strong>#{{ $activeSession->id }}</strong>.<br><br>Veuillez la clôturer avant de vous déconnecter.',icon:'warning',confirmButtonColor:'#1e6b2e',confirmButtonText:'Compris',showCancelButton:true,cancelButtonText:'Aller à la session',cancelButtonColor:'#545954'}).then(r=>{if(r.dismiss===Swal.DismissReason.cancel)window.location.href='{{ route('cashier.sessions.show', $activeSession) }}';});}else{alert('Session active. Clôturez d\'abord.');}"
-                            style="cursor:pointer;opacity:.7" data-tooltip="Déconnexion bloquée">
+                            onclick="if(typeof Swal!=='undefined'){Swal.fire({title:'{{ __('sidebar.logout_blocked_title') }}',html:'{{ __('sidebar.logout_blocked_text', ['id' => $activeSession->id]) }}',icon:'warning',confirmButtonColor:'#1e6b2e',confirmButtonText:'{{ __('sidebar.logout_blocked_confirm') }}',showCancelButton:true,cancelButtonText:'{{ __('sidebar.logout_blocked_cancel') }}',cancelButtonColor:'#545954'}).then(r=>{if(r.dismiss===Swal.DismissReason.cancel)window.location.href='{{ route('cashier.sessions.show', $activeSession) }}';});}else{alert('{{ __('sidebar.logout_blocked_text', ['id' => $activeSession->id]) }}');}"
+                            style="cursor:pointer;opacity:.7" data-tooltip="{{ __('sidebar.logout_blocked') }}">
                             <div class="nav-icon"><i class="fas fa-sign-out-alt" style="color:#fca5a5"></i></div>
                             <div class="nav-content">
-                                <div class="nav-title" style="color:#fca5a5">Déconnexion (bloquée)</div>
-                                <div class="nav-subtitle">Session #{{ $activeSession->id }} active</div>
+                                <div class="nav-title" style="color:#fca5a5">{{ __('sidebar.logout_blocked') }}</div>
+                                <div class="nav-subtitle">{{ __('sidebar.session_active', ['id' => $activeSession->id]) }}</div>
                             </div>
                         </div>
                     @else
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none">
                             @csrf</form>
                         <a href="#" class="nav-item nav-item--logout"
-                            onclick="event.preventDefault();if(typeof Swal!=='undefined'){Swal.fire({title:'Déconnexion',text:'Voulez-vous vraiment vous déconnecter ?',icon:'question',showCancelButton:true,confirmButtonColor:'#1e6b2e',cancelButtonColor:'#545954',confirmButtonText:'Oui, déconnecter',cancelButtonText:'Annuler'}).then(r=>{if(r.isConfirmed)document.getElementById('logout-form').submit();});}else{if(confirm('Déconnecter ?'))document.getElementById('logout-form').submit();}return false;"
-                            data-tooltip="Déconnexion">
+                            onclick="event.preventDefault();if(typeof Swal!=='undefined'){Swal.fire({title:'{{ __('sidebar.logout_confirm_title') }}',text:'{{ __('sidebar.logout_confirm_text') }}',icon:'question',showCancelButton:true,confirmButtonColor:'#1e6b2e',cancelButtonColor:'#545954',confirmButtonText:'{{ __('sidebar.logout_confirm_button') }}',cancelButtonText:'{{ __('sidebar.logout_cancel_button') }}'}).then(r=>{if(r.isConfirmed)document.getElementById('logout-form').submit();});}else{if(confirm('{{ __('sidebar.logout_confirm_text') }}'))document.getElementById('logout-form').submit();}return false;"
+                            data-tooltip="{{ __('sidebar.logout_title') }}">
                             <div class="nav-icon"><i class="fas fa-sign-out-alt"></i></div>
                             <div class="nav-content">
-                                <div class="nav-title">Déconnexion</div>
-                                <div class="nav-subtitle">Quitter la session</div>
+                                <div class="nav-title">{{ __('sidebar.logout_title') }}</div>
+                                <div class="nav-subtitle">{{ __('sidebar.logout_subtitle') }}</div>
                             </div>
                         </a>
                     @endif
@@ -484,35 +484,35 @@
                     <div class="user-role-badge">
                         @switch(auth()->user()->role)
                             @case('Super')
-                                <span class="role-pill role-super">Super Admin</span>
+                                <span class="role-pill role-super">{{ __('sidebar.role_super') }}</span>
                             @break
 
                             @case('Admin')
-                                <span class="role-pill role-admin">Administrateur</span>
+                                <span class="role-pill role-admin">{{ __('sidebar.role_admin') }}</span>
                             @break
 
                             @case('Receptionist')
-                                <span class="role-pill role-recep">Réceptionniste</span>
+                                <span class="role-pill role-recep">{{ __('sidebar.role_receptionist') }}</span>
                             @break
 
                             @case('Cashier')
-                                <span class="role-pill role-recep">Caissier</span>
+                                <span class="role-pill role-recep">{{ __('sidebar.role_cashier') }}</span>
                             @break
 
                             @case('Housekeeping')
-                                <span class="role-pill role-house">Femme de Chambre</span>
+                                <span class="role-pill role-house">{{ __('sidebar.role_housekeeping') }}</span>
                             @break
 
                             @case('Servant')
-                                <span class="role-pill role-recep">Serveur</span>
+                                <span class="role-pill role-recep">{{ __('sidebar.role_servant') }}</span>
                             @break
 
                             @case('Cuisiner')
-                                <span class="role-pill role-house">Cuisinier</span>
+                                <span class="role-pill role-house">{{ __('sidebar.role_cook') }}</span>
                             @break
 
                             @case('Customer')
-                                <span class="role-pill role-cust">Client</span>
+                                <span class="role-pill role-cust">{{ __('sidebar.role_customer') }}</span>
                             @break
 
                             @default
@@ -522,10 +522,23 @@
                     @if ($hasActiveSession)
                         <div class="session-dot">
                             <span class="dot-live"></span>
-                            <small>Session #{{ $activeSession->id }}</small>
+                            <small>{{ __('sidebar.session_hash', ['id' => $activeSession->id]) }}</small>
                         </div>
                     @endif
                 </div>
+            </div>
+            <div class="sidebar-lang-toggle">
+                <a href="{{ route('lang.switch', app()->getLocale() === 'fr' ? 'en' : 'fr') }}"
+                   class="lang-toggle-btn" title="{{ app()->getLocale() === 'fr' ? 'Switch to English' : 'Passer en français' }}">
+                    <i class="fas fa-globe"></i>
+                    <span>{{ app()->getLocale() === 'fr' ? 'English' : 'Français' }}</span>
+                </a>
+            </div>
+            <div class="sidebar-theme-toggle">
+                <button type="button" class="theme-toggle-btn" id="themeToggle" title="Changer de thème">
+                    <i class="fas fa-sun" id="themeIcon"></i>
+                    <span id="themeLabel">Clair</span>
+                </button>
             </div>
             <div class="sidebar-time">
                 <i class="far fa-clock"></i>
@@ -948,6 +961,71 @@
         color: rgba(255, 255, 255, .38);
     }
 
+    /* ── Language Toggle ── */
+    .sidebar-lang-toggle {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid rgba(255, 255, 255, .08);
+    }
+    .lang-toggle-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: rgba(255, 255, 255, .7);
+        text-decoration: none;
+        font-size: .78rem;
+        font-weight: 500;
+        transition: background .2s, color .2s;
+    }
+    .lang-toggle-btn:hover {
+        background: rgba(255, 255, 255, .1);
+        color: #fff;
+        text-decoration: none;
+    }
+    .lang-toggle-btn i {
+        font-size: .85rem;
+    }
+
+    /* ── Theme Toggle ── */
+    .sidebar-theme-toggle {
+        margin-top: 6px;
+    }
+    .theme-toggle-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 8px;
+        color: rgba(255, 255, 255, .7);
+        border: none;
+        background: none;
+        width: 100%;
+        font-size: .78rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background .2s, color .2s;
+        font-family: inherit;
+    }
+    .theme-toggle-btn:hover {
+        background: rgba(255, 255, 255, .1);
+        color: #fff;
+    }
+    .theme-toggle-btn i {
+        font-size: .85rem;
+        width: 18px;
+        text-align: center;
+    }
+
+    .sidebar.collapsed .sidebar-theme-toggle {
+        display: none;
+    }
+
+    .sidebar.collapsed .sidebar-lang-toggle {
+        display: none;
+    }
+
     #sidebar-datetime {
         font-family: 'Courier New', monospace;
         font-weight: 500;
@@ -966,6 +1044,7 @@
     .sidebar.collapsed .nav-badge,
     .sidebar.collapsed .user-info,
     .sidebar.collapsed .sidebar-time,
+    .sidebar.collapsed .sidebar-theme-toggle,
     .sidebar.collapsed .restricted::after,
     .sidebar.collapsed .readonly-tag {
         display: none;

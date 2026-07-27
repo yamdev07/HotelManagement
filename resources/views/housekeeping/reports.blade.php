@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Rapports de Nettoyage')
+@section('title', __('housekeeping.reports.title'))
 
 @section('content')
 <style>
@@ -447,7 +447,7 @@
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('housekeeping.index') }}">Housekeeping</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Rapports</span>
+        <span class="current">{{ __('housekeeping.reports.breadcrumb_reports') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -455,16 +455,16 @@
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-chart-bar"></i></span>
-                <h1>Rapports de <em>nettoyage</em></h1>
+                <h1>{!! __('housekeeping.reports.header') !!}</h1>
             </div>
-            <p class="header-subtitle">Analyses et statistiques détaillées</p>
+            <p class="header-subtitle">{{ __('housekeeping.reports.header_subtitle') }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('housekeeping.index') }}" class="btn btn-gray">
-                <i class="fas fa-arrow-left"></i> Retour
+                <i class="fas fa-arrow-left"></i> {{ __('housekeeping.reports.btn_back') }}
             </a>
             <a href="{{ route('housekeeping.daily-report') }}" class="btn btn-green">
-                <i class="fas fa-file-alt"></i> Rapport Quotidien
+                <i class="fas fa-file-alt"></i> {{ __('housekeeping.reports.btn_daily_report') }}
             </a>
         </div>
     </div>
@@ -474,16 +474,16 @@
         <form action="{{ route('housekeeping.reports') }}" method="GET" id="reportFilters">
             <div class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Date</label>
+                    <label class="form-label">{{ __('housekeeping.reports.filter_date') }}</label>
                     <div class="input-group">
                         <input type="date" class="form-control" name="date" value="{{ $selectedDate->format('Y-m-d') }}">
-                        <button class="btn btn-gray" type="button" id="todayBtn">Aujourd'hui</button>
+                        <button class="btn btn-gray" type="button" id="todayBtn">{{ __('housekeeping.reports.filter_today') }}</button>
                     </div>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Agent</label>
+                    <label class="form-label">{{ __('housekeeping.reports.filter_agent') }}</label>
                     <select class="form-select" name="employee">
-                        <option value="">Tous</option>
+                        <option value="">{{ __('housekeeping.reports.filter_all') }}</option>
                         @php $staff = \App\Models\User::where('role', 'Housekeeping')->orWhere('role','housekeeping')->get(); @endphp
                         @foreach($staff as $e)
                             <option value="{{ $e->id }}" {{ request('employee') == $e->id ? 'selected' : '' }}>{{ $e->name }}</option>
@@ -491,9 +491,9 @@
                     </select>
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Type chambre</label>
+                    <label class="form-label">{{ __('housekeeping.reports.filter_room_type') }}</label>
                     <select class="form-select" name="room_type">
-                        <option value="">Tous</option>
+                        <option value="">{{ __('housekeeping.reports.filter_all') }}</option>
                         @php
                             $types = class_exists('\App\Models\Type') ? \App\Models\Type::all() : collect();
                         @endphp
@@ -505,9 +505,9 @@
             </div>
             <div class="row mt-3">
                 <div class="col-12 d-flex justify-content-end gap-2">
-                    <button class="btn btn-green" type="submit"><i class="fas fa-filter"></i> Filtrer</button>
-                    <a href="{{ route('housekeeping.reports') }}" class="btn btn-gray"><i class="fas fa-redo"></i> Réinitialiser</a>
-                    <button class="btn btn-green" type="button" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Exporter</button>
+                    <button class="btn btn-green" type="submit"><i class="fas fa-filter"></i> {{ __('housekeeping.reports.btn_filter') }}</button>
+                    <a href="{{ route('housekeeping.reports') }}" class="btn btn-gray"><i class="fas fa-redo"></i> {{ __('housekeeping.reports.btn_reset') }}</a>
+                    <button class="btn btn-green" type="button" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> {{ __('housekeeping.reports.btn_export') }}</button>
                 </div>
             </div>
         </form>
@@ -517,7 +517,7 @@
     <div class="stats-grid anim-3">
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Nettoyées</h6>
+                <h6>{{ __('housekeeping.reports.stat_cleaned') }}</h6>
                 <h2>{{ $stats['total_cleaned'] ?? 0 }}</h2>
                 <small>{{ $selectedDate->format('d/m/Y') }}</small>
             </div>
@@ -525,25 +525,25 @@
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Temps moyen</h6>
+                <h6>{{ __('housekeeping.reports.stat_avg_time') }}</h6>
                 <h2>{{ $stats['average_cleaning_time'] ?? 30 }} min</h2>
-                <small>par chambre</small>
+                <small>{{ __('housekeeping.reports.stat_per_room') }}</small>
             </div>
             <div class="stat-icon"><i class="fas fa-clock"></i></div>
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Disponibles</h6>
+                <h6>{{ __('housekeeping.reports.stat_available') }}</h6>
                 <h2>{{ $stats['cleaned_by_status'][1] ?? 0 }}</h2>
-                <small>prêtes</small>
+                <small>{{ __('housekeeping.reports.stat_ready') }}</small>
             </div>
             <div class="stat-icon green"><i class="fas fa-check-circle"></i></div>
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Occupées</h6>
+                <h6>{{ __('housekeeping.reports.stat_occupied') }}</h6>
                 <h2>{{ $stats['cleaned_by_status'][2] ?? 0 }}</h2>
-                <small>nettoyées occupées</small>
+                <small>{{ __('housekeeping.reports.stat_occupied_cleaned') }}</small>
             </div>
             <div class="stat-icon orange"><i class="fas fa-users"></i></div>
         </div>
@@ -554,8 +554,8 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header blue">
-                    <div><i class="fas fa-list"></i> Détail des chambres nettoyées</div>
-                    <span class="badge">{{ $cleanedRooms->count() }} chambres</span>
+                    <div><i class="fas fa-list"></i> {{ __('housekeeping.reports.card_detail') }}</div>
+                    <span class="badge">{{ $cleanedRooms->count() }} {{ __('housekeeping.reports.chambres') }}</span>
                 </div>
                 <div class="card-body">
                     @if($cleanedRooms->count() > 0)
@@ -563,14 +563,14 @@
                             <table class="table" id="cleaningReportTable">
                                 <thead>
                                     <tr>
-                                        <th>Chambre</th>
-                                        <th>Type</th>
-                                        <th>Début</th>
-                                        <th>Fin</th>
-                                        <th>Durée</th>
-                                        <th>Agent</th>
-                                        <th>Statut</th>
-                                        <th class="text-center">Actions</th>
+                                         <th>{{ __('housekeeping.reports.th_room') }}</th>
+                                         <th>{{ __('housekeeping.reports.th_type') }}</th>
+                                         <th>{{ __('housekeeping.reports.th_start') }}</th>
+                                         <th>{{ __('housekeeping.reports.th_end') }}</th>
+                                         <th>{{ __('housekeeping.reports.th_duration') }}</th>
+                                         <th>{{ __('housekeeping.reports.th_agent') }}</th>
+                                         <th>{{ __('housekeeping.reports.th_status') }}</th>
+                                         <th class="text-center">{{ __('housekeeping.reports.th_actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -617,8 +617,8 @@
                     @else
                         <div class="empty-state">
                             <div class="empty-icon"><i class="fas fa-chart-bar"></i></div>
-                            <h5>Aucune donnée</h5>
-                            <p>Aucune chambre nettoyée à cette date</p>
+                             <h5>{{ __('housekeeping.reports.empty_title') }}</h5>
+                             <p>{{ __('housekeeping.reports.empty_desc') }}</p>
                         </div>
                     @endif
                 </div>
@@ -636,7 +636,7 @@
             {{-- Graphique agent --}}
             <div class="card">
                 <div class="card-header blue">
-                    <i class="fas fa-users"></i> Répartition par agent
+                     <i class="fas fa-users"></i> {{ __('housekeeping.reports.chart_agent') }}
                 </div>
                 <div class="card-body p-3">
                     @if(isset($cleanedByUser) && $cleanedByUser->count() > 0)
@@ -652,7 +652,7 @@
                     @else
                         <div class="empty-state py-3">
                             <i class="fas fa-user-slash"></i>
-                            <p class="mb-0">Aucune donnée</p>
+                             <p class="mb-0">{{ __('housekeeping.reports.empty_agent_data') }}</p>
                         </div>
                     @endif
                 </div>
@@ -661,7 +661,7 @@
             {{-- Dates disponibles --}}
             <div class="card mt-3">
                 <div class="card-header blue">
-                    <i class="fas fa-calendar"></i> Dates disponibles
+                     <i class="fas fa-calendar"></i> {{ __('housekeeping.reports.card_dates') }}
                 </div>
                 <div class="card-body p-0">
                     @if(isset($availableDates) && $availableDates->count() > 0)
@@ -677,7 +677,7 @@
                     @else
                         <div class="empty-state py-3">
                             <i class="fas fa-calendar-times"></i>
-                            <p class="mb-0">Aucune date</p>
+                             <p class="mb-0">{{ __('housekeeping.reports.empty_dates') }}</p>
                         </div>
                     @endif
                 </div>
@@ -691,13 +691,13 @@
             <div class="alert alert-green">
                 <i class="fas fa-chart-line fa-2x"></i>
                 <div>
-                    <h6 class="fw-semibold">Tendances mensuelles</h6>
-                    <p class="mb-0">Consultez les <a href="{{ route('housekeeping.monthly-stats') }}" class="alert-link">statistiques mensuelles</a> pour une analyse détaillée.</p>
+                     <h6 class="fw-semibold">{{ __('housekeeping.reports.monthly_trend') }}</h6>
+                     <p class="mb-0">{!! __('housekeeping.reports.monthly_trend_desc') !!}</p>
                 </div>
             </div>
             <div class="text-center">
                 <a href="{{ route('housekeeping.monthly-stats') }}" class="btn btn-green">
-                    <i class="fas fa-chart-bar"></i> Voir mensuel
+                     <i class="fas fa-chart-bar"></i> {{ __('housekeeping.reports.btn_monthly') }}
                 </a>
             </div>
         </div>
@@ -710,7 +710,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-door-closed" style="color:var(--green-600);"></i> Détails chambre</h5>
+                 <h5 class="modal-title"><i class="fas fa-door-closed" style="color:var(--green-600);"></i> {{ __('housekeeping.reports.modal_room_title') }}</h5>
                 <button class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="roomModalBody"></div>
@@ -744,7 +744,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function exportToExcel() {
     const table = document.getElementById('cleaningReportTable');
-    if (!table) return alert('Aucune donnée');
+    if (!table) return alert(@json(__('housekeeping.reports.export_error')));
     const w = window.open('', '_blank');
     w.document.write('<html><head><title>Rapport {{ $selectedDate->format('d/m/Y') }}</title><style>table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px}th{background:#f2f2f2}</style></head><body>' + table.outerHTML + '</body></html>');
     w.print();
@@ -752,10 +752,10 @@ function exportToExcel() {
 
 function showRoomDetails(id) {
     const modal = new bootstrap.Modal(document.getElementById('roomModal'));
-    document.getElementById('roomModalBody').innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p>Chargement...</p></div>';
+    document.getElementById('roomModalBody').innerHTML = '<div class="text-center p-4"><i class="fas fa-spinner fa-spin fa-2x"></i><p>' + @json(__('housekeeping.reports.modal_loading')) + '</p></div>';
     modal.show();
     setTimeout(() => {
-        document.getElementById('roomModalBody').innerHTML = '<div class="alert alert-green">Détails à venir pour chambre ' + id + '</div>';
+        document.getElementById('roomModalBody').innerHTML = '<div class="alert alert-green">' + @json(__('housekeeping.reports.modal_coming_soon')) + ' ' + id + '</div>';
     }, 500);
 }
 </script>

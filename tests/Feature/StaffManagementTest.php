@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use App\Models\Hotel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
@@ -20,11 +19,11 @@ class StaffManagementTest extends TestCase
     private function hotelAdmin(string $name): array
     {
         $hotel = Hotel::create([
-            'name'                    => $name,
-            'slug'                    => Str::slug($name.' '.Str::random(4)),
-            'is_active'               => true,
+            'name' => $name,
+            'slug' => Str::slug($name.' '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
@@ -36,9 +35,9 @@ class StaffManagementTest extends TestCase
         [$hotel, $admin] = $this->hotelAdmin('Hotel Staff A');
 
         $this->actingAs($admin)->post(route('staff.store'), [
-            'name'     => 'Awa Réception',
-            'email'    => 'awa@staff.test',
-            'role'     => 'Receptionist',
+            'name' => 'Awa Réception',
+            'email' => 'awa@staff.test',
+            'role' => 'Receptionist',
             'password' => 'MotDePasse1',
         ])->assertRedirect();
 
@@ -53,9 +52,9 @@ class StaffManagementTest extends TestCase
         [, $admin] = $this->hotelAdmin('Hotel Staff B');
 
         $this->actingAs($admin)->post(route('staff.store'), [
-            'name'     => 'Pirate',
-            'email'    => 'pirate@staff.test',
-            'role'     => 'Admin',
+            'name' => 'Pirate',
+            'email' => 'pirate@staff.test',
+            'role' => 'Admin',
             'password' => 'MotDePasse1',
         ])->assertSessionHasErrors('role');
 
@@ -67,9 +66,9 @@ class StaffManagementTest extends TestCase
         [, $admin] = $this->hotelAdmin('Hotel Staff C');
 
         $this->actingAs($admin)->post(route('staff.store'), [
-            'name'     => 'Faible',
-            'email'    => 'faible@staff.test',
-            'role'     => 'Housekeeping',
+            'name' => 'Faible',
+            'email' => 'faible@staff.test',
+            'role' => 'Housekeeping',
             'password' => 'abc',
         ])->assertSessionHasErrors('password');
     }
@@ -77,7 +76,7 @@ class StaffManagementTest extends TestCase
     public function test_admin_cannot_delete_staff_of_another_hotel(): void
     {
         [, $adminA] = $this->hotelAdmin('Hotel Staff D');
-        [$hotelB]   = $this->hotelAdmin('Hotel Staff E');
+        [$hotelB] = $this->hotelAdmin('Hotel Staff E');
         $staffB = User::factory()->create(['role' => 'Receptionist', 'hotel_id' => $hotelB->id]);
 
         $this->actingAs($adminA)->delete(route('staff.destroy', $staffB))->assertForbidden();

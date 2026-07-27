@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use Illuminate\Support\Facades\DB;
+use Tests\TestCase;
 
 class MariaDBTest extends TestCase
 {
@@ -12,14 +12,14 @@ class MariaDBTest extends TestCase
         try {
             $pdo = DB::connection()->getPdo();
             $driver = DB::connection()->getDriverName();
-            
+
             $this->assertEquals('mysql', $driver);
-            
+
             dump('✅ Connexion MariaDB réussie !');
-            dump('📊 Base de données : ' . DB::connection()->getDatabaseName());
-            
+            dump('📊 Base de données : '.DB::connection()->getDatabaseName());
+
         } catch (\Exception $e) {
-            dump('❌ Erreur : ' . $e->getMessage());
+            dump('❌ Erreur : '.$e->getMessage());
             $this->fail('Connexion à MariaDB échouée');
         }
     }

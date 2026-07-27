@@ -39,21 +39,21 @@ class CheckOutNotification extends Notification
         $totalPaid = $this->transaction->getTotalPayment();
         $totalPrice = $this->transaction->getTotalPrice();
         $isFullyPaid = $totalPaid >= $totalPrice;
-        
+
         return (new MailMessage)
-            ->subject('🛎️ Check-out effectué - ' . $this->transaction->customer->name)
-            ->greeting('Bonjour ' . $notifiable->name)
+            ->subject('🛎️ Check-out effectué - '.$this->transaction->customer->name)
+            ->greeting('Bonjour '.$notifiable->name)
             ->line('Un client vient d\'effectuer son check-out.')
             ->line('**Détails :**')
-            ->line('• Client : **' . $this->transaction->customer->name . '**')
-            ->line('• Chambre : **' . $this->transaction->room->number . '**')
-            ->line('• Départ effectué : **' . now()->format('d/m/Y H:i') . '**')
-            ->line('• Arrivée : **' . $this->transaction->check_in->format('d/m/Y') . '**')
-            ->line('• Durée du séjour : **' . $this->transaction->nights . ' nuit(s)**')
-            ->line('• Total séjour : **' . number_format($totalPrice, 0, ',', ' ') . ' FCFA**')
-            ->line('• Total payé : **' . number_format($totalPaid, 0, ',', ' ') . ' FCFA**')
-            ->line('• Statut : **' . ($isFullyPaid ? '✅ Entièrement payé' : '⚠️ Solde restant') . '**')
-            
+            ->line('• Client : **'.$this->transaction->customer->name.'**')
+            ->line('• Chambre : **'.$this->transaction->room->number.'**')
+            ->line('• Départ effectué : **'.now()->format('d/m/Y H:i').'**')
+            ->line('• Arrivée : **'.$this->transaction->check_in->format('d/m/Y').'**')
+            ->line('• Durée du séjour : **'.$this->transaction->nights.' nuit(s)**')
+            ->line('• Total séjour : **'.number_format($totalPrice, 0, ',', ' ').' FCFA**')
+            ->line('• Total payé : **'.number_format($totalPaid, 0, ',', ' ').' FCFA**')
+            ->line('• Statut : **'.($isFullyPaid ? '✅ Entièrement payé' : '⚠️ Solde restant').'**')
+
             ->action('Voir la transaction', route('transaction.show', $this->transaction->id))
             ->line('Merci d\'utiliser notre système de gestion hôtelière !');
     }
@@ -68,9 +68,9 @@ class CheckOutNotification extends Notification
         $totalPaid = $this->transaction->getTotalPayment();
         $totalPrice = $this->transaction->getTotalPrice();
         $isFullyPaid = $totalPaid >= $totalPrice;
-        
+
         return [
-            'message' => 'Check-out effectué pour ' . $this->transaction->customer->name . ' - Chambre ' . $this->transaction->room->number,
+            'message' => 'Check-out effectué pour '.$this->transaction->customer->name.' - Chambre '.$this->transaction->room->number,
             'url' => route('transaction.show', $this->transaction->id),
             'type' => 'checkout',
             'transaction_id' => $this->transaction->id,

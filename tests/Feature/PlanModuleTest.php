@@ -15,13 +15,13 @@ class PlanModuleTest extends TestCase
     private function adminOf(string $plan): User
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel '.$plan,
-            'slug'                    => Str::slug('Hotel '.$plan.' '.Str::random(4)),
-            'is_active'               => true,
-            'plan'                    => $plan,
-            'room_limit'              => config('plans.tiers.'.$plan.'.room_limit'),
+            'name' => 'Hotel '.$plan,
+            'slug' => Str::slug('Hotel '.$plan.' '.Str::random(4)),
+            'is_active' => true,
+            'plan' => $plan,
+            'room_limit' => config('plans.tiers.'.$plan.'.room_limit'),
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
 
         return User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
@@ -29,8 +29,8 @@ class PlanModuleTest extends TestCase
 
     public function test_module_matrix_matches_plans(): void
     {
-        $starter  = Hotel::make(['plan' => 'starter']);
-        $pro      = Hotel::make(['plan' => 'pro']);
+        $starter = Hotel::make(['plan' => 'starter']);
+        $pro = Hotel::make(['plan' => 'pro']);
         $business = Hotel::make(['plan' => 'business']);
 
         $this->assertFalse($starter->hasModule('restaurant'));

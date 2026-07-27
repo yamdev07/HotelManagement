@@ -29,9 +29,9 @@ class RegisterHotelController extends Controller
         }
 
         return view('auth.register-hotel', [
-            'plans'          => config('plans.tiers'),
-            'selectedPlan'   => $plan,
-            'countries'      => config('plans.countries'),
+            'plans' => config('plans.tiers'),
+            'selectedPlan' => $plan,
+            'countries' => config('plans.countries'),
             'defaultCountry' => config('plans.default_country', 'BJ'),
         ]);
     }
@@ -39,25 +39,57 @@ class RegisterHotelController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'company_name'  => ['required', 'string', 'max:255', new \App\Rules\NoEmoji],
-            'plan'          => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
-            'country'       => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.countries')))],
+            'company_name' => ['required', 'string', 'max:255', new \App\Rules\NoEmoji],
+            'plan' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
+            'country' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.countries')))],
             'contact_phone' => ['nullable', 'string', 'max:50'],
             // 'file' plutôt que 'image' : 'image' (getimagesize) rejette les SVG.
-            'logo'          => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:4096'],
-            'admin_name'    => ['required', 'string', 'max:255', new \App\Rules\NoEmoji],
-            'admin_email'   => ['required', 'email', 'max:255', 'unique:users,email'],
+            'logo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:4096'],
+            'admin_name' => ['required', 'string', 'max:255', new \App\Rules\NoEmoji],
+            'admin_email' => ['required', 'email', 'max:255'],
         ], [
-            'logo.mimes' => 'Le logo doit être une image JPG, PNG, WEBP ou SVG.',
-            'logo.max'   => 'Le logo est trop lourd (4 Mo maximum). Réduisez sa taille et réessayez.',
-            'logo.file'  => "Le logo n'a pas pu être lu. Réessayez avec une image JPG ou PNG.",
+            'logo.mimes' => __('flash.register_invalid_logo'),
+            'logo.max' => __('flash.register_logo_too_heavy'),
+            'logo.file' => __('flash.register_logo_unreadable'),
         ], [
             'company_name' => "nom de l'établissement",
-            'admin_name'   => 'nom complet',
+            'admin_name' => 'nom complet',
         ]);
 
-        $plan    = $data['plan'] ?? config('plans.default', 'starter');
-        $tier    = config('plans.tiers')[$plan];
+        // Si l'email existe déjà (l'utilisateur revient en arrière pour changer de plan),
+        // on met à jour l'hôtel avec les nouvelles infos et on le reconnecte.
+        $existingUser = User::where('email', $data['admin_email'])->first();
+        if ($existingUser) {
+            $plan = $data['plan'] ?? config('plans.default', 'starter');
+            $tier = config('plans.tiers')[$plan];
+            $country = $data['country'] ?? config('plans.default_country', 'BJ');
+            $currency = config('plans.countries.'.$country.'.currency', 'XOF');
+
+            if ($existingUser->hotel) {
+                $existingUser->hotel->update([
+                    'name' => $data['company_name'],
+                    'country' => $country,
+                    'currency' => $currency,
+                    'plan' => $plan,
+                    'room_limit' => $tier['room_limit'],
+                ]);
+
+                if ($request->hasFile('logo')) {
+                    $existingUser->hotel->update([
+                        'logo' => $request->file('logo')->store('hotel-logos', 'public'),
+                    ]);
+                }
+            }
+
+            Auth::login($existingUser);
+
+            return redirect()->route('onboarding.show')
+                ->with('success', __('flash.register_existing_account', ['plan' => $tier['name']]))
+                ->with('credentials_email', $existingUser->email);
+        }
+
+        $plan = $data['plan'] ?? config('plans.default', 'starter');
+        $tier = config('plans.tiers')[$plan];
         $country = $data['country'] ?? config('plans.default_country', 'BJ');
         $currency = config('plans.countries.'.$country.'.currency', 'XOF');
 
@@ -66,15 +98,15 @@ class RegisterHotelController extends Controller
 
         [$hotel, $admin] = DB::transaction(function () use ($data, $request, $plan, $tier, $country, $currency, $plainPassword) {
             $hotel = Hotel::create([
-                'name'                 => $data['company_name'],
-                'slug'                 => $this->uniqueSlug($data['company_name']),
-                'country'              => $country,
-                'currency'             => $currency,
-                'contact_phone'        => $data['contact_phone'] ?? null,
-                'contact_email'        => $data['admin_email'],
-                'plan'                 => $plan,
-                'room_limit'           => $tier['room_limit'],
-                'is_active'            => true,
+                'name' => $data['company_name'],
+                'slug' => $this->uniqueSlug($data['company_name']),
+                'country' => $country,
+                'currency' => $currency,
+                'contact_phone' => $data['contact_phone'] ?? null,
+                'contact_email' => $data['admin_email'],
+                'plan' => $plan,
+                'room_limit' => $tier['room_limit'],
+                'is_active' => true,
                 'subscription_ends_at' => now()->addDays(config('plans.trial_days', 14)),
             ]);
 
@@ -83,12 +115,12 @@ class RegisterHotelController extends Controller
             }
 
             $admin = User::create([
-                'hotel_id'   => $hotel->id,
-                'name'       => $data['admin_name'],
-                'email'      => $data['admin_email'],
-                'phone'      => $data['contact_phone'] ?? null,
-                'role'       => 'Admin',
-                'password'   => Hash::make($plainPassword),
+                'hotel_id' => $hotel->id,
+                'name' => $data['admin_name'],
+                'email' => $data['admin_email'],
+                'phone' => $data['contact_phone'] ?? null,
+                'role' => 'Admin',
+                'password' => Hash::make($plainPassword),
                 'random_key' => Str::random(60),
             ]);
 
@@ -96,10 +128,11 @@ class RegisterHotelController extends Controller
 
             // Historique : période d'essai gratuit
             $hotel->recordSubscription([
-                'status'    => 'trial',
-                'amount'    => 0,
+                'status' => 'trial',
+                'amount' => 0,
                 'starts_at' => now(),
-                'ends_at'   => $hotel->subscription_ends_at,
+                'ends_at' => $hotel->subscription_ends_at,
+                'created_by' => $admin->id,
             ]);
 
             return [$hotel, $admin];
@@ -116,7 +149,7 @@ class RegisterHotelController extends Controller
 
         // Direction l'onboarding : choix des couleurs, du nom du site et du logo
         return redirect()->route('onboarding.show')
-            ->with('success', 'Bienvenue ! Votre essai gratuit de '.config('plans.trial_days', 14).' jours a démarré.')
+            ->with('success', __('flash.register_trial_started', ['days' => config('plans.trial_days', 14)]))
             ->with('credentials_email', $admin->email);
     }
 

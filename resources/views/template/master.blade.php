@@ -13,7 +13,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="{{ ($currentHotel ?? null)?->logoUrl() ?? asset('favicon.svg') }}">
-    @vite('resources/sass/app.scss')
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Toastr -->
+    <link href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css" rel="stylesheet">
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <!-- DataTables Bootstrap 5 -->
+    <link href="https://cdn.datatables.net/1.13.7/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     @stack('styles')
     <title>@yield('title') - {{ $currentHotel->name ?? 'Hotel Admin' }}</title>
@@ -71,7 +83,162 @@
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
         .table-responsive { overflow-x: auto; }
+
+        /* ═══════════════════════════════════════════════════
+   DARK MODE — JS resolves "system" → "dark" or "light"
+   ═══════════════════════════════════════════════════ */
+
+        /* ── CSS Variables ── */
+        html[data-theme="dark"] {
+            color-scheme: dark;
+            --surface: #0f172a;
+            --white: #1e293b;
+            --gray-50: #1e293b;
+            --gray-100: #1e293b;
+            --gray-200: #334155;
+            --gray-300: #475569;
+            --gray-400: #64748b;
+            --gray-500: #94a3b8;
+            --gray-600: #cbd5e1;
+            --gray-700: #e2e8f0;
+            --gray-800: #f1f5f9;
+            --gray-900: #f8fafc;
+            --shadow-xs: 0 1px 2px rgba(0,0,0,.2);
+            --shadow-sm: 0 1px 6px rgba(0,0,0,.3);
+            --shadow-md: 0 4px 16px rgba(0,0,0,.4);
+        }
+        html[data-theme="dark"] body { background: #0f172a; color: #e2e8f0; }
+        html[data-theme="dark"] #page-content-wrapper { background: #0f172a; }
+        html[data-theme="dark"] #page-content-wrapper > .p-3 { color: #e2e8f0; }
+
+        /* ── Page-specific backgrounds ── */
+        html[data-theme="dark"] .act-page { background: #0f172a; }
+        html[data-theme="dark"] .notifications-page { background: #0f172a; }
+
+        /* ── All surfaces ── */
+        html[data-theme="dark"] .modal-content,
+        html[data-theme="dark"] .modal-header,
+        html[data-theme="dark"] .modal-footer,
+        html[data-theme="dark"] .swal2-popup,
+        html[data-theme="dark"] .dropdown-menu,
+        html[data-theme="dark"] .card,
+        html[data-theme="dark"] .bg-white,
+        html[data-theme="dark"] .table-container,
+        html[data-theme="dark"] .filter-section,
+        html[data-theme="dark"] .stat-card,
+        html[data-theme="dark"] .details-collapse,
+        html[data-theme="dark"] .details-pre,
+        html[data-theme="dark"] .notification-card,
+        html[data-theme="dark"] .modal pre,
+        html[data-theme="dark"] pre,
+        html[data-theme="dark"] .form-control,
+        html[data-theme="dark"] .form-select,
+        html[data-theme="dark"] .per-page-select,
+        html[data-theme="dark"] .btn-gray,
+        html[data-theme="dark"] .btn-icon,
+        html[data-theme="dark"] .filter-badge,
+        html[data-theme="dark"] .pagination-modern .page-link,
+        html[data-theme="dark"] .alert-green,
+        html[data-theme="dark"] .empty-state,
+        html[data-theme="dark"] .table thead th,
+        html[data-theme="dark"] .table tbody td {
+            background-color: #1e293b !important;
+            color: #e2e8f0 !important;
+            border-color: #334155 !important;
+        }
+
+        /* ── Text ── */
+        html[data-theme="dark"] .text-muted,
+        html[data-theme="dark"] .text-secondary,
+        html[data-theme="dark"] .stat-label,
+        html[data-theme="dark"] .stat-value,
+        html[data-theme="dark"] .stat-change,
+        html[data-theme="dark"] .form-label,
+        html[data-theme="dark"] label,
+        html[data-theme="dark"] .breadcrumb,
+        html[data-theme="dark"] .header-subtitle,
+        html[data-theme="dark"] h1, html[data-theme="dark"] h2,
+        html[data-theme="dark"] h3, html[data-theme="dark"] h5,
+        html[data-theme="dark"] h6, html[data-theme="dark"] p,
+        html[data-theme="dark"] span, html[data-theme="dark"] div {
+            color: #e2e8f0;
+        }
+        html[data-theme="dark"] .breadcrumb a { color: #94a3b8; }
+        html[data-theme="dark"] .breadcrumb a:hover { color: #10b981; }
+        html[data-theme="dark"] .breadcrumb .current { color: #cbd5e1; }
+
+        /* ── Table ── */
+        html[data-theme="dark"] .table tbody tr:hover td { background: #334155 !important; }
+        html[data-theme="dark"] .table thead th { background: #0f172a !important; color: #94a3b8 !important; }
+        html[data-theme="dark"] .table > :not(caption) > * > * { border-bottom-color: #334155 !important; }
+
+        /* ── Pagination ── */
+        html[data-theme="dark"] .pagination-modern .page-link { background: #1e293b; color: #94a3b8; border-color: #334155; }
+        html[data-theme="dark"] .pagination-modern .page-link:hover { background: #334155; color: #e2e8f0; }
+        html[data-theme="dark"] .pagination-modern .active .page-link { background: #10b981; border-color: #10b981; color: #fff; }
+
+        /* ── Scrollbar ── */
+        html[data-theme="dark"] ::-webkit-scrollbar { background: #1e293b; }
+        html[data-theme="dark"] ::-webkit-scrollbar-thumb { background: #475569; }
+
+        /* ── SweetAlert2 ── */
+        html[data-theme="dark"] .swal2-popup { background: #1e293b; color: #e2e8f0; }
+        html[data-theme="dark"] .swal2-title { color: #e2e8f0 !important; }
+        html[data-theme="dark"] .swal2-html-container { color: #94a3b8 !important; }
+
+        /* ── Dropdowns ── */
+        html[data-theme="dark"] .dropdown-item { color: #e2e8f0; }
+        html[data-theme="dark"] .dropdown-item:hover,
+        html[data-theme="dark"] .dropdown-item:focus { background: #334155; color: #fff; }
+        html[data-theme="dark"] .dropdown-item i { color: #10b981; }
+
+        /* ── Forms ── */
+        html[data-theme="dark"] .form-check-input { background-color: #334155; border-color: #475569; }
+        html[data-theme="dark"] .form-check-input:checked { background-color: #10b981; border-color: #10b981; }
+
+        /* ── Alerts ── */
+        html[data-theme="dark"] .alert-success { background-color: rgba(16,185,129,.15) !important; color: #6ee7b7 !important; border-color: rgba(16,185,129,.3) !important; }
+        html[data-theme="dark"] .alert-danger { background-color: rgba(239,68,68,.15) !important; color: #fca5a5 !important; border-color: rgba(239,68,68,.3) !important; }
+        html[data-theme="dark"] .alert-warning { background-color: rgba(245,158,11,.15) !important; color: #fcd34d !important; border-color: rgba(245,158,11,.3) !important; }
+        html[data-theme="dark"] .alert-info { background-color: rgba(59,130,246,.15) !important; color: #93c5fd !important; border-color: rgba(59,130,246,.3) !important; }
+
+        /* ── Misc ── */
+        html[data-theme="dark"] .bg-light,
+        html[data-theme="dark"] .bg-light-subtle { background-color: #1e293b !important; color: #e2e8f0 !important; }
+        html[data-theme="dark"] .border,
+        html[data-theme="dark"] .border-bottom,
+        html[data-theme="dark"] .border-top,
+        html[data-theme="dark"] .border-start,
+        html[data-theme="dark"] .border-end { border-color: #334155 !important; }
+        html[data-theme="dark"] .sidebar-time { color: rgba(255,255,255,.38); }
+        html[data-theme="dark"] .empty-state i { color: #475569; }
+        html[data-theme="dark"] .badge-number { background: #334155; color: #94a3b8; }
+        html[data-theme="dark"] .object-badge { background: #334155; color: #94a3b8; }
+        html[data-theme="dark"] .header-icon { box-shadow: 0 4px 10px rgba(0,0,0,.3); }
+        html[data-theme="dark"] .notification-card--unread { background: #1e293b; border-color: #334155; }
+        html[data-theme="dark"] .notification-card--read { background: #1e293b; border-color: #334155; }
+        html[data-theme="dark"] .notification-card__message,
+        html[data-theme="dark"] .notification-card__meta { color: #94a3b8; }
+        html[data-theme="dark"] .badge-green { background: rgba(16,185,129,.2) !important; color: #6ee7b7 !important; border-color: rgba(16,185,129,.3) !important; }
+        html[data-theme="dark"] .badge-red { background: rgba(239,68,68,.2) !important; color: #fca5a5 !important; border-color: rgba(239,68,68,.3) !important; }
+        html[data-theme="dark"] .badge-gray { background: rgba(148,163,184,.2) !important; color: #cbd5e1 !important; border-color: rgba(148,163,184,.3) !important; }
+        html[data-theme="dark"] .stat-icon { background: rgba(16,185,129,.15); }
+        html[data-theme="dark"] .avatar { background: rgba(16,185,129,.15); }
+        html[data-theme="dark"] .details-pre { background: #0f172a; color: #94a3b8; }
+        html[data-theme="dark"] .toast-success { background: #065f46; }
+        html[data-theme="dark"] .toast-error { background: #991b1b; }
+        html[data-theme="dark"] #sidebar-overlay { background: rgba(0,0,0,.5); }
     </style>
+
+    <script>
+    (function() {
+        var saved = localStorage.getItem('theme') || 'light';
+        var resolved = saved === 'system'
+            ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+            : saved;
+        document.documentElement.setAttribute('data-theme', resolved);
+    })();
+    </script>
 </head>
 
 <body>
@@ -107,7 +274,17 @@
 
     <!-- Bootstrap -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    @vite('resources/js/app.js')
+    <!-- jQuery (required by Toastr, Select2, DataTables) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Toastr -->
+    <script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+    <!-- Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.bootstrap5.min.js"></script>
+    <!-- Axios -->
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.2/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
@@ -200,5 +377,42 @@
     </script>
 
     @yield('footer')
+
+    <script>
+    (function() {
+        var themes = ['light', 'dark', 'system'];
+        var icons  = { light: 'fa-sun', dark: 'fa-moon', system: 'fa-desktop' };
+        var labels = { light: 'Clair', dark: 'Sombre', system: 'Système' };
+        var current = localStorage.getItem('theme') || 'light';
+
+        function applyTheme(theme) {
+            localStorage.setItem('theme', theme);
+            var resolved = theme === 'system'
+                ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                : theme;
+            document.documentElement.setAttribute('data-theme', resolved);
+            var icon  = document.getElementById('themeIcon');
+            var label = document.getElementById('themeLabel');
+            if (icon)  { icon.className = 'fas ' + icons[theme]; }
+            if (label) { label.textContent = labels[theme]; }
+        }
+
+        applyTheme(current);
+
+        /* Met à jour si l'OS change de préférence quand on est en "system" */
+        matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function() {
+            if (localStorage.getItem('theme') === 'system') applyTheme('system');
+        });
+
+        var btn = document.getElementById('themeToggle');
+        if (btn) {
+            btn.addEventListener('click', function() {
+                var idx = themes.indexOf(current);
+                current = themes[(idx + 1) % themes.length];
+                applyTheme(current);
+            });
+        }
+    })();
+    </script>
 </body>
 </html>

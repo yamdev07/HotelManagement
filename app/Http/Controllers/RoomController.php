@@ -67,7 +67,7 @@ class RoomController extends Controller
 
     public function store(StoreRoomRequest $request)
     {
-        $data         = $request->validated();
+        $data = $request->validated();
         $data['view'] = $data['view'] ?? '';
         $data['name'] = $data['name'] ?: null;
 
@@ -120,7 +120,7 @@ class RoomController extends Controller
 
     public function update(UpdateRoomRequest $request, Room $room)
     {
-        $data         = $request->validated();
+        $data = $request->validated();
         $data['view'] = $data['view'] ?? '';
         $data['name'] = $data['name'] ?: null;
 
@@ -195,10 +195,10 @@ class RoomController extends Controller
                 }
 
                 $room->update([
-                    'room_status_id'          => RoomStatusEnum::Maintenance->value,
-                    'maintenance_reason'      => $reason,
-                    'maintenance_started_at'  => now(),
-                    'maintenance_ended_at'    => null,
+                    'room_status_id' => RoomStatusEnum::Maintenance->value,
+                    'maintenance_reason' => $reason,
+                    'maintenance_started_at' => now(),
+                    'maintenance_ended_at' => null,
                     'maintenance_requested_by' => auth()->id(),
                 ]);
 
@@ -364,8 +364,7 @@ class RoomController extends Controller
 
     /**
      * ✅ Marquer une chambre comme sale manuellement
-     * 
-     * @param Room $room
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function markAsDirty(Room $room)
@@ -373,7 +372,7 @@ class RoomController extends Controller
         Log::info("🔴 Tentative de marquer la chambre #{$room->id} comme sale", [
             'user' => auth()->user()->name,
             'room' => $room->number,
-            'old_status' => $room->room_status_id
+            'old_status' => $room->room_status_id,
         ]);
 
         DB::beginTransaction();
@@ -381,9 +380,9 @@ class RoomController extends Controller
         try {
             // Vérifier si la chambre est occupée
             if ($room->isOccupied()) {
-                Log::warning("❌ Tentative de marquer une chambre occupée comme sale", [
+                Log::warning('❌ Tentative de marquer une chambre occupée comme sale', [
                     'room_id' => $room->id,
-                    'current_status' => $room->room_status_id
+                    'current_status' => $room->room_status_id,
                 ]);
 
                 return redirect()->back()
@@ -416,7 +415,7 @@ class RoomController extends Controller
                     'old_status' => $room->getOriginal('room_status_id'),
                     'new_status' => Room::STATUS_DIRTY,
                     'room_number' => $room->number,
-                    'action' => 'mark_dirty'
+                    'action' => 'mark_dirty',
                 ])
                 ->log('a marqué la chambre comme sale');
 
@@ -433,18 +432,17 @@ class RoomController extends Controller
             Log::error('❌ Erreur lors du marquage de la chambre comme sale:', [
                 'room_id' => $room->id,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return redirect()->back()
-                ->with('error', 'Erreur lors du marquage de la chambre: ' . $e->getMessage());
+                ->with('error', 'Erreur lors du marquage de la chambre: '.$e->getMessage());
         }
     }
 
     /**
      * ✅ Marquer une chambre comme propre (après nettoyage)
-     * 
-     * @param Room $room
+     *
      * @return \Illuminate\Http\RedirectResponse
      */
     public function markAsClean(Room $room)
@@ -452,7 +450,7 @@ class RoomController extends Controller
         Log::info("🟢 Tentative de marquer la chambre #{$room->id} comme propre", [
             'user' => auth()->user()->name,
             'room' => $room->number,
-            'old_status' => $room->room_status_id
+            'old_status' => $room->room_status_id,
         ]);
 
         DB::beginTransaction();
@@ -461,7 +459,7 @@ class RoomController extends Controller
             // Vérifier si la chambre est occupée
             if ($room->isOccupied()) {
                 return redirect()->back()
-                    ->with('error', 'Impossible de marquer une chambre occupée comme propre. Le client est toujours présent.');
+                    ->with('error', __('flash.room_cannot_clean_occupied'));
             }
 
             // Vérifier si la chambre est déjà propre
@@ -473,7 +471,7 @@ class RoomController extends Controller
             // Vérifier si la chambre est en maintenance
             if ($room->room_status_id == Room::STATUS_MAINTENANCE) {
                 return redirect()->back()
-                    ->with('error', "Impossible de marquer une chambre en maintenance comme propre. Terminez d'abord la maintenance.");
+                    ->with('error', __('flash.room_cannot_clean_maintenance'));
             }
 
             // Déterminer le nouveau statut
@@ -493,7 +491,7 @@ class RoomController extends Controller
                     'new_status' => $newStatus,
                     'cleaned_at' => now(),
                     'room_number' => $room->number,
-                    'action' => 'mark_clean'
+                    'action' => 'mark_clean',
                 ])
                 ->log('a marqué la chambre comme propre');
 
@@ -502,27 +500,24 @@ class RoomController extends Controller
             Log::info("✅ Chambre #{$room->id} marquée comme propre avec succès");
 
             return redirect()->back()
-                ->with('success', "✅ Chambre {$room->number} marquée comme propre.");
+                ->with('success', __('flash.room_marked_clean', ['number' => $room->number]));
 
         } catch (\Exception $e) {
             DB::rollBack();
 
             Log::error('❌ Erreur lors du marquage de la chambre comme propre:', [
                 'room_id' => $room->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
 
             return redirect()->back()
-                ->with('error', 'Erreur: ' . $e->getMessage());
+                ->with('error', __('flash.room_mark_error').': '.$e->getMessage());
         }
     }
 
     /**
      * ✅ Vérifier si une chambre peut être marquée comme sale
      * (Méthode utilitaire pour la vue)
-     * 
-     * @param Room $room
-     * @return bool
      */
     public function canMarkAsDirty(Room $room): bool
     {
@@ -531,47 +526,44 @@ class RoomController extends Controller
         // - Elle est déjà sale
         // - Elle est en maintenance
         // - L'utilisateur n'a pas les droits
-        
-        if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping'])) {
+
+        if (! in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping'])) {
             return false;
         }
-        
+
         if ($room->isOccupied()) {
             return false;
         }
-        
+
         if ($room->room_status_id == Room::STATUS_DIRTY) {
             return false;
         }
-        
+
         if ($room->room_status_id == Room::STATUS_MAINTENANCE) {
             return false;
         }
-        
+
         return true;
     }
 
     /**
      * ✅ Vérifier si une chambre peut être marquée comme propre
      * (Méthode utilitaire pour la vue)
-     * 
-     * @param Room $room
-     * @return bool
      */
     public function canMarkAsClean(Room $room): bool
     {
         // Ne peut être marquée comme propre que si :
         // - Elle est sale
         // - L'utilisateur a les droits
-        
-        if (!in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping'])) {
+
+        if (! in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping'])) {
             return false;
         }
-        
+
         if ($room->room_status_id != Room::STATUS_DIRTY) {
             return false;
         }
-        
+
         return true;
     }
 }

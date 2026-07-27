@@ -11,7 +11,10 @@
     {{-- Icon --}}
     <link rel="icon" href="{{ asset('img/logo/sip.png') }}">
 
-    @vite('resources/sass/app.scss')
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     @yield('head')
 </head>
 
@@ -22,7 +25,10 @@
     </main>
 
     @yield('footer')
-    @vite('resources/js/app.js')
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

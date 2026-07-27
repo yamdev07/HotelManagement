@@ -14,6 +14,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         if (! Schema::hasTable('cashier_transactions')) {
             DB::statement("
                 CREATE TABLE `cashier_transactions` (
@@ -106,7 +110,7 @@ return new class extends Migration
         }
 
         if (! Schema::hasTable('room_status_history')) {
-            DB::statement("
+            DB::statement('
                 CREATE TABLE `room_status_history` (
                   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
                   `room_id` bigint unsigned NOT NULL,
@@ -120,12 +124,16 @@ return new class extends Migration
                   KEY `idx_rsh_new_status` (`new_status_id`),
                   KEY `idx_rsh_changed_by` (`changed_by`)
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
-            ");
+            ');
         }
     }
 
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+
         Schema::dropIfExists('cashier_transactions');
         Schema::dropIfExists('receptionist_commissions');
         Schema::dropIfExists('receptionist_profiles');

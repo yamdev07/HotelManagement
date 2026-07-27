@@ -17,18 +17,18 @@ return new class extends Migration
             $table->decimal('amount', 10, 2)->default(0)->change();
 
             // created_by (FK -> users)
-            if (!Schema::hasColumn('payments', 'created_by')) {
+            if (! Schema::hasColumn('payments', 'created_by')) {
                 $table->unsignedBigInteger('created_by')->nullable()->after('user_id');
             }
 
             // cashier_session_id column (FK later only if table exists)
-            if (!Schema::hasColumn('payments', 'cashier_session_id')) {
+            if (! Schema::hasColumn('payments', 'cashier_session_id')) {
                 $table->unsignedBigInteger('cashier_session_id')->nullable()->after('transaction_id');
             }
         });
 
         // 2) Rename column in a separate schema call (safer)
-        if (Schema::hasColumn('payments', 'notes') && !Schema::hasColumn('payments', 'description')) {
+        if (Schema::hasColumn('payments', 'notes') && ! Schema::hasColumn('payments', 'description')) {
             Schema::table('payments', function (Blueprint $table) {
                 $table->renameColumn('notes', 'description');
             });
@@ -44,7 +44,8 @@ return new class extends Migration
                         ->references('id')
                         ->on('users')
                         ->nullOnDelete();
-                } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {
+                }
             });
         }
 
@@ -56,7 +57,8 @@ return new class extends Migration
                         ->references('id')
                         ->on('cashier_sessions')
                         ->nullOnDelete();
-                } catch (\Throwable $e) {}
+                } catch (\Throwable $e) {
+                }
             });
         }
     }
@@ -66,15 +68,21 @@ return new class extends Migration
         // Drop FKs safely first
         Schema::table('payments', function (Blueprint $table) {
             if (Schema::hasColumn('payments', 'created_by')) {
-                try { $table->dropForeign(['created_by']); } catch (\Throwable $e) {}
+                try {
+                    $table->dropForeign(['created_by']);
+                } catch (\Throwable $e) {
+                }
             }
             if (Schema::hasColumn('payments', 'cashier_session_id')) {
-                try { $table->dropForeign(['cashier_session_id']); } catch (\Throwable $e) {}
+                try {
+                    $table->dropForeign(['cashier_session_id']);
+                } catch (\Throwable $e) {
+                }
             }
         });
 
         // Rename back (separate)
-        if (Schema::hasColumn('payments', 'description') && !Schema::hasColumn('payments', 'notes')) {
+        if (Schema::hasColumn('payments', 'description') && ! Schema::hasColumn('payments', 'notes')) {
             Schema::table('payments', function (Blueprint $table) {
                 $table->renameColumn('description', 'notes');
             });

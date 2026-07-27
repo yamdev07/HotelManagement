@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Modifier la Chambre')
+@section('title', __('room.edit_page_title'))
 
 @section('content')
 <style>
@@ -369,13 +369,13 @@
 <div class="edit-page">
     <!-- Breadcrumb -->
     <div class="edit-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('room.breadcrumb_dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('room.index') }}">Chambres</a>
+        <a href="{{ route('room.index') }}">{{ __('room.breadcrumb_rooms') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('room.show', $room->id) }}">Chambre {{ $room->number }}</a>
+        <a href="{{ route('room.show', $room->id) }}">{{ __('room.breadcrumb_room_number', ['number' => $room->number]) }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Modifier</span>
+        <span class="current">{{ __('room.breadcrumb_edit') }}</span>
     </div>
 
     <!-- Header -->
@@ -383,15 +383,15 @@
         <div class="edit-brand">
             <div class="edit-brand-icon"><i class="fas fa-edit"></i></div>
             <div>
-                <h1 class="edit-header-title">Modifier la <em>chambre</em></h1>
+                <h1 class="edit-header-title">{!! __('room.edit_title') !!}</h1>
                 <p class="edit-header-sub">
-                    <i class="fas fa-door-open me-1"></i> Chambre {{ $room->number }} · {{ $room->name ?? 'Sans nom' }}
+                    <i class="fas fa-door-open me-1"></i> {{ __('room.edit_subtitle', ['number' => $room->number, 'name' => $room->name ?? __('room.guest_no_specified')]) }}
                 </p>
             </div>
         </div>
         <div class="edit-header-actions">
             <a href="{{ route('room.show', $room->id) }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-eye me-2"></i> Voir
+                <i class="fas fa-eye me-2"></i> {{ __('room.view_button') }}
             </a>
         </div>
     </div>
@@ -401,7 +401,7 @@
     <div class="alert-modern alert-danger anim-2">
         <div class="alert-icon"><i class="fas fa-exclamation-triangle"></i></div>
         <div style="flex:1">
-            <strong>Veuillez corriger les erreurs suivantes :</strong>
+            <strong>{{ __('room.error_heading') }}</strong>
             <ul>
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
@@ -433,7 +433,7 @@
         <div class="edit-card-header">
             <h5 class="edit-card-title">
                 <i class="fas fa-info-circle"></i>
-                Informations de la chambre
+                {{ __('room.card_info') }}
             </h5>
         </div>
         <div class="edit-card-body">
@@ -447,14 +447,14 @@
                     <div class="form-group">
                         <label for="number" class="form-label">
                             <i class="fas fa-hashtag"></i>
-                            Numéro de chambre *
+                            {{ __('room.label_number') }}
                         </label>
                         <input type="text" 
                                class="form-control @error('number') is-invalid @enderror" 
                                id="number" 
                                name="number" 
                                value="{{ old('number', $room->number) }}" 
-                               placeholder="Ex: 101, 201, 301" 
+                               placeholder="{{ __('room.placeholder_number') }}" 
                                required>
                         @error('number')
                         <div class="invalid-feedback">
@@ -462,42 +462,42 @@
                             {{ $message }}
                         </div>
                         @enderror
-                        <div class="form-hint">Identifiant unique de la chambre</div>
+                        <div class="form-hint">{{ __('room.hint_unique_id_edit') }}</div>
                     </div>
                     
                     <!-- Nom de la chambre -->
                     <div class="form-group">
                         <label for="name" class="form-label">
                             <i class="fas fa-signature"></i>
-                            Nom de la chambre
-                            <span class="optional">(Optionnel)</span>
+                            {{ __('room.label_name') }}
+                            <span class="optional">{{ __('room.optional') }}</span>
                         </label>
                         <input type="text" 
                                class="form-control @error('name') is-invalid @enderror" 
                                id="name" 
                                name="name" 
                                value="{{ old('name', $room->name) }}" 
-                               placeholder="Suite Présidentielle, Vue Mer">
+                               placeholder="{{ __('room.placeholder_name') }}">
                         @error('name')
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
                             {{ $message }}
                         </div>
                         @enderror
-                        <div class="form-hint">Nom descriptif de la chambre</div>
+                        <div class="form-hint">{{ __('room.hint_name') }}</div>
                     </div>
                     
                     <!-- Type de chambre -->
                     <div class="form-group">
                         <label for="type_id" class="form-label">
                             <i class="fas fa-bed"></i>
-                            Type de chambre *
+                            {{ __('room.label_type') }}
                         </label>
                         <select id="type_id" 
                                 name="type_id" 
                                 class="form-select @error('type_id') is-invalid @enderror" 
                                 required>
-                            <option value="" disabled>-- Sélectionner un type --</option>
+                            <option value="" disabled>{{ __('room.hint_select_type') }}</option>
                             @foreach ($types as $type)
                                 <option value="{{ $type->id }}" {{ old('type_id', $room->type_id) == $type->id ? 'selected' : '' }}>
                                     {{ $type->name }} 
@@ -519,39 +519,39 @@
                     <div class="form-group">
                         <label class="form-label">
                             <i class="fas fa-circle"></i>
-                            Statut actuel
-                            <span class="optional">(Auto-géré)</span>
+                            {{ __('room.label_status_current') }}
+                            <span class="optional">{{ __('room.auto_managed') }}</span>
                         </label>
                         
                         <div class="status-box">
                             <div class="status-display">
                                 @php
-                                    $statusColor = match($room->roomStatus->name ?? '') {
-                                        'Disponible' => 'success',
-                                        'Occupée' => 'danger',
-                                        'Réservée' => 'warning',
-                                        'En maintenance' => 'gray',
-                                        'À nettoyer' => 'gray',
-                                        default => 'gray'
-                                    };
+                                $statusColor = match($room->roomStatus->name ?? '') {
+                                    'Available' => 'success',
+                                    'Occupied' => 'danger',
+                                    'Reserved' => 'warning',
+                                    'Maintenance' => 'gray',
+                                    'Dirty' => 'gray',
+                                    default => 'gray'
+                                };
                                 @endphp
                                 
                                 <span class="status-badge status-badge--{{ $statusColor }}">
-                                    <i class="fas fa-{{ match($room->roomStatus->name ?? '') {
-                                        'Disponible' => 'check',
-                                        'Occupée' => 'user',
-                                        'Réservée' => 'calendar-check',
-                                        'En maintenance' => 'tools',
-                                        'À nettoyer' => 'broom',
-                                        default => 'question-circle'
+                                <i class="fas fa-{{ match($room->roomStatus->name ?? '') {
+                                    'Available' => 'check',
+                                    'Occupied' => 'user',
+                                    'Reserved' => 'calendar-check',
+                                    'Maintenance' => 'tools',
+                                    'Dirty' => 'broom',
+                                    default => 'question-circle'
                                     } }}"></i>
-                                    {{ $room->roomStatus->name ?? 'Inconnu' }}
+                                    {{ $room->roomStatus->name ?? __('room.unknown') }}
                                 </span>
                                 
                                 <div class="status-info">
                                     <div class="status-meta">{{ $room->roomStatus->information ?? '' }}</div>
                                     
-                                    @if($room->roomStatus->name == 'Occupée')
+                                    @if($room->roomStatus->name == 'Occupied')
                                         @php
                                             $activeTransaction = $room->transactions()
                                                 ->where('status', 'active')
@@ -562,10 +562,10 @@
                                         @if($activeTransaction)
                                         <div class="status-detail">
                                             <i class="fas fa-user"></i>
-                                            Client: {{ $activeTransaction->customer->name }}
+                                            {{ __('room.label_guest') }} {{ $activeTransaction->customer->name }}
                                         </div>
                                         @endif
-                                    @elseif($room->roomStatus->name == 'Réservée')
+                                    @elseif($room->roomStatus->name == 'Reserved')
                                         @php
                                             $nextReservation = $room->transactions()
                                                 ->where('status', 'reservation')
@@ -576,20 +576,20 @@
                                         @if($nextReservation)
                                         <div class="status-detail">
                                             <i class="fas fa-calendar"></i>
-                                            Arrivée: {{ \Carbon\Carbon::parse($nextReservation->check_in)->format('d/m/Y') }}
+                                            {{ __('room.label_arrival') }} {{ \Carbon\Carbon::parse($nextReservation->check_in)->translatedFormat('d/m/Y') }}
                                         </div>
                                         @endif
-                                    @elseif($room->roomStatus->name == 'En maintenance')
+                                    @elseif($room->roomStatus->name == 'Maintenance')
                                         @if($room->maintenance_started_at)
                                         <div class="status-detail">
                                             <i class="fas fa-clock"></i>
-                                            Depuis: {{ \Carbon\Carbon::parse($room->maintenance_started_at)->format('d/m/Y H:i') }}
+                                            {{ __('room.label_since') }} {{ \Carbon\Carbon::parse($room->maintenance_started_at)->translatedFormat('d/m/Y H:i') }}
                                         </div>
                                         @endif
                                         @if($room->maintenance_reason)
                                         <div class="status-detail">
                                             <i class="fas fa-sticky-note"></i>
-                                            Raison: {{ $room->maintenance_reason }}
+                                            {{ __('room.label_reason') }} {{ $room->maintenance_reason }}
                                         </div>
                                         @endif
                                     @endif
@@ -602,8 +602,8 @@
                         <div class="info-box">
                             <i class="fas fa-info-circle"></i>
                             <div class="info-box__content">
-                                <strong>Statut auto-géré</strong>
-                                Ce statut est automatiquement mis à jour en fonction des réservations et séjours.
+                                <strong>{{ __('room.hint_status_auto') }}</strong>
+                                {{ __('room.hint_status_auto_desc') }}
                             </div>
                         </div>
                         
@@ -612,7 +612,7 @@
                             <button type="button" class="btn-db btn-db-info" 
                                     onclick="toggleMaintenance({{ $room->id }}, '{{ $room->roomStatus->name ?? '' }}')">
                                 <i class="fas fa-tools"></i>
-                                {{ $room->roomStatus->name == 'En maintenance' ? 'Terminer la maintenance' : 'Mettre en maintenance' }}
+                                {{ $room->roomStatus->name == 'Maintenance' ? __('room.maintenance_toggle_off') : __('room.maintenance_toggle_on') }}
                             </button>
                         </div>
                         @endif
@@ -622,7 +622,7 @@
                     <div class="form-group">
                         <label for="capacity" class="form-label">
                             <i class="fas fa-users"></i>
-                            Capacité *
+                            {{ __('room.label_capacity') }}
                         </label>
                         <input type="number" 
                                class="form-control @error('capacity') is-invalid @enderror" 
@@ -639,14 +639,14 @@
                             {{ $message }}
                         </div>
                         @enderror
-                        <div class="form-hint">Nombre de personnes (1-10)</div>
+                        <div class="form-hint">{{ __('room.hint_capacity') }}</div>
                     </div>
                     
                     <!-- Prix par nuit -->
                     <div class="form-group">
                         <label for="price" class="form-label">
                             <i class="fas fa-money-bill-wave"></i>
-                            Prix par nuit *
+                            {{ __('room.label_price') }}
                         </label>
                         <div class="input-group">
                             <span class="input-group-text">FCFA</span>
@@ -671,13 +671,13 @@
                     <div class="form-group">
                         <label for="view" class="form-label">
                             <i class="fas fa-binoculars"></i>
-                            Description de la vue
+                            {{ __('room.label_view') }}
                         </label>
                         <textarea class="form-control @error('view') is-invalid @enderror" 
                                   id="view" 
                                   name="view" 
                                   rows="1" 
-                                  placeholder="Vue sur mer, Vue sur montagne, Vue sur ville">{{ old('view', $room->view) }}</textarea>
+                                  placeholder="{{ __('room.placeholder_view') }}">{{ old('view', $room->view) }}</textarea>
                         @error('view')
                         <div class="invalid-feedback">
                             <i class="fas fa-exclamation-circle"></i>
@@ -691,10 +691,10 @@
                         <div class="meta-card">
                             <div class="meta-title">
                                 <i class="fas fa-calendar-alt"></i>
-                                Informations
+                                {{ __('room.card_info') }}
                             </div>
-                            <div class="meta-row">Créée le: {{ $room->created_at->format('d/m/Y H:i') }}</div>
-                            <div class="meta-row">Dernière modification: {{ $room->updated_at->format('d/m/Y H:i') }}</div>
+                            <div class="meta-row">{{ __('room.meta_created', ['date' => $room->created_at->translatedFormat('d/m/Y H:i')]) }}</div>
+                            <div class="meta-row">{{ __('room.meta_updated', ['date' => $room->updated_at->translatedFormat('d/m/Y H:i')]) }}</div>
                         </div>
                     </div>
                     
@@ -704,16 +704,16 @@
                 <div class="actions-bar">
                     <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost">
                         <i class="fas fa-times me-2"></i>
-                        Annuler
+                        {{ __('room.cancel') }}
                     </a>
                     <div class="actions-group">
                         <a href="{{ route('room.show', $room->id) }}" class="btn-db btn-db-info">
                             <i class="fas fa-eye me-2"></i>
-                            Voir
+                            {{ __('room.view_button') }}
                         </a>
                         <button type="submit" class="btn-db btn-db-primary">
                             <i class="fas fa-save me-2"></i>
-                            Mettre à jour
+                            {{ __('room.submit_update') }}
                         </button>
                     </div>
                 </div>
@@ -728,21 +728,21 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 function toggleMaintenance(roomId, currentStatus) {
-    const isMaintenance = currentStatus === 'En maintenance';
+    const isMaintenance = currentStatus === 'Maintenance';
     
     Swal.fire({
-        title: isMaintenance ? 'Terminer la maintenance ?' : 'Mettre en maintenance ?',
+        title: isMaintenance ? '{{ __("room.swal_maintenance_end_title") }}' : '{{ __("room.swal_maintenance_start_title") }}',
         html: `
             <div style="text-align:left">
                 <p>${isMaintenance 
-                    ? 'Cette action marquera la chambre comme disponible à nouveau.' 
-                    : 'Cette action marquera temporairement la chambre comme indisponible.'}</p>
+                    ? '{!! __("room.swal_maintenance_end_html") !!}' 
+                    : '{!! __("room.swal_maintenance_start_html") !!}'}</p>
                 
                 ${!isMaintenance ? `
                 <div style="margin-bottom:16px">
-                    <label style="display:block;margin-bottom:6px;font-weight:600">Raison de la maintenance :</label>
+                    <label style="display:block;margin-bottom:6px;font-weight:600">{!! __("room.swal_maintenance_reason_label") !!}</label>
                     <textarea id="maintenanceReason" class="form-control" rows="3" 
-                              placeholder="Nettoyage, réparations, rénovation..."></textarea>
+                              placeholder="{!! __("room.swal_maintenance_reason_placeholder") !!}"></textarea>
                 </div>
                 ` : ''}
             </div>
@@ -751,14 +751,14 @@ function toggleMaintenance(roomId, currentStatus) {
         showCancelButton: true,
         confirmButtonColor: isMaintenance ? '#1e6b2e' : '#eab308',
         cancelButtonColor: '#9ba09b',
-        confirmButtonText: isMaintenance ? 'Oui, terminer' : 'Oui, mettre en maintenance',
-        cancelButtonText: 'Annuler',
+        confirmButtonText: isMaintenance ? '{{ __("room.swal_confirm_end") }}' : '{{ __("room.swal_confirm_start") }}',
+        cancelButtonText: '{{ __("room.cancel") }}',
         showLoaderOnConfirm: true,
         preConfirm: () => {
             if (!isMaintenance) {
                 const reason = document.getElementById('maintenanceReason').value;
                 if (!reason.trim()) {
-                    Swal.showValidationMessage('Veuillez entrer une raison de maintenance');
+                    Swal.showValidationMessage('{!! __("room.swal_maintenance_reason_required") !!}');
                     return false;
                 }
                 return { reason: reason.trim() };
@@ -770,8 +770,8 @@ function toggleMaintenance(roomId, currentStatus) {
             const reason = result.value?.reason || '';
             
             Swal.fire({
-                title: 'Traitement en cours...',
-                text: 'Veuillez patienter',
+                title: '{{ __("room.swal_processing") }}',
+                text: '{{ __("room.swal_please_wait") }}',
                 allowOutsideClick: false,
                 showConfirmButton: false,
                 didOpen: () => {
@@ -799,7 +799,7 @@ function toggleMaintenance(roomId, currentStatus) {
                 if (data.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Succès !',
+                        title: '{{ __("room.swal_success_title") }}',
                         text: data.message,
                         timer: 2000,
                         showConfirmButton: false
@@ -809,8 +809,8 @@ function toggleMaintenance(roomId, currentStatus) {
                 } else {
                     Swal.fire({
                         icon: 'error',
-                        title: 'Erreur',
-                        text: data.message || 'Opération échouée'
+                        title: '{{ __("room.swal_error_title") }}',
+                        text: data.message || '{{ __("room.swal_operation_failed") }}'
                     });
                 }
             })
@@ -818,8 +818,8 @@ function toggleMaintenance(roomId, currentStatus) {
                 console.error('Error:', error);
                 Swal.fire({
                     icon: 'error',
-                    title: 'Erreur',
-                    text: 'Erreur réseau. Veuillez réessayer.'
+                    title: '{{ __("room.swal_error_title") }}',
+                    text: '{{ __("room.swal_network_error") }}'
                 });
             });
         }

@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Équipements')
+@section('title', __('facility.title'))
 @section('content')
 
 <style>
@@ -262,7 +262,7 @@
     <div class="breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Équipements</span>
+        <span class="current">{{ __('facility.breadcrumb_index') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -270,12 +270,12 @@
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-cogs"></i></span>
-                <h1>Gestion des <em>équipements</em></h1>
+                <h1>{!! __('facility.header_index') !!}</h1>
             </div>
-            <p class="header-subtitle">Liste des équipements disponibles dans les chambres</p>
+            <p class="header-subtitle">{{ __('facility.header_index_desc') }}</p>
         </div>
         <a href="{{ route('facility.create') }}" class="btn btn-green">
-            <i class="fas fa-plus-circle"></i> Ajouter
+            <i class="fas fa-plus-circle"></i> {{ __('facility.btn_add') }}
         </a>
     </div>
 
@@ -285,10 +285,10 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th width="80">#</th>
-                        <th>Nom</th>
-                        <th width="120">Statut</th>
-                        <th width="200" class="text-center">Actions</th>
+                        <th width="80">{{ __('facility.table_id') }}</th>
+                        <th>{{ __('facility.table_name') }}</th>
+                        <th width="120">{{ __('facility.table_status') }}</th>
+                        <th width="200" class="text-center">{{ __('facility.table_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -307,22 +307,22 @@
                             </td>
                             <td>
                                 @if($facility->status)
-                                    <span class="badge badge-green"><i class="fas fa-check-circle"></i> Actif</span>
+                                    <span class="badge badge-green"><i class="fas fa-check-circle"></i> {{ __('facility.status_active') }}</span>
                                 @else
-                                    <span class="badge badge-red"><i class="fas fa-times-circle"></i> Inactif</span>
+                                    <span class="badge badge-red"><i class="fas fa-times-circle"></i> {{ __('facility.status_inactive') }}</span>
                                 @endif
                             </td>
                             <td>
                                 <div class="d-flex gap-1 justify-content-center">
                                     <a href="{{ route('facility.edit', $facility->id) }}" 
                                        class="btn btn-gray btn-sm"
-                                       title="Modifier">
+                                       title="{{ __('facility.btn_edit') }}">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <button class="btn btn-red btn-sm delete" 
                                             data-id="{{ $facility->id }}" 
                                             data-name="{{ $facility->name }}"
-                                            title="Supprimer">
+                                            title="{{ __('facility.btn_delete') }}">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                     <form id="delete-form-{{ $facility->id }}" 
@@ -338,10 +338,10 @@
                             <td colspan="4">
                                 <div class="empty-state">
                                     <div class="empty-icon"><i class="fas fa-cogs"></i></div>
-                                    <h4>Aucun équipement</h4>
-                                    <p>Commencez par ajouter un équipement.</p>
+                                    <h4>{{ __('facility.empty_title') }}</h4>
+                                    <p>{{ __('facility.empty_desc') }}</p>
                                     <a href="{{ route('facility.create') }}" class="btn btn-green mt-3">
-                                        <i class="fas fa-plus-circle"></i> Ajouter
+                                        <i class="fas fa-plus-circle"></i> {{ __('facility.btn_add') }}
                                     </a>
                                 </div>
                             </td>
@@ -363,14 +363,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = this.dataset.name;
 
             Swal.fire({
-                title: 'Confirmer la suppression',
-                html: `Supprimer l'équipement <strong>${name}</strong> ?`,
+                title: @json(__('facility.swal_delete_title')),
+                html: @json(__('facility.swal_delete_html')) + ' <strong>' + name + '</strong> ?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#1e6b2e',
                 cancelButtonColor: '#b91c1c',
-                confirmButtonText: '<i class="fas fa-check"></i> Oui, supprimer',
-                cancelButtonText: '<i class="fas fa-times"></i> Annuler'
+                confirmButtonText: @json(__('facility.swal_confirm_delete')),
+                cancelButtonText: @json(__('facility.swal_cancel'))
             }).then((result) => {
                 if (result.isConfirmed) {
                     document.getElementById(`delete-form-${id}`).submit();

@@ -440,13 +440,13 @@ textarea.form-control {
 
     {{-- Breadcrumb --}}
     <div class="breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> {{ __('customer.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('customer.index') }}">Clients</a>
+        <a href="{{ route('customer.index') }}">{{ __('customer.clients') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('customer.show', $customer->id) }}">{{ $customer->name }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Modifier</span>
+        <span class="current">{{ __('customer.edit') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -454,9 +454,9 @@ textarea.form-control {
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-user-edit"></i></span>
-                <h1>Modifier <em>{{ $customer->name }}</em></h1>
+                <h1>{!! __('customer.header_edit_customer', ['name' => $customer->name]) !!}</h1>
             </div>
-            <p class="header-subtitle">Mettez à jour les informations du client</p>
+            <p class="header-subtitle">{{ __('customer.header_edit_subtitle') }}</p>
         </div>
     </div>
 
@@ -473,7 +473,7 @@ textarea.form-control {
     <div class="alert alert-red">
         <div class="alert-icon"><i class="fas fa-exclamation"></i></div>
         <div>
-            <strong>Erreur de validation</strong>
+            <strong>{{ __('customer.validation_error') }}</strong>
             <ul class="mb-0 mt-2">
                 @foreach($errors->all() as $error)
                 <li>{{ $error }}</li>
@@ -489,8 +489,8 @@ textarea.form-control {
         <div class="col-lg-8">
             <div class="form-card">
                 <div class="form-header">
-                    <h2><i class="fas fa-user"></i> Informations du client</h2>
-                    <p>Modifiez les informations ci-dessous</p>
+                    <h2><i class="fas fa-user"></i> {{ __('customer.customer_info') }}</h2>
+                    <p>{{ __('customer.customer_info_text') }}</p>
                 </div>
                 
                 <div class="form-body">
@@ -507,14 +507,14 @@ textarea.form-control {
                             <img src="{{ $avatarUrl ?? 'https://ui-avatars.com/api/?name='.urlencode($customer->name).'&background=1e6b2e&color=fff&size=80' }}" 
                                  alt="{{ $customer->name }}">
                             <div class="avatar-preview-info">
-                                <h6>Photo de profil actuelle</h6>
-                                <p>Vous pouvez télécharger une nouvelle photo ci-dessous</p>
+                                <h6>{{ __('customer.current_photo') }}</h6>
+                                <p>{{ __('customer.upload_new_photo') }}</p>
                             </div>
                         </div>
                         
                         {{-- Nom --}}
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-user"></i> Nom complet</label>
+                            <label class="form-label"><i class="fas fa-user"></i> {{ __('customer.full_name') }}</label>
                             <input type="text" class="form-control @error('name') is-invalid @enderror" 
                                    name="name" value="{{ old('name', $customer->name) }}" required>
                             @error('name')<div class="error-message"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>@enderror
@@ -524,13 +524,13 @@ textarea.form-control {
                         <div class="form-group">
                             <label class="form-label"><i class="fas fa-envelope"></i> Email</label>
                             <input type="email" class="form-control" value="{{ $customer->user->email ?? '' }}" disabled>
-                            <span class="text-muted"><i class="fas fa-info-circle"></i> L'email ne peut pas être modifié</span>
+                            <span class="text-muted"><i class="fas fa-info-circle"></i> {{ __('customer.email_disabled_hint') }}</span>
                         </div>
                         
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label"><i class="fas fa-cake-candles"></i> Date de naissance</label>
+                                    <label class="form-label"><i class="fas fa-cake-candles"></i> {{ __('customer.date_of_birth') }}</label>
                                     <input type="date" class="form-control @error('birthdate') is-invalid @enderror"
                                            min="1900-01-01" max="{{ date('Y-m-d') }}"
                                            name="birthdate" value="{{ old('birthdate', $customer->birthdate) }}">
@@ -539,11 +539,11 @@ textarea.form-control {
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label"><i class="fas fa-venus-mars"></i> Genre</label>
+                                    <label class="form-label"><i class="fas fa-venus-mars"></i> {{ __('customer.gender') }}</label>
                                     <select class="form-select @error('gender') is-invalid @enderror" name="gender">
-                                        <option value="">-- Sélectionnez --</option>
-                                        <option value="Male" {{ old('gender', $customer->gender) == 'Male' ? 'selected' : '' }}>Masculin</option>
-                                        <option value="Female" {{ old('gender', $customer->gender) == 'Female' ? 'selected' : '' }}>Féminin</option>
+                                        <option value="">{{ __('customer.gender_select') }}</option>
+                                        <option value="Male" {{ old('gender', $customer->gender) == 'Male' ? 'selected' : '' }}>{{ __('customer.gender_male') }}</option>
+                                        <option value="Female" {{ old('gender', $customer->gender) == 'Female' ? 'selected' : '' }}>{{ __('customer.gender_female') }}</option>
                                     </select>
                                     @error('gender')<div class="error-message"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>@enderror
                                 </div>
@@ -553,7 +553,7 @@ textarea.form-control {
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label"><i class="fas fa-briefcase"></i> Profession</label>
+                                    <label class="form-label"><i class="fas fa-briefcase"></i> {{ __('customer.profession') }}</label>
                                     <input type="text" class="form-control @error('job') is-invalid @enderror" 
                                            name="job" value="{{ old('job', $customer->job) }}">
                                     @error('job')<div class="error-message"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>@enderror
@@ -561,7 +561,7 @@ textarea.form-control {
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="form-label"><i class="fas fa-phone"></i> Téléphone</label>
+                                    <label class="form-label"><i class="fas fa-phone"></i> {{ __('customer.phone') }}</label>
                                     <input type="tel" class="form-control @error('phone') is-invalid @enderror" 
                                            name="phone" value="{{ old('phone', $customer->phone) }}">
                                     @error('phone')<div class="error-message"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>@enderror
@@ -570,7 +570,7 @@ textarea.form-control {
                         </div>
                         
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-map-marker-alt"></i> Adresse</label>
+                            <label class="form-label"><i class="fas fa-map-marker-alt"></i> {{ __('customer.address') }}</label>
                             <textarea class="form-control @error('address') is-invalid @enderror" 
                                       name="address" rows="3">{{ old('address', $customer->address) }}</textarea>
                             @error('address')<div class="error-message"><i class="fas fa-exclamation-circle"></i> {{ $message }}</div>@enderror
@@ -578,14 +578,14 @@ textarea.form-control {
                         
                         {{-- Photo de profil --}}
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-camera"></i> Nouvelle photo</label>
+                            <label class="form-label"><i class="fas fa-camera"></i> {{ __('customer.new_photo') }}</label>
                             <div class="form-file">
                                 <input type="file" class="form-file-input" name="avatar" id="avatar" accept="image/*">
                                 <div class="form-file-label">
                                     <div class="form-file-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                                     <div class="form-file-text">
-                                        <div class="filename" id="fileName">Aucun fichier choisi</div>
-                                        <div class="hint">JPG, PNG, GIF (max. 2 Mo)</div>
+                                        <div class="filename" id="fileName">{{ __('customer.no_file_chosen') }}</div>
+                                        <div class="hint">{{ __('customer.avatar_format_hint') }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -595,10 +595,10 @@ textarea.form-control {
                         {{-- Actions --}}
                         <div class="form-actions">
                             <a href="{{ route('customer.show', $customer->id) }}" class="btn btn-outline">
-                                <i class="fas fa-times"></i> Annuler
+                                <i class="fas fa-times"></i> {{ __('customer.cancel') }}
                             </a>
                             <button type="submit" class="btn btn-green">
-                                <i class="fas fa-save"></i> Enregistrer
+                                <i class="fas fa-save"></i> {{ __('customer.save') }}
                             </button>
                         </div>
                     </form>

@@ -24,11 +24,11 @@ class OnboardingController extends Controller
         $hotel = $this->currentHotel();
 
         $data = $request->validate([
-            'name'            => ['required', 'string', 'max:255'],
-            'tagline'         => ['nullable', 'string', 'max:255'],
-            'primary_color'   => ['nullable', 'regex:/^#([0-9a-fA-F]{6})$/'],
+            'name' => ['required', 'string', 'max:255'],
+            'tagline' => ['nullable', 'string', 'max:255'],
+            'primary_color' => ['nullable', 'regex:/^#([0-9a-fA-F]{6})$/'],
             'secondary_color' => ['nullable', 'regex:/^#([0-9a-fA-F]{6})$/'],
-            'logo'            => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg,webp', 'max:2048'],
+            'logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,svg,webp', 'max:2048'],
         ]);
 
         if ($request->hasFile('logo')) {
@@ -43,14 +43,14 @@ class OnboardingController extends Controller
         $hotel->update($data);
 
         return redirect('/home')
-            ->with('success', 'Votre site est configuré ! Bienvenue dans votre espace.');
+            ->with('success', __('flash.onboarding_complete'));
     }
 
     private function currentHotel(): Hotel
     {
         $hotel = auth()->user()->hotel;
 
-        abort_unless($hotel !== null, 404, 'Aucun établissement associé à ce compte.');
+        abort_unless($hotel !== null, 404, __('flash.hotel_settings_no_hotel'));
 
         return $hotel;
     }

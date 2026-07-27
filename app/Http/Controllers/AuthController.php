@@ -17,32 +17,29 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request)
     {
-        // Connexion par email OU téléphone (issue #165) : si l'identifiant
-        // saisi n'est pas un email, on le traite comme un numéro de téléphone.
-        $identifier = trim((string) $request->input('email'));
-        $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+        $email = trim((string) $request->input('email'));
 
-        if (Auth::attempt([$field => $identifier, 'password' => $request->password])) {
+        if (Auth::attempt(['email' => $email, 'password' => $request->password])) {
             activity()->causedBy(auth()->user())->log('User logged into the portal');
 
             // Super-Admin plateforme (sans hôtel) -> dashboard de gestion des hôtels
             if (auth()->user()->hotel_id === null && auth()->user()->role === 'Super') {
-                return redirect()->route('platform.hotels.index')->with('success', 'Bienvenue ' . auth()->user()->name);
+                return redirect()->route('platform.hotels.index')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
             }
 
             // Redirection intelligente selon le rôle
             if (auth()->user()->role === 'Customer') {
-                return redirect()->route('transaction.myReservations')->with('success', 'Bienvenue ' . auth()->user()->name);
+                return redirect()->route('transaction.myReservations')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
             }
 
             if (in_array(auth()->user()->role, ['Servant', 'Cuisiner'])) {
-                return redirect()->route('restaurant.orders')->with('success', 'Bienvenue ' . auth()->user()->name);
+                return redirect()->route('restaurant.orders')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
             }
 
-            return redirect('/home')->with('success', 'Bienvenue ' . auth()->user()->name);
+            return redirect('/home')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
         }
 
-        return redirect('login')->with('failed', 'Identifiants incorrects. Vérifiez votre email (ou téléphone) et votre mot de passe.');
+        return redirect('login')->with('failed', __('flash.login_invalid'));
     }
 
     public function register(Request $request)
@@ -59,7 +56,7 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        return redirect()->route('login.index')->with('success', 'Votre compte a bien été créé. Vous pouvez maintenant vous connecter.');
+        return redirect()->route('login.index')->with('success', __('flash.register_success'));
     }
 
     public function logout()
@@ -76,7 +73,7 @@ class AuthController extends Controller
         // Régénère le token CSRF
         session()->regenerateToken();
 
-        return redirect('login')->with('success', 'Déconnexion réussie. Au revoir '.$name.' !');
+        return redirect('login')->with('success', __('flash.logout_success').' '.$name.' !');
     }
 
     public function forgotPassword(ForgotPasswordRequest $request)

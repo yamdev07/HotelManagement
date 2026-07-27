@@ -1,11 +1,11 @@
 @extends('template.master')
-@section('title', 'Restaurant - Modifier Menu')
+@section('title', __('restaurant.edit.page_title'))
 @section('content')
 
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h3 class="mb-0">Modifier un Menu</h3>
+    <h3 class="mb-0">{{ __('restaurant.edit.header') }}</h3>
     <a href="{{ route('restaurant.index') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-2"></i>Retour
+        <i class="fas fa-arrow-left me-2"></i>{{ __('restaurant.edit.back') }}
     </a>
 </div>
 
@@ -17,7 +17,7 @@
             
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="name" class="form-label">Nom du menu <span class="text-danger">*</span></label>
+                    <label for="name" class="form-label">{{ __('restaurant.edit.name') }} <span class="text-danger">*</span></label>
                     <input type="text" class="form-control @error('name') is-invalid @enderror" 
                            id="name" name="name" value="{{ old('name', $menu->name) }}" required>
                     @error('name')
@@ -26,10 +26,10 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label for="category" class="form-label">Catégorie <span class="text-danger">*</span></label>
+                    <label for="category" class="form-label">{{ __('restaurant.edit.category') }} <span class="text-danger">*</span></label>
                     <select class="form-select @error('category_id') is-invalid @enderror" 
                             id="category" name="category_id" required>
-                        <option value="">Sélectionner une catégorie</option>
+                        <option value="">{{ __('restaurant.edit.category_select') }}</option>
                         @foreach($categories as $category)
                             <option value="{{ $category->id }}" {{ old('category_id', $menu->category_id) == $category->id ? 'selected' : '' }}>
                                 {{ $category->name }}
@@ -44,7 +44,7 @@
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label for="price" class="form-label">Prix (FCFA) <span class="text-danger">*</span></label>
+                    <label for="price" class="form-label">{{ __('restaurant.edit.price') }} <span class="text-danger">*</span></label>
                     <div class="input-group">
                         <input type="number" step="1" class="form-control @error('price') is-invalid @enderror"
                                id="price" name="price" value="{{ old('price', $menu->price) }}" min="0" required>
@@ -56,10 +56,10 @@
                 </div>
 
                 <div class="col-md-6 mb-3">
-                    <label for="image" class="form-label">Image du menu</label>
+                    <label for="image" class="form-label">{{ __('restaurant.edit.image') }}</label>
                     <input type="file" class="form-control @error('image') is-invalid @enderror" 
                            id="image" name="image" accept="image/*">
-                    <small class="text-muted">Laissez vide pour conserver l'image actuelle.</small>
+                    <small class="text-muted">{{ __('restaurant.edit.image_hint') }}</small>
                     @error('image')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -67,10 +67,10 @@
             </div>
 
             <div class="mb-3">
-                <label for="description" class="form-label av-label">Description</label>
+                <label for="description" class="form-label av-label">{{ __('restaurant.edit.description') }}</label>
                 <textarea class="form-control @error('description') is-invalid @enderror" 
                           id="description" name="description" rows="3" style="font-size: 0.85rem;">{{ old('description', $menu->description) }}</textarea>
-                <small class="text-muted" style="font-size: 0.7rem;">Décrivez les ingrédients, la préparation, etc.</small>
+                <small class="text-muted" style="font-size: 0.7rem;">{{ __('restaurant.edit.description_hint') }}</small>
                 @error('description')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -81,9 +81,9 @@
             @endphp
             <div class="row align-items-center">
                 <div class="col-md-8 mb-3">
-                    <label class="form-label d-block av-label">Jours de disponibilité</label>
+                    <label class="form-label d-block av-label">{{ __('restaurant.edit.availability_days') }}</label>
                     <div class="btn-group w-100" role="group">
-                        @foreach(['mon' => 'Lun', 'tue' => 'Mar', 'wed' => 'Mer', 'thu' => 'Jeu', 'fri' => 'Ven', 'sat' => 'Sam', 'sun' => 'Dim'] as $key => $label)
+                        @foreach(['mon' => __('restaurant.edit.monday'), 'tue' => __('restaurant.edit.tuesday'), 'wed' => __('restaurant.edit.wednesday'), 'thu' => __('restaurant.edit.thursday'), 'fri' => __('restaurant.edit.friday'), 'sat' => __('restaurant.edit.saturday'), 'sun' => __('restaurant.edit.sunday')] as $key => $label)
                             <input type="checkbox" class="btn-check" id="day-{{ $key }}" name="available_days[]" value="{{ $key }}" 
                                    {{ in_array($key, $availableDays) ? 'checked' : '' }} autocomplete="off">
                             <label class="btn btn-outline-secondary btn-day" for="day-{{ $key }}">{{ $label }}</label>
@@ -95,7 +95,7 @@
                     <div class="form-check form-switch mb-1 p-2 px-3 rounded border bg-light d-flex align-items-center" style="height: 38px;">
                         <input class="form-check-input ms-0" type="checkbox" id="is_available" name="is_available" value="1" 
                                {{ $menu->is_available ? 'checked' : '' }}>
-                        <label class="form-check-label ms-2 fw-bold av-switch-label" for="is_available">Dispo immédiatement</label>
+                        <label class="form-check-label ms-2 fw-bold av-switch-label" for="is_available">{{ __('restaurant.edit.available_now') }}</label>
                     </div>
                 </div>
             </div>
@@ -110,13 +110,13 @@
                 }
             @endphp
             <div class="mb-3" id="imagePreviewContainer" style="{{ $hasRealImage ? 'display: block;' : 'display: none;' }}">
-                <label class="form-label preview-title">Prévisualisation d'origine</label>
+                <label class="form-label preview-title">{{ __('restaurant.edit.preview_original') }}</label>
                 <div class="border rounded p-2 text-center bg-light">
                     <img id="imagePreview" src="{{ $previewSrc }}" alt="Prévisualisation" style="max-height: 120px;" class="img-fluid mb-2 border no-fallback" 
                          onerror="if(this.src !== '#') { document.getElementById('imagePreviewContainer').style.display = 'none'; }">
                     <div class="mt-1">
                         <button type="button" class="btn btn-xs btn-danger" onclick="removeImagePreview()" style="font-size: 0.65rem; padding: 2px 8px;">
-                            <i class="fas fa-trash me-1"></i> Supprimer l'image actuelle
+                            <i class="fas fa-trash me-1"></i> {{ __('restaurant.edit.delete_image') }}
                         </button>
                     </div>
                 </div>
@@ -125,10 +125,10 @@
 
             <div class="d-flex justify-content-between mt-4 db-form-footer">
                 <a href="{{ route('restaurant.index') }}" class="btn btn-secondary btn-responsive">
-                    <i class="fas fa-arrow-left me-1"></i> Annuler
+                    <i class="fas fa-arrow-left me-1"></i> {{ __('restaurant.edit.cancel') }}
                 </a>
                 <button type="submit" class="btn btn-primary btn-responsive">
-                    <i class="fas fa-save me-1"></i> Enregistrer les modifications
+                    <i class="fas fa-save me-1"></i> {{ __('restaurant.edit.save') }}
                 </button>
             </div>
         </form>

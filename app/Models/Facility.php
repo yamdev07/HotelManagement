@@ -9,7 +9,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Facility extends Model
 {
-    use HasFactory, LogsActivity, \App\Models\Concerns\BelongsToHotel;
+    use \App\Models\Concerns\BelongsToHotel, HasFactory, LogsActivity;
 
     protected static $recordEvents = [];
 

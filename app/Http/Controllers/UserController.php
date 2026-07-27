@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Repositories\Interfaces\UserRepositoryInterface;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -136,13 +138,13 @@ class UserController extends Controller
             ]);
         }
 
-        return redirect()->route('user.index')->with('success', 'User '.$user->name.' updated!');
+        return redirect()->route('user.index')->with('success', __('flash.user_updated'));
     }
 
     public function destroy(User $user)
     {
         // Vérification des permissions (Super ou Admin)
-        if (!in_array(Auth::user()->role, ['Super', 'Admin'])) {
+        if (! in_array(Auth::user()->role, ['Super', 'Admin'])) {
             abort(403, 'Seuls les Super Admins et Admins peuvent supprimer des utilisateurs.');
         }
 
@@ -155,12 +157,12 @@ class UserController extends Controller
         // Vérifier si l'utilisateur a des transactions actives
         if ($user->role === 'Customer') {
             $customer = Customer::where('user_id', $user->id)->first();
-            
+
             if ($customer) {
                 $activeTransactions = $customer->transactions()
                     ->whereIn('status', ['reservation', 'active'])
                     ->count();
-                
+
                 if ($activeTransactions > 0) {
                     return redirect()->route('user.index')
                         ->with('error', 'Ce client a des réservations actives. Impossible de supprimer.');
@@ -176,7 +178,7 @@ class UserController extends Controller
 
             return redirect()->route('user.index')
                 ->with('success', 'Utilisateur '.$user->name.' supprimé avec succès!');
-                
+
         } catch (\Exception $e) {
             return redirect()->route('user.index')
                 ->with('error', 'Impossible de supprimer '.$user->name.'. Erreur: '.$e->getMessage());
@@ -191,5 +193,92 @@ class UserController extends Controller
         if (Auth::user()->role !== 'Super') {
             abort(403, 'Unauthorized: Super Admin privileges required.');
         }
+    }
+
+    public function resetPassword(Request $request, User $user)
+    {
+        $validator = Validator::make($request->all(), [
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        try {
+            $user->update([
+                'password' => Hash::make($request->password),
+            ]);
+
+            activity()->causedBy(auth()->user())->log('Mot de passe réinitialisé pour '.$user->name);
+
+            return redirect()->route('user.show', $user)->with('success', 'Mot de passe réinitialisé avec succès.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erreur lors de la réinitialisation : '.$e->getMessage());
+        }
+    }
+
+    public function toggleStatus(User $user)
+    {
+        if (Auth::user()->id === $user->id) {
+            return redirect()->back()->with('error', 'Vous ne pouvez pas désactiver votre propre compte.');
+        }
+
+        try {
+            $newStatus = $user->is_active ? false : true;
+            $user->update(['is_active' => $newStatus]);
+
+            $label = $newStatus ? 'activé' : 'désactivé';
+            activity()->causedBy(auth()->user())->log("Utilisateur {$user->name} {$label}");
+
+            return redirect()->back()->with('success', "Utilisateur {$label} avec succès.");
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Erreur lors du changement de statut : '.$e->getMessage());
+        }
+    }
+
+    public function activity(User $user)
+    {
+        $activities = activity()
+            ->causedBy($user)
+            ->latest()
+            ->paginate(20);
+
+        return view('activity.index', [
+            'activities' => $activities,
+            'users' => [$user],
+            'totalActivities' => activity()->causedBy($user)->count(),
+        ]);
+    }
+
+    public function export(Request $request)
+    {
+        $users = User::select('id', 'name', 'email', 'role', 'is_active', 'created_at')
+            ->orderBy('name')
+            ->get();
+
+        $csv = fopen('php://temp', 'w');
+        fputcsv($csv, ['ID', 'Nom', 'Email', 'Rôle', 'Statut', 'Date de création']);
+
+        foreach ($users as $u) {
+            fputcsv($csv, [
+                $u->id,
+                $u->name,
+                $u->email,
+                $u->role,
+                $u->is_active ? 'Actif' : 'Inactif',
+                $u->created_at->format('d/m/Y H:i'),
+            ]);
+        }
+
+        rewind($csv);
+        $data = stream_get_contents($csv);
+        fclose($csv);
+
+        return response($data)
+            ->header('Content-Type', 'text/csv')
+            ->header('Content-Disposition', 'attachment; filename="utilisateurs_'.date('Y-m-d').'.csv"');
     }
 }

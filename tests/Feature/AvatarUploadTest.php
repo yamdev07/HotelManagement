@@ -21,11 +21,11 @@ class AvatarUploadTest extends TestCase
     private function admin(): User
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Avatar',
-            'slug'                    => Str::slug('Hotel Avatar '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Avatar',
+            'slug' => Str::slug('Hotel Avatar '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
 
         return User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);

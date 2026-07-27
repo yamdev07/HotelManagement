@@ -19,14 +19,14 @@ class SafeName implements ValidationRule
         }
 
         if (preg_match(NoEmoji::EMOJI_PATTERN, $value)) {
-            $fail('Le champ :attribute ne doit pas contenir d\'emoji ou de symbole.');
+            $fail(__('flash.validation_no_emoji', ['attribute' => $attribute]));
 
             return;
         }
 
         // Au moins deux lettres (n'importe quelle langue) quelque part dans le nom.
         if (! preg_match('/\p{L}.*\p{L}/u', $value)) {
-            $fail('Le champ :attribute doit contenir un vrai nom (des lettres).');
+            $fail(__('flash.validation_real_name', ['attribute' => $attribute]));
         }
     }
 }

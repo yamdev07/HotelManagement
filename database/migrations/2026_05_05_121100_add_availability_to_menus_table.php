@@ -26,5 +26,4 @@ return new class extends Migration
             $table->dropColumn(['available_days', 'is_available']);
         });
     }
-
 };

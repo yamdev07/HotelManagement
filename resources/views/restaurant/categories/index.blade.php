@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Restaurant - Catégories')
+@section('title', __('restaurant.categories.page_title'))
 @section('content')
 
 @include('restaurant.partials.nav-tabs')
@@ -7,11 +7,11 @@
 <div class="db-page">
     <div class="db-header anim-1">
         <div>
-            <h1 class="db-title-h1">Gestion des Catégories</h1>
-            <p class="text-muted small">Organisez vos menus par types de plats</p>
+            <h1 class="db-title-h1">{{ __('restaurant.categories.header') }}</h1>
+            <p class="text-muted small">{{ __('restaurant.categories.header_desc') }}</p>
         </div>
         <button type="button" class="btn-db-primary" data-bs-toggle="modal" data-bs-target="#createCategoryModal">
-            <i class="fas fa-plus"></i> Nouvelle Catégorie
+            <i class="fas fa-plus"></i> {{ __('restaurant.categories.new') }}
         </button>
     </div>
 
@@ -20,9 +20,9 @@
             <table class="table db-table">
                 <thead>
                     <tr>
-                        <th>Nom</th>
-                        <th>Slug</th>
-                        <th>Actions</th>
+                        <th>{{ __('restaurant.categories.th_name') }}</th>
+                        <th>{{ __('restaurant.categories.th_slug') }}</th>
+                        <th>{{ __('restaurant.categories.th_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,7 +50,7 @@
                     @empty
                         <tr>
                             <td colspan="3" class="text-center py-4 text-muted">
-                                Aucune catégorie définie.
+                                {{ __('restaurant.categories.empty') }}
                             </td>
                         </tr>
                     @endforelse
@@ -65,20 +65,20 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-light border-0">
-                <h5 class="modal-title fw-bold">Nouvelle Catégorie</h5>
+                <h5 class="modal-title fw-bold">{{ __('restaurant.categories.create_title') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('restaurant.categories.store') }}" method="POST">
                 @csrf
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label for="name" class="form-label fw-600">Nom de la catégorie</label>
-                        <input type="text" class="form-control" name="name" required placeholder="Ex: Entrées, Boissons...">
+                        <label for="name" class="form-label fw-600">{{ __('restaurant.categories.name_label') }}</label>
+                        <input type="text" class="form-control" name="name" required placeholder="{{ __('restaurant.categories.name_placeholder') }}">
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary px-4">Enregistrer</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">{{ __('restaurant.categories.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary px-4">{{ __('restaurant.categories.save') }}</button>
                 </div>
             </form>
         </div>
@@ -90,7 +90,7 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-light border-0">
-                <h5 class="modal-title fw-bold">Modifier la Catégorie</h5>
+                <h5 class="modal-title fw-bold">{{ __('restaurant.categories.edit_title') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="editCategoryForm" method="POST">
@@ -98,13 +98,13 @@
                 @method('PUT')
                 <div class="modal-body p-4">
                     <div class="mb-3">
-                        <label for="edit_name" class="form-label fw-600">Nom de la catégorie</label>
+                        <label for="edit_name" class="form-label fw-600">{{ __('restaurant.categories.name_label') }}</label>
                         <input type="text" class="form-control" name="name" id="edit_name" required>
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-4 pt-0">
-                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary px-4">Mettre à jour</button>
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">{{ __('restaurant.categories.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary px-4">{{ __('restaurant.categories.update') }}</button>
                 </div>
             </form>
         </div>
@@ -112,6 +112,13 @@
 </div>
 
 <script>
+const confirmTitle = @json(__('restaurant.categories.delete_confirm'));
+const confirmYes = @json(__('restaurant.categories.delete_yes'));
+const confirmCancel = @json(__('restaurant.categories.delete_cancel'));
+const deleteMsg = @json(__('restaurant.categories.delete_message'));
+const deleteWarn = @json(__('restaurant.categories.delete_warning'));
+const deletePlat = @json(__('restaurant.categories.delete_plat'));
+
 function editCategory(id, name) {
     const form = document.getElementById('editCategoryForm');
     form.action = `/restaurant/categorie/${id}`;
@@ -120,20 +127,20 @@ function editCategory(id, name) {
 }
 
 function confirmDelete(id, name, count) {
-    let message = `Voulez-vous vraiment supprimer la catégorie "<strong>${name}</strong>" ?`;
+    let message = `${deleteMsg} "<strong>${name}</strong>" ?`;
     if (count > 0) {
-        message += `<br><br><span class="text-danger"><i class="fas fa-exclamation-triangle"></i> Attention : Cette catégorie contient <strong>${count} plat(s)</strong>.</span>`;
+        message += `<br><br><span class="text-danger"><i class="fas fa-exclamation-triangle"></i> ${deleteWarn} <strong>${count} ${deletePlat}</strong>.</span>`;
     }
 
     Swal.fire({
-        title: 'Confirmation',
+        title: confirmTitle,
         html: message,
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#d33',
         cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Oui, supprimer',
-        cancelButtonText: 'Annuler',
+        confirmButtonText: confirmYes,
+        cancelButtonText: confirmCancel,
         reverseButtons: true
     }).then((result) => {
         if (result.isConfirmed) {

@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Gestion des Clients')
+@section('title', __('customer.page_title'))
 @section('content')
 
 <style>
@@ -687,9 +687,9 @@
 
     {{-- Breadcrumb --}}
     <div class="breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> {{ __('customer.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Clients</span>
+        <span class="current">{{ __('customer.clients') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -697,9 +697,9 @@
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-users"></i></span>
-                <h1>Gestion des <em>Clients</em></h1>
+                <h1>{{ __('customer.header_title') }}</h1>
             </div>
-            <p class="header-subtitle">Gérez votre base de données clients</p>
+            <p class="header-subtitle">{{ __('customer.header_subtitle') }}</p>
         </div>
     </div>
 
@@ -712,18 +712,18 @@
     <div class="stats-grid anim-3">
         <div class="stat-card">
             <div class="stat-number">{{ $totalClients }}</div>
-            <div class="stat-label">Clients totaux</div>
-            <div class="stat-footer"><i class="fas fa-user"></i> enregistrés</div>
+            <div class="stat-label">{{ __('customer.total_clients') }}</div>
+            <div class="stat-footer"><i class="fas fa-user"></i> {{ __('customer.registered') }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-number">{{ $resultCount }}</div>
-            <div class="stat-label">Sur cette page</div>
-            <div class="stat-footer">Page {{ $customers->currentPage() }}/{{ $customers->lastPage() }}</div>
+            <div class="stat-label">{{ __('customer.on_this_page') }}</div>
+            <div class="stat-footer">{{ __('customer.page_of', ['current' => $customers->currentPage(), 'last' => $customers->lastPage()]) }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-number">{{ $customers->lastPage() }}</div>
-            <div class="stat-label">Pages totales</div>
-            <div class="stat-footer">{{ $customers->perPage() }} par page</div>
+            <div class="stat-label">{{ __('customer.total_pages') }}</div>
+            <div class="stat-footer">{{ __('customer.per_page', ['count' => $customers->perPage()]) }}</div>
         </div>
     </div>
 
@@ -731,17 +731,17 @@
     <div class="action-bar anim-4">
         <div class="action-left">
             <button class="btn btn-green" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
-                <i class="fas fa-plus-circle"></i> Nouveau client
+                <i class="fas fa-plus-circle"></i> {{ __('customer.new_customer') }}
             </button>
             
             <div class="filter-badges">
                 <a href="{{ route('customer.index') }}" class="filter-badge {{ !request('search') ? 'active' : '' }}">
-                    <i class="fas fa-users"></i> Tous
+                    <i class="fas fa-users"></i> {{ __('customer.all') }}
                     <span class="badge-count">{{ $totalClients }}</span>
                 </a>
                 @if(request('search'))
                 <a href="{{ route('customer.index') }}" class="filter-badge">
-                    <i class="fas fa-times"></i> Effacer
+                    <i class="fas fa-times"></i> {{ __('customer.clear') }}
                 </a>
                 @endif
             </div>
@@ -753,7 +753,7 @@
                 <form method="GET" action="{{ route('customer.index') }}" id="search-form">
                     <input type="text" 
                            class="search-input" 
-                           placeholder="Nom, email, téléphone..." 
+                           placeholder="{{ __('customer.search_placeholder') }}" 
                            name="search" 
                            value="{{ request('search') }}"
                            autocomplete="off">
@@ -790,8 +790,8 @@
     @if(request('search'))
     <div class="alert alert-blue">
         <div class="alert-icon"><i class="fas fa-search"></i></div>
-        <span><strong>{{ $customers->total() }}</strong> résultat(s) pour "<strong>{{ request('search') }}</strong>"</span>
-        <a href="{{ route('customer.index') }}" class="btn btn-sm btn-outline ms-auto">Effacer</a>
+        <span><strong>{{ $customers->total() }}</strong> {{ __('customer.results_for') }} "<strong>{{ request('search') }}</strong>"</span>
+        <a href="{{ route('customer.index') }}" class="btn btn-sm btn-outline ms-auto">{{ __('customer.clear') }}</a>
     </div>
     @endif
 
@@ -810,7 +810,7 @@
         @endphp
         <div class="customer-card" style="animation: fadeSlide .3s ease {{ $loop->index * 0.03 }}s both;">
             <div class="customer-header">
-                <span class="customer-badge"><i class="fas fa-star"></i> Client #{{ $index }}</span>
+                <span class="customer-badge"><i class="fas fa-star"></i> {{ __('customer.client_number', ['index' => $index]) }}</span>
                 <span class="customer-number">{{ $index }}</span>
                 <img src="{{ $customer->avatar_url }}" 
                      onerror="this.src='https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg'"
@@ -826,11 +826,11 @@
                             <i class="fas fa-ellipsis-v"></i>
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('customer.show', $customer->id) }}"><i class="fas fa-eye"></i> Voir</a></li>
-                            <li><a class="dropdown-item" href="{{ route('transaction.reservation.customerReservations', $customer->id) }}"><i class="fas fa-calendar-check"></i> Réservations</a></li>
+                            <li><a class="dropdown-item" href="{{ route('customer.show', $customer->id) }}"><i class="fas fa-eye"></i> {{ __('customer.view') }}</a></li>
+                            <li><a class="dropdown-item" href="{{ route('transaction.reservation.customerReservations', $customer->id) }}"><i class="fas fa-calendar-check"></i> {{ __('customer.reservations') }}</a></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="{{ route('customer.edit', $customer->id) }}"><i class="fas fa-edit"></i> Modifier</a></li>
-                            <li><button class="dropdown-item" style="color:var(--red-500);" onclick="confirmDelete('{{ $customer->name }}', {{ $customer->id }})"><i class="fas fa-trash"></i> Supprimer</button></li>
+                            <li><a class="dropdown-item" href="{{ route('customer.edit', $customer->id) }}"><i class="fas fa-edit"></i> {{ __('customer.edit') }}</a></li>
+                            <li><button class="dropdown-item" style="color:var(--red-500);" onclick="confirmDelete('{{ $customer->name }}', {{ $customer->id }})"><i class="fas fa-trash"></i> {{ __('customer.delete') }}</button></li>
                         </ul>
                     </div>
                 </div>
@@ -838,28 +838,28 @@
                 @if($customer->user && $customer->user->email)
                 <div class="info-item">
                     <div class="info-icon"><i class="fas fa-envelope"></i></div>
-                    <div><div class="info-label">Email</div><div class="info-value">{{ $customer->user->email }}</div></div>
+                    <div><div class="info-label">{{ __('customer.email') }}</div><div class="info-value">{{ $customer->user->email }}</div></div>
                 </div>
                 @endif
                 
                 @if($customer->phone)
                 <div class="info-item">
                     <div class="info-icon"><i class="fas fa-phone"></i></div>
-                    <div><div class="info-label">Téléphone</div><div class="info-value">{{ $customer->phone }}</div></div>
+                    <div><div class="info-label">{{ __('customer.phone') }}</div><div class="info-value">{{ $customer->phone }}</div></div>
                 </div>
                 @endif
                 
                 @if($customer->job)
                 <div class="info-item">
                     <div class="info-icon"><i class="fas fa-briefcase"></i></div>
-                    <div><div class="info-label">Profession</div><div class="info-value">{{ $customer->job }}</div></div>
+                    <div><div class="info-label">{{ __('customer.profession') }}</div><div class="info-value">{{ $customer->job }}</div></div>
                 </div>
                 @endif
                 
                 <div class="info-item">
                     <div class="info-icon"><i class="fas fa-calendar-check"></i></div>
                     <div>
-                        <div class="info-label">Réservations</div>
+                        <div class="info-label">{{ __('customer.reservations') }}</div>
                         <div class="info-value"><span class="info-badge">{{ $reservationsCount }}</span></div>
                     </div>
                 </div>
@@ -867,10 +867,10 @@
             
             <div class="customer-footer">
                 <a href="{{ route('customer.show', $customer->id) }}" class="footer-btn green">
-                    <i class="fas fa-user"></i> Profil
+                    <i class="fas fa-user"></i> {{ __('customer.profile') }}
                 </a>
                 <a href="{{ route('transaction.reservation.customerReservations', $customer->id) }}" class="footer-btn">
-                    <i class="fas fa-calendar-check"></i> Réservations
+                    <i class="fas fa-calendar-check"></i> {{ __('customer.reservations') }}
                 </a>
             </div>
         </div>
@@ -889,20 +889,20 @@
     <div class="empty-state">
         <div class="empty-icon"><i class="fas fa-search"></i></div>
         <span class="search-term">"{{ request('search') }}"</span>
-        <h3>Aucun client trouvé</h3>
-        <p>Essayez d'autres termes ou ajoutez un nouveau client.</p>
+        <h3>{{ __('customer.no_results_title') }}</h3>
+        <p>{{ __('customer.no_results_text') }}</p>
         <div class="d-flex gap-2 justify-content-center">
-            <a href="{{ route('customer.index') }}" class="btn btn-gray">Effacer</a>
-            <button class="btn btn-green" data-bs-toggle="modal" data-bs-target="#addCustomerModal">Ajouter</button>
+            <a href="{{ route('customer.index') }}" class="btn btn-gray">{{ __('customer.clear') }}</a>
+            <button class="btn btn-green" data-bs-toggle="modal" data-bs-target="#addCustomerModal">{{ __('customer.add') }}</button>
         </div>
     </div>
     @else
     {{-- Aucun client --}}
     <div class="empty-state">
         <div class="empty-icon"><i class="fas fa-users"></i></div>
-        <h3>Aucun client</h3>
-        <p>Commencez par ajouter votre premier client.</p>
-        <button class="btn btn-green" data-bs-toggle="modal" data-bs-target="#addCustomerModal">Ajouter</button>
+        <h3>{{ __('customer.no_customers_title') }}</h3>
+        <p>{{ __('customer.no_customers_text') }}</p>
+        <button class="btn btn-green" data-bs-toggle="modal" data-bs-target="#addCustomerModal">{{ __('customer.add') }}</button>
     </div>
     @endif
 
@@ -911,17 +911,17 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-user-plus"></i> Nouveau client</h5>
+                    <h5 class="modal-title"><i class="fas fa-user-plus"></i> {{ __('customer.modal_title') }}</h5>
                     <button class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body text-center">
                     <div style="font-size: 3rem; color:var(--gray-300); margin-bottom:16px;"><i class="fas fa-user-circle"></i></div>
-                    <p class="mb-4">Choisissez comment ajouter un client</p>
+                    <p class="mb-4">{{ __('customer.modal_choose') }}</p>
                     <div class="d-grid gap-2">
                         <a href="{{ route('customer.create') }}" class="btn btn-green">
-                            <i class="fas fa-user-plus"></i> Créer un compte
+                            <i class="fas fa-user-plus"></i> {{ __('customer.create_account') }}
                         </a>
-                        <button class="btn btn-gray" data-bs-dismiss="modal">Annuler</button>
+                        <button class="btn btn-gray" data-bs-dismiss="modal">{{ __('customer.cancel') }}</button>
                     </div>
                 </div>
             </div>
@@ -941,14 +941,14 @@ function clearSearch() {
 
 function confirmDelete(name, id) {
     Swal.fire({
-        title: 'Confirmer',
-        html: `Supprimer <strong>${name}</strong> ?`,
+        title: '{{ __("customer.confirm") }}',
+        html: `{!! __("customer.delete_confirm_html", ["name" => "__NAME__"]) !!}`.replace('__NAME__', name),
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#b91c1c',
         cancelButtonColor: '#545954',
-        confirmButtonText: 'Supprimer',
-        cancelButtonText: 'Annuler'
+        confirmButtonText: '{{ __("customer.delete_confirm_btn") }}',
+        cancelButtonText: '{{ __("customer.cancel_btn") }}'
     }).then(r => {
         if (r.isConfirmed) {
             const form = document.getElementById('delete-form');

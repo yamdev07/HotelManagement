@@ -16,9 +16,9 @@ class AuthServiceProvider extends ServiceProvider
 {
     protected $policies = [
         Transaction::class => TransactionPolicy::class,
-        Payment::class     => PaymentPolicy::class,
-        Room::class        => RoomPolicy::class,
-        User::class        => UserPolicy::class,
+        Payment::class => PaymentPolicy::class,
+        Room::class => RoomPolicy::class,
+        User::class => UserPolicy::class,
     ];
 
     public function boot(): void

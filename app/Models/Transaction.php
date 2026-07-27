@@ -15,7 +15,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Transaction extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes, \App\Models\Concerns\BelongsToHotel;
+    use \App\Models\Concerns\BelongsToHotel, HasFactory, LogsActivity, SoftDeletes;
 
     // Spatie auto-logging disabled · manual activity() calls in methods provide richer context
     protected static $recordEvents = [];
@@ -63,17 +63,26 @@ class Transaction extends Model
 
     // Constantes pour les statuts
     const STATUS_RESERVATION = 'reservation';
+
     const STATUS_ACTIVE = 'active';
+
     const STATUS_COMPLETED = 'completed';
+
     const STATUS_CANCELLED = 'cancelled';
+
     const STATUS_NO_SHOW = 'no_show';
-    const STATUS_PENDING_CHECKOUT = 'pending_checkout'; 
-    const STATUS_RESERVED_WAITING = 'reserved_waiting'; 
+
+    const STATUS_PENDING_CHECKOUT = 'pending_checkout';
+
+    const STATUS_RESERVED_WAITING = 'reserved_waiting';
 
     // Types de pièces d'identité
     const ID_TYPE_PASSPORT = 'passeport';
+
     const ID_TYPE_CNI = 'cni';
+
     const ID_TYPE_DRIVER_LICENSE = 'permis';
+
     const ID_TYPE_OTHER = 'autre';
 
     /**
@@ -359,25 +368,25 @@ class Transaction extends Model
         if ($this->isCancelled()) {
             return false;
         }
-        
+
         // 2. Déjà no show ? Non
         if ($this->isNoShow()) {
             return false;
         }
-        
+
         // 3. Seulement les réservations peuvent être annulées
-        if (!$this->isReservation()) {
+        if (! $this->isReservation()) {
             return false;
         }
-        
+
         // 4. Vérifier la date d'arrivée
         $checkIn = Carbon::parse($this->check_in);
-        
+
         // Si la date d'arrivée est passée de plus de 24h
         if ($checkIn->isPast() && $checkIn->diffInHours(now()) > 24) {
             return false; // Trop tard pour annuler, utiliser No Show
         }
-        
+
         return true;
     }
 
@@ -389,35 +398,37 @@ class Transaction extends Model
         if ($this->isCancelled()) {
             return 'Cette réservation est déjà annulée.';
         }
-        
+
         if ($this->isNoShow()) {
             return 'Cette réservation est déjà marquée comme "No Show".';
         }
-        
-        if (!$this->isReservation()) {
+
+        if (! $this->isReservation()) {
             if ($this->isActive()) {
                 return 'Impossible d\'annuler un client déjà installé.';
             }
             if ($this->isCompleted()) {
                 return 'Impossible d\'annuler un séjour terminé.';
             }
+
             return 'Cette réservation ne peut pas être annulée.';
         }
-        
+
         $checkIn = Carbon::parse($this->check_in);
-        
+
         if ($checkIn->isPast()) {
             $hoursPassed = $checkIn->diffInHours(now());
             if ($hoursPassed > 24) {
                 return 'La date d\'arrivée est dépassée depuis plus de 24h. Utilisez "No Show" à la place.';
             }
+
             return 'La date d\'arrivée est dépassée. Vous pouvez encore annuler ou utiliser "No Show".';
         }
-        
+
         if ($this->completedPayments()->exists()) {
             return 'Des paiements ont été effectués. Vous devez procéder à un remboursement.';
         }
-        
+
         return null;
     }
 
@@ -430,18 +441,18 @@ class Transaction extends Model
         if ($this->isCancelled() || $this->isNoShow()) {
             return false;
         }
-        
+
         // 2. Seulement les réservations
-        if (!$this->isReservation()) {
+        if (! $this->isReservation()) {
             return false;
         }
-        
+
         // 3. La date d'arrivée doit être passée
         $checkIn = Carbon::parse($this->check_in);
-        if (!$checkIn->isPast()) {
+        if (! $checkIn->isPast()) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -701,27 +712,27 @@ class Transaction extends Model
      */
     public function markAsNoShow($userId, $reason = null)
     {
-        if (!$this->canBeNoShow()) {
+        if (! $this->canBeNoShow()) {
             throw new \Exception('Cette réservation ne peut pas être marquée comme No Show.');
         }
-        
+
         DB::beginTransaction();
-        
+
         try {
             $oldStatus = $this->status;
-            
+
             $this->update([
                 'status' => self::STATUS_NO_SHOW,
                 'cancelled_by' => $userId,
                 'cancel_reason' => $reason ?? 'Client non présenté',
                 'cancelled_at' => now(),
             ]);
-            
+
             // Libérer la chambre
             if ($this->room) {
                 $this->room->update(['room_status_id' => Room::STATUS_AVAILABLE]);
             }
-            
+
             // Logger le no-show
             activity()
                 ->causedBy(User::find($userId))
@@ -732,11 +743,11 @@ class Transaction extends Model
                     'reason' => $reason,
                 ])
                 ->log('a marqué comme no-show');
-            
+
             DB::commit();
-            
+
             return true;
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -748,10 +759,10 @@ class Transaction extends Model
      */
     public function restoreTransaction()
     {
-        if (!$this->canBeRestored()) {
+        if (! $this->canBeRestored()) {
             throw new \Exception('Cette transaction ne peut pas être restaurée.');
         }
-        
+
         $oldStatus = $this->status;
 
         $this->update([
@@ -880,11 +891,11 @@ class Transaction extends Model
     {
         // 1. Calculer le prix de base (nuits * prix chambre)
         $basePrice = $this->calculateTotalPrice();
-        
+
         // 2. Vérifier s'il y a un supplément late checkout
         $hasLateCheckout = $this->late_checkout ?? false;
         $lateFee = (float) ($this->late_checkout_fee ?? 0);
-        
+
         // 3. Calculer le total des commandes restaurant sur facture chambre (uniquement livrées)
         // Les commandes en attente/préparation ne sont pas encore sur la facture.
         // Les commandes payées directement (non room_charge) ne s'ajoutent pas non plus.
@@ -912,11 +923,11 @@ class Transaction extends Model
                 'ancien' => $this->total_price,
                 'nouveau' => $totalWithExtras,
             ]);
-            
+
             $this->total_price = $totalWithExtras;
             $this->saveQuietly();
         }
-        
+
         return (float) $totalWithExtras;
     }
 
@@ -1138,7 +1149,7 @@ class Transaction extends Model
 
                 Log::info("Commandes restaurant de la transaction #{$this->id} marquées comme payées.");
             } else {
-                // Si le solde redevient positif (ex: annulation de paiement), 
+                // Si le solde redevient positif (ex: annulation de paiement),
                 // on remet les commandes "room_charge" en "delivered"
                 $updatedCount = $this->restaurantOrders()
                     ->where('payment_method', 'room_charge')
@@ -1413,7 +1424,7 @@ class Transaction extends Model
     public static function createWaitingReservation($data)
     {
         DB::beginTransaction();
-        
+
         try {
             $transaction = self::create([
                 'user_id' => $data['user_id'],
@@ -1427,17 +1438,17 @@ class Transaction extends Model
                 'person_count' => $data['person_count'] ?? 1,
                 'total_price' => $data['total_price'],
                 'total_payment' => 0,
-                'notes' => $data['notes'] . ' | En attente du check-out du client actuel',
+                'notes' => $data['notes'].' | En attente du check-out du client actuel',
                 'special_requests' => $data['special_requests'] ?? null,
                 'id_type' => $data['id_type'] ?? null,
                 'id_number' => $data['id_number'] ?? null,
                 'nationality' => $data['nationality'] ?? null,
             ]);
-            
+
             DB::commit();
-            
+
             return $transaction;
-            
+
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
@@ -1452,15 +1463,15 @@ class Transaction extends Model
         if ($this->status !== self::STATUS_RESERVED_WAITING) {
             return false;
         }
-        
+
         $this->status = self::STATUS_RESERVATION;
-        $this->notes = $this->notes . ' | Confirmée après check-out';
+        $this->notes = $this->notes.' | Confirmée après check-out';
         $this->save();
-        
+
         activity()
             ->performedOn($this)
             ->log('Réservation confirmée après libération de la chambre');
-        
+
         return true;
     }
 
@@ -1471,38 +1482,38 @@ class Transaction extends Model
     {
         $checkIn = Carbon::parse($checkIn)->startOfDay();
         $checkOut = Carbon::parse($checkOut)->startOfDay();
-        
+
         // Vérifier les transactions qui pourraient bloquer
         $conflictingTransactions = self::where('room_id', $roomId)
             ->whereNotIn('status', [self::STATUS_CANCELLED, self::STATUS_NO_SHOW, self::STATUS_COMPLETED])
-            ->where(function($query) use ($checkIn, $checkOut) {
+            ->where(function ($query) use ($checkIn, $checkOut) {
                 $query->where('check_in', '<', $checkOut)
                     ->where('check_out', '>', $checkIn);
             });
-        
+
         if ($excludeTransactionId) {
             $conflictingTransactions->where('id', '!=', $excludeTransactionId);
         }
-        
+
         $conflicts = $conflictingTransactions->get();
-        
+
         foreach ($conflicts as $conflict) {
             // Si la transaction conflictuelle se termine le jour du check-in
             if ($conflict->check_out->format('Y-m-d') == $checkIn->format('Y-m-d')) {
                 // OK - le client part le jour de l'arrivée
                 continue;
             }
-            
+
             // Si la transaction conflictuelle commence le jour du check-out
             if ($conflict->check_in->format('Y-m-d') == $checkOut->format('Y-m-d')) {
                 // OK - le nouveau client part le jour où l'autre arrive
                 continue;
             }
-            
+
             // Autre conflit → non disponible
             return false;
         }
-        
+
         return true;
     }
 
@@ -1512,23 +1523,23 @@ class Transaction extends Model
     public function isLateCheckoutPaid(): bool
     {
         // Si pas de late checkout ou pas de frais, considéré comme payé
-        if (!$this->late_checkout || !$this->late_checkout_fee || $this->late_checkout_fee <= 0) {
+        if (! $this->late_checkout || ! $this->late_checkout_fee || $this->late_checkout_fee <= 0) {
             return true;
         }
-        
+
         try {
             // Chercher un paiement complété pour ce late checkout
             $latePayment = $this->completedPayments()
-                ->where(function($query) {
-                    $query->where('reference', 'like', 'LATE-' . $this->id . '%')
+                ->where(function ($query) {
+                    $query->where('reference', 'like', 'LATE-'.$this->id.'%')
                         ->orWhere('description', 'like', '%Late checkout%')
                         ->orWhere('description', 'like', '%late checkout%');
                 })
                 ->where('amount', '>=', $this->late_checkout_fee)
                 ->first();
-            
-            $isPaid = !is_null($latePayment);
-            
+
+            $isPaid = ! is_null($latePayment);
+
             \Log::info("Vérification paiement late checkout #{$this->id}", [
                 'late_checkout' => $this->late_checkout,
                 'late_fee' => $this->late_checkout_fee,
@@ -1537,11 +1548,12 @@ class Transaction extends Model
                 'payment_amount' => $latePayment?->amount,
                 'payment_status' => $latePayment?->status,
             ]);
-            
+
             return $isPaid;
-            
+
         } catch (\Exception $e) {
-            \Log::error("Erreur vérification late checkout #{$this->id}: " . $e->getMessage());
+            \Log::error("Erreur vérification late checkout #{$this->id}: ".$e->getMessage());
+
             return false;
         }
     }
@@ -1551,21 +1563,21 @@ class Transaction extends Model
      */
     public function getLateCheckoutPaymentStatus(): array
     {
-        if (!$this->late_checkout || !$this->late_checkout_fee) {
+        if (! $this->late_checkout || ! $this->late_checkout_fee) {
             return [
                 'has_late_checkout' => false,
                 'is_paid' => true,
                 'message' => 'Pas de late checkout',
             ];
         }
-        
+
         $latePayment = $this->completedPayments()
-            ->where(function($query) {
-                $query->where('reference', 'like', 'LATE-' . $this->id . '%')
+            ->where(function ($query) {
+                $query->where('reference', 'like', 'LATE-'.$this->id.'%')
                     ->orWhere('description', 'like', '%Late checkout%');
             })
             ->first();
-        
+
         if ($latePayment) {
             return [
                 'has_late_checkout' => true,
@@ -1577,16 +1589,16 @@ class Transaction extends Model
                 'message' => 'Late checkout payé',
             ];
         }
-        
+
         // Chercher un paiement en attente
         $pendingPayment = $this->payments()
-            ->where(function($query) {
-                $query->where('reference', 'like', 'LATE-' . $this->id . '%')
+            ->where(function ($query) {
+                $query->where('reference', 'like', 'LATE-'.$this->id.'%')
                     ->orWhere('description', 'like', '%Late checkout%');
             })
             ->where('status', 'pending')
             ->first();
-        
+
         if ($pendingPayment) {
             return [
                 'has_late_checkout' => true,
@@ -1597,7 +1609,7 @@ class Transaction extends Model
                 'message' => 'Late checkout en attente de paiement',
             ];
         }
-        
+
         return [
             'has_late_checkout' => true,
             'is_paid' => false,

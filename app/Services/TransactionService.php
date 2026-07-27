@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Enums\RoomStatus;
 use App\Enums\TransactionStatus;
-use App\Enums\UserRole;
 use App\Exceptions\TransactionException;
 use App\Models\History;
 use App\Models\Payment;
@@ -33,9 +32,9 @@ class TransactionService
             throw TransactionException::cannotModify('réservation terminée, annulée ou no show.');
         }
 
-        $checkIn  = Carbon::parse($data['check_in_date'])->setTime(12, 0);
+        $checkIn = Carbon::parse($data['check_in_date'])->setTime(12, 0);
         $checkOut = Carbon::parse($data['check_out_date'])->setTime(12, 0);
-        $roomId   = (int) $data['room_id'];
+        $roomId = (int) $data['room_id'];
 
         if (! $this->isRoomAvailable($roomId, $checkIn, $checkOut, $transaction->id)) {
             throw TransactionException::roomUnavailable();
@@ -44,33 +43,33 @@ class TransactionService
         return DB::transaction(function () use ($transaction, $data, $checkIn, $checkOut, $roomId) {
             $before = $this->snapshot($transaction);
 
-            $newRoom       = Room::findOrFail($roomId);
-            $newNights     = $checkIn->diffInDays($checkOut);
+            $newRoom = Room::findOrFail($roomId);
+            $newNights = $checkIn->diffInDays($checkOut);
             $newTotalPrice = $newRoom->price * $newNights;
-            $changes       = $this->detectChanges($transaction, $roomId, $checkIn, $checkOut);
+            $changes = $this->detectChanges($transaction, $roomId, $checkIn, $checkOut);
 
             $transaction->update([
-                'room_id'     => $roomId,
-                'check_in'    => $checkIn,
-                'check_out'   => $checkOut,
+                'room_id' => $roomId,
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
                 'total_price' => $newTotalPrice,
-                'notes'       => $data['notes'] ?? $transaction->notes,
+                'notes' => $data['notes'] ?? $transaction->notes,
             ]);
 
             $transaction->refresh();
 
             History::create([
                 'transaction_id' => $transaction->id,
-                'user_id'        => Auth::id(),
-                'action'         => 'update',
-                'description'    => 'Modification: ' . implode(', ', $changes),
-                'old_values'     => json_encode($before),
-                'new_values'     => json_encode($this->snapshot($transaction)),
-                'notes'          => $data['notes'] ?? null,
+                'user_id' => Auth::id(),
+                'action' => 'update',
+                'description' => 'Modification: '.implode(', ', $changes),
+                'old_values' => json_encode($before),
+                'new_values' => json_encode($this->snapshot($transaction)),
+                'notes' => $data['notes'] ?? null,
             ]);
 
             Log::info("Transaction #{$transaction->id} modifiée", [
-                'by'      => Auth::id(),
+                'by' => Auth::id(),
                 'changes' => $changes,
             ]);
 
@@ -93,10 +92,10 @@ class TransactionService
             $updateData = ['status' => $status->value];
 
             match ($status) {
-                TransactionStatus::Active    => $this->applyCheckIn($transaction, $updateData),
+                TransactionStatus::Active => $this->applyCheckIn($transaction, $updateData),
                 TransactionStatus::Completed => $this->applyCheckOut($transaction, $updateData),
                 TransactionStatus::Cancelled => $this->applyCancel($transaction, $updateData, $cancelReason),
-                default                      => null,
+                default => null,
             };
 
             $transaction->update($updateData);
@@ -123,9 +122,9 @@ class TransactionService
 
         return DB::transaction(function () use ($transaction, $reason) {
             $transaction->update([
-                'status'        => TransactionStatus::Cancelled->value,
-                'cancelled_at'  => now(),
-                'cancelled_by'  => Auth::id(),
+                'status' => TransactionStatus::Cancelled->value,
+                'cancelled_at' => now(),
+                'cancelled_by' => Auth::id(),
                 'cancel_reason' => $reason,
             ]);
 
@@ -133,7 +132,7 @@ class TransactionService
             $this->createRefundIfPaid($transaction, $reason);
 
             Log::info("Transaction #{$transaction->id} annulée", [
-                'by'     => Auth::id(),
+                'by' => Auth::id(),
                 'reason' => $reason,
             ]);
 
@@ -154,10 +153,10 @@ class TransactionService
 
         return DB::transaction(function () use ($transaction, $reason) {
             $transaction->update([
-                'status'        => TransactionStatus::NoShow->value,
-                'cancelled_by'  => Auth::id(),
+                'status' => TransactionStatus::NoShow->value,
+                'cancelled_by' => Auth::id(),
                 'cancel_reason' => $reason ?: 'Client non présenté',
-                'cancelled_at'  => now(),
+                'cancelled_at' => now(),
             ]);
 
             if ($transaction->room) {
@@ -183,9 +182,9 @@ class TransactionService
 
         return DB::transaction(function () use ($transaction) {
             $transaction->update([
-                'status'        => TransactionStatus::Reservation->value,
-                'cancelled_at'  => null,
-                'cancelled_by'  => null,
+                'status' => TransactionStatus::Reservation->value,
+                'cancelled_at' => null,
+                'cancelled_by' => null,
                 'cancel_reason' => null,
             ]);
 
@@ -211,7 +210,7 @@ class TransactionService
             $this->releaseRoomIfOccupied($transaction);
 
             Log::warning("Transaction #{$transaction->id} supprimée définitivement", [
-                'by'       => Auth::id(),
+                'by' => Auth::id(),
                 'snapshot' => $snapshot,
             ]);
         });
@@ -226,8 +225,8 @@ class TransactionService
         TransactionStatus $newStatus,
         ?string $cancelReason
     ): void {
-        $now         = Carbon::now();
-        $checkInDay  = Carbon::parse($transaction->check_in)->startOfDay();
+        $now = Carbon::now();
+        $checkInDay = Carbon::parse($transaction->check_in)->startOfDay();
         $checkOutDay = Carbon::parse($transaction->check_out)->startOfDay();
 
         if ($newStatus === TransactionStatus::Active) {
@@ -238,8 +237,8 @@ class TransactionService
             }
             $checkInTime = $checkInDay->copy()->setTime(12, 0);
             if ($now->lt($checkInTime)) {
-                $diff    = $now->diffInMinutes($checkInTime, false);
-                $hours   = (int) floor($diff / 60);
+                $diff = $now->diffInMinutes($checkInTime, false);
+                $hours = (int) floor($diff / 60);
                 $minutes = (int) ($diff % 60);
                 throw \App\Exceptions\ReservationException::tooEarlyForCheckIn($hours, $minutes);
             }
@@ -252,7 +251,7 @@ class TransactionService
                 );
             }
             $checkOutDeadline = $checkOutDay->copy()->setTime(12, 0);
-            $checkOutLargess  = $checkOutDay->copy()->setTime(14, 0);
+            $checkOutLargess = $checkOutDay->copy()->setTime(14, 0);
 
             if ($now->gt($checkOutLargess) && ! $transaction->late_checkout) {
                 throw \App\Exceptions\ReservationException::lateCheckoutGracePeriodExpired();
@@ -302,8 +301,8 @@ class TransactionService
 
     private function applyCancel(Transaction $transaction, array &$updateData, ?string $reason): void
     {
-        $updateData['cancelled_at']  = now();
-        $updateData['cancelled_by']  = Auth::id();
+        $updateData['cancelled_at'] = now();
+        $updateData['cancelled_by'] = Auth::id();
         $updateData['cancel_reason'] = $reason;
 
         $this->releaseRoomIfOccupied($transaction);
@@ -332,18 +331,18 @@ class TransactionService
             ->first();
 
         Payment::create([
-            'transaction_id'     => $transaction->id,
+            'transaction_id' => $transaction->id,
             'cashier_session_id' => $lastPayment?->cashier_session_id,
-            'user_id'            => $lastPayment?->user_id ?? Auth::id(),
-            'created_by'         => Auth::id(),
-            'amount'             => $totalPaid,
-            'payment_method'     => 'refund',
-            'reference'          => 'REFUND-' . $transaction->id . '-' . time(),
-            'status'             => 'completed',
-            'payment_date'       => now(),
-            'verified_by'        => Auth::id(),
-            'verified_at'        => now(),
-            'notes'              => 'Remboursement annulation' . ($reason ? ": {$reason}" : ''),
+            'user_id' => $lastPayment?->user_id ?? Auth::id(),
+            'created_by' => Auth::id(),
+            'amount' => $totalPaid,
+            'payment_method' => 'refund',
+            'reference' => 'REFUND-'.$transaction->id.'-'.time(),
+            'status' => 'completed',
+            'payment_date' => now(),
+            'verified_by' => Auth::id(),
+            'verified_at' => now(),
+            'notes' => 'Remboursement annulation'.($reason ? ": {$reason}" : ''),
         ]);
     }
 
@@ -362,7 +361,7 @@ class TransactionService
         $changes = [];
 
         if ($transaction->room_id !== $newRoomId) {
-            $newRoom   = Room::find($newRoomId);
+            $newRoom = Room::find($newRoomId);
             $changes[] = "chambre: {$transaction->room->number} → {$newRoom->number}";
         }
         if ($transaction->check_in->format('Y-m-d') !== $newCheckIn->format('Y-m-d')) {
@@ -378,13 +377,13 @@ class TransactionService
     private function snapshot(Transaction $transaction): array
     {
         return [
-            'room_id'     => $transaction->room_id,
+            'room_id' => $transaction->room_id,
             'room_number' => optional($transaction->room)->number,
-            'check_in'    => $transaction->check_in?->format('Y-m-d H:i:s'),
-            'check_out'   => $transaction->check_out?->format('Y-m-d H:i:s'),
+            'check_in' => $transaction->check_in?->format('Y-m-d H:i:s'),
+            'check_out' => $transaction->check_out?->format('Y-m-d H:i:s'),
             'total_price' => $transaction->total_price,
-            'status'      => $transaction->status,
-            'notes'       => $transaction->notes,
+            'status' => $transaction->status,
+            'notes' => $transaction->notes,
         ];
     }
 }

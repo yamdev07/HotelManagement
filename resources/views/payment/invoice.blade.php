@@ -1,6 +1,6 @@
 @extends('template.invoicemaster')
 
-@section('title', 'Facture de Paiement')
+@section('title', __('payment.invoice_title'))
 
 @section('head')
     <style>
@@ -331,10 +331,10 @@
     <!-- Boutons d'action -->
     <div class="action-buttons no-print">
         <button class="btn-print mr-3" onclick="printInvoice()">
-            <i class="fas fa-print mr-2"></i>Imprimer la Facture
+            <i class="fas fa-print mr-2"></i>{{ __('payment.invoice_print') }}
         </button>
         <button class="btn-pdf" onclick="downloadPDF()">
-            <i class="fas fa-file-pdf mr-2"></i>Télécharger en PDF
+            <i class="fas fa-file-pdf mr-2"></i>{{ __('payment.invoice_download') }}
         </button>
     </div>
 
@@ -379,13 +379,13 @@
             if ($extraHours > 0) {
                 if ($extraHours <= 3) {
                     $extraCharge = 0;
-                    $extraChargeRate = 'Gratuit (≤ 3h)';
+                    $extraChargeRate = __('payment.invoice_late_rate_free');
                 } elseif ($extraHours <= 6) {
                     $extraCharge = $roomPrice * 0.5;
-                    $extraChargeRate = '50% du prix journalier';
+                    $extraChargeRate = __('payment.invoice_late_rate_50');
                 } else {
                     $extraCharge = $roomPrice;
-                    $extraChargeRate = '100% du prix journalier (1 nuit)';
+                    $extraChargeRate = __('payment.invoice_late_rate_100');
                 }
             }
             
@@ -408,22 +408,22 @@
                         <img src="{{ asset('img/logo/sip.png') }}" width="60" style="margin-right: 15px;">
                         <div>
                             <h1 style="font-size: 28px; font-weight: bold; margin: 0;">FACTURE</h1>
-                            <p style="font-size: 14px; opacity: 0.9; margin: 5px 0 0;">N° INV-{{ $transaction->id }}</p>
+                            <p style="font-size: 14px; opacity: 0.9; margin: 5px 0 0;">{{ __('payment.invoice_number', ['id' => $transaction->id]) }}</p>
                         </div>
                     </div>
                 </div>
                 <div style="text-align: right;">
                     @if($hasLateCheckout)
                         <span class="status-badge status-late">
-                            <i class="fas fa-clock mr-1"></i> DÉPART TARDIF
+                            <i class="fas fa-clock mr-1"></i> {{ __('payment.invoice_status_late') }}
                         </span>
                     @else
                         <span class="status-badge {{ $isFullyPaid ? 'status-paid' : 'status-pending' }}">
-                            {{ $isFullyPaid ? '✓ PAYÉ' : '⏱ EN ATTENTE' }}
+                            {{ $isFullyPaid ? __('payment.invoice_status_paid') : __('payment.invoice_status_pending') }}
                         </span>
                     @endif
                     <p style="font-size: 14px; opacity: 0.9; margin: 10px 0 0;">
-                        Date d'émission : {{ date('d/m/Y') }}
+                        {{ __('payment.invoice_emission_date') }} {{ date('d/m/Y') }}
                     </p>
                 </div>
             </div>
@@ -460,49 +460,49 @@
                 <div style="flex: 1;">
                     <h6 class="section-title">
                         <i class="fas fa-user"></i>
-                        CLIENT
+                        {{ __('payment.invoice_client') }}
                     </h6>
                     <div class="info-box">
                         <p class="mb-2">
-                            <strong style="color: #28a745;">ID Client :</strong> 
+                            <strong style="color: #28a745;">{{ __('payment.invoice_client_id') }}</strong> 
                             {{ $transaction->customer->id }}
                         </p>
                         <p class="mb-2">
-                            <strong style="color: #28a745;">Nom :</strong> 
+                            <strong style="color: #28a745;">{{ __('payment.invoice_name') }}</strong> 
                             {{ $transaction->customer->name }}
                         </p>
                         <p class="mb-2">
-                            <strong style="color: #28a745;">Profession :</strong> 
-                            {{ $transaction->customer->job ?? 'Non spécifié' }}
+                            <strong style="color: #28a745;">{{ __('payment.invoice_profession') }}</strong> 
+                            {{ $transaction->customer->job ?? __('payment.invoice_not_specified') }}
                         </p>
                         <p class="mb-0">
-                            <strong style="color: #28a745;">Adresse :</strong> 
-                            {{ $transaction->customer->address ?? 'Non spécifié' }}
+                            <strong style="color: #28a745;">{{ __('payment.invoice_address') }}</strong> 
+                            {{ $transaction->customer->address ?? __('payment.invoice_not_specified') }}
                         </p>
                     </div>
                 </div>
                 <div style="flex: 1;">
                     <h6 class="section-title">
                         <i class="fas fa-calendar"></i>
-                        PÉRIODE DE SÉJOUR
+                        {{ __('payment.invoice_stay_period') }}
                     </h6>
                     <div class="info-box">
                         <p class="mb-2">
-                            <strong style="color: #28a745;">Arrivée :</strong> 
+                            <strong style="color: #28a745;">{{ __('payment.invoice_arrival') }}</strong> 
                             {{ $transaction->check_in->format('d/m/Y H:i') }}
                         </p>
                         <p class="mb-2">
-                            <strong style="color: #28a745;">Départ prévu :</strong> 
+                            <strong style="color: #28a745;">{{ __('payment.invoice_checkout_planned') }}</strong> 
                             {{ $transaction->check_out->format('d/m/Y H:i') }}
                         </p>
                         
                         @if($hasLateCheckout)
                             <p class="mb-2">
-                                <strong style="color: #dc3545;">Départ effectif :</strong> 
+                                <strong style="color: #dc3545;">{{ __('payment.invoice_checkout_actual') }}</strong> 
                                 {{ \Carbon\Carbon::parse($transaction->actual_check_out)->format('d/m/Y H:i') }}
                             </p>
                             <p class="mb-0">
-                                <strong style="color: #dc3545;">Dépassement :</strong> 
+                                <strong style="color: #dc3545;">{{ __('payment.invoice_exceeded') }}</strong> 
                                 @if($extraHours > 24)
                                     {{ floor($extraHours/24) }} jour(s) et {{ $extraHours % 24 }} heure(s)
                                 @else
@@ -511,7 +511,7 @@
                             </p>
                         @else
                             <p class="mb-0">
-                                <strong style="color: #28a745;">Durée :</strong> 
+                                <strong style="color: #28a745;">{{ __('payment.invoice_duration') }}</strong> 
                                 {{ $transaction->getDateDifferenceWithPlural() }}
                             </p>
                         @endif
@@ -523,22 +523,22 @@
             <div class="mb-4">
                 <h6 class="section-title">
                     <i class="fas fa-bed"></i>
-                    DÉTAILS DU SÉJOUR
+                    {{ __('payment.invoice_stay_details') }}
                 </h6>
                 <div style="overflow-x: auto;">
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Description</th>
-                                <th class="text-center">Prix/Jour</th>
-                                <th class="text-center">Jours</th>
-                                <th class="text-right">Total</th>
+                                <th>{{ __('payment.invoice_table_description') }}</th>
+                                <th class="text-center">{{ __('payment.invoice_table_price_per_day') }}</th>
+                                <th class="text-center">{{ __('payment.invoice_table_days') }}</th>
+                                <th class="text-right">{{ __('payment.invoice_table_total') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>
-                                    Chambre {{ $transaction->room->number }} - 
+                                    {{ __('payment.invoice_room_label') }} {{ $transaction->room->number }} - 
                                     {{ $transaction->room->type->name ?? 'Standard' }}
                                 </td>
                                 <td class="text-center">
@@ -557,12 +557,12 @@
                                     <div class="late-checkout-box mb-0">
                                         <div class="late-checkout-title">
                                             <i class="fas fa-exclamation-triangle"></i>
-                                            <span>FRAIS DE DÉPART TARDIF</span>
+                                            <span>{{ __('payment.invoice_late_fee') }}</span>
                                         </div>
                                         <div style="display: flex; margin-top: 10px;">
                                             <div style="flex: 1;">
-                                                <small>Dépassement : {{ $extraHours }} heure(s)</small><br>
-                                                <small>Tarif appliqué : {{ $extraChargeRate }}</small>
+                                                <small>{{ __('payment.invoice_late_exceeded') }} {{ $extraHours }} heure(s)</small><br>
+                                                <small>{{ __('payment.invoice_late_rate') }} {{ $extraChargeRate }}</small>
                                             </div>
                                             <div style="text-align: right;">
                                                 <strong style="font-size: 16px; color: #dc3545;">
@@ -587,7 +587,7 @@
             <div class="mb-4">
                 <h6 class="section-title">
                     <i class="fas fa-utensils"></i>
-                    COMMANDES RESTAURANT
+                    {{ __('payment.invoice_restaurant') }}
                 </h6>
 
                 @if($restaurantOrders->isNotEmpty())
@@ -595,11 +595,11 @@
                         <table class="table table-bordered">
                             <thead>
                                 <tr>
-                                    <th>Commande</th>
-                                    <th>Menu</th>
-                                    <th class="text-center">Prix</th>
-                                    <th class="text-center">Quantité</th>
-                                    <th class="text-right">Sous-total</th>
+                                    <th>{{ __('payment.invoice_restaurant_table_order') }}</th>
+                                    <th>{{ __('payment.invoice_restaurant_table_menu') }}</th>
+                                    <th class="text-center">{{ __('payment.invoice_restaurant_table_price') }}</th>
+                                    <th class="text-center">{{ __('payment.invoice_restaurant_table_qty') }}</th>
+                                    <th class="text-right">{{ __('payment.invoice_restaurant_table_subtotal') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -614,12 +614,12 @@
                                     </tr>
                                     @endforeach
                                     <tr class="table-secondary">
-                                        <td colspan="4" class="text-end"><strong>Total commande {{ strtoupper($order->status) }}</strong></td>
+                                        <td colspan="4" class="text-end"><strong>{{ __('payment.invoice_restaurant_total_order') }} {{ strtoupper($order->status) }}</strong></td>
                                         <td class="text-right"><strong>{{ number_format($order->total, 0, ',', ' ') }} FCFA</strong></td>
                                     </tr>
                                 @endforeach
                                 <tr class="table-success">
-                                    <td colspan="4" class="text-end"><strong>Total restaurant</strong></td>
+                                    <td colspan="4" class="text-end"><strong>{{ __('payment.invoice_restaurant_total') }}</strong></td>
                                     <td class="text-right"><strong>{{ number_format($restaurantTotal, 0, ',', ' ') }} FCFA</strong></td>
                                 </tr>
                             </tbody>
@@ -629,7 +629,7 @@
                     <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107;">
                         <p class="mb-0 text-center">
                             <i class="fas fa-info-circle mr-2"></i>
-                            Aucune commande restaurant enregistrée pour cette transaction.
+                            {{ __('payment.invoice_restaurant_empty') }}
                         </p>
                     </div>
                 @endif
@@ -640,17 +640,17 @@
             <div class="mb-4">
                 <h6 class="section-title">
                     <i class="fas fa-concierge-bell"></i>
-                    EXTRAS & SERVICES
+                    {{ __('payment.invoice_extras') }}
                 </h6>
                 <div style="overflow-x: auto;">
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Catégorie</th>
-                                <th>Description</th>
-                                <th class="text-center">Prix unit.</th>
-                                <th class="text-center">Qté</th>
-                                <th class="text-right">Sous-total</th>
+                                <th>{{ __('payment.invoice_extras_table_category') }}</th>
+                                <th>{{ __('payment.invoice_extras_table_description') }}</th>
+                                <th class="text-center">{{ __('payment.invoice_extras_table_unit_price') }}</th>
+                                <th class="text-center">{{ __('payment.invoice_extras_table_qty') }}</th>
+                                <th class="text-right">{{ __('payment.invoice_extras_table_subtotal') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -666,7 +666,7 @@
                             </tr>
                             @endforeach
                             <tr class="table-success">
-                                <td colspan="4" class="text-end"><strong>Total extras</strong></td>
+                                <td colspan="4" class="text-end"><strong>{{ __('payment.invoice_extras_total') }}</strong></td>
                                 <td class="text-right"><strong>{{ number_format($extrasTotal, 0, ',', ' ') }} FCFA</strong></td>
                             </tr>
                         </tbody>
@@ -679,9 +679,9 @@
             <div class="mb-4">
                 <h6 class="section-title">
                     <i class="fas fa-history"></i>
-                    HISTORIQUE DES PAIEMENTS
+                    {{ __('payment.invoice_payment_history') }}
                     <span style="margin-left: auto; font-size: 12px; color: #666;">
-                        {{ $allPayments->count() }} paiement(s)
+                        {{ __('payment.invoice_payment_count', ['count' => $allPayments->count()]) }}
                     </span>
                 </h6>
                 
@@ -690,11 +690,11 @@
                     <table class="table table-bordered payment-history-table">
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Référence</th>
-                                <th>Méthode</th>
-                                <th class="text-right">Montant</th>
-                                <th>Réceptionniste</th>
+                                <th>{{ __('payment.invoice_payment_table_date') }}</th>
+                                <th>{{ __('payment.invoice_payment_table_reference') }}</th>
+                                <th>{{ __('payment.invoice_payment_table_method') }}</th>
+                                <th class="text-right">{{ __('payment.invoice_payment_table_amount') }}</th>
+                                <th>{{ __('payment.invoice_payment_table_receptionist') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -747,7 +747,7 @@
                             
                             <!-- Ligne de total des paiements -->
                             <tr style="background-color: #e8f5e9; font-weight: bold;">
-                                <td colspan="3" class="text-right">TOTAL PAYÉ</td>
+                                <td colspan="3" class="text-right">{{ __('payment.invoice_pay_total') }}</td>
                                 <td class="text-right" style="color: #28a745; font-size: 16px;">
                                     {{ number_format($totalPayments, 0, ',', ' ') }} FCFA
                                 </td>
@@ -760,7 +760,7 @@
                 <div class="info-box" style="background: #fff3cd; border-left-color: #ffc107;">
                     <p class="mb-0 text-center">
                         <i class="fas fa-exclamation-triangle mr-2"></i>
-                        Aucun paiement enregistré pour cette transaction
+                        {{ __('payment.invoice_pay_empty') }}
                     </p>
                 </div>
                 @endif
@@ -770,7 +770,7 @@
             <div style="display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;">
                 <div style="flex: 1; min-width: 140px; text-align: center;">
                     <div class="info-box">
-                        <p class="mb-1 text-muted">🛏 Chambre</p>
+                        <p class="mb-1 text-muted">{{ __('payment.invoice_summary_room') }}</p>
                         <p class="mb-0 amount" style="color: #28a745;">
                             {{ number_format($roomSubtotal, 0, ',', ' ') }} FCFA
                         </p>
@@ -778,7 +778,7 @@
                 </div>
                 <div style="flex: 1; min-width: 140px; text-align: center;">
                     <div class="info-box">
-                        <p class="mb-1 text-muted">🍽 Restaurant</p>
+                        <p class="mb-1 text-muted">{{ __('payment.invoice_summary_restaurant') }}</p>
                         <p class="mb-0 amount" style="color: #28a745;">
                             {{ number_format($restaurantTotal, 0, ',', ' ') }} FCFA
                         </p>
@@ -787,7 +787,7 @@
                 @if($extrasTotal > 0)
                 <div style="flex: 1; min-width: 140px; text-align: center;">
                     <div class="info-box">
-                        <p class="mb-1 text-muted">🔔 Extras</p>
+                        <p class="mb-1 text-muted">{{ __('payment.invoice_summary_extras') }}</p>
                         <p class="mb-0 amount" style="color: #28a745;">
                             {{ number_format($extrasTotal, 0, ',', ' ') }} FCFA
                         </p>
@@ -796,12 +796,12 @@
                 @endif
                 <div style="flex: 1; min-width: 140px; text-align: center;">
                     <div class="info-box">
-                        <p class="mb-1 text-muted">📋 Total Facture</p>
+                        <p class="mb-1 text-muted">{{ __('payment.invoice_summary_total') }}</p>
                         <p class="mb-0 amount" style="color: #28a745;">
                             {{ number_format($grandTotal, 0, ',', ' ') }} FCFA
                         </p>
                         @if($hasLateCheckout && $extraCharge > 0)
-                        <small class="text-muted">(dont {{ number_format($extraCharge, 0, ',', ' ') }} FCFA de frais)</small>
+                        <small class="text-muted">{{ __('payment.invoice_summary_late_fees', ['amount' => number_format($extraCharge, 0, ',', ' ')]) }}</small>
                         @endif
                     </div>
                 </div>
@@ -811,12 +811,12 @@
             <div class="total-box">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <h5 style="margin: 0 0 5px;">RÉCAPITULATIF FINAL</h5>
+                        <h5 style="margin: 0 0 5px;">{{ __('payment.invoice_final') }}</h5>
                         <p style="margin: 0; opacity: 0.8; font-size: 13px;">
                             @if($hasLateCheckout && $extraCharge > 0)
-                                <i class="fas fa-info-circle mr-1"></i> Inclut les frais de late checkout
+                                <i class="fas fa-info-circle mr-1"></i> {{ __('payment.invoice_final_late') }}
                             @else
-                                Solde à payer
+                                {{ __('payment.invoice_final_balance') }}
                             @endif
                         </p>
                     </div>
@@ -830,9 +830,9 @@
                         </h2>
                         <p style="margin: 0; opacity: 0.8; font-size: 13px;">
                             @if($remaining <= 0)
-                                <i class="fas fa-check-circle mr-1"></i> Facture entièrement réglée
+                                <i class="fas fa-check-circle mr-1"></i> {{ __('payment.invoice_final_paid') }}
                             @else
-                                Reste à payer avant le départ
+                                {{ __('payment.invoice_final_remaining') }}
                             @endif
                         </p>
                     </div>
@@ -841,34 +841,34 @@
 
             <!-- Notes et informations importantes -->
             <div class="mt-4 p-3" style="border: 1px solid #28a745; border-radius: 8px;">
-                <h6 class="section-title mb-3">INFORMATIONS IMPORTANTES</h6>
+                <h6 class="section-title mb-3">{{ __('payment.invoice_info_title') }}</h6>
                 <div style="display: flex; gap: 20px;">
                     <div style="flex: 1;">
-                        <p class="small mb-2"><strong style="color: #28a745;">Conditions de paiement :</strong></p>
+                        <p class="small mb-2"><strong style="color: #28a745;">{{ __('payment.invoice_info_payment_conditions') }}</strong></p>
                         <ul class="small" style="padding-left: 20px; margin-bottom: 0;">
-                            <li>Acompte minimum de 30% à la réservation</li>
-                            <li>Solde à régler à l'arrivée ou au départ</li>
-                            <li>Frais d'annulation : voir conditions générales</li>
+                            <li>{{ __('payment.invoice_info_deposit') }}</li>
+                            <li>{{ __('payment.invoice_info_balance') }}</li>
+                            <li>{{ __('payment.invoice_info_cancellation') }}</li>
                         </ul>
                     </div>
                     <div style="flex: 1;">
-                        <p class="small mb-2"><strong style="color: #28a745;">Moyens de paiement acceptés :</strong></p>
+                        <p class="small mb-2"><strong style="color: #28a745;">{{ __('payment.invoice_info_payment_methods') }}</strong></p>
                         <div style="display: flex; flex-wrap: wrap; gap: 5px;">
-                            <span class="payment-method-badge method-cash">Espèces</span>
-                            <span class="payment-method-badge method-card">Carte</span>
+                            <span class="payment-method-badge method-cash">{{ __('payment.invoice_info_cash') }}</span>
+                            <span class="payment-method-badge method-card">{{ __('payment.invoice_info_card') }}</span>
                             <span class="payment-method-badge method-mobile">Mobile Money</span>
-                            <span class="payment-method-badge method-bank">Virement</span>
+                            <span class="payment-method-badge method-bank">{{ __('payment.invoice_info_bank') }}</span>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Politique de late checkout -->
                 <div class="mt-3">
-                    <p class="small mb-2"><strong style="color: #28a745;">Politique de départ tardif :</strong></p>
+                    <p class="small mb-2"><strong style="color: #28a745;">{{ __('payment.invoice_late_policy') }}</strong></p>
                     <ul class="small" style="padding-left: 20px; margin-bottom: 0;">
-                        <li>< 3 heures : Gratuit</li>
-                        <li>3 - 6 heures : 50% du prix journalier</li>
-                        <li>> 6 heures : 100% du prix journalier (1 nuit supplémentaire)</li>
+                        <li>{{ __('payment.invoice_late_policy_free') }}</li>
+                        <li>{{ __('payment.invoice_late_policy_50') }}</li>
+                        <li>{{ __('payment.invoice_late_policy_100') }}</li>
                     </ul>
                 </div>
             </div>
@@ -879,7 +879,7 @@
             <div style="display: flex; justify-content: space-between;">
                 <div>
                     <p class="small text-muted mb-0">
-                        <strong style="color: #28a745;">Signature et cachet :</strong><br>
+                        <strong style="color: #28a745;">{{ __('payment.invoice_footer_signature') }}</strong><br>
                         <span style="margin-top: 30px; display: inline-block; border-top: 1px solid #28a745; padding-top: 8px; width: 150px;">
                             {{ $transaction->user->name ?? '____________________' }}
                         </span>
@@ -887,8 +887,8 @@
                 </div>
                 <div style="text-align: right;">
                     <p class="small mb-0" style="color: #28a745;">
-                        Merci de votre confiance.<br>
-                        Nous vous souhaitons un agréable séjour !
+                        {{ __('payment.invoice_footer_thanks') }}<br>
+                        {{ __('payment.invoice_footer_wish') }}
                     </p>
                 </div>
             </div>
@@ -943,7 +943,7 @@ function downloadPDF() {
         z-index: 9999;
         font-family: 'Maven Pro', sans-serif;
     `;
-    loadingMessage.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Génération du PDF en cours...';
+    loadingMessage.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> {{ __("payment.invoice_pdf_generating") }}';
     document.body.appendChild(loadingMessage);
 
     // Générer le PDF
@@ -964,7 +964,7 @@ function downloadPDF() {
             z-index: 9999;
             font-family: 'Maven Pro', sans-serif;
         `;
-        successMessage.innerHTML = '<i class="fas fa-check mr-2"></i> PDF téléchargé avec succès !';
+        successMessage.innerHTML = '<i class="fas fa-check mr-2"></i> {{ __("payment.invoice_pdf_success") }}';
         document.body.appendChild(successMessage);
         
         setTimeout(() => {

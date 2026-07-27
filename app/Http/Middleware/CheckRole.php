@@ -12,10 +12,10 @@ class CheckRole
     public function handle(Request $request, Closure $next, string ...$roles): mixed
     {
         if (! Auth::check()) {
-            return redirect()->route('login')->with('error', 'Veuillez vous connecter.');
+            return redirect()->route('login')->with('error', __('flash.middleware_login_required'));
         }
 
-        $user     = Auth::user();
+        $user = Auth::user();
         $userRole = $user->roleEnum;
 
         // Super admin bypass
@@ -36,15 +36,15 @@ class CheckRole
 
         if (app()->environment('local')) {
             \Log::debug('Accès refusé par CheckRole', [
-                'user_id'       => $user->id,
-                'user_role'     => $user->role,
-                'roles_requis'  => $roles,
-                'url'           => $request->fullUrl(),
+                'user_id' => $user->id,
+                'user_role' => $user->role,
+                'roles_requis' => $roles,
+                'url' => $request->fullUrl(),
             ]);
         }
 
         return redirect()->back()
-            ->with('failed', 'Vous n\'êtes pas autorisé à accéder à cette page.')
+            ->with('failed', __('flash.middleware_unauthorized'))
             ->with('error_type', 'role_denied');
     }
 }

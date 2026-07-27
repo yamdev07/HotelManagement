@@ -1,4 +1,5 @@
 <?php
+
 // database/migrations/2024_02_23_000000_add_shift_type_to_cashier_sessions_table.php
 
 use Illuminate\Database\Migrations\Migration;
@@ -15,7 +16,7 @@ return new class extends Migration
         Schema::table('cashier_sessions', function (Blueprint $table) {
             // Ajouter la colonne shift_type (nullable pour les anciennes sessions)
             $table->string('shift_type')->nullable()->after('status');
-            
+
             // Optionnel : Ajouter un index pour les recherches
             $table->index('shift_type');
         });

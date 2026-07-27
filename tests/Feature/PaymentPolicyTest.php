@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Enums\PaymentStatus;
 use App\Enums\UserRole;
 use App\Models\Payment;
 use App\Models\User;
@@ -43,7 +42,7 @@ class PaymentPolicyTest extends TestCase
 
     public function test_only_admin_can_refund_payment(): void
     {
-        $admin        = User::factory()->create(['role' => UserRole::Admin->value]);
+        $admin = User::factory()->create(['role' => UserRole::Admin->value]);
         $receptionist = User::factory()->create(['role' => UserRole::Receptionist->value]);
 
         $this->assertTrue($admin->can('refund', Payment::class));

@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Historique Réservation')
+@section('title', __('history.page_title'))
 @section('content')
     <style>
         .timeline {
@@ -131,15 +131,15 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="{{ route('dashboard.index') }}">Dashboard</a>
+                            <a href="{{ route('dashboard.index') }}">{{ __('history.dashboard') }}</a>
                         </li>
                         <li class="breadcrumb-item">
-                            <a href="{{ route('transaction.index') }}">Réservations</a>
+                            <a href="{{ route('transaction.index') }}">{{ __('history.reservations') }}</a>
                         </li>
                         <li class="breadcrumb-item">
-                            <a href="{{ route('transaction.show', $transaction) }}">Réservation #{{ $transaction->id }}</a>
+                            <a href="{{ route('transaction.show', $transaction) }}">{{ __('history.reservation', ['id' => $transaction->id]) }}</a>
                         </li>
-                        <li class="breadcrumb-item active">Historique</li>
+                        <li class="breadcrumb-item active">{{ __('history.history') }}</li>
                     </ol>
                 </nav>
                 
@@ -147,12 +147,12 @@
                     <div>
                         <h2 class="h4 mb-0">
                             <i class="fas fa-history text-primary me-2"></i>
-                            Historique de la Réservation #{{ $transaction->id }}
+                            {{ __('history.page_heading', ['id' => $transaction->id]) }}
                         </h2>
-                        <p class="text-muted">Journal complet des modifications et événements</p>
+                        <p class="text-muted">{{ __('history.page_description') }}</p>
                     </div>
                     <a href="{{ route('transaction.show', $transaction) }}" class="btn btn-outline-primary">
-                        <i class="fas fa-arrow-left me-2"></i>Retour aux détails
+                        <i class="fas fa-arrow-left me-2"></i>{{ __('history.back_to_details') }}
                     </a>
                 </div>
             </div>
@@ -172,19 +172,19 @@
             <div class="row">
                 <div class="col-md-3">
                     <div class="mb-3">
-                        <small class="opacity-75">Client</small>
+                        <small class="opacity-75">{{ __('history.client') }}</small>
                         <h5 class="mb-0">{{ $transaction->customer->name }}</h5>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="mb-3">
-                        <small class="opacity-75">Chambre</small>
-                        <h5 class="mb-0">Chambre {{ $transaction->room->number }}</h5>
+                        <small class="opacity-75">{{ __('history.room') }}</small>
+                        <h5 class="mb-0">{{ __('history.room_number', ['number' => $transaction->room->number]) }}</h5>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <div class="mb-3">
-                        <small class="opacity-75">Statut actuel</small>
+                        <small class="opacity-75">{{ __('history.current_status') }}</small>
                         <h5 class="mb-0">
                             <span class="badge bg-light text-dark px-3 py-2">
                                 {{ $transaction->status_label }}
@@ -194,7 +194,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="mb-3">
-                        <small class="opacity-75">Créée le</small>
+                        <small class="opacity-75">{{ __('history.created_on') }}</small>
                         <h5 class="mb-0">{{ \Carbon\Carbon::parse($transaction->created_at)->format('d/m/Y H:i') }}</h5>
                     </div>
                 </div>
@@ -207,23 +207,23 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h5 class="mb-3">
-                            <i class="fas fa-filter me-2"></i>Filtrer par type
+                            <i class="fas fa-filter me-2"></i>{{ __('history.filter_by_type') }}
                         </h5>
                         <div class="filter-buttons">
                             <button class="btn btn-sm btn-outline-primary active" data-filter="all">
-                                Tous <span class="badge bg-primary">{{ count($histories ?? []) + 1 }}</span>
+                                {{ __('history.all') }} <span class="badge bg-primary">{{ count($histories ?? []) + 1 }}</span>
                             </button>
                             <button class="btn btn-sm btn-outline-purple" data-filter="status-changed">
-                                <i class="fas fa-exchange-alt me-1"></i>Statut <span class="badge bg-purple">{{ $statusChangesCount ?? 0 }}</span>
+                                <i class="fas fa-exchange-alt me-1"></i>{{ __('history.status') }} <span class="badge bg-purple">{{ $statusChangesCount ?? 0 }}</span>
                             </button>
                             <button class="btn btn-sm btn-outline-success" data-filter="payment-added">
-                                <i class="fas fa-credit-card me-1"></i>Paiements <span class="badge bg-success">{{ $paymentCount ?? 0 }}</span>
+                                <i class="fas fa-credit-card me-1"></i>{{ __('history.payments') }} <span class="badge bg-success">{{ $paymentCount ?? 0 }}</span>
                             </button>
                             <button class="btn btn-sm btn-outline-info" data-filter="date-changed">
-                                <i class="fas fa-calendar-alt me-1"></i>Dates <span class="badge bg-info">{{ $dateChangesCount ?? 0 }}</span>
+                                <i class="fas fa-calendar-alt me-1"></i>{{ __('history.dates') }} <span class="badge bg-info">{{ $dateChangesCount ?? 0 }}</span>
                             </button>
                             <button class="btn btn-sm btn-outline-warning" data-filter="note-added">
-                                <i class="fas fa-sticky-note me-1"></i>Notes <span class="badge bg-warning text-dark">{{ $noteChangesCount ?? 0 }}</span>
+                                <i class="fas fa-sticky-note me-1"></i>{{ __('history.notes') }} <span class="badge bg-warning text-dark">{{ $noteChangesCount ?? 0 }}</span>
                             </button>
                         </div>
                     </div>
@@ -233,7 +233,7 @@
                                 <div class="card border-0 bg-light">
                                     <div class="card-body text-center">
                                         <h3 class="mb-0">{{ $totalModifications ?? 1 }}</h3>
-                                        <small class="text-muted">Modifications totales</small>
+                                        <small class="text-muted">{{ __('history.total_modifications') }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -241,7 +241,7 @@
                                 <div class="card border-0 bg-light">
                                     <div class="card-body text-center">
                                         <h3 class="mb-0">{{ $uniqueUsers ?? 1 }}</h3>
-                                        <small class="text-muted">Utilisateurs impliqués</small>
+                                        <small class="text-muted">{{ __('history.users_involved') }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -256,11 +256,11 @@
                 <div class="card">
                     <div class="card-header bg-light d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
-                            <i class="fas fa-stream me-2"></i>Chronologie des événements
+                            <i class="fas fa-stream me-2"></i>{{ __('history.event_timeline') }}
                         </h5>
                         <div class="dropdown">
                             <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-download me-1"></i> Exporter
+                                <i class="fas fa-download me-1"></i> {{ __('history.export') }}
                             </button>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ route('transaction.export', ['type' => 'pdf']) }}?transaction_id={{ $transaction->id }}"><i class="fas fa-file-pdf me-2"></i> PDF</a></li>
@@ -276,34 +276,34 @@
                                 <div class="timeline-content created">
                                     <div class="timeline-date">
                                         <i class="fas fa-calendar me-1"></i>
-                                        {{ \Carbon\Carbon::parse($transaction->created_at)->format('d/m/Y à H:i') }}
+                                        {{ \Carbon\Carbon::parse($transaction->created_at)->translatedFormat('d/m/Y H:i') }}
                                     </div>
                                     <div class="timeline-user">
                                         <i class="fas fa-user-circle me-1"></i>
-                                        {{ $transaction->createdBy->name ?? 'Système' }}
-                                        <span class="badge-history bg-primary">Création</span>
+                                        {{ $transaction->createdBy->name ?? __('history.system') }}
+                                        <span class="badge-history bg-primary">{{ __('history.creation_badge') }}</span>
                                     </div>
                                     <div class="timeline-title">
-                                        <i class="fas fa-plus-circle me-2"></i>Réservation créée
+                                        <i class="fas fa-plus-circle me-2"></i>{{ __('history.reservation_created') }}
                                     </div>
                                     <div class="timeline-details">
-                                        <p>Nouvelle réservation créée avec les paramètres suivants :</p>
+                                        <p>{{ __('history.reservation_created_text') }}</p>
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <ul class="changes-list">
-                                                    <li><strong>Client :</strong> {{ $transaction->customer->name }}</li>
-                                                    <li><strong>Chambre :</strong> Chambre {{ $transaction->room->number }}</li>
-                                                    <li><strong>Arrivée :</strong> {{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y H:i') }}</li>
-                                                    <li><strong>Départ :</strong> {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y H:i') }}</li>
+                                                    <li><strong>{{ __('history.client_label') }}</strong> {{ $transaction->customer->name }}</li>
+                                                    <li><strong>{{ __('history.room_label') }}</strong> {{ __('history.room_number', ['number' => $transaction->room->number]) }}</li>
+                                                    <li><strong>{{ __('history.arrival_label') }}</strong> {{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y H:i') }}</li>
+                                                    <li><strong>{{ __('history.departure_label') }}</strong> {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y H:i') }}</li>
                                                 </ul>
                                             </div>
                                             <div class="col-md-6">
                                                 <ul class="changes-list">
-                                                    <li><strong>Statut initial :</strong> <span class="badge bg-secondary">{{ $transaction->status_label }}</span></li>
-                                                    <li><strong>Nuits :</strong> {{ \Carbon\Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out) }}</li>
-                                                    <li><strong>Prix total :</strong> {{ Helper::formatCFA($transaction->getTotalPrice()) }}</li>
+                                                    <li><strong>{{ __('history.initial_status') }}</strong> <span class="badge bg-secondary">{{ $transaction->status_label }}</span></li>
+                                                    <li><strong>{{ __('history.nights') }}</strong> {{ \Carbon\Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out) }}</li>
+                                                    <li><strong>{{ __('history.total_price') }}</strong> {{ Helper::formatCFA($transaction->getTotalPrice()) }}</li>
                                                     @if($transaction->notes)
-                                                        <li><strong>Note initiale :</strong> {{ $transaction->notes }}</li>
+                                                        <li><strong>{{ __('history.initial_note') }}</strong> {{ $transaction->notes }}</li>
                                                     @endif
                                                 </ul>
                                             </div>
@@ -318,34 +318,34 @@
                                 <div class="timeline-content created">
                                     <div class="timeline-date">
                                         <i class="fas fa-calendar me-1"></i>
-                                        {{ \Carbon\Carbon::parse($transaction->created_at)->format('d/m/Y à H:i') }}
+                                        {{ \Carbon\Carbon::parse($transaction->created_at)->translatedFormat('d/m/Y H:i') }}
                                     </div>
                                     <div class="timeline-user">
                                         <i class="fas fa-user-circle me-1"></i>
-                                        {{ $transaction->createdBy->name ?? 'Système' }}
-                                        <span class="badge-history bg-primary">Création</span>
+                                        {{ $transaction->createdBy->name ?? __('history.system') }}
+                                        <span class="badge-history bg-primary">{{ __('history.creation_badge') }}</span>
                                     </div>
                                     <div class="timeline-title">
-                                        <i class="fas fa-plus-circle me-2"></i>Réservation créée
+                                        <i class="fas fa-plus-circle me-2"></i>{{ __('history.reservation_created') }}
                                     </div>
                                     <div class="timeline-details">
-                                        <p>Nouvelle réservation créée avec les paramètres suivants :</p>
+                                        <p>{{ __('history.reservation_created_text') }}</p>
                                         <div class="row">
                                             <div class="col-md-6">
                                                 <ul class="changes-list">
-                                                    <li><strong>Client :</strong> {{ $transaction->customer->name }}</li>
-                                                    <li><strong>Chambre :</strong> Chambre {{ $transaction->room->number }}</li>
-                                                    <li><strong>Arrivée :</strong> {{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y H:i') }}</li>
-                                                    <li><strong>Départ :</strong> {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y H:i') }}</li>
+                                                    <li><strong>{{ __('history.client_label') }}</strong> {{ $transaction->customer->name }}</li>
+                                                    <li><strong>{{ __('history.room_label') }}</strong> {{ __('history.room_number', ['number' => $transaction->room->number]) }}</li>
+                                                    <li><strong>{{ __('history.arrival_label') }}</strong> {{ \Carbon\Carbon::parse($transaction->check_in)->format('d/m/Y H:i') }}</li>
+                                                    <li><strong>{{ __('history.departure_label') }}</strong> {{ \Carbon\Carbon::parse($transaction->check_out)->format('d/m/Y H:i') }}</li>
                                                 </ul>
                                             </div>
                                             <div class="col-md-6">
                                                 <ul class="changes-list">
-                                                    <li><strong>Statut initial :</strong> <span class="badge bg-secondary">{{ $transaction->status_label }}</span></li>
-                                                    <li><strong>Nuits :</strong> {{ \Carbon\Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out) }}</li>
-                                                    <li><strong>Prix total :</strong> {{ Helper::formatCFA($transaction->getTotalPrice()) }}</li>
+                                                    <li><strong>{{ __('history.initial_status') }}</strong> <span class="badge bg-secondary">{{ $transaction->status_label }}</span></li>
+                                                    <li><strong>{{ __('history.nights') }}</strong> {{ \Carbon\Carbon::parse($transaction->check_in)->diffInDays($transaction->check_out) }}</li>
+                                                    <li><strong>{{ __('history.total_price') }}</strong> {{ Helper::formatCFA($transaction->getTotalPrice()) }}</li>
                                                     @if($transaction->notes)
-                                                        <li><strong>Note initiale :</strong> {{ $transaction->notes }}</li>
+                                                        <li><strong>{{ __('history.initial_note') }}</strong> {{ $transaction->notes }}</li>
                                                     @endif
                                                 </ul>
                                             </div>
@@ -360,19 +360,19 @@
                                 <div class="timeline-content marked-arrived">
                                     <div class="timeline-date">
                                         <i class="fas fa-calendar me-1"></i>
-                                        {{ \Carbon\Carbon::parse($transaction->arrived_at)->format('d/m/Y à H:i') }}
+                                        {{ \Carbon\Carbon::parse($transaction->arrived_at)->translatedFormat('d/m/Y H:i') }}
                                     </div>
                                     <div class="timeline-user">
                                         <i class="fas fa-user-circle me-1"></i>
-                                        {{ $transaction->arrivedBy->name ?? 'Système' }}
-                                        <span class="badge-history bg-success">Arrivée</span>
+                                        {{ $transaction->arrivedBy->name ?? __('history.system') }}
+                                        <span class="badge-history bg-success">{{ __('history.arrival_badge') }}</span>
                                     </div>
                                     <div class="timeline-title">
-                                        <i class="fas fa-sign-in-alt me-2"></i>Client marqué comme arrivé
+                                        <i class="fas fa-sign-in-alt me-2"></i>{{ __('history.guest_marked_arrived') }}
                                     </div>
                                     <div class="timeline-details">
-                                        <p>Le client est arrivé à l'hôtel et a été enregistré.</p>
-                                        <p><strong>Heure d'arrivée réelle :</strong> {{ \Carbon\Carbon::parse($transaction->arrived_at)->format('H:i') }}</p>
+                                        <p>{{ __('history.guest_arrived_text') }}</p>
+                                        <p><strong>{{ __('history.actual_arrival_time') }}</strong> {{ \Carbon\Carbon::parse($transaction->arrived_at)->format('H:i') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -383,19 +383,19 @@
                                 <div class="timeline-content marked-departed">
                                     <div class="timeline-date">
                                         <i class="fas fa-calendar me-1"></i>
-                                        {{ \Carbon\Carbon::parse($transaction->departed_at)->format('d/m/Y à H:i') }}
+                                        {{ \Carbon\Carbon::parse($transaction->departed_at)->translatedFormat('d/m/Y H:i') }}
                                     </div>
                                     <div class="timeline-user">
                                         <i class="fas fa-user-circle me-1"></i>
-                                        {{ $transaction->departedBy->name ?? 'Système' }}
-                                        <span class="badge-history bg-info">Départ</span>
+                                        {{ $transaction->departedBy->name ?? __('history.system') }}
+                                        <span class="badge-history bg-info">{{ __('history.departure_badge') }}</span>
                                     </div>
                                     <div class="timeline-title">
-                                        <i class="fas fa-sign-out-alt me-2"></i>Client marqué comme parti
+                                        <i class="fas fa-sign-out-alt me-2"></i>{{ __('history.guest_marked_departed') }}
                                     </div>
                                     <div class="timeline-details">
-                                        <p>Le client a quitté l'hôtel. Le séjour est terminé.</p>
-                                        <p><strong>Heure de départ réelle :</strong> {{ \Carbon\Carbon::parse($transaction->departed_at)->format('H:i') }}</p>
+                                        <p>{{ __('history.guest_departed_text') }}</p>
+                                        <p><strong>{{ __('history.actual_departure_time') }}</strong> {{ \Carbon\Carbon::parse($transaction->departed_at)->format('H:i') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -406,21 +406,21 @@
                                 <div class="timeline-content cancelled">
                                     <div class="timeline-date">
                                         <i class="fas fa-calendar me-1"></i>
-                                        {{ \Carbon\Carbon::parse($transaction->cancelled_at)->format('d/m/Y à H:i') }}
+                                        {{ \Carbon\Carbon::parse($transaction->cancelled_at)->translatedFormat('d/m/Y H:i') }}
                                     </div>
                                     <div class="timeline-user">
                                         <i class="fas fa-user-circle me-1"></i>
-                                        {{ $transaction->cancelledBy->name ?? 'Système' }}
-                                        <span class="badge-history bg-danger">Annulation</span>
+                                        {{ $transaction->cancelledBy->name ?? __('history.system') }}
+                                        <span class="badge-history bg-danger">{{ __('history.cancellation_badge') }}</span>
                                     </div>
                                     <div class="timeline-title">
-                                        <i class="fas fa-ban me-2"></i>Réservation annulée
+                                        <i class="fas fa-ban me-2"></i>{{ __('history.reservation_cancelled') }}
                                     </div>
                                     <div class="timeline-details">
                                         @if($transaction->cancel_reason)
-                                            <p><strong>Raison de l'annulation :</strong> {{ $transaction->cancel_reason }}</p>
+                                            <p><strong>{{ __('history.cancellation_reason') }}</strong> {{ $transaction->cancel_reason }}</p>
                                         @endif
-                                        <p>La réservation a été annulée. Tous les paiements associés ont été remboursés.</p>
+                                        <p>{{ __('history.cancellation_text') }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -433,31 +433,31 @@
                                     <div class="timeline-content payment-added">
                                         <div class="timeline-date">
                                             <i class="fas fa-calendar me-1"></i>
-                                            {{ \Carbon\Carbon::parse($payment->created_at)->format('d/m/Y à H:i') }}
+                                            {{ \Carbon\Carbon::parse($payment->created_at)->translatedFormat('d/m/Y H:i') }}
                                         </div>
                                         <div class="timeline-user">
                                             <i class="fas fa-user-circle me-1"></i>
-                                            {{ $payment->createdBy->name ?? 'Système' }}
-                                            <span class="badge-history bg-success">Paiement #{{ $payment->id }}</span>
+                                            {{ $payment->createdBy->name ?? __('history.system') }}
+                                            <span class="badge-history bg-success">{{ __('history.payment_badge', ['id' => $payment->id]) }}</span>
                                         </div>
                                         <div class="timeline-title">
-                                            <i class="fas fa-credit-card me-2"></i>Paiement effectué
+                                            <i class="fas fa-credit-card me-2"></i>{{ __('history.payment_made') }}
                                         </div>
                                         <div class="timeline-details">
                                             <div class="row">
                                                 <div class="col-md-6">
-                                                    <p><strong>Montant :</strong> {{ Helper::formatCFA($payment->amount) }}</p>
-                                                    <p><strong>Méthode :</strong> {{ $payment->payment_method_label }}</p>
-                                                    <p><strong>Référence :</strong> {{ $payment->reference ?? 'N/A' }}</p>
+                                                    <p><strong>{{ __('history.amount') }}</strong> {{ Helper::formatCFA($payment->amount) }}</p>
+                                                    <p><strong>{{ __('history.method') }}</strong> {{ $payment->payment_method_label }}</p>
+                                                    <p><strong>{{ __('history.reference') }}</strong> {{ $payment->reference ?? 'N/A' }}</p>
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <p><strong>Statut :</strong> 
+                                                    <p><strong>{{ __('history.payment_status') }}</strong> 
                                                         <span class="badge {{ $payment->status == 'completed' ? 'bg-success' : 'bg-warning' }}">
                                                             {{ $payment->status_label }}
                                                         </span>
                                                     </p>
                                                     @if($payment->notes)
-                                                        <p><strong>Notes :</strong> {{ $payment->notes }}</p>
+                                                        <p><strong>{{ __('history.notes') }}</strong> {{ $payment->notes }}</p>
                                                     @endif
                                                 </div>
                                             </div>
@@ -471,8 +471,7 @@
                             @if(empty($histories))
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle me-2"></i>
-                                Aucune modification supplémentaire n'a été enregistrée pour cette réservation.
-                                L'historique complet inclut les événements automatiques (création, arrivée, départ, paiements).
+                                {{ __('history.no_additional_history') }}
                             </div>
                             @endif
                         @endif
@@ -485,15 +484,15 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-0">
-                                    <i class="fas fa-info-circle me-2"></i>À propos de l'historique
+                                    <i class="fas fa-info-circle me-2"></i>{{ __('history.about_history') }}
                                 </h6>
                                 <small class="text-muted">
-                                    Cet historique est généré automatiquement. Toutes les modifications sont enregistrées avec horodatage et auteur.
+                                    {{ __('history.about_history_text') }}
                                 </small>
                             </div>
                             <div>
                                 <button class="btn btn-outline-secondary" onclick="window.print()">
-                                    <i class="fas fa-print me-2"></i>Imprimer
+                                    <i class="fas fa-print me-2"></i>{{ __('history.print') }}
                                 </button>
                             </div>
                         </div>
@@ -548,14 +547,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('button[onclick="window.print()"]').addEventListener('click', function(e) {
         e.preventDefault();
         Swal.fire({
-            title: 'Imprimer l\'historique ?',
-            text: 'L\'historique complet sera imprimé au format paysage.',
+            title: '{{ __("history.print_title") }}',
+            text: '{{ __("history.print_text") }}',
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: '<i class="fas fa-print me-2"></i>Imprimer',
-            cancelButtonText: 'Annuler'
+            confirmButtonText: '<i class="fas fa-print me-2"></i>{{ __("history.print_confirm") }}',
+            cancelButtonText: '{{ __("history.print_cancel") }}'
         }).then((result) => {
             if (result.isConfirmed) {
                 // Ajouter un style pour l'impression

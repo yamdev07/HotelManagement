@@ -29,9 +29,9 @@ class HotelCredentialsMail extends Mailable
             ->text('emails.hotel-credentials-text')
             ->with([
                 'hotelName' => $this->hotel->name,
-                'email'     => $this->admin->email,
-                'password'  => $this->plainPassword,
-                'loginUrl'  => route('login.index'),
+                'email' => $this->admin->email,
+                'password' => $this->plainPassword,
+                'loginUrl' => route('login.index'),
             ]);
     }
 }

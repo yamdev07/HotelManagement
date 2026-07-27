@@ -16,13 +16,13 @@ class HotelSeeder extends Seeder
         Hotel::firstOrCreate(
             ['slug' => 'hotel-par-defaut'],
             [
-                'name'        => config('app.name', 'MyHotel'),
-                'currency'    => 'CFA',
-                'timezone'    => config('app.timezone', 'Africa/Lagos'),
-                'is_active'   => true,
+                'name' => config('app.name', 'MyHotel'),
+                'currency' => 'CFA',
+                'timezone' => config('app.timezone', 'Africa/Lagos'),
+                'is_active' => true,
                 // Hôtel démo hébergeant les données existantes : offre complète (tous les modules).
-                'plan'        => 'business',
-                'room_limit'  => null,
+                'plan' => 'business',
+                'room_limit' => null,
             ]
         );
     }

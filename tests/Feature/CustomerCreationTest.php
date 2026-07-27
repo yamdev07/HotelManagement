@@ -23,18 +23,18 @@ class CustomerCreationTest extends TestCase
         \Illuminate\Support\Facades\Storage::fake('public');
 
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Photo Client',
-            'slug'                    => Str::slug('Hotel Photo Client '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Photo Client',
+            'slug' => Str::slug('Hotel Photo Client '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         $admin = \App\Models\User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
         $this->actingAs($admin)->post(route('transaction.reservation.storeCustomer'), [
-            'name'   => 'Client Photo',
-            'email'  => 'photo@client.test',
-            'phone'  => '+229 00 00 00 00',
+            'name' => 'Client Photo',
+            'email' => 'photo@client.test',
+            'phone' => '+229 00 00 00 00',
             'gender' => 'Male',
             'avatar' => \Illuminate\Http\UploadedFile::fake()->image('client.jpg'),
         ])->assertSessionHasNoErrors()->assertRedirect();
@@ -51,11 +51,11 @@ class CustomerCreationTest extends TestCase
     public function test_reservation_dates_validated_with_clear_messages(): void
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Dates Resa',
-            'slug'                    => Str::slug('Hotel Dates Resa '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Dates Resa',
+            'slug' => Str::slug('Hotel Dates Resa '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         $admin = \App\Models\User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
@@ -65,44 +65,44 @@ class CustomerCreationTest extends TestCase
         // Issue #174 : arrivée dans le passé -> message clair, pas de blocage silencieux
         $this->actingAs($admin)->get(route('transaction.reservation.chooseRoom', $customer).'?'.http_build_query([
             'count_person' => 2,
-            'check_in'     => now()->subDays(3)->toDateString(),
-            'check_out'    => now()->addDay()->toDateString(),
+            'check_in' => now()->subDays(3)->toDateString(),
+            'check_out' => now()->addDay()->toDateString(),
         ]))->assertSessionHasErrors(['check_in']);
 
         // Départ avant l'arrivée -> message clair
         $this->actingAs($admin)->get(route('transaction.reservation.chooseRoom', $customer).'?'.http_build_query([
             'count_person' => 2,
-            'check_in'     => now()->addDays(5)->toDateString(),
-            'check_out'    => now()->addDays(2)->toDateString(),
+            'check_in' => now()->addDays(5)->toDateString(),
+            'check_out' => now()->addDays(2)->toDateString(),
         ]))->assertSessionHasErrors(['check_out']);
     }
 
     public function test_absurd_birthdate_is_rejected(): void
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Date',
-            'slug'                    => Str::slug('Hotel Date '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Date',
+            'slug' => Str::slug('Hotel Date '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         $admin = \App\Models\User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
         // Issue #161 : 01/01/0001 doit être refusé
         $this->actingAs($admin)->post(route('transaction.reservation.storeCustomer'), [
-            'name'      => 'Client Antique',
-            'email'     => 'antique@test.test',
-            'phone'     => '+229 00 00 00 00',
-            'gender'    => 'Male',
+            'name' => 'Client Antique',
+            'email' => 'antique@test.test',
+            'phone' => '+229 00 00 00 00',
+            'gender' => 'Male',
             'birthdate' => '0001-01-01',
         ])->assertSessionHasErrors('birthdate');
 
         // Date future refusée aussi
         $this->actingAs($admin)->post(route('transaction.reservation.storeCustomer'), [
-            'name'      => 'Client Futur',
-            'email'     => 'futur@test.test',
-            'phone'     => '+229 00 00 00 00',
-            'gender'    => 'Male',
+            'name' => 'Client Futur',
+            'email' => 'futur@test.test',
+            'phone' => '+229 00 00 00 00',
+            'gender' => 'Male',
             'birthdate' => now()->addYear()->toDateString(),
         ])->assertSessionHasErrors('birthdate');
 
@@ -113,8 +113,8 @@ class CustomerCreationTest extends TestCase
     public function test_customer_created_without_optional_fields_and_gender_other(): void
     {
         $hotel = Hotel::create([
-            'name'      => 'Hotel Client',
-            'slug'      => Str::slug('Hotel Client '.Str::random(4)),
+            'name' => 'Hotel Client',
+            'slug' => Str::slug('Hotel Client '.Str::random(4)),
             'is_active' => true,
         ]);
 
@@ -122,18 +122,18 @@ class CustomerCreationTest extends TestCase
 
         // Client "de passage" : pas d'adresse, ni métier, ni date de naissance, genre "Other"
         $customer = Customer::create([
-            'name'      => 'Client Passage',
-            'email'     => 'passage@test.test',
-            'phone'     => '+229 00 00 00 00',
-            'gender'    => 'Other',
-            'address'   => null,
-            'job'       => null,
+            'name' => 'Client Passage',
+            'email' => 'passage@test.test',
+            'phone' => '+229 00 00 00 00',
+            'gender' => 'Other',
+            'address' => null,
+            'job' => null,
             'birthdate' => null,
         ]);
 
         $this->assertDatabaseHas('customers', [
-            'id'       => $customer->id,
-            'gender'   => 'Other',
+            'id' => $customer->id,
+            'gender' => 'Other',
             'hotel_id' => $hotel->id,
         ]);
         $this->assertNull($customer->fresh()->address);

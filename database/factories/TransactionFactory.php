@@ -14,14 +14,14 @@ class TransactionFactory extends Factory
     {
         // Lightweight defaults — no sub-factories so make() never touches the DB.
         return [
-            'user_id'      => 1,
-            'customer_id'  => 1,
-            'room_id'      => 1,
-            'check_in'     => now()->addDays(1)->format('Y-m-d'),
-            'check_out'    => now()->addDays(3)->format('Y-m-d'),
-            'status'       => TransactionStatus::Reservation->value,
+            'user_id' => 1,
+            'customer_id' => 1,
+            'room_id' => 1,
+            'check_in' => now()->addDays(1)->format('Y-m-d'),
+            'check_out' => now()->addDays(3)->format('Y-m-d'),
+            'status' => TransactionStatus::Reservation->value,
             'person_count' => 1,
-            'total_price'  => 50000,
+            'total_price' => 50000,
         ];
     }
 

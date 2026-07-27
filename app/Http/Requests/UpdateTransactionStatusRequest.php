@@ -32,8 +32,8 @@ class UpdateTransactionStatusRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'status.required'        => 'Le statut est requis.',
-            'status.in'              => 'Le statut sélectionné est invalide.',
+            'status.required' => 'Le statut est requis.',
+            'status.in' => 'Le statut sélectionné est invalide.',
             'cancel_reason.required' => 'Une raison est obligatoire pour l\'annulation.',
         ];
     }

@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Chambres à Nettoyer')
+@section('title', __('housekeeping.toclean.title'))
 
 @section('content')
 <style>
@@ -451,7 +451,7 @@
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('housekeeping.index') }}">Housekeeping</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">À nettoyer</span>
+        <span class="current">{{ __('housekeeping.toclean.breadcrumb_to_clean') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -459,16 +459,16 @@
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-broom"></i></span>
-                <h1>Chambres à <em>nettoyer</em></h1>
+                <h1>{!! __('housekeeping.toclean.header') !!}</h1>
             </div>
-            <p class="header-subtitle">Liste complète des chambres nécessitant un nettoyage</p>
+            <p class="header-subtitle">{{ __('housekeeping.toclean.header_desc') }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('housekeeping.index') }}" class="btn btn-gray">
-                <i class="fas fa-arrow-left"></i> Retour
+                <i class="fas fa-arrow-left"></i> {{ __('housekeeping.toclean.btn_back') }}
             </a>
             <a href="{{ route('housekeeping.mobile') }}" class="btn btn-green">
-                <i class="fas fa-mobile-alt"></i> Vue Mobile
+                <i class="fas fa-mobile-alt"></i> {{ __('housekeeping.toclean.btn_mobile') }}
             </a>
         </div>
     </div>
@@ -477,7 +477,7 @@
     <div class="stats-grid anim-3">
         <div class="stat-card">
             <div class="stat-left">
-                <h6>À nettoyer</h6>
+                <h6>{{ __('housekeeping.toclean.stat_to_clean') }}</h6>
                 <h3>{{ $stats['total_to_clean'] }}</h3>
                 <small><i class="fas fa-clock"></i> {{ now()->format('H:i') }}</small>
             </div>
@@ -485,17 +485,17 @@
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Sales</h6>
+                <h6>{{ __('housekeeping.toclean.stat_dirty') }}</h6>
                 <h3>{{ $stats['dirty'] }}</h3>
-                <small>statut sale</small>
+                <small>{{ __('housekeeping.toclean.stat_dirty_status') }}</small>
             </div>
             <div class="stat-icon orange"><i class="fas fa-exclamation-triangle"></i></div>
         </div>
         <div class="stat-card">
             <div class="stat-left">
-                <h6>Départs</h6>
+                <h6>{{ __('housekeeping.toclean.stat_departures') }}</h6>
                 <h3>{{ $stats['departing_today'] }}</h3>
-                <small>aujourd'hui</small>
+                <small>{{ __('housekeeping.toclean.stat_today') }}</small>
             </div>
             <div class="stat-icon blue"><i class="fas fa-sign-out-alt"></i></div>
         </div>
@@ -504,7 +504,7 @@
     {{-- Tableau --}}
     <div class="card">
         <div class="card-header red">
-            <div><i class="fas fa-list"></i> Liste des chambres à nettoyer</div>
+            <div><i class="fas fa-list"></i> {!! __('housekeeping.toclean.table_title') !!}</div>
             <span class="badge">{{ $rooms->count() }} chambres</span>
         </div>
         <div class="card-body">
@@ -513,13 +513,13 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Chambre</th>
-                                <th>Type</th>
-                                <th>Statut</th>
-                                <th>Client</th>
-                                <th>Départ</th>
-                                <th>Dernier nettoyage</th>
-                                <th class="text-end">Actions</th>
+                                <th>{{ __('housekeeping.toclean.th_room') }}</th>
+                                <th>{{ __('housekeeping.toclean.th_type') }}</th>
+                                <th>{{ __('housekeeping.toclean.th_status') }}</th>
+                                <th>{{ __('housekeeping.toclean.th_guest') }}</th>
+                                <th>{{ __('housekeeping.toclean.th_departure') }}</th>
+                                <th>{{ __('housekeeping.toclean.th_last_cleaned') }}</th>
+                                <th class="text-end">{{ __('housekeeping.toclean.th_actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -530,18 +530,18 @@
                                         <div class="room-icon"><i class="fas fa-door-closed"></i></div>
                                         <div>
                                             <strong>{{ $room->number }}</strong>
-                                            <small class="d-block text-muted">Étage {{ substr($room->number,0,1) }}</small>
+                                            <small class="d-block text-muted">{{ __('housekeeping.toclean.floor') }} {{ substr($room->number,0,1) }}</small>
                                         </div>
                                     </div>
                                 </td>
                                 <td><span class="badge badge-gray">{{ $room->type->name ?? 'Standard' }}</span></td>
                                 <td>
                                     @if($room->room_status_id == 3)
-                                        <span class="badge badge-red"><i class="fas fa-broom"></i> À nettoyer</span>
+                                        <span class="badge badge-red"><i class="fas fa-broom"></i> {{ __('housekeeping.toclean.status_to_clean') }}</span>
                                     @elseif($room->activeTransactions->count() > 0)
-                                        <span class="badge badge-blue"><i class="fas fa-users"></i> Occupée</span>
+                                        <span class="badge badge-blue"><i class="fas fa-users"></i> {{ __('housekeeping.toclean.status_occupied') }}</span>
                                     @else
-                                        <span class="badge badge-orange"><i class="fas fa-question"></i> Inconnu</span>
+                                        <span class="badge badge-orange"><i class="fas fa-question"></i> {{ __('housekeeping.toclean.status_unknown') }}</span>
                                     @endif
                                 </td>
                                 <td>
@@ -550,7 +550,7 @@
                                             <i class="fas fa-user text-muted me-1"></i>{{ $t->customer->name ?? 'Client' }}
                                         @endforeach
                                     @else
-                                        <span class="text-muted">Vacante</span>
+                                        <span class="text-muted">{{ __('housekeeping.toclean.vacant') }}</span>
                                     @endif
                                 </td>
                                 <td>
@@ -569,24 +569,24 @@
                                     @if($room->last_cleaned_at)
                                         <span class="text-muted">{{ $room->last_cleaned_at->format('d/m H:i') }}</span>
                                     @else
-                                        <span class="badge badge-red"><i class="fas fa-exclamation-circle"></i> Jamais</span>
+                                        <span class="badge badge-red"><i class="fas fa-exclamation-circle"></i> {{ __('housekeeping.toclean.never') }}</span>
                                     @endif
                                 </td>
                                 <td class="text-end">
                                     <div class="d-flex gap-1 justify-content-end">
                                         <form action="{{ route('housekeeping.start-cleaning', $room->id) }}" method="POST">
                                             @csrf
-                                            <button class="btn btn-red btn-sm"><i class="fas fa-broom"></i> Démarrer</button>
+                                            <button class="btn btn-red btn-sm"><i class="fas fa-broom"></i> {{ __('housekeeping.toclean.btn_start') }}</button>
                                         </form>
                                         <div class="dropdown">
                                             <button class="btn btn-gray btn-sm" data-bs-toggle="dropdown"><i class="fas fa-ellipsis-v"></i></button>
                                             <ul class="dropdown-menu dropdown-menu-end">
-                                                <li><a class="dropdown-item" href="{{ route('room.show', $room->id) }}"><i class="fas fa-eye"></i> Détails</a></li>
-                                                <li><a class="dropdown-item" href="{{ route('housekeeping.maintenance-form', $room->id) }}"><i class="fas fa-tools"></i> Maintenance</a></li>
+                                                <li><a class="dropdown-item" href="{{ route('room.show', $room->id) }}"><i class="fas fa-eye"></i> {{ __('housekeeping.toclean.menu_details') }}</a></li>
+                                                <li><a class="dropdown-item" href="{{ route('housekeeping.maintenance-form', $room->id) }}"><i class="fas fa-tools"></i> {{ __('housekeeping.toclean.menu_maintenance') }}</a></li>
                                                 <li>
                                                     <form action="{{ route('housekeeping.mark-inspection', $room->id) }}" method="POST">
                                                         @csrf
-                                                        <button class="dropdown-item"><i class="fas fa-clipboard-check"></i> Inspection</button>
+                                                        <button class="dropdown-item"><i class="fas fa-clipboard-check"></i> {{ __('housekeeping.toclean.menu_inspection') }}</button>
                                                     </form>
                                                 </li>
                                             </ul>
@@ -601,8 +601,8 @@
             @else
                 <div class="empty-state">
                     <div class="empty-icon"><i class="fas fa-check-circle"></i></div>
-                    <h4>Excellent travail !</h4>
-                    <p>Toutes les chambres sont propres</p>
+                    <h4>{{ __('housekeeping.toclean.empty_title') }}</h4>
+                    <p>{{ __('housekeeping.toclean.empty_desc') }}</p>
                     <a href="{{ route('housekeeping.index') }}" class="btn btn-green">Retour</a>
                 </div>
             @endif
@@ -610,8 +610,8 @@
         @if($rooms->count() > 0)
         <div class="card-footer">
             <div class="d-flex justify-content-between align-items-center">
-                <small class="text-muted"><i class="fas fa-info-circle"></i> Cliquez sur Démarrer pour commencer</small>
-                <button class="btn btn-gray btn-sm"><i class="fas fa-print"></i> Imprimer</button>
+                <small class="text-muted"><i class="fas fa-info-circle"></i> {{ __('housekeeping.toclean.footer_hint') }}</small>
+                <button class="btn btn-gray btn-sm"><i class="fas fa-print"></i> {{ __('housekeeping.toclean.btn_print') }}</button>
             </div>
         </div>
         @endif
@@ -622,31 +622,31 @@
         <div class="col-md-6">
             <div class="instruction-card">
                 <div class="instruction-header">
-                    <i class="fas fa-info-circle"></i> Procédure de nettoyage
+                    <i class="fas fa-info-circle"></i> {!! __('housekeeping.toclean.procedure_title') !!}
                 </div>
                 <ul class="instruction-list">
-                    <li>Vérifier le matériel de nettoyage</li>
-                    <li>Scanner le QR code de la chambre</li>
-                    <li>Suivre le protocole standard</li>
-                    <li>Signaler tout problème</li>
-                    <li>Marquer comme nettoyée</li>
+                    <li>{{ __('housekeeping.toclean.procedure_step1') }}</li>
+                    <li>{{ __('housekeeping.toclean.procedure_step2') }}</li>
+                    <li>{{ __('housekeeping.toclean.procedure_step3') }}</li>
+                    <li>{{ __('housekeeping.toclean.procedure_step4') }}</li>
+                    <li>{{ __('housekeeping.toclean.procedure_step5') }}</li>
                 </ul>
             </div>
         </div>
         <div class="col-md-6">
             <div class="instruction-card">
                 <div class="instruction-header">
-                    <i class="fas fa-exclamation-triangle"></i> Chambres prioritaires
+                    <i class="fas fa-exclamation-triangle"></i> {!! __('housekeeping.toclean.priority_title') !!}
                 </div>
                 <div class="alert alert-orange">
                     <div class="d-flex gap-3">
                         <i class="fas fa-star fa-2x"></i>
                         <div>
-                            <h6 class="fw-semibold">Ordre de priorité</h6>
+                            <h6 class="fw-semibold">{{ __('housekeeping.toclean.priority_order') }}</h6>
                             <ol class="mb-0">
-                                <li>Départs matinaux</li>
-                                <li>Chambres sales</li>
-                                <li>Arrivées prévues</li>
+                                <li>{{ __('housekeeping.toclean.priority_step1') }}</li>
+                                <li>{{ __('housekeeping.toclean.priority_step2') }}</li>
+                                <li>{{ __('housekeeping.toclean.priority_step3') }}</li>
                             </ol>
                         </div>
                     </div>
@@ -663,12 +663,12 @@ document.querySelectorAll('form[action*="start-cleaning"]').forEach(f => {
         e.preventDefault();
         const form = f;
         Swal.fire({
-            title: 'Démarrer le nettoyage ?',
-            text: 'Confirmer la prise en charge de cette chambre.',
+            title: @json(__('housekeeping.toclean.swal_title')),
+            text: @json(__('housekeeping.toclean.swal_text')),
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: '<i class="fas fa-broom me-1"></i> Oui, démarrer',
-            cancelButtonText: 'Annuler',
+            confirmButtonText: '<i class="fas fa-broom me-1"></i> ' + @json(__('housekeeping.toclean.swal_confirm')),
+            cancelButtonText: @json(__('housekeeping.toclean.swal_cancel')),
             confirmButtonColor: '#1e6b2e',
             reverseButtons: true
         }).then(r => { if (r.isConfirmed) form.submit(); });

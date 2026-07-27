@@ -11,6 +11,7 @@ class RestaurantCategoryController extends Controller
     public function index()
     {
         $categories = Category::withCount('menus')->orderBy('name')->get();
+
         return view('restaurant.categories.index', compact('categories'));
     }
 
@@ -31,9 +32,9 @@ class RestaurantCategoryController extends Controller
     public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
-        
+
         $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,' . $id,
+            'name' => 'required|string|max:255|unique:categories,name,'.$id,
         ]);
 
         $category->update([

@@ -21,7 +21,7 @@ class CustomerSeeder extends Seeder
                 'job' => 'Architecte',
                 'address' => 'Avenue Steinmetz, Cotonou',
                 'nationality' => 'Béninoise',
-                'avatar' => 'https://i.pravatar.cc/150?u=jean'
+                'avatar' => 'https://i.pravatar.cc/150?u=jean',
             ],
             [
                 'name' => 'Marie Akpotrossou',
@@ -31,7 +31,7 @@ class CustomerSeeder extends Seeder
                 'job' => 'Médecin',
                 'address' => 'quartier Haie Vive, Cotonou',
                 'nationality' => 'Béninoise',
-                'avatar' => 'https://i.pravatar.cc/150?u=marie'
+                'avatar' => 'https://i.pravatar.cc/150?u=marie',
             ],
             [
                 'name' => 'Marc Keller',
@@ -41,7 +41,7 @@ class CustomerSeeder extends Seeder
                 'job' => 'Consultant IT',
                 'address' => 'Rue 120, Abomey-Calavi',
                 'nationality' => 'Allemande',
-                'avatar' => 'https://i.pravatar.cc/150?u=marc'
+                'avatar' => 'https://i.pravatar.cc/150?u=marc',
             ],
             [
                 'name' => 'Sophie Lawson',
@@ -51,7 +51,7 @@ class CustomerSeeder extends Seeder
                 'job' => 'Designer',
                 'address' => 'Zongo, Parakou',
                 'nationality' => 'Togolaise',
-                'avatar' => 'https://i.pravatar.cc/150?u=sophie'
+                'avatar' => 'https://i.pravatar.cc/150?u=sophie',
             ],
             [
                 'name' => 'Paul Yao',
@@ -61,7 +61,7 @@ class CustomerSeeder extends Seeder
                 'job' => 'Directeur Commercial',
                 'address' => 'Cocody, Abidjan',
                 'nationality' => 'Ivoirienne',
-                'avatar' => 'https://i.pravatar.cc/150?u=paul'
+                'avatar' => 'https://i.pravatar.cc/150?u=paul',
             ],
         ];
 

@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\TransactionExtraController;
 use App\Http\Controllers\AuthorizationController;
 use App\Http\Controllers\AvailabilityController;
 use App\Http\Controllers\CashierSessionController;
@@ -19,14 +18,15 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Platform\HotelController as PlatformHotelController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RestaurantCategoryController;
 use App\Http\Controllers\RestaurantController;
 use App\Http\Controllers\RoomController;
 use App\Http\Controllers\RoomStatusController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\TransactionExtraController;
 use App\Http\Controllers\TransactionRoomReservationController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\RestaurantCategoryController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -60,6 +60,16 @@ Route::get('/', function () {
 Route::view('/v1', 'landing')->name('landing.v1');
 // Guide d'utilisation / documentation (accessible à tous)
 Route::view('/guide', 'guide')->name('guide');
+
+Route::get('/lang/{locale}', function (string $locale) {
+    if (! in_array($locale, ['fr', 'en'])) {
+        abort(400);
+    }
+    app()->setLocale($locale);
+    session(['locale' => $locale]);
+
+    return redirect()->back();
+})->name('lang.switch');
 
 // ==================== VITRINE PUBLIQUE PAR HÔTEL (multi-pages) ====================
 Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(function () {
@@ -96,10 +106,8 @@ Route::post('/reservation/submit', [FrontendController::class, 'submitReservatio
 Route::post('/restaurant/orders', [RestaurantController::class, 'storeOrder'])->name('restaurant.orders.store');
 
 // Vérifier si une chambre a un client actif (public)
-    Route::get('/api/restaurant/check-room', [RestaurantController::class, 'checkRoomGuest'])->name('restaurant.check-room');
-    Route::post('/restaurant/menus/{id}/toggle-status', [RestaurantController::class, 'toggleStatus'])->name('restaurant.menus.toggle-status');
-
-
+Route::get('/api/restaurant/check-room', [RestaurantController::class, 'checkRoomGuest'])->name('restaurant.check-room');
+Route::post('/restaurant/menus/{id}/toggle-status', [RestaurantController::class, 'toggleStatus'])->name('restaurant.menus.toggle-status');
 
 Route::get('/api/available-rooms', [FrontendController::class, 'availableRooms'])->name('api.available-rooms');
 
@@ -171,7 +179,7 @@ Route::get('/logout-now', function () {
         \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('laravel_session'));
         \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('XSRF-TOKEN'));
 
-        return redirect('/login')->with('success', '✅ Déconnexion réussie. Au revoir '.$userName.' !');
+        return redirect('/login')->with('success', __('flash.logout_success_route').' '.$userName.' !');
 
     } catch (\Exception $e) {
         return redirect('/login')->with('error', 'Erreur de déconnexion: '.$e->getMessage());
@@ -248,8 +256,8 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
         Route::get('/{customer}/{room}/{from}/{to}/confirmation', [TransactionRoomReservationController::class, 'confirmation'])->name('confirmation');
         Route::post('/{customer}/{room}/payDownPayment', [TransactionRoomReservationController::class, 'payDownPayment'])->name('payDownPayment');
         Route::get('/customer/{customer}/reservations', [TransactionRoomReservationController::class, 'showCustomerReservations'])->name('customerReservations');
-         Route::get('/api/checkouts-today', [TransactionRoomReservationController::class, 'getRoomsBeingCheckedOutToday'])
-        ->name('api.checkouts-today');  
+        Route::get('/api/checkouts-today', [TransactionRoomReservationController::class, 'getRoomsBeingCheckedOutToday'])
+            ->name('api.checkouts-today');
         Route::post('/api/check-room-availability', [TransactionRoomReservationController::class, 'checkRoomAvailabilityToday'])
             ->name('api.check-room-availability');
         Route::post('/create-waiting', [TransactionRoomReservationController::class, 'createWaitingReservation'])
@@ -307,15 +315,15 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
 
         // Routes de lecture pour tous (admins et réceptionnistes)
         Route::get('/', [RoomController::class, 'index'])->name('index');
-        
-         Route::post('/{room}/mark-dirty', [RoomController::class, 'markAsDirty'])
-        ->name('mark-dirty')
-        ->middleware('checkrole:Super,Admin,Housekeeping');
-        
+
+        Route::post('/{room}/mark-dirty', [RoomController::class, 'markAsDirty'])
+            ->name('mark-dirty')
+            ->middleware('checkrole:Super,Admin,Housekeeping');
+
         Route::post('/{room}/mark-clean', [RoomController::class, 'markAsClean'])
-        ->name('mark-clean')
-        ->middleware('checkrole:Super,Admin,Housekeeping');
-        
+            ->name('mark-clean')
+            ->middleware('checkrole:Super,Admin,Housekeeping');
+
         // IMPORTANT: La route show DOIT être définie EN DERNIER
         Route::get('/{room}', [RoomController::class, 'show'])->name('show');
     });
@@ -334,22 +342,22 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
         Route::get('/export/{type}', [TransactionController::class, 'export'])->name('export')
             ->middleware('checkrole:Super,Admin');
 
-          // Groupe pour les routes avec paramètre {transaction} et segments supplémentaires
-    Route::prefix('{transaction}')->group(function () {
-        // === ROUTES LATE CHECKOUT ET EARLY CHECKOUT ===
-        Route::post('/late-checkout', [TransactionController::class, 'lateCheckout'])
-            ->name('late-checkout')
-            ->middleware('checkrole:Super,Admin,Receptionist');
-            
-        // ✅ AJOUTEZ ICI LA ROUTE EARLY CHECKOUT
-        Route::post('/early-checkout', [TransactionController::class, 'earlyCheckout'])
-            ->name('early-checkout')
-            ->middleware('checkrole:Super,Admin,Receptionist');
-            
-        // ✅ AJOUTEZ ICI LA ROUTE POUR VÉRIFIER LA POSSIBILITÉ D'EARLY CHECKOUT
-        Route::get('/check-early-checkout', [TransactionController::class, 'checkEarlyCheckoutPossibility'])
-            ->name('check-early-checkout')
-            ->middleware('checkrole:Super,Admin,Receptionist');
+        // Groupe pour les routes avec paramètre {transaction} et segments supplémentaires
+        Route::prefix('{transaction}')->group(function () {
+            // === ROUTES LATE CHECKOUT ET EARLY CHECKOUT ===
+            Route::post('/late-checkout', [TransactionController::class, 'lateCheckout'])
+                ->name('late-checkout')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+
+            // ✅ AJOUTEZ ICI LA ROUTE EARLY CHECKOUT
+            Route::post('/early-checkout', [TransactionController::class, 'earlyCheckout'])
+                ->name('early-checkout')
+                ->middleware('checkrole:Super,Admin,Receptionist');
+
+            // ✅ AJOUTEZ ICI LA ROUTE POUR VÉRIFIER LA POSSIBILITÉ D'EARLY CHECKOUT
+            Route::get('/check-early-checkout', [TransactionController::class, 'checkEarlyCheckoutPossibility'])
+                ->name('check-early-checkout')
+                ->middleware('checkrole:Super,Admin,Receptionist');
 
             // Routes avec segments supplémentaires
             Route::get('/edit', [TransactionController::class, 'edit'])->name('edit')
@@ -387,11 +395,13 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
             Route::put('/', [TransactionController::class, 'update'])->name('update')
                 ->middleware('checkrole:Super,Admin,Receptionist');
 
-            // Actions critiques nécessitant autorisation
-            Route::middleware('checkrole:Super,Admin')->group(function () {
-                Route::delete('/', [TransactionController::class, 'destroy'])->name('destroy');
-                Route::delete('/cancel', [TransactionController::class, 'cancel'])->name('cancel');
-            });
+            // Annulation : tout le personnel de l'hôtel
+            Route::delete('/cancel', [TransactionController::class, 'cancel'])->name('cancel')
+                ->middleware('checkrole:Super,Admin,Receptionist,Cashier,Housekeeping,Servant,Cuisiner');
+
+            // Suppression : admin uniquement
+            Route::delete('/', [TransactionController::class, 'destroy'])->name('destroy')
+                ->middleware('checkrole:Super,Admin');
 
             // Restauration seulement pour admins
             Route::post('/restore', [TransactionController::class, 'restore'])->name('restore')
@@ -497,13 +507,13 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
     });
 });
 
-    // ==================== DASHBOARD (RESTEINT) ====================
-    Route::prefix('dashboard')->name('dashboard.')->middleware('checkrole:Super,Admin,Housekeeping,Receptionist')->group(function () {
-        Route::get('/', [DashboardController::class, 'index'])->name('index');
-        Route::get('/data', [DashboardController::class, 'getDashboardData'])->name('data');
-        Route::get('/stats', [DashboardController::class, 'updateStats'])->name('stats');
-        Route::get('/debug', [DashboardController::class, 'debug'])->name('debug');
-    });
+// ==================== DASHBOARD (RESTEINT) ====================
+Route::prefix('dashboard')->name('dashboard.')->middleware('checkrole:Super,Admin,Housekeeping,Receptionist')->group(function () {
+    Route::get('/', [DashboardController::class, 'index'])->name('index');
+    Route::get('/data', [DashboardController::class, 'getDashboardData'])->name('data');
+    Route::get('/stats', [DashboardController::class, 'updateStats'])->name('stats');
+    Route::get('/debug', [DashboardController::class, 'debug'])->name('debug');
+});
 
 // ==================== ROUTES POUR TOUS LES UTILISATEURS AUTHENTIFIÉS ====================
 Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant,Cuisiner']], function () {
@@ -516,9 +526,9 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
         if ($user->role === 'Servant' || $user->role === 'Cuisiner') {
             return redirect()->route('cashier.dashboard');
         }
+
         return redirect()->route('dashboard.index');
     })->name('home');
-
 
     // ==================== ACTIVITY LOG ====================
     Route::prefix('activity')->name('activity.')->group(function () {
@@ -648,33 +658,33 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
 
 // Toutes les routes checkin regroupées sous un même préfixe
 Route::prefix('checkin')->name('checkin.')->middleware(['auth'])->group(function () {
-    
+
     // Routes de lecture (GET) - Accessibles à plusieurs rôles
     Route::get('/', [CheckInController::class, 'index'])->name('index')
         ->middleware('checkrole:Super,Admin,Receptionist,Housekeeping');
-    
+
     Route::get('/search', [CheckInController::class, 'search'])->name('search')
         ->middleware('checkrole:Super,Admin,Receptionist,Housekeeping');
-    
+
     Route::get('/availability/check', [CheckInController::class, 'checkAvailability'])->name('availability')
         ->middleware('checkrole:Super,Admin,Receptionist,Housekeeping');
-    
+
     // ✅ ROUTE DIRECT CHECKIN (celle que vous cherchez)
     Route::get('/direct', [CheckInController::class, 'directCheckIn'])->name('direct')
         ->middleware('checkrole:Super,Admin,Receptionist');
-    
+
     // Route pour traiter le direct checkin
     Route::post('/process-direct-checkin', [CheckInController::class, 'processDirectCheckIn'])->name('process-direct-checkin')
         ->middleware('checkrole:Super,Admin,Receptionist');
-    
+
     // Route show avec paramètre
     Route::get('/{transaction}', [CheckInController::class, 'show'])->name('show')
         ->middleware('checkrole:Super,Admin,Receptionist,Housekeeping');
-    
+
     // Routes POST avec paramètre
     Route::post('/{transaction}', [CheckInController::class, 'store'])->name('store')
         ->middleware('checkrole:Super,Admin,Receptionist');
-    
+
     Route::post('/{transaction}/quick', [CheckInController::class, 'quickCheckIn'])->name('quick')
         ->middleware('checkrole:Super,Admin,Receptionist');
 });
@@ -692,30 +702,28 @@ Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'check
     Route::get('/to-clean', [HousekeepingController::class, 'toClean'])->name('to-clean');
     Route::get('/quick-list/{status}', [HousekeepingController::class, 'quickList'])->name('quick-list');
 
-
     // ✅ AJOUTER CES NOUVELLES ROUTES POUR VOIR LES CHECK-IN/OUT
     Route::get('/checkins', [HousekeepingController::class, 'viewCheckins'])->name('checkins')
         ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
-    
+
     Route::get('/checkouts', [HousekeepingController::class, 'viewCheckouts'])->name('checkouts')
         ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
-    
+
     Route::get('/today-schedule', [HousekeepingController::class, 'todaySchedule'])->name('today-schedule')
         ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
-    
+
     Route::get('/room/{room}/status', [HousekeepingController::class, 'roomStatus'])->name('room.status')
         ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
-    
+
     Route::get('/occupied-rooms', [HousekeepingController::class, 'occupiedRooms'])->name('occupied-rooms')
         ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
-    
+
     // Routes pour les statistiques en lecture seule
     Route::get('/stats/checkins-today', [HousekeepingController::class, 'checkinsToday'])->name('stats.checkins-today')
         ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
-    
+
     Route::get('/stats/checkouts-today', [HousekeepingController::class, 'checkoutsToday'])->name('stats.checkouts-today')
         ->middleware('checkrole:Super,Admin,Housekeeping,Receptionist');
-
 
     Route::post('/room/{room}/clean', [HousekeepingController::class, 'cleanRoom'])
         ->name('clean-room')
@@ -724,7 +732,6 @@ Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'check
     Route::post('/room/{room}/mark-cleaned', [HousekeepingController::class, 'markAsCleaned'])
         ->name('mark-cleaned')
         ->middleware('checkrole:Super,Admin,Housekeeping');
-        
 
     // Rapports et statistiques
     Route::get('/reports', [HousekeepingController::class, 'reports'])->name('reports');
@@ -785,7 +792,7 @@ Route::middleware(['auth', 'checkrole:Super,Admin,Housekeeping,Receptionist'])->
         $controller = new HousekeepingController;
         $count = $controller->autoMarkDirtyRooms();
 
-        return back()->with('success', "{$count} chambres marquées comme sales");
+        return back()->with('success', __('flash.rooms_marked_dirty', ['count' => $count]));
     })->name('housekeeping.test.auto-mark')
         ->middleware('checkrole:Super,Admin');
 });
@@ -800,6 +807,7 @@ Route::get('/admin', function () {
     if (auth()->user()->role === 'Customer') {
         return redirect()->route('transaction.myReservations');
     }
+
     return redirect()->route('dashboard.index');
 })->name('admin');
 
@@ -1041,7 +1049,7 @@ Route::get('/force-logout-all', function () {
     \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('laravel_session'));
     \Illuminate\Support\Facades\Cookie::queue(\Illuminate\Support\Facades\Cookie::forget('XSRF-TOKEN'));
 
-    return redirect('/login')->with('success', 'Déconnexion forcée réussie.');
+    return redirect('/login')->with('success', __('flash.logout_forced'));
 });
 
 // ==================== API POUR RECHERCHE DE CLIENTS ====================
@@ -1069,10 +1077,11 @@ Route::get('/storage/{path}', function (string $path) {
 Route::fallback(function () {
     if (auth()->check()) {
         if (auth()->user()->role === 'Customer') {
-            return redirect()->route('transaction.myReservations')->with('error', 'Page non trouvée.');
+            return redirect()->route('transaction.myReservations')->with('error', __('flash.page_not_found'));
         }
-        return redirect()->route('dashboard.index')->with('error', 'Page non trouvée.');
+
+        return redirect()->route('dashboard.index')->with('error', __('flash.page_not_found'));
     }
 
-    return redirect()->route('login.index')->with('error', 'Page non trouvée. Veuillez vous connecter.');
+    return redirect()->route('login.index')->with('error', __('flash.page_not_found_login'));
 });

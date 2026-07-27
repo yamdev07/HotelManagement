@@ -70,14 +70,14 @@ class CheckInController extends Controller
         // Vérifier si la réservation peut être checkée-in
         if ($transaction->status !== 'reservation') {
             return redirect()->route('checkin.index')
-                ->with('error', 'Cette réservation ne peut pas être checkée-in. Statut: '.$transaction->status_label);
+                ->with('error', __('flash.checkin_not_allowed', ['status' => $transaction->status_label]));
         }
 
         // Vérifier si la chambre permet le check-in
         $room = $transaction->room;
         $canCheckIn = $room->canCheckIn();
         $checkInBlockedReason = $canCheckIn ? null : $room->getCheckInErrorMessage();
-        
+
         // Vérifier disponibilité de la chambre (conflits de dates)
         $isRoomAvailable = $room->isAvailableForPeriod(
             $transaction->check_in,
@@ -96,14 +96,14 @@ class CheckInController extends Controller
 
         // Chambres alternatives si besoin
         $alternativeRooms = [];
-        if (!$isRoomAvailable && $room->type_id) {
+        if (! $isRoomAvailable && $room->type_id) {
             $alternativeRooms = Room::where('type_id', $room->type_id)
                 ->where('id', '!=', $room->id)
                 ->whereIn('room_status_id', [Room::STATUS_AVAILABLE, Room::STATUS_DIRTY]) // Inclut les sales
                 ->get()
                 ->filter(function ($altRoom) use ($transaction) {
                     return $altRoom->isAvailableForPeriod(
-                        $transaction->check_in, 
+                        $transaction->check_in,
                         $transaction->check_out
                     ) && $altRoom->isAvailableForBooking(); // Vérifie si réservable
                 })
@@ -149,7 +149,7 @@ class CheckInController extends Controller
     public function store(Request $request, Transaction $transaction)
     {
         // Vérifier que le check-in est possible AVANT toute validation
-        if (!$transaction->room->canCheckIn()) {
+        if (! $transaction->room->canCheckIn()) {
             return redirect()->route('checkin.show', $transaction)
                 ->with('error', $transaction->room->getCheckInErrorMessage());
         }
@@ -172,14 +172,14 @@ class CheckInController extends Controller
             $newRoom = Room::findOrFail($request->new_room_id);
 
             // Vérifier que la nouvelle chambre permet le check-in
-            if (!$newRoom->canCheckIn()) {
-                return back()->with('error', 'La chambre sélectionnée ne permet pas le check-in : ' . $newRoom->getCheckInErrorMessage())
+            if (! $newRoom->canCheckIn()) {
+                return back()->with('error', __('flash.checkin_room_error'))
                     ->withInput();
             }
 
             // Vérifier disponibilité
-            if (!$newRoom->isAvailableForPeriod($transaction->check_in, $transaction->check_out, $transaction->id)) {
-                return back()->with('error', 'La chambre sélectionnée n\'est pas disponible pour cette période')
+            if (! $newRoom->isAvailableForPeriod($transaction->check_in, $transaction->check_out, $transaction->id)) {
+                return back()->with('error', __('flash.checkin_room_unavailable'))
                     ->withInput();
             }
 
@@ -189,11 +189,11 @@ class CheckInController extends Controller
             $priceDifference = $newPrice - $oldPrice;
 
             // Si le prix est différent, demander confirmation
-            if ($priceDifference != 0 && !$request->confirmed_price_change) {
+            if ($priceDifference != 0 && ! $request->confirmed_price_change) {
                 return back()->with('warning',
-                    'Changement de prix détecté. Ancien prix: ' . number_format($oldPrice, 0, ',', ' ') . ' CFA, ' .
-                    'Nouveau prix: ' . number_format($newPrice, 0, ',', ' ') . ' CFA. ' .
-                    'Différence: ' . ($priceDifference > 0 ? '+' : '') . number_format($priceDifference, 0, ',', ' ') . ' CFA. ' .
+                    'Changement de prix détecté. Ancien prix: '.number_format($oldPrice, 0, ',', ' ').' CFA, '.
+                    'Nouveau prix: '.number_format($newPrice, 0, ',', ' ').' CFA. '.
+                    'Différence: '.($priceDifference > 0 ? '+' : '').number_format($priceDifference, 0, ',', ' ').' CFA. '.
                     'Veuillez confirmer le changement de prix.')
                     ->withInput()
                     ->with('show_price_confirmation', true);
@@ -205,7 +205,7 @@ class CheckInController extends Controller
         try {
             // Sauvegarder l'ancienne chambre avant modification
             $oldRoomId = $transaction->room_id;
-            
+
             // Si changement de chambre
             if ($request->change_room && $request->new_room_id) {
                 $newRoom = Room::findOrFail($request->new_room_id);
@@ -237,14 +237,14 @@ class CheckInController extends Controller
             // Effectuer le check-in
             $result = $transaction->checkIn(auth()->id(), $checkInData);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 throw new \Exception($result['error']);
             }
 
             // Mettre à jour le statut de la nouvelle chambre
             $transaction->room->update([
                 'room_status_id' => Room::STATUS_OCCUPIED,
-                'last_cleaned_at' => $transaction->room->room_status_id == Room::STATUS_DIRTY ? now() : $transaction->room->last_cleaned_at
+                'last_cleaned_at' => $transaction->room->room_status_id == Room::STATUS_DIRTY ? now() : $transaction->room->last_cleaned_at,
             ]);
 
             DB::commit();
@@ -271,13 +271,13 @@ class CheckInController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Erreur check-in: ' . $e->getMessage(), [
+            \Log::error('Erreur check-in: '.$e->getMessage(), [
                 'transaction_id' => $transaction->id,
                 'user_id' => auth()->id(),
                 'request' => $request->all(),
             ]);
 
-            return back()->with('error', 'Erreur lors du check-in: ' . $e->getMessage())
+            return back()->with('error', __('flash.checkin_error'))
                 ->withInput();
         }
     }
@@ -289,18 +289,18 @@ class CheckInController extends Controller
     {
         // Vérifier si la réservation peut être checkée-in
         if ($transaction->status !== 'reservation') {
-            return back()->with('error', 'Cette réservation ne peut pas être checkée-in. Statut: ' . $transaction->status_label);
+            return back()->with('error', __('flash.checkin_not_allowed', ['status' => $transaction->status_label]));
         }
 
         // Vérifier que la chambre permet le check-in
-        if (!$transaction->room->canCheckIn()) {
+        if (! $transaction->room->canCheckIn()) {
             return redirect()->route('checkin.show', $transaction)
                 ->with('error', $transaction->room->getCheckInErrorMessage());
         }
 
         // Vérifier disponibilité de la chambre
-        if (!$transaction->room->isAvailableForPeriod($transaction->check_in, $transaction->check_out, $transaction->id)) {
-            return back()->with('error', 'La chambre n\'est pas disponible. Veuillez utiliser le check-in normal pour sélectionner une autre chambre.');
+        if (! $transaction->room->isAvailableForPeriod($transaction->check_in, $transaction->check_out, $transaction->id)) {
+            return back()->with('error', __('flash.checkin_direct_room_unavailable'));
         }
 
         DB::beginTransaction();
@@ -311,7 +311,7 @@ class CheckInController extends Controller
                 'children' => 0,
             ]);
 
-            if (!$result['success']) {
+            if (! $result['success']) {
                 throw new \Exception($result['error']);
             }
 
@@ -344,12 +344,12 @@ class CheckInController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('Erreur check-in rapide: ' . $e->getMessage(), [
+            \Log::error('Erreur check-in rapide: '.$e->getMessage(), [
                 'transaction_id' => $transaction->id,
                 'user_id' => auth()->id(),
             ]);
 
-            return back()->with('error', 'Erreur lors du check-in rapide: ' . $e->getMessage());
+            return back()->with('error', __('flash.checkin_direct_error'));
         }
     }
 
@@ -431,6 +431,7 @@ class CheckInController extends Controller
             $transaction->check_in_blocked_reason = $transaction->can_check_in ? null : $transaction->room->getCheckInErrorMessage();
             $transaction->room_status_label = $transaction->room->status_label;
             $transaction->room_status_color = $transaction->room->status_color;
+
             return $transaction;
         });
 
@@ -443,7 +444,7 @@ class CheckInController extends Controller
         ));
     }
 
-   /**
+    /**
      * Check-in direct (sans réservation)
      */
     public function directCheckIn()
@@ -462,86 +463,87 @@ class CheckInController extends Controller
 
         return view('checkin.direct', compact('availableRooms', 'idTypes'));
     }
-/**
- * Processus de check-in direct
- */
-public function processDirectCheckIn(Request $request)
-{
-    \Log::info('🚀 processDirectCheckIn appelée', [
-        'method' => $request->method(),
-        'url' => $request->fullUrl(),
-        'all_data' => $request->all()
-    ]);
 
-    $request->validate([
-        'room_id' => 'required|exists:rooms,id',
-        'check_in' => 'required|date',
-        'check_out' => 'required|date|after:check_in',
-        'customer_name' => 'required|string|max:255',
-        'customer_phone' => 'required|string|max:50',
-        'customer_email' => 'nullable|email|max:255',
-        'person_count' => 'required|integer|min:1|max:10',
-        'notes' => 'nullable|string|max:500',
-        // On garde ces champs mais on ne les utilise pas dans la table
-        'id_type' => 'nullable|string',
-        'id_number' => 'nullable|string|max:50',
-        'nationality' => 'nullable|string|max:50',
-    ]);
-
-    DB::beginTransaction();
-
-    try {
-        // Vérifier disponibilité de la chambre
-        $room = Room::findOrFail($request->room_id);
-        
-        // Vérifier que la chambre peut être utilisée pour check-in
-        if (!$room->canCheckIn()) {
-            throw new \Exception($room->getCheckInErrorMessage());
-        }
-        
-        if (!$room->isAvailableForPeriod($request->check_in, $request->check_out)) {
-            throw new \Exception('La chambre n\'est pas disponible pour cette période.');
-        }
-
-        // Créer le client
-        $customer = Customer::create([
-            'name' => $request->customer_name,
-            'email' => $request->customer_email,
-            'phone' => $request->customer_phone,
-            'address' => 'À renseigner',
-            'gender' => $request->gender ?? 'male',
-            'job' => 'Non spécifié',
-            'birthdate' => now()->subYears(30)->format('Y-m-d'),
-            'user_id' => auth()->id(),
+    /**
+     * Processus de check-in direct
+     */
+    public function processDirectCheckIn(Request $request)
+    {
+        \Log::info('🚀 processDirectCheckIn appelée', [
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+            'all_data' => $request->all(),
         ]);
 
-        // Calculer le nombre de nuits et le prix total
-        $checkIn = Carbon::parse($request->check_in);
-        $checkOut = Carbon::parse($request->check_out);
-        $nights = $checkIn->diffInDays($checkOut);
-        $totalPrice = $room->price * $nights;
-
-        // Créer la transaction SANS les champs qui n'existent pas
-        $transaction = Transaction::create([
-            'customer_id' => $customer->id,
-            'room_id' => $room->id,
-            'check_in' => $checkIn,
-            'check_out' => $checkOut,
-            'total_price' => $totalPrice,
-            'person_count' => $request->person_count,
-            'status' => 'active',
-            'created_by' => auth()->id(),
-            'actual_check_in' => now(),
-            'checked_in_by' => auth()->id(),
-            'notes' => $request->notes,
+        $request->validate([
+            'room_id' => 'required|exists:rooms,id',
+            'check_in' => 'required|date',
+            'check_out' => 'required|date|after:check_in',
+            'customer_name' => 'required|string|max:255',
+            'customer_phone' => 'required|string|max:50',
+            'customer_email' => 'nullable|email|max:255',
+            'person_count' => 'required|integer|min:1|max:10',
+            'notes' => 'nullable|string|max:500',
+            // On garde ces champs mais on ne les utilise pas dans la table
+            'id_type' => 'nullable|string',
+            'id_number' => 'nullable|string|max:50',
+            'nationality' => 'nullable|string|max:50',
         ]);
 
-        // Mettre à jour le statut de la chambre
-        $room->update(['room_status_id' => Room::STATUS_OCCUPIED]);
+        DB::beginTransaction();
 
-        DB::commit();
+        try {
+            // Vérifier disponibilité de la chambre
+            $room = Room::findOrFail($request->room_id);
 
-        $message = '
+            // Vérifier que la chambre peut être utilisée pour check-in
+            if (! $room->canCheckIn()) {
+                throw new \Exception($room->getCheckInErrorMessage());
+            }
+
+            if (! $room->isAvailableForPeriod($request->check_in, $request->check_out)) {
+                throw new \Exception('La chambre n\'est pas disponible pour cette période.');
+            }
+
+            // Créer le client
+            $customer = Customer::create([
+                'name' => $request->customer_name,
+                'email' => $request->customer_email,
+                'phone' => $request->customer_phone,
+                'address' => 'À renseigner',
+                'gender' => $request->gender ?? 'male',
+                'job' => 'Non spécifié',
+                'birthdate' => now()->subYears(30)->format('Y-m-d'),
+                'user_id' => auth()->id(),
+            ]);
+
+            // Calculer le nombre de nuits et le prix total
+            $checkIn = Carbon::parse($request->check_in);
+            $checkOut = Carbon::parse($request->check_out);
+            $nights = $checkIn->diffInDays($checkOut);
+            $totalPrice = $room->price * $nights;
+
+            // Créer la transaction SANS les champs qui n'existent pas
+            $transaction = Transaction::create([
+                'customer_id' => $customer->id,
+                'room_id' => $room->id,
+                'check_in' => $checkIn,
+                'check_out' => $checkOut,
+                'total_price' => $totalPrice,
+                'person_count' => $request->person_count,
+                'status' => 'active',
+                'created_by' => auth()->id(),
+                'actual_check_in' => now(),
+                'checked_in_by' => auth()->id(),
+                'notes' => $request->notes,
+            ]);
+
+            // Mettre à jour le statut de la chambre
+            $room->update(['room_status_id' => Room::STATUS_OCCUPIED]);
+
+            DB::commit();
+
+            $message = '
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             <div class="d-flex align-items-start">
                 <div class="flex-shrink-0">
@@ -569,18 +571,19 @@ public function processDirectCheckIn(Request $request)
             </div>
         </div>';
 
-        return redirect()->route('checkin.index')
-            ->with('success', $message);
+            return redirect()->route('checkin.index')
+                ->with('success', $message);
 
-    } catch (\Exception $e) {
-        DB::rollBack();
-        
-        \Log::error('Erreur check-in direct: ' . $e->getMessage());
-        
-        return back()->with('error', 'Erreur lors du check-in direct: ' . $e->getMessage())
-            ->withInput();
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('Erreur check-in direct: '.$e->getMessage());
+
+            return back()->with('error', __('flash.checkin_direct_error2'))
+                ->withInput();
+        }
     }
-}
+
     /**
      * Vérifier disponibilité d'une chambre
      */
@@ -594,11 +597,11 @@ public function processDirectCheckIn(Request $request)
         ]);
 
         $room = Room::findOrFail($request->room_id);
-        
+
         // Vérifier si la chambre peut être checkée-in
         $canCheckIn = $room->canCheckIn();
         $needsCleaning = $room->room_status_id == Room::STATUS_DIRTY;
-        
+
         $isAvailable = $room->isAvailableForPeriod(
             $request->check_in,
             $request->check_out,
@@ -624,23 +627,23 @@ public function processDirectCheckIn(Request $request)
                 'status' => $room->status_label,
                 'status_color' => $room->status_color,
                 'status_id' => $room->room_status_id,
-                'formatted_price' => number_format($room->price, 0, ',', ' ') . ' CFA/nuit',
+                'formatted_price' => number_format($room->price, 0, ',', ' ').' CFA/nuit',
             ],
             'check_in' => $checkIn->format('Y-m-d'),
             'check_out' => $checkOut->format('Y-m-d'),
             'nights' => $nights,
             'total_price' => $totalPrice,
-            'formatted_total_price' => number_format($totalPrice, 0, ',', ' ') . ' CFA',
+            'formatted_total_price' => number_format($totalPrice, 0, ',', ' ').' CFA',
         ];
 
         // Si disponible mais check-in impossible (sale)
-        if ($isAvailable && !$canCheckIn) {
+        if ($isAvailable && ! $canCheckIn) {
             $response['warning'] = '⚠️ Cette chambre est réservable mais nécessite un nettoyage avant le check-in.';
             $response['urgent'] = $room->hasReservationToday();
         }
 
         // Si non disponible, obtenir les conflits
-        if (!$isAvailable) {
+        if (! $isAvailable) {
             $conflicts = $room->getReservationsForPeriod($request->check_in, $request->check_out);
             $response['conflicts'] = $conflicts->map(function ($transaction) {
                 return [
@@ -656,7 +659,7 @@ public function processDirectCheckIn(Request $request)
             $nextAvailable = $room->getNextAvailableDate($checkOut);
             if ($nextAvailable) {
                 $response['next_available'] = $nextAvailable->format('Y-m-d');
-                $response['suggestion'] = 'Disponible à partir du ' . $nextAvailable->format('d/m/Y');
+                $response['suggestion'] = 'Disponible à partir du '.$nextAvailable->format('d/m/Y');
             }
         }
 
@@ -671,13 +674,13 @@ public function processDirectCheckIn(Request $request)
         if ($room->room_status_id != Room::STATUS_DIRTY) {
             return response()->json([
                 'success' => false,
-                'message' => 'Cette chambre n\'a pas besoin de nettoyage.'
+                'message' => 'Cette chambre n\'a pas besoin de nettoyage.',
             ]);
         }
 
         // Récupérer la réservation du jour
         $reservation = $room->getTodayReservation();
-        
+
         // Log de la notification
         \Log::info('🔔 Notification housekeeping urgente', [
             'room_id' => $room->id,
@@ -685,12 +688,12 @@ public function processDirectCheckIn(Request $request)
             'customer' => $reservation ? $reservation->customer->name : 'N/A',
             'arrival_time' => $reservation ? $reservation->check_in->format('H:i') : 'N/A',
             'notified_by' => auth()->user()->name,
-            'notified_at' => now()
+            'notified_at' => now(),
         ]);
 
         // Ici, vous pourriez ajouter un système de notifications réel
         // event(new RoomNeedsCleaning($room));
-        
+
         // Ou créer une notification en base de données
         // \App\Models\Notification::create([...]);
 
@@ -700,8 +703,8 @@ public function processDirectCheckIn(Request $request)
             'room' => [
                 'id' => $room->id,
                 'number' => $room->number,
-                'status' => $room->status_label
-            ]
+                'status' => $room->status_label,
+            ],
         ]);
     }
 
@@ -711,11 +714,11 @@ public function processDirectCheckIn(Request $request)
     public function getUrgentCleanings()
     {
         $urgentRooms = Room::getUrgentCleaningRooms();
-        
+
         return response()->json([
             'success' => true,
             'count' => $urgentRooms->count(),
-            'rooms' => $urgentRooms
+            'rooms' => $urgentRooms,
         ]);
     }
 

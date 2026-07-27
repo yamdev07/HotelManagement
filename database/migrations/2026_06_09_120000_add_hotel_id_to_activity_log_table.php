@@ -24,11 +24,17 @@ return new class extends Migration
         });
 
         // Backfill : rattache chaque activité passée à l'hôtel de son auteur.
-        DB::table('activity_log')
-            ->join('users', 'activity_log.causer_id', '=', 'users.id')
-            ->where('activity_log.causer_type', \App\Models\User::class)
-            ->whereNull('activity_log.hotel_id')
-            ->update(['activity_log.hotel_id' => DB::raw('users.hotel_id')]);
+        if (Schema::hasColumn('users', 'hotel_id')) {
+            try {
+                DB::table('activity_log')
+                    ->join('users', 'activity_log.causer_id', '=', 'users.id')
+                    ->where('activity_log.causer_type', \App\Models\User::class)
+                    ->whereNull('activity_log.hotel_id')
+                    ->update(['activity_log.hotel_id' => DB::raw('users.hotel_id')]);
+            } catch (\Throwable $e) {
+                // Skip backfill on drivers that don't support raw column references in UPDATE
+            }
+        }
     }
 
     public function down(): void

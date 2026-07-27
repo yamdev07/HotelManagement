@@ -11,18 +11,18 @@ class TransactionExtraController extends Controller
     public function store(Request $request, Transaction $transaction)
     {
         $validated = $request->validate([
-            'category'    => 'required|in:minibar,laundry,service,other',
+            'category' => 'required|in:minibar,laundry,service,other',
             'description' => 'required|string|max:255',
-            'amount'      => 'required|numeric|min:0',
-            'quantity'    => 'required|integer|min:1',
+            'amount' => 'required|numeric|min:0',
+            'quantity' => 'required|integer|min:1',
         ]);
 
         $extra = $transaction->extras()->create([
-            'user_id'     => auth()->id(),
-            'category'    => $validated['category'],
+            'user_id' => auth()->id(),
+            'category' => $validated['category'],
             'description' => $validated['description'],
-            'amount'      => $validated['amount'],
-            'quantity'    => $validated['quantity'],
+            'amount' => $validated['amount'],
+            'quantity' => $validated['quantity'],
         ]);
 
         // Mettre à jour le total de la transaction
@@ -31,20 +31,20 @@ class TransactionExtraController extends Controller
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Extra ajouté avec succès',
-                'extra'   => [
-                    'id'          => $extra->id,
-                    'category'    => $extra->category_label,
+                'message' => __('flash.extra_created'),
+                'extra' => [
+                    'id' => $extra->id,
+                    'category' => $extra->category_label,
                     'description' => $extra->description,
-                    'amount'      => $extra->amount,
-                    'quantity'    => $extra->quantity,
-                    'subtotal'    => $extra->subtotal,
+                    'amount' => $extra->amount,
+                    'quantity' => $extra->quantity,
+                    'subtotal' => $extra->subtotal,
                 ],
                 'new_total' => $transaction->fresh()->getTotalPrice(),
             ]);
         }
 
-        return back()->with('success', 'Extra "' . $extra->description . '" ajouté à la facture.');
+        return back()->with('success', __('flash.extra_add_detail', ['description' => $extra->description]));
     }
 
     public function destroy(Transaction $transaction, TransactionExtra $extra)
@@ -57,12 +57,12 @@ class TransactionExtraController extends Controller
 
         if (request()->expectsJson()) {
             return response()->json([
-                'success'   => true,
-                'message'   => 'Extra supprimé',
+                'success' => true,
+                'message' => __('flash.extra_deleted'),
                 'new_total' => $transaction->fresh()->getTotalPrice(),
             ]);
         }
 
-        return back()->with('success', 'Extra supprimé de la facture.');
+        return back()->with('success', __('flash.extra_remove_detail'));
     }
 }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
 {
-    use HasFactory, \App\Models\Concerns\BelongsToHotel;
+    use \App\Models\Concerns\BelongsToHotel, HasFactory;
 
     protected $fillable = [
         'customer_id',

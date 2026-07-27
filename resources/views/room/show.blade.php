@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Détails de la Chambre')
+@section('title', __('room.show_page_title'))
 
 @section('content')
 <style>
@@ -386,11 +386,11 @@
 <div class="details-page">
     <!-- Breadcrumb -->
     <div class="details-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('room.breadcrumb_dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('room.index') }}">Chambres</a>
+        <a href="{{ route('room.index') }}">{{ __('room.breadcrumb_rooms') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Chambre {{ $room->number }}</span>
+        <span class="current">{{ __('room.breadcrumb_room_number', ['number' => $room->number]) }}</span>
     </div>
 
     <!-- Header -->
@@ -398,18 +398,18 @@
         <div class="details-brand">
             <div class="details-brand-icon"><i class="fas fa-bed"></i></div>
             <div>
-                <h1 class="details-header-title">Détails de la <em>chambre</em></h1>
+                <h1 class="details-header-title">{!! __('room.show_title') !!}</h1>
                 <p class="details-header-sub">
-                    <i class="fas fa-door-open me-1"></i> Chambre {{ $room->number }} · {{ $room->name ?? 'Sans nom' }}
+                    <i class="fas fa-door-open me-1"></i> {{ __('room.show_subtitle', ['number' => $room->number, 'name' => $room->name ?? __('room.guest_no_specified')]) }}
                 </p>
             </div>
         </div>
         <div class="details-header-actions">
             <a href="{{ route('room.edit', $room->id) }}" class="btn-db btn-db-primary">
-                <i class="fas fa-edit me-2"></i> Modifier
+                <i class="fas fa-edit me-2"></i> {{ __('room.edit_action') }}
             </a>
             <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-arrow-left me-2"></i> Retour
+                <i class="fas fa-arrow-left me-2"></i> {{ __('room.back') }}
             </a>
         </div>
     </div>
@@ -424,7 +424,7 @@
                 <div class="details-card-header details-card-header--green">
                     <h5 class="details-card-title">
                         <i class="fas fa-user"></i>
-                        Client actuel
+                        {{ __('room.guest_current') }}
                     </h5>
                 </div>
                 <div class="details-card-body">
@@ -439,20 +439,20 @@
                         </div>
                         <div class="guest-info-item">
                             <div class="guest-info-icon"><i class="fas fa-briefcase"></i></div>
-                            <div class="guest-info-text">{{ $customer->job ?? 'Non spécifié' }}</div>
+                            <div class="guest-info-text">{{ $customer->job ?? __('room.guest_no_specified') }}</div>
                         </div>
                         <div class="guest-info-item">
                             <div class="guest-info-icon"><i class="fas fa-map-marker-alt"></i></div>
-                            <div class="guest-info-text">{{ $customer->address ?? 'Non spécifié' }}</div>
+                            <div class="guest-info-text">{{ $customer->address ?? __('room.guest_no_specified') }}</div>
                         </div>
                         <div class="guest-info-item">
                             <div class="guest-info-icon"><i class="fas fa-phone"></i></div>
-                            <div class="guest-info-text">{{ $customer->phone ?? 'Non spécifié' }}</div>
+                            <div class="guest-info-text">{{ $customer->phone ?? __('room.guest_no_specified') }}</div>
                         </div>
                         @if($customer->birthdate)
                         <div class="guest-info-item">
                             <div class="guest-info-icon"><i class="fas fa-birthday-cake"></i></div>
-                            <div class="guest-info-text">{{ \Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y') }}</div>
+                            <div class="guest-info-text">{{ \Carbon\Carbon::parse($customer->birthdate)->translatedFormat('d/m/Y') }}</div>
                         </div>
                         @endif
                     </div>
@@ -463,8 +463,8 @@
                 <div class="details-card-body">
                     <div class="empty-state">
                         <div class="empty-icon"><i class="fas fa-user-slash"></i></div>
-                        <p class="empty-title">Chambre disponible</p>
-                        <p class="empty-text">Aucun client actuellement</p>
+                        <p class="empty-title">{{ __('room.guest_room_available') }}</p>
+                        <p class="empty-text">{{ __('room.guest_no_current') }}</p>
                     </div>
                 </div>
             </div>
@@ -477,25 +477,25 @@
                 <div class="details-card-header">
                     <h5 class="details-card-title">
                         <i class="fas fa-info-circle"></i>
-                        Informations
+                        {{ __('room.info_title') }}
                     </h5>
                     <button type="button" class="btn-db btn-db-ghost" data-bs-toggle="modal" data-bs-target="#imageUploadModal">
                         <i class="fas fa-upload me-2"></i>
-                        Ajouter une image
+                        {{ __('room.info_add_image') }}
                     </button>
                 </div>
                 <div class="details-card-body">
                     <div class="info-grid">
                         <div class="info-card">
-                            <div class="info-label">Type</div>
+                            <div class="info-label">{{ __('room.info_type') }}</div>
                             <div class="info-value">{{ $room->type->name ?? 'N/A' }}</div>
                         </div>
                         <div class="info-card">
-                            <div class="info-label">Statut</div>
+                            <div class="info-label">{{ __('room.info_status') }}</div>
                             <div>
                                 <span class="badge badge--{{ $room->roomStatus->color ?? 'gray' }}">
                                     <i class="fas fa-{{ $room->status_icon ?? 'door-closed' }} me-1"></i>
-                                    {{ $room->roomStatus->name ?? 'Inconnu' }}
+                                    {{ $room->roomStatus->name ?? __('room.unknown') }}
                                 </span>
                             </div>
                         </div>
@@ -507,9 +507,9 @@
                                 <i class="fas fa-users"></i>
                             </div>
                             <div>
-                                <div class="stat-label">Capacité</div>
+                                <div class="stat-label">{{ __('room.info_capacity') }}</div>
                                 <div class="stat-value">{{ $room->capacity }}</div>
-                                <div class="stat-sub">personnes</div>
+                                <div class="stat-sub">{{ __('room.info_persons') }}</div>
                             </div>
                         </div>
                         <div class="stat-card">
@@ -517,9 +517,9 @@
                                 <i class="fas fa-money-bill-wave"></i>
                             </div>
                             <div>
-                                <div class="stat-label">Prix</div>
+                                <div class="stat-label">{{ __('room.info_price') }}</div>
                                 <div class="stat-value">{{ number_format($room->price, 0, ',', ' ') }}</div>
-                                <div class="stat-sub">FCFA / nuit</div>
+                                <div class="stat-sub">{{ __('room.info_price_per_night') }}</div>
                             </div>
                         </div>
                     </div>
@@ -530,7 +530,7 @@
                             <i class="fas fa-mountain"></i>
                         </div>
                         <div>
-                            <div class="stat-label">Vue</div>
+                            <div class="stat-label">{{ __('room.info_view') }}</div>
                             <div class="stat-value" style="font-size:.9rem">{{ $room->view }}</div>
                         </div>
                     </div>
@@ -545,7 +545,7 @@
                 <div class="details-card-header">
                     <h5 class="details-card-title">
                         <i class="fas fa-images"></i>
-                        Images
+                        {{ __('room.images_title') }}
                     </h5>
                 </div>
                 <div class="details-card-body">
@@ -559,17 +559,17 @@
                         <div class="img-card">
                             <img src="{{ asset('img/room/' . $room->number . '/' . $image->url) }}" 
                                  class="img-card__img" 
-                                 alt="Image chambre"
+                                 alt="{{ __('room.image_alt') }}"
                                  onclick="openImageModal('{{ asset('img/room/' . $room->number . '/' . $image->url) }}')">
                             <div class="img-card__foot">
                                 <span class="img-date">
                                     <i class="fas fa-calendar-alt"></i>
-                                    {{ $image->created_at->format('d/m/Y H:i') }}
+                                    {{ $image->created_at->translatedFormat('d/m/Y H:i') }}
                                 </span>
                                 @if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin')
                                 <form action="{{ route('image.destroy', $image->id) }}" 
                                       method="POST"
-                                      onsubmit="return confirm('Supprimer cette image ?')"
+                                      onsubmit="return confirm('{{ __('room.confirm_delete_image') }}')"
                                       style="display:inline">
                                     @csrf
                                     @method('DELETE')
@@ -585,12 +585,12 @@
                     @else
                     <div class="empty-state">
                         <div class="empty-icon"><i class="fas fa-images"></i></div>
-                        <p class="empty-title">Aucune image</p>
-                        <p class="empty-text">Cette chambre n'a pas encore d'images</p>
+                        <p class="empty-title">{{ __('room.images_empty_title') }}</p>
+                        <p class="empty-text">{{ __('room.images_empty_text') }}</p>
                         @if(auth()->user()->role === 'Super' || auth()->user()->role === 'Admin')
                         <button type="button" class="btn-db btn-db-primary" data-bs-toggle="modal" data-bs-target="#imageUploadModal">
                             <i class="fas fa-upload me-2"></i>
-                            Ajouter une image
+                            {{ __('room.info_add_image') }}
                         </button>
                         @endif
                     </div>
@@ -609,7 +609,7 @@
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="fas fa-upload"></i>
-                    Ajouter une image
+                    {{ __('room.modal_upload_title') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -617,7 +617,7 @@
                 <form action="{{ route('image.store', ['room' => $room->id]) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div style="margin-bottom:16px">
-                        <label for="image" class="form-label-db">Sélectionner une image</label>
+                        <label for="image" class="form-label-db">{{ __('room.modal_label_image') }}</label>
                         <input type="file" 
                                class="form-control-db @error('image') is-invalid @enderror" 
                                name="image" 
@@ -628,12 +628,12 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <div class="form-text-db">
-                            Formats supportés: JPG, PNG, GIF. Max: 2MB.
+                            {{ __('room.modal_formats') }}
                         </div>
                     </div>
                     <button type="submit" class="btn-db btn-db-primary w-100">
                         <i class="fas fa-upload me-2"></i>
-                        Uploader
+                        {{ __('room.modal_upload_btn') }}
                     </button>
                 </form>
             </div>
@@ -648,7 +648,7 @@
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="fas fa-image"></i>
-                    Image
+                    {{ __('room.images_title') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
@@ -670,15 +670,15 @@ function openImageModal(imageUrl) {
 }
 
 @if(session('success'))
-    toastr.success("{{ session('success') }}", "Succès");
+    toastr.success("{{ session('success') }}", "{{ __('room.toast_success') }}");
 @endif
 
 @if(session('failed'))
-    toastr.error("{{ session('failed') }}", "Erreur");
+    toastr.error("{{ session('failed') }}", "{{ __('room.toast_error') }}");
 @endif
 
 @error('image')
-    toastr.error("{{ $message }}", "Upload échoué");
+    toastr.error("{{ $message }}", "{{ __('room.toast_upload_failed') }}");
     document.addEventListener('DOMContentLoaded', function() {
         const modal = new bootstrap.Modal(document.getElementById('imageUploadModal'));
         modal.show();

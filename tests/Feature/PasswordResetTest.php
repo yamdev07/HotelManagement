@@ -31,9 +31,9 @@ class PasswordResetTest extends TestCase
         $token = Password::createToken($user);
 
         $this->post('/reset-password', [
-            'token'                 => $token,
-            'email'                 => 'reset2@test.test',
-            'password'              => 'nouveauMotDePasse1',
+            'token' => $token,
+            'email' => 'reset2@test.test',
+            'password' => 'nouveauMotDePasse1',
             'password_confirmation' => 'nouveauMotDePasse1',
         ])->assertRedirect(route('login.index'));
 

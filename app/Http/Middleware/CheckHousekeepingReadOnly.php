@@ -44,13 +44,13 @@ class CheckHousekeepingReadOnly
             // 3. Si ce n'est pas une route autorisée, bloque
             if (! $isReadOnlyRoute) {
                 return redirect()->route('housekeeping.index')
-                    ->with('error', 'Accès restreint au personnel housekeeping.');
+                    ->with('error', __('flash.middleware_housekeeping_restricted'));
             }
 
             // 4. Pour les routes en lecture seule, bloque les méthodes POST/PUT/DELETE
             if ($isReadOnlyRoute && ! in_array($method, ['GET', 'HEAD'])) {
                 return redirect()->back()
-                    ->with('error', 'Le personnel housekeeping a un accès en lecture seulement.');
+                    ->with('error', __('flash.middleware_housekeeping_readonly'));
             }
         }
 

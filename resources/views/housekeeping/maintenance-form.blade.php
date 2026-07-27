@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Signalement Maintenance - Chambre ' . $room->number)
+@section('title', __('housekeeping.maintenanceform.title') . ' ' . $room->number)
 
 @section('content')
 <style>
@@ -439,9 +439,9 @@ textarea.form-control {
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('housekeeping.index') }}">Housekeeping</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('availability.room.detail', $room->id) }}">Chambre {{ $room->number }}</a>
+        <a href="{{ route('availability.room.detail', $room->id) }}">{{ __('housekeeping.maintenanceform.header_subtitle') }} {{ $room->number }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Maintenance</span>
+        <span class="current">{{ __('housekeeping.maintenanceform.breadcrumb_maintenance') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -449,12 +449,12 @@ textarea.form-control {
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-tools"></i></span>
-                <h1>Signalement <em>maintenance</em></h1>
+                <h1>{!! __('housekeeping.maintenanceform.header') !!}</h1>
             </div>
-            <p class="header-subtitle">Chambre {{ $room->number }}</p>
+            <p class="header-subtitle">{{ __('housekeeping.maintenanceform.header_subtitle') }} {{ $room->number }}</p>
         </div>
         <a href="{{ url()->previous() }}" class="btn btn-gray">
-            <i class="fas fa-arrow-left"></i> Retour
+            <i class="fas fa-arrow-left"></i> {{ __('housekeeping.maintenanceform.btn_back') }}
         </a>
     </div>
 
@@ -469,10 +469,10 @@ textarea.form-control {
                     <h6>Chambre {{ $room->number }}</h6>
                     <div class="row">
                         <div class="col-md-6">
-                            <small><i class="fas fa-layer-group" style="color:var(--green-600);"></i> Type: {{ $room->type->name ?? 'Standard' }}</small>
+                            <small><i class="fas fa-layer-group" style="color:var(--green-600);"></i> {{ __('housekeeping.maintenanceform.info_type') }}: {{ $room->type->name ?? 'Standard' }}</small>
                         </div>
                         <div class="col-md-6">
-                            <small><i class="fas fa-bed" style="color:var(--green-600);"></i> Statut: 
+                            <small><i class="fas fa-bed" style="color:var(--green-600);"></i> {{ __('housekeeping.maintenanceform.info_status') }}: 
                                 <span class="room-badge {{ $room->room_status_id == 2 ? 'warning' : 'info' }}">
                                     {{ $room->roomStatus->name ?? 'Inconnu' }}
                                 </span>
@@ -485,7 +485,7 @@ textarea.form-control {
             {{-- Carte formulaire --}}
             <div class="card">
                 <div class="card-header">
-                    <i class="fas fa-exclamation-triangle"></i> Détails de la maintenance
+                    <i class="fas fa-exclamation-triangle"></i> {{ __('housekeeping.maintenanceform.card_details') }}
                 </div>
                 <div class="card-body">
                     <form action="{{ route('housekeeping.mark-maintenance', $room->id) }}" method="POST" id="maintenanceForm" enctype="multipart/form-data">
@@ -493,76 +493,76 @@ textarea.form-control {
 
                         {{-- Raison --}}
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-clipboard-list"></i> Type de problème</label>
+                            <label class="form-label"><i class="fas fa-clipboard-list"></i> {{ __('housekeeping.maintenanceform.form_problem_type') }}</label>
                             <select class="form-select" name="maintenance_reason" required>
-                                <option value="">Sélectionner...</option>
-                                <optgroup label="Problèmes techniques">
-                                    <option value="Électricité">Problème électrique</option>
-                                    <option value="Plomberie">Fuite d'eau / Plomberie</option>
-                                    <option value="Climatisation">Climatisation défectueuse</option>
-                                    <option value="Chauffage">Problème de chauffage</option>
-                                    <option value="Télévision">Télévision défectueuse</option>
-                                    <option value="WiFi">Problème de connexion WiFi</option>
+                                <option value="">{{ __('housekeeping.maintenanceform.form_select') }}</option>
+                                <optgroup label="{{ __('housekeeping.maintenanceform.optgroup_technical') }}">
+                                    <option value="Électricité">{{ __('housekeeping.maintenanceform.opt_electrical') }}</option>
+                                    <option value="Plomberie">{{ __('housekeeping.maintenanceform.opt_plumbing') }}</option>
+                                    <option value="Climatisation">{{ __('housekeeping.maintenanceform.opt_ac') }}</option>
+                                    <option value="Chauffage">{{ __('housekeeping.maintenanceform.opt_heating') }}</option>
+                                    <option value="Télévision">{{ __('housekeeping.maintenanceform.opt_tv') }}</option>
+                                    <option value="WiFi">{{ __('housekeeping.maintenanceform.opt_wifi') }}</option>
                                 </optgroup>
-                                <optgroup label="Équipements">
-                                    <option value="Meuble">Meuble cassé</option>
-                                    <option value="Literie">Literie endommagée</option>
-                                    <option value="Salle de bain">Équipement salle de bain</option>
-                                    <option value="Fenêtre">Fenêtre / Store</option>
-                                    <option value="Serrure">Problème de serrure</option>
+                                <optgroup label="{{ __('housekeeping.maintenanceform.optgroup_equipment') }}">
+                                    <option value="Meuble">{{ __('housekeeping.maintenanceform.opt_furniture') }}</option>
+                                    <option value="Literie">{{ __('housekeeping.maintenanceform.opt_bedding') }}</option>
+                                    <option value="Salle de bain">{{ __('housekeeping.maintenanceform.opt_bathroom') }}</option>
+                                    <option value="Fenêtre">{{ __('housekeeping.maintenanceform.opt_window') }}</option>
+                                    <option value="Serrure">{{ __('housekeeping.maintenanceform.opt_lock') }}</option>
                                 </optgroup>
-                                <option value="Autre">Autre problème</option>
+                                <option value="Autre">{{ __('housekeeping.maintenanceform.opt_other') }}</option>
                             </select>
                         </div>
 
                         {{-- Description --}}
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-align-left"></i> Description détaillée</label>
-                            <textarea class="form-control" name="detailed_description" rows="4" placeholder="Décrivez le problème..."></textarea>
+                            <label class="form-label"><i class="fas fa-align-left"></i> {{ __('housekeeping.maintenanceform.form_description') }}</label>
+                            <textarea class="form-control" name="detailed_description" rows="4" placeholder="{{ __('housekeeping.maintenanceform.form_description_placeholder') }}"></textarea>
                         </div>
 
                         {{-- Urgence --}}
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-exclamation"></i> Niveau d'urgence</label>
+                            <label class="form-label"><i class="fas fa-exclamation"></i> {{ __('housekeeping.maintenanceform.form_urgency') }}</label>
                             <div class="urgency-grid">
                                 <label class="urgency-card" data-value="low">
                                     <input type="radio" name="urgency" value="low" class="radio-input" checked>
                                     <div class="urgency-icon low"><i class="fas fa-flag"></i></div>
-                                    <div class="urgency-title">Basse</div>
-                                    <div class="urgency-desc">Problème mineur</div>
+                                    <div class="urgency-title">{{ __('housekeeping.maintenanceform.urgency_low') }}</div>
+                                    <div class="urgency-desc">{{ __('housekeeping.maintenanceform.urgency_low_desc') }}</div>
                                 </label>
                                 <label class="urgency-card" data-value="medium">
                                     <input type="radio" name="urgency" value="medium" class="radio-input">
                                     <div class="urgency-icon medium"><i class="fas fa-flag"></i></div>
-                                    <div class="urgency-title">Moyenne</div>
-                                    <div class="urgency-desc">À traiter rapidement</div>
+                                    <div class="urgency-title">{{ __('housekeeping.maintenanceform.urgency_medium') }}</div>
+                                    <div class="urgency-desc">{{ __('housekeeping.maintenanceform.urgency_medium_desc') }}</div>
                                 </label>
                                 <label class="urgency-card" data-value="high">
                                     <input type="radio" name="urgency" value="high" class="radio-input">
                                     <div class="urgency-icon high"><i class="fas fa-flag"></i></div>
-                                    <div class="urgency-title">Haute</div>
-                                    <div class="urgency-desc">Problème critique</div>
+                                    <div class="urgency-title">{{ __('housekeeping.maintenanceform.urgency_high') }}</div>
+                                    <div class="urgency-desc">{{ __('housekeeping.maintenanceform.urgency_high_desc') }}</div>
                                 </label>
                             </div>
                         </div>
 
                         {{-- Durée --}}
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-clock"></i> Durée estimée</label>
+                            <label class="form-label"><i class="fas fa-clock"></i> {{ __('housekeeping.maintenanceform.form_duration') }}</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" name="estimated_duration" min="1" max="168" value="2" required>
-                                <span class="input-group-text">heures</span>
+                                <span class="input-group-text">{{ __('housekeeping.maintenanceform.form_duration_unit') }}</span>
                             </div>
                         </div>
 
                         {{-- Photos --}}
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-camera"></i> Photos (optionnel)</label>
+                            <label class="form-label"><i class="fas fa-camera"></i> {{ __('housekeeping.maintenanceform.form_photos') }}</label>
                             <div class="upload-area" id="uploadArea">
                                 <input type="file" id="photoInput" multiple accept="image/*" class="d-none" name="photos[]">
                                 <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-                                <p>Cliquez ou glissez pour ajouter des photos</p>
-                                <small class="text-muted">JPG, PNG (max 5 Mo)</small>
+                                <p>{{ __('housekeeping.maintenanceform.form_photos_desc') }}</p>
+                                <small class="text-muted">{{ __('housekeeping.maintenanceform.form_photos_hint') }}</small>
                             </div>
                             <div class="photo-preview" id="photoPreview"></div>
                         </div>
@@ -570,8 +570,8 @@ textarea.form-control {
                 </div>
                 <div class="card-footer">
                     <div class="d-flex justify-content-between">
-                        <button class="btn btn-gray" onclick="history.back()"><i class="fas fa-times"></i> Annuler</button>
-                        <button class="btn btn-red" form="maintenanceForm"><i class="fas fa-paper-plane"></i> Signaler</button>
+                        <button class="btn btn-gray" onclick="history.back()"><i class="fas fa-times"></i> {{ __('housekeeping.maintenanceform.btn_cancel') }}</button>
+                        <button class="btn btn-red" form="maintenanceForm"><i class="fas fa-paper-plane"></i> {{ __('housekeeping.maintenanceform.btn_submit') }}</button>
                     </div>
                 </div>
             </div>
@@ -580,8 +580,8 @@ textarea.form-control {
             <div class="alert alert-warning mt-4">
                 <div class="alert-icon"><i class="fas fa-info-circle"></i></div>
                 <div class="alert-content">
-                    <h6>Important</h6>
-                    <p class="mb-0">La chambre sera marquée "En maintenance" et ne sera plus disponible à la vente.</p>
+                    <h6>{{ __('housekeeping.maintenanceform.warning_title') }}</h6>
+                    <p class="mb-0">{{ __('housekeeping.maintenanceform.warning_desc') }}</p>
                 </div>
             </div>
 

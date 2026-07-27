@@ -10,7 +10,7 @@ use Spatie\Activitylog\Traits\LogsActivity;
 
 class Payment extends Model
 {
-    use HasFactory, LogsActivity, SoftDeletes, \App\Models\Concerns\BelongsToHotel;
+    use \App\Models\Concerns\BelongsToHotel, HasFactory, LogsActivity, SoftDeletes;
 
     protected static $recordEvents = [];
 
@@ -81,8 +81,7 @@ class Payment extends Model
 
     const STATUS_PARTIALLY_REFUNDED = 'partially_refunded';
 
-    const METHOD_MIXTE = 'mixte'; 
-
+    const METHOD_MIXTE = 'mixte';
 
     // Constantes pour les méthodes de paiement
     const METHOD_CASH = 'cash';
@@ -901,6 +900,7 @@ class Payment extends Model
             'can_refund' => $this->can_be_refunded,
         ];
     }
+
     /**
      * Marquer un paiement late checkout comme complété
      */
@@ -929,13 +929,13 @@ class Payment extends Model
             // Mettre à jour le total de la transaction
             if ($this->transaction) {
                 $this->transaction->updatePaymentStatus();
-                
+
                 // Ajouter une note à la transaction
                 $transaction = $this->transaction;
-                $note = "\n[" . now()->format('d/m/Y H:i') . "] ✅ Supplément late checkout de " .
-                        number_format($this->amount, 0, ',', ' ') . " CFA payé";
-                
-                $transaction->notes = ($transaction->notes ? $transaction->notes . $note : $note);
+                $note = "\n[".now()->format('d/m/Y H:i').'] ✅ Supplément late checkout de '.
+                        number_format($this->amount, 0, ',', ' ').' CFA payé';
+
+                $transaction->notes = ($transaction->notes ? $transaction->notes.$note : $note);
                 $transaction->saveQuietly();
 
                 // Vérifier si c'est un late checkout et logger
@@ -977,14 +977,14 @@ class Payment extends Model
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Erreur marquage paiement late checkout: ' . $e->getMessage(), [
+            Log::error('Erreur marquage paiement late checkout: '.$e->getMessage(), [
                 'payment_id' => $this->id,
                 'error' => $e->getMessage(),
             ]);
 
             return [
                 'success' => false,
-                'message' => 'Erreur: ' . $e->getMessage(),
+                'message' => 'Erreur: '.$e->getMessage(),
             ];
         }
     }
@@ -994,7 +994,7 @@ class Payment extends Model
      */
     public function isLateCheckoutPayment(): bool
     {
-        return str_contains($this->reference ?? '', 'LATE-') || 
+        return str_contains($this->reference ?? '', 'LATE-') ||
             str_contains($this->description ?? '', 'Late checkout') ||
             str_contains($this->description ?? '', 'late checkout');
     }
@@ -1004,7 +1004,7 @@ class Payment extends Model
      */
     public function getLateCheckoutDetailsAttribute(): ?array
     {
-        if (!$this->isLateCheckoutPayment()) {
+        if (! $this->isLateCheckoutPayment()) {
             return null;
         }
 
@@ -1022,5 +1022,4 @@ class Payment extends Model
             'room_number' => $this->transaction?->room?->number,
         ];
     }
-    
 }

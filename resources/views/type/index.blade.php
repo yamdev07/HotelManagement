@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Types de Chambres')
+@section('title', __('type.page_title'))
 @section('content')
 
 <style>
@@ -395,18 +395,18 @@
         <div class="types-brand">
             <div class="types-brand-icon"><i class="fas fa-list-alt"></i></div>
             <div>
-                <h1 class="types-header-title">Types de <em>chambres</em></h1>
+                <h1 class="types-header-title">{!! __('type.header_title') !!}</h1>
                 <p class="types-header-sub">
-                    <i class="fas fa-bed me-1"></i> {{ $types->count() }} type(s) disponible(s)
+                    <i class="fas fa-bed me-1"></i> {{ __('type.header_sub', ['count' => $types->count()]) }}
                 </p>
             </div>
         </div>
         <div class="types-header-actions">
             <a href="{{ route('type.create') }}" class="btn-db btn-db-primary">
-                <i class="fas fa-plus-circle me-2"></i> Nouveau type
+                <i class="fas fa-plus-circle me-2"></i> {{ __('type.new_type') }}
             </a>
             <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-bed me-2"></i> Voir les chambres
+                <i class="fas fa-bed me-2"></i> {{ __('type.view_rooms') }}
             </a>
         </div>
     </div>
@@ -444,10 +444,10 @@
                 <div class="stat-card-icon"><i class="fas fa-list-alt"></i></div>
             </div>
             <div class="stat-card-value">{{ $types->count() }}</div>
-            <div class="stat-card-label">Total types</div>
+            <div class="stat-card-label">{{ __('type.stat_total') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-tag"></i>
-                Types de chambres
+                {{ __('type.stat_total_footer') }}
             </div>
         </div>
 
@@ -456,10 +456,10 @@
                 <div class="stat-card-icon"><i class="fas fa-check-circle"></i></div>
             </div>
             <div class="stat-card-value">{{ $activeTypes }}</div>
-            <div class="stat-card-label">Actifs</div>
+            <div class="stat-card-label">{{ __('type.stat_active') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-eye"></i>
-                Visibles
+                {{ __('type.stat_active_footer') }}
             </div>
         </div>
 
@@ -468,10 +468,10 @@
                 <div class="stat-card-icon"><i class="fas fa-eye-slash"></i></div>
             </div>
             <div class="stat-card-value">{{ $inactiveTypes }}</div>
-            <div class="stat-card-label">Inactifs</div>
+            <div class="stat-card-label">{{ __('type.stat_inactive') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-clock"></i>
-                Masqués
+                {{ __('type.stat_inactive_footer') }}
             </div>
         </div>
 
@@ -480,10 +480,10 @@
                 <div class="stat-card-icon"><i class="fas fa-bed"></i></div>
             </div>
             <div class="stat-card-value">{{ $totalRooms }}</div>
-            <div class="stat-card-label">Chambres</div>
+            <div class="stat-card-label">{{ __('type.stat_rooms') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-door-open"></i>
-                Au total
+                {{ __('type.stat_rooms_footer') }}
             </div>
         </div>
     </div>
@@ -493,7 +493,7 @@
         <div class="types-card-header">
             <h5 class="types-card-title">
                 <i class="fas fa-list-alt"></i>
-                Tous les types de chambres
+                {{ __('type.card_title') }}
             </h5>
             <button class="btn-db btn-db-ghost" onclick="window.location.reload()">
                 <i class="fas fa-sync-alt"></i>
@@ -509,13 +509,13 @@
                         @endphp
                         <thead>
                             <tr>
-                                <th class="ps-4">N°</th>
-                                <th>Détails</th>
-                                <th>Tarif</th>
-                                <th>Capacité</th>
-                                <th class="text-center">Statut</th>
-                                <th class="text-center">Chambres</th>
-                                <th class="pe-4 text-end">Actions</th>
+                                <th class="ps-4">{{ __('type.col_number') }}</th>
+                                <th>{{ __('type.col_details') }}</th>
+                                <th>{{ __('type.col_rate') }}</th>
+                                <th>{{ __('type.col_capacity') }}</th>
+                                <th class="text-center">{{ __('type.col_status') }}</th>
+                                <th class="text-center">{{ __('type.col_rooms') }}</th>
+                                <th class="pe-4 text-end">{{ __('type.col_actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -544,12 +544,12 @@
                                                     </div>
                                                 @else
                                                     <div style="font-size:.7rem; color:var(--s400);">
-                                                        <i class="fas fa-minus"></i> Aucune description
+                                                        <i class="fas fa-minus"></i> {{ __('type.no_description') }}
                                                     </div>
                                                 @endif
                                                 @if($isPopular)
                                                     <span class="badge badge--popular mt-1">
-                                                        <i class="fas fa-star me-1"></i> Populaire
+                                                        <i class="fas fa-star me-1"></i> {{ __('type.popular') }}
                                                     </span>
                                                 @endif
                                             </div>
@@ -560,30 +560,30 @@
                                             <div style="font-size:.9rem; font-weight:600; color:var(--s800); font-family:var(--mono);">
                                                 {{ number_format($type->base_price, 0, ',', ' ') }} FCFA
                                             </div>
-                                            <div style="font-size:.65rem; color:var(--s400);">prix de base</div>
+                                            <div style="font-size:.65rem; color:var(--s400);">{{ __('type.base_price_label') }}</div>
                                         @else
-                                            <span style="color:var(--s400); font-size:.7rem;">Non défini</span>
+                                            <span style="color:var(--s400); font-size:.7rem;">{{ __('type.not_defined') }}</span>
                                         @endif
                                     </td>
                                     <td>
                                         <div style="display:flex; align-items:center; gap:6px;">
                                             <i class="fas fa-users" style="color:var(--g500); font-size:.7rem;"></i>
-                                            <span style="font-size:.8rem; color:var(--s800);">{{ $type->capacity ?? 1 }} personne(s)</span>
+                                            <span style="font-size:.8rem; color:var(--s800);">{{ $type->capacity ?? 1 }} {{ __('type.person_s') }}</span>
                                         </div>
                                         @if($type->bed_type)
                                             <div style="font-size:.65rem; color:var(--s400); margin-top:2px;">
-                                                <i class="fas fa-bed"></i> Lit {{ $type->bed_type }}
+                                                <i class="fas fa-bed"></i> {{ __('type.bed_type', ['type' => $type->bed_type]) }}
                                             </div>
                                         @endif
                                     </td>
                                     <td class="text-center">
                                         @if($type->is_active)
                                             <span class="badge badge--success">
-                                                <i class="fas fa-check-circle me-1"></i> Actif
+                                                <i class="fas fa-check-circle me-1"></i> {{ __('type.active') }}
                                             </span>
                                         @else
                                             <span class="badge badge--gray">
-                                                <i class="fas fa-eye-slash me-1"></i> Inactif
+                                                <i class="fas fa-eye-slash me-1"></i> {{ __('type.inactive') }}
                                             </span>
                                         @endif
                                     </td>
@@ -595,7 +595,7 @@
                                             </span>
                                             @if($roomCount > 0)
                                                 <div style="font-size:.6rem; color:var(--s400); margin-top:2px;">
-                                                    {{ $roomCount }} chambre(s)
+                                                    {{ $roomCount }} {{ __('type.room_s') }}
                                                 </div>
                                             @endif
                                         </div>
@@ -605,7 +605,7 @@
                                             <!-- Edit -->
                                             <a href="{{ route('type.edit', $type->id) }}" 
                                                class="btn-db-icon" 
-                                               title="Modifier">
+                                               title="{{ __('type.tooltip_edit') }}">
                                                 <i class="fas fa-edit"></i>
                                             </a>
                                             
@@ -613,7 +613,7 @@
                                             @if($roomCount > 0)
                                                 <a href="{{ route('room.index') }}?type={{ $type->id }}" 
                                                    class="btn-db-icon" 
-                                                   title="Voir les chambres">
+                                                   title="{{ __('type.tooltip_view_rooms') }}">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
                                             @endif
@@ -627,7 +627,7 @@
                                                 @method('DELETE')
                                                 <button type="submit" 
                                                         class="btn-db-icon btn-db-icon-danger"
-                                                        title="Supprimer"
+                                                        title="{{ __('type.tooltip_delete') }}"
                                                         {{ $roomCount > 0 ? 'disabled' : '' }}>
                                                     <i class="fas fa-trash"></i>
                                                 </button>
@@ -645,11 +645,11 @@
                     <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
                         <div style="font-size:.7rem; color:var(--s400);">
                             <i class="fas fa-info-circle me-1"></i>
-                            Affichage de {{ $types->count() }} type(s) de chambre
+                            {{ __('type.footer_showing', ['count' => $types->count()]) }}
                         </div>
                         <div style="font-size:.7rem; color:var(--s400);">
                             <i class="fas fa-ban me-1" style="color:var(--s400);"></i>
-                            La suppression est désactivée pour les types ayant des chambres assignées
+                            {{ __('type.footer_delete_disabled') }}
                         </div>
                     </div>
                 </div>
@@ -657,14 +657,14 @@
                 <!-- Empty state -->
                 <div class="empty-state">
                     <div class="empty-icon"><i class="fas fa-bed"></i></div>
-                    <p class="empty-title">Aucun type de chambre</p>
+                    <p class="empty-title">{{ __('type.empty_title') }}</p>
                     <p class="empty-text">
-                        Commencez par créer votre premier type de chambre.<br>
-                        Les types aident à organiser vos chambres par catégorie et tarif.
+                        {{ __('type.empty_text_1') }}<br>
+                        {{ __('type.empty_text_2') }}
                     </p>
                     <a href="{{ route('type.create') }}" class="btn-db btn-db-primary">
                         <i class="fas fa-plus-circle me-2"></i>
-                        Créer un type
+                        {{ __('type.empty_add') }}
                     </a>
                 </div>
             @endif
@@ -680,15 +680,14 @@
                     <i class="fas fa-lightbulb"></i>
                 </div>
                 <div class="help-text">
-                    <strong>Besoin d'aide pour gérer les types de chambres ?</strong><br>
-                    Les types définissent des catégories comme "Standard", "Deluxe" ou "Suite". 
-                    Chaque type peut avoir des tarifs, capacités et équipements différents.
+                    <strong>{{ __('type.help_title') }}</strong><br>
+                    {{ __('type.help_text') }}
                 </div>
             </div>
             <div style="margin-left:auto;">
                 <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost">
                     <i class="fas fa-bed me-2"></i>
-                    Gérer les chambres
+                    {{ __('type.help_manage_rooms') }}
                 </a>
             </div>
         </div>
@@ -720,11 +719,11 @@ document.addEventListener('DOMContentLoaded', function() {
 // Confirmation de suppression
 function confirmDelete(typeName, roomCount) {
     if (roomCount > 0) {
-        alert(`Impossible de supprimer "${typeName}" car ${roomCount} chambre(s) y sont assignées.\n\nVeuillez d'abord réassigner ou supprimer ces chambres.`);
+        alert(`{!! __('type.js_delete_impossible', ['name' => ' typeName ', 'count' => ' roomCount ']) !!}`);
         return false;
     }
     
-    return confirm(`Êtes-vous sûr de vouloir supprimer "${typeName}" ?\n\nCette action est irréversible.`);
+    return confirm(`{!! __('type.js_delete_confirm', ['name' => ' typeName ']) !!}`);
 }
 </script>
 @endsection

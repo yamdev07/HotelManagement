@@ -28,14 +28,14 @@ class PublicSiteTest extends TestCase
     private function makeHotelWithRoom(string $name, string $roomName, array $attrs = []): Hotel
     {
         $hotel = Hotel::create(array_merge([
-            'name'      => $name,
-            'slug'      => Str::slug($name),
+            'name' => $name,
+            'slug' => Str::slug($name),
             'is_active' => true,
         ], $attrs));
 
         app(TenantManager::class)->withHotel($hotel->id, function () use ($roomName) {
             $type = Type::create(['name' => 'Standard', 'information' => 'Type standard']);
-            $room = new Room();
+            $room = new Room;
             $room->number = '101';
             $room->name = $roomName;
             $room->type_id = $type->id;

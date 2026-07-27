@@ -45,12 +45,12 @@
 <div class="db-tabs-card anim-1">
     <a href="{{ route('restaurant.index') }}"
        class="db-tab-link {{ request()->routeIs('restaurant.index') ? 'active' : '' }}">
-        <i class="fas fa-utensils"></i> Menus
+        <i class="fas fa-utensils"></i> {{ __('restaurant.nav.menus') }}
     </a>
     
     <a href="{{ route('restaurant.orders') }}"
        class="db-tab-link {{ (request()->routeIs('restaurant.orders') || request()->is('restaurant/orders*')) ? 'active' : '' }}">
-        <i class="fas fa-receipt"></i> Commandes
+        <i class="fas fa-receipt"></i> {{ __('restaurant.nav.orders') }}
         @php $pendingCount = \App\Models\RestaurantOrder::whereIn('status', ['pending', 'validated', 'preparing'])->count(); @endphp
         @if($pendingCount > 0)
             <span class="badge-pending">{{ $pendingCount }}</span>
@@ -59,13 +59,13 @@
 
     <a href="{{ route('restaurant.categories.index') }}"
        class="db-tab-link {{ request()->routeIs('restaurant.categories.*') ? 'active' : '' }}">
-        <i class="fas fa-tags"></i> Catégories
+        <i class="fas fa-tags"></i> {{ __('restaurant.nav.categories') }}
     </a>
     
     @if(in_array(auth()->user()->role, ['Super','Admin']))
         <a href="{{ route('restaurant.sales') }}"
            class="db-tab-link {{ request()->routeIs('restaurant.sales') ? 'active' : '' }}">
-            <i class="fas fa-chart-line"></i> Ventes
+            <i class="fas fa-chart-line"></i> {{ __('restaurant.nav.sales') }}
         </a>
     @endif
 </div>

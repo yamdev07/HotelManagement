@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Ajouter un équipement')
+@section('title', __('facility.create_title'))
 @section('content')
 
 <style>
@@ -330,9 +330,9 @@ textarea.form-control {
     <div class="breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('facility.index') }}">Équipements</a>
+        <a href="{{ route('facility.index') }}">{{ __('facility.breadcrumb_index') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Ajouter</span>
+        <span class="current">{{ __('facility.btn_add') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -340,9 +340,9 @@ textarea.form-control {
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-plus-circle"></i></span>
-                <h1>Ajouter un <em>équipement</em></h1>
+                <h1>{!! __('facility.create_header') !!}</h1>
             </div>
-            <p class="header-subtitle">Créez un nouvel équipement pour les chambres</p>
+            <p class="header-subtitle">{{ __('facility.create_desc') }}</p>
         </div>
     </div>
 
@@ -351,7 +351,7 @@ textarea.form-control {
         <div class="alert alert-red">
             <div class="alert-icon"><i class="fas fa-exclamation"></i></div>
             <div class="alert-content">
-                <strong>Erreur de validation</strong>
+                <strong>{{ __('facility.validation_error') }}</strong>
                 <ul class="mb-0">
                     @foreach($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -366,7 +366,7 @@ textarea.form-control {
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header">
-                    <h2><i class="fas fa-plus-circle"></i> Nouvel équipement</h2>
+                    <h2><i class="fas fa-plus-circle"></i> {{ __('facility.create_card_title') }}</h2>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('facility.store') }}" method="POST">
@@ -374,50 +374,50 @@ textarea.form-control {
 
                         {{-- Nom --}}
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-tag"></i> Nom de l'équipement</label>
+                            <label class="form-label"><i class="fas fa-tag"></i> {{ __('facility.form_name_label') }}</label>
                             <input type="text" name="name" class="form-control" 
-                                   value="{{ old('name') }}" placeholder="Ex: WiFi, Piscine, Parking..." required>
+                                   value="{{ old('name') }}" placeholder="{{ __('facility.form_name_placeholder') }}" required>
                         </div>
 
                         {{-- Détail --}}
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-align-left"></i> Description</label>
+                            <label class="form-label"><i class="fas fa-align-left"></i> {{ __('facility.form_desc_label') }}</label>
                             <textarea name="detail" class="form-control" 
-                                      placeholder="Description détaillée de l'équipement..." required>{{ old('detail') }}</textarea>
+                                      placeholder="{{ __('facility.form_desc_placeholder') }}" required>{{ old('detail') }}</textarea>
                         </div>
 
                         {{-- Icône --}}
                         <div class="form-group">
-                            <label class="form-label"><i class="fas fa-icons"></i> Icône</label>
+                            <label class="form-label"><i class="fas fa-icons"></i> {{ __('facility.form_icon_label') }}</label>
                             
                             @php
                                 $icons = [
-                                    'fas fa-wifi' => 'WiFi',
-                                    'fas fa-swimming-pool' => 'Piscine',
-                                    'fas fa-dumbbell' => 'Salle de sport',
-                                    'fas fa-concierge-bell' => 'Service en chambre',
-                                    'fas fa-parking' => 'Parking',
-                                    'fas fa-utensils' => 'Restaurant',
-                                    'fas fa-spa' => 'Spa',
-                                    'fas fa-tv' => 'Télévision',
-                                    'fas fa-shuttle-van' => 'Navette',
-                                    'fas fa-cocktail' => 'Bar',
-                                    'fas fa-wine-glass-alt' => 'Vin',
-                                    'fas fa-tshirt' => 'Blanchisserie',
-                                    'fas fa-laptop' => 'Ordinateur',
-                                    'fas fa-phone' => 'Téléphone',
-                                    'fas fa-coffee' => 'Café',
-                                    'fas fa-snowflake' => 'Climatisation',
-                                    'fas fa-hot-tub' => 'Jacuzzi',
-                                    'fas fa-bath' => 'Baignoire',
-                                    'fas fa-shower' => 'Douche',
-                                    'fas fa-iron' => 'Fer à repasser',
-                                    'fas fa-baby' => 'Équipement bébé',
+                                    'fas fa-wifi' => __('facility.icon_wifi'),
+                                    'fas fa-swimming-pool' => __('facility.icon_pool'),
+                                    'fas fa-dumbbell' => __('facility.icon_gym'),
+                                    'fas fa-concierge-bell' => __('facility.icon_room_service'),
+                                    'fas fa-parking' => __('facility.icon_parking'),
+                                    'fas fa-utensils' => __('facility.icon_restaurant'),
+                                    'fas fa-spa' => __('facility.icon_spa'),
+                                    'fas fa-tv' => __('facility.icon_tv'),
+                                    'fas fa-shuttle-van' => __('facility.icon_shuttle'),
+                                    'fas fa-cocktail' => __('facility.icon_bar'),
+                                    'fas fa-wine-glass-alt' => __('facility.icon_wine'),
+                                    'fas fa-tshirt' => __('facility.icon_laundry'),
+                                    'fas fa-laptop' => __('facility.icon_computer'),
+                                    'fas fa-phone' => __('facility.icon_phone'),
+                                    'fas fa-coffee' => __('facility.icon_coffee'),
+                                    'fas fa-snowflake' => __('facility.icon_ac'),
+                                    'fas fa-hot-tub' => __('facility.icon_jacuzzi'),
+                                    'fas fa-bath' => __('facility.icon_bathtub'),
+                                    'fas fa-shower' => __('facility.icon_shower'),
+                                    'fas fa-iron' => __('facility.icon_iron'),
+                                    'fas fa-baby' => __('facility.icon_baby'),
                                 ];
                             @endphp
 
                             <select name="icon" class="form-select" id="iconSelect">
-                                <option value="">-- Aucune icône --</option>
+                                <option value="">{{ __('facility.form_icon_none') }}</option>
                                 @foreach($icons as $class => $label)
                                     <option value="{{ $class }}" {{ old('icon') == $class ? 'selected' : '' }}>
                                         {{ $label }}
@@ -427,7 +427,7 @@ textarea.form-control {
 
                             {{-- Aperçu de l'icône sélectionnée --}}
                             <div class="mt-2 d-flex align-items-center">
-                                <small class="text-muted me-2">Aperçu :</small>
+                                <small class="text-muted me-2">{{ __('facility.form_icon_preview') }}</small>
                                 <span id="iconPreview" class="icon-preview">
                                     <i class="fas fa-ban text-muted"></i>
                                 </span>
@@ -435,7 +435,7 @@ textarea.form-control {
 
                             {{-- Grille alternative --}}
                             <details class="mt-2">
-                                <summary class="text-muted small">Choisir dans la grille</summary>
+                                <summary class="text-muted small">{{ __('facility.form_icon_grid') }}</summary>
                                 <div class="icon-grid">
                                     @foreach($icons as $class => $label)
                                         <label class="icon-option">
@@ -453,10 +453,10 @@ textarea.form-control {
                         {{-- Actions --}}
                         <div class="form-actions">
                             <a href="{{ route('facility.index') }}" class="btn btn-gray">
-                                <i class="fas fa-times"></i> Annuler
+                                <i class="fas fa-times"></i> {{ __('facility.form_cancel') }}
                             </a>
                             <button type="submit" class="btn btn-green">
-                                <i class="fas fa-save"></i> Enregistrer
+                                <i class="fas fa-save"></i> {{ __('facility.form_save') }}
                             </button>
                         </div>
                     </form>

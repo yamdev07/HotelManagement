@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Restaurant - Suivi des Ventes')
+@section('title', __('restaurant.sales.page_title'))
 @section('content')
 
 @include('restaurant.partials.nav-tabs')
@@ -7,12 +7,12 @@
 <div class="db-page">
     <div class="db-header anim-1">
         <div>
-            <h1 class="db-title-h1">Suivi des Ventes</h1>
-            <p class="text-muted small">Analysez les performances et le chiffre d'affaires du restaurant</p>
+            <h1 class="db-title-h1">{{ __('restaurant.sales.header') }}</h1>
+            <p class="text-muted small">{{ __('restaurant.sales.header_desc') }}</p>
         </div>
         <div class="d-flex gap-2">
             <button class="btn btn-outline-secondary d-flex align-items-center gap-2" onclick="window.print()" style="border-radius: 10px; font-weight: 600;">
-                <i class="fas fa-print"></i> Imprimer le rapport
+                <i class="fas fa-print"></i> {!! __('restaurant.sales.print_report') !!}
             </button>
         </div>
     </div>
@@ -22,28 +22,28 @@
         <div class="kpi-card">
             <div class="kpi-icon" style="background: var(--g50); color: var(--g600);"><i class="fas fa-chart-line"></i></div>
             <div class="kpi-data">
-                <div class="kpi-label">CHIFFRE D'AFFAIRES TOTAL</div>
+                <div class="kpi-label">{{ __('restaurant.sales.kpi_total_revenue') }}</div>
                 <div class="kpi-value">{{ number_format($totalRevenue, 0, ',', ' ') }} <small style="font-size: .6em; color: var(--s400);">CFA</small></div>
             </div>
         </div>
         <div class="kpi-card">
             <div class="kpi-icon" style="background: #f0fdf4; color: #10b981;"><i class="fas fa-calendar-day"></i></div>
             <div class="kpi-data">
-                <div class="kpi-label">REVENUS AUJOURD'HUI</div>
+                <div class="kpi-label">{{ __('restaurant.sales.kpi_today') }}</div>
                 <div class="kpi-value text-success">{{ number_format($todayRevenue, 0, ',', ' ') }}</div>
             </div>
         </div>
         <div class="kpi-card">
             <div class="kpi-icon" style="background: #eff6ff; color: #2563eb;"><i class="fas fa-calendar-alt"></i></div>
             <div class="kpi-data">
-                <div class="kpi-label">CHIFFRE DU MOIS</div>
+                <div class="kpi-label">{{ __('restaurant.sales.kpi_month') }}</div>
                 <div class="kpi-value text-primary">{{ number_format($monthRevenue, 0, ',', ' ') }}</div>
             </div>
         </div>
         <div class="kpi-card">
             <div class="kpi-icon" style="background: #fffbeb; color: #d97706;"><i class="fas fa-receipt"></i></div>
             <div class="kpi-data">
-                <div class="kpi-label">TOTAL COMMANDES</div>
+                <div class="kpi-label">{{ __('restaurant.sales.kpi_orders') }}</div>
                 <div class="kpi-value text-warning">{{ number_format($totalOrders, 0, ',', ' ') }}</div>
             </div>
         </div>
@@ -54,7 +54,7 @@
         <div class="col-lg-8 mb-4">
             <div class="db-card h-100 anim-3">
                 <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
-                    <i class="fas fa-chart-bar text-primary"></i> Revenus · 7 derniers jours
+                    <i class="fas fa-chart-bar text-primary"></i> {!! __('restaurant.sales.chart_revenue') !!}
                 </h5>
                 <div style="height: 300px;">
                     <canvas id="dailyChart"></canvas>
@@ -66,7 +66,7 @@
         <div class="col-lg-4 mb-4">
             <div class="db-card h-100 anim-3" style="animation-delay: 0.3s;">
                 <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
-                    <i class="fas fa-chart-pie text-info"></i> Par catégorie
+                    <i class="fas fa-chart-pie text-info"></i> {!! __('restaurant.sales.chart_category') !!}
                 </h5>
                 <div class="d-flex align-items-center justify-content-center" style="height: 300px;">
                     <canvas id="categoryChart"></canvas>
@@ -80,17 +80,17 @@
         <div class="col-lg-7 mb-4">
             <div class="db-card anim-3" style="animation-delay: 0.4s;">
                 <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
-                    <i class="fas fa-trophy text-warning"></i> Top 10 · Plats les plus vendus
+                    <i class="fas fa-trophy text-warning"></i> {!! __('restaurant.sales.chart_top10') !!}
                 </h5>
                 <div class="table-responsive">
                     <table class="db-table">
                         <thead>
                             <tr>
                                 <th style="width: 50px;">#</th>
-                                <th>Désignation du plat</th>
-                                <th>Catégorie</th>
-                                <th class="text-center">Ventes</th>
-                                <th class="text-end">Recettes</th>
+                                <th>{{ __('restaurant.sales.th_dish') }}</th>
+                                <th>{{ __('restaurant.sales.th_category') }}</th>
+                                <th class="text-center">{{ __('restaurant.sales.th_sales') }}</th>
+                                <th class="text-end">{{ __('restaurant.sales.th_revenue') }}</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -103,7 +103,7 @@
                                         <span class="text-muted small">#{{ $i + 1 }}</span>
                                     @endif
                                 </td>
-                                <td class="fw-bold">{{ $item->menu->name ?? 'Article inconnu' }}</td>
+                                <td class="fw-bold">{{ $item->menu->name ?? __('restaurant.sales.unknown_item') }}</td>
                                 <td>
                                     @if($item->menu)
                                         <span class="badge bg-light text-dark border px-2 py-1">{{ ucfirst($item->menu->category) }}</span>
@@ -123,7 +123,7 @@
         <div class="col-lg-5 mb-4">
             <div class="db-card anim-3" style="animation-delay: 0.5s;">
                 <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
-                    <i class="fas fa-chart-area text-success"></i> Évolution mensuelle (12 mois)
+                    <i class="fas fa-chart-area text-success"></i> {!! __('restaurant.sales.chart_monthly') !!}
                 </h5>
                 <div style="height: 300px;">
                     <canvas id="monthlyChart"></canvas>
@@ -161,12 +161,12 @@
         data: {
             labels: daily.labels,
             datasets: [{
-                label: 'Revenus (CFA)',
+                label: '{{ __("restaurant.sales.dataset_revenue") }}',
                 data: daily.values,
                 backgroundColor: '#2e8540',
                 borderRadius: 5,
             }, {
-                label: 'Commandes',
+                label: '{{ __("restaurant.sales.dataset_orders") }}',
                 data: daily.orderCounts,
                 type: 'line',
                 borderColor: '#2563eb',
@@ -205,7 +205,7 @@
         data: {
             labels: mLabels,
             datasets: [{
-                label: 'CA mensuel',
+                label: '{{ __("restaurant.sales.monthly_ca") }}',
                 data: mValues,
                 borderColor: '#10b981',
                 backgroundColor: 'rgba(16,185,129,0.1)',

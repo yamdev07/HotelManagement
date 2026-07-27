@@ -18,8 +18,8 @@ class TypeUniquenessTest extends TestCase
     private function hotel(): Hotel
     {
         return Hotel::create([
-            'name'      => 'Hotel '.Str::random(5),
-            'slug'      => Str::slug('Hotel '.Str::random(6)),
+            'name' => 'Hotel '.Str::random(5),
+            'slug' => Str::slug('Hotel '.Str::random(6)),
             'is_active' => true,
         ]);
     }

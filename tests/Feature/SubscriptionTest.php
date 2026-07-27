@@ -22,12 +22,12 @@ class SubscriptionTest extends TestCase
     private function makeHotel(array $attrs = []): Hotel
     {
         return Hotel::create(array_merge([
-            'name'                    => 'Hotel Sub',
-            'slug'                    => Str::slug('Hotel Sub '.Str::random(4)),
-            'is_active'               => true,
-            'plan'                    => 'pro',
+            'name' => 'Hotel Sub',
+            'slug' => Str::slug('Hotel Sub '.Str::random(4)),
+            'is_active' => true,
+            'plan' => 'pro',
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ], $attrs));
     }
 
@@ -37,9 +37,9 @@ class SubscriptionTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel Essai',
-            'plan'         => 'pro',
-            'admin_name'   => 'X',
-            'admin_email'  => 'x@essai.test',
+            'plan' => 'pro',
+            'admin_name' => 'X',
+            'admin_email' => 'x@essai.test',
         ]);
 
         $hotel = Hotel::where('name', 'Hotel Essai')->first();

@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Sessions de Caisse')
+@section('title', __('cashier-sessions.title'))
 
 @push('styles')
 <style>
@@ -422,23 +422,23 @@
             <div>
                 <h1 class="header-title">
                     <i class="fas fa-history"></i>
-                    Sessions de Caisse
+                    {{ __('cashier-sessions.title') }}
                 </h1>
-                <p class="text-muted small mt-2">Gérez et consultez toutes les sessions de caisse</p>
+                <p class="text-muted small mt-2">{{ __('cashier-sessions.subtitle') }}</p>
             </div>
             @if(in_array(auth()->user()->role, ['Admin', 'Super']))
             <a href="{{ route('cashier.sessions.create') }}" class="btn btn-green">
-                <i class="fas fa-plus"></i> Nouvelle session
+                <i class="fas fa-plus"></i> {{ __('cashier-sessions.new_session') }}
             </a>
             @endif
         </div>
         
         <div class="breadcrumb">
-            <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Accueil</a>
+            <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> {{ __('cashier-sessions.home') }}</a>
             <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-            <a href="{{ route('cashier.dashboard') }}">Caissier</a>
+            <a href="{{ route('cashier.dashboard') }}">{{ __('cashier-sessions.cashier') }}</a>
             <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-            <span class="active">Sessions</span>
+            <span class="active">{{ __('cashier-sessions.sessions') }}</span>
         </div>
     </div>
 
@@ -453,43 +453,43 @@
     @endphp
 
     <div class="stats-grid anim-2">
-        <div class="stat-card">
-            <div class="stat-label">Total sessions</div>
-            <div class="stat-value">{{ $totalSessions }}</div>
-            <div class="stat-subtitle">Depuis le début</div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-label">Sessions actives</div>
-            <div class="stat-value stat-value-green">{{ $activeSessions }}</div>
-            <div class="stat-subtitle">En cours</div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-label">Chiffre d'affaires</div>
-            <div class="stat-value stat-value-green">{{ number_format($totalRevenue, 0, ',', ' ') }}</div>
-            <div class="stat-subtitle">FCFA total</div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-label">Moyenne/session</div>
-            <div class="stat-value">{{ number_format($avgSession, 0, ',', ' ') }}</div>
-            <div class="stat-subtitle">FCFA par session</div>
-        </div>
+            <div class="stat-card">
+                <div class="stat-label">{{ __('cashier-sessions.stat_total_sessions') }}</div>
+                <div class="stat-value">{{ $totalSessions }}</div>
+                <div class="stat-subtitle">{{ __('cashier-sessions.stat_total_since') }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">{{ __('cashier-sessions.stat_active_sessions') }}</div>
+                <div class="stat-value stat-value-green">{{ $activeSessions }}</div>
+                <div class="stat-subtitle">{{ __('cashier-sessions.stat_active_en_cours') }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">{{ __('cashier-sessions.stat_revenue') }}</div>
+                <div class="stat-value stat-value-green">{{ number_format($totalRevenue, 0, ',', ' ') }}</div>
+                <div class="stat-subtitle">{{ __('cashier-sessions.stat_revenue_total') }}</div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-label">{{ __('cashier-sessions.stat_avg_session') }}</div>
+                <div class="stat-value">{{ number_format($avgSession, 0, ',', ' ') }}</div>
+                <div class="stat-subtitle">{{ __('cashier-sessions.stat_avg_per_session') }}</div>
+            </div>
     </div>
 
     {{-- Filtres --}}
     <div class="filters-row anim-3">
         <div class="filter-group">
             <select class="filter-select" id="status-filter">
-                <option value="">Tous les statuts</option>
-                <option value="active">Sessions actives</option>
-                <option value="closed">Sessions fermées</option>
+                <option value="">{{ __('cashier-sessions.filter_all_statuses') }}</option>
+                <option value="active">{{ __('cashier-sessions.filter_active_sessions') }}</option>
+                <option value="closed">{{ __('cashier-sessions.filter_closed_sessions') }}</option>
             </select>
         </div>
         <div class="filter-group">
             <select class="filter-select" id="user-filter">
-                <option value="">Tous les utilisateurs</option>
+                <option value="">{{ __('cashier-sessions.filter_all_users') }}</option>
                 @if(isset($allUsers) && $allUsers)
                     @foreach($allUsers as $user)
                         <option value="{{ $user->id }}">{{ $user->name }}</option>
@@ -498,14 +498,14 @@
             </select>
         </div>
         <div class="filter-group">
-            <input type="date" class="filter-input" id="date-filter" placeholder="Date">
+            <input type="date" class="filter-input" id="date-filter" placeholder="{{ __('cashier-sessions.filter_date_placeholder') }}">
         </div>
         <div class="filter-group d-flex gap-2">
             <button class="btn btn-green" id="apply-filters">
-                <i class="fas fa-filter"></i> Filtrer
+                <i class="fas fa-filter"></i> {{ __('cashier-sessions.filter_apply') }}
             </button>
             <button class="btn btn-gray" id="reset-filters">
-                <i class="fas fa-undo"></i> Réinitialiser
+                <i class="fas fa-undo"></i> {{ __('cashier-sessions.filter_reset') }}
             </button>
         </div>
     </div>
@@ -517,16 +517,16 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Réceptionniste</th>
-                        <th>Début</th>
-                        <th>Fin</th>
-                        <th>Durée</th>
-                        <th>Initial</th>
-                        <th>Final</th>
-                        <th>Différence</th>
-                        <th>Statut</th>
-                        <th>Actions</th>
+                        <th>{{ __('cashier-sessions.col_id') }}</th>
+                        <th>{{ __('cashier-sessions.col_receptionist') }}</th>
+                        <th>{{ __('cashier-sessions.col_start') }}</th>
+                        <th>{{ __('cashier-sessions.col_end') }}</th>
+                        <th>{{ __('cashier-sessions.col_duration') }}</th>
+                        <th>{{ __('cashier-sessions.col_initial') }}</th>
+                        <th>{{ __('cashier-sessions.col_final') }}</th>
+                        <th>{{ __('cashier-sessions.col_difference') }}</th>
+                        <th>{{ __('cashier-sessions.col_status') }}</th>
+                        <th>{{ __('cashier-sessions.col_actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -552,7 +552,7 @@
                                     @endif
                                 </div>
                                 <div class="user-details">
-                                    <div class="user-name">{{ $session->user->name ?? 'Utilisateur inconnu' }}</div>
+                                    <div class="user-name">{{ $session->user->name ?? __('cashier-sessions.unknown_user') }}</div>
                                     <div class="user-role">{{ $session->user->role ?? 'N/A' }}</div>
                                 </div>
                             </div>
@@ -566,7 +566,7 @@
                                 <div>{{ $session->end_time->format('d/m/Y') }}</div>
                                 <small class="text-muted">{{ $session->end_time->format('H:i') }}</small>
                             @else
-                                <span class="badge badge-green">En cours</span>
+                                <span class="badge badge-green">{{ __('cashier-sessions.in_progress') }}</span>
                             @endif
                         </td>
                         <td>
@@ -581,25 +581,25 @@
                                 {{ $difference > 0 ? '+' : '' }}{{ number_format($difference, 0, ',', ' ') }}
                             </span>
                             @if($session->status == 'active')
-                                <span class="amount-diff text-muted" data-tooltip="Solde actuel">(estimé)</span>
+                                <span class="amount-diff text-muted" data-tooltip="{{ __('cashier-sessions.tooltip_current_balance') }}">{{ __('cashier-sessions.estimated') }}</span>
                             @endif
                         </td>
                         <td>
                             <span class="badge {{ $session->status == 'active' ? 'badge-green' : 'badge-gray' }}">
-                                {{ $session->status == 'active' ? 'Active' : 'Fermée' }}
+                                {{ $session->status == 'active' ? __('cashier-sessions.status_active') : __('cashier-sessions.status_closed') }}
                             </span>
                         </td>
                         <td>
                             <div class="d-flex gap-1" onclick="event.stopPropagation();">
                                 <a href="{{ route('cashier.sessions.show', $session) }}" 
                                    class="btn-icon" 
-                                   title="Voir détails">
+                                   title="{{ __('cashier-sessions.btn_view_details') }}">
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 @if($session->status == 'closed')
                                 <a href="{{ route('cashier.sessions.report', $session) }}" 
                                    class="btn-icon"
-                                   title="Rapport détaillé">
+                                   title="{{ __('cashier-sessions.btn_report') }}">
                                     <i class="fas fa-file-pdf"></i>
                                 </a>
                                 @endif
@@ -622,11 +622,11 @@
             <div class="empty-icon">
                 <i class="fas fa-history"></i>
             </div>
-            <h5 class="fw-bold mb-2">Aucune session</h5>
-            <p class="text-muted mb-3">Aucune session de caisse n'a été trouvée.</p>
+            <h5 class="fw-bold mb-2">{{ __('cashier-sessions.empty_title') }}</h5>
+            <p class="text-muted mb-3">{{ __('cashier-sessions.empty_message') }}</p>
             @if(in_array(auth()->user()->role, ['Admin', 'Super']))
             <a href="{{ route('cashier.sessions.create') }}" class="btn btn-green">
-                <i class="fas fa-plus"></i> Démarrer une session
+                <i class="fas fa-plus"></i> {{ __('cashier-sessions.btn_start_session') }}
             </a>
             @endif
         </div>

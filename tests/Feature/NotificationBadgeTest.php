@@ -19,18 +19,18 @@ class NotificationBadgeTest extends TestCase
     public function test_visiting_notifications_marks_all_as_read(): void
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Notif',
-            'slug'                    => Str::slug('Hotel Notif '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Notif',
+            'slug' => Str::slug('Hotel Notif '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         $user = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
         // Deux notifications non lues
         foreach (range(1, 2) as $i) {
             $user->notifications()->create([
-                'id'   => (string) Str::uuid(),
+                'id' => (string) Str::uuid(),
                 'type' => 'App\\Notifications\\Dummy',
                 'data' => ['title' => 'Test '.$i, 'url' => '/'],
             ]);

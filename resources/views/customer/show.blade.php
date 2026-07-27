@@ -568,9 +568,9 @@
 
     {{-- Breadcrumb --}}
     <div class="breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home"></i> {{ __('customer.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('customer.index') }}">Clients</a>
+        <a href="{{ route('customer.index') }}">{{ __('customer.clients') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">{{ $customer->name }}</span>
     </div>
@@ -582,10 +582,10 @@
                 <span class="header-icon"><i class="fas fa-user"></i></span>
                 <h1>{{ $customer->name }}</h1>
             </div>
-            <p class="header-subtitle">Fiche client détaillée</p>
+            <p class="header-subtitle">{{ __('customer.detailed_profile') }}</p>
         </div>
         <a href="{{ route('customer.edit', $customer->id) }}" class="btn btn-gray">
-            <i class="fas fa-edit"></i> Modifier
+            <i class="fas fa-edit"></i> {{ __('customer.edit') }}
         </a>
     </div>
 
@@ -613,18 +613,18 @@
     <div class="stats-grid anim-3">
         <div class="stat-card">
             <div class="stat-number">{{ $totalReservations }}</div>
-            <div class="stat-label">Réservations</div>
-            <div class="stat-footer"><i class="fas fa-calendar-check"></i> totales</div>
+            <div class="stat-label">{{ __('customer.total_reservations') }}</div>
+            <div class="stat-footer"><i class="fas fa-calendar-check"></i> {{ __('customer.total') }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-number">{{ $totalNights }}</div>
-            <div class="stat-label">Nuits passées</div>
-            <div class="stat-footer"><i class="fas fa-moon"></i> au total</div>
+            <div class="stat-label">{{ __('customer.nights_spent') }}</div>
+            <div class="stat-footer"><i class="fas fa-moon"></i> {{ __('customer.overall') }}</div>
         </div>
         <div class="stat-card">
             <div class="stat-number">{{ $activeReservations }}</div>
-            <div class="stat-label">En cours</div>
-            <div class="stat-footer"><i class="fas fa-clock"></i> actuellement</div>
+            <div class="stat-label">{{ __('customer.in_progress') }}</div>
+            <div class="stat-footer"><i class="fas fa-clock"></i> {{ __('customer.currently') }}</div>
         </div>
     </div>
 
@@ -638,7 +638,7 @@
                          class="profile-avatar">
                     <h2 class="profile-name">{{ $customer->name }}</h2>
                     @if($customer->job)<div class="profile-job">{{ $customer->job }}</div>@endif
-                    <span class="profile-badge"><i class="fas fa-id-card"></i> Client #{{ $customer->id }}</span>
+                    <span class="profile-badge"><i class="fas fa-id-card"></i> {{ __('customer.client') }} #{{ $customer->id }}</span>
                 </div>
                 
                 <div class="profile-body">
@@ -646,27 +646,27 @@
                     {{-- Contact --}}
                     <div class="profile-section">
                         <div class="section-title">
-                            <i class="fas fa-address-card"></i> Contact
+                            <i class="fas fa-address-card"></i> {{ __('customer.contact') }}
                         </div>
                         
                         @if($customer->user && $customer->user->email)
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-envelope"></i></div>
-                            <div><span class="info-label">Email</span><div class="info-value"><a href="mailto:{{ $customer->user->email }}">{{ $customer->user->email }}</a></div></div>
+                            <div><span class="info-label">{{ __('customer.email') }}</span><div class="info-value"><a href="mailto:{{ $customer->user->email }}">{{ $customer->user->email }}</a></div></div>
                         </div>
                         @endif
                         
                         @if($customer->phone)
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-phone"></i></div>
-                            <div><span class="info-label">Téléphone</span><div class="info-value">{{ $customer->phone }}</div></div>
+                            <div><span class="info-label">{{ __('customer.phone') }}</span><div class="info-value">{{ $customer->phone }}</div></div>
                         </div>
                         @endif
                         
                         @if($customer->address)
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-map-marker-alt"></i></div>
-                            <div><span class="info-label">Adresse</span><div class="info-value">{{ $customer->address }}</div></div>
+                            <div><span class="info-label">{{ __('customer.address') }}</span><div class="info-value">{{ $customer->address }}</div></div>
                         </div>
                         @endif
                     </div>
@@ -674,13 +674,13 @@
                     {{-- Informations personnelles --}}
                     <div class="profile-section">
                         <div class="section-title">
-                            <i class="fas fa-user-circle"></i> Personnel
+                            <i class="fas fa-user-circle"></i> {{ __('customer.personal') }}
                         </div>
                         
                         @if($customer->gender)
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-venus-mars"></i></div>
-                            <div><span class="info-label">Genre</span><div class="info-value">{{ $customer->gender }}</div></div>
+                            <div><span class="info-label">{{ __('customer.gender') }}</span><div class="info-value">{{ $customer->gender }}</div></div>
                         </div>
                         @endif
                         
@@ -688,8 +688,8 @@
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-cake-candles"></i></div>
                             <div>
-                                <span class="info-label">Date de naissance</span>
-                                <div class="info-value">{{ \Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y') }} ({{ \Carbon\Carbon::parse($customer->birthdate)->age }} ans)</div>
+                                <span class="info-label">{{ __('customer.date_of_birth') }}</span>
+                                <div class="info-value">{{ \Carbon\Carbon::parse($customer->birthdate)->format('d/m/Y') }} ({{ \Carbon\Carbon::parse($customer->birthdate)->age }} {{ __('customer.age_suffix') }})</div>
                             </div>
                         </div>
                         @endif
@@ -697,7 +697,7 @@
                         <div class="info-item">
                             <div class="info-icon"><i class="fas fa-calendar-alt"></i></div>
                             <div>
-                                <span class="info-label">Client depuis</span>
+                                <span class="info-label">{{ __('customer.customer_since') }}</span>
                                 <div class="info-value">{{ $customer->created_at->format('d/m/Y') }}</div>
                             </div>
                         </div>
@@ -706,32 +706,32 @@
                     {{-- Actions rapides --}}
                     <div class="profile-section">
                         <div class="section-title">
-                            <i class="fas fa-bolt"></i> Actions rapides
+                            <i class="fas fa-bolt"></i> {{ __('customer.quick_actions') }}
                         </div>
                         
                         <div class="actions-grid">
                             <a href="{{ route('customer.edit', $customer->id) }}" class="action-card">
                                 <div class="action-icon"><i class="fas fa-edit"></i></div>
-                                <div class="action-title">Modifier</div>
-                                <div class="action-subtitle">Mettre à jour</div>
+                                <div class="action-title">{{ __('customer.edit') }}</div>
+                                <div class="action-subtitle">{{ __('customer.update') }}</div>
                             </a>
                             
                             <a href="{{ route('transaction.reservation.createIdentity') }}?customer_id={{ $customer->id }}" class="action-card">
                                 <div class="action-icon"><i class="fas fa-calendar-plus"></i></div>
-                                <div class="action-title">Réserver</div>
-                                <div class="action-subtitle">Nouveau séjour</div>
+                                <div class="action-title">{{ __('customer.book') }}</div>
+                                <div class="action-subtitle">{{ __('customer.new_stay') }}</div>
                             </a>
                             
                             <a href="{{ route('transaction.reservation.customerReservations', $customer->id) }}" class="action-card">
                                 <div class="action-icon"><i class="fas fa-history"></i></div>
-                                <div class="action-title">Historique</div>
-                                <div class="action-subtitle">Toutes les réservations</div>
+                                <div class="action-title">{{ __('customer.history') }}</div>
+                                <div class="action-subtitle">{{ __('customer.all_reservations') }}</div>
                             </a>
                             
                             <a href="{{ route('customer.index') }}" class="action-card">
                                 <div class="action-icon"><i class="fas fa-arrow-left"></i></div>
-                                <div class="action-title">Retour</div>
-                                <div class="action-subtitle">Liste des clients</div>
+                                <div class="action-title">{{ __('customer.back') }}</div>
+                                <div class="action-subtitle">{{ __('customer.customers_list') }}</div>
                             </a>
                         </div>
                     </div>
@@ -744,8 +744,8 @@
             {{-- Réservations en cours --}}
             <div class="profile-card anim-4">
                 <div class="profile-header" style="background: linear-gradient(135deg, var(--gray-700), var(--gray-800));">
-                    <h2 class="profile-name" style="font-size:1.2rem;"><i class="fas fa-calendar-check me-2"></i> Réservations en cours</h2>
-                    <span class="profile-badge">{{ $activeReservations }} active(s)</span>
+                    <h2 class="profile-name" style="font-size:1.2rem;"><i class="fas fa-calendar-check me-2"></i> {{ __('customer.active_reservations') }}</h2>
+                    <span class="profile-badge">{{ __('customer.active_count', ['count' => $activeReservations]) }}</span>
                 </div>
                 
                 <div class="profile-body">
@@ -769,13 +769,13 @@
                                         <div class="res-room">
                                             <div class="res-room-icon"><i class="fas fa-bed"></i></div>
                                             <div class="res-room-info">
-                                                <h6>Chambre {{ $t->room->number ?? 'N/A' }}</h6>
-                                                <small>{{ $t->room->type->name ?? 'Standard' }}</small>
+                                                <h6>{{ __('customer.room') }} {{ $t->room->number ?? 'N/A' }}</h6>
+                                                <small>{{ $t->room->type->name ?? __('customer.standard') }}</small>
                                             </div>
                                         </div>
                                         <span class="res-status status-{{ $isActive ? 'active' : 'upcoming' }}">
                                             <i class="fas fa-{{ $isActive ? 'user-check' : 'clock' }}"></i>
-                                            {{ $isActive ? 'En cours' : 'À venir' }}
+                                            {{ $isActive ? __('customer.status_in_progress') : __('customer.status_upcoming') }}
                                         </span>
                                     </div>
                                     
@@ -784,7 +784,7 @@
                                             <div class="res-date">
                                                 <div class="res-date-icon"><i class="fas fa-sign-in-alt"></i></div>
                                                 <div class="res-date-info">
-                                                    <span class="label">Arrivée</span>
+                                                    <span class="label">{{ __('customer.arrival') }}</span>
                                                     <div class="value">{{ $checkIn->format('d/m/Y') }}</div>
                                                     <div class="time">{{ $checkIn->format('H:i') }}</div>
                                                 </div>
@@ -793,7 +793,7 @@
                                             <div class="res-date">
                                                 <div class="res-date-icon"><i class="fas fa-sign-out-alt"></i></div>
                                                 <div class="res-date-info">
-                                                    <span class="label">Départ</span>
+                                                    <span class="label">{{ __('customer.departure') }}</span>
                                                     <div class="value">{{ $checkOut->format('d/m/Y') }}</div>
                                                     <div class="time">{{ $checkOut->format('H:i') }}</div>
                                                 </div>
@@ -802,25 +802,25 @@
                                         
                                         <div class="res-details">
                                             <div class="res-detail-item">
-                                                <span class="res-detail-label">Nuits</span>
+                                                <span class="res-detail-label">{{ __('customer.nights') }}</span>
                                                 <span class="res-detail-value">{{ $nights }}</span>
                                             </div>
                                             <div class="res-detail-item">
-                                                <span class="res-detail-label">Total</span>
+                                                <span class="res-detail-label">{{ __('customer.total_label') }}</span>
                                                 <span class="res-detail-value">{{ number_format($t->total_price, 0, ',', ' ') }} <small>FCFA</small></span>
                                             </div>
                                             @if($balance > 0)
                                             <div class="res-detail-item">
-                                                <span class="res-detail-label">Solde</span>
+                                                <span class="res-detail-label">{{ __('customer.balance') }}</span>
                                                 <span class="res-detail-value" style="color:var(--red-500);">{{ number_format($balance, 0, ',', ' ') }}</span>
                                             </div>
                                             @endif
                                         </div>
                                         
                                         <div class="res-footer">
-                                            <a href="{{ route('transaction.show', $t->id) }}" class="btn btn-outline btn-sm">Détails</a>
+                                            <a href="{{ route('transaction.show', $t->id) }}" class="btn btn-outline btn-sm">{{ __('customer.details') }}</a>
                                             @if($balance > 0)
-                                            <a href="{{ route('transaction.payment.create', $t->id) }}" class="btn btn-green btn-sm">Payer</a>
+                                            <a href="{{ route('transaction.payment.create', $t->id) }}" class="btn btn-green btn-sm">{{ __('customer.pay') }}</a>
                                             @endif
                                         </div>
                                     </div>
@@ -830,8 +830,8 @@
                     @else
                         <div class="text-center py-5">
                             <i class="fas fa-calendar-times fa-3x" style="color:var(--gray-300); margin-bottom:12px;"></i>
-                            <h6>Aucune réservation en cours</h6>
-                            <p class="text-muted small">Ce client n'a pas de réservation active.</p>
+                            <h6>{{ __('customer.no_active_reservations_title') }}</h6>
+                            <p class="text-muted small">{{ __('customer.no_active_reservations_text') }}</p>
                         </div>
                     @endif
                 </div>
@@ -845,8 +845,8 @@
             @if($pastStays->count() > 0)
             <div class="profile-card mt-4 anim-4">
                 <div class="profile-header" style="background: linear-gradient(135deg, var(--gray-600), var(--gray-700));">
-                    <h2 class="profile-name" style="font-size:1.2rem;"><i class="fas fa-history me-2"></i> Historique</h2>
-                    <span class="profile-badge">{{ $completedReservations }} terminée(s)</span>
+                    <h2 class="profile-name" style="font-size:1.2rem;"><i class="fas fa-history me-2"></i> {{ __('customer.history') }}</h2>
+                    <span class="profile-badge">{{ __('customer.completed_count', ['count' => $completedReservations]) }}</span>
                 </div>
                 
                 <div class="profile-body">
@@ -867,16 +867,16 @@
                                             <small>{{ $t->room->type->name ?? 'Standard' }}</small>
                                         </div>
                                     </div>
-                                    <span class="res-status status-completed"><i class="fas fa-check-circle"></i> Terminé</span>
+                                    <span class="res-status status-completed"><i class="fas fa-check-circle"></i> {{ __('customer.status_completed') }}</span>
                                 </div>
                                 
                                 <div class="res-body">
                                     <div class="res-dates mb-3">
                                         <div class="d-flex align-items-center gap-2">
-                                            <small class="text-muted">Du</small>
+                                            <small class="text-muted">{{ __('customer.from') }}</small>
                                             <span class="fw-semibold">{{ $checkIn->format('d/m/Y') }}</span>
                                             <i class="fas fa-arrow-right text-muted fa-xs"></i>
-                                            <small class="text-muted">au</small>
+                                            <small class="text-muted">{{ __('customer.to') }}</small>
                                             <span class="fw-semibold">{{ $checkOut->format('d/m/Y') }}</span>
                                         </div>
                                     </div>
@@ -893,7 +893,7 @@
                                     </div>
                                     
                                     <div class="res-footer">
-                                        <a href="{{ route('transaction.show', $t->id) }}" class="btn btn-outline btn-sm">Voir</a>
+                                        <a href="{{ route('transaction.show', $t->id) }}" class="btn btn-outline btn-sm">{{ __('customer.view') }}</a>
                                     </div>
                                 </div>
                             </div>
@@ -903,7 +903,7 @@
                     @if($completedReservations > 3)
                     <div class="text-center mt-3">
                         <a href="{{ route('transaction.reservation.customerReservations', $customer->id) }}" class="btn btn-outline btn-sm">
-                            Voir tout l'historique
+                            {{ __('customer.see_all_history') }}
                         </a>
                     </div>
                     @endif
