@@ -439,19 +439,21 @@
                 @php
                     $pop = !empty($tier['popular']);
                     $min = $tier['room_min']; $max = $tier['room_max'];
-                    $rooms = $max === null ? 'Plus de '.($min-1).' chambres' : ($min <= 0 ? "Jusqu'à $max chambres" : "$min à $max chambres");
+                    $rooms = $max === null ? __('flash.plan_business_f1') : ($min <= 0 ? __('flash.plan_starter_f1') : __('flash.plan_pro_f1'));
+                    $taglines = ['starter' => __('flash.plan_starter_tagline'), 'pro' => __('flash.plan_pro_tagline'), 'business' => __('flash.plan_business_tagline')];
+                    $features = ['starter' => [__('flash.plan_starter_f1'), __('flash.plan_starter_f2'), __('flash.plan_starter_f3'), __('flash.plan_starter_f4')], 'pro' => [__('flash.plan_pro_f1'), __('flash.plan_pro_f2'), __('flash.plan_pro_f3'), __('flash.plan_pro_f4')], 'business' => [__('flash.plan_business_f1'), __('flash.plan_business_f2'), __('flash.plan_business_f3'), __('flash.plan_business_f4')]];
                 @endphp
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index*120 }}">
                     <div class="price-card {{ $pop ? 'pop' : '' }} p-4 h-100" data-base="{{ $tier['price'] }}">
-                        @if ($pop)<span class="chip mb-2" style="border-color:var(--brand);color:var(--head)"><i class="fas fa-star" style="color:var(--accent)"></i> {{ __('landing_v2.pricing_popular') }}</span>@endif
+                        @if ($pop)<span class="chip mb-2" style="border-color:var(--brand);color:var(--head)"><i class="fas fa-star" style="color:var(--accent)"></i> {{ __('flash.plan_popular') }}</span>@endif
                         <h4 class="fw-bold">{{ $tier['name'] }}</h4>
-                        <p class="text-muted2 small">{{ $tier['tagline'] }}</p>
+                        <p class="text-muted2 small">{{ $taglines[$key] ?? $tier['tagline'] }}</p>
                         <div class="chip mb-2" style="color:var(--head)"><i class="fas fa-bed" style="color:var(--brand)"></i> {{ $rooms }}@if ($max === null) · illimité @endif</div>
                         <div class="my-2"><span class="price-amount pr-amount">{{ number_format($tier['price'],0,',',' ') }}</span>
-                            <span class="text-muted2"><span class="pr-cur">XOF</span> / {{ __('landing_v2.pricing_month') }}</span></div>
+                            <span class="text-muted2"><span class="pr-cur">XOF</span> {{ __('flash.plan_per_month') }}</span></div>
                         <hr style="border-color:var(--border)">
                         <ul class="list-unstyled mb-4">
-                            @foreach ($tier['features'] as $item)
+                            @foreach (($features[$key] ?? $tier['features']) as $item)
                                 <li class="mb-2 text-muted2"><i class="fas fa-check me-2" style="color:var(--accent)"></i>{{ $item }}</li>
                             @endforeach
                         </ul>

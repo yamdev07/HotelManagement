@@ -18,7 +18,7 @@ class NoEmoji implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (is_string($value) && preg_match(self::EMOJI_PATTERN, $value)) {
-            $fail('Le champ :attribute ne doit pas contenir d\'emoji ou de symbole.');
+            $fail(__('flash.validation_no_emoji', ['attribute' => $attribute]));
         }
     }
 }

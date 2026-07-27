@@ -311,21 +311,25 @@
         </div>
         <div class="row g-4 justify-content-center">
             @foreach (config('plans.tiers') as $key => $tier)
-                @php $popular = ! empty($tier['popular']); @endphp
+                @php
+                    $popular = ! empty($tier['popular']);
+                    $taglines = ['starter' => __('flash.plan_starter_tagline'), 'pro' => __('flash.plan_pro_tagline'), 'business' => __('flash.plan_business_tagline')];
+                    $features = ['starter' => [__('flash.plan_starter_f1'), __('flash.plan_starter_f2'), __('flash.plan_starter_f3'), __('flash.plan_starter_f4')], 'pro' => [__('flash.plan_pro_f1'), __('flash.plan_pro_f2'), __('flash.plan_pro_f3'), __('flash.plan_pro_f4')], 'business' => [__('flash.plan_business_f1'), __('flash.plan_business_f2'), __('flash.plan_business_f3'), __('flash.plan_business_f4')]];
+                @endphp
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index * 130 }}">
                     <div class="price-card p-4 h-100 {{ $popular ? 'popular' : '' }}" data-base="{{ $tier['price'] }}">
                         @if ($popular)
-                            <span class="badge text-white mb-2" style="background:var(--brand)">{{ __('landing.pricing_popular') }}</span>
+                            <span class="badge text-white mb-2" style="background:var(--brand)">{{ __('flash.plan_popular') }}</span>
                         @endif
                         <h4 class="fw-bold">{{ $tier['name'] }}</h4>
-                        <p class="text-secondary small">{{ $tier['tagline'] }}</p>
+                        <p class="text-secondary small">{{ $taglines[$key] ?? $tier['tagline'] }}</p>
                         <div class="price-amount mb-1">
                             <span class="pr-amount">{{ number_format($tier['price'], 0, ',', ' ') }}</span>
-                            <span class="fs-6 text-secondary fw-normal"><span class="pr-cur">XOF</span> / {{ __('landing.pricing_month') }}</span>
+                            <span class="fs-6 text-secondary fw-normal"><span class="pr-cur">XOF</span> {{ __('flash.plan_per_month') }}</span>
                         </div>
                         <hr>
                         <ul class="list-unstyled mb-4">
-                            @foreach ($tier['features'] as $item)
+                            @foreach (($features[$key] ?? $tier['features']) as $item)
                                 <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{{ $item }}</li>
                             @endforeach
                         </ul>

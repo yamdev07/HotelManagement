@@ -88,7 +88,8 @@
                                             @if (! empty($tier['popular']))<span class="badge bg-primary">{{ __('billing.form_popular') }}</span>@endif
                                         </div>
                                         <div class="h4 mt-2 mb-0">{{ $fmt($price) }} <small class="text-muted fs-6">{{ $currency }}{{ __('billing.form_per_month') }}</small></div>
-                                        <div class="small text-muted">{{ $tier['tagline'] }}</div>
+                                        @php $taglines = ['starter' => __('flash.plan_starter_tagline'), 'pro' => __('flash.plan_pro_tagline'), 'business' => __('flash.plan_business_tagline')]; @endphp
+                                        <div class="small text-muted">{{ $taglines[$key] ?? $tier['tagline'] }}</div>
                                     </div>
                                 </label>
                             </div>

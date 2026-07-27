@@ -252,4 +252,29 @@ return [
     'report_this_month' => 'This month',
     'report_this_quarter' => 'This quarter',
     'report_this_year' => 'This year',
+
+    // ─── PLANS ──────────────────────────────────────────
+    'plan_starter_tagline' => 'For a hotel that\'s just starting out',
+    'plan_starter_f1' => 'Up to 10 rooms',
+    'plan_starter_f2' => 'Reservations & check-in',
+    'plan_starter_f3' => 'Cash register & payments',
+    'plan_starter_f4' => 'Email support',
+    'plan_pro_tagline' => 'For growing hotels',
+    'plan_pro_f1' => '11 to 20 rooms',
+    'plan_pro_f2' => 'Restaurant & housekeeping',
+    'plan_pro_f3' => 'Advanced reports',
+    'plan_pro_f4' => 'Priority support',
+    'plan_business_tagline' => 'For large establishments',
+    'plan_business_f1' => 'More than 20 rooms',
+    'plan_business_f2' => 'Unlimited rooms',
+    'plan_business_f3' => 'All features',
+    'plan_business_f4' => 'Dedicated support',
+    'plan_popular' => 'Popular',
+    'plan_per_month' => '/month',
+    'plan_free_trial' => 'Free trial · 14 days · no credit card',
+
+    // ─── VALIDATION ─────────────────────────────────────
+    'validation_no_emoji' => 'The :attribute field must not contain emojis or symbols.',
+    'validation_real_name' => 'The :attribute field must contain a real name (letters).',
+    'default_tagline' => 'Your stay, our passion.',
 ];

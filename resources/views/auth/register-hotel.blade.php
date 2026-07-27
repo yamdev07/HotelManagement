@@ -73,7 +73,8 @@
                                             @if (! empty($tier['popular']))<span class="badge bg-primary">{{ __('register.popular') }}</span>@endif
                                         </div>
                                         <div class="plan-price"><span class="price-amount">{{ number_format($tier['price'], 0, ',', ' ') }}</span> <small class="text-secondary fw-normal price-cur" style="font-size:.8rem">XOF/{{ __('register.month') }}</small></div>
-                                        <div class="small text-secondary">{{ $tier['tagline'] }}</div>
+                                        @php $taglines = ['starter' => __('flash.plan_starter_tagline'), 'pro' => __('flash.plan_pro_tagline'), 'business' => __('flash.plan_business_tagline')]; @endphp
+                                        <div class="small text-secondary">{{ $taglines[$key] ?? $tier['tagline'] }}</div>
                                     </label>
                                 </div>
                             @endforeach

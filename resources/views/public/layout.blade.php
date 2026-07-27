@@ -130,7 +130,7 @@
         <div class="row g-4 align-items-start">
             <div class="col-lg-5">
                 <div class="serif h3 text-white mb-2">{{ $hotel->name }}</div>
-                <p class="small" style="max-width:320px;opacity:.8;">{{ $hotel->tagline ?? 'Votre séjour, notre passion.' }}</p>
+                <p class="small" style="max-width:320px;opacity:.8;">{{ $hotel->tagline ?? __('flash.default_tagline') }}</p>
                 @php $icons = ['facebook'=>'fab fa-facebook-f','instagram'=>'fab fa-instagram','whatsapp'=>'fab fa-whatsapp','website'=>'fas fa-globe']; @endphp
                 @if ($hotel->socialLinks())
                     <div class="d-flex gap-2 mt-3">

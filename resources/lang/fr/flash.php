@@ -252,4 +252,29 @@ return [
     'report_this_month' => 'Ce mois',
     'report_this_quarter' => 'Ce trimestre',
     'report_this_year' => 'Cette année',
+
+    // ─── PLANS ──────────────────────────────────────────
+    'plan_starter_tagline' => 'Pour un hôtel qui démarre',
+    'plan_starter_f1' => 'Jusqu\'à 10 chambres',
+    'plan_starter_f2' => 'Réservations & check-in',
+    'plan_starter_f3' => 'Caisse & paiements',
+    'plan_starter_f4' => 'Support par email',
+    'plan_pro_tagline' => 'Pour les hôtels en croissance',
+    'plan_pro_f1' => 'De 11 à 20 chambres',
+    'plan_pro_f2' => 'Restaurant & housekeeping',
+    'plan_pro_f3' => 'Rapports avancés',
+    'plan_pro_f4' => 'Support prioritaire',
+    'plan_business_tagline' => 'Pour les grands établissements',
+    'plan_business_f1' => 'Plus de 20 chambres',
+    'plan_business_f2' => 'Chambres illimitées',
+    'plan_business_f3' => 'Toutes les fonctionnalités',
+    'plan_business_f4' => 'Accompagnement dédié',
+    'plan_popular' => 'Populaire',
+    'plan_per_month' => '/mois',
+    'plan_free_trial' => 'Essai gratuit · 14 jours · sans carte bancaire',
+
+    // ─── VALIDATION ─────────────────────────────────────
+    'validation_no_emoji' => 'Le champ :attribute ne doit pas contenir d\'emoji ou de symbole.',
+    'validation_real_name' => 'Le champ :attribute doit contenir un vrai nom (des lettres).',
+    'default_tagline' => 'Votre séjour, notre passion.',
 ];
