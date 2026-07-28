@@ -50,6 +50,21 @@ foreach (['config:clear', 'route:clear', 'view:clear'] as $cmd) {
     } catch (\Throwable $e) {
     }
 }
+
+// IMPORTANT : vider l'OPcache PHP, sinon les fichiers .php mis à jour (routes,
+// contrôleurs, enums) restent figés en prod alors que les vues Blade, elles,
+// sont recompilées. C'est LA cause classique de « déployé mais rien ne change ».
+if (function_exists('opcache_reset')) {
+    @opcache_reset();
+    echo "   OPcache réinitialisé (fichiers PHP rechargés)\n";
+} else {
+    echo "   OPcache absent (rien à réinitialiser)\n";
+}
+// Certains hébergeurs isolent l'OPcache CLI de celui du web : on invalide aussi
+// explicitement les fichiers clés côté requête web.
+foreach ([base_path('routes/web.php')] as $f) {
+    if (function_exists('opcache_invalidate') && is_file($f)) { @opcache_invalidate($f, true); }
+}
 echo "   OK (les changements du .env sont pris en compte)\n\n";
 
 echo "1) Migrations...\n";

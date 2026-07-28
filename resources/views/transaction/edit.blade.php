@@ -355,11 +355,12 @@
                 <div class="transaction-card-header">
                     <h5><i class="fas fa-edit"></i> {{ __('edit.edit_reservation_card') }}</h5>
                     <span class="badge-statut badge-{{ $transaction->status }}">
-                        @if($transaction->status == 'reservation') 📅
-                        @elseif($transaction->status == 'active') 🏨
-                        @elseif($transaction->status == 'completed') ✅
-                        @elseif($transaction->status == 'cancelled') ❌
-                        @else 👤
+                        {{-- Icônes Font Awesome au lieu d'emojis, cohérent avec le reste de l'app · issue #185 --}}
+                        @if($transaction->status == 'reservation') <i class="fas fa-calendar-alt"></i>
+                        @elseif($transaction->status == 'active') <i class="fas fa-hotel"></i>
+                        @elseif($transaction->status == 'completed') <i class="fas fa-check-circle"></i>
+                        @elseif($transaction->status == 'cancelled') <i class="fas fa-times-circle"></i>
+                        @else <i class="fas fa-user-times"></i>
                         @endif
                         {{ $transaction->status_label }}
                     </span>
@@ -644,9 +645,11 @@
 
                             <!-- Champ raison d'annulation (caché par défaut) -->
                             <div id="cancelReasonField" style="display: none;" class="mb-3">
-                                <label class="form-label">{{ __('edit.cancel_reason_label') }}</label>
-                                <textarea name="cancel_reason" class="form-control" rows="2" 
+                                <label class="form-label">{{ __('edit.cancel_reason_label') }} <span class="text-danger">*</span></label>
+                                <textarea name="cancel_reason" class="form-control @error('cancel_reason') is-invalid @enderror" rows="2"
+                                          minlength="3" maxlength="500"
                                           placeholder="{{ __('edit.cancel_reason_placeholder') }}">{{ old('cancel_reason', $transaction->cancel_reason) }}</textarea>
+                                @error('cancel_reason')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             @else
                             <div class="alert alert-info">
@@ -1021,7 +1024,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 Swal.fire({ title: '{{ __('edit.js_checking_title') }}', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
                 
-                const response = await fetch(`/transactions/${transactionId}/check-availability`, {
+                const response = await fetch(`/transaction/${transactionId}/check-availability`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

@@ -35,6 +35,21 @@ class OnboardingTest extends TestCase
         $this->actingAs($admin)->get('/dashboard')->assertRedirect(route('onboarding.show'));
     }
 
+    public function test_logged_in_user_cannot_reach_login_or_register_page(): void
+    {
+        // Issue #183 : un connecté ne doit pas pouvoir se reconnecter à un autre
+        // compte depuis /login ou /register · il est renvoyé vers son espace.
+        $hotel = $this->makeHotel(onboarded: true);
+        $user  = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
+
+        $this->actingAs($user)->get('/login')->assertRedirect('/home');
+        $this->actingAs($user)->get('/register')->assertRedirect('/home');
+
+        // Un visiteur non connecté accède bien au formulaire.
+        auth()->logout();
+        $this->get('/login')->assertOk();
+    }
+
     public function test_logged_in_onboarded_admin_is_redirected_from_landing_to_app(): void
     {
         // Issue #195 : un admin déjà connecté et configuré ne doit pas retomber

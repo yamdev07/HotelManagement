@@ -62,7 +62,7 @@
                         </div>
                     </a>
 
-                    @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
+                    @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Manager', 'Receptionist']))
                         @if (Route::has('availability.dashboard'))
                             <a href="{{ route('availability.dashboard') }}"
                                 class="nav-item {{ $activeClass('availability.', false) }}"
@@ -79,7 +79,7 @@
                 @endif
 
                 <!-- ACTIONS RAPIDES -->
-                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
+                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Manager', 'Receptionist']))
                     <div class="nav-section">
                         <div class="nav-section-title">{{ __('sidebar.section_quick_actions') }}</div>
 
@@ -122,7 +122,7 @@
                 @endif
 
                 <!-- OPÉRATIONS -->
-                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist', 'Cashier', 'Servant', 'Cuisiner']))
+                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Manager', 'Receptionist', 'Cashier', 'Servant', 'Cuisiner']))
                     <div class="nav-section">
                         <div class="nav-section-title">{{ __('sidebar.section_operations') }}</div>
 
@@ -171,7 +171,7 @@
                 @endif
 
                 <!-- GESTION -->
-                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
+                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Manager', 'Receptionist']))
                     <div class="nav-section">
                         <div class="nav-section-title">{{ __('sidebar.section_management') }}</div>
 
@@ -203,7 +203,7 @@
                             </a>
                         @endif
 
-                        @if (Route::has('type.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                        @if (Route::has('type.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
                             <a href="{{ route('type.index') }}"
                                 class="nav-item restricted {{ $activeClass('type.index') }}"
                                 data-tooltip="{{ __('sidebar.room_types_title') }}">
@@ -227,7 +227,7 @@
                             </a>
                         @endif
 
-                        @if (Route::has('hotel.settings.edit') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                        @if (Route::has('hotel.settings.edit') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
                             <a href="{{ route('hotel.settings.edit') }}"
                                 class="nav-item {{ $activeClass('hotel.settings.') }}" data-tooltip="{{ __('sidebar.establishment_title') }}">
                                 <div class="nav-icon"><i class="fas fa-palette"></i></div>
@@ -266,7 +266,7 @@
                 @endif
 
                 <!-- NETTOYAGE -->
-                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Housekeeping', 'Receptionist']) && (($currentHotel ?? null)?->hasModule('housekeeping') ?? true))
+                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Manager', 'Housekeeping', 'Receptionist']) && (($currentHotel ?? null)?->hasModule('housekeeping') ?? true))
                     <div class="nav-section">
                         <div class="nav-section-title">{{ __('sidebar.section_housekeeping') }}</div>
 
@@ -306,7 +306,7 @@
                             </a>
                         @endif
 
-                        @if (Route::has('roomstatus.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                        @if (Route::has('roomstatus.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
                             <a href="{{ route('roomstatus.index') }}"
                                 class="nav-item {{ $activeClass('roomstatus.index') }}" data-tooltip="{{ __('sidebar.room_status_title') }}">
                                 <div class="nav-icon"><i class="fas fa-flag"></i></div>
@@ -317,7 +317,7 @@
                             </a>
                         @endif
 
-                        @if (Route::has('facility.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                        @if (Route::has('facility.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
                             <a href="{{ route('facility.index') }}"
                                 class="nav-item {{ $activeClass('facility.index') }}" data-tooltip="{{ __('sidebar.equipment_title') }}">
                                 <div class="nav-icon"><i class="fas fa-tools"></i></div>
@@ -331,12 +331,12 @@
                 @endif
 
                 <!-- ADMINISTRATION -->
-                @if (in_array(auth()->user()->role, ['Super', 'Admin']))
+                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
                     <div class="nav-section">
                         <div class="nav-section-title">{{ __('sidebar.section_administration') }}</div>
 
                         {{-- Personnel : l'hôtelier gère son équipe (issue #180) --}}
-                        @if (Route::has('staff.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                        @if (Route::has('staff.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
                             <a href="{{ route('staff.index') }}"
                                 class="nav-item {{ $activeClass('staff.', false) }}" data-tooltip="{{ __('sidebar.staff_title') }}">
                                 <div class="nav-icon"><i class="fas fa-user-tie"></i></div>
@@ -489,6 +489,10 @@
 
                             @case('Admin')
                                 <span class="role-pill role-admin">{{ __('sidebar.role_admin') }}</span>
+                            @break
+
+                            @case('Manager')
+                                <span class="role-pill role-admin">Direction</span>
                             @break
 
                             @case('Receptionist')

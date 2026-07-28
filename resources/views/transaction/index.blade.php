@@ -1424,9 +1424,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     cancelButtonText: '{{ __("reservation.no") }}',
                     confirmButtonColor: '#545954',
                     cancelButtonColor: '#1e6b2e',
+                    preConfirm: () => {
+                        const reason = (document.getElementById('reason')?.value || '').trim();
+                        if (reason.length < 3) {
+                            Swal.showValidationMessage('Veuillez indiquer un motif (au moins 3 caractères).');
+                            return false;
+                        }
+                        return reason;
+                    },
                 }).then(result => {
                     if (result.isConfirmed) {
-                        document.getElementById('cancel-reason-input').value = document.getElementById('reason')?.value || '';
+                        document.getElementById('cancel-reason-input').value = result.value || '';
                         document.getElementById('cancel-transaction-id-input').value = transactionId;
                         document.getElementById('cancel-form').action = `/transaction/${transactionId}/cancel`;
                         document.getElementById('cancel-form').submit();

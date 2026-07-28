@@ -23,6 +23,12 @@ class CheckRole
             return $next($request);
         }
 
+        // La Direction (Manager) a le même accès que l'Admin sur tout le back-office.
+        // La seule exception (facturation/abonnement) est gérée dans BillingController.
+        if ($userRole === UserRole::Manager && in_array('Admin', $roles, true)) {
+            return $next($request);
+        }
+
         // Valider les rôles demandés via l'enum (évite les magic strings)
         $allowedRoles = array_filter(
             array_map(fn (string $r) => UserRole::tryFrom($r), $roles)

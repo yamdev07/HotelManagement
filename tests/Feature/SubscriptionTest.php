@@ -37,9 +37,9 @@ class SubscriptionTest extends TestCase
 
         $this->post('/inscription', [
             'company_name' => 'Hotel Essai',
-            'plan' => 'pro',
-            'admin_name' => 'X',
-            'admin_email' => 'x@essai.test',
+            'plan'         => 'pro',
+            'admin_name'   => 'Nom Valide',
+            'admin_email'  => 'x@essai.test',
         ]);
 
         $hotel = Hotel::where('name', 'Hotel Essai')->first();

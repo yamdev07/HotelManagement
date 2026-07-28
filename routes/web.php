@@ -114,9 +114,15 @@ Route::post('/restaurant/menus/{id}/toggle-status', [RestaurantController::class
 Route::get('/api/available-rooms', [FrontendController::class, 'availableRooms'])->name('api.available-rooms');
 
 // ==================== ROUTES D'AUTHENTIFICATION ====================
-Route::view('/login', 'auth.login')->name('login.index');
+// Un utilisateur DÉJÀ connecté ne doit pas atteindre le formulaire de connexion
+// (sinon il peut se connecter à un AUTRE compte sans se déconnecter) · issue #183.
+Route::get('/login', function () {
+    return auth()->check() ? redirect('/home') : view('auth.login');
+})->name('login.index');
 Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::view('/register', 'auth.register')->name('register.index');
+Route::get('/register', function () {
+    return auth()->check() ? redirect('/home') : view('auth.register');
+})->name('register.index');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 // ==================== ROUTE LOGOUT GLOBALE ====================
@@ -137,6 +143,8 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
 Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::get('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'edit'])->name('hotel.settings.edit');
     Route::put('/mon-etablissement', [\App\Http\Controllers\HotelSettingsController::class, 'update'])->name('hotel.settings.update');
+    // Clôture définitive par le propriétaire (issue #191)
+    Route::delete('/mon-etablissement/supprimer', [\App\Http\Controllers\HotelSettingsController::class, 'destroyAccount'])->name('hotel.account.destroy');
 });
 
 // ==================== ABONNEMENT / PAIEMENT EN LIGNE (FedaPay) ====================
@@ -249,7 +257,9 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
 
     // ==================== RÉSERVATIONS (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
     Route::prefix('transaction/reservation')->name('transaction.reservation.')->middleware('checkrole:Super,Admin,Receptionist')->group(function () {
-        Route::get('/createIdentity', [TransactionRoomReservationController::class, 'createIdentity'])->name('createIdentity');
+        // {customer?} : quand on revient en arrière modifier le client déjà saisi,
+        // on le repasse pour l'ÉDITER au lieu d'en créer un doublon (issue #189).
+        Route::get('/createIdentity/{customer?}', [TransactionRoomReservationController::class, 'createIdentity'])->name('createIdentity');
         Route::get('/pickFromCustomer', [TransactionRoomReservationController::class, 'pickFromCustomer'])->name('pickFromCustomer');
         Route::post('/search-by-email', [TransactionRoomReservationController::class, 'searchByEmail'])->name('searchByEmail');
         Route::post('/storeCustomer', [TransactionRoomReservationController::class, 'storeCustomer'])->name('storeCustomer');
