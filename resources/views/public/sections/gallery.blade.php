@@ -2,8 +2,8 @@
 <section class="section" id="galerie">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <div class="eyebrow mb-2">Galerie</div>
-            <h2 class="display-serif" style="font-size:clamp(2rem,4vw,3.2rem);">L'atmosphère des lieux</h2>
+            <div class="eyebrow mb-2">{{ __('vitrine.gallery_eyebrow') }}</div>
+            <h2 class="display-serif" style="font-size:clamp(2rem,4vw,3.2rem);">{{ __('vitrine.gallery_heading') }}</h2>
             <div class="hero-divider" style="background:var(--c);opacity:.5;"></div>
         </div>
         <div class="gallery-grid">

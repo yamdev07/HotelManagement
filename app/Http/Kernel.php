@@ -85,6 +85,7 @@ class Kernel extends HttpKernel
         'admin.restrict' => CheckAdminRestriction::class,
         'receptionist.restrict' => CheckReceptionistRestriction::class,
         'housekeeping.readonly' => CheckHousekeepingReadOnly::class,
+        'public.locale' => \App\Http\Middleware\PublicSiteLocale::class,
 
         // SUPPRIMEZ CES LIGNES TEMPORAIREMENT POUR DÉBOGUER
         // 'activity' => TrackUserActivity::class,

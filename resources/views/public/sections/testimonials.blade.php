@@ -8,8 +8,8 @@
 <section class="section dark-sec" id="avis">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <div class="eyebrow mb-2">Témoignages</div>
-            <h2 class="display-serif text-white" style="font-size:clamp(2rem,4vw,3.2rem);">Ils ont séjourné chez nous</h2>
+            <div class="eyebrow mb-2">{{ __('vitrine.testimonials_eyebrow') }}</div>
+            <h2 class="display-serif text-white" style="font-size:clamp(2rem,4vw,3.2rem);">{{ __('vitrine.testimonials_heading') }}</h2>
             <div class="hero-divider" style="margin-top:1rem;"></div>
         </div>
         <div class="row g-4">

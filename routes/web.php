@@ -72,13 +72,15 @@ Route::get('/lang/{locale}', function (string $locale) {
 })->name('lang.switch');
 
 // ==================== VITRINE PUBLIQUE PAR HÔTEL (multi-pages) ====================
-Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(function () {
-    Route::get('/h/{slug}', 'show')->name('public.hotel');
-    Route::get('/h/{slug}/chambres', 'rooms')->name('public.hotel.rooms');
-    Route::get('/h/{slug}/restaurant', 'restaurant')->name('public.hotel.restaurant');
-    Route::get('/h/{slug}/services', 'services')->name('public.hotel.services');
-    Route::get('/h/{slug}/contact', 'contact')->name('public.hotel.contact');
-});
+Route::controller(\App\Http\Controllers\PublicSiteController::class)
+    ->middleware('public.locale')
+    ->group(function () {
+        Route::get('/h/{slug}', 'show')->name('public.hotel');
+        Route::get('/h/{slug}/chambres', 'rooms')->name('public.hotel.rooms');
+        Route::get('/h/{slug}/restaurant', 'restaurant')->name('public.hotel.restaurant');
+        Route::get('/h/{slug}/services', 'services')->name('public.hotel.services');
+        Route::get('/h/{slug}/contact', 'contact')->name('public.hotel.contact');
+    });
 
 // ==================== INSCRIPTION SELF-SERVICE (essai gratuit) ====================
 // PAS de middleware "guest" : un utilisateur déjà connecté doit quand même pouvoir

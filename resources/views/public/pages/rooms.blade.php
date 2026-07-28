@@ -1,20 +1,20 @@
 @extends('public.layout')
-@section('title', 'Chambres')
+@section('title', __('vitrine.rooms_title'))
 
 @section('content')
     @php $cover = $hotel->coverUrl(); @endphp
     <header class="page-head {{ $cover ? 'has-img' : '' }}" @if($cover) style="background-image:url('{{ $cover }}')" @endif>
         @if($cover)<div class="ov"></div>@endif
         <div class="container">
-            <div class="eyebrow mb-2" style="color:#fff;opacity:.85;">Hébergement</div>
-            <h1 class="display-serif" style="font-size:clamp(2.4rem,6vw,4rem);">Nos chambres</h1>
+            <div class="eyebrow mb-2" style="color:#fff;opacity:.85;">{{ __('vitrine.rooms_eyebrow') }}</div>
+            <h1 class="display-serif" style="font-size:clamp(2.4rem,6vw,4rem);">{{ __('vitrine.rooms_heading') }}</h1>
         </div>
     </header>
 
     <section class="section">
         <div class="container">
             @if ($rooms->isEmpty())
-                <p class="text-center text-secondary">Nos chambres seront bientôt disponibles à la réservation.</p>
+                <p class="text-center text-secondary">{{ __('vitrine.rooms_empty') }}</p>
             @else
                 @php $fallbacks = config('vitrine.rooms'); @endphp
                 <div class="row g-4">
@@ -24,17 +24,17 @@
                             <div class="room-card lift h-100">
                                 <div class="room-media">
                                     <div class="img" style="background-image: url('{{ $img }}');"></div>
-                                    <span class="room-price">{{ number_format($room->price, 0, ',', ' ') }} {{ $hotel->currency }}<small style="font-weight:400;opacity:.85;"> /nuit</small></span>
+                                    <span class="room-price">{{ number_format($room->price, 0, ',', ' ') }} {{ $hotel->currency }}<small style="font-weight:400;opacity:.85;"> {{ __('vitrine.rooms_per_night') }}</small></span>
                                 </div>
                                 <div class="p-4">
                                     @if ($room->type)<div class="eyebrow mb-1">{{ $room->type->name }}</div>@endif
-                                    <h4 class="serif mb-2" style="font-size:1.5rem;">{{ $room->name ?: 'Chambre '.$room->number }}</h4>
+                                    <h4 class="serif mb-2" style="font-size:1.5rem;">{{ $room->name ?: __('vitrine.rooms_room').' '.$room->number }}</h4>
                                     <p class="text-secondary small mb-3">
-                                        <i class="fas fa-user-group me-1 text-c"></i> {{ $room->capacity }} personnes
-                                        @if ($room->number) &nbsp;·&nbsp; <i class="fas fa-door-closed me-1 text-c"></i> Chambre {{ $room->number }}@endif
+                                        <i class="fas fa-user-group me-1 text-c"></i> {{ $room->capacity }} {{ __('vitrine.rooms_persons') }}
+                                        @if ($room->number) &nbsp;·&nbsp; <i class="fas fa-door-closed me-1 text-c"></i> {{ __('vitrine.rooms_room') }} {{ $room->number }}@endif
                                     </p>
                                     @if ($hotel->show_contact)
-                                        <a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="text-c fw-semibold">Réserver <i class="fas fa-arrow-right-long ms-1"></i></a>
+                                        <a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="text-c fw-semibold">{{ __('vitrine.rooms_book') }} <i class="fas fa-arrow-right-long ms-1"></i></a>
                                     @endif
                                 </div>
                             </div>

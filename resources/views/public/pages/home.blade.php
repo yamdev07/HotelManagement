@@ -9,8 +9,8 @@
         <section class="section" style="background:#faf9f7;">
             <div class="container">
                 <div class="text-center mb-5" data-aos="fade-up">
-                    <div class="eyebrow mb-2">Hébergement</div>
-                    <h2 class="display-serif" style="font-size:clamp(2rem,4vw,3.2rem);">Nos chambres</h2>
+                    <div class="eyebrow mb-2">{{ __('vitrine.home_accommodation') }}</div>
+                    <h2 class="display-serif" style="font-size:clamp(2rem,4vw,3.2rem);">{{ __('vitrine.home_our_rooms') }}</h2>
                     <div class="hero-divider" style="background:var(--c);opacity:.5;"></div>
                 </div>
                 @php $fallbacks = config('vitrine.rooms'); @endphp
@@ -25,15 +25,15 @@
                                 </div>
                                 <div class="p-4">
                                     @if ($room->type)<div class="eyebrow mb-1">{{ $room->type->name }}</div>@endif
-                                    <h4 class="serif mb-2" style="font-size:1.4rem;">{{ $room->name ?: 'Chambre '.$room->number }}</h4>
-                                    <p class="text-secondary small mb-0"><i class="fas fa-user-group me-1 text-c"></i> {{ $room->capacity }} personnes</p>
+                                    <h4 class="serif mb-2" style="font-size:1.4rem;">{{ $room->name ?: __('vitrine.home_room').' '.$room->number }}</h4>
+                                    <p class="text-secondary small mb-0"><i class="fas fa-user-group me-1 text-c"></i> {{ $room->capacity }} {{ __('vitrine.home_persons') }}</p>
                                 </div>
                             </div>
                         </div>
                     @endforeach
                 </div>
                 <div class="text-center mt-5" data-aos="fade-up">
-                    <a href="{{ route('public.hotel.rooms', $hotel->slug) }}" class="btn-c">Toutes nos chambres</a>
+                    <a href="{{ route('public.hotel.rooms', $hotel->slug) }}" class="btn-c">{{ __('vitrine.home_all_rooms') }}</a>
                 </div>
             </div>
         </section>
@@ -47,9 +47,9 @@
     @if ($hotel->show_contact)
         <section class="section dark-sec text-center">
             <div class="container" data-aos="zoom-in">
-                <div class="eyebrow mb-2">Réservez votre séjour</div>
-                <h2 class="display-serif text-white mb-4" style="font-size:clamp(2rem,4vw,3rem);">Vivez l'expérience {{ $hotel->name }}</h2>
-                <a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="btn-c">Nous contacter</a>
+                <div class="eyebrow mb-2">{{ __('vitrine.home_cta_title') }}</div>
+                <h2 class="display-serif text-white mb-4" style="font-size:clamp(2rem,4vw,3rem);">{{ __('vitrine.home_cta_subtitle') }} {{ $hotel->name }}</h2>
+                <a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="btn-c">{{ __('vitrine.home_cta_btn') }}</a>
             </div>
         </section>
     @endif

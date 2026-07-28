@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ app()->getLocale() }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -111,12 +111,14 @@
             <span>{{ $hotel->name }}</span>
         </a>
         <div class="d-none d-lg-flex align-items-center">
-            <a href="{{ route('public.hotel', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel') ? 'active' : '' }}">Accueil</a>
-            @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.rooms') ? 'active' : '' }}">Chambres</a>@endif
-            @if ($hotel->show_restaurant)<a href="{{ route('public.hotel.restaurant', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.restaurant') ? 'active' : '' }}">Restaurant</a>@endif
-            @if ($hotel->show_services)<a href="{{ route('public.hotel.services', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.services') ? 'active' : '' }}">Services</a>@endif
-            @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.contact') ? 'active' : '' }}">Contact</a>@endif
-            @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="btn-c ms-3" style="padding:.5rem 1.4rem;">Réserver</a>@endif
+            <a href="{{ route('public.hotel', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel') ? 'active' : '' }}">{{ __('vitrine.nav_home') }}</a>
+            @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.rooms') ? 'active' : '' }}">{{ __('vitrine.nav_rooms') }}</a>@endif
+            @if ($hotel->show_restaurant)<a href="{{ route('public.hotel.restaurant', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.restaurant') ? 'active' : '' }}">{{ __('vitrine.nav_restaurant') }}</a>@endif
+            @if ($hotel->show_services)<a href="{{ route('public.hotel.services', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.services') ? 'active' : '' }}">{{ __('vitrine.nav_services') }}</a>@endif
+            @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.contact') ? 'active' : '' }}">{{ __('vitrine.nav_contact') }}</a>@endif
+            @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="btn-c ms-3" style="padding:.5rem 1.4rem;">{{ __('vitrine.nav_book') }}</a>@endif
+            @php $otherLang = app()->getLocale() === 'fr' ? 'en' : 'fr'; @endphp
+            <a href="{{ request()->fullUrlWithQuery(['lang' => $otherLang]) }}" class="nav-link2 ms-2" style="font-size:.85rem;opacity:.8;">{{ strtoupper($otherLang) }}</a>
         </div>
     </div>
 </nav>
@@ -142,20 +144,20 @@
                 @endif
             </div>
             <div class="col-lg-4">
-                <div class="eyebrow mb-3" style="color:#fff;opacity:.5;">Navigation</div>
+                <div class="eyebrow mb-3" style="color:#fff;opacity:.5;">{{ __('vitrine.footer_navigation') }}</div>
                 <div class="d-flex flex-column gap-2 small">
-                    <a href="{{ route('public.hotel', $hotel->slug) }}">Accueil</a>
-                    @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}">Chambres</a>@endif
-                    @if ($hotel->show_restaurant)<a href="{{ route('public.hotel.restaurant', $hotel->slug) }}">Restaurant</a>@endif
-                    @if ($hotel->show_services)<a href="{{ route('public.hotel.services', $hotel->slug) }}">Services</a>@endif
-                    @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}">Contact</a>@endif
+                    <a href="{{ route('public.hotel', $hotel->slug) }}">{{ __('vitrine.nav_home') }}</a>
+                    @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}">{{ __('vitrine.nav_rooms') }}</a>@endif
+                    @if ($hotel->show_restaurant)<a href="{{ route('public.hotel.restaurant', $hotel->slug) }}">{{ __('vitrine.nav_restaurant') }}</a>@endif
+                    @if ($hotel->show_services)<a href="{{ route('public.hotel.services', $hotel->slug) }}">{{ __('vitrine.nav_services') }}</a>@endif
+                    @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}">{{ __('vitrine.nav_contact') }}</a>@endif
                 </div>
             </div>
             <div class="col-lg-3 text-lg-end">
                 @if ($hotel->contact_phone)<p class="small mb-2"><i class="fas fa-phone me-2 text-c"></i>{{ $hotel->contact_phone }}</p>@endif
                 @if ($hotel->contact_email)<p class="small mb-2"><i class="fas fa-envelope me-2 text-c"></i>{{ $hotel->contact_email }}</p>@endif
                 <p class="small mb-0 mt-3" style="opacity:.5;">© {{ date('Y') }} {{ $hotel->name }}</p>
-                <p class="small" style="opacity:.35;">Propulsé par {{ config('app.name', 'checkinHub') }}</p>
+                <p class="small" style="opacity:.35;">{{ __('vitrine.footer_powered') }} {{ config('app.name', 'checkinHub') }}</p>
             </div>
         </div>
     </div>

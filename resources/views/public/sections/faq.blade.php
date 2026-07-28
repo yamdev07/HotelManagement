@@ -9,8 +9,8 @@
 <section class="section" id="faq" style="background:#faf9f7;">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <div class="eyebrow mb-2">Questions fréquentes</div>
-            <h2 class="display-serif" style="font-size:clamp(2rem,4vw,3.2rem);">Tout ce qu'il faut savoir</h2>
+            <div class="eyebrow mb-2">{{ __('vitrine.faq_eyebrow') }}</div>
+            <h2 class="display-serif" style="font-size:clamp(2rem,4vw,3.2rem);">{{ __('vitrine.faq_heading') }}</h2>
             <div class="hero-divider" style="background:var(--c);opacity:.5;"></div>
         </div>
         <div class="accordion accordion-flush mx-auto" id="faqAcc" style="max-width:760px;" data-aos="fade-up">
