@@ -1,8 +1,8 @@
 @php
     $reviews = [
-        ['Awa D.', 'Cotonou', "Un séjour absolument parfait. Le service est aux petits soins et les chambres sont magnifiques.", 5],
-        ['Marc L.', 'Paris', "Cadre raffiné, personnel souriant et une table d'exception. Je recommande sans hésiter.", 5],
-        ['Sarah B.', 'Abidjan', "L'élégance à chaque détail. On se sent comme à la maison, en mieux. Vivement le retour !", 5],
+        ['Awa D.', 'Cotonou', __('vitrine.review_1_text'), 5],
+        ['Marc L.', 'Paris', __('vitrine.review_2_text'), 5],
+        ['Sarah B.', 'Abidjan', __('vitrine.review_3_text'), 5],
     ];
 @endphp
 <section class="section dark-sec" id="avis">

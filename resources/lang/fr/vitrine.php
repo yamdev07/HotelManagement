@@ -71,10 +71,21 @@ return [
     // ─── TESTIMONIALS ───────────────────────────────────
     'testimonials_eyebrow' => 'Témoignages',
     'testimonials_heading' => 'Ils ont séjourné chez nous',
+    'review_1_text' => 'Un séjour absolument parfait. Le service est aux petits soins et les chambres sont magnifiques.',
+    'review_2_text' => 'Cadre raffiné, personnel souriant et une table d\'exception. Je recommande sans hésiter.',
+    'review_3_text' => 'L\'élégance à chaque détail. On se sent comme à la maison, en mieux. Vivement le retour !',
 
     // ─── FAQ ────────────────────────────────────────────
     'faq_eyebrow' => 'Questions fréquentes',
     'faq_heading' => 'Tout ce qu\'il faut savoir',
+    'faq_q1' => 'À quelle heure se font le check-in et le check-out ?',
+    'faq_a1' => 'L\'arrivée se fait à partir de 14h et le départ jusqu\'à 12h. Des arrangements sont possibles selon les disponibilités.',
+    'faq_q2' => 'Le petit-déjeuner est-il inclus ?',
+    'faq_a2' => 'Selon la formule choisie. N\'hésitez pas à nous contacter pour connaître les détails de votre réservation.',
+    'faq_q3' => 'Proposez-vous un parking ?',
+    'faq_a3' => 'Oui, un stationnement sécurisé est à la disposition de nos clients.',
+    'faq_q4' => 'Comment réserver ?',
+    'faq_a4' => 'Contactez-nous par téléphone ou par email, nous nous occupons du reste avec plaisir.',
 
     // ─── FOOTER ─────────────────────────────────────────
     'footer_navigation' => 'Navigation',

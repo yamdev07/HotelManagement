@@ -71,10 +71,21 @@ return [
     // ─── TESTIMONIALS ───────────────────────────────────
     'testimonials_eyebrow' => 'Testimonials',
     'testimonials_heading' => 'They stayed with us',
+    'review_1_text' => 'An absolutely perfect stay. The service is exceptional and the rooms are magnificent.',
+    'review_2_text' => 'Refined setting, friendly staff and an outstanding restaurant. Highly recommended.',
+    'review_3_text' => 'Elegance in every detail. You feel right at home, only better. Can\'t wait to come back!',
 
     // ─── FAQ ────────────────────────────────────────────
     'faq_eyebrow' => 'FAQ',
     'faq_heading' => 'Everything you need to know',
+    'faq_q1' => 'What are the check-in and check-out times?',
+    'faq_a1' => 'Check-in is from 2 PM and check-out is until 12 PM. Arrangements may be possible depending on availability.',
+    'faq_q2' => 'Is breakfast included?',
+    'faq_a2' => 'It depends on the plan chosen. Feel free to contact us for details about your reservation.',
+    'faq_q3' => 'Do you have parking?',
+    'faq_a3' => 'Yes, a secure parking area is available for our guests.',
+    'faq_q4' => 'How can I book?',
+    'faq_a4' => 'Contact us by phone or email, we\'ll take care of the rest with pleasure.',
 
     // ─── FOOTER ─────────────────────────────────────────
     'footer_navigation' => 'Navigation',

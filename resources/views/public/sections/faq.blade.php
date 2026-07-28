@@ -1,9 +1,9 @@
 @php
     $faq = [
-        ['À quelle heure se font le check-in et le check-out ?', "L'arrivée se fait à partir de 14h et le départ jusqu'à 12h. Des arrangements sont possibles selon les disponibilités."],
-        ['Le petit-déjeuner est-il inclus ?', "Selon la formule choisie. N'hésitez pas à nous contacter pour connaître les détails de votre réservation."],
-        ['Proposez-vous un parking ?', "Oui, un stationnement sécurisé est à la disposition de nos clients."],
-        ['Comment réserver ?', "Contactez-nous par téléphone ou par email, nous nous occupons du reste avec plaisir."],
+        [__('vitrine.faq_q1'), __('vitrine.faq_a1')],
+        [__('vitrine.faq_q2'), __('vitrine.faq_a2')],
+        [__('vitrine.faq_q3'), __('vitrine.faq_a3')],
+        [__('vitrine.faq_q4'), __('vitrine.faq_a4')],
     ];
 @endphp
 <section class="section" id="faq" style="background:#faf9f7;">
