@@ -22,20 +22,20 @@ class ReservationCustomerNoDuplicateTest extends TestCase
     public function test_editing_customer_on_step_back_updates_instead_of_duplicating(): void
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Dup',
-            'slug'                    => Str::slug('Hotel Dup '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Dup',
+            'slug' => Str::slug('Hotel Dup '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         app(TenantManager::class)->setHotelId($hotel->id);
         $agent = User::factory()->create(['role' => 'Receptionist', 'hotel_id' => $hotel->id]);
 
         // Étape 1 : création initiale du client
         $this->actingAs($agent)->post(route('transaction.reservation.storeCustomer'), [
-            'name'   => 'Jean',
-            'email'  => 'jean@client.test',
-            'phone'  => '+229 01 02 03 04',
+            'name' => 'Jean',
+            'email' => 'jean@client.test',
+            'phone' => '+229 01 02 03 04',
             'gender' => 'Male',
         ])->assertRedirect();
 
@@ -46,10 +46,10 @@ class ReservationCustomerNoDuplicateTest extends TestCase
         // Retour en arrière : on corrige le nom (et l'email) en transmettant customer_id
         $this->actingAs($agent)->post(route('transaction.reservation.storeCustomer'), [
             'customer_id' => $customer->id,
-            'name'        => 'Jean Dupont',
-            'email'       => 'jean.dupont@client.test',
-            'phone'       => '+229 01 02 03 04',
-            'gender'      => 'Male',
+            'name' => 'Jean Dupont',
+            'email' => 'jean.dupont@client.test',
+            'phone' => '+229 01 02 03 04',
+            'gender' => 'Male',
         ])->assertRedirect();
 
         // Toujours UN SEUL client, mis à jour (pas de doublon).

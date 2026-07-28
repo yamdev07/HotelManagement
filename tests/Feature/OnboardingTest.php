@@ -40,7 +40,7 @@ class OnboardingTest extends TestCase
         // Issue #183 : un connecté ne doit pas pouvoir se reconnecter à un autre
         // compte depuis /login ou /register · il est renvoyé vers son espace.
         $hotel = $this->makeHotel(onboarded: true);
-        $user  = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
+        $user = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
         $this->actingAs($user)->get('/login')->assertRedirect('/home');
         $this->actingAs($user)->get('/register')->assertRedirect('/home');

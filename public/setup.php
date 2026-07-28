@@ -63,7 +63,9 @@ if (function_exists('opcache_reset')) {
 // Certains hébergeurs isolent l'OPcache CLI de celui du web : on invalide aussi
 // explicitement les fichiers clés côté requête web.
 foreach ([base_path('routes/web.php')] as $f) {
-    if (function_exists('opcache_invalidate') && is_file($f)) { @opcache_invalidate($f, true); }
+    if (function_exists('opcache_invalidate') && is_file($f)) {
+        @opcache_invalidate($f, true);
+    }
 }
 echo "   OK (les changements du .env sont pris en compte)\n\n";
 

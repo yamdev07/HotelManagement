@@ -21,15 +21,15 @@ class HotelSelfDeletionTest extends TestCase
     private function hotelWithOwner(): array
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Ferme',
-            'slug'                    => Str::slug('Hotel Ferme '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Ferme',
+            'slug' => Str::slug('Hotel Ferme '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         app(TenantManager::class)->setHotelId($hotel->id);
         $owner = User::factory()->create([
-            'role'     => 'Admin',
+            'role' => 'Admin',
             'hotel_id' => $hotel->id,
             'password' => Hash::make('secret123'),
         ]);
@@ -45,7 +45,7 @@ class HotelSelfDeletionTest extends TestCase
 
         app(TenantManager::class)->forget();
         $this->actingAs($owner)->delete(route('hotel.account.destroy'), [
-            'password'     => 'secret123',
+            'password' => 'secret123',
             'confirmation' => 'SUPPRIMER',
         ])->assertRedirect(route('landing'));
 
@@ -61,7 +61,7 @@ class HotelSelfDeletionTest extends TestCase
 
         app(TenantManager::class)->forget();
         $this->actingAs($owner)->delete(route('hotel.account.destroy'), [
-            'password'     => 'mauvais',
+            'password' => 'mauvais',
             'confirmation' => 'SUPPRIMER',
         ])->assertSessionHasErrors('password');
 
@@ -72,14 +72,14 @@ class HotelSelfDeletionTest extends TestCase
     {
         [$hotel] = $this->hotelWithOwner();
         $manager = User::factory()->create([
-            'role'     => 'Manager',
+            'role' => 'Manager',
             'hotel_id' => $hotel->id,
             'password' => Hash::make('secret123'),
         ]);
 
         app(TenantManager::class)->forget();
         $this->actingAs($manager)->delete(route('hotel.account.destroy'), [
-            'password'     => 'secret123',
+            'password' => 'secret123',
             'confirmation' => 'SUPPRIMER',
         ])->assertForbidden();
 

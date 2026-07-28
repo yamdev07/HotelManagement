@@ -47,16 +47,16 @@ class NotificationBadgeTest extends TestCase
     {
         // Issue #198 : distinguer les nouvelles des anciennes + recherche/filtres.
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Notif2',
-            'slug'                    => Str::slug('Hotel Notif2 '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Notif2',
+            'slug' => Str::slug('Hotel Notif2 '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         $user = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
 
         $user->notifications()->create([
-            'id'   => (string) Str::uuid(),
+            'id' => (string) Str::uuid(),
             'type' => 'App\\Notifications\\Dummy',
             'data' => ['message' => 'Réservation confirmée', 'url' => '/'],
         ]);

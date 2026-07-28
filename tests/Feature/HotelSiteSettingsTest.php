@@ -41,7 +41,7 @@ class HotelSiteSettingsTest extends TestCase
         $this->get('/h/hotel-toggle/contact')->assertNotFound();
 
         // La page activée fonctionne
-        $this->get('/h/hotel-toggle/services')->assertOk()->assertSee('Nos services');
+        $this->get('/h/hotel-toggle/services')->assertOk()->assertSee(__('vitrine.services_heading'));
     }
 
     public function test_admin_can_define_custom_services_and_socials(): void

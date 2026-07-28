@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\User;
 use App\Support\TenantManager;
-use Illuminate\Http\Request;
 // Modèle custom scopé par hôtel (BelongsToHotel) : le journal ne montre QUE
 // l'hôtel courant. Le Super-Admin plateforme (sans hôtel) voit tout. Issue #144.
-use App\Models\Activity;
+use Illuminate\Http\Request;
 
 class ActivityController extends Controller
 {

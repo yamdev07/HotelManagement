@@ -28,15 +28,15 @@ class ReservationCancellationTest extends TestCase
     private function makeReservation(): array
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Annul',
-            'slug'                    => Str::slug('Hotel Annul '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Annul',
+            'slug' => Str::slug('Hotel Annul '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         app(TenantManager::class)->setHotelId($hotel->id);
 
-        $admin    = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
+        $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
         $customer = Customer::create([
             'name' => 'Client Test', 'email' => 'c@annul.test', 'phone' => '+229 01 02 03 04',
             'gender' => 'Male', 'user_id' => $admin->id,

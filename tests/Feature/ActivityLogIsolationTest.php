@@ -23,23 +23,23 @@ class ActivityLogIsolationTest extends TestCase
     private function hotel(string $name): Hotel
     {
         return Hotel::create([
-            'name'                    => $name,
-            'slug'                    => Str::slug($name.' '.Str::random(4)),
-            'is_active'               => true,
+            'name' => $name,
+            'slug' => Str::slug($name.' '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
     }
 
     private function logFor(int $hotelId, string $description): int
     {
         return DB::table('activity_log')->insertGetId([
-            'log_name'    => 'default',
+            'log_name' => 'default',
             'description' => $description,
-            'hotel_id'    => $hotelId,
-            'properties'  => '{}',
-            'created_at'  => now(),
-            'updated_at'  => now(),
+            'hotel_id' => $hotelId,
+            'properties' => '{}',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 

@@ -90,9 +90,9 @@ class StaffManagementTest extends TestCase
         [$hotel, $admin] = $this->hotelAdmin('Hotel Dir A');
 
         $this->actingAs($admin)->post(route('staff.store'), [
-            'name'     => 'Directrice',
-            'email'    => 'dir@staff.test',
-            'role'     => 'Manager',
+            'name' => 'Directrice',
+            'email' => 'dir@staff.test',
+            'role' => 'Manager',
             'password' => 'MotDePasse1',
         ])->assertRedirect();
 
@@ -109,18 +109,18 @@ class StaffManagementTest extends TestCase
 
         // Un Manager ne peut créer QUE de l'opérationnel, pas un autre Manager.
         $this->actingAs($manager)->post(route('staff.store'), [
-            'name'     => 'Autre Dir',
-            'email'    => 'autredir@staff.test',
-            'role'     => 'Manager',
+            'name' => 'Autre Dir',
+            'email' => 'autredir@staff.test',
+            'role' => 'Manager',
             'password' => 'MotDePasse1',
         ])->assertSessionHasErrors('role');
         $this->assertDatabaseMissing('users', ['email' => 'autredir@staff.test']);
 
         // …mais il crée bien un réceptionniste.
         $this->actingAs($manager)->post(route('staff.store'), [
-            'name'     => 'Recep OK',
-            'email'    => 'recepok@staff.test',
-            'role'     => 'Receptionist',
+            'name' => 'Recep OK',
+            'email' => 'recepok@staff.test',
+            'role' => 'Receptionist',
             'password' => 'MotDePasse1',
         ])->assertRedirect();
         $this->assertDatabaseHas('users', ['email' => 'recepok@staff.test', 'role' => 'Receptionist']);
@@ -141,7 +141,7 @@ class StaffManagementTest extends TestCase
     public function test_manager_cannot_delete_or_touch_another_manager(): void
     {
         [$hotel] = $this->hotelAdmin('Hotel Dir D');
-        $manager      = User::factory()->create(['role' => 'Manager', 'hotel_id' => $hotel->id]);
+        $manager = User::factory()->create(['role' => 'Manager', 'hotel_id' => $hotel->id]);
         $otherManager = User::factory()->create(['role' => 'Manager', 'hotel_id' => $hotel->id]);
 
         $this->actingAs($manager)->delete(route('staff.destroy', $otherManager))->assertForbidden();

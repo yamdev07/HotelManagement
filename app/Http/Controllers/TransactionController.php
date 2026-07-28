@@ -174,7 +174,7 @@ class TransactionController extends Controller
             'cancel_reason' => ['required', 'string', 'min:3', 'max:500', new \App\Rules\NoEmoji],
         ], [
             'cancel_reason.required' => "Veuillez indiquer le motif de l'annulation.",
-            'cancel_reason.min'      => 'Le motif doit comporter au moins 3 caractères.',
+            'cancel_reason.min' => 'Le motif doit comporter au moins 3 caractères.',
         ]);
 
         try {

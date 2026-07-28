@@ -20,9 +20,9 @@ class EmojiNameTest extends TestCase
     public function test_register_rejects_emoji_name(): void
     {
         $this->post('/register', [
-            'name'                  => 'lionel sisso🎉🎉🎉',
-            'email'                 => 'lionel@test.test',
-            'password'              => 'MotDePasse1',
+            'name' => 'lionel sisso🎉🎉🎉',
+            'email' => 'lionel@test.test',
+            'password' => 'MotDePasse1',
             'password_confirmation' => 'MotDePasse1',
         ])->assertSessionHasErrors('name');
 
@@ -32,11 +32,11 @@ class EmojiNameTest extends TestCase
     public function test_logout_message_strips_emojis_from_legacy_name(): void
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Bye',
-            'slug'                    => Str::slug('Hotel Bye '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Bye',
+            'slug' => Str::slug('Hotel Bye '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         // Donnée héritée : nom avec emojis déjà en base
         $user = User::factory()->create([

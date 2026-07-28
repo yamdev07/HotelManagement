@@ -19,11 +19,11 @@ class HotelSettingsValidationTest extends TestCase
     private function ownerOf(): array
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel Perso',
-            'slug'                    => Str::slug('Hotel Perso '.Str::random(4)),
-            'is_active'               => true,
+            'name' => 'Hotel Perso',
+            'slug' => Str::slug('Hotel Perso '.Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         app(TenantManager::class)->setHotelId($hotel->id);
         $admin = User::factory()->create(['role' => 'Admin', 'hotel_id' => $hotel->id]);
@@ -38,10 +38,10 @@ class HotelSettingsValidationTest extends TestCase
 
         app(TenantManager::class)->forget();
         $this->actingAs($admin)->put(route('hotel.settings.update'), [
-            'name'          => '***',                 // charabia
+            'name' => '***',                 // charabia
             'contact_phone' => 'appelez-moi',          // lettres
             'contact_email' => 'pas-un-email',         // invalide
-            'socials'       => ['facebook' => 'coucou'], // pas une URL
+            'socials' => ['facebook' => 'coucou'], // pas une URL
         ])->assertSessionHasErrors(['name', 'contact_phone', 'contact_email', 'socials.facebook']);
     }
 
@@ -51,11 +51,11 @@ class HotelSettingsValidationTest extends TestCase
 
         app(TenantManager::class)->forget();
         $this->actingAs($admin)->put(route('hotel.settings.update'), [
-            'name'          => 'Hôtel du Lac',
+            'name' => 'Hôtel du Lac',
             'contact_phone' => '+229 01 02 03 04',
             'contact_email' => 'contact@hotel.test',
             'primary_color' => '#2e8540',
-            'socials'       => ['facebook' => 'https://facebook.com/hotel'],
+            'socials' => ['facebook' => 'https://facebook.com/hotel'],
         ])->assertSessionHasNoErrors();
 
         $this->assertEquals('Hôtel du Lac', $hotel->fresh()->name);

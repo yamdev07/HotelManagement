@@ -25,11 +25,11 @@ class ReservationRoomSearchTest extends TestCase
     private function makeHotel(): Hotel
     {
         $hotel = Hotel::create([
-            'name'                    => 'Hotel '.Str::random(5),
-            'slug'                    => Str::slug('Hotel '.Str::random(6)),
-            'is_active'               => true,
+            'name' => 'Hotel '.Str::random(5),
+            'slug' => Str::slug('Hotel '.Str::random(6)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
         app(TenantManager::class)->setHotelId($hotel->id);
 
@@ -45,12 +45,12 @@ class ReservationRoomSearchTest extends TestCase
         $statusId = RoomStatus::where('code', $statusCode)->value('id');
 
         return Room::create([
-            'type_id'        => $type->id,
+            'type_id' => $type->id,
             'room_status_id' => $statusId,
-            'number'         => $number,
-            'capacity'       => $capacity,
-            'price'          => 100,
-            'view'           => '',
+            'number' => $number,
+            'capacity' => $capacity,
+            'price' => 100,
+            'view' => '',
         ]);
     }
 
@@ -58,15 +58,15 @@ class ReservationRoomSearchTest extends TestCase
     {
         $this->makeHotel();
 
-        $available   = $this->makeRoom('101', 'AVL'); // disponible
+        $available = $this->makeRoom('101', 'AVL'); // disponible
         $occupiedNow = $this->makeRoom('102', 'OCC'); // occupée AUJOURD'HUI mais libre pour d'autres dates
         $maintenance = $this->makeRoom('103', 'MNT'); // hors service → jamais réservable
 
-        $repo    = new ReservationRepository;
+        $repo = new ReservationRepository;
         $request = new Request(['count_person' => 1]);
         $occupied = collect(); // aucun conflit de dates
 
-        $list  = $repo->getUnocuppiedroom($request, $occupied);
+        $list = $repo->getUnocuppiedroom($request, $occupied);
         $count = $repo->countUnocuppiedroom($request, $occupied);
 
         // Le compteur reflète EXACTEMENT la liste (plus de décalage).

@@ -71,7 +71,7 @@ class StaffController extends Controller
     public function index()
     {
         $hotelId = $this->hotelId();
-        $roles   = $this->manageableRoles();
+        $roles = $this->manageableRoles();
 
         $staff = $hotelId
             ? User::where('hotel_id', $hotelId)->whereIn('role', array_keys($roles))->orderBy('name')->get()
@@ -86,10 +86,10 @@ class StaffController extends Controller
         abort_if($hotelId === null, 403, __('staff.alert_error_no_hotel'));
 
         $data = $request->validate([
-            'name'     => ['required', 'string', 'max:255', new SafeName],
-            'email'    => ['required', 'email', 'max:255', 'unique:users,email'],
-            'phone'    => ['nullable', 'string', 'max:30'],
-            'role'     => ['required', Rule::in(array_keys($this->manageableRoles()))],
+            'name' => ['required', 'string', 'max:255', new SafeName],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'role' => ['required', Rule::in(array_keys($this->manageableRoles()))],
             'password' => ['required', new StrongPassword],
         ], [], [
             'name' => __('staff.validation_name'), 'email' => __('staff.validation_email'), 'role' => __('staff.validation_role'), 'password' => __('staff.validation_password'),
