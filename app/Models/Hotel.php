@@ -88,13 +88,28 @@ class Hotel extends Model
 
     public function aboutTitle(): string
     {
+        $locale = app()->getLocale();
+
+        if ($locale === 'en' && ! empty($this->about_title_en)) {
+            return $this->about_title_en;
+        }
+
         return $this->about_title ?: "Une expérience d'exception";
     }
 
     public function aboutText(): string
     {
-        return $this->about_text
-            ?: ($this->description ?: 'Niché dans un cadre raffiné, '.$this->name.' vous accueille pour un séjour inoubliable.');
+        $locale = app()->getLocale();
+
+        if ($locale === 'en' && ! empty($this->about_text_en)) {
+            return $this->about_text_en;
+        }
+
+        if ($this->about_text) {
+            return $this->about_text;
+        }
+
+        return $this->description ?: 'Niché dans un cadre raffiné, '.$this->name.' vous accueille pour un séjour inoubliable.';
     }
 
     /** L'hôtel doit-il encore passer par l'onboarding (personnalisation initiale) ? */
