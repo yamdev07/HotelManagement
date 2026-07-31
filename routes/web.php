@@ -78,6 +78,8 @@ Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(func
     Route::get('/h/{slug}/reserver/{room}', 'booking')->name('public.hotel.booking');
     Route::post('/h/{slug}/reserver/{room}', 'storeBooking')->name('public.hotel.booking.store');
     Route::get('/h/{slug}/reservation/{transaction}/confirmee', 'bookingConfirmed')->name('public.hotel.booking.confirmed');
+    Route::post('/h/{slug}/reservation/{transaction}/payer', 'payDeposit')->name('public.hotel.payment.pay');
+    Route::get('/h/{slug}/reservation/{transaction}/retour', 'paymentReturn')->name('public.hotel.payment.return');
     Route::get('/h/{slug}/chambres', 'rooms')->name('public.hotel.rooms');
     Route::get('/h/{slug}/restaurant', 'restaurant')->name('public.hotel.restaurant');
     Route::get('/h/{slug}/services', 'services')->name('public.hotel.services');

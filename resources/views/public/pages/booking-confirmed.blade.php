@@ -19,6 +19,19 @@
     .cf-btn.wa { background:#25d366; color:#fff; }
     .cf-btn.ghost { background:#fff; border:1.5px solid #e3e6ee; color:#374151; }
     .cf-btn:hover { filter:brightness(1.04); }
+
+    /* Paiement en ligne (Lot 3) */
+    .cf-pay { margin-top:22px; background:#fff; border:1px solid #ececf2; border-radius:16px; box-shadow:0 18px 48px -30px rgba(20,30,50,.35); padding:20px; text-align:center; }
+    .cf-pay h3 { margin:0 0 4px; font-size:1.05rem; color:#1f2733; }
+    .cf-pay p { margin:0 0 14px; color:#6b7280; font-size:.9rem; }
+    .cf-pay .amt { font-size:1.5rem; font-weight:900; color:var(--c); margin:2px 0 12px; }
+    .cf-paybtn { display:inline-flex; align-items:center; gap:9px; background:var(--c); color:#fff; border:0; border-radius:12px; padding:14px 26px; font-weight:800; font-size:1rem; cursor:pointer; text-decoration:none; }
+    .cf-paybtn:hover { filter:brightness(1.06); color:#fff; }
+    .cf-secure { margin-top:10px; font-size:.76rem; color:#9aa1ad; }
+    .cf-paid { margin-top:22px; background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; border-radius:14px; padding:16px 18px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:10px; }
+    .cf-flash { border-radius:12px; padding:12px 16px; margin:18px 0 0; font-size:.9rem; }
+    .cf-flash.err { background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; }
+    .cf-flash.ok { background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46; }
 </style>
 @endpush
 
@@ -52,10 +65,45 @@
                 </div>
             </div>
 
-            <div class="cf-next">
-                <strong><i class="fas fa-circle-info"></i> Prochaine étape</strong><br>
-                L'hôtel va vous contacter pour confirmer et régler l'acompte. Le <strong>paiement en ligne sécurisé</strong> arrive très bientôt.
-            </div>
+            @if (session('payment_success'))
+                <div class="cf-flash ok"><i class="fas fa-circle-check"></i> Paiement reçu, merci ! Votre acompte a bien été enregistré.</div>
+            @endif
+            @if (session('payment_error'))
+                <div class="cf-flash err"><i class="fas fa-triangle-exclamation"></i> {{ session('payment_error') }}</div>
+            @endif
+
+            @if ($depositPaid)
+                {{-- Acompte déjà réglé --}}
+                <div class="cf-paid">
+                    <i class="fas fa-circle-check"></i>
+                    Acompte de {{ number_format($deposit, 0, ',', ' ') }} {{ $hotel->currency }} payé · réservation confirmée
+                </div>
+                <div class="cf-next">
+                    <strong><i class="fas fa-circle-info"></i> Prochaine étape</strong><br>
+                    Le solde ({{ number_format(max(0, $tx->total_price - $deposit), 0, ',', ' ') }} {{ $hotel->currency }}) se règle à l'arrivée. À bientôt !
+                </div>
+            @elseif ($canPayOnline)
+                {{-- Paiement en ligne de l'acompte --}}
+                <div class="cf-pay">
+                    <h3><i class="fas fa-lock" style="color:var(--c)"></i> Sécurisez votre réservation</h3>
+                    <p>Réglez l'acompte en ligne pour confirmer immédiatement votre chambre.</p>
+                    <div class="amt">{{ number_format($deposit, 0, ',', ' ') }} {{ $hotel->currency }}</div>
+                    <form method="POST" action="{{ route('public.hotel.payment.pay', [$hotel->slug, $tx->id]) }}">
+                        @csrf
+                        <button type="submit" class="cf-paybtn"><i class="fas fa-credit-card"></i> Payer l'acompte</button>
+                    </form>
+                    <div class="cf-secure"><i class="fas fa-shield-halved"></i> Paiement sécurisé par FedaPay · carte & Mobile Money</div>
+                </div>
+                <div class="cf-next">
+                    Le solde ({{ number_format(max(0, $tx->total_price - $deposit), 0, ',', ' ') }} {{ $hotel->currency }}) se règle à l'arrivée.
+                </div>
+            @else
+                {{-- Repli : pas de paiement en ligne activé --}}
+                <div class="cf-next">
+                    <strong><i class="fas fa-circle-info"></i> Prochaine étape</strong><br>
+                    L'hôtel va vous contacter pour confirmer et régler l'acompte de <strong>{{ number_format($deposit, 0, ',', ' ') }} {{ $hotel->currency }}</strong>.
+                </div>
+            @endif
 
             <div class="cf-actions">
                 @if ($wa)

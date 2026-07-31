@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\Customer;
 use App\Models\Hotel;
 use App\Models\Menu;
+use App\Models\Payment;
 use App\Models\Room;
 use App\Models\RoomStatus;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Services\FedaPayService;
 use App\Support\TenantManager;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -22,6 +24,22 @@ class PublicSiteController extends Controller
 {
     /** Acompte demandé à la réservation en ligne (15 % du séjour, comme le back-office). */
     private const DEPOSIT_RATE = 0.15;
+
+    public function __construct(private FedaPayService $fedapay) {}
+
+    /** Montant de l'acompte (15 %) pour une réservation. */
+    private function depositFor(Transaction $tx): int
+    {
+        return (int) round(((float) ($tx->total_price ?? 0)) * self::DEPOSIT_RATE);
+    }
+
+    /** L'acompte de cette réservation est-il déjà couvert par les paiements enregistrés ? */
+    private function depositPaid(Transaction $tx): bool
+    {
+        $deposit = $this->depositFor($tx);
+
+        return $deposit > 0 && (float) ($tx->total_payment ?? 0) >= $deposit - 1;
+    }
 
     /** Une chambre est-elle libre pour la période (pas de chevauchement, pas en maintenance) ? */
     private function roomIsAvailable(Room $room, Carbon $ci, Carbon $co): bool
@@ -296,8 +314,123 @@ class PublicSiteController extends Controller
         }
 
         $tx = Transaction::with(['room.type', 'customer'])->findOrFail($transaction); // scopé hôtel
-        $deposit = (int) round(($tx->total_price ?? 0) * self::DEPOSIT_RATE);
+        $deposit = $this->depositFor($tx);
+        $canPayOnline = $this->fedapay->isConfigured();
+        $depositPaid = $this->depositPaid($tx);
 
-        return view('public.pages.booking-confirmed', compact('hotel', 'tx', 'deposit'));
+        return view('public.pages.booking-confirmed', compact('hotel', 'tx', 'deposit', 'canPayOnline', 'depositPaid'));
+    }
+
+    /**
+     * LOT 3 — Initie le paiement en ligne de l'acompte (FedaPay) et redirige
+     * vers la page de paiement hébergée.
+     */
+    public function payDeposit(Request $request, string $slug, $transaction)
+    {
+        $hotel = $this->resolve($slug);
+        if (! $hotel instanceof Hotel) {
+            return $hotel;
+        }
+
+        $tx = Transaction::with('customer')->findOrFail($transaction); // scopé hôtel
+
+        if (! $this->fedapay->isConfigured()) {
+            return redirect()->route('public.hotel.booking.confirmed', [$hotel->slug, $tx->id])
+                ->with('payment_error', "Le paiement en ligne n'est pas encore activé pour cet établissement.");
+        }
+
+        if ($this->depositPaid($tx)) {
+            return redirect()->route('public.hotel.booking.confirmed', [$hotel->slug, $tx->id]);
+        }
+
+        $deposit = $this->depositFor($tx);
+        $ref = 'RES-'.str_pad((string) $tx->id, 5, '0', STR_PAD_LEFT);
+
+        try {
+            $checkout = $this->fedapay->createCheckout(
+                hotel: $hotel,
+                plan: 'reservation-deposit',
+                amount: $deposit,
+                currency: $hotel->currency ?: 'XOF',
+                description: "Acompte réservation {$ref} — {$hotel->name}",
+                callbackUrl: route('public.hotel.payment.return', [$hotel->slug, $tx->id]),
+                customerEmail: $tx->customer->email ?? 'client@example.com',
+                customerName: $tx->customer->name ?? 'Client',
+            );
+        } catch (\Throwable $e) {
+            report($e);
+
+            return redirect()->route('public.hotel.booking.confirmed', [$hotel->slug, $tx->id])
+                ->with('payment_error', "Le paiement n'a pas pu être initié. Réessayez dans un instant.");
+        }
+
+        // Mémorise la transaction FedaPay pour la vérifier au retour (anti-fraude).
+        $request->session()->put('online_pay.'.$tx->id, [
+            'fedapay_id' => $checkout['transaction_id'],
+            'amount' => $deposit,
+        ]);
+
+        return redirect()->away($checkout['url']);
+    }
+
+    /**
+     * LOT 3 — Retour de FedaPay : vérifie le statut ('approved') et enregistre
+     * l'acompte comme paiement en ligne (hors caisse) sur la réservation.
+     */
+    public function paymentReturn(Request $request, string $slug, $transaction)
+    {
+        $hotel = $this->resolve($slug);
+        if (! $hotel instanceof Hotel) {
+            return $hotel;
+        }
+
+        $tx = Transaction::with('customer')->findOrFail($transaction); // scopé hôtel
+
+        // Déjà réglé (double retour / rechargement) : idempotent.
+        if ($this->depositPaid($tx)) {
+            return redirect()->route('public.hotel.booking.confirmed', [$hotel->slug, $tx->id])
+                ->with('payment_success', true);
+        }
+
+        $pending = $request->session()->pull('online_pay.'.$tx->id, []);
+        $fedapayId = (int) ($pending['fedapay_id'] ?? $request->query('id', 0));
+
+        $approved = false;
+        if ($fedapayId) {
+            try {
+                $approved = $this->fedapay->isApproved($fedapayId);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        if (! $approved) {
+            return redirect()->route('public.hotel.booking.confirmed', [$hotel->slug, $tx->id])
+                ->with('payment_error', "Le paiement n'a pas été confirmé. Vous pouvez réessayer.");
+        }
+
+        $amount = (float) ($pending['amount'] ?? $this->depositFor($tx));
+        $agentId = $tx->user_id ?? $hotel->owner_user_id;
+
+        // Paiement en ligne : rattaché à l'hôtelier, sans session de caisse.
+        Payment::create([
+            'transaction_id' => $tx->id,
+            'user_id' => $agentId,
+            'created_by' => $agentId,
+            'cashier_session_id' => null,
+            'amount' => $amount,
+            'status' => Payment::STATUS_COMPLETED,
+            'payment_method' => 'fedapay',
+            'reference' => 'ONLINE-'.$tx->id.'-'.$fedapayId,
+            'payment_date' => now(),
+            'currency' => $hotel->currency ?: 'XOF',
+            'payment_gateway_response' => ['fedapay_transaction_id' => $fedapayId, 'source' => 'public_vitrine'],
+            'notes' => "Acompte réglé en ligne (FedaPay #{$fedapayId}) depuis la vitrine.",
+        ]);
+
+        $tx->updatePaymentStatus();
+
+        return redirect()->route('public.hotel.booking.confirmed', [$hotel->slug, $tx->id])
+            ->with('payment_success', true);
     }
 }
