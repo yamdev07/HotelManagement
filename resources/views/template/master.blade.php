@@ -259,31 +259,22 @@
     })();
 
     // Fond d'établissement (préférence locale par appareil) — appliqué sur toutes les pages
-    window.__APPBG = {
-        neon:     'radial-gradient(120% 120% at 15% 10%, #7c3aed 0%, transparent 45%), radial-gradient(120% 120% at 85% 20%, #db2777 0%, transparent 45%), #0d0b1f',
-        sunset:   'linear-gradient(135deg, #4f46e5 0%, #db2777 55%, #f59e0b 100%)',
-        pastel:   'linear-gradient(135deg, #fde7f3 0%, #e6f0ff 50%, #dff5ec 100%)',
-        spectrum: 'linear-gradient(115deg, #2563eb, #06b6d4, #10b981, #f59e0b, #ef4444)',
-        golden:   'linear-gradient(180deg, #f59e0b 0%, #fcd9a0 45%, #a7c7e7 100%)',
-        mauve:    'linear-gradient(180deg, #e9d5ff 0%, #a78bfa 55%, #6d28d9 100%)',
-        bluedusk: 'linear-gradient(180deg, #93c5fd 0%, #3b82f6 55%, #1e3a8a 100%)',
-        moonlight:'linear-gradient(180deg, #fbcfe8 0%, #fde7c8 100%)'
-    };
+    window.__APPBG = @json(collect(config('appearance.backgrounds', []))->map(fn ($b) => $b['css']));
     window.applyAppBg = function () {
         try {
             var key = localStorage.getItem('app-bg') || 'none';
             var css = key === 'custom'
-                ? 'url(' + (localStorage.getItem('app-bg-custom') || '') + ')'
+                ? 'url("' + (localStorage.getItem('app-bg-custom') || '') + '")'
                 : (window.__APPBG[key] || '');
             var el = document.body || document.documentElement;
             if (css && key !== 'none') {
-                el.style.backgroundImage = css;
+                el.style.background = css;               // shorthand : gère les dégradés à couleur finale + SVG
                 el.style.backgroundSize = 'cover';
                 el.style.backgroundPosition = 'center';
                 el.style.backgroundAttachment = 'fixed';
                 document.documentElement.classList.add('has-app-bg');
             } else {
-                el.style.backgroundImage = '';
+                el.style.background = '';
                 document.documentElement.classList.remove('has-app-bg');
             }
         } catch (e) {}

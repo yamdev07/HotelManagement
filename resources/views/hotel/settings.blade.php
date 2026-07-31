@@ -228,18 +228,7 @@ html[data-theme="dark"] .settings-page {
         </section>
 
         {{-- ═══ FOND (préférence locale par appareil) ═══ --}}
-        @php
-            $backgrounds = [
-                'neon'     => ['Néon',            'radial-gradient(120% 120% at 15% 10%, #7c3aed 0%, transparent 45%), radial-gradient(120% 120% at 85% 20%, #db2777 0%, transparent 45%), #0d0b1f'],
-                'sunset'   => ['Coucher de soleil','linear-gradient(135deg, #4f46e5 0%, #db2777 55%, #f59e0b 100%)'],
-                'pastel'   => ['Pastel',          'linear-gradient(135deg, #fde7f3 0%, #e6f0ff 50%, #dff5ec 100%)'],
-                'spectrum' => ['Spectre',         'linear-gradient(115deg, #2563eb, #06b6d4, #10b981, #f59e0b, #ef4444)'],
-                'golden'   => ['Aube dorée',      'linear-gradient(180deg, #f59e0b 0%, #fcd9a0 45%, #a7c7e7 100%)'],
-                'mauve'    => ['Brume mauve',     'linear-gradient(180deg, #e9d5ff 0%, #a78bfa 55%, #6d28d9 100%)'],
-                'bluedusk' => ['Crépuscule bleu', 'linear-gradient(180deg, #93c5fd 0%, #3b82f6 55%, #1e3a8a 100%)'],
-                'moonlight'=> ['Clair de lune',   'linear-gradient(180deg, #fbcfe8 0%, #fde7c8 100%)'],
-            ];
-        @endphp
+        @php $backgrounds = config('appearance.backgrounds'); @endphp
         <section class="panel">
             <div class="panel-head">
                 <div class="panel-title"><span class="ic"><i class="fas fa-images"></i></span>
@@ -256,8 +245,8 @@ html[data-theme="dark"] .settings-page {
                     </button>
                     @foreach ($backgrounds as $key => $b)
                         <button type="button" class="bg-card" data-bg="{{ $key }}">
-                            <div class="thumb" style="background-image:{{ $b[1] }}"></div>
-                            <div class="cap"><span>{{ $b[0] }}</span><span class="bgcheck"></span></div>
+                            <div class="thumb" style="background:{{ $b['css'] }};background-size:cover;background-position:center;"></div>
+                            <div class="cap"><span>{{ $b['label'] }}</span><span class="bgcheck"></span></div>
                         </button>
                     @endforeach
                     <button type="button" class="bg-card" data-bg="custom" id="bgCustomCard">
