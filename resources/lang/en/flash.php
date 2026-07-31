@@ -138,6 +138,8 @@ return [
     'billing_session_not_found' => 'Payment session not found. If you were charged, contact us.',
     'billing_payment_failed' => 'Payment did not go through. No amount was charged.',
     'billing_confirmed' => 'Payment confirmed! Your subscription is active until :date.',
+    'channel_feed_added' => 'Calendar added. Synchronisation will run automatically.',
+    'channel_feed_removed' => 'Calendar removed.',
 
     // ─── HOTEL SETTINGS ─────────────────────────────────
     'hotel_settings_updated' => 'Your property information has been updated.',

@@ -23,6 +23,7 @@ return [
     'form_duration' => 'Durée',
     'form_months' => ':count mois',
     'form_submit' => 'Payer et activer',
+    'form_change' => 'Changer de formule',
     'history_title' => 'Historique',
     'history_date' => 'Date',
     'history_plan' => 'Formule',

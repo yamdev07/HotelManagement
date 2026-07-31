@@ -23,6 +23,7 @@ return [
     'form_duration' => 'Duration',
     'form_months' => ':count month(s)',
     'form_submit' => 'Pay and activate',
+    'form_change' => 'Switch plan',
     'history_title' => 'History',
     'history_date' => 'Date',
     'history_plan' => 'Plan',

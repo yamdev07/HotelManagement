@@ -138,6 +138,8 @@ return [
     'billing_session_not_found' => 'Session de paiement introuvable. Si vous avez été débité, contactez-nous.',
     'billing_payment_failed' => 'Le paiement n\'a pas abouti. Aucun montant n\'a été prélevé.',
     'billing_confirmed' => 'Paiement confirmé ! Votre abonnement est actif jusqu\'au :date.',
+    'channel_feed_added' => 'Calendrier ajouté. La synchronisation se fera automatiquement.',
+    'channel_feed_removed' => 'Calendrier retiré.',
 
     // ─── HOTEL SETTINGS ─────────────────────────────────
     'hotel_settings_updated' => 'Les informations de votre établissement ont été mises à jour.',
