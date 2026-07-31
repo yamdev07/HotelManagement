@@ -104,7 +104,7 @@
     background: var(--g600); border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 1.1rem; flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
 }
 .payment-header-title {
     font-size: 1.4rem; font-weight: 700;
@@ -395,12 +395,12 @@
 
 .btn-primary-modern {
     background: var(--g600); color: white;
-    box-shadow: 0 2px 10px rgba(46,133,64,.3);
+    box-shadow: 0 2px 10px rgb(from var(--g500) r g b / .3);
 }
 .btn-primary-modern:hover {
     background: var(--g700); color: white;
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
     text-decoration: none;
 }
 
@@ -418,7 +418,7 @@
 }
 .btn-success-modern:hover {
     background: var(--g700); transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(46,133,64,.25);
+    box-shadow: 0 4px 12px rgb(from var(--g500) r g b / .25);
 }
 
 .btn-outline-warning-modern {

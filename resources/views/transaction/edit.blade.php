@@ -7,8 +7,8 @@
     --primary: #2563eb;
     --primary-light: #3b82f6;
     --primary-soft: rgba(37, 99, 235, 0.08);
-    --success: #10b981;
-    --success-light: rgba(16, 185, 129, 0.08);
+    --success: var(--g500);
+    --success-light: rgb(from var(--g500) r g b / 0.08);
     --warning: #f59e0b;
     --warning-light: rgba(245, 158, 11, 0.08);
     --danger: #ef4444;
@@ -98,8 +98,8 @@
 }
 .badge-active {
     background: var(--success-light);
-    color: #047857;
-    border: 1px solid rgba(16, 185, 129, 0.15);
+    color: var(--g700);
+    border: 1px solid rgb(from var(--g500) r g b / 0.15);
 }
 .badge-completed {
     background: var(--info-light);

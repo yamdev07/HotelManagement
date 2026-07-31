@@ -10,8 +10,8 @@
     --primary: #2563eb;
     --primary-light: #3b82f6;
     --primary-soft: rgba(37, 99, 235, 0.08);
-    --success: #10b981;
-    --success-light: rgba(16, 185, 129, 0.08);
+    --success: var(--g500);
+    --success-light: rgb(from var(--g500) r g b / 0.08);
     --warning: #f59e0b;
     --warning-light: rgba(245, 158, 11, 0.08);
     --danger: #ef4444;
@@ -90,7 +90,7 @@
 .night-option.selected {
     border-color: var(--success);
     background: var(--success-light);
-    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1);
+    box-shadow: 0 4px 10px rgb(from var(--g500) r g b / 0.1);
 }
 .night-option .h4 {
     font-size: 1.5rem;
@@ -606,7 +606,7 @@
                     <div class="info-item">
                         <span class="info-label"><i class="fas fa-chart-line"></i>{{ __('extend.status_active') }}</span>
                         <span class="info-value">
-                            <span class="badge" style="background: {{ $transaction->status == 'active' ? 'var(--success-light)' : 'var(--warning-light)' }}; color: {{ $transaction->status == 'active' ? '#047857' : '#b45309' }};">
+                            <span class="badge" style="background: {{ $transaction->status == 'active' ? 'var(--success-light)' : 'var(--warning-light)' }}; color: {{ $transaction->status == 'active' ? 'var(--g700)' : '#b45309' }};">
                                 {{ $transaction->status == 'active' ? __('extend.status_active') : __('extend.status_reservation') }}
                             </span>
                         </span>
@@ -756,7 +756,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (data.available) {
                 resultDiv.innerHTML = `
-                    <div class="alert alert-success py-2" style="background: var(--success-light); border: 1px solid rgba(16, 185, 129, 0.2); color: #047857;">
+                    <div class="alert alert-success py-2" style="background: var(--success-light); border: 1px solid rgb(from var(--g500) r g b / 0.2); color: var(--g700);">
                         <i class="fas fa-check-circle me-1"></i> {{ __('extend.available') }}
                     </div>
                 `;

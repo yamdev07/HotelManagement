@@ -8,12 +8,12 @@
 ═══════════════════════════════════════════════════════════════════ */
 :root {
     --primary-50: #ecfdf5;
-    --primary-100: #d1fae5;
-    --primary-400: #34d399;
-    --primary-500: #10b981;
-    --primary-600: #059669;
-    --primary-700: #047857;
-    --primary-800: #065f46;
+    --primary-100: var(--g100);
+    --primary-400: var(--g400);
+    --primary-500: var(--g500);
+    --primary-600: var(--g600);
+    --primary-700: var(--g700);
+    --primary-800: var(--g800);
 
     --amber-50: #fffbeb;
     --amber-100: #fef3c7;
@@ -115,7 +115,7 @@
     justify-content: center;
     color: white;
     font-size: 1.25rem;
-    box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);
+    box-shadow: 0 4px 10px rgb(from var(--g600) r g b / 0.3);
 }
 
 /* Info badge heures */
@@ -150,7 +150,7 @@
 .btn-primary-modern {
     background: linear-gradient(135deg, var(--primary-700), var(--primary-500));
     color: white;
-    box-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.3);
+    box-shadow: 0 4px 6px -1px rgb(from var(--g600) r g b / 0.3);
 }
 
 .btn-primary-modern:hover {

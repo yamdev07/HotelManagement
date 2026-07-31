@@ -89,7 +89,7 @@
     background: var(--g600); border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 1.1rem; flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
 }
 .trx-header-title {
     font-size: 1.4rem; font-weight: 700;
@@ -190,7 +190,7 @@
 .search-input:focus {
     border-color: var(--g400);
     background: var(--white);
-    box-shadow: 0 0 0 3px rgba(46,133,64,.08);
+    box-shadow: 0 0 0 3px rgb(from var(--g500) r g b / .08);
 }
 .search-btn {
     height: 40px;
@@ -318,12 +318,12 @@
 .btn-db-primary {
     background: var(--g600);
     color: white;
-    box-shadow: 0 2px 10px rgba(46,133,64,.25);
+    box-shadow: 0 2px 10px rgb(from var(--g500) r g b / .25);
 }
 .btn-db-primary:hover {
     background: var(--g700);
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(46,133,64,.3);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .3);
     color: white;
     text-decoration: none;
 }
@@ -1193,7 +1193,7 @@
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 @if(in_array($status, ['active', 'pending_checkout']))
-                                <a href="{{ route('transaction.compte-sejour', $transaction) }}" class="btn-action" style="background:#10b981; color:#fff;" data-bs-toggle="tooltip" title="{{ __('reservation.tooltip_stay_bill') }}">
+                                <a href="{{ route('transaction.compte-sejour', $transaction) }}" class="btn-action" style="background:var(--g500); color:#fff;" data-bs-toggle="tooltip" title="{{ __('reservation.tooltip_stay_bill') }}">
                                     <i class="fas fa-receipt"></i>
                                 </a>
                                 @endif
@@ -1423,7 +1423,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     confirmButtonText: '{{ __("reservation.yes") }}, {{ __("reservation.cancel") }}',
                     cancelButtonText: '{{ __("reservation.no") }}',
                     confirmButtonColor: '#545954',
-                    cancelButtonColor: '#1e6b2e',
+                    cancelButtonColor: 'var(--g600)',
                     preConfirm: () => {
                         const reason = (document.getElementById('reason')?.value || '').trim();
                         if (reason.length < 3) {
@@ -1452,7 +1452,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     showCancelButton: true,
                     confirmButtonText: '{{ __("reservation.yes") }}',
                     cancelButtonText: '{{ __("reservation.no") }}',
-                    confirmButtonColor: '#1e6b2e',
+                    confirmButtonColor: 'var(--g600)',
                 }).then(result => {
                     if (result.isConfirmed) form.submit();
                 });
@@ -1487,7 +1487,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon: 'error',
                     title: '{{ __("reservation.after_8pm") }}',
                     text: '{{ __("reservation.departure_impossible_after_20h") }}',
-                    confirmButtonColor: '#1e6b2e'
+                    confirmButtonColor: 'var(--g600)'
                 });
                 return;
             }
@@ -1499,7 +1499,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     html: `Solde restant: <strong>${parseInt(remaining).toLocaleString()} CFA</strong>`,
                     confirmButtonText: '{{ __("reservation.go_to_payment") }}',
                     showCancelButton: true,
-                    confirmButtonColor: '#1e6b2e'
+                    confirmButtonColor: 'var(--g600)'
                 }).then(result => {
                     if (result.isConfirmed) {
                         window.location.href = `/transaction/${btn.dataset.transactionId}/payment/create`;
@@ -1522,7 +1522,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 showCancelButton: true,
                 confirmButtonText: '{{ __("reservation.yes_departure") }}',
                 cancelButtonText: '{{ __("reservation.cancel") }}',
-                confirmButtonColor: '#1e6b2e'
+                confirmButtonColor: 'var(--g600)'
             }).then(result => {
                 if (result.isConfirmed) {
                     const form = document.createElement('form');
