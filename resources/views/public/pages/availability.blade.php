@@ -133,13 +133,14 @@
                                             <div class="ptotal">Total séjour : <strong>{{ number_format($room->price * $nights, 0, ',', ' ') }} {{ $hotel->currency }}</strong></div>
                                         </div>
                                     </div>
+                                    <a class="cta" href="{{ route('public.hotel.booking', ['slug' => $hotel->slug, 'room' => $room->id, 'check_in' => $checkIn, 'check_out' => $checkOut, 'guests' => $guests]) }}">
+                                        <i class="fas fa-calendar-check"></i> Réserver
+                                    </a>
                                     @if ($wa)
-                                        <a class="cta wa" target="_blank" rel="noopener"
+                                        <a class="cta wa" target="_blank" rel="noopener" style="margin-top:8px;"
                                            href="https://wa.me/{{ $wa }}?text={{ urlencode("Bonjour {$hotel->name}, je souhaite réserver la « ".($room->type->name ?? 'chambre')." » (chambre {$room->number}) du ".\Carbon\Carbon::parse($checkIn)->format('d/m/Y')." au ".\Carbon\Carbon::parse($checkOut)->format('d/m/Y')." pour {$guests} voyageur(s).") }}">
-                                            <i class="fab fa-whatsapp"></i> Réserver via WhatsApp
+                                            <i class="fab fa-whatsapp"></i> Via WhatsApp
                                         </a>
-                                    @elseif ($hotel->show_contact)
-                                        <a class="cta" href="{{ route('public.hotel.contact', $hotel->slug) }}">Demander cette chambre</a>
                                     @endif
                                 </div>
                             </div>

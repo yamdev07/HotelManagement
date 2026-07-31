@@ -75,6 +75,9 @@ Route::get('/lang/{locale}', function (string $locale) {
 Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(function () {
     Route::get('/h/{slug}', 'show')->name('public.hotel');
     Route::get('/h/{slug}/reserver', 'availability')->name('public.hotel.availability');
+    Route::get('/h/{slug}/reserver/{room}', 'booking')->name('public.hotel.booking');
+    Route::post('/h/{slug}/reserver/{room}', 'storeBooking')->name('public.hotel.booking.store');
+    Route::get('/h/{slug}/reservation/{transaction}/confirmee', 'bookingConfirmed')->name('public.hotel.booking.confirmed');
     Route::get('/h/{slug}/chambres', 'rooms')->name('public.hotel.rooms');
     Route::get('/h/{slug}/restaurant', 'restaurant')->name('public.hotel.restaurant');
     Route::get('/h/{slug}/services', 'services')->name('public.hotel.services');
