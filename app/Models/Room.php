@@ -60,6 +60,16 @@ class Room extends Model
         return $query->where('active', true);
     }
 
+    public function calendarFeeds()
+    {
+        return $this->hasMany(RoomCalendarFeed::class);
+    }
+
+    public function blocks()
+    {
+        return $this->hasMany(RoomBlock::class);
+    }
+
     /** Jeton iCal (généré et persisté à la première demande). */
     public function icalToken(): string
     {

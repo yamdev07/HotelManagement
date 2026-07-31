@@ -7,6 +7,7 @@ use App\Models\Hotel;
 use App\Models\Menu;
 use App\Models\Payment;
 use App\Models\Room;
+use App\Models\RoomBlock;
 use App\Models\RoomStatus;
 use App\Models\Transaction;
 use App\Models\User;
@@ -119,6 +120,14 @@ class PublicSiteController extends Controller
     {
         $outOfService = RoomStatus::whereIn('code', ['MNT'])->pluck('id')->all();
         if (in_array($room->room_status_id, $outOfService, true)) {
+            return false;
+        }
+
+        // Bloquée par un calendrier OTA (Booking/Airbnb) importé ?
+        $blockedByOta = RoomBlock::where('room_id', $room->id)
+            ->overlapping($ci->format('Y-m-d'), $co->format('Y-m-d'))
+            ->exists();
+        if ($blockedByOta) {
             return false;
         }
 
@@ -260,9 +269,15 @@ class PublicSiteController extends Controller
                 // Statuts hors service (maintenance) exclus (comme le back-office).
                 $outOfService = RoomStatus::whereIn('code', ['MNT'])->pluck('id')->all();
 
+                // Chambres bloquées par un calendrier OTA (Booking/Airbnb) sur la période.
+                $blocked = RoomBlock::overlapping($ci->format('Y-m-d'), $co->format('Y-m-d'))
+                    ->pluck('room_id')->unique()->filter()->all();
+
+                $excluded = array_values(array_unique(array_merge($occupied, $blocked)));
+
                 $rooms = Room::with(['type', 'images'])
                     ->where('capacity', '>=', $guests)
-                    ->when($occupied, fn ($q) => $q->whereNotIn('id', $occupied))
+                    ->when($excluded, fn ($q) => $q->whereNotIn('id', $excluded))
                     ->when($outOfService, fn ($q) => $q->whereNotIn('room_status_id', $outOfService))
                     ->orderBy('price')
                     ->get();

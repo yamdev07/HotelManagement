@@ -3,9 +3,13 @@
 namespace App\Services;
 
 use App\Models\Room;
+use App\Models\RoomBlock;
+use App\Models\RoomCalendarFeed;
 use App\Models\Transaction;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Génère et analyse des flux iCal (RFC 5545) pour la synchronisation de
@@ -65,6 +69,66 @@ class IcalService
         $lines[] = 'END:VCALENDAR';
 
         return implode("\r\n", $lines)."\r\n";
+    }
+
+    /**
+     * Importe un flux OTA : télécharge l'iCal, met à jour les blocs de la
+     * chambre et supprime ceux qui ont disparu du flux (résa OTA annulée).
+     *
+     * @return array{ok:bool, count:int, error:?string}
+     */
+    public function syncFeed(RoomCalendarFeed $feed): array
+    {
+        try {
+            $response = Http::timeout(25)
+                ->withHeaders(['User-Agent' => 'checkinHub-ical/1.0'])
+                ->get($feed->url);
+
+            if (! $response->successful()) {
+                return $this->markFeedError($feed, 'HTTP '.$response->status());
+            }
+        } catch (\Throwable $e) {
+            Log::warning('iCal: échec de téléchargement', ['feed' => $feed->id, 'error' => $e->getMessage()]);
+
+            return $this->markFeedError($feed, mb_substr($e->getMessage(), 0, 480));
+        }
+
+        $events = $this->parseEvents($response->body());
+        $seen = [];
+
+        foreach ($events as $event) {
+            $uid = $event['uid'];
+            $seen[] = $uid;
+
+            RoomBlock::updateOrCreate(
+                ['feed_id' => $feed->id, 'external_uid' => $uid],
+                [
+                    'hotel_id' => $feed->hotel_id,
+                    'room_id' => $feed->room_id,
+                    'source' => $feed->source,
+                    'start_date' => $event['start']->format('Y-m-d'),
+                    'end_date' => $event['end']->format('Y-m-d'),
+                    'summary' => mb_substr($event['summary'] ?: 'Indisponible', 0, 255),
+                ]
+            );
+        }
+
+        // Purge les blocs de ce flux qui n'y figurent plus (annulations OTA).
+        RoomBlock::where('feed_id', $feed->id)
+            ->when($seen, fn ($q) => $q->whereNotIn('external_uid', $seen))
+            ->delete();
+
+        $feed->forceFill(['last_synced_at' => now(), 'last_error' => null])->save();
+
+        return ['ok' => true, 'count' => count($seen), 'error' => null];
+    }
+
+    /** @return array{ok:bool, count:int, error:string} */
+    private function markFeedError(RoomCalendarFeed $feed, string $error): array
+    {
+        $feed->forceFill(['last_error' => $error, 'last_synced_at' => now()])->save();
+
+        return ['ok' => false, 'count' => 0, 'error' => $error];
     }
 
     /**

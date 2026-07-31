@@ -21,3 +21,6 @@ Artisan::command('inspire', function () {
 
 // Rappel WhatsApp aux clients arrivant le lendemain (une fois par jour).
 Schedule::command('whatsapp:reminders')->dailyAt('09:00');
+
+// Import des calendriers OTA (Booking/Airbnb) pour bloquer les dates vendues ailleurs.
+Schedule::command('ical:sync')->hourly();
