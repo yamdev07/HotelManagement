@@ -39,13 +39,8 @@
             .border-primary { border-color: var(--hotel-primary) !important; }
             a { color: var(--hotel-primary); }
 
-            /* Sidebar & navigation active */
-            #sidebar { background: var(--hotel-secondary) !important; }
-            #sidebar .nav-item.active,
-            #sidebar .nav-item:hover,
-            #sidebar .nav-item--active {
-                background: var(--hotel-primary) !important;
-            }
+            /* La sidebar (design épuré clair) gère elle-même ses accents via --g*,
+               qui sont déjà recolorés ci-dessus depuis la couleur de l'hôtel. */
             .progress-bar { background-color: var(--hotel-primary) !important; }
         </style>
     @endif
