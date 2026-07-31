@@ -29,6 +29,7 @@ class Room extends Model
         'maintenance_started_at',
         'maintenance_ended_at',
         'maintenance_reason',
+        'ical_token',
     ];
 
     protected $appends = [
@@ -57,6 +58,22 @@ class Room extends Model
     public function scopeActive($query)
     {
         return $query->where('active', true);
+    }
+
+    /** Jeton iCal (généré et persisté à la première demande). */
+    public function icalToken(): string
+    {
+        if (empty($this->ical_token)) {
+            $this->forceFill(['ical_token' => \Illuminate\Support\Str::random(32)])->save();
+        }
+
+        return $this->ical_token;
+    }
+
+    /** URL publique du flux iCal de la chambre (à coller dans Booking/Airbnb). */
+    public function icalUrl(): string
+    {
+        return route('ical.export', ['token' => $this->icalToken()]);
     }
 
     // Constantes pour les statuts

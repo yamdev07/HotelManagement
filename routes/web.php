@@ -86,6 +86,10 @@ Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(func
     Route::get('/h/{slug}/contact', 'contact')->name('public.hotel.contact');
 });
 
+// Flux iCal d'une chambre (export vers Booking.com / Airbnb), accès par jeton.
+Route::get('/calendar/{token}.ics', [\App\Http\Controllers\IcalController::class, 'export'])
+    ->name('ical.export');
+
 // ==================== INSCRIPTION SELF-SERVICE (essai gratuit) ====================
 // PAS de middleware "guest" : un utilisateur déjà connecté doit quand même pouvoir
 // ouvrir le formulaire et créer un nouvel établissement (sinon il était renvoyé
