@@ -203,6 +203,18 @@
                             </a>
                         @endif
 
+                        @if (Route::has('channels.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
+                            <a href="{{ route('channels.index') }}"
+                                class="nav-item restricted {{ $activeClass('channels.') }}"
+                                data-tooltip="Synchronisation Booking/Airbnb">
+                                <div class="nav-icon"><i class="fas fa-arrows-rotate"></i></div>
+                                <div class="nav-content">
+                                    <div class="nav-title">Synchronisation</div>
+                                    <div class="nav-subtitle">Booking · Airbnb</div>
+                                </div>
+                            </a>
+                        @endif
+
                         @if (Route::has('type.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
                             <a href="{{ route('type.index') }}"
                                 class="nav-item restricted {{ $activeClass('type.index') }}"

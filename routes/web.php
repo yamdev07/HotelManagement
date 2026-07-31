@@ -155,6 +155,14 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::delete('/mon-etablissement/supprimer', [\App\Http\Controllers\HotelSettingsController::class, 'destroyAccount'])->name('hotel.account.destroy');
 });
 
+// ==================== SYNCHRONISATION CALENDRIERS (OTA : Booking/Airbnb) ====================
+Route::middleware(['auth', 'checkrole:Super,Admin'])->prefix('canaux')->name('channels.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ChannelSyncController::class, 'index'])->name('index');
+    Route::post('/chambre/{room}/calendrier', [\App\Http\Controllers\ChannelSyncController::class, 'storeFeed'])->name('feed.store');
+    Route::delete('/calendrier/{feed}', [\App\Http\Controllers\ChannelSyncController::class, 'destroyFeed'])->name('feed.destroy');
+    Route::post('/synchroniser', [\App\Http\Controllers\ChannelSyncController::class, 'syncNow'])->name('sync');
+});
+
 // ==================== ABONNEMENT / PAIEMENT EN LIGNE (FedaPay) ====================
 // Accessible même si l'abonnement a expiré (régularisation) — cf. EnsureHotelActive.
 Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
