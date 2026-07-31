@@ -142,12 +142,14 @@ html[data-theme="dark"] .bill-page{
                 @if ($hotel->suspension_reason)<strong>{{ __('billing.alert_suspended_reason') }} {{ $hotel->suspension_reason }}.</strong>@endif
                 {{ __('billing.alert_suspended_text') }}</div>
         </div>
-    @elseif (! $configured)
-        <div class="notice info">
-            <i class="fas fa-circle-info" style="margin-top:2px"></i>
-            <div>{{ __('billing.alert_not_configured') }}</div>
-        </div>
     @else
+        @unless ($configured)
+            <div class="notice info">
+                <i class="fas fa-circle-info" style="margin-top:2px"></i>
+                <div>{{ __('billing.alert_not_configured') }}</div>
+            </div>
+        @endunless
+
         {{-- Choix de formule + paiement --}}
         <div class="panel">
             <div class="hd"><i class="fas fa-arrows-rotate" style="color:var(--acc)"></i> {{ __('billing.form_title') }}

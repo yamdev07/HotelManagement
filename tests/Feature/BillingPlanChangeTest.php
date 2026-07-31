@@ -98,6 +98,17 @@ class BillingPlanChangeTest extends TestCase
         $this->assertFalse($pending['reset']);
     }
 
+    public function test_plans_are_visible_even_without_online_payment(): void
+    {
+        config(['services.fedapay.secret' => null]); // paiement en ligne non configuré
+        [$hotel, $admin] = $this->hotelOn('starter');
+
+        $this->actingAs($admin)->get('/abonnement')
+            ->assertOk()
+            ->assertSee('name="plan"', false) // le sélecteur de formule est bien présent
+            ->assertSee('Business');          // les paliers sont listés
+    }
+
     public function test_pending_downgrade_applies_when_due(): void
     {
         [$hotel, $admin] = $this->hotelOn('business');
