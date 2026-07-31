@@ -41,4 +41,17 @@ return [
         'env' => env('FEDAPAY_ENV', 'sandbox'),
     ],
 
+    /*
+    | WhatsApp — notifications automatiques (Meta WhatsApp Cloud API, officiel/gratuit).
+    | On appelle l'API Graph via le client HTTP de Laravel (pas de SDK).
+    | Non configuré (token/phone_id vides) => aucun envoi (dégradation silencieuse).
+    | 'templates' : noms des modèles approuvés (envoi business-initiated). Vide => texte simple.
+    */
+    'whatsapp' => [
+        'token' => env('WHATSAPP_TOKEN'),
+        'phone_id' => env('WHATSAPP_PHONE_ID'),
+        'api_version' => env('WHATSAPP_API_VERSION', 'v21.0'),
+        'default_country' => env('WHATSAPP_DEFAULT_COUNTRY', '229'), // Bénin par défaut
+    ],
+
 ];

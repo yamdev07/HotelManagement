@@ -11,6 +11,7 @@ use App\Models\RoomStatus;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\FedaPayService;
+use App\Services\WhatsAppService;
 use App\Support\TenantManager;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -25,7 +26,79 @@ class PublicSiteController extends Controller
     /** Acompte demandé à la réservation en ligne (15 % du séjour, comme le back-office). */
     private const DEPOSIT_RATE = 0.15;
 
-    public function __construct(private FedaPayService $fedapay) {}
+    public function __construct(
+        private FedaPayService $fedapay,
+        private WhatsAppService $whatsapp,
+    ) {}
+
+    /** Référence lisible d'une réservation (RES-00042). */
+    private function bookingRef(Transaction $tx): string
+    {
+        return 'RES-'.str_pad((string) $tx->id, 5, '0', STR_PAD_LEFT);
+    }
+
+    /** Numéro WhatsApp de l'hôtel (réseaux sociaux en priorité, sinon téléphone). */
+    private function hotelWhatsApp(Hotel $hotel): ?string
+    {
+        return $hotel->socials['whatsapp'] ?? $hotel->contact_phone ?? null;
+    }
+
+    /**
+     * Notifie le client + l'hôtelier qu'une réservation vient d'être créée.
+     * Silencieux si WhatsApp n'est pas configuré ; n'interrompt jamais le tunnel.
+     */
+    private function notifyBookingCreated(Hotel $hotel, Transaction $tx): void
+    {
+        if (! $this->whatsapp->isConfigured()) {
+            return;
+        }
+
+        $ref = $this->bookingRef($tx);
+        $ci = Carbon::parse($tx->check_in)->format('d/m/Y');
+        $co = Carbon::parse($tx->check_out)->format('d/m/Y');
+        $room = $tx->room->number ?? '';
+        $currency = $hotel->currency ?: 'XOF';
+        $total = number_format((float) $tx->total_price, 0, ',', ' ');
+
+        // Au client
+        $this->whatsapp->sendText(
+            $tx->customer->phone ?? null,
+            "Bonjour {$tx->customer->name},\n\n".
+            "Votre réservation *{$ref}* chez *{$hotel->name}* est bien enregistrée ✅\n\n".
+            "🛏️ Chambre {$room}\n📅 Du {$ci} au {$co}\n💰 Total : {$total} {$currency}\n\n".
+            'Nous revenons vers vous très vite. Merci !'
+        );
+
+        // À l'hôtelier
+        $this->whatsapp->sendText(
+            $this->hotelWhatsApp($hotel),
+            "🔔 Nouvelle réservation en ligne *{$ref}*\n\n".
+            "👤 {$tx->customer->name} ({$tx->customer->phone})\n🛏️ Chambre {$room}\n".
+            "📅 {$ci} → {$co}\n💰 {$total} {$currency}"
+        );
+    }
+
+    /** Notifie le client que l'acompte a été reçu et la réservation confirmée. */
+    private function notifyDepositPaid(Hotel $hotel, Transaction $tx, float $amount): void
+    {
+        if (! $this->whatsapp->isConfigured()) {
+            return;
+        }
+
+        $ref = $this->bookingRef($tx);
+        $currency = $hotel->currency ?: 'XOF';
+        $paid = number_format($amount, 0, ',', ' ');
+        $balance = number_format(max(0, (float) $tx->total_price - $amount), 0, ',', ' ');
+
+        $this->whatsapp->sendText(
+            $tx->customer->phone ?? null,
+            "Merci {$tx->customer->name} ! 🎉\n\n".
+            "Nous avons bien reçu votre acompte de *{$paid} {$currency}* pour la réservation *{$ref}*.\n".
+            "Votre chambre est confirmée ✅\n\n".
+            "Solde à régler à l'arrivée : {$balance} {$currency}.\n".
+            "À très bientôt chez *{$hotel->name}* !"
+        );
+    }
 
     /** Montant de l'acompte (15 %) pour une réservation. */
     private function depositFor(Transaction $tx): int
@@ -302,6 +375,9 @@ class PublicSiteController extends Controller
             'notes' => 'Réservation en ligne depuis la vitrine.',
         ]);
 
+        $tx->load(['room', 'customer']);
+        $this->notifyBookingCreated($hotel, $tx);
+
         return redirect()->route('public.hotel.booking.confirmed', [$hotel->slug, $tx->id]);
     }
 
@@ -429,6 +505,9 @@ class PublicSiteController extends Controller
         ]);
 
         $tx->updatePaymentStatus();
+
+        $tx->load(['room', 'customer']);
+        $this->notifyDepositPaid($hotel, $tx, $amount);
 
         return redirect()->route('public.hotel.booking.confirmed', [$hotel->slug, $tx->id])
             ->with('payment_success', true);
