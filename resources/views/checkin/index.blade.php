@@ -94,7 +94,7 @@
     background: var(--g600); border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 1.1rem; flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
 }
 .ci-header-title {
     font-size: 1.4rem; font-weight: 700;
@@ -566,7 +566,7 @@
 .btn-res-checkin:hover {
     background: var(--g700);
     transform: translateY(-1px);
-    box-shadow: 0 4px 10px rgba(46,133,64,.25);
+    box-shadow: 0 4px 10px rgb(from var(--g500) r g b / .25);
 }
 .btn-res-quick {
     background: var(--white);

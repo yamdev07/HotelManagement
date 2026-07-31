@@ -81,7 +81,7 @@
         }
 
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--g500); border-radius: 10px; }
         .table-responsive { overflow-x: auto; }
 
         /* ═══════════════════════════════════════════════════
@@ -164,7 +164,7 @@
             color: #e2e8f0;
         }
         html[data-theme="dark"] .breadcrumb a { color: #94a3b8; }
-        html[data-theme="dark"] .breadcrumb a:hover { color: #10b981; }
+        html[data-theme="dark"] .breadcrumb a:hover { color: var(--g500); }
         html[data-theme="dark"] .breadcrumb .current { color: #cbd5e1; }
 
         /* ── Table ── */
@@ -175,7 +175,7 @@
         /* ── Pagination ── */
         html[data-theme="dark"] .pagination-modern .page-link { background: #1e293b; color: #94a3b8; border-color: #334155; }
         html[data-theme="dark"] .pagination-modern .page-link:hover { background: #334155; color: #e2e8f0; }
-        html[data-theme="dark"] .pagination-modern .active .page-link { background: #10b981; border-color: #10b981; color: #fff; }
+        html[data-theme="dark"] .pagination-modern .active .page-link { background: var(--g500); border-color: var(--g500); color: #fff; }
 
         /* ── Scrollbar ── */
         html[data-theme="dark"] ::-webkit-scrollbar { background: #1e293b; }
@@ -190,14 +190,14 @@
         html[data-theme="dark"] .dropdown-item { color: #e2e8f0; }
         html[data-theme="dark"] .dropdown-item:hover,
         html[data-theme="dark"] .dropdown-item:focus { background: #334155; color: #fff; }
-        html[data-theme="dark"] .dropdown-item i { color: #10b981; }
+        html[data-theme="dark"] .dropdown-item i { color: var(--g500); }
 
         /* ── Forms ── */
         html[data-theme="dark"] .form-check-input { background-color: #334155; border-color: #475569; }
-        html[data-theme="dark"] .form-check-input:checked { background-color: #10b981; border-color: #10b981; }
+        html[data-theme="dark"] .form-check-input:checked { background-color: var(--g500); border-color: var(--g500); }
 
         /* ── Alerts ── */
-        html[data-theme="dark"] .alert-success { background-color: rgba(16,185,129,.15) !important; color: #6ee7b7 !important; border-color: rgba(16,185,129,.3) !important; }
+        html[data-theme="dark"] .alert-success { background-color: rgb(from var(--g500) r g b / .15) !important; color: var(--g300) !important; border-color: rgb(from var(--g500) r g b / .3) !important; }
         html[data-theme="dark"] .alert-danger { background-color: rgba(239,68,68,.15) !important; color: #fca5a5 !important; border-color: rgba(239,68,68,.3) !important; }
         html[data-theme="dark"] .alert-warning { background-color: rgba(245,158,11,.15) !important; color: #fcd34d !important; border-color: rgba(245,158,11,.3) !important; }
         html[data-theme="dark"] .alert-info { background-color: rgba(59,130,246,.15) !important; color: #93c5fd !important; border-color: rgba(59,130,246,.3) !important; }
@@ -219,13 +219,13 @@
         html[data-theme="dark"] .notification-card--read { background: #1e293b; border-color: #334155; }
         html[data-theme="dark"] .notification-card__message,
         html[data-theme="dark"] .notification-card__meta { color: #94a3b8; }
-        html[data-theme="dark"] .badge-green { background: rgba(16,185,129,.2) !important; color: #6ee7b7 !important; border-color: rgba(16,185,129,.3) !important; }
+        html[data-theme="dark"] .badge-green { background: rgb(from var(--g500) r g b / .2) !important; color: var(--g300) !important; border-color: rgb(from var(--g500) r g b / .3) !important; }
         html[data-theme="dark"] .badge-red { background: rgba(239,68,68,.2) !important; color: #fca5a5 !important; border-color: rgba(239,68,68,.3) !important; }
         html[data-theme="dark"] .badge-gray { background: rgba(148,163,184,.2) !important; color: #cbd5e1 !important; border-color: rgba(148,163,184,.3) !important; }
-        html[data-theme="dark"] .stat-icon { background: rgba(16,185,129,.15); }
-        html[data-theme="dark"] .avatar { background: rgba(16,185,129,.15); }
+        html[data-theme="dark"] .stat-icon { background: rgb(from var(--g500) r g b / .15); }
+        html[data-theme="dark"] .avatar { background: rgb(from var(--g500) r g b / .15); }
         html[data-theme="dark"] .details-pre { background: #0f172a; color: #94a3b8; }
-        html[data-theme="dark"] .toast-success { background: #065f46; }
+        html[data-theme="dark"] .toast-success { background: var(--g800); }
         html[data-theme="dark"] .toast-error { background: #991b1b; }
         html[data-theme="dark"] #sidebar-overlay { background: rgba(0,0,0,.5); }
     </style>
@@ -345,7 +345,7 @@
                 title: '⚠️ Session Active',
                 html: 'Vous avez une session active <strong>#{{ $activeSession->id }}</strong>.<br>Veuillez la clôturer avant de vous déconnecter.',
                 icon: 'warning',
-                confirmButtonColor: '#10b981', confirmButtonText: 'Compris',
+                confirmButtonColor: 'var(--g500)', confirmButtonText: 'Compris',
                 showCancelButton: true, cancelButtonText: 'Aller à la session', cancelButtonColor: '#3b82f6'
             }).then(function (r) {
                 if (r.dismiss === Swal.DismissReason.cancel)

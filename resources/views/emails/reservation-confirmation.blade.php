@@ -35,7 +35,7 @@
                 @if ($paid > 0)
                 <tr style="border-top:1px solid #eef1f6;">
                     <td style="padding:9px 0;color:#64748b;">Déjà réglé</td>
-                    <td style="padding:9px 0;font-weight:bold;text-align:right;color:#16a34a;">{{ number_format($paid, 0, ',', ' ') }} FCFA</td>
+                    <td style="padding:9px 0;font-weight:bold;text-align:right;color:var(--g600);">{{ number_format($paid, 0, ',', ' ') }} FCFA</td>
                 </tr>
                 <tr style="border-top:1px solid #eef1f6;">
                     <td style="padding:9px 0;color:#64748b;">Reste à payer</td>

@@ -107,7 +107,7 @@
     background: var(--g600); border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 1.1rem; flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
 }
 .reports-header-title {
     font-size: 1.4rem; font-weight: 700;
@@ -134,12 +134,12 @@
 }
 .btn-db-primary {
     background: var(--g600); color: white;
-    box-shadow: 0 2px 10px rgba(46,133,64,.3);
+    box-shadow: 0 2px 10px rgb(from var(--g500) r g b / .3);
 }
 .btn-db-primary:hover {
     background: var(--g700); color: white;
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
     text-decoration: none;
 }
 .btn-db-ghost {
@@ -915,11 +915,11 @@
                         label: 'Chiffre d\'affaires (CFA)',
                         data: revenueData,
                         borderWidth: 3,
-                        borderColor: '#2e8540',
-                        backgroundColor: 'rgba(46, 133, 64, 0.1)',
+                        borderColor: 'var(--g500)',
+                        backgroundColor: 'rgb(from var(--g500) r g b / 0.1)',
                         fill: true,
                         tension: 0.3,
-                        pointBackgroundColor: '#2e8540',
+                        pointBackgroundColor: 'var(--g500)',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
                         pointRadius: 5
@@ -974,9 +974,9 @@
                     datasets: [{
                         data: paymentData,
                         backgroundColor: [
-                            '#2e8540', // cash - green
+                            'var(--g500)', // cash - green
                             '#dc3545', // card - red
-                            '#1e6b2e', // mobile - dark green
+                            'var(--g600)', // mobile - dark green
                             '#ffc107', // transfer - yellow
                             '#6f42c1', // fedapay - purple
                             '#fd7e14', // check - orange
@@ -1027,7 +1027,7 @@
                     labels: ['Occupées', 'Disponibles'],
                     datasets: [{
                         data: [occupied, available],
-                        backgroundColor: ['#dc3545', '#2e8540'],
+                        backgroundColor: ['#dc3545', 'var(--g500)'],
                         borderWidth: 0
                     }]
                 },
@@ -1074,10 +1074,10 @@
                         label: 'Nombre de chambres',
                         data: roomStatusData,
                         backgroundColor: [
-                            '#2e8540', // disponible - green
+                            'var(--g500)', // disponible - green
                             '#dc3545', // occupée - red
                             '#ffc107', // maintenance - yellow
-                            '#1e6b2e', // réservée - dark green
+                            'var(--g600)', // réservée - dark green
                             '#6f42c1', // nettoyage - purple
                             '#737873'  // sale - gray
                         ],
@@ -1121,7 +1121,7 @@
                     labels: ['Avant 12h', '12h-14h (largesse)', 'Après 14h (late checkout)'],
                     datasets: [{
                         data: checkoutTimesData,
-                        backgroundColor: ['#2e8540', '#ffc107', '#dc3545'],
+                        backgroundColor: ['var(--g500)', '#ffc107', '#dc3545'],
                         borderWidth: 0
                     }]
                 },

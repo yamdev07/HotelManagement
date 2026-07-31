@@ -8,11 +8,11 @@
 
 :root {
     /* ── 4 COULEURS (vert, rouge, gris, blanc) ── */
-    --green-50:  #f0faf0;
-    --green-100: #d4edda;
-    --green-500: #2e8540;
-    --green-600: #1e6b2e;
-    --green-700: #155221;
+    --green-50:  var(--g50);
+    --green-100: var(--g100);
+    --green-500: var(--g500);
+    --green-600: var(--g600);
+    --green-700: var(--g700);
 
     --red-50:    #fee2e2;
     --red-100:   #fecaca;
@@ -117,7 +117,7 @@
     justify-content: center;
     color: white;
     font-size: 1.25rem;
-    box-shadow: 0 4px 10px rgba(46,133,64,.3);
+    box-shadow: 0 4px 10px rgb(from var(--g500) r g b / .3);
 }
 .header-title h1 {
     font-size: 1.6rem;
@@ -686,7 +686,7 @@ document.addEventListener('DOMContentLoaded', function() {
         data: {
             labels,
             datasets: [
-                { label: @json(__('housekeeping.monthlystats.chart_cleaned')), data: cleaned, borderColor: '#1e6b2e', backgroundColor: 'rgba(30,107,46,0.1)', tension:0.4, yAxisID:'y' },
+                { label: @json(__('housekeeping.monthlystats.chart_cleaned')), data: cleaned, borderColor: 'var(--g600)', backgroundColor: 'rgba(30,107,46,0.1)', tension:0.4, yAxisID:'y' },
                 { label: @json(__('housekeeping.monthlystats.chart_avg_time')), data: times, borderColor: '#b91c1c', backgroundColor: 'rgba(185,28,28,0.1)', tension:0.4, yAxisID:'y1' }
             ]
         },
@@ -710,7 +710,7 @@ document.addEventListener('DOMContentLoaded', function() {
             datasets: [{
                 label: @json(__('housekeeping.monthlystats.chart_cleaned')),
                 data: days.map(d => totals[d]),
-                backgroundColor: ['#1e6b2e','#1e6b2e','#1e6b2e','#1e6b2e','#1e6b2e','#1e6b2e','#1e6b2e']
+                backgroundColor: ['var(--g600)','var(--g600)','var(--g600)','var(--g600)','var(--g600)','var(--g600)','var(--g600)']
             }]
         },
         options: { scales: { y: { beginAtZero:true } }, plugins: { legend: { display:false } } }
@@ -729,7 +729,7 @@ function exportMonthlyReport() {
     ).join('');
     w.document.write(`
         <html><head><title>Rapport {{ $selectedMonth->translatedFormat('F Y') }}</title>
-        <style>body{font-family:sans-serif;margin:20px}h1{color:#1e6b2e}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px}th{background:#f2f2f2}</style>
+        <style>body{font-family:sans-serif;margin:20px}h1{color:var(--g600)}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px}th{background:#f2f2f2}</style>
         </head><body>
         <h1>Rapport Mensuel - {{ $selectedMonth->translatedFormat('F Y') }}</h1>
         <p>Généré le ${new Date().toLocaleString()}</p>

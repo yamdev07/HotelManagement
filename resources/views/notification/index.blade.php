@@ -105,7 +105,7 @@
     background: var(--g600); border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 1.1rem; flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
 }
 .notifications-header-title {
     font-size: 1.4rem; font-weight: 700;
@@ -132,12 +132,12 @@
 }
 .btn-db-primary {
     background: var(--g600); color: white;
-    box-shadow: 0 2px 10px rgba(46,133,64,.3);
+    box-shadow: 0 2px 10px rgb(from var(--g500) r g b / .3);
 }
 .btn-db-primary:hover {
     background: var(--g700); color: white;
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
     text-decoration: none;
 }
 .btn-db-ghost {
@@ -408,7 +408,7 @@
 .notif-filter:hover { border-color: var(--g300); color: var(--g700); }
 .notif-filter.active {
     background: var(--g600); color: white; border-color: var(--g600);
-    box-shadow: 0 2px 8px rgba(46,133,64,.3);
+    box-shadow: 0 2px 8px rgb(from var(--g500) r g b / .3);
 }
 .notif-filter .count {
     font-family: var(--mono); font-size: .7rem; opacity: .85;

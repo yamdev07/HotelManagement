@@ -17,14 +17,14 @@
   --ink2: #5c655f;
   --ink3: #98a19b;
   --tint: #f4f7f5;
-  --ok: #2e8540;  --ok-t: #eaf3ec;
+  --ok: var(--g500);  --ok-t: #eaf3ec;
   --warn: #b7791f; --warn-t: #fbf1de;
   --bad: #b4342a;  --bad-t: #fbe9e7;
   --info: #3b6c8f; --info-t: #e7f0f6;
 
-  --acc: var(--g600, #2e8540);
-  --acc2: var(--g500, #2e8540);
-  --acc-t: color-mix(in srgb, var(--g500, #2e8540) 13%, var(--card));
+  --acc: var(--g600, var(--g500));
+  --acc2: var(--g500, var(--g500));
+  --acc-t: color-mix(in srgb, var(--g500, var(--g500)) 13%, var(--card));
 
   --r: 12px; --r-sm: 9px;
   --sh: 0 1px 2px rgba(20,40,30,.05);
@@ -843,7 +843,7 @@ function confirmCancel(url, name) {
         confirmButtonText: '{{ __("dashboard.confirm_cancel") }}',
         cancelButtonText: '{{ __("dashboard.keep_reservation") }}',
         confirmButtonColor: '#545954',
-        cancelButtonColor: '#1e6b2e',
+        cancelButtonColor: 'var(--g600)',
     }).then(r => {
         if (!r.isConfirmed) return;
         const f = document.createElement('form');

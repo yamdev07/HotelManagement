@@ -441,7 +441,7 @@
                     <!-- DÉCONNEXION -->
                     @if ($hasActiveSession)
                         <div class="nav-item nav-item--logout"
-                            onclick="if(typeof Swal!=='undefined'){Swal.fire({title:'{{ __('sidebar.logout_blocked_title') }}',html:'{{ __('sidebar.logout_blocked_text', ['id' => $activeSession->id]) }}',icon:'warning',confirmButtonColor:'#1e6b2e',confirmButtonText:'{{ __('sidebar.logout_blocked_confirm') }}',showCancelButton:true,cancelButtonText:'{{ __('sidebar.logout_blocked_cancel') }}',cancelButtonColor:'#545954'}).then(r=>{if(r.dismiss===Swal.DismissReason.cancel)window.location.href='{{ route('cashier.sessions.show', $activeSession) }}';});}else{alert('{{ __('sidebar.logout_blocked_text', ['id' => $activeSession->id]) }}');}"
+                            onclick="if(typeof Swal!=='undefined'){Swal.fire({title:'{{ __('sidebar.logout_blocked_title') }}',html:'{{ __('sidebar.logout_blocked_text', ['id' => $activeSession->id]) }}',icon:'warning',confirmButtonColor:'{{ ($currentHotel ?? null)?->primaryColor() ?? "#1e6b2e" }}',confirmButtonText:'{{ __('sidebar.logout_blocked_confirm') }}',showCancelButton:true,cancelButtonText:'{{ __('sidebar.logout_blocked_cancel') }}',cancelButtonColor:'#545954'}).then(r=>{if(r.dismiss===Swal.DismissReason.cancel)window.location.href='{{ route('cashier.sessions.show', $activeSession) }}';});}else{alert('{{ __('sidebar.logout_blocked_text', ['id' => $activeSession->id]) }}');}"
                             style="cursor:pointer;opacity:.7" data-tooltip="{{ __('sidebar.logout_blocked') }}">
                             <div class="nav-icon"><i class="fas fa-sign-out-alt" style="color:#fca5a5"></i></div>
                             <div class="nav-content">
@@ -453,7 +453,7 @@
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display:none">
                             @csrf</form>
                         <a href="#" class="nav-item nav-item--logout"
-                            onclick="event.preventDefault();if(typeof Swal!=='undefined'){Swal.fire({title:'{{ __('sidebar.logout_confirm_title') }}',text:'{{ __('sidebar.logout_confirm_text') }}',icon:'question',showCancelButton:true,confirmButtonColor:'#1e6b2e',cancelButtonColor:'#545954',confirmButtonText:'{{ __('sidebar.logout_confirm_button') }}',cancelButtonText:'{{ __('sidebar.logout_cancel_button') }}'}).then(r=>{if(r.isConfirmed)document.getElementById('logout-form').submit();});}else{if(confirm('{{ __('sidebar.logout_confirm_text') }}'))document.getElementById('logout-form').submit();}return false;"
+                            onclick="event.preventDefault();if(typeof Swal!=='undefined'){Swal.fire({title:'{{ __('sidebar.logout_confirm_title') }}',text:'{{ __('sidebar.logout_confirm_text') }}',icon:'question',showCancelButton:true,confirmButtonColor:'{{ ($currentHotel ?? null)?->primaryColor() ?? "#1e6b2e" }}',cancelButtonColor:'#545954',confirmButtonText:'{{ __('sidebar.logout_confirm_button') }}',cancelButtonText:'{{ __('sidebar.logout_cancel_button') }}'}).then(r=>{if(r.isConfirmed)document.getElementById('logout-form').submit();});}else{if(confirm('{{ __('sidebar.logout_confirm_text') }}'))document.getElementById('logout-form').submit();}return false;"
                             data-tooltip="{{ __('sidebar.logout_title') }}">
                             <div class="nav-icon"><i class="fas fa-sign-out-alt"></i></div>
                             <div class="nav-content">

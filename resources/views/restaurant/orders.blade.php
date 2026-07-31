@@ -34,7 +34,7 @@
     .qr-menu-card::before {
         content: ''; position: absolute; top: -50%; right: -10%;
         width: 300px; height: 300px;
-        background: radial-gradient(circle, rgba(16,185,129,0.1) 0%, transparent 70%);
+        background: radial-gradient(circle, rgb(from var(--g500) r g b / 0.1) 0%, transparent 70%);
         z-index: 0;
     }
     .qr-info { position: relative; z-index: 1; flex: 1; }
@@ -42,11 +42,11 @@
     .qr-info p { font-size: 0.8rem; color: #94a3b8; margin-bottom: 12px; line-height: 1.4; }
     .qr-url { 
         font-family: monospace; font-size: 0.7rem; background: rgba(255,255,255,0.05); 
-        padding: 6px 12px; border-radius: 6px; color: #10b981; width: fit-content;
-        border: 1px solid rgba(16,185,129,0.2);
+        padding: 6px 12px; border-radius: 6px; color: var(--g500); width: fit-content;
+        border: 1px solid rgb(from var(--g500) r g b / 0.2);
     }
     .badge-qr {
-        background: #10b981; color: #fff; font-size: 0.65rem; padding: 2px 8px;
+        background: var(--g500); color: #fff; font-size: 0.65rem; padding: 2px 8px;
         border-radius: 50px; font-weight: 700; margin-left: 8px; vertical-align: middle;
     }
     .qr-download-container {
@@ -60,13 +60,13 @@
     }
     .qr-image-wrap img { width: 100px; height: 100px; }
     .btn-download-qr {
-        background: #10b981; color: #fff; border: none;
+        background: var(--g500); color: #fff; border: none;
         padding: 12px 24px; border-radius: 8px; font-size: 0.9rem;
         font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;
         transition: background 0.2s, transform 0.1s; white-space: nowrap;
-        z-index: 10; position: relative; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        z-index: 10; position: relative; box-shadow: 0 2px 8px rgb(from var(--g500) r g b / 0.3);
     }
-    .btn-download-qr:hover { background: #059669; transform: translateY(-1px); }
+    .btn-download-qr:hover { background: var(--g600); transform: translateY(-1px); }
     .btn-download-qr:active { transform: translateY(0); }
     
     @media (max-width: 600px) {
@@ -121,7 +121,7 @@
         </div>
 
         <div class="kpi-card">
-            <div class="kpi-icon" style="background: #f0fdf4; color: #10b981;"><i class="fas fa-hat-chef"></i></div>
+            <div class="kpi-icon" style="background: #f0fdf4; color: var(--g500);"><i class="fas fa-hat-chef"></i></div>
             <div class="kpi-data">
                 <div class="kpi-label">{{ __('restaurant.orders.kpi_ready') }}</div>
                 <div class="kpi-value text-success">{{ $readyOrders ?? 0 }}</div>

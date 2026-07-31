@@ -177,12 +177,12 @@
 .btn-db-primary {
     background: var(--g600);
     color: white;
-    box-shadow: 0 2px 10px rgba(46,133,64,.25);
+    box-shadow: 0 2px 10px rgb(from var(--g500) r g b / .25);
 }
 .btn-db-primary:hover {
     background: var(--g700);
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(46,133,64,.3);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .3);
     color: white;
     text-decoration: none;
 }
@@ -310,7 +310,7 @@
 .form-select:focus {
     outline: none;
     border-color: var(--g400);
-    box-shadow: 0 0 0 3px rgba(46,133,64,.1);
+    box-shadow: 0 0 0 3px rgb(from var(--g500) r g b / .1);
 }
 .filter-actions {
     display: flex;

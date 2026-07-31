@@ -117,7 +117,7 @@
     padding: 10px 14px; font-size: .9rem; background: var(--white);
 }
 .form-control:focus, .form-select:focus {
-    border-color: var(--g400); box-shadow: 0 0 0 4px rgba(46,133,64,.08);
+    border-color: var(--g400); box-shadow: 0 0 0 4px rgb(from var(--g500) r g b / .08);
 }
 
 .btn-db-primary {
@@ -126,11 +126,11 @@
     color: white; border-radius: var(--r);
     font-weight: 600; text-decoration: none;
     transition: var(--transition); border: none;
-    box-shadow: 0 4px 12px rgba(46,133,64,.2);
+    box-shadow: 0 4px 12px rgb(from var(--g500) r g b / .2);
 }
 .btn-db-primary:hover {
     background: var(--g700); color: white;
-    transform: translateY(-2px); box-shadow: 0 6px 18px rgba(46,133,64,.3);
+    transform: translateY(-2px); box-shadow: 0 6px 18px rgb(from var(--g500) r g b / .3);
     text-decoration: none;
 }
 
@@ -142,7 +142,7 @@
 }
 .db-input:focus {
     border-color: var(--g400); background: var(--white);
-    box-shadow: 0 0 0 4px rgba(46,133,64,.08);
+    box-shadow: 0 0 0 4px rgb(from var(--g500) r g b / .08);
 }
 
 .filter-row {

@@ -341,8 +341,8 @@
 .nom-step span { font-size:.72rem; color:#94a3b8; white-space:nowrap; }
 .nom-step.active .nom-dot { background:var(--g600); border-color:var(--g600); color:#fff; }
 .nom-step.active span { color:var(--g700); font-weight:600; }
-.nom-step.done .nom-dot { background:#10b981; border-color:#10b981; color:#fff; }
-.nom-step.done span { color:#10b981; }
+.nom-step.done .nom-dot { background:var(--g500); border-color:var(--g500); color:#fff; }
+.nom-step.done span { color:var(--g500); }
 .nom-step-line { flex:1; height:1px; background:#e2e8f0; margin:0 6px; }
 
 /* Corps */
@@ -518,8 +518,8 @@
 .nom-btn-outline:hover { border-color:#94a3b8; color:#1e293b; }
 .nom-btn-primary { background:var(--g800); color:#fff; }
 .nom-btn-primary:hover { background:var(--g900); }
-.nom-btn-success { background:#10b981; color:#fff; box-shadow:0 3px 10px rgba(16,185,129,.3); }
-.nom-btn-success:hover { background:#059669; }
+.nom-btn-success { background:var(--g500); color:#fff; box-shadow:0 3px 10px rgb(from var(--g500) r g b / .3); }
+.nom-btn-success:hover { background:var(--g600); }
 .nom-btn-success:disabled { opacity:.5; cursor:not-allowed; }
 
 
@@ -595,11 +595,11 @@
 }
 .nom-customer-item:hover { background: #f8fafc; border-color: #e2e8f0; }
 .nom-customer-item.selected { 
-    background: #f0faf0; border-color: #10b981; 
-    box-shadow: 0 4px 6px -1px rgba(16,185,129,0.1); 
+    background: var(--g50); border-color: var(--g500); 
+    box-shadow: 0 4px 6px -1px rgb(from var(--g500) r g b / 0.1); 
 }
 .nom-c-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #e2e8f0; flex-shrink: 0; }
-.nom-customer-item.selected .nom-c-avatar { border-color: #10b981; }
+.nom-customer-item.selected .nom-c-avatar { border-color: var(--g500); }
 .nom-c-info { flex: 1; min-width: 0; }
 .nom-c-name { font-size: .88rem; font-weight: 700; color: #1e293b; }
 .nom-c-sub { font-size: .72rem; color: #94a3b8; margin-top: 1px; display: flex; align-items: center; gap: 10px; }
@@ -1264,7 +1264,7 @@ function initNomModal() {
             url: $(this).attr('action'), type:'POST', data:fd, processData:false, contentType:false,
             success: function() {
                 localStorage.removeItem('restaurant_cart');
-                Swal.fire({ icon:'success', title:modalJs.orderSaved, confirmButtonColor:'#10b981' })
+                Swal.fire({ icon:'success', title:modalJs.orderSaved, confirmButtonColor:'var(--g500)' })
                 .then(() => { bootstrap.Modal.getInstance(document.getElementById('newOrderModal'))?.hide(); location.reload(); });
             },
             error: function(xhr) {

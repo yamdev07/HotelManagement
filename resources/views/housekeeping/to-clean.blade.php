@@ -8,11 +8,11 @@
 
 :root {
     /* ── 4 COULEURS (vert, rouge, gris, blanc) ── */
-    --green-50:  #f0faf0;
-    --green-100: #d4edda;
-    --green-500: #2e8540;
-    --green-600: #1e6b2e;
-    --green-700: #155221;
+    --green-50:  var(--g50);
+    --green-100: var(--g100);
+    --green-500: var(--g500);
+    --green-600: var(--g600);
+    --green-700: var(--g700);
 
     --red-50:    #fee2e2;
     --red-100:   #fecaca;
@@ -117,7 +117,7 @@
     justify-content: center;
     color: white;
     font-size: 1.25rem;
-    box-shadow: 0 4px 10px rgba(46,133,64,.3);
+    box-shadow: 0 4px 10px rgb(from var(--g500) r g b / .3);
 }
 .header-title h1 {
     font-size: 1.6rem;
@@ -669,7 +669,7 @@ document.querySelectorAll('form[action*="start-cleaning"]').forEach(f => {
             showCancelButton: true,
             confirmButtonText: '<i class="fas fa-broom me-1"></i> ' + @json(__('housekeeping.toclean.swal_confirm')),
             cancelButtonText: @json(__('housekeeping.toclean.swal_cancel')),
-            confirmButtonColor: '#1e6b2e',
+            confirmButtonColor: 'var(--g600)',
             reverseButtons: true
         }).then(r => { if (r.isConfirmed) form.submit(); });
     });

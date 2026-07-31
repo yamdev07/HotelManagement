@@ -11,11 +11,11 @@
 
 :root {
     /* ── 4 COULEURS (vert, rouge, gris, blanc) ── */
-    --green-50:  #f0faf0;
-    --green-100: #d4edda;
-    --green-500: #2e8540;
-    --green-600: #1e6b2e;
-    --green-700: #155221;
+    --green-50:  var(--g50);
+    --green-100: var(--g100);
+    --green-500: var(--g500);
+    --green-600: var(--g600);
+    --green-700: var(--g700);
 
     --red-50:    #fee2e2;
     --red-100:   #fecaca;

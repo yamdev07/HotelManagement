@@ -179,7 +179,7 @@
             font-weight: 600;
         }
         /* Issue #176 : couleurs nettes et lisibles (plus de vert/rouge mélangés illisibles) */
-        .password-match.ok { color: #34d399; }
+        .password-match.ok { color: var(--g400); }
         .password-match.ko { color: #f87171; }
 
         /* Issue #179 : checklist claire des conditions, sous le champ */
@@ -203,7 +203,7 @@
         }
 
         .requirement-item.met {
-            color: #34d399;
+            color: var(--g400);
         }
 
         .requirement-icon {
@@ -214,7 +214,7 @@
         }
         /* Puce grise -> coche verte quand la condition est remplie */
         .requirement-item .requirement-icon::before { content: "\f111"; } /* fa-circle */
-        .requirement-item.met .requirement-icon { color: #34d399; }
+        .requirement-item.met .requirement-icon { color: var(--g400); }
         .requirement-item.met .requirement-icon::before { content: "\f058"; } /* fa-check-circle */
 
         .password-toggle {
@@ -309,9 +309,9 @@
                 strengthText.textContent = 'Mot de passe moyen';
                 strengthText.style.color = '#fbbf24';
             } else {
-                strengthFill.style.background = '#34d399';
+                strengthFill.style.background = 'var(--g400)';
                 strengthText.textContent = 'Mot de passe valide';
-                strengthText.style.color = '#34d399';
+                strengthText.style.color = 'var(--g400)';
             }
         }
 

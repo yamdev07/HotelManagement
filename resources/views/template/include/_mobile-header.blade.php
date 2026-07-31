@@ -135,15 +135,15 @@
 .mh-hamburger {
     width: 38px; height: 38px;
     border-radius: 10px;
-    background: #f0faf0;
-    border: 1.5px solid #d4edda;
-    color: var(--hotel-primary, #1e6b2e);
+    background: var(--g50);
+    border: 1.5px solid var(--g100);
+    color: var(--hotel-primary, var(--g600));
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; flex-shrink: 0;
     font-size: .95rem;
     transition: background .2s, transform .15s;
 }
-.mh-hamburger:hover { background: #d4edda; transform: scale(1.05); }
+.mh-hamburger:hover { background: var(--g100); transform: scale(1.05); }
 .mh-hamburger:active { transform: scale(.96); }
 
 /* ── Brand ── */
@@ -153,7 +153,7 @@
 }
 .mh-brand-icon {
     width: 30px; height: 30px; border-radius: 8px;
-    background: var(--hotel-primary, #1e6b2e);
+    background: var(--hotel-primary, var(--g600));
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: .78rem; flex-shrink: 0;
     box-shadow: 0 2px 6px rgba(30,107,46,.3);
@@ -178,11 +178,11 @@
     cursor: pointer; position: relative; font-size: .85rem;
     transition: background .2s;
 }
-.mh-icon-btn:hover { background: #eff0ef; color: var(--hotel-primary, #1e6b2e); }
+.mh-icon-btn:hover { background: #eff0ef; color: var(--hotel-primary, var(--g600)); }
 
 .mh-notif-dot {
     position: absolute; top: -3px; right: -3px;
-    background: var(--hotel-primary, #2e8540); color: white;
+    background: var(--hotel-primary, var(--g500)); color: white;
     font-size: .55rem; font-weight: 700;
     min-width: 16px; height: 16px; border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
@@ -202,11 +202,11 @@
 
 .mh-avatar {
     width: 30px; height: 30px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--hotel-primary, #1e6b2e), var(--hotel-primary, #2e8540));
+    background: linear-gradient(135deg, var(--hotel-primary, var(--g600)), var(--hotel-primary, var(--g500)));
     color: white; font-size: .7rem; font-weight: 700;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0; font-family: 'DM Mono', monospace;
-    border: 2px solid #d4edda;
+    border: 2px solid var(--g100);
 }
 .mh-avatar--sm { width: 34px; height: 34px; font-size: .72rem; }
 
@@ -232,16 +232,16 @@
 .mh-dd-head {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px 16px;
-    background: #f0faf0;
-    border-bottom: 1.5px solid #d4edda;
+    background: var(--g50);
+    border-bottom: 1.5px solid var(--g100);
 }
 .mh-dd-head--profile {
     gap: 10px; justify-content: flex-start;
-    background: linear-gradient(135deg, #f0faf0, #f8f9f8);
+    background: linear-gradient(135deg, var(--g50), #f8f9f8);
 }
 .mh-dd-title { font-size: .82rem; font-weight: 700; color: #252825; }
 .mh-dd-badge {
-    background: var(--hotel-primary, #1e6b2e); color: white;
+    background: var(--hotel-primary, var(--g600)); color: white;
     font-size: .62rem; font-weight: 700;
     padding: 2px 7px; border-radius: 100px;
 }
@@ -257,10 +257,10 @@
     border-bottom: 1px solid #eff0ef;
     transition: background .15s;
 }
-.mh-notif-item:hover { background: #f0faf0; text-decoration: none; color: var(--hotel-primary, #1e6b2e); }
+.mh-notif-item:hover { background: var(--g50); text-decoration: none; color: var(--hotel-primary, var(--g600)); }
 .mh-notif-ico {
     width: 28px; height: 28px; border-radius: 7px;
-    background: #d4edda; color: var(--hotel-primary, #1e6b2e);
+    background: var(--g100); color: var(--hotel-primary, var(--g600));
     display: flex; align-items: center; justify-content: center;
     font-size: .72rem; flex-shrink: 0; margin-top: 1px;
 }
@@ -277,11 +277,11 @@
 .mh-dd-footer {
     display: block; text-align: center;
     padding: 10px; font-size: .75rem; font-weight: 600;
-    color: var(--hotel-primary, #1e6b2e); text-decoration: none;
+    color: var(--hotel-primary, var(--g600)); text-decoration: none;
     background: #f8f9f8; border-top: 1.5px solid #eff0ef;
     transition: background .15s;
 }
-.mh-dd-footer:hover { background: #f0faf0; text-decoration: none; }
+.mh-dd-footer:hover { background: var(--g50); text-decoration: none; }
 
 /* Profile dropdown items */
 .mh-dd-divider { height: 1px; background: #eff0ef; margin: 4px 0; }
@@ -292,8 +292,8 @@
     transition: background .15s;
 }
 .mh-dd-item i { width: 14px; text-align: center; color: #9ba09b; font-size: .78rem; }
-.mh-dd-item:hover { background: #f0faf0; color: var(--hotel-primary, #1e6b2e); text-decoration: none; }
-.mh-dd-item:hover i { color: var(--hotel-primary, #1e6b2e); }
+.mh-dd-item:hover { background: var(--g50); color: var(--hotel-primary, var(--g600)); text-decoration: none; }
+.mh-dd-item:hover i { color: var(--hotel-primary, var(--g600)); }
 .mh-dd-item--danger { color: #545954; }
 .mh-dd-item--danger:hover { background: #f8f9f8; color: #3a3e3a; }
 

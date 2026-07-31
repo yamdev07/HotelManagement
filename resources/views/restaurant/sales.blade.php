@@ -27,7 +27,7 @@
             </div>
         </div>
         <div class="kpi-card">
-            <div class="kpi-icon" style="background: #f0fdf4; color: #10b981;"><i class="fas fa-calendar-day"></i></div>
+            <div class="kpi-icon" style="background: #f0fdf4; color: var(--g500);"><i class="fas fa-calendar-day"></i></div>
             <div class="kpi-data">
                 <div class="kpi-label">{{ __('restaurant.sales.kpi_today') }}</div>
                 <div class="kpi-value text-success">{{ number_format($todayRevenue, 0, ',', ' ') }}</div>
@@ -163,7 +163,7 @@
             datasets: [{
                 label: '{{ __("restaurant.sales.dataset_revenue") }}',
                 data: daily.values,
-                backgroundColor: '#2e8540',
+                backgroundColor: 'var(--g500)',
                 borderRadius: 5,
             }, {
                 label: '{{ __("restaurant.sales.dataset_orders") }}',
@@ -192,7 +192,7 @@
         type: 'doughnut',
         data: {
             labels: catLabels,
-            datasets: [{ data: catValues, backgroundColor: ['#2e8540', '#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'], borderWidth: 0 }]
+            datasets: [{ data: catValues, backgroundColor: ['var(--g500)', 'var(--g500)', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'], borderWidth: 0 }]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } }, cutout: '70%' }
     });
@@ -207,8 +207,8 @@
             datasets: [{
                 label: '{{ __("restaurant.sales.monthly_ca") }}',
                 data: mValues,
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16,185,129,0.1)',
+                borderColor: 'var(--g500)',
+                backgroundColor: 'rgb(from var(--g500) r g b / 0.1)',
                 fill: true,
                 tension: 0.4,
                 pointRadius: 4,

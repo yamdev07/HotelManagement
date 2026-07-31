@@ -292,7 +292,7 @@
     .room-badge-status.available {
         background: rgba(34,197,94,0.15);
         border: 1px solid rgba(34,197,94,0.5);
-        color: #16a34a;
+        color: var(--g600);
         background: rgba(255,255,255,0.92);
     }
     .room-badge-status.unavailable {
@@ -857,7 +857,7 @@
                         {{-- Status badge --}}
                         <span class="room-badge-status {{ $room->is_available_today ? 'available' : 'unavailable' }}">
                             @if($room->is_available_today)
-                                <i class="fas fa-circle" style="font-size:7px;color:#16a34a;margin-right:4px;"></i>Disponible
+                                <i class="fas fa-circle" style="font-size:7px;color:var(--g600);margin-right:4px;"></i>Disponible
                             @else
                                 <i class="fas fa-circle" style="font-size:7px;color:#dc2626;margin-right:4px;"></i>Occupée
                             @endif

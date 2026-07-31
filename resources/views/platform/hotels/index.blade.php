@@ -8,7 +8,7 @@
         @php
             $cards = [
                 ['Inscriptions ce mois', $summary['this_month'], 'fa-user-plus', '#a9b0ff', 'rgba(124,131,255,.18)'],
-                ['Revenus totaux', number_format($summary['revenue'], 0, ',', ' ').' F', 'fa-sack-dollar', '#34d399', 'rgba(52,211,153,.16)'],
+                ['Revenus totaux', number_format($summary['revenue'], 0, ',', ' ').' F', 'fa-sack-dollar', 'var(--g400)', 'rgb(from var(--g400) r g b / .16)'],
                 ['Revenu mensuel', number_format($summary['mrr'], 0, ',', ' ').' F', 'fa-arrow-trend-up', '#38bdf8', 'rgba(56,189,248,.16)'],
                 ['Hôtels actifs', $summary['active'].' / '.$summary['total'], 'fa-circle-check', '#c4b5fd', 'rgba(176,107,255,.18)'],
                 ['Réabonnements', $summary['renewals'], 'fa-rotate', '#fbbf24', 'rgba(251,191,36,.16)'],

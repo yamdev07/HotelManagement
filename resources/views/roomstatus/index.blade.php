@@ -105,7 +105,7 @@
     background: var(--g600); border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 1.1rem; flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
 }
 .status-header-title {
     font-size: 1.4rem; font-weight: 700;
@@ -132,12 +132,12 @@
 }
 .btn-db-primary {
     background: var(--g600); color: white;
-    box-shadow: 0 2px 10px rgba(46,133,64,.3);
+    box-shadow: 0 2px 10px rgb(from var(--g500) r g b / .3);
 }
 .btn-db-primary:hover {
     background: var(--g700); color: white;
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
     text-decoration: none;
 }
 .btn-db-ghost {
@@ -774,7 +774,7 @@ $(document).ready(function() {
             confirmButtonText: '<i class="fas fa-save me-2"></i>{!! __('roomstatus.swal_btn_add') !!}',
             cancelButtonText: '<i class="fas fa-times me-2"></i>{!! __('roomstatus.swal_btn_cancel') !!}',
             reverseButtons: true,
-            confirmButtonColor: '#1e6b2e',
+            confirmButtonColor: 'var(--g600)',
             cancelButtonColor: '#737873',
             preConfirm: () => {
                 const name = document.getElementById('statusName').value;
@@ -806,7 +806,7 @@ $(document).ready(function() {
                     title: @json(__('roomstatus.swal_success_title')),
                     text: @json(__('roomstatus.swal_success_added')),
                     icon: 'success',
-                    confirmButtonColor: '#1e6b2e',
+                    confirmButtonColor: 'var(--g600)',
                     timer: 2000
                 });
             }
@@ -827,7 +827,7 @@ function viewStatus(id) {
             </div>
         `,
         confirmButtonText: '<i class="fas fa-check me-2"></i>{!! __('roomstatus.swal_btn_close') !!}',
-        confirmButtonColor: '#1e6b2e'
+        confirmButtonColor: 'var(--g600)'
     });
 }
 
@@ -861,7 +861,7 @@ function editStatus(id) {
         confirmButtonText: '<i class="fas fa-save me-2"></i>{!! __('roomstatus.swal_btn_save') !!}',
         cancelButtonText: '<i class="fas fa-times me-2"></i>{!! __('roomstatus.swal_btn_cancel') !!}',
         reverseButtons: true,
-        confirmButtonColor: '#1e6b2e',
+        confirmButtonColor: 'var(--g600)',
         cancelButtonColor: '#737873'
     }).then((result) => {
         if (result.isConfirmed) {
@@ -869,7 +869,7 @@ function editStatus(id) {
                 title: @json(__('roomstatus.swal_success_title')),
                 text: @json(__('roomstatus.swal_success_edited')),
                 icon: 'success',
-                confirmButtonColor: '#1e6b2e',
+                confirmButtonColor: 'var(--g600)',
                 timer: 2000
             });
         }
@@ -894,7 +894,7 @@ function deleteStatus(id, name) {
                 title: @json(__('roomstatus.swal_success_deleted_title')),
                 text: @json(__('roomstatus.swal_success_deleted')),
                 icon: 'success',
-                confirmButtonColor: '#1e6b2e',
+                confirmButtonColor: 'var(--g600)',
                 timer: 2000
             });
         }

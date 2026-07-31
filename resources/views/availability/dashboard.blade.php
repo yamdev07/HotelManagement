@@ -77,7 +77,7 @@ body {
     background: var(--g600); border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: .85rem;
-    box-shadow: 0 2px 8px rgba(46,133,64,.3);
+    box-shadow: 0 2px 8px rgb(from var(--g500) r g b / .3);
 }
 .db-topbar__title {
     font-size: .9rem; font-weight: 700;
@@ -101,8 +101,8 @@ body {
     animation: blink 2.2s ease-in-out infinite;
 }
 @keyframes blink {
-    0%,100% { opacity:1; box-shadow:0 0 0 0 rgba(46,133,64,.5); }
-    50%      { opacity:.4; box-shadow:0 0 0 5px rgba(46,133,64,0); }
+    0%,100% { opacity:1; box-shadow:0 0 0 0 rgb(from var(--g500) r g b / .5); }
+    50%      { opacity:.4; box-shadow:0 0 0 5px rgb(from var(--g500) r g b / 0); }
 }
 
 /* ══════════════════════════════════════

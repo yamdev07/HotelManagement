@@ -105,7 +105,7 @@
     background: var(--g600); border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 1.1rem; flex-shrink: 0;
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
 }
 .profile-header-title {
     font-size: 1.4rem; font-weight: 700;
@@ -259,19 +259,19 @@
 }
 .btn-db-primary {
     background: var(--g600); color: white;
-    box-shadow: 0 2px 10px rgba(46,133,64,.3);
+    box-shadow: 0 2px 10px rgb(from var(--g500) r g b / .3);
 }
 .btn-db-primary:hover {
     background: var(--g700); color: white;
     transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(46,133,64,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g500) r g b / .35);
 }
 .btn-db-success {
     background: var(--g500); color: white;
 }
 .btn-db-success:hover {
     background: var(--g600); transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(46,133,64,.3);
+    box-shadow: 0 4px 12px rgb(from var(--g500) r g b / .3);
 }
 .btn-db-warning {
     background: #fff3cd; color: #856404;
@@ -499,7 +499,7 @@
                         .pw-checklist { list-style: none; padding: 0; margin: 10px 0 0; font-size: .72rem; }
                         .pw-checklist li { color: #94a3b8; margin-bottom: 4px; transition: color .2s; display: flex; align-items: center; }
                         .pw-checklist li i { font-size: .55rem; width: 14px; margin-right: 6px; text-align: center; }
-                        .pw-checklist li.ok { color: #16a34a; }
+                        .pw-checklist li.ok { color: var(--g600); }
                         .pw-checklist .pw-opt { color: #cbd5e1; margin-left: 4px; }
                         .pw-checklist li.ok .pw-opt { color: #86efac; }
                     </style>

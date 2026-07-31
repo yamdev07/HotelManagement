@@ -8,14 +8,14 @@
 ══════════════════════════════════════════════ */
 :root {
     --green-950: #052e16;
-    --green-900: #064e3b;
-    --green-800: #065f46;
-    --green-700: #047857;
-    --green-600: #059669;
-    --green-500: #10b981;
-    --green-400: #34d399;
+    --green-900: var(--g900);
+    --green-800: var(--g800);
+    --green-700: var(--g700);
+    --green-600: var(--g600);
+    --green-500: var(--g500);
+    --green-400: var(--g400);
     --green-200: #a7f3d0;
-    --green-100: #d1fae5;
+    --green-100: var(--g100);
     --green-50:  #ecfdf5;
 
     --blue-600:  #2563eb;
@@ -92,7 +92,7 @@
     border-radius: var(--radius-sm);
     display: flex; align-items: center; justify-content: center;
     color: white; font-size: 1.1rem; flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(5,150,105,.3);
+    box-shadow: 0 4px 12px rgb(from var(--g600) r g b / .3);
 }
 .dc-header-subtitle {
     color: var(--slate-500); font-size: .875rem;
@@ -172,7 +172,7 @@
     background: linear-gradient(135deg, var(--green-800), var(--green-600));
     border-color: var(--green-500);
     color: white;
-    box-shadow: 0 0 0 4px white, 0 4px 14px rgba(5,150,105,.35);
+    box-shadow: 0 0 0 4px white, 0 4px 14px rgb(from var(--g600) r g b / .35);
     transform: scale(1.08);
 }
 .step-item.completed .step-bubble {
@@ -247,7 +247,7 @@
 }
 .form-control-dc:focus {
     border-color: var(--green-500);
-    box-shadow: 0 0 0 3px rgba(16,185,129,.12);
+    box-shadow: 0 0 0 3px rgb(from var(--g500) r g b / .12);
 }
 .form-control-dc.error { border-color: var(--red-500); box-shadow: 0 0 0 3px rgba(239,68,68,.1); }
 .form-control-dc-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1 1l5 5 5-5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; cursor: pointer; }
@@ -379,7 +379,7 @@
 }
 .room-card.selected {
     border-color: var(--green-500);
-    box-shadow: 0 0 0 3px rgba(16,185,129,.2), var(--shadow-md);
+    box-shadow: 0 0 0 3px rgb(from var(--g500) r g b / .2), var(--shadow-md);
 }
 .room-card.selected::after {
     content: '';
@@ -389,7 +389,7 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='9' viewBox='0 0 12 9' fill='none'%3E%3Cpath d='M1 4L4.5 7.5L11 1' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
-    box-shadow: 0 2px 6px rgba(16,185,129,.4);
+    box-shadow: 0 2px 6px rgb(from var(--g500) r g b / .4);
 }
 .room-img {
     height: 140px;
@@ -527,23 +527,23 @@
     background: linear-gradient(135deg, var(--green-800), var(--green-600));
     color: white; border: none; cursor: pointer;
     transition: var(--transition);
-    box-shadow: 0 4px 12px rgba(5,150,105,.3);
+    box-shadow: 0 4px 12px rgb(from var(--g600) r g b / .3);
 }
-.btn-dc-next:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(5,150,105,.38); }
+.btn-dc-next:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgb(from var(--g600) r g b / .38); }
 .btn-dc-next:disabled {
     opacity: .5; cursor: not-allowed; transform: none;
     box-shadow: none;
 }
 .btn-dc-submit {
-    background: linear-gradient(135deg, #065f46, #059669);
+    background: linear-gradient(135deg, var(--g800), var(--g600));
     display: inline-flex; align-items: center; gap: 8px;
     padding: 11px 28px; border-radius: var(--radius-sm);
     font-size: .9rem; font-weight: 700;
     color: white; border: none; cursor: pointer;
     transition: var(--transition);
-    box-shadow: 0 4px 14px rgba(5,150,105,.35);
+    box-shadow: 0 4px 14px rgb(from var(--g600) r g b / .35);
 }
-.btn-dc-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(5,150,105,.4); }
+.btn-dc-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgb(from var(--g600) r g b / .4); }
 .btn-dc-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
 
 /* ── Info note ──────────────────────────────── */
