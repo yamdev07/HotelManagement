@@ -117,6 +117,24 @@
             --gray-700: #cfd5d0;
             --gray-800: #e4e9e5;
             --gray-900: #eef2ee;
+            /* Échelle « slate » (--slate-*) neutre utilisée par certaines pages : bascule complète. */
+            --slate-50:  #1b211d;
+            --slate-100: #222a25;
+            --slate-200: #2b332d;
+            --slate-300: #3a433c;
+            --slate-400: #8a938c;
+            --slate-500: #9aa39c;
+            --slate-600: #b3bbb5;
+            --slate-700: #cfd5d0;
+            --slate-800: #e4e9e5;
+            --slate-900: #eef2ee;
+            /* Échelle « green » (--green-*) : les teintes claires (50-300) donnaient des
+               ronds/badges BLANCS en sombre -> on les rend sombres. Les verts moyens/foncés
+               (400-900) restent (accents, en-têtes) — lisibles sur fond sombre. */
+            --green-50:  #14181c;
+            --green-100: #191f26;
+            --green-200: #202834;
+            --green-300: #24303a;
             --shadow-xs: 0 1px 2px rgba(0,0,0,.3);
             --shadow-sm: 0 1px 6px rgba(0,0,0,.4);
             --shadow-md: 0 4px 16px rgba(0,0,0,.5);
