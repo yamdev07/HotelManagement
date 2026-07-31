@@ -14,6 +14,7 @@ return [
     'card_appearance' => 'Apparence & marque',
     'appearance_sub' => "Thème et couleur d'accent de votre espace.",
     'theme_label' => "Thème de l'interface",
+    'card_background' => 'Fond',
     'label_primary_color' => 'Couleur principale',
     'label_primary_hint' => 'Boutons, liens et accents.',
     'label_secondary_color' => 'Couleur secondaire',

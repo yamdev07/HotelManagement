@@ -82,16 +82,37 @@ html[data-theme="dark"] .settings-page {
 .appear-opt .check { margin-left:auto; width:9px; height:9px; border-radius:50%; background:var(--acc); opacity:0; }
 .appear-opt.on .check { opacity:1; }
 
-/* Palette presets */
-.palette { display:flex; flex-wrap:wrap; gap:10px; }
-.swatch {
-  position:relative; width:40px; height:40px; border-radius:11px; cursor:pointer; border:2px solid transparent;
-  box-shadow:0 0 0 1px var(--line) inset; transition:transform .12s;
+/* Palette presets — cartes étiquetées (comme le screenshot) */
+.pal-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+@media(max-width:560px){ .pal-grid { grid-template-columns:1fr 1fr; } }
+.pal-card {
+  position:relative; display:flex; align-items:center; gap:11px; padding:12px 14px;
+  border:1.5px solid var(--line2); border-radius:var(--r-sm); cursor:pointer; background:var(--card); transition:all .15s;
 }
-.swatch:hover { transform:translateY(-2px); }
-.swatch.on { border-color:var(--card); box-shadow:0 0 0 2px var(--ink); }
-.swatch::after { content:attr(data-name); position:absolute; top:calc(100% + 5px); left:50%; transform:translateX(-50%);
-  font-size:.64rem; color:var(--ink3); white-space:nowrap; }
+.pal-card:hover { border-color:var(--acc); }
+.pal-card .pdot { width:20px; height:20px; border-radius:50%; flex:none; box-shadow:0 0 0 1px rgba(0,0,0,.06) inset; }
+.pal-card .pname { font-weight:640; font-size:.86rem; }
+.pal-card .pcheck { margin-left:auto; width:9px; height:9px; border-radius:50%; background:var(--acc); opacity:0; }
+.pal-card.on { border-color:var(--acc); background:var(--acc-t); }
+.pal-card.on .pcheck { opacity:1; }
+
+/* Background — cartes vignettes */
+.bg-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+@media(max-width:900px){ .bg-grid { grid-template-columns:repeat(3,1fr); } }
+@media(max-width:640px){ .bg-grid { grid-template-columns:1fr 1fr; } }
+.bg-card {
+  position:relative; border:1.5px solid var(--line2); border-radius:var(--r-sm); overflow:hidden;
+  cursor:pointer; background:var(--card); transition:all .15s; padding:0;
+}
+.bg-card:hover { border-color:var(--acc); }
+.bg-card .thumb { height:78px; background-size:cover; background-position:center; }
+.bg-card .thumb.none { background:repeating-linear-gradient(45deg, var(--tint), var(--tint) 8px, var(--card) 8px, var(--card) 16px); }
+.bg-card .cap { display:flex; align-items:center; justify-content:space-between; padding:8px 11px; font-size:.78rem; font-weight:600; }
+.bg-card .cap .bgcheck { width:9px; height:9px; border-radius:50%; background:var(--acc); opacity:0; }
+.bg-card.on { border-color:var(--acc); box-shadow:0 0 0 2px var(--acc-t); }
+.bg-card.on .cap .bgcheck { opacity:1; }
+.bg-import { display:inline-flex; align-items:center; gap:8px; margin-top:14px; }
+
 .custom-color { display:flex; align-items:center; gap:10px; }
 .custom-color input[type=color] { width:44px; height:40px; border:1px solid var(--line2); border-radius:9px; background:var(--card); cursor:pointer; padding:3px; }
 
@@ -175,11 +196,14 @@ html[data-theme="dark"] .settings-page {
                 <div class="field">
                     <span class="lbl">{{ __('hotel-settings.label_primary_color') }}</span>
                     @php $pc = old('primary_color', $hotel->primaryColor()); @endphp
-                    <div class="palette">
+                    <div class="pal-grid">
                         @foreach ($palette as $pname => $phex)
-                            <button type="button" class="swatch {{ strtolower($pc) === strtolower($phex) ? 'on' : '' }}"
-                                    data-color="{{ $phex }}" data-name="{{ $pname }}" title="{{ $pname }}"
-                                    style="background:{{ $phex }}"></button>
+                            <button type="button" class="pal-card {{ strtolower($pc) === strtolower($phex) ? 'on' : '' }}"
+                                    data-color="{{ $phex }}" data-name="{{ $pname }}">
+                                <span class="pdot" style="background:{{ $phex }}"></span>
+                                <span class="pname">{{ $pname }}</span>
+                                <span class="pcheck"></span>
+                            </button>
                         @endforeach
                     </div>
                     <div class="custom-color" style="margin-top:14px;">
@@ -200,6 +224,52 @@ html[data-theme="dark"] .settings-page {
                         <span class="hint">{{ __('hotel-settings.label_secondary_hint') }}</span>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        {{-- ═══ FOND (préférence locale par appareil) ═══ --}}
+        @php
+            $backgrounds = [
+                'neon'     => ['Néon',            'radial-gradient(120% 120% at 15% 10%, #7c3aed 0%, transparent 45%), radial-gradient(120% 120% at 85% 20%, #db2777 0%, transparent 45%), #0d0b1f'],
+                'sunset'   => ['Coucher de soleil','linear-gradient(135deg, #4f46e5 0%, #db2777 55%, #f59e0b 100%)'],
+                'pastel'   => ['Pastel',          'linear-gradient(135deg, #fde7f3 0%, #e6f0ff 50%, #dff5ec 100%)'],
+                'spectrum' => ['Spectre',         'linear-gradient(115deg, #2563eb, #06b6d4, #10b981, #f59e0b, #ef4444)'],
+                'golden'   => ['Aube dorée',      'linear-gradient(180deg, #f59e0b 0%, #fcd9a0 45%, #a7c7e7 100%)'],
+                'mauve'    => ['Brume mauve',     'linear-gradient(180deg, #e9d5ff 0%, #a78bfa 55%, #6d28d9 100%)'],
+                'bluedusk' => ['Crépuscule bleu', 'linear-gradient(180deg, #93c5fd 0%, #3b82f6 55%, #1e3a8a 100%)'],
+                'moonlight'=> ['Clair de lune',   'linear-gradient(180deg, #fbcfe8 0%, #fde7c8 100%)'],
+            ];
+        @endphp
+        <section class="panel">
+            <div class="panel-head">
+                <div class="panel-title"><span class="ic"><i class="fas fa-images"></i></span>
+                    <div>{{ __('hotel-settings.card_background') ?? 'Fond' }}
+                        <div class="panel-sub">Habillez votre espace d'un fond intégré ou de votre image. Un léger voile garde la lisibilité.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="bg-grid" id="bgGrid">
+                    <button type="button" class="bg-card" data-bg="none">
+                        <div class="thumb none"></div>
+                        <div class="cap"><span>Aucun</span><span class="bgcheck"></span></div>
+                    </button>
+                    @foreach ($backgrounds as $key => $b)
+                        <button type="button" class="bg-card" data-bg="{{ $key }}">
+                            <div class="thumb" style="background-image:{{ $b[1] }}"></div>
+                            <div class="cap"><span>{{ $b[0] }}</span><span class="bgcheck"></span></div>
+                        </button>
+                    @endforeach
+                    <button type="button" class="bg-card" data-bg="custom" id="bgCustomCard">
+                        <div class="thumb" id="bgCustomThumb" style="background:linear-gradient(135deg,#c7d2fe,#a5b4fc)"></div>
+                        <div class="cap"><span>Mon image</span><span class="bgcheck"></span></div>
+                    </button>
+                </div>
+                <label class="btn-ghost bg-import" style="cursor:pointer">
+                    <i class="fas fa-image"></i> Importer une image
+                    <input type="file" id="bgFile" accept="image/*" hidden>
+                </label>
+                <div class="hint" style="margin-top:8px">L'image reste sur cet appareil (préférence locale, non envoyée au serveur).</div>
             </div>
         </section>
 
@@ -475,12 +545,51 @@ html[data-theme="dark"] .settings-page {
     function applyAccent(hex) {
         pcColor.value = hex; pcText.value = hex;
         document.documentElement.style.setProperty('--hotel-primary', hex);
-        document.querySelectorAll('.swatch').forEach(s =>
+        document.querySelectorAll('.pal-card').forEach(s =>
             s.classList.toggle('on', (s.getAttribute('data-color') || '').toLowerCase() === hex.toLowerCase()));
     }
-    document.querySelectorAll('.swatch').forEach(sw =>
+    document.querySelectorAll('.pal-card').forEach(sw =>
         sw.addEventListener('click', () => applyAccent(sw.getAttribute('data-color'))));
     pcColor.addEventListener('input', () => applyAccent(pcColor.value));
+
+    // ── Fond : préférence locale par appareil (aperçu live + persistance) ──
+    const bgGrid = document.getElementById('bgGrid');
+    function markBg(key) {
+        bgGrid.querySelectorAll('.bg-card').forEach(c => c.classList.toggle('on', c.getAttribute('data-bg') === key));
+    }
+    // état initial
+    try { markBg(localStorage.getItem('app-bg') || 'none'); } catch (e) { markBg('none'); }
+    var customThumb = document.getElementById('bgCustomThumb');
+    try {
+        var savedImg = localStorage.getItem('app-bg-custom');
+        if (savedImg) customThumb.style.backgroundImage = 'url(' + savedImg + ')';
+    } catch (e) {}
+
+    bgGrid.querySelectorAll('.bg-card').forEach(card => {
+        card.addEventListener('click', function () {
+            var key = this.getAttribute('data-bg');
+            if (key === 'custom' && !(localStorage.getItem('app-bg-custom'))) {
+                document.getElementById('bgFile').click();
+                return;
+            }
+            try { localStorage.setItem('app-bg', key); } catch (e) {}
+            markBg(key);
+            if (window.applyAppBg) window.applyAppBg();
+        });
+    });
+    document.getElementById('bgFile').addEventListener('change', function (e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function (ev) {
+            var url = ev.target.result;
+            try { localStorage.setItem('app-bg-custom', url); localStorage.setItem('app-bg', 'custom'); } catch (err) {}
+            customThumb.style.backgroundImage = 'url(' + url + ')';
+            markBg('custom');
+            if (window.applyAppBg) window.applyAppBg();
+        };
+        reader.readAsDataURL(file);
+    });
 })();
 </script>
 @endsection

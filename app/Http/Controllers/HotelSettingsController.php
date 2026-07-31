@@ -28,13 +28,11 @@ class HotelSettingsController extends Controller
     /** Palette de presets d'accent (label => hex). L'hôtelier peut aussi choisir sa couleur. */
     public const PALETTE = [
         'Indigo'   => '#4f46e5',
-        'Bleu'     => '#1d4ed8',
+        'Navy'     => '#1d4ed8',
         'Océan'    => '#0891b2',
-        'Émeraude' => '#059669',
-        'Ambre'    => '#d97706',
-        'Rubis'    => '#e11d48',
-        'Violet'   => '#7c3aed',
-        'Ardoise'  => '#475569',
+        'Ambre'    => '#f59e0b',
+        'Émeraude' => '#10b981',
+        'Ardoise'  => '#64748b',
     ];
 
     public function edit()
