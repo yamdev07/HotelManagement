@@ -349,6 +349,28 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+    // Correctif : les fonds d'écran d'établissement appliquent un backdrop-filter
+    // sur #page-content-wrapper, ce qui « piège » les modales Bootstrap (fixed) et
+    // met le backdrop au-dessus -> page figée. On déplace chaque modale vers <body>
+    // à l'ouverture pour qu'elle partage le même contexte d'empilement que le backdrop.
+    document.addEventListener('show.bs.modal', function (e) {
+        var modal = e.target;
+        if (modal && modal.classList && modal.classList.contains('modal') && modal.parentNode !== document.body) {
+            document.body.appendChild(modal);
+        }
+    });
+    // Filet de sécurité : nettoie tout backdrop résiduel si une modale se ferme mal.
+    document.addEventListener('hidden.bs.modal', function () {
+        if (!document.querySelector('.modal.show')) {
+            document.querySelectorAll('.modal-backdrop').forEach(function (b) { b.remove(); });
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('overflow');
+            document.body.style.removeProperty('padding-right');
+        }
+    });
+    </script>
+
+    <script>
     (function () {
         'use strict';
 
