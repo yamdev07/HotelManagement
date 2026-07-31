@@ -780,36 +780,20 @@ html[data-theme="dark"] .nav-item--logout:hover { background: #2a1714; color: #e
 }
 @media (max-width: 380px) { .sidebar { width: 92vw; max-width: none; } }
 
-/* ═══════════ Popup de déconnexion (SweetAlert stylé, épuré, theme-aware) ═══════════ */
-.swal2-container.swal-logout-bg { background: rgba(15,19,17,.45) !important; backdrop-filter: blur(3px); }
-.swal-logout {
-  border-radius: 20px !important;
-  padding: 28px 26px 22px !important;
-  background: var(--white, #fff) !important;
-  box-shadow: 0 24px 70px rgba(0,0,0,.28) !important;
-  border: 1px solid var(--s100, #eef0ef) !important;
-  font-family: 'DM Sans', system-ui, sans-serif !important;
-}
-.swal-logout .swl-ic {
-  width: 62px; height: 62px; border-radius: 50%; margin: 2px auto 16px;
-  display: grid; place-items: center; font-size: 1.55rem;
-  background: color-mix(in srgb, var(--g600, #2e8540) 15%, transparent);
-  color: var(--g600, #2e8540);
-}
-.swal-logout .swl-title { font-size: 1.16rem; font-weight: 700; letter-spacing: -.01em; color: var(--s900, #171c19); margin-bottom: 6px; }
-.swal-logout .swl-text { font-size: .9rem; color: var(--s500, #737873); line-height: 1.5; max-width: 300px; margin: 0 auto; }
-.swal-logout .swl-actions { display: flex; gap: 10px; margin-top: 22px; width: 100%; }
-.swal-logout .swl-btn {
-  flex: 1; border: 0; border-radius: 11px; padding: 11px 16px; font-weight: 650; font-size: .9rem;
-  cursor: pointer; font-family: inherit; transition: filter .15s, background .15s; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-}
-.swal-logout .swl-btn-confirm { background: var(--g600, #2e8540); color: #fff; }
-.swal-logout .swl-btn-confirm:hover { filter: brightness(1.08); }
-.swal-logout .swl-btn-cancel { background: transparent; color: var(--s600, #545954); border: 1.5px solid var(--s200, #dde0dd); }
-.swal-logout .swl-btn-cancel:hover { background: var(--s50, #f8f9f8); color: var(--s900, #171c19); }
-@keyframes swlIn { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
-.swal-logout.swl-anim { animation: swlIn .25s cubic-bezier(.2,.8,.2,1); }
-@media (prefers-reduced-motion: reduce) { .swal-logout.swl-anim { animation: none; } }
+/* ═══════════ Popup de déconnexion (SweetAlert habillé, épuré, theme-aware) ═══════════ */
+/* On n'habille que l'apparence — les boutons restent gérés par SweetAlert (interaction OK). */
+.swal-logout { border-radius: 20px !important; font-family: 'DM Sans', system-ui, sans-serif !important; padding-bottom: 8px !important; }
+.swal-logout .swal2-icon { border: 0 !important; width: 62px; height: 62px;
+  background: color-mix(in srgb, var(--g600, #2e8540) 15%, transparent) !important;
+  color: var(--g600, #2e8540) !important; }
+.swal-logout .swal2-icon .swal2-icon-content { font-size: 1.5rem; color: var(--g600, #2e8540) !important; }
+.swal-logout .swal2-title { font-size: 1.2rem !important; font-weight: 700 !important; letter-spacing: -.01em; }
+.swal-logout .swal2-html-container { font-size: .92rem !important; }
+.swal-logout .swal2-confirm, .swal-logout .swal2-cancel { border-radius: 11px !important; font-weight: 650 !important; padding: 10px 20px !important; box-shadow: none !important; }
+/* Mode sombre : popup sombre lisible */
+html[data-theme="dark"] .swal-logout { background: #161b18 !important; }
+html[data-theme="dark"] .swal-logout .swal2-title,
+html[data-theme="dark"] .swal-logout .swal2-html-container { color: #e9eeeb !important; }
 </style>
 
 <script>
@@ -827,27 +811,17 @@ html[data-theme="dark"] .nav-item--logout:hover { background: #2a1714; color: #e
         };
         if (typeof Swal === 'undefined') { if (confirm(L.text)) doLogout(); return; }
         Swal.fire({
-            html:
-                '<div class="swl-ic"><i class="fas fa-right-from-bracket"></i></div>' +
-                '<div class="swl-title">' + L.title + '</div>' +
-                '<div class="swl-text">' + L.text + '</div>',
-            width: 372,
-            padding: 0,
+            icon: 'question',
+            iconHtml: '<i class="fas fa-right-from-bracket"></i>',
+            title: L.title,
+            text: L.text,
             showCancelButton: true,
-            buttonsStyling: false,
             reverseButtons: true,
-            focusCancel: true,
-            confirmButtonText: '<i class="fas fa-right-from-bracket"></i> ' + L.confirm,
+            confirmButtonText: L.confirm,
             cancelButtonText: L.cancel,
-            customClass: {
-                popup: 'swal-logout swl-anim',
-                container: 'swal-logout-bg',
-                actions: 'swl-actions',
-                confirmButton: 'swl-btn swl-btn-confirm',
-                cancelButton: 'swl-btn swl-btn-cancel'
-            },
-            showClass: { popup: '' },
-            hideClass: { popup: '' }
+            confirmButtonColor: @js(($currentHotel ?? null)?->primaryColor() ?? '#2e8540'),
+            cancelButtonColor: '#6b746e',
+            customClass: { popup: 'swal-logout' }
         }).then(function (r) { if (r.isConfirmed) doLogout(); });
     };
 
