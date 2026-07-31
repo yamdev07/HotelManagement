@@ -15,11 +15,37 @@ use Illuminate\Support\Facades\Storage;
  */
 class HotelSettingsController extends Controller
 {
+    /** Devises disponibles (on choisit, on ne saisit pas) · code => libellé. */
+    public const CURRENCIES = [
+        'XOF' => 'Franc CFA (BCEAO) · XOF',
+        'XAF' => 'Franc CFA (BEAC) · XAF',
+        'NGN' => 'Naira · NGN',
+        'GHS' => 'Cedi · GHS',
+        'EUR' => 'Euro · EUR',
+        'USD' => 'Dollar US · USD',
+    ];
+
+    /** Palette de presets d'accent (label => hex). L'hôtelier peut aussi choisir sa couleur. */
+    public const PALETTE = [
+        'Indigo'   => '#4f46e5',
+        'Bleu'     => '#1d4ed8',
+        'Océan'    => '#0891b2',
+        'Émeraude' => '#059669',
+        'Ambre'    => '#d97706',
+        'Rubis'    => '#e11d48',
+        'Violet'   => '#7c3aed',
+        'Ardoise'  => '#475569',
+    ];
+
     public function edit()
     {
         $hotel = $this->currentHotel();
 
-        return view('hotel.settings', compact('hotel'));
+        return view('hotel.settings', [
+            'hotel'      => $hotel,
+            'currencies' => self::CURRENCIES,
+            'palette'    => self::PALETTE,
+        ]);
     }
 
     public function update(Request $request)
@@ -31,7 +57,8 @@ class HotelSettingsController extends Controller
             'name'            => ['required', 'string', 'max:255', new \App\Rules\SafeName],
             'primary_color'   => ['nullable', 'regex:/^#([0-9a-fA-F]{6})$/'],
             'secondary_color' => ['nullable', 'regex:/^#([0-9a-fA-F]{6})$/'],
-            'currency'        => ['nullable', 'string', 'max:10'],
+            'theme_mode'      => ['nullable', \Illuminate\Validation\Rule::in(['light', 'dark', 'system'])],
+            'currency'        => ['nullable', \Illuminate\Validation\Rule::in(array_keys(\App\Http\Controllers\HotelSettingsController::CURRENCIES))],
             'contact_email'   => ['nullable', 'email', 'max:255'],
             'contact_phone'   => ['nullable', 'string', 'regex:/^[0-9+\s().\-]{6,20}$/'],
             'address'         => ['nullable', 'string', 'max:255', new \App\Rules\NoEmoji],

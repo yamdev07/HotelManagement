@@ -19,6 +19,7 @@ class Hotel extends Model
         'logo',
         'primary_color',
         'secondary_color',
+        'theme_mode',
         'tagline',
         'description',
         'cover_image',
@@ -332,6 +333,12 @@ class Hotel extends Model
     public function secondaryColor(): string
     {
         return $this->secondary_color ?: '#0f172a';
+    }
+
+    /** Thème par défaut de l'établissement : light | dark | system. */
+    public function themeMode(): string
+    {
+        return in_array($this->theme_mode, ['light', 'dark', 'system'], true) ? $this->theme_mode : 'light';
     }
 
     /**

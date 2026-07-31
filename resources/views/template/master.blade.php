@@ -232,7 +232,8 @@
 
     <script>
     (function() {
-        var saved = localStorage.getItem('theme') || 'light';
+        // Défaut = thème choisi pour l'établissement ; l'appareil peut surcharger (toggle sidebar).
+        var saved = localStorage.getItem('theme') || '{{ ($currentHotel ?? null)?->themeMode() ?? "light" }}';
         var resolved = saved === 'system'
             ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
             : saved;
@@ -383,7 +384,7 @@
         var themes = ['light', 'dark', 'system'];
         var icons  = { light: 'fa-sun', dark: 'fa-moon', system: 'fa-desktop' };
         var labels = { light: 'Clair', dark: 'Sombre', system: 'Système' };
-        var current = localStorage.getItem('theme') || 'light';
+        var current = localStorage.getItem('theme') || '{{ ($currentHotel ?? null)?->themeMode() ?? "light" }}';
 
         function applyTheme(theme) {
             localStorage.setItem('theme', theme);
