@@ -371,6 +371,67 @@
     </script>
 
     <script>
+    // ── Pop-ups modernes : remplace les alert()/confirm() natifs par SweetAlert2 ──
+    (function () {
+        if (!window.Swal) return;
+        var isEn = (document.documentElement.lang || 'fr').slice(0, 2) === 'en';
+        function brand() {
+            var c = getComputedStyle(document.documentElement).getPropertyValue('--hotel-primary');
+            return (c && c.trim()) || '#2e8540';
+        }
+
+        // alert() -> pop-up (icône déduite du texte : erreur / succès / info)
+        var nativeAlert = window.alert.bind(window);
+        window.alert = function (msg) {
+            try {
+                var s = String(msg == null ? '' : msg).trim();
+                var icon = 'info';
+                if (/^[❌⛔🚫]/.test(s) || /(erreur|error|échec|echec|invalide|impossible|refus)/i.test(s)) icon = 'error';
+                else if (/^[✅🎉👍]/.test(s) || /(succ[eè]s|success|enregistr|cré[eé]|ajout[ée]?|mis[e]?\s*à\s*jour|supprim|envoy|termin)/i.test(s)) icon = 'success';
+                else if (/^[⚠]/.test(s) || /(attention|warning|avertiss)/i.test(s)) icon = 'warning';
+                var clean = s.replace(/^([❌⛔🚫✅🎉👍⚠]️?\s*)+/, '').trim();
+                Swal.fire({ icon: icon, text: clean || s, confirmButtonText: 'OK', confirmButtonColor: brand(), heightAuto: false });
+            } catch (err) { nativeAlert(msg); }
+        };
+
+        // confirm() en attribut inline "return confirm('…')" -> pop-up de confirmation
+        document.addEventListener('DOMContentLoaded', function () {
+            var re = /^\s*return\s+confirm\(\s*(['"`])([\s\S]*?)\1\s*\)\s*;?\s*$/;
+            ['onsubmit', 'onclick'].forEach(function (attr) {
+                document.querySelectorAll('[' + attr + ']').forEach(function (el) {
+                    var m = (el.getAttribute(attr) || '').match(re);
+                    if (!m) return;
+                    var message = m[2];
+                    var isForm = el.tagName === 'FORM' || attr === 'onsubmit';
+                    el.removeAttribute(attr);
+                    el.addEventListener(isForm ? 'submit' : 'click', function (e) {
+                        if (el.__swalOK) { el.__swalOK = false; return; }
+                        e.preventDefault();
+                        Swal.fire({
+                            icon: 'warning',
+                            title: isEn ? 'Please confirm' : 'Confirmation',
+                            text: message,
+                            showCancelButton: true,
+                            confirmButtonText: isEn ? 'Yes' : 'Oui',
+                            cancelButtonText: isEn ? 'Cancel' : 'Annuler',
+                            confirmButtonColor: brand(),
+                            cancelButtonColor: '#94a3b8',
+                            heightAuto: false
+                        }).then(function (r) {
+                            if (!r.isConfirmed) return;
+                            if (isForm) { (el.tagName === 'FORM' ? el : el.closest('form')).submit(); }
+                            else if (el.tagName === 'A' && el.getAttribute('href')) { window.location.href = el.href; }
+                            else if (el.form) { el.form.submit(); }
+                            else { el.__swalOK = true; el.click(); }
+                        });
+                    });
+                });
+            });
+        });
+    })();
+    </script>
+
+    <script>
     (function () {
         'use strict';
 
