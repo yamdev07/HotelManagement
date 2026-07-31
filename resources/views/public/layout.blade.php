@@ -116,7 +116,7 @@
             @if ($hotel->show_restaurant)<a href="{{ route('public.hotel.restaurant', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.restaurant') ? 'active' : '' }}">Restaurant</a>@endif
             @if ($hotel->show_services)<a href="{{ route('public.hotel.services', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.services') ? 'active' : '' }}">Services</a>@endif
             @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.contact') ? 'active' : '' }}">Contact</a>@endif
-            @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="btn-c ms-3" style="padding:.5rem 1.4rem;">Réserver</a>@endif
+            <a href="{{ route('public.hotel.availability', $hotel->slug) }}" class="btn-c ms-3 {{ request()->routeIs('public.hotel.availability') ? 'active' : '' }}" style="padding:.5rem 1.4rem;">Réserver</a>
         </div>
     </div>
 </nav>
