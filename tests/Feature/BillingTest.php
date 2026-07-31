@@ -72,17 +72,18 @@ class BillingTest extends TestCase
         [$hotel, $admin] = $this->hotelWithAdmin();
         $oldEnd = $hotel->subscription_ends_at->copy();
 
-        $this->actingAs($admin)->post(route('billing.checkout'), ['plan' => 'business', 'months' => 3]);
+        // Même formule (pro) => renouvellement : prolonge depuis la date de fin, plein tarif.
+        $this->actingAs($admin)->post(route('billing.checkout'), ['plan' => 'pro', 'months' => 3]);
         $this->actingAs($admin)->get(route('billing.callback'))
             ->assertRedirect(route('billing.show'));
 
         $hotel->refresh();
         $this->assertEquals($oldEnd->copy()->addMonths(3)->toDateString(), $hotel->subscription_ends_at->toDateString());
-        $this->assertEquals('business', $hotel->plan);
+        $this->assertEquals('pro', $hotel->plan);
 
         $renewal = Subscription::where('hotel_id', $hotel->id)->where('is_renewal', true)->first();
         $this->assertNotNull($renewal);
-        $this->assertEquals(Hotel::priceFor('business', 'BJ') * 3, (float) $renewal->amount);
+        $this->assertEquals(Hotel::priceFor('pro', 'BJ') * 3, (float) $renewal->amount);
     }
 
     public function test_declined_callback_does_not_extend_subscription(): void

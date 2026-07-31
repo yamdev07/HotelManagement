@@ -76,6 +76,9 @@ html[data-theme="dark"] .bill-page{
 .htable .amt{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink);font-weight:700}
 .tagm{font-size:.68rem;font-weight:800;padding:2px 9px;border-radius:999px}
 .tagm.trial{background:var(--acc-t);color:var(--acc)} .tagm.renew{background:var(--ok-t);color:var(--ok)} .tagm.new{background:var(--tint);color:var(--ink2)}
+.undo-btn{border:1.5px solid currentColor;background:transparent;color:inherit;border-radius:9px;padding:8px 16px;font-weight:700;font-size:.85rem;cursor:pointer;white-space:nowrap}
+.undo-btn:hover{opacity:.75}
+.pay-total .credit{font-size:.76rem;color:var(--ink2);margin-top:2px;font-weight:600}
 </style>
 
 <div class="bill-page">
@@ -92,6 +95,22 @@ html[data-theme="dark"] .bill-page{
     @endif
     @if (session('error'))
         <div class="flash err"><i class="fas fa-triangle-exclamation"></i>{{ session('error') }}</div>
+    @endif
+
+    @if ($hotel->pending_plan)
+        <div class="notice warn" style="justify-content:space-between;align-items:center">
+            <div style="display:flex;gap:11px;align-items:flex-start">
+                <i class="fas fa-clock" style="margin-top:2px"></i>
+                <div>Changement programmé : passage à la formule
+                    <strong>{{ config('plans.tiers.'.$hotel->pending_plan.'.name', ucfirst($hotel->pending_plan)) }}</strong>
+                    le <strong>{{ $hotel->pending_plan_effective_at?->format('d/m/Y') ?? '—' }}</strong>.
+                    Vous gardez votre formule actuelle jusque-là.</div>
+            </div>
+            <form method="POST" action="{{ route('billing.cancelChange') }}">
+                @csrf
+                <button type="submit" class="undo-btn">Annuler</button>
+            </form>
+        </div>
     @endif
 
     {{-- État courant --}}
@@ -145,7 +164,7 @@ html[data-theme="dark"] .bill-page{
                                 $isCurrent = $hotel->plan === $key;
                                 $features = is_array($tier['features'] ?? null) ? array_slice($tier['features'], 0, 4) : [];
                             @endphp
-                            <label class="plan {{ $isCurrent ? 'selected' : '' }}" data-price="{{ $price }}" data-key="{{ $key }}">
+                            <label class="plan {{ $isCurrent ? 'selected' : '' }}" data-price="{{ $price }}" data-key="{{ $key }}" data-type="{{ $hotel->changeType($key) }}">
                                 <input type="radio" name="plan" value="{{ $key }}" {{ $isCurrent ? 'checked' : '' }} required>
                                 <div class="top">
                                     <span class="nm"><span class="dot"></span>{{ $tier['name'] }}</span>
@@ -171,10 +190,11 @@ html[data-theme="dark"] .bill-page{
                             </select>
                         </div>
                         <div class="pay-total">
-                            <div class="l">Total</div>
+                            <div class="l" id="billTotalLabel">Total</div>
                             <div class="v"><span id="billTotal">{{ $fmt($hotel->monthlyPrice()) }}</span> {{ $currency }}</div>
+                            <div class="credit" id="billCredit" style="display:none"></div>
                         </div>
-                        <button type="submit" class="pay-submit"><i class="fas fa-lock"></i> <span id="billBtnLabel">{{ __('billing.form_submit') }}</span></button>
+                        <button type="submit" class="pay-submit"><i class="fas fa-lock" id="billBtnIcon"></i> <span id="billBtnLabel">{{ __('billing.form_submit') }}</span></button>
                     </div>
                 </form>
             </div>
@@ -220,23 +240,55 @@ html[data-theme="dark"] .bill-page{
     var plans = Array.prototype.slice.call(form.querySelectorAll('.plan'));
     var monthsSel = document.getElementById('billMonths');
     var totalEl = document.getElementById('billTotal');
+    var totalLbl = document.getElementById('billTotalLabel');
+    var creditEl = document.getElementById('billCredit');
     var btnLabel = document.getElementById('billBtnLabel');
-    var currentKey = @json($hotel->plan);
-    var LBL_RENEW = @json(__('billing.form_submit'));
-    var LBL_CHANGE = @json(__('billing.form_change') ?? 'Changer de formule');
+    var btnIcon = document.getElementById('billBtnIcon');
+    var credit = {{ (int) $hotel->prorationCredit() }};       // avoir prorata (jours restants)
+    var currency = @json($currency);
+
+    var LBL = {
+        reactivation: @json(__('billing.form_submit')),
+        renewal:      @json(__('billing.form_submit')),
+        upgrade:      @json(__('billing.form_change') ?? 'Changer de formule'),
+        downgrade:    'Programmer le changement'
+    };
 
     function fmt(n){ return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
-
     function selected(){ return plans.find(function(p){ return p.querySelector('input').checked; }); }
 
     function refresh(){
         var p = selected();
         plans.forEach(function(x){ x.classList.toggle('selected', x === p); });
         if (!p) return;
+
         var price = parseInt(p.getAttribute('data-price'), 10) || 0;
         var months = parseInt(monthsSel.value, 10) || 1;
-        totalEl.textContent = fmt(price * months);
-        btnLabel.textContent = (p.getAttribute('data-key') === currentKey) ? LBL_RENEW : LBL_CHANGE;
+        var type = p.getAttribute('data-type');
+        creditEl.style.display = 'none';
+
+        if (type === 'downgrade') {
+            // Gratuit, effet en fin de cycle.
+            totalLbl.textContent = 'À payer';
+            totalEl.textContent = '0';
+            creditEl.style.display = '';
+            creditEl.textContent = 'Effet en fin de cycle · rien à payer maintenant';
+            btnLabel.textContent = LBL.downgrade;
+            btnIcon.className = 'fas fa-calendar-check';
+            return;
+        }
+
+        var gross = price * months;
+        var due = gross;
+        if (type === 'upgrade' && credit > 0) {
+            due = Math.max(0, gross - credit);
+            creditEl.style.display = '';
+            creditEl.textContent = '− ' + fmt(credit) + ' ' + currency + ' d’avoir (jours restants déduits)';
+        }
+        totalLbl.textContent = 'Total';
+        totalEl.textContent = fmt(due);
+        btnLabel.textContent = LBL[type] || LBL.renewal;
+        btnIcon.className = 'fas fa-lock';
     }
 
     plans.forEach(function(p){ p.addEventListener('click', function(){ p.querySelector('input').checked = true; refresh(); }); });

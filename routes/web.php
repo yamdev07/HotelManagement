@@ -169,6 +169,7 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::get('/abonnement', [\App\Http\Controllers\BillingController::class, 'show'])->name('billing.show');
     Route::post('/abonnement/payer', [\App\Http\Controllers\BillingController::class, 'checkout'])->name('billing.checkout');
     Route::get('/abonnement/retour', [\App\Http\Controllers\BillingController::class, 'callback'])->name('billing.callback');
+    Route::post('/abonnement/annuler-changement', [\App\Http\Controllers\BillingController::class, 'cancelChange'])->name('billing.cancelChange');
 });
 
 // ==================== PERSONNEL (l'hôtelier gère son équipe) · issue #180 ====================

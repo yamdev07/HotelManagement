@@ -38,6 +38,8 @@ class Hotel extends Model
         'suspension_reason',
         'subscription_ends_at',
         'plan',
+        'pending_plan',
+        'pending_plan_effective_at',
         'room_limit',
         'onboarding_completed_at',
         'owner_user_id',
@@ -51,6 +53,7 @@ class Hotel extends Model
         'show_services' => 'boolean',
         'show_contact' => 'boolean',
         'subscription_ends_at' => 'datetime',
+        'pending_plan_effective_at' => 'datetime',
         'onboarding_completed_at' => 'datetime',
         'room_limit' => 'integer',
         'services' => 'array',
@@ -265,16 +268,104 @@ class Hotel extends Model
         ], $attrs));
     }
 
+    // ───────────────────────── Changement de formule ─────────────────────────
+
+    /** Nombre de jours restants sur l'abonnement en cours (0 si expiré). */
+    public function remainingDays(): int
+    {
+        if (! $this->subscription_ends_at || $this->subscription_ends_at->isPast()) {
+            return 0;
+        }
+
+        return (int) ceil(now()->floatDiffInDays($this->subscription_ends_at));
+    }
+
+    /**
+     * Valeur (monétaire) des jours non consommés du plan actuel, au tarif
+     * journalier du plan courant. Sert d'avoir lors d'une montée en gamme.
+     */
+    public function prorationCredit(): int
+    {
+        if (! $this->hasActiveAccess()) {
+            return 0;
+        }
+
+        $dailyRate = $this->monthlyPrice() / 30;
+
+        return (int) round($this->remainingDays() * $dailyRate);
+    }
+
+    /**
+     * Nature d'un passage vers $newPlan :
+     *  - reactivation : abonnement expiré/suspendu (paiement plein)
+     *  - renewal      : même formule, actif (prolongation)
+     *  - upgrade      : formule plus chère, actif (immédiat, au prorata)
+     *  - downgrade    : formule moins chère, actif (programmé en fin de cycle)
+     */
+    public function changeType(string $newPlan): string
+    {
+        if (! $this->hasActiveAccess()) {
+            return 'reactivation';
+        }
+        if ($newPlan === $this->plan) {
+            return 'renewal';
+        }
+
+        $newPrice = self::priceFor($newPlan, $this->country);
+        $curPrice = $this->monthlyPrice();
+
+        return $newPrice > $curPrice ? 'upgrade' : 'downgrade';
+    }
+
+    /** Programme une descente en gamme à la fin du cycle payé (sans paiement). */
+    public function scheduleDowngrade(string $newPlan): void
+    {
+        $this->update([
+            'pending_plan' => $newPlan,
+            'pending_plan_effective_at' => $this->subscription_ends_at,
+        ]);
+    }
+
+    /** Annule un changement de formule programmé. */
+    public function cancelScheduledChange(): void
+    {
+        $this->update(['pending_plan' => null, 'pending_plan_effective_at' => null]);
+    }
+
+    /** Applique un downgrade programmé si sa date d'effet est atteinte. */
+    public function applyDuePendingPlan(): void
+    {
+        if (! $this->pending_plan) {
+            return;
+        }
+        if ($this->pending_plan_effective_at && $this->pending_plan_effective_at->isFuture()) {
+            return;
+        }
+        if (! array_key_exists($this->pending_plan, config('plans.tiers'))) {
+            $this->cancelScheduledChange();
+
+            return;
+        }
+
+        $this->update([
+            'plan' => $this->pending_plan,
+            'room_limit' => config('plans.tiers.'.$this->pending_plan.'.room_limit'),
+            'pending_plan' => null,
+            'pending_plan_effective_at' => null,
+        ]);
+    }
+
     /**
      * Prolonge l'abonnement de N mois et enregistre la période dans l'historique.
-     * Repart de la date de fin si elle est future, sinon d'aujourd'hui.
+     * Repart de la date de fin si elle est future (renouvellement), ou de maintenant
+     * si $resetFromNow (montée en gamme au prorata : nouveau cycle immédiat).
      * Réactive l'accès (is_active) et met éventuellement à jour le palier.
      */
-    public function applyRenewal(int $months, float $amount, ?string $plan = null, array $extra = []): Subscription
+    public function applyRenewal(int $months, float $amount, ?string $plan = null, array $extra = [], bool $resetFromNow = false): Subscription
     {
         $months = max(1, $months);
 
-        $start = ($this->subscription_ends_at && $this->subscription_ends_at->isFuture())
+        $start = (! $resetFromNow && $this->subscription_ends_at && $this->subscription_ends_at->isFuture())
             ? $this->subscription_ends_at->copy()
             : now();
         $newEnd = $start->copy()->addMonths($months);
@@ -283,6 +374,9 @@ class Hotel extends Model
             'subscription_ends_at' => $newEnd,
             'is_active' => true,
             'suspension_reason' => null,
+            // Tout paiement effectif annule un changement de formule programmé.
+            'pending_plan' => null,
+            'pending_plan_effective_at' => null,
         ];
         if ($plan && array_key_exists($plan, config('plans.tiers'))) {
             $updates['plan'] = $plan;

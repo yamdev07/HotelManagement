@@ -140,6 +140,8 @@ return [
     'billing_confirmed' => 'Payment confirmed! Your subscription is active until :date.',
     'channel_feed_added' => 'Calendar added. Synchronisation will run automatically.',
     'channel_feed_removed' => 'Calendar removed.',
+    'billing_downgrade_scheduled' => 'Switch to the :plan plan scheduled for :date. You keep your current plan until then, nothing to pay now.',
+    'billing_change_cancelled' => 'Plan change cancelled. Your current plan is kept.',
 
     // ─── HOTEL SETTINGS ─────────────────────────────────
     'hotel_settings_updated' => 'Your property information has been updated.',

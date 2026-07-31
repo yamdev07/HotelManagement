@@ -140,6 +140,8 @@ return [
     'billing_confirmed' => 'Paiement confirmé ! Votre abonnement est actif jusqu\'au :date.',
     'channel_feed_added' => 'Calendrier ajouté. La synchronisation se fera automatiquement.',
     'channel_feed_removed' => 'Calendrier retiré.',
+    'billing_downgrade_scheduled' => 'Passage à la formule :plan programmé le :date. Vous gardez votre formule actuelle jusque-là, rien à payer maintenant.',
+    'billing_change_cancelled' => 'Changement de formule annulé. Votre formule actuelle est conservée.',
 
     // ─── HOTEL SETTINGS ─────────────────────────────────
     'hotel_settings_updated' => 'Les informations de votre établissement ont été mises à jour.',

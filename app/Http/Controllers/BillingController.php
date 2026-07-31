@@ -40,6 +40,9 @@ class BillingController extends Controller
         $hotel = $request->user()->hotel;
         abort_unless($hotel, 403);
 
+        // Applique un éventuel downgrade programmé dont la date d'effet est atteinte.
+        $hotel->applyDuePendingPlan();
+
         return view('billing.show', [
             'hotel' => $hotel,
             'tiers' => config('plans.tiers'),
@@ -66,15 +69,40 @@ class BillingController extends Controller
             return back()->with('error', __('flash.billing_suspended'));
         }
 
+        $months = (int) $data['months'];
+        $plan = $data['plan'];
+        $currency = $hotel->displayCurrency();
+        $type = $hotel->changeType($plan);
+
+        // Descente en gamme : programmée à la fin du cycle payé, sans paiement.
+        if ($type === 'downgrade') {
+            $hotel->scheduleDowngrade($plan);
+
+            return redirect()->route('billing.show')->with('success', __('flash.billing_downgrade_scheduled', [
+                'plan' => config('plans.tiers.'.$plan.'.name'),
+                'date' => $hotel->pending_plan_effective_at?->format('d/m/Y') ?? '—',
+            ]));
+        }
+
         if (! $this->fedapay->isConfigured()) {
             return back()->with('error', __('flash.billing_not_configured'));
         }
 
-        $months = (int) $data['months'];
-        $plan = $data['plan'];
-        $unit = Hotel::priceFor($plan, $hotel->country);
-        $amount = $unit * $months;
-        $currency = $hotel->displayCurrency();
+        // Montée en gamme : avoir au prorata des jours non consommés du plan actuel.
+        $gross = Hotel::priceFor($plan, $hotel->country) * $months;
+        $credit = $type === 'upgrade' ? $hotel->prorationCredit() : 0;
+        $amount = max(0, $gross - $credit);
+
+        // Avoir couvrant tout le montant : changement appliqué immédiatement, sans paiement.
+        if ($amount <= 0) {
+            $sub = $hotel->applyRenewal($months, 0, $plan, [
+                'currency' => $currency, 'status' => 'active',
+            ], resetFromNow: true);
+
+            return redirect()->route('billing.show')->with('success', __('flash.billing_confirmed', [
+                'date' => $sub->ends_at->format('d/m/Y'),
+            ]));
+        }
 
         $user = $request->user();
 
@@ -101,6 +129,7 @@ class BillingController extends Controller
             'months' => $months,
             'amount' => $amount,
             'hotel_id' => $hotel->id,
+            'reset' => $type === 'upgrade', // montée en gamme = nouveau cycle immédiat
         ]);
 
         return redirect()->away($checkout['url']);
@@ -141,11 +170,23 @@ class BillingController extends Controller
                 'currency' => $hotel->displayCurrency(),
                 'status' => 'active',
             ],
+            resetFromNow: (bool) ($pending['reset'] ?? false),
         );
 
         return redirect()->route('billing.show')->with(
             'success',
             __('flash.billing_confirmed', ['date' => $sub->ends_at->format('d/m/Y')])
         );
+    }
+
+    /** Annule un changement de formule programmé (downgrade en attente). */
+    public function cancelChange(Request $request)
+    {
+        $hotel = $request->user()->hotel;
+        abort_unless($hotel, 403);
+
+        $hotel->cancelScheduledChange();
+
+        return redirect()->route('billing.show')->with('success', __('flash.billing_change_cancelled'));
     }
 }
