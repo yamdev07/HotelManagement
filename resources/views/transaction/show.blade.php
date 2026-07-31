@@ -793,6 +793,30 @@
     <!-- Actions rapides -->
     @if(in_array(auth()->user()->role, ['Super', 'Admin', 'Receptionist']))
     <div class="quick-actions">
+        {{-- Contacter le client sur WhatsApp (messages pré-remplis, envoi en un tap) --}}
+        @php
+            $waHotel = auth()->user()->hotel;
+            $waPhone = optional($transaction->customer)->phone;
+            $waConfirm = $waHotel ? \App\Support\GuestMessages::link($waPhone, \App\Support\GuestMessages::confirmation($waHotel, $transaction)) : null;
+            $waReminder = $waHotel ? \App\Support\GuestMessages::link($waPhone, \App\Support\GuestMessages::checkInReminder($waHotel, $transaction)) : null;
+            $waPayment = ($waHotel && (float) ($transaction->total_payment ?? 0) > 0)
+                ? \App\Support\GuestMessages::link($waPhone, \App\Support\GuestMessages::paymentReceived($waHotel, $transaction)) : null;
+        @endphp
+        @if($waConfirm)
+            <div class="dropdown d-inline">
+                <button type="button" class="btn-modern" style="background:#25d366;color:#fff" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fab fa-whatsapp me-1"></i>{{ __('show.whatsapp_client') ?? 'WhatsApp client' }}
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ $waConfirm }}" target="_blank" rel="noopener"><i class="fas fa-circle-check me-2 text-success"></i>{{ __('show.whatsapp_confirmation') ?? 'Confirmation de réservation' }}</a></li>
+                    <li><a class="dropdown-item" href="{{ $waReminder }}" target="_blank" rel="noopener"><i class="fas fa-clock me-2 text-warning"></i>{{ __('show.whatsapp_reminder') ?? "Rappel d'arrivée" }}</a></li>
+                    @if($waPayment)
+                        <li><a class="dropdown-item" href="{{ $waPayment }}" target="_blank" rel="noopener"><i class="fas fa-coins me-2 text-primary"></i>{{ __('show.whatsapp_payment') ?? 'Accusé de paiement' }}</a></li>
+                    @endif
+                </ul>
+            </div>
+        @endif
+
         @if($transaction->status == 'reservation')
             @php
                 $now = \Carbon\Carbon::now();

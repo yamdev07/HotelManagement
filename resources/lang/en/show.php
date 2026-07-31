@@ -21,6 +21,10 @@ return [
     // Buttons
     'back' => 'Back',
     'arrival' => 'Check-in',
+    'whatsapp_client' => 'WhatsApp guest',
+    'whatsapp_confirmation' => 'Booking confirmation',
+    'whatsapp_reminder' => 'Arrival reminder',
+    'whatsapp_payment' => 'Payment receipt',
     'arrival_at_12h' => 'Check-in at 12h',
     'departure_largesse' => 'Check-out (grace)',
     'departure_late_checkout' => 'Check-out (late checkout)',
