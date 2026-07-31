@@ -64,7 +64,7 @@ body {
     height: 54px;
     display: flex; align-items: center; gap: 12px;
     padding: 0 24px;
-    background: rgba(255,255,255,.95);
+    background: var(--white, #fff);
     backdrop-filter: blur(10px);
     border-bottom: 1.5px solid var(--s200);
     box-shadow: var(--shadow-xs);
@@ -155,7 +155,7 @@ body {
     height: 52px;
     display: flex; align-items: center; gap: 6px;
     padding: 0 24px;
-    background: rgba(255,255,255,.97);
+    background: var(--white, #fff);
     backdrop-filter: blur(10px);
     border-bottom: 1.5px solid var(--s200);
     overflow-x: auto; scrollbar-width: none;

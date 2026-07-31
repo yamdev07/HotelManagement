@@ -128,7 +128,7 @@ html[data-theme="dark"] .settings-page {
 .toggle { position:relative; width:38px; height:22px; flex:none; }
 .toggle input { position:absolute; opacity:0; width:100%; height:100%; margin:0; cursor:pointer; }
 .toggle .track { position:absolute; inset:0; background:var(--line2); border-radius:20px; transition:background .15s; }
-.toggle .track::before { content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:#fff; transition:transform .15s; }
+.toggle .track::before { content:""; position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%; background:var(--white, #fff); transition:transform .15s; }
 .toggle input:checked + .track { background:var(--acc); }
 .toggle input:checked + .track::before { transform:translateX(16px); }
 

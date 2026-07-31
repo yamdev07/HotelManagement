@@ -36,7 +36,7 @@
 
 /* ────────── CARTE PRINCIPALE ────────── */
 .extend-card {
-    background: white;
+    background: var(--white, #fff);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     border: 1px solid var(--gray-200);
@@ -79,7 +79,7 @@
     padding: 16px;
     cursor: pointer;
     transition: var(--transition);
-    background: white;
+    background: var(--white, #fff);
     text-align: center;
 }
 .night-option:hover {
@@ -202,7 +202,7 @@
 
 /* ────────── SIDEBAR ────────── */
 .info-card {
-    background: white;
+    background: var(--white, #fff);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     border: 1px solid var(--gray-200);

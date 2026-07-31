@@ -365,7 +365,7 @@
     padding: 2px 8px;
     border-radius: 100px;
     font-size: .65rem;
-    background: rgba(255,255,255,.2);
+    background: var(--white, #fff);
     color: white;
 }
 

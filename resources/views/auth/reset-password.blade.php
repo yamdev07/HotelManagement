@@ -155,7 +155,7 @@
 
         .strength-bar {
             height: 4px;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--white, #fff);
             border-radius: 2px;
             overflow: hidden;
             margin-bottom: 0.5rem;
@@ -188,7 +188,7 @@
             gap: 0.4rem;
             margin-top: 0.7rem;
             padding: 0.7rem 0.9rem;
-            background: rgba(255, 255, 255, 0.06);
+            background: var(--white, #fff);
             border: 1px solid rgba(255, 255, 255, 0.12);
             border-radius: 10px;
         }
@@ -244,7 +244,7 @@
         }
 
         .form-control[readonly] {
-            background-color: rgba(255, 255, 255, 0.05);
+            background-color: var(--white, #fff);
             border-color: rgba(255, 255, 255, 0.2);
         }
     </style>

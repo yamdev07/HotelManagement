@@ -174,7 +174,7 @@
 }
 .add-user-card-header-icon {
     width: 56px; height: 56px; border-radius: 12px;
-    background: rgba(255,255,255,0.15);
+    background: var(--white, #fff);
     display: flex; align-items: center; justify-content: center;
     font-size: 1.4rem; color: white;
 }

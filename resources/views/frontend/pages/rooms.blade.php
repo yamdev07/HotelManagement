@@ -293,10 +293,10 @@
         background: rgba(34,197,94,0.15);
         border: 1px solid rgba(34,197,94,0.5);
         color: var(--g600);
-        background: rgba(255,255,255,0.92);
+        background: var(--white, #fff);
     }
     .room-badge-status.unavailable {
-        background: rgba(255,255,255,0.92);
+        background: var(--white, #fff);
         border: 1px solid rgba(239,68,68,0.3);
         color: #dc2626;
     }
@@ -325,7 +325,7 @@
         height: 36px;
         border-radius: 50%;
         border: none;
-        background: rgba(255,255,255,0.92);
+        background: var(--white, #fff);
         color: #aaa;
         display: flex;
         align-items: center;
@@ -575,7 +575,7 @@
     }
     .stat-divider {
         width: 1px;
-        background: rgba(255,255,255,0.1);
+        background: var(--white, #fff);
         margin: 0 auto;
     }
 
@@ -631,7 +631,7 @@
         align-items: center;
         gap: 10px;
         padding: 15px 36px;
-        background: rgba(255,255,255,0.1);
+        background: var(--white, #fff);
         color: var(--white);
         border-radius: 10px;
         font-size: 0.95rem;
@@ -640,7 +640,7 @@
         border: 2px solid rgba(255,255,255,0.3);
         transition: var(--transition);
     }
-    .btn-cta-white:hover { background: rgba(255,255,255,0.18); color: var(--white); }
+    .btn-cta-white:hover { background: var(--white, #fff); color: var(--white); }
 
     /* ── LIST VIEW ── */
     #rooms-grid.view-list .room-item { flex: 0 0 100% !important; max-width: 100% !important; }
@@ -1033,7 +1033,7 @@
                 </div>
             </div>
             <div class="col-lg-5 mt-5 mt-lg-0 text-lg-end" data-aos="fade-left">
-                <div style="display:inline-block;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px 36px;">
+                <div style="display:inline-block;background:var(--white, #fff);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:32px 36px;">
                     <div style="font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:700;color:var(--gold-accent);line-height:1;">5★</div>
                     <div style="color:rgba(255,255,255,0.9);font-weight:600;margin:8px 0 4px;">Cactus Palace</div>
                     <div style="color:rgba(255,255,255,0.5);font-size:0.85rem;">Haie Vive, Cotonou · Bénin</div>

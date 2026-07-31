@@ -36,7 +36,7 @@
 
         .hero-mock {
             border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 30px 60px -20px rgba(79,70,229,.35);
-            overflow: hidden; background: #fff;
+            overflow: hidden; background: var(--white, #fff);
         }
         .hero-mock .bar { height: 36px; background: #f1f5f9; display: flex; align-items: center; gap: 6px; padding: 0 12px; }
         .hero-mock .dot { width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1; }
@@ -72,7 +72,7 @@
         @keyframes blob { 0%,100%{ border-radius: 42% 58% 63% 37% / 42% 45% 55% 58% } 50%{ border-radius: 58% 42% 38% 62% / 60% 38% 62% 40% } }
 
         /* Navbar dynamique au scroll */
-        .navbar.scrolled { box-shadow: 0 8px 30px -18px rgba(15,23,42,.35); backdrop-filter: blur(8px); background: rgba(255,255,255,.92) !important; }
+        .navbar.scrolled { box-shadow: 0 8px 30px -18px rgba(15,23,42,.35); backdrop-filter: blur(8px); background: var(--white, #fff) !important; }
         .navbar { transition: box-shadow .25s, background .25s; }
 
         /* Blobs décoratifs */

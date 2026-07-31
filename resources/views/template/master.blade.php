@@ -91,39 +91,39 @@
         /* ── CSS Variables ── */
         html[data-theme="dark"] {
             color-scheme: dark;
-            --surface: #0f172a;
-            --surface2: #1e293b;
-            --white: #1e293b;
-            /* Échelle « slate » (--s*) utilisée par la plupart des vues : on la
-               BASCULE en sombre, sinon le texte (--s800/--s900) reste foncé sur
-               fond foncé → illisible. Surfaces sombres, texte clair. */
-            --s50:  #1e293b;
-            --s100: #26324a;
-            --s200: #334155;
-            --s300: #475569;
-            --s400: #94a3b8;
-            --s500: #aab4c2;
-            --s600: #c3ccd8;
-            --s700: #d8dee7;
-            --s800: #e9edf2;
-            --s900: #f4f7fb;
-            --gray-50: #1e293b;
-            --gray-100: #1e293b;
-            --gray-200: #334155;
-            --gray-300: #475569;
-            --gray-400: #64748b;
-            --gray-500: #94a3b8;
-            --gray-600: #cbd5e1;
-            --gray-700: #e2e8f0;
-            --gray-800: #f1f5f9;
-            --gray-900: #f8fafc;
-            --shadow-xs: 0 1px 2px rgba(0,0,0,.2);
-            --shadow-sm: 0 1px 6px rgba(0,0,0,.3);
-            --shadow-md: 0 4px 16px rgba(0,0,0,.4);
+            /* Palette sombre COHÉRENTE avec le tableau de bord (dark vert-nuit).
+               On bascule TOUTES les échelles neutres utilisées par les vues
+               (--surface, --white, --s*, --gray-*) : surfaces sombres, texte clair. */
+            --surface:  #0f1311;
+            --surface2: #1b211d;
+            --white:    #161b18;
+            --s50:  #1b211d;
+            --s100: #222a25;
+            --s200: #2b332d;
+            --s300: #3a433c;
+            --s400: #8a938c;
+            --s500: #9aa39c;
+            --s600: #b3bbb5;
+            --s700: #cfd5d0;
+            --s800: #e4e9e5;
+            --s900: #eef2ee;
+            --gray-50:  #161b18;
+            --gray-100: #1b211d;
+            --gray-200: #2b332d;
+            --gray-300: #3a433c;
+            --gray-400: #8a938c;
+            --gray-500: #9aa39c;
+            --gray-600: #b3bbb5;
+            --gray-700: #cfd5d0;
+            --gray-800: #e4e9e5;
+            --gray-900: #eef2ee;
+            --shadow-xs: 0 1px 2px rgba(0,0,0,.3);
+            --shadow-sm: 0 1px 6px rgba(0,0,0,.4);
+            --shadow-md: 0 4px 16px rgba(0,0,0,.5);
         }
-        html[data-theme="dark"] body { background: #0f172a; color: #e2e8f0; }
-        html[data-theme="dark"] #page-content-wrapper { background: #0f172a; }
-        html[data-theme="dark"] #page-content-wrapper > .p-3 { color: #e2e8f0; }
+        html[data-theme="dark"] body { background: #0f1311; color: #e4e9e5; }
+        html[data-theme="dark"] #page-content-wrapper { background: #0f1311; }
+        html[data-theme="dark"] #page-content-wrapper > .p-3 { color: #e4e9e5; }
 
         /* Fond d'établissement (préférence locale) : voile pour garder la lisibilité */
         html.has-app-bg #page-content-wrapper { background: rgba(248,250,249,.82) !important; backdrop-filter: blur(8px); }

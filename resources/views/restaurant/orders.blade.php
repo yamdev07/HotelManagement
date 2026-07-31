@@ -41,7 +41,7 @@
     .qr-info h3 { font-size: 1.15rem; margin-bottom: 8px; font-weight: 700; color: #fff; }
     .qr-info p { font-size: 0.8rem; color: #94a3b8; margin-bottom: 12px; line-height: 1.4; }
     .qr-url { 
-        font-family: monospace; font-size: 0.7rem; background: rgba(255,255,255,0.05); 
+        font-family: monospace; font-size: 0.7rem; background: var(--white, #fff); 
         padding: 6px 12px; border-radius: 6px; color: var(--g500); width: fit-content;
         border: 1px solid rgb(from var(--g500) r g b / 0.2);
     }
@@ -53,7 +53,7 @@
         display: flex; flex-direction: column; align-items: center; gap: 15px;
     }
     .qr-image-wrap {
-        background: #fff; padding: 15px; border-radius: 12px;
+        background: var(--white, #fff); padding: 15px; border-radius: 12px;
         display: flex; align-items: center; justify-content: center;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         position: relative; z-index: 1;

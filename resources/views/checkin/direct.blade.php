@@ -102,7 +102,7 @@
     display: inline-flex; align-items: center; gap: 7px;
     padding: 8px 16px; border-radius: var(--radius-sm);
     font-size: .84rem; font-weight: 500;
-    color: var(--slate-600); background: white;
+    color: var(--slate-600); background: var(--white, #fff);
     border: 1.5px solid var(--slate-200);
     text-decoration: none; transition: var(--transition);
     box-shadow: var(--shadow-sm);
@@ -122,7 +122,7 @@
     display: flex; align-items: center; justify-content: center;
     position: relative; margin-bottom: 32px;
     padding: 24px 32px;
-    background: white;
+    background: var(--white, #fff);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--slate-200);
@@ -194,7 +194,7 @@
    FORM CARD
 ══════════════════════════════════════════════ */
 .dc-card {
-    background: white;
+    background: var(--white, #fff);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--slate-200);
@@ -240,7 +240,7 @@
     border: 1.5px solid var(--slate-200);
     border-radius: var(--radius-sm);
     font-size: .875rem; color: var(--slate-900);
-    background: white;
+    background: var(--white, #fff);
     transition: var(--transition);
     outline: none;
     width: 100%;
@@ -295,7 +295,7 @@
     padding: 11px 16px;
     border-bottom: 1px solid var(--slate-100);
     cursor: pointer; transition: var(--transition);
-    background: white;
+    background: var(--white, #fff);
 }
 .customer-result-item:last-child { border-bottom: none; }
 .customer-result-item:hover { background: var(--blue-50); }
@@ -369,7 +369,7 @@
     overflow: hidden;
     cursor: pointer;
     transition: var(--transition);
-    background: white;
+    background: var(--white, #fff);
     position: relative;
 }
 .room-card:hover {
@@ -515,7 +515,7 @@
     display: inline-flex; align-items: center; gap: 7px;
     padding: 10px 20px; border-radius: var(--radius-sm);
     font-size: .85rem; font-weight: 500;
-    color: var(--slate-600); background: white;
+    color: var(--slate-600); background: var(--white, #fff);
     border: 1.5px solid var(--slate-200);
     cursor: pointer; transition: var(--transition); text-decoration: none;
 }
@@ -1195,7 +1195,7 @@ function showAlert(msg, type = 'error') {
     t.style.cssText = `
         position:fixed;top:24px;right:24px;z-index:9999;
         display:flex;align-items:center;gap:10px;
-        padding:13px 18px;background:white;min-width:280px;max-width:380px;
+        padding:13px 18px;background:var(--white, #fff);min-width:280px;max-width:380px;
         border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.12);
         border-left:4px solid ${colors[type]};font-size:.875rem;font-weight:500;
         animation:fadeUp .25s ease;

@@ -21,7 +21,7 @@
             --sans: 'Jost', system-ui, sans-serif;
         }
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: var(--sans); color: var(--ink); overflow-x: hidden; background: #fff; }
+        body { margin: 0; font-family: var(--sans); color: var(--ink); overflow-x: hidden; background: var(--white, #fff); }
         h1,h2,h3,h4,.serif { font-family: var(--serif); }
         a { text-decoration: none; }
         .text-c { color: var(--c) !important; }
@@ -29,15 +29,15 @@
         .btn-c { background: var(--c); color:#fff; border:none; border-radius:2px; padding:.85rem 2rem; font-weight:500; letter-spacing:.04em; transition:.3s; display:inline-block; }
         .btn-c:hover { color:#fff; filter:brightness(.9); transform: translateY(-2px); box-shadow:0 14px 30px -12px var(--c); }
         .btn-ghost { background:transparent; color:#fff; border:1px solid rgba(255,255,255,.7); border-radius:2px; padding:.85rem 2rem; font-weight:500; letter-spacing:.04em; transition:.3s; display:inline-block; }
-        .btn-ghost:hover { background:#fff; color:var(--ink); }
+        .btn-ghost:hover { background:var(--white, #fff); color:var(--ink); }
         .eyebrow { font-family:var(--sans); letter-spacing:.35em; text-transform:uppercase; font-size:.72rem; font-weight:500; color:var(--c); }
         .section { padding: 7rem 0; }
         .display-serif { font-family:var(--serif); font-weight:600; line-height:1.04; letter-spacing:-.01em; }
-        .hero-divider { width:60px; height:1px; background:rgba(255,255,255,.6); margin:1.4rem auto; }
+        .hero-divider { width:60px; height:1px; background:var(--white, #fff); margin:1.4rem auto; }
 
         /* Navbar */
         .nav-lux { position:fixed; top:0; left:0; right:0; z-index:50; padding:1.4rem 0; transition:.4s; }
-        .nav-lux.solid, .nav-lux.scrolled { background:#fff; box-shadow:0 10px 30px -18px rgba(0,0,0,.25); padding:.8rem 0; }
+        .nav-lux.solid, .nav-lux.scrolled { background:var(--white, #fff); box-shadow:0 10px 30px -18px rgba(0,0,0,.25); padding:.8rem 0; }
         .nav-lux .brand { font-family:var(--serif); font-size:1.6rem; font-weight:700; color:#fff; transition:.4s; display:flex; align-items:center; gap:.6rem; }
         .nav-lux.solid .brand, .nav-lux.scrolled .brand { color:var(--ink); }
         .nav-lux .nav-link2 { color:rgba(255,255,255,.92); margin:0 1rem; font-weight:400; letter-spacing:.05em; font-size:.95rem; position:relative; transition:.3s; }
@@ -63,11 +63,11 @@
 
         .lift { transition:transform .4s, box-shadow .4s; }
         .lift:hover { transform:translateY(-8px); box-shadow:0 30px 60px -30px rgba(0,0,0,.4); }
-        .svc-card { padding:2.5rem 1.5rem; text-align:center; border-radius:4px; transition:.35s; background:#fff; }
+        .svc-card { padding:2.5rem 1.5rem; text-align:center; border-radius:4px; transition:.35s; background:var(--white, #fff); }
         .svc-card:hover { background:var(--c); color:#fff; transform:translateY(-6px); box-shadow:0 30px 60px -30px var(--c); }
         .svc-card:hover .svc-ico { color:#fff; }
         .svc-ico { font-size:2.4rem; color:var(--c); transition:.35s; }
-        .room-card { border:none; border-radius:4px; overflow:hidden; background:#fff; box-shadow:0 10px 40px -24px rgba(0,0,0,.35); }
+        .room-card { border:none; border-radius:4px; overflow:hidden; background:var(--white, #fff); box-shadow:0 10px 40px -24px rgba(0,0,0,.35); }
         .room-media { height:230px; overflow:hidden; position:relative; }
         .room-media .img { position:absolute; inset:0; background-size:cover; background-position:center; transition:transform .8s; }
         .room-card:hover .room-media .img { transform:scale(1.1); }
@@ -86,8 +86,8 @@
         @media (max-width:768px){ .gallery-grid{ grid-template-columns:repeat(2,1fr); grid-auto-rows:150px; } .gallery-item.wide{ grid-column:span 1 } }
 
         /* Témoignages */
-        .review { background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.10); border-radius:8px; padding:2.2rem; backdrop-filter:blur(6px); transition:.35s; }
-        .review:hover { transform:translateY(-6px); background:rgba(255,255,255,.10); }
+        .review { background:var(--white, #fff); border:1px solid rgba(255,255,255,.10); border-radius:8px; padding:2.2rem; backdrop-filter:blur(6px); transition:.35s; }
+        .review:hover { transform:translateY(-6px); background:var(--white, #fff); }
         .rev-ava { width:42px; height:42px; border-radius:50%; background:var(--c); color:#fff; display:grid; place-items:center; font-weight:700; }
 
         /* FAQ */
@@ -136,7 +136,7 @@
                     <div class="d-flex gap-2 mt-3">
                         @foreach ($hotel->socialLinks() as $key => $url)
                             <a href="{{ $url }}" target="_blank" rel="noopener" aria-label="{{ $key }}"
-                               style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.08);"><i class="{{ $icons[$key] ?? 'fas fa-link' }}"></i></a>
+                               style="width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--white, #fff);"><i class="{{ $icons[$key] ?? 'fas fa-link' }}"></i></a>
                         @endforeach
                     </div>
                 @endif

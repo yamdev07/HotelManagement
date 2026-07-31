@@ -28,7 +28,7 @@
             width: 16px;
             height: 16px;
             border-radius: 50%;
-            background: #fff;
+            background: var(--white, #fff);
             border: 3px solid;
             z-index: 1;
         }
@@ -42,7 +42,7 @@
         .timeline-item.marked-departed::before { border-color: #6c757d; }
         
         .timeline-content {
-            background: #fff;
+            background: var(--white, #fff);
             border-radius: 8px;
             padding: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -563,7 +563,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     @media print {
                         .breadcrumb, .btn, .filter-buttons, .dropdown, .alert, .history-summary { display: none !important; }
                         .card { border: none !important; box-shadow: none !important; }
-                        .card-header { background: white !important; border-bottom: 2px solid #000 !important; }
+                        .card-header { background: var(--white, #fff) !important; border-bottom: 2px solid #000 !important; }
                         .container-fluid { padding: 0 !important; }
                         body { font-size: 12px !important; }
                         .timeline::before { left: 10px !important; }

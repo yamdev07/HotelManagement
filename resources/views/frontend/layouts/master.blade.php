@@ -40,7 +40,7 @@
         body {
             font-family: 'Montserrat', sans-serif;
             color: #333;
-            background-color: #fff;
+            background-color: var(--white, #fff);
         }
 
         h1, h2, h3, h4, h5, h6 {
@@ -51,7 +51,7 @@
 
         /* ── Navbar ── */
         .cp-navbar {
-            background: rgba(255,255,255,.96);
+            background: var(--white, #fff);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(201,169,97,.2);
@@ -175,7 +175,7 @@
 
         @media (max-width: 991px) {
             .nav-link::after { display: none; }
-            .navbar-collapse { background: #fff; padding: 1rem; border-radius: 8px; margin-top: .5rem; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
+            .navbar-collapse { background: var(--white, #fff); padding: 1rem; border-radius: 8px; margin-top: .5rem; box-shadow: 0 8px 24px rgba(0,0,0,.12); }
             .cp-navbar.scrolled .navbar-collapse { background: var(--cactus-dark); }
         }
         @media (max-width: 576px) {

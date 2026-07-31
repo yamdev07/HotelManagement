@@ -297,7 +297,7 @@
 .card-header.blue { background: var(--green-600); color: white; }
 .card-header i { color: white; }
 .card-header .badge {
-    background: rgba(255,255,255,.2);
+    background: var(--white, #fff);
     color: white;
     border: 1.5px solid rgba(255,255,255,.2);
 }
@@ -389,7 +389,7 @@
     color: white;
 }
 .list-item.active .badge {
-    background: white;
+    background: var(--white, #fff);
     color: var(--green-600);
 }
 

@@ -481,7 +481,7 @@
 .conflict-item {
     margin-bottom: 8px;
     padding: 8px 10px;
-    background: rgba(255,255,255,.5);
+    background: var(--white, #fff);
     border-radius: var(--r);
     border-left: 3px solid var(--red-500);
 }

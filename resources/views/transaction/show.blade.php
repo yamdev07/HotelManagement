@@ -191,7 +191,7 @@
 }
 
 .btn-outline-modern {
-    background: white;
+    background: var(--white, #fff);
     color: var(--gray-700);
     border: 1px solid var(--gray-200);
 }
@@ -205,7 +205,7 @@
 }
 
 .btn-outline-danger-modern {
-    background: white;
+    background: var(--white, #fff);
     color: #ef4444;
     border: 1px solid #ef4444;
 }
@@ -311,7 +311,7 @@
 
 /* Cartes */
 .detail-card {
-    background: white;
+    background: var(--white, #fff);
     border-radius: 20px;
     border: 1px solid var(--gray-200);
     overflow: hidden;
@@ -326,7 +326,7 @@
 .card-header {
     padding: 16px 24px;
     border-bottom: 1px solid var(--gray-100);
-    background: white;
+    background: var(--white, #fff);
 }
 
 .card-header h5 {
@@ -474,7 +474,7 @@
     padding: 8px 16px;
     border-radius: 10px;
     border: 1px solid var(--gray-200);
-    background: white;
+    background: var(--white, #fff);
     font-size: 0.875rem;
     font-weight: 500;
     color: var(--gray-700);

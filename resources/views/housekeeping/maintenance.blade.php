@@ -268,7 +268,7 @@
     color: white;
 }
 .card-header .badge {
-    background: rgba(255,255,255,.2);
+    background: var(--white, #fff);
     color: white;
     border: 1.5px solid rgba(255,255,255,.2);
 }

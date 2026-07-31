@@ -21,7 +21,7 @@
         /* Standalone Experience */
         .cp-navbar, .footer { display: none !important; }
         main { padding-top: 0 !important; }
-        body { background: #fff; overflow-x: hidden; }
+        body { background: var(--white, #fff); overflow-x: hidden; }
 
         /* ── Splash Animation ── */
         #splash-screen {
@@ -135,7 +135,7 @@
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 15px 35px rgba(0,0,0,0.4);
         }
-        .btn-start:hover { transform: scale(1.08) translateY(-5px); background: #fff; box-shadow: 0 20px 45px rgba(201, 169, 97, 0.4); }
+        .btn-start:hover { transform: scale(1.08) translateY(-5px); background: var(--white, #fff); box-shadow: 0 20px 45px rgba(201, 169, 97, 0.4); }
 
         @media (max-width: 1024px) {
             .menu-card { flex-direction: column !important; height: auto !important; }

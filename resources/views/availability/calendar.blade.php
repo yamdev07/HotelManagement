@@ -80,7 +80,7 @@
     position: sticky;
     top: 0;
     z-index: 300;
-    background: rgba(255,255,255,.94);
+    background: var(--white, #fff);
     backdrop-filter: blur(20px);
     border-bottom: 1.5px solid var(--s100);
     padding: 16px 28px;

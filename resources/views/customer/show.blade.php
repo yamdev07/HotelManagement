@@ -310,7 +310,7 @@
     align-items: center;
     gap: 6px;
     padding: 6px 16px;
-    background: rgba(255,255,255,.15);
+    background: var(--white, #fff);
     border: 1.5px solid rgba(255,255,255,.2);
     border-radius: 100px;
     color: white;

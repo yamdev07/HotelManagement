@@ -64,7 +64,7 @@
 .hero-badge-item {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 8px 18px;
-    background: rgba(255,255,255,0.1);
+    background: var(--white, #fff);
     border: 1px solid rgba(255,255,255,0.2);
     border-radius: 50px;
     color: var(--white); font-size: 13px; font-weight: 500;
@@ -114,7 +114,7 @@
 .gallery-nav-btn {
     pointer-events: all;
     width: 44px; height: 44px; border-radius: 50%;
-    background: rgba(255,255,255,0.9); border: none;
+    background: var(--white, #fff); border: none;
     display: flex; align-items: center; justify-content: center;
     color: var(--cactus-green); font-size: 0.85rem; cursor: pointer;
     transition: var(--transition); box-shadow: var(--shadow-md);

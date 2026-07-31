@@ -432,7 +432,7 @@
     justify-content: space-between;
 }
 .customer-badge {
-    background: rgba(255,255,255,.15);
+    background: var(--white, #fff);
     border: 1.5px solid rgba(255,255,255,.2);
     padding: 4px 12px;
     border-radius: 100px;
@@ -445,7 +445,7 @@
     backdrop-filter: blur(4px);
 }
 .customer-number {
-    background: rgba(255,255,255,.15);
+    background: var(--white, #fff);
     border: 1.5px solid rgba(255,255,255,.2);
     width: 32px;
     height: 32px;

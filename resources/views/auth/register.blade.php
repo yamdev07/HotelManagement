@@ -260,7 +260,7 @@
 
         .strength-bar {
             height: 4px;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--white, #fff);
             border-radius: 2px;
             overflow: hidden;
             margin-bottom: 0.5rem;

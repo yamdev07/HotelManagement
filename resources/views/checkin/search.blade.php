@@ -255,7 +255,7 @@
     align-items: center;
     gap: 6px;
     padding: 6px 16px;
-    background: rgba(255,255,255,.15);
+    background: var(--white, #fff);
     border: 1.5px solid rgba(255,255,255,.2);
     border-radius: 100px;
     font-size: .75rem;
@@ -265,7 +265,7 @@
     transition: var(--transition);
 }
 .filter-badge:hover {
-    background: rgba(255,255,255,.25);
+    background: var(--white, #fff);
     transform: translateY(-1px);
 }
 

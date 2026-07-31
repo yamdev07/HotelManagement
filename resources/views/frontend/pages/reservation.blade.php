@@ -155,7 +155,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 .room-card {
     border: 2px solid #e9ecef; border-radius: 8px;
     padding: 1rem; cursor: pointer; transition: all .25s;
-    background: white; margin-bottom: .75rem;
+    background: var(--white, #fff); margin-bottom: .75rem;
 }
 .room-card:hover { border-color: var(--gold); transform: translateX(4px); box-shadow: 0 4px 12px rgba(201,169,97,.2); }
 .room-card.selected { border-color: var(--gold); background: rgba(201,169,97,.06); box-shadow: 0 0 0 3px rgba(201,169,97,.25); }

@@ -20,7 +20,7 @@
         .plan-card input { display: none; }
         .plan-card.selected { border-color: #4f46e5; box-shadow: 0 10px 30px -12px rgba(79,70,229,.5); }
         .plan-price { font-size: 1.6rem; font-weight: 800; color: #4f46e5; }
-        .lang-toggle { border: 1px solid #e8eaf0; border-radius: 8px; padding: .35rem .75rem; font-weight: 600; font-size: .85rem; color: #4f46e5; background: #fff; text-decoration: none; transition: .2s; }
+        .lang-toggle { border: 1px solid #e8eaf0; border-radius: 8px; padding: .35rem .75rem; font-weight: 600; font-size: .85rem; color: #4f46e5; background: var(--white, #fff); text-decoration: none; transition: .2s; }
         .lang-toggle:hover { background: #eef2ff; border-color: #c7d2fe; color: #4338ca; }
     </style>
 </head>

@@ -118,7 +118,7 @@
     top: 0;
     z-index: 999;
     height: 56px;
-    background: #ffffff;
+    background: var(--white, #ffffff);
     border-bottom: 1.5px solid #dde0dd;
     box-shadow: 0 1px 8px rgba(0,0,0,.06);
 }
@@ -173,7 +173,7 @@
 /* ── Icon button (notif) ── */
 .mh-icon-btn {
     width: 36px; height: 36px; border-radius: 10px;
-    background: #f8f9f8; border: 1.5px solid #dde0dd;
+    background: var(--surface, #f8f9f8); border: 1.5px solid #dde0dd;
     color: #545954; display: flex; align-items: center; justify-content: center;
     cursor: pointer; position: relative; font-size: .85rem;
     transition: background .2s;
@@ -194,7 +194,7 @@
 .mh-profile-btn {
     display: flex; align-items: center; gap: 8px;
     padding: 5px 10px 5px 5px;
-    background: #f8f9f8; border: 1.5px solid #dde0dd;
+    background: var(--surface, #f8f9f8); border: 1.5px solid #dde0dd;
     border-radius: 10px; cursor: pointer;
     transition: background .2s;
 }
@@ -278,7 +278,7 @@
     display: block; text-align: center;
     padding: 10px; font-size: .75rem; font-weight: 600;
     color: var(--hotel-primary, var(--g600)); text-decoration: none;
-    background: #f8f9f8; border-top: 1.5px solid #eff0ef;
+    background: var(--surface, #f8f9f8); border-top: 1.5px solid #eff0ef;
     transition: background .15s;
 }
 .mh-dd-footer:hover { background: var(--g50); text-decoration: none; }
@@ -295,7 +295,7 @@
 .mh-dd-item:hover { background: var(--g50); color: var(--hotel-primary, var(--g600)); text-decoration: none; }
 .mh-dd-item:hover i { color: var(--hotel-primary, var(--g600)); }
 .mh-dd-item--danger { color: #545954; }
-.mh-dd-item--danger:hover { background: #f8f9f8; color: #3a3e3a; }
+.mh-dd-item--danger:hover { background: var(--surface, #f8f9f8); color: #3a3e3a; }
 
 /* ════════════════════════════════════════
    RESPONSIVE · mobile header visible ≤ 768px

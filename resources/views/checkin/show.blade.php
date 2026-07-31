@@ -10,7 +10,7 @@
             border-left: 4px solid #0d6efd;
         }
         .info-box {
-            background-color: white;
+            background-color: var(--white, #fff);
             border: 1px solid #dee2e6;
             border-radius: 6px;
             padding: 15px;

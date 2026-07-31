@@ -9,7 +9,7 @@
         body {
             font-family: Arial, Helvetica, sans-serif;
             color: #222;
-            background: #fff;
+            background: var(--white, #fff);
             font-size: 13px;
         }
         .page {

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="utf-8"></head>
-<body style="font-family: Arial, sans-serif; background:#f5f7fb; padding:24px; color:#0f172a;">
-    <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
+<body style="font-family: Arial, sans-serif; background:var(--surface, #f5f7fb); padding:24px; color:#0f172a;">
+    <div style="max-width:560px;margin:0 auto;background:var(--white, #fff);border-radius:12px;overflow:hidden;border:1px solid #e2e8f0;">
         <div style="background:#4f46e5;color:#fff;padding:24px 28px;">
             <h2 style="margin:0;">Bienvenue sur {{ config('app.name', 'checkinHub') }}</h2>
         </div>

@@ -550,7 +550,7 @@ body {
 .badge-text {
     display: inline-block;
     padding: 8px 24px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--white, #fff);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 50px;
     color: var(--gold-accent);
@@ -593,7 +593,7 @@ body {
 }
 
 .booking-form-inline {
-    background: rgba(255, 255, 255, 0.95);
+    background: var(--white, #fff);
     backdrop-filter: blur(10px);
     border-radius: 16px;
     padding: 30px;
@@ -690,7 +690,7 @@ body {
     content: '';
     width: 4px;
     height: 8px;
-    background: rgba(255, 255, 255, 0.6);
+    background: var(--white, #fff);
     position: absolute;
     top: 8px;
     left: 50%;
@@ -742,7 +742,7 @@ body {
 }
 
 .btn-outline:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--white, #fff);
     border-color: var(--white);
     color: var(--white);
 }
@@ -803,7 +803,7 @@ body {
 }
 
 .section-tag.light {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--white, #fff);
     color: var(--gold-accent);
 }
 
@@ -999,7 +999,7 @@ body {
     right: 20px;
     width: 40px;
     height: 40px;
-    background: rgba(255, 255, 255, 0.9);
+    background: var(--white, #fff);
     border: none;
     border-radius: 50%;
     display: flex;
@@ -1221,7 +1221,7 @@ body {
 }
 
 .testimonial-card-modern {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--white, #fff);
     backdrop-filter: blur(10px);
     padding: 35px;
     border-radius: 16px;
@@ -1231,7 +1231,7 @@ body {
 }
 
 .testimonial-card-modern:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--white, #fff);
     transform: translateY(-5px);
     border-color: var(--gold-accent);
 }

@@ -654,7 +654,7 @@ tr:last-child td {
         margin: 0.5cm;
     }
     
-    body { background: white; padding: 0; }
+    body { background: var(--white, #fff); padding: 0; }
     .footer-actions { display: none !important; }
     .btn { display: none !important; }
     

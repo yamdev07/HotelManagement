@@ -33,7 +33,7 @@
 
 /* Carte principale */
 .transaction-card {
-    background: white;
+    background: var(--white, #fff);
     border-radius: var(--radius);
     box-shadow: var(--shadow);
     border: 1px solid var(--gray-200);
@@ -52,7 +52,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 18px 24px;
-    background: white;
+    background: var(--white, #fff);
     border-bottom: 1px solid var(--gray-200);
     flex-wrap: wrap;
     gap: 16px;
@@ -240,7 +240,7 @@
     border-left: 4px solid;
     padding: 12px 16px;
     border-radius: 8px;
-    background: white;
+    background: var(--white, #fff);
     margin-bottom: 20px;
 }
 .alert-status-reservation { border-left-color: var(--warning); background: var(--warning-light); }

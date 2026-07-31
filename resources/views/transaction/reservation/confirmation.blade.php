@@ -179,7 +179,7 @@
     font-size: .7rem; color: rgba(255,255,255,0.8);
 }
 .agent-badge {
-    background: rgba(255,255,255,0.2); color: white;
+    background: var(--white, #fff); color: white;
     padding: 3px 10px; border-radius: 30px; font-size: .65rem;
     font-weight: 600; border: 1px solid rgba(255,255,255,0.3);
 }
@@ -502,7 +502,7 @@
     margin-bottom: 4px;
 }
 .profile-badge {
-    background: rgba(255,255,255,0.2); color: white;
+    background: var(--white, #fff); color: white;
     padding: 3px 10px; border-radius: 30px; font-size: .65rem;
     display: inline-block;
 }
@@ -593,7 +593,7 @@
     @auth
     <div class="agent-card anim-4">
         <div class="d-flex align-items-center gap-3">
-            <div class="agent-avatar d-flex align-items-center justify-content-center" style="background:rgba(255,255,255,0.2);">
+            <div class="agent-avatar d-flex align-items-center justify-content-center" style="background:var(--white, #fff);">
                 <i class="fas fa-user-tie fa-2x text-white"></i>
             </div>
             <div class="flex-grow-1">
@@ -932,7 +932,7 @@
                     @if($customer->avatar)
                         <img src="{{ Storage::url($customer->avatar) }}" alt="{{ $customer->name }}" class="profile-avatar">
                     @else
-                        <div class="profile-avatar d-flex align-items-center justify-content-center" style="background:rgba(255,255,255,0.2);">
+                        <div class="profile-avatar d-flex align-items-center justify-content-center" style="background:var(--white, #fff);">
                             <i class="fas fa-user-circle fa-4x text-white"></i>
                         </div>
                     @endif

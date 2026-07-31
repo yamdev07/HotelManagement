@@ -393,7 +393,7 @@
     .additional-services { background: var(--cactus-dark); }
 
     .add-service-card {
-        background: rgba(255,255,255,0.04);
+        background: var(--white, #fff);
         border: 1px solid rgba(255,255,255,0.08);
         border-radius: 16px;
         padding: 30px 24px;
@@ -402,7 +402,7 @@
     }
 
     .add-service-card:hover {
-        background: rgba(255,255,255,0.08);
+        background: var(--white, #fff);
         border-color: rgba(201,169,97,0.3);
         transform: translateY(-6px);
     }
@@ -749,7 +749,7 @@
         width: 400px;
         height: 400px;
         border-radius: 50%;
-        background: rgba(255,255,255,0.03);
+        background: var(--white, #fff);
         z-index: 0;
     }
 

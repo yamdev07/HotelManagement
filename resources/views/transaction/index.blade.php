@@ -665,7 +665,7 @@
     cursor: pointer;
     width: 100%;
     text-align: left;
-    background: white;
+    background: var(--white, #fff);
     border: none;
     margin-bottom: 2px;
 }

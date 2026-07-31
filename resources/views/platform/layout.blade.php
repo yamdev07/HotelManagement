@@ -53,8 +53,8 @@
         /* Tables */
         .table{ --bs-table-bg:transparent; --bs-table-color:var(--txt); color:var(--txt); margin-bottom:0; }
         .table > :not(caption) > * > *{ background:transparent; color:var(--txt); border-color:var(--border); }
-        .table thead th, .table > thead.table-light th{ background:rgba(255,255,255,.03)!important; color:var(--muted)!important; text-transform:uppercase; font-size:.68rem; letter-spacing:.5px; border-color:var(--border)!important; }
-        .table-hover > tbody > tr:hover > *{ background:rgba(255,255,255,.05)!important; }
+        .table thead th, .table > thead.table-light th{ background:var(--white, #fff)!important; color:var(--muted)!important; text-transform:uppercase; font-size:.68rem; letter-spacing:.5px; border-color:var(--border)!important; }
+        .table-hover > tbody > tr:hover > *{ background:var(--white, #fff)!important; }
 
         /* Formulaires */
         .form-label{ color:#dfe4f2!important; font-weight:500; }
@@ -144,7 +144,7 @@
         </div>
         <form action="{{ route('logout') }}" method="POST" class="mt-2">
             @csrf
-            <button class="btn btn-sm w-100 text-start" style="color:#aab2c5;background:rgba(255,255,255,.05);border:none;border-radius:10px;padding:.55rem .8rem;">
+            <button class="btn btn-sm w-100 text-start" style="color:#aab2c5;background:var(--white, #fff);border:none;border-radius:10px;padding:.55rem .8rem;">
                 <i class="fas fa-arrow-right-from-bracket me-2"></i> Déconnexion
             </button>
         </form>

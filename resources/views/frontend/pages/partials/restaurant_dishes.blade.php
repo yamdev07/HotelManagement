@@ -18,7 +18,7 @@
                         <i class="fas fa-globe-africa"></i>
                         Spécialités Africaines
                         <span
-                            style="background:rgba(255,255,255,0.2);border-radius:20px;padding:2px 9px;font-size:11px;">Nouveau</span>
+                            style="background:var(--white, #fff);border-radius:20px;padding:2px 9px;font-size:11px;">Nouveau</span>
                     </a>
                 </div>
             </div>
@@ -839,7 +839,7 @@
         .om-hint { font-size: .68rem; color: #444; }
 
         .om-payment-card {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--white, #fff);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 12px;
             padding: 20px;

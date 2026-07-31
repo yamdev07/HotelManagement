@@ -451,7 +451,7 @@
 .summary-icon {
     width: 48px;
     height: 48px;
-    background: rgba(255,255,255,.2);
+    background: var(--white, #fff);
     border-radius: 12px;
     display: flex;
     align-items: center;
@@ -474,13 +474,13 @@
 .summary-progress {
     margin-top: 16px;
     height: 6px;
-    background: rgba(255,255,255,.2);
+    background: var(--white, #fff);
     border-radius: 100px;
     overflow: hidden;
 }
 .summary-bar {
     height: 100%;
-    background: white;
+    background: var(--white, #fff);
     border-radius: 100px;
 }
 

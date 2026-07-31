@@ -57,7 +57,7 @@
 
         .shape {
             position: absolute;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--white, #fff);
             border-radius: 50%;
             animation: float 20s infinite linear;
         }
@@ -118,7 +118,7 @@
         }
 
         .auth-card {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--white, #fff);
             backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
@@ -154,7 +154,7 @@
         .auth-logo {
             width: 80px;
             height: 80px;
-            background: rgba(255, 255, 255, 0.2);
+            background: var(--white, #fff);
             border-radius: 20px;
             display: flex;
             align-items: center;
@@ -199,7 +199,7 @@
         .form-control {
             width: 100%;
             padding: 1rem 1.25rem;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--white, #fff);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 12px;
             color: white;
@@ -210,7 +210,7 @@
         .form-control:focus {
             outline: none;
             border-color: rgba(255, 255, 255, 0.4);
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--white, #fff);
             box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
         }
 

@@ -16,7 +16,7 @@
         .invoice-container {
             max-width: 800px;
             margin: 0 auto;
-            background: white;
+            background: var(--white, #fff);
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
             border: 2px solid #28a745;
@@ -310,7 +310,7 @@
             }
             
             body {
-                background: white !important;
+                background: var(--white, #fff) !important;
                 font-size: 12pt !important;
                 padding: 0;
             }

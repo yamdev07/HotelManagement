@@ -124,7 +124,7 @@
         }
 
         .auth-secondary-btn {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--white, #fff);
             border: 1px solid rgba(255, 255, 255, 0.2);
             color: rgba(255, 255, 255, 0.9);
             padding: 0.75rem 1.5rem;
@@ -139,7 +139,7 @@
         }
 
         .auth-secondary-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--white, #fff);
             border-color: rgba(255, 255, 255, 0.3);
             color: white;
             transform: translateY(-2px);

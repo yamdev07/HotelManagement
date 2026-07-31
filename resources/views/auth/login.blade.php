@@ -23,19 +23,19 @@
             display:flex; flex-direction:column; justify-content:center;
         }
         @keyframes grad { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
-        .blob { position:absolute; border-radius:50%; filter:blur(2px); background:rgba(255,255,255,.10); animation:float 9s ease-in-out infinite; }
+        .blob { position:absolute; border-radius:50%; filter:blur(2px); background:var(--white, #fff); animation:float 9s ease-in-out infinite; }
         @keyframes float { 0%,100%{ transform:translateY(0) } 50%{ transform:translateY(-26px) } }
         .grid-deco { position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.12) 1px,transparent 1px); background-size:26px 26px; opacity:.4; mask-image:linear-gradient(180deg,transparent,#000 40%,transparent); }
         .side-inner { position:relative; z-index:2; max-width:460px; }
         .brand { font-size:2rem; font-weight:800; display:flex; align-items:center; gap:.7rem; }
         .side h1 { font-size:clamp(2rem,3.2vw,3rem); font-weight:800; line-height:1.1; letter-spacing:-.02em; margin:2rem 0 1rem; }
         .feat { display:flex; gap:1rem; align-items:flex-start; margin-top:1.4rem; }
-        .feat-ico { width:46px;height:46px;border-radius:14px;background:rgba(255,255,255,.16);display:grid;place-items:center;flex-shrink:0;backdrop-filter:blur(4px); }
+        .feat-ico { width:46px;height:46px;border-radius:14px;background:var(--white, #fff);display:grid;place-items:center;flex-shrink:0;backdrop-filter:blur(4px); }
 
-        .panel { display:flex; align-items:center; justify-content:center; padding:2rem; background:#fff; }
+        .panel { display:flex; align-items:center; justify-content:center; padding:2rem; background:var(--white, #fff); }
         .form-wrap { width:100%; max-width:420px; }
         .form-control { border-radius:14px; padding:.9rem 1rem .9rem 2.8rem; border:1px solid #e5e7eb; background:#f8fafc; transition:.25s; }
-        .form-control:focus { border-color:var(--brand); box-shadow:0 0 0 .25rem rgba(79,70,229,.15); background:#fff; }
+        .form-control:focus { border-color:var(--brand); box-shadow:0 0 0 .25rem rgba(79,70,229,.15); background:var(--white, #fff); }
         .input-ico { position:absolute; left:1rem; top:50%; transform:translateY(-50%); color:#94a3b8; transition:.25s; }
         .position-relative:focus-within .input-ico { color:var(--brand); }
         .pw-eye { position:absolute; right:.85rem; top:50%; transform:translateY(-50%); background:none; border:none;
@@ -44,8 +44,8 @@
         .btn-brand { background:linear-gradient(135deg,var(--brand),var(--brand2)); border:none; color:#fff; border-radius:14px; padding:.95rem; font-weight:600; width:100%; transition:.25s; }
         .btn-brand:hover { transform:translateY(-2px); box-shadow:0 16px 34px -12px var(--brand); color:#fff; filter:brightness(1.05); }
         .link-brand { color:var(--brand); font-weight:600; text-decoration:none; }
-        .lang-toggle { border:1px solid rgba(255,255,255,.3); border-radius:8px; padding:.35rem .75rem; font-weight:600; font-size:.85rem; color:#fff; background:rgba(255,255,255,.1); text-decoration:none; transition:.2s; backdrop-filter:blur(4px); }
-        .lang-toggle:hover { background:rgba(255,255,255,.22); border-color:rgba(255,255,255,.5); color:#fff; }
+        .lang-toggle { border:1px solid rgba(255,255,255,.3); border-radius:8px; padding:.35rem .75rem; font-weight:600; font-size:.85rem; color:#fff; background:var(--white, #fff); text-decoration:none; transition:.2s; backdrop-filter:blur(4px); }
+        .lang-toggle:hover { background:var(--white, #fff); border-color:rgba(255,255,255,.5); color:#fff; }
 
         @keyframes up { from{ opacity:0; transform:translateY(22px) } to{ opacity:1; transform:none } }
         @keyframes inLeft { from{ opacity:0; transform:translateX(-26px) } to{ opacity:1; transform:none } }
@@ -77,7 +77,7 @@
         .blob { transition:transform .4s cubic-bezier(.2,.7,.2,1); will-change:transform; }
         .feat { transition:transform .25s; }
         .feat:hover { transform:translateX(6px); }
-        .feat:hover .feat-ico { background:rgba(255,255,255,.32); }
+        .feat:hover .feat-ico { background:var(--white, #fff); }
         .feat-ico { transition:.25s; }
 
         @media (max-width:860px){
