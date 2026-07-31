@@ -21,6 +21,20 @@
                 --g900: color-mix(in srgb, var(--hotel-primary) 45%, #000) !important;
             }
 
+            /* MODE SOMBRE : les teintes de marque doivent aussi basculer, sinon
+               --g50/--g100 (quasi-blanc) donnent des pastilles/ronds BLANCS et
+               --g700..900 (foncé) rendent le texte invisible. On mélange les
+               teintes claires avec du sombre, et on éclaircit les nuances foncées. */
+            html[data-theme="dark"] {
+                --g50:  color-mix(in srgb, var(--hotel-primary) 14%, #14181c) !important;
+                --g100: color-mix(in srgb, var(--hotel-primary) 20%, #191f26) !important;
+                --g200: color-mix(in srgb, var(--hotel-primary) 30%, #202834) !important;
+                --g300: color-mix(in srgb, var(--hotel-primary) 46%, #2a3340) !important;
+                --g700: color-mix(in srgb, var(--hotel-primary) 45%, #ffffff) !important;
+                --g800: color-mix(in srgb, var(--hotel-primary) 65%, #ffffff) !important;
+                --g900: color-mix(in srgb, var(--hotel-primary) 82%, #ffffff) !important;
+            }
+
             /* Boutons & accents Bootstrap */
             .btn-primary {
                 background-color: var(--hotel-primary) !important;
