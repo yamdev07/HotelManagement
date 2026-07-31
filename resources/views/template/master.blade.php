@@ -92,7 +92,21 @@
         html[data-theme="dark"] {
             color-scheme: dark;
             --surface: #0f172a;
+            --surface2: #1e293b;
             --white: #1e293b;
+            /* Échelle « slate » (--s*) utilisée par la plupart des vues : on la
+               BASCULE en sombre, sinon le texte (--s800/--s900) reste foncé sur
+               fond foncé → illisible. Surfaces sombres, texte clair. */
+            --s50:  #1e293b;
+            --s100: #26324a;
+            --s200: #334155;
+            --s300: #475569;
+            --s400: #94a3b8;
+            --s500: #aab4c2;
+            --s600: #c3ccd8;
+            --s700: #d8dee7;
+            --s800: #e9edf2;
+            --s900: #f4f7fb;
             --gray-50: #1e293b;
             --gray-100: #1e293b;
             --gray-200: #334155;
