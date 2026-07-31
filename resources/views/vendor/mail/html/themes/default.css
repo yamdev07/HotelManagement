@@ -10,7 +10,7 @@ body *:not(html):not(style):not(br):not(tr):not(code) {
 
 body {
     -webkit-text-size-adjust: none;
-    background-color: var(--white, #ffffff);
+    background-color: #ffffff;
     color: #718096;
     height: 100%;
     line-height: 1.4;
@@ -135,7 +135,7 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 570px;
-    background-color: var(--white, #ffffff);
+    background-color: #ffffff;
     border-color: #e8e5ef;
     border-radius: 2px;
     border-width: 1px;
