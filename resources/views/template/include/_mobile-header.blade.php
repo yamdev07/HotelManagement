@@ -97,7 +97,7 @@
                     <div class="mh-dd-divider"></div>
                     <a class="mh-dd-item mh-dd-item--danger"
                        href="{{ route('logout') }}"
-                       onclick="event.preventDefault(); document.getElementById('mh-logout-form').submit();">
+                       onclick="event.preventDefault(); if (window.confirmLogout) { confirmLogout(); } else { document.getElementById('mh-logout-form').submit(); } return false;">
                         <i class="fas fa-sign-out-alt"></i> {{ __('sidebar.logout_title') }}
                     </a>
                     <form id="mh-logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
