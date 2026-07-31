@@ -34,7 +34,8 @@ class HotelBrandingTest extends TestCase
         $response = $this->actingAs($admin)->get('/mon-etablissement');
 
         $response->assertOk();
-        $response->assertSee('Couleurs de la marque');
+        // Le contrôle de couleur de marque est présent (libellé indépendant : on vérifie le champ).
+        $response->assertSee('name="primary_color"', false);
     }
 
     public function test_admin_can_update_colors_and_info(): void
