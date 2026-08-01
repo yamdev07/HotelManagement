@@ -211,7 +211,8 @@ html[data-theme="dark"] .db-page {
 .btn-db-ghost { background: var(--card); color: var(--ink2); border-color: var(--line); }
 .btn-db-ghost:hover { background: var(--tint); color: var(--ink); border-color: var(--line2); }
 .btn-db-icon, .btn-db-icon-green {
-  width: 32px; height: 32px; padding: 0; justify-content: center; border-radius: 8px;
+  width: 32px; height: 32px; padding: 0; border-radius: 8px;
+  display: inline-flex; align-items: center; justify-content: center;
   background: var(--tint); border: 1px solid var(--line2); color: var(--ink);
 }
 .btn-db-icon-green { background: var(--acc-t); border-color: transparent; color: var(--acc); }
