@@ -253,9 +253,11 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
   text-align: left; font-size: .66rem; text-transform: uppercase; letter-spacing: .05em;
   color: var(--ink3); font-weight: 700; padding: 10px 14px; border-bottom: 1px solid var(--line);
 }
-.db-table td { padding: 14px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.db-table td { padding: 16px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 /* Cellule solde : badge + total + bouton bien aérés et alignés */
-.balance-cell { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 7px; }
+.balance-cell { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 9px; }
+.balance-cell .balance-due-amount { margin-bottom: 1px; }
+.balance-cell .btn-pay-now { margin-top: 2px; }
 .db-table tbody tr:last-child td { border-bottom: 0; }
 .db-table tbody tr:hover { background: var(--tint); }
 .guest-avatar {

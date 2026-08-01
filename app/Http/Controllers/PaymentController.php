@@ -129,11 +129,13 @@ class PaymentController extends Controller
             return redirect()->route('transaction.show', $transaction)->with('success', $message);
 
         } catch (HotelException $e) {
+            // Exception métier : le message est destiné à l'utilisateur (ex. « ouvrez
+            // d'abord une session de caisse »), on l'affiche tel quel.
             if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'message' => __('flash.generic_error')], $e->httpStatusCode());
+                return response()->json(['success' => false, 'message' => $e->getMessage()], $e->httpStatusCode());
             }
 
-            return redirect()->back()->with('error', __('flash.generic_error'))->withInput();
+            return redirect()->back()->with('error', $e->getMessage())->withInput();
 
         } catch (\Exception $e) {
             Log::error('Erreur paiement', ['transaction_id' => $transaction->id, 'error' => $e->getMessage()]);
@@ -171,7 +173,7 @@ class PaymentController extends Controller
             return redirect()->route('payments.index')->with('success', __('flash.payment_cancelled_success'));
 
         } catch (HotelException $e) {
-            return redirect()->back()->with('error', __('flash.generic_error'));
+            return redirect()->back()->with('error', $e->getMessage());
         } catch (\Exception $e) {
             Log::error('Erreur annulation paiement', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
 
