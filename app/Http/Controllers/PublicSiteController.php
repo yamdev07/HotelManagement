@@ -198,7 +198,8 @@ class PublicSiteController extends Controller
         }
         $gallery = $gallery->filter()->unique()->take(10)->values();
 
-        return view('public.pages.home', compact('hotel', 'rooms', 'gallery'));
+        // Nav en mode solide : le hero éditorial est sur fond clair.
+        return view('public.pages.home', compact('hotel', 'rooms', 'gallery') + ['solidNav' => true]);
     }
 
     public function rooms(string $slug)
