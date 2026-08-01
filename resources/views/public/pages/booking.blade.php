@@ -25,6 +25,13 @@
     .sum-total .val { font-size:1.4rem; font-weight:900; color:#1f2733; }
     .sum-deposit { margin-top:12px; background:color-mix(in srgb, var(--c) 8%, #fff); border:1px solid color-mix(in srgb, var(--c) 22%, #fff); border-radius:12px; padding:12px 14px; font-size:.86rem; color:#374151; }
     .sum-deposit b { color:var(--c); }
+    .promo-box { display:flex; gap:8px; margin-top:14px; }
+    .promo-box input { flex:1; min-width:0; padding:10px 12px; border:1.5px solid #e3e6ee; border-radius:10px; font-size:.9rem; color:#1f2733; font-family:inherit; }
+    .promo-box input:focus { outline:none; border-color:var(--c); box-shadow:0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent); }
+    .promo-box button { flex:none; border:1.5px solid var(--c); background:transparent; color:var(--c); border-radius:10px; padding:0 16px; font-weight:700; font-size:.85rem; cursor:pointer; }
+    .promo-box button:hover { background:var(--c); color:#fff; }
+    .promo-err { margin-top:8px; font-size:.82rem; color:#b91c1c; }
+    .promo-ok { margin-top:8px; font-size:.82rem; color:#16a34a; font-weight:600; }
 
     /* Form */
     .bk-field { margin-bottom:14px; }
@@ -63,6 +70,7 @@
                             <input type="hidden" name="check_in" value="{{ $checkIn }}">
                             <input type="hidden" name="check_out" value="{{ $checkOut }}">
                             <input type="hidden" name="guests" value="{{ $guests }}">
+                            <input type="hidden" name="promo_code" value="{{ $promo?->code ?? '' }}">
 
                             <div class="bk-field">
                                 <label>Nom complet *</label>
@@ -103,11 +111,31 @@
                             <div class="sum-line"><span>Arrivée</span> <strong>{{ \Carbon\Carbon::parse($checkIn)->translatedFormat('D d M Y') }}</strong></div>
                             <div class="sum-line"><span>Départ</span> <strong>{{ \Carbon\Carbon::parse($checkOut)->translatedFormat('D d M Y') }}</strong></div>
                             <div class="sum-line"><span>{{ number_format($roomModel->price, 0, ',', ' ') }} {{ $hotel->currency }} × {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}</span> <strong>{{ number_format($total, 0, ',', ' ') }} {{ $hotel->currency }}</strong></div>
+                            @if (($discount ?? 0) > 0)
+                                <div class="sum-line" style="color:#16a34a"><span><i class="fas fa-tag"></i> Code « {{ $promo->code }} »</span> <strong style="color:#16a34a">− {{ number_format($discount, 0, ',', ' ') }} {{ $hotel->currency }}</strong></div>
+                            @endif
                         </div>
+
+                        {{-- Code promo --}}
+                        <form method="GET" action="{{ route('public.hotel.booking', [$hotel->slug, $roomModel->id]) }}" class="promo-box">
+                            <input type="hidden" name="check_in" value="{{ $checkIn }}">
+                            <input type="hidden" name="check_out" value="{{ $checkOut }}">
+                            <input type="hidden" name="guests" value="{{ $guests }}">
+                            <input type="text" name="promo" value="{{ $promoRaw ?? '' }}" placeholder="Code promo" maxlength="40" style="text-transform:uppercase">
+                            <button type="submit">{{ ($discount ?? 0) > 0 ? 'Modifier' : 'Appliquer' }}</button>
+                        </form>
+                        @if (! empty($promoError))
+                            <div class="promo-err"><i class="fas fa-circle-exclamation"></i> {{ $promoError }}</div>
+                        @elseif (($discount ?? 0) > 0)
+                            <div class="promo-ok"><i class="fas fa-circle-check"></i> Code appliqué : vous économisez {{ number_format($discount, 0, ',', ' ') }} {{ $hotel->currency }} !</div>
+                        @endif
 
                         <div class="sum-total">
                             <span class="lbl">Total du séjour</span>
-                            <span class="val">{{ number_format($total, 0, ',', ' ') }} {{ $hotel->currency }}</span>
+                            <span class="val">
+                                @if (($discount ?? 0) > 0)<span style="font-size:.9rem;font-weight:600;color:#9aa1ad;text-decoration:line-through;margin-right:6px">{{ number_format($total, 0, ',', ' ') }}</span>@endif
+                                {{ number_format($finalTotal ?? $total, 0, ',', ' ') }} {{ $hotel->currency }}
+                            </span>
                         </div>
 
                         <div class="sum-deposit">

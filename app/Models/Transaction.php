@@ -30,6 +30,8 @@ class Transaction extends Model
         'person_count',
         'total_price',
         'total_payment',
+        'promo_code',
+        'discount_amount',
         'cancelled_at',
         'cancelled_by',
         'cancel_reason',
@@ -907,11 +909,13 @@ class Transaction extends Model
         // 4. Calculer le total des extras (minibar, lessive, services)
         $extrasTotal = $this->extras()->sum(\Illuminate\Support\Facades\DB::raw('amount * quantity'));
 
-        // 5. Prix total = base + restaurant + extras
+        // 5. Prix total = base + restaurant + extras − remise (code promo)
         $totalWithExtras = $basePrice + $restaurantTotal + $extrasTotal;
         if ($hasLateCheckout && $lateFee > 0) {
             $totalWithExtras += $lateFee;
         }
+        // La remise (code promo) est une réduction permanente sur le séjour.
+        $totalWithExtras = max(0, $totalWithExtras - (float) ($this->discount_amount ?? 0));
 
         // 6. Si le champ total_price existe et est différent, le mettre à jour
         if ($this->total_price && abs($totalWithExtras - (float) $this->total_price) > 1) {

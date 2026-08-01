@@ -6,6 +6,7 @@ use App\Models\Customer;
 use App\Models\Hotel;
 use App\Models\Menu;
 use App\Models\Payment;
+use App\Models\PromoCode;
 use App\Models\Room;
 use App\Models\RoomBlock;
 use App\Models\RoomStatus;
@@ -113,6 +114,30 @@ class PublicSiteController extends Controller
         $deposit = $this->depositFor($tx);
 
         return $deposit > 0 && (float) ($tx->total_payment ?? 0) >= $deposit - 1;
+    }
+
+    /**
+     * Cherche un code promo valide pour l'hôtel courant et un séjour de N nuits.
+     *
+     * @return array{promo:?PromoCode, error:?string}
+     */
+    private function findValidPromo(?string $rawCode, int $nights): array
+    {
+        $code = PromoCode::normalize($rawCode);
+        if ($code === '') {
+            return ['promo' => null, 'error' => null];
+        }
+
+        $promo = PromoCode::where('code', $code)->first(); // scopé à l'hôtel (tenant)
+        if (! $promo) {
+            return ['promo' => null, 'error' => 'Code promo inconnu.'];
+        }
+
+        $check = $promo->validateFor($nights);
+
+        return $check['ok']
+            ? ['promo' => $promo, 'error' => null]
+            : ['promo' => null, 'error' => $check['reason']];
     }
 
     /** Une chambre est-elle libre pour la période (pas de chevauchement, pas en maintenance) ? */
@@ -326,12 +351,20 @@ class PublicSiteController extends Controller
 
         $nights  = max(1, $ci->diffInDays($co));
         $total   = $roomModel->price * $nights;
-        $deposit = (int) round($total * self::DEPOSIT_RATE);
+
+        // Code promo éventuel (saisi par le voyageur).
+        $promoRaw = $request->query('promo');
+        ['promo' => $promo, 'error' => $promoError] = $this->findValidPromo($promoRaw, $nights);
+        $discount = $promo ? $promo->discountOn($total) : 0;
+        $finalTotal = $total - $discount;
+        $deposit = (int) round($finalTotal * self::DEPOSIT_RATE);
 
         return view('public.pages.booking', [
             'hotel' => $hotel, 'roomModel' => $roomModel,
             'checkIn' => $ci->format('Y-m-d'), 'checkOut' => $co->format('Y-m-d'),
-            'guests' => $guests, 'nights' => $nights, 'total' => $total, 'deposit' => $deposit,
+            'guests' => $guests, 'nights' => $nights, 'total' => $total,
+            'discount' => $discount, 'finalTotal' => $finalTotal, 'deposit' => $deposit,
+            'promo' => $promo, 'promoRaw' => $promoRaw, 'promoError' => $promoError,
         ]);
     }
 
@@ -352,6 +385,7 @@ class PublicSiteController extends Controller
             'name'      => ['required', 'string', 'max:255', new \App\Rules\SafeName],
             'email'     => ['required', 'email', 'max:255'],
             'phone'     => ['required', 'string', 'regex:/^[0-9+\s().\-]{6,20}$/'],
+            'promo_code' => ['nullable', 'string', 'max:40'],
         ], [
             'name.required'  => 'Votre nom est requis.',
             'email.required' => 'Votre email est requis.',
@@ -370,6 +404,11 @@ class PublicSiteController extends Controller
         $nights = max(1, $ci->diffInDays($co));
         $total  = $roomModel->price * $nights;
 
+        // Code promo : re-validé côté serveur (on ne fait jamais confiance au client).
+        ['promo' => $promo] = $this->findValidPromo($data['promo_code'] ?? null, $nights);
+        $discount = $promo ? $promo->discountOn($total) : 0;
+        $finalTotal = $total - $discount;
+
         // "Agent" propriétaire de la ligne (pas d'utilisateur connecté côté public).
         $agentId = $hotel->owner_user_id
             ?? User::where('hotel_id', $hotel->id)->whereIn('role', ['Admin', 'Super'])->value('id')
@@ -386,9 +425,14 @@ class PublicSiteController extends Controller
         $tx = Transaction::create([
             'user_id' => $agentId, 'customer_id' => $customer->id, 'room_id' => $roomModel->id,
             'check_in' => $ci->format('Y-m-d'), 'check_out' => $co->format('Y-m-d'),
-            'status' => 'reservation', 'person_count' => $data['guests'], 'total_price' => $total,
-            'notes' => 'Réservation en ligne depuis la vitrine.',
+            'status' => 'reservation', 'person_count' => $data['guests'], 'total_price' => $finalTotal,
+            'promo_code' => $promo?->code, 'discount_amount' => $discount,
+            'notes' => 'Réservation en ligne depuis la vitrine.'.($promo ? ' Code promo : '.$promo->code.' (-'.number_format($discount, 0, ',', ' ').').' : ''),
         ]);
+
+        if ($promo) {
+            $promo->increment('used_count');
+        }
 
         $tx->load(['room', 'customer']);
         $this->notifyBookingCreated($hotel, $tx);
