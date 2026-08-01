@@ -33,8 +33,8 @@
                                         <i class="fas fa-user-group me-1 text-c"></i> {{ $room->capacity }} personnes
                                         @if ($room->number) &nbsp;·&nbsp; <i class="fas fa-door-closed me-1 text-c"></i> Chambre {{ $room->number }}@endif
                                     </p>
-                                    @if ($hotel->show_contact)
-                                        <a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="text-c fw-semibold">Réserver <i class="fas fa-arrow-right-long ms-1"></i></a>
+                                    @if ($hotel->show_rooms)
+                                        <a href="{{ route('public.hotel.booking', ['slug' => $hotel->slug, 'room' => $room->id, 'check_in' => now()->format('Y-m-d'), 'check_out' => now()->addDay()->format('Y-m-d'), 'guests' => 1]) }}" class="btn-c" style="padding:.55rem 1.3rem;font-size:.9rem;">Réserver <i class="fas fa-arrow-right-long ms-1"></i></a>
                                     @endif
                                 </div>
                             </div>

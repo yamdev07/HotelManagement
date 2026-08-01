@@ -27,7 +27,7 @@
                                     @if ($room->type)<div class="eyebrow mb-1">{{ $room->type->name }}</div>@endif
                                     <h4 class="serif mb-2" style="font-size:1.4rem;">{{ $room->name ?: 'Chambre '.$room->number }}</h4>
                                     <p class="text-secondary small mb-3"><i class="fas fa-user-group me-1 text-c"></i> {{ $room->capacity }} personnes</p>
-                                    <a href="{{ route('public.hotel.availability', $hotel->slug) }}" class="btn-c mt-auto" style="padding:.6rem 1.4rem;font-size:.9rem;text-align:center;">Réserver</a>
+                                    <a href="{{ route('public.hotel.availability', ['slug' => $hotel->slug, 'check_in' => now()->format('Y-m-d'), 'check_out' => now()->addDay()->format('Y-m-d'), 'guests' => 1]) }}" class="btn-c mt-auto" style="padding:.6rem 1.4rem;font-size:.9rem;text-align:center;">Réserver</a>
                                 </div>
                             </div>
                         </div>
