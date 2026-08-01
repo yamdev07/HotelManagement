@@ -73,6 +73,17 @@
                         </a>
                     @endif
 
+                    @if (Route::has('promo.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
+                        <a href="{{ route('promo.index') }}" class="nav-item restricted {{ $activeClass('promo.') }}"
+                            data-tooltip="Codes promo">
+                            <div class="nav-icon"><i class="fas fa-tags"></i></div>
+                            <div class="nav-content">
+                                <div class="nav-title">Codes promo</div>
+                                <div class="nav-subtitle">Réductions vitrine</div>
+                            </div>
+                        </a>
+                    @endif
+
                     @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Manager', 'Receptionist']))
                         @if (Route::has('availability.dashboard'))
                             <a href="{{ route('availability.dashboard') }}"

@@ -160,6 +160,14 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::delete('/mon-etablissement/supprimer', [\App\Http\Controllers\HotelSettingsController::class, 'destroyAccount'])->name('hotel.account.destroy');
 });
 
+// ==================== CODES PROMO (réductions vitrine) ====================
+Route::middleware(['auth', 'checkrole:Super,Admin'])->prefix('promos')->name('promo.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\PromoCodeController::class, 'index'])->name('index');
+    Route::post('/', [\App\Http\Controllers\PromoCodeController::class, 'store'])->name('store');
+    Route::post('/{promoCode}/toggle', [\App\Http\Controllers\PromoCodeController::class, 'toggle'])->name('toggle');
+    Route::delete('/{promoCode}', [\App\Http\Controllers\PromoCodeController::class, 'destroy'])->name('destroy');
+});
+
 // ==================== DASHBOARD REVENUS (pilotage financier) ====================
 // Réservé au propriétaire (Admin) et à la Direction (Manager, via le middleware).
 Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
