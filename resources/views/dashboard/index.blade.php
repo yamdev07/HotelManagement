@@ -197,7 +197,7 @@ html[data-theme="dark"] .db-page {
 .occ-fill { height: 100%; background: var(--acc); border-radius: 20px; transition: width .4s ease; }
 
 /* ══════════ MAIN GRID ══════════ */
-.db-main-grid { display: grid; grid-template-columns: 2.6fr 1fr; gap: 16px; align-items: start; }
+.db-main-grid { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 16px; align-items: start; }
 @media (max-width: 1000px) { .db-main-grid { grid-template-columns: 1fr; } }
 
 /* ── buttons ── */
