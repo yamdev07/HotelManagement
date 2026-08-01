@@ -267,15 +267,8 @@ class RoomController extends Controller
      */
     public function statusHistory(Room $room)
     {
-        $statusChanges = DB::table('room_status_history')
-            ->where('room_id', $room->id)
-            ->orderBy('changed_at', 'desc')
-            ->get();
-
-        return view('room.status-history', [
-            'room' => $room,
-            'statusChanges' => $statusChanges,
-        ]);
+        // Vue d'historique non encore réalisée : repli propre vers la fiche chambre.
+        return redirect()->route('room.show', $room)->with('info', __('flash.feature_unavailable'));
     }
 
     /**

@@ -175,7 +175,8 @@ class CashierSessionController extends Controller
             return redirect()->route('cashier.sessions.show', $cashierSession)->with('error', __('flash.session_closed_error'));
         }
 
-        return view('cashier.sessions.edit', compact('cashierSession', 'user'));
+        // Vue d'édition de session non réalisée : repli vers la fiche de session.
+        return redirect()->route('cashier.sessions.show', $cashierSession)->with('info', __('flash.feature_unavailable'));
     }
 
     public function update(Request $request, CashierSession $cashierSession)
@@ -300,7 +301,8 @@ class CashierSessionController extends Controller
             'totalRefunded' => $payments->where('status', Payment::STATUS_REFUNDED)->sum('amount') ?? 0,
         ];
 
-        return view('cashier.reports.daily', compact('sessions', 'payments', 'stats', 'date', 'user'));
+        // Vue de rapport non réalisée : repli propre.
+        return redirect()->route('cashier.dashboard')->with('info', __('flash.feature_unavailable'));
     }
 
     public function receptionistReport(?int $userId = null)
@@ -311,26 +313,8 @@ class CashierSessionController extends Controller
             return redirect()->route('cashier.dashboard')->with('error', __('flash.session_admin_only'));
         }
 
-        try {
-            if ($userId) {
-                $receptionist = User::findOrFail($userId);
-                $sessions = CashierSession::where('user_id', $userId)->orderByDesc('created_at')->paginate(20);
-                $stats = $this->sessionService->getReceptionistStats($userId);
-
-                return view('cashier.reports.receptionist', compact('receptionist', 'sessions', 'stats', 'user'));
-            }
-
-            $receptionists = User::whereIn('role', ['Receptionist', 'Cashier'])
-                ->withCount([
-                    'cashierSessions',
-                    'cashierSessions as active_sessions_count' => fn ($q) => $q->where('status', 'active'),
-                ])
-                ->paginate(15);
-
-            return view('cashier.reports.index', compact('receptionists', 'user'));
-        } catch (\Throwable $e) {
-            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_report_error'));
-        }
+        // Vues de rapports non réalisées : repli propre.
+        return redirect()->route('cashier.dashboard')->with('info', __('flash.feature_unavailable'));
     }
 
     public function detailedClosingReport(CashierSession $cashierSession)
@@ -374,8 +358,7 @@ class CashierSessionController extends Controller
             'cancelled' => $transactions->where('status', 'cancelled')->count(),
         ];
 
-        return view('cashier.reports.closing', compact(
-            'cashierSession', 'transactions', 'payments', 'paymentMethodsAnalysis', 'transactionStatusAnalysis', 'user'
-        ));
+        // Vue de rapport de clôture non réalisée : repli vers la fiche de session.
+        return redirect()->route('cashier.sessions.show', $cashierSession)->with('info', __('flash.feature_unavailable'));
     }
 }

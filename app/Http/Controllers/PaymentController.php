@@ -149,13 +149,10 @@ class PaymentController extends Controller
     {
         $this->authorize('view', $payment);
 
-        $payment->load(['transaction.customer', 'transaction.room.type', 'user', 'createdBy', 'cancelledByUser']);
         $payment->transaction?->updatePaymentStatus();
 
-        return view('payment.show', [
-            'payment' => $payment,
-            'paymentMethods' => Payment::getPaymentMethods(),
-        ]);
+        // La fiche détaillée d'un paiement, c'est sa facture.
+        return redirect()->route('payment.invoice', $payment);
     }
 
     public function cancel(Request $request, Payment $payment)

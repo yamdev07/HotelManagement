@@ -920,13 +920,8 @@ class TransactionRoomReservationController extends Controller
             ];
         }
 
-        return view('transaction.reservation.choose-room-with-checkouts', [
-            'customer' => $customer,
-            'availableRooms' => $availableRooms,
-            'roomsBeingCheckedOut' => $roomsBeingCheckedOut,
-            'stayFrom' => $stayFrom,
-            'stayUntil' => $stayUntil,
-            'hasWaitingRooms' => count($roomsBeingCheckedOut) > 0,
-        ]);
+        // Vue enrichie (chambres en cours de départ) non réalisée : repli vers le
+        // choix de chambre standard, qui gère le même client.
+        return redirect()->route('transaction.reservation.chooseRoom', $customer);
     }
 }

@@ -404,7 +404,7 @@ class AvailabilityController extends Controller
 
             \Log::info('=== SUCCÈS - Données préparées pour la vue ===');
 
-            return view('availability.conflicts', $viewData);
+            return view('availability.conflits', $viewData);
 
         } catch (\Exception $e) {
             \Log::error('ERREUR dans showConflicts: '.$e->getMessage());

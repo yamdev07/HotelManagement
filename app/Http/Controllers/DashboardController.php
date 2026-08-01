@@ -83,9 +83,8 @@ class DashboardController extends Controller
 
     public function checkinDashboard()
     {
-        $data = $this->dashboard->getCheckinDashboardData();
-
-        return view('checkin.dashboard', $data);
+        // Vue de dashboard check-in non réalisée : repli vers la page check-in.
+        return redirect()->route('checkin.index')->with('info', __('flash.feature_unavailable'));
     }
 
     public function updateStats()
