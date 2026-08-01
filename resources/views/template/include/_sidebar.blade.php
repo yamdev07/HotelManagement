@@ -84,6 +84,17 @@
                         </a>
                     @endif
 
+                    @if (Route::has('reviews.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
+                        <a href="{{ route('reviews.index') }}" class="nav-item restricted {{ $activeClass('reviews.') }}"
+                            data-tooltip="Avis clients">
+                            <div class="nav-icon"><i class="fas fa-star"></i></div>
+                            <div class="nav-content">
+                                <div class="nav-title">Avis clients</div>
+                                <div class="nav-subtitle">Modération vitrine</div>
+                            </div>
+                        </a>
+                    @endif
+
                     @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Manager', 'Receptionist']))
                         @if (Route::has('availability.dashboard'))
                             <a href="{{ route('availability.dashboard') }}"

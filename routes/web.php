@@ -84,6 +84,9 @@ Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(func
     Route::get('/h/{slug}/restaurant', 'restaurant')->name('public.hotel.restaurant');
     Route::get('/h/{slug}/services', 'services')->name('public.hotel.services');
     Route::get('/h/{slug}/contact', 'contact')->name('public.hotel.contact');
+    // Dépôt d'un avis client (limité pour éviter le spam).
+    Route::post('/h/{slug}/avis', 'storeReview')->name('public.hotel.review.store')
+        ->middleware('throttle:6,1');
 });
 
 // Flux iCal d'une chambre (export vers Booking.com / Airbnb), accès par jeton.
@@ -170,6 +173,15 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->prefix('promos')->name('pr
     Route::post('/', [\App\Http\Controllers\PromoCodeController::class, 'store'])->name('store');
     Route::post('/{promoCode}/toggle', [\App\Http\Controllers\PromoCodeController::class, 'toggle'])->name('toggle');
     Route::delete('/{promoCode}', [\App\Http\Controllers\PromoCodeController::class, 'destroy'])->name('destroy');
+});
+
+// ==================== AVIS CLIENTS (modération) ====================
+Route::middleware(['auth', 'checkrole:Super,Admin,Manager'])->prefix('avis')->name('reviews.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\ReviewController::class, 'index'])->name('index');
+    Route::post('/{review}/approve', [\App\Http\Controllers\ReviewController::class, 'approve'])->name('approve');
+    Route::post('/{review}/reject', [\App\Http\Controllers\ReviewController::class, 'reject'])->name('reject');
+    Route::post('/{review}/reply', [\App\Http\Controllers\ReviewController::class, 'reply'])->name('reply');
+    Route::delete('/{review}', [\App\Http\Controllers\ReviewController::class, 'destroy'])->name('destroy');
 });
 
 // ==================== DASHBOARD REVENUS (pilotage financier) ====================

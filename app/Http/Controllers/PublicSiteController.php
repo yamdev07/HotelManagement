@@ -7,6 +7,7 @@ use App\Models\Hotel;
 use App\Models\Menu;
 use App\Models\Payment;
 use App\Models\PromoCode;
+use App\Models\Review;
 use App\Models\Room;
 use App\Models\RoomBlock;
 use App\Models\RoomStatus;
@@ -198,7 +199,64 @@ class PublicSiteController extends Controller
         }
         $gallery = $gallery->filter()->unique()->take(10)->values();
 
-        return view('public.pages.home', compact('hotel', 'rooms', 'gallery'));
+        // Avis approuvés + note moyenne (affichés seulement si activés).
+        $reviews = collect();
+        $reviewsAvg = null;
+        $reviewsCount = 0;
+        if ($hotel->show_reviews) {
+            $approved = Review::approved()->latest('approved_at')->get();
+            $reviewsCount = $approved->count();
+            $reviewsAvg = $reviewsCount ? round($approved->avg('rating'), 1) : null;
+            $reviews = $approved->take(9);
+        }
+
+        return view('public.pages.home', compact('hotel', 'rooms', 'gallery', 'reviews', 'reviewsAvg', 'reviewsCount'));
+    }
+
+    /**
+     * Dépôt d'un avis depuis la vitrine. Selon le réglage de l'hôtel, l'avis
+     * est publié directement ou mis en attente de modération.
+     */
+    public function storeReview(Request $request, string $slug)
+    {
+        $hotel = $this->resolve($slug);
+        if (! $hotel instanceof Hotel) {
+            return $hotel;
+        }
+
+        if (! $hotel->show_reviews) {
+            return back()->with('review_error', "Les avis ne sont pas activés pour cet établissement.");
+        }
+
+        $data = $request->validate([
+            'author_name' => ['required', 'string', 'max:120', new \App\Rules\SafeName],
+            'author_city' => ['nullable', 'string', 'max:120'],
+            'rating'      => ['required', 'integer', 'min:1', 'max:5'],
+            'comment'     => ['required', 'string', 'min:10', 'max:1000', new \App\Rules\NoEmoji],
+        ], [
+            'author_name.required' => 'Votre nom est requis.',
+            'rating.required'      => 'Merci de donner une note.',
+            'comment.required'     => 'Merci de laisser un commentaire.',
+            'comment.min'          => 'Votre commentaire est un peu court.',
+        ], ['author_name' => 'nom', 'author_city' => 'ville', 'comment' => 'commentaire']);
+
+        $moderated = $hotel->reviews_moderation ?? true;
+
+        Review::create([
+            'hotel_id'    => $hotel->id,
+            'author_name' => $data['author_name'],
+            'author_city' => $data['author_city'] ?? null,
+            'rating'      => (int) $data['rating'],
+            'comment'     => $data['comment'],
+            'status'      => $moderated ? Review::STATUS_PENDING : Review::STATUS_APPROVED,
+            'approved_at' => $moderated ? null : now(),
+        ]);
+
+        $message = $moderated
+            ? 'Merci ! Votre avis a été envoyé et sera publié après validation.'
+            : 'Merci ! Votre avis a été publié.';
+
+        return back()->with('review_success', $message)->withFragment('avis');
     }
 
     public function rooms(string $slug)

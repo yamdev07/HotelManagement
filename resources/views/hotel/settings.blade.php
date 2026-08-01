@@ -433,6 +433,7 @@ html[data-theme="dark"] .settings-page {
                             'show_restaurant' => __('hotel-settings.section_restaurant'),
                             'show_services'   => __('hotel-settings.section_services'),
                             'show_contact'    => __('hotel-settings.section_contact'),
+                            'show_reviews'    => 'Avis clients',
                         ];
                     @endphp
                     @foreach ($sections as $field => $label)
@@ -445,6 +446,16 @@ html[data-theme="dark"] .settings-page {
                             <label for="{{ $field }}">{{ $label }}</label>
                         </div>
                     @endforeach
+
+                    {{-- Modération des avis : sous-option de la section Avis --}}
+                    <div class="switch">
+                        <span class="toggle">
+                            <input type="hidden" name="reviews_moderation" value="0">
+                            <input type="checkbox" id="reviews_moderation" name="reviews_moderation" value="1" {{ old('reviews_moderation', $hotel->reviews_moderation ?? true) ? 'checked' : '' }}>
+                            <span class="track"></span>
+                        </span>
+                        <label for="reviews_moderation">Modérer les avis avant publication</label>
+                    </div>
                 </div>
             </div>
         </section>

@@ -117,7 +117,7 @@ class HotelSettingsController extends Controller
         }
 
         // Cases à cocher : absentes du payload = false
-        foreach (['show_rooms', 'show_restaurant', 'show_services', 'show_contact'] as $toggle) {
+        foreach (['show_rooms', 'show_restaurant', 'show_services', 'show_contact', 'show_reviews', 'reviews_moderation'] as $toggle) {
             $data[$toggle] = $request->boolean($toggle);
         }
 
