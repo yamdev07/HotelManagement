@@ -117,7 +117,11 @@ Route::post('/restaurant/orders', [RestaurantController::class, 'storeOrder'])->
 
 // Vérifier si une chambre a un client actif (public)
 Route::get('/api/restaurant/check-room', [RestaurantController::class, 'checkRoomGuest'])->name('restaurant.check-room');
-Route::post('/restaurant/menus/{id}/toggle-status', [RestaurantController::class, 'toggleStatus'])->name('restaurant.menus.toggle-status');
+
+// Activer/désactiver un plat = action staff (auth + rôles), pas publique.
+Route::post('/restaurant/menus/{id}/toggle-status', [RestaurantController::class, 'toggleStatus'])
+    ->name('restaurant.menus.toggle-status')
+    ->middleware(['auth', 'checkrole:Super,Admin,Servant,Cuisiner']);
 
 Route::get('/api/available-rooms', [FrontendController::class, 'availableRooms'])->name('api.available-rooms');
 
