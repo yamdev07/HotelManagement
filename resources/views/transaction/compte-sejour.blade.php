@@ -2,6 +2,26 @@
 @section('title', __('compte-sejour.page_title', ['room' => $transaction->room->number]))
 
 @section('content')
+<style>
+/* ── Compte séjour : style épuré + couleur de marque (remplace le Bootstrap brut) ── */
+.folio-page .card { border: 1px solid var(--s200, #e5e7eb) !important; box-shadow: 0 1px 2px rgba(20,40,30,.04) !important; border-radius: 14px !important; overflow: hidden; }
+.folio-page .card-header { font-weight: 700 !important; border-bottom: 1px solid var(--s100, #eef0ee) !important; background: var(--white, #fff) !important; color: var(--s800, #1f2937) !important; }
+.folio-page .card-header i { color: var(--g600) !important; }
+/* En-tête chambre : accent marque plein */
+.folio-page .card-header.bg-primary { background: var(--g600) !important; color: #fff !important; border-bottom: 0 !important; }
+.folio-page .card-header.bg-primary i, .folio-page .card-header.bg-primary .badge { color: #fff !important; }
+/* Restaurant / Extras / Ajouter : en-têtes clairs avec liseré marque (fini le jaune/cyan/dark) */
+.folio-page .card-header.bg-warning, .folio-page .card-header.bg-info, .folio-page .card-header.bg-dark { background: var(--tint, #f4f7f5) !important; color: var(--s800, #1f2937) !important; border-bottom: 2px solid var(--g500) !important; }
+.folio-page .card-header.bg-warning i, .folio-page .card-header.bg-info i, .folio-page .card-header.bg-dark i { color: var(--g600) !important; }
+.folio-page .card-header .badge.bg-light, .folio-page .card-header .badge { background: rgba(0,0,0,.08) !important; color: inherit !important; }
+.folio-page .card-header.bg-light { background: var(--surface, #f8faf9) !important; color: var(--s800) !important; }
+/* Accents texte/boutons -> marque */
+.folio-page .text-primary, .folio-page .text-warning, .folio-page .text-info, .folio-page .text-success { color: var(--g600) !important; }
+.folio-page .btn-success { background: var(--g600) !important; border-color: var(--g600) !important; }
+.folio-page .btn-success:hover { background: var(--g700) !important; border-color: var(--g700) !important; }
+.folio-page .btn-outline-secondary { color: var(--s600); border-color: var(--s300); }
+</style>
+<div class="folio-page">
 <div class="d-flex justify-content-between align-items-center mb-3">
     <div>
         <h3 class="mb-0">
@@ -319,4 +339,5 @@
     </div>
 </div>
 @endif
+</div>{{-- /.folio-page --}}
 @endsection
