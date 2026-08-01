@@ -8,7 +8,7 @@
         </div>
         <div class="row g-4 align-items-stretch">
             <div class="col-lg-5" data-aos="fade-right">
-                <div style="background:#faf9f7;border-radius:8px;padding:2rem;height:100%;">
+                <div style="background:var(--card);border:1px solid var(--line);border-radius:8px;padding:2rem;height:100%;">
                     <div class="d-flex align-items-start gap-3 mb-4">
                         <i class="fas fa-location-dot text-c" style="font-size:1.4rem;margin-top:4px;"></i>
                         <div>

@@ -6,7 +6,7 @@
 
     {{-- Aperçu des chambres --}}
     @if ($hotel->show_rooms && $rooms->isNotEmpty())
-        <section class="section" style="background:#faf9f7;">
+        <section class="section" style="background:var(--bg2);">
             <div class="container">
                 <div class="text-center mb-5" data-aos="fade-up">
                     <div class="eyebrow mb-2">Hébergement</div>

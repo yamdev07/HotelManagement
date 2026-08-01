@@ -1,6 +1,6 @@
 @php $gallery = ($gallery ?? collect()); @endphp
 @if ($gallery->isNotEmpty())
-<section class="section" id="galerie" style="background:#faf9f7;">
+<section class="section" id="galerie" style="background:var(--bg2);">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
             <div class="eyebrow mb-2">Galerie</div>

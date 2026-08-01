@@ -6,7 +6,7 @@
         ['Comment réserver ?', "Contactez-nous par téléphone ou par email, nous nous occupons du reste avec plaisir."],
     ];
 @endphp
-<section class="section" id="faq" style="background:#faf9f7;">
+<section class="section" id="faq" style="background:var(--bg2);">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
             <div class="eyebrow mb-2">Questions fréquentes</div>

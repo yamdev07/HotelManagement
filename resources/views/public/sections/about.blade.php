@@ -19,25 +19,25 @@
             <div class="col-lg-6" data-aos="fade-left" data-aos-delay="150">
                 <div class="row g-4 text-center">
                     <div class="col-6">
-                        <div class="p-4 lift" style="background:#faf9f7;border-radius:6px;">
+                        <div class="p-4 lift" style="background:var(--card);border:1px solid var(--line);border-radius:6px;">
                             <div class="display-serif text-c" style="font-size:2.8rem;">{{ $roomCount ?: '∞' }}</div>
                             <div class="eyebrow mt-1" style="color:var(--ink);opacity:.6;">Chambres</div>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="p-4 lift" style="background:#faf9f7;border-radius:6px;">
+                        <div class="p-4 lift" style="background:var(--card);border:1px solid var(--line);border-radius:6px;">
                             <div class="display-serif text-c" style="font-size:2.8rem;">24/7</div>
                             <div class="eyebrow mt-1" style="color:var(--ink);opacity:.6;">Réception</div>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="p-4 lift" style="background:#faf9f7;border-radius:6px;">
+                        <div class="p-4 lift" style="background:var(--card);border:1px solid var(--line);border-radius:6px;">
                             <div class="display-serif text-c" style="font-size:2.8rem;">5★</div>
                             <div class="eyebrow mt-1" style="color:var(--ink);opacity:.6;">Service</div>
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="p-4 lift" style="background:#faf9f7;border-radius:6px;">
+                        <div class="p-4 lift" style="background:var(--card);border:1px solid var(--line);border-radius:6px;">
                             <div class="display-serif text-c" style="font-size:2.8rem;">100%</div>
                             <div class="eyebrow mt-1" style="color:var(--ink);opacity:.6;">Satisfaction</div>
                         </div>

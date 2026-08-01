@@ -1,70 +1,57 @@
 @php $cover = $hotel->coverOrDefault(); @endphp
 @push('head')
 <style>
-    .hero-ed { padding:9rem 0 3.5rem; position:relative; overflow:hidden; }
-    .hero-ed::before { content:''; position:absolute; top:-10%; right:-8%; width:44vw; height:44vw; max-width:620px; max-height:620px;
-        background:radial-gradient(circle, color-mix(in srgb, var(--c) 22%, transparent), transparent 68%); z-index:0; }
-    .hero-ed-grid { display:grid; grid-template-columns:1.05fr 1fr; gap:3.2rem; align-items:center; position:relative; z-index:1; }
-    .hero-ed-eyebrow { display:inline-flex; align-items:center; gap:.5rem; }
-    .hero-ed-title { font-size:clamp(3rem, 7.2vw, 6.2rem); font-weight:800; letter-spacing:-.03em; line-height:.98; margin:1.1rem 0 1.3rem; }
-    .hero-ed-title .accent { color:var(--c); }
-    .hero-ed-tag { font-size:1.2rem; color:var(--ink2); max-width:460px; line-height:1.6; margin-bottom:2rem; }
-    .hero-ed-cta { display:flex; gap:.9rem; flex-wrap:wrap; }
-    .hero-ed-media { position:relative; }
-    .hero-ed-img { aspect-ratio:4/5; border-radius:26px; background-size:cover; background-position:center; box-shadow:0 50px 90px -50px rgba(0,0,0,.5);
-        transform:scale(1.02); animation:heroReveal 1.1s cubic-bezier(.2,.7,.2,1) forwards; }
-    @keyframes heroReveal { from { opacity:0; transform:scale(1.08) translateY(14px); } to { opacity:1; transform:scale(1) translateY(0); } }
-    .hero-ed-badge { position:absolute; left:-18px; bottom:26px; background:#fff; border-radius:18px; padding:14px 18px; box-shadow:0 24px 50px -24px rgba(0,0,0,.35); display:flex; align-items:center; gap:12px; }
-    .hero-ed-badge .n { font-family:var(--disp); font-weight:800; font-size:1.5rem; color:var(--c); line-height:1; }
-    .hero-ed-badge small { color:var(--ink2); }
+    .hero-cine { height:100vh; min-height:660px; position:relative; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; overflow:hidden; }
+    .hero-cine-bg { position:absolute; inset:0; background-size:cover; background-position:center; transform:scale(1.1); animation:cineZoom 16s ease-out forwards; }
+    @keyframes cineZoom { to { transform:scale(1); } }
+    .hero-cine-ov { position:absolute; inset:0; background:
+        radial-gradient(120% 90% at 50% 10%, transparent, rgba(0,0,0,.35) 60%),
+        linear-gradient(180deg, rgba(11,13,17,.55) 0%, rgba(11,13,17,.25) 35%, color-mix(in srgb, var(--bg) 92%, transparent) 100%); }
+    .hero-cine-glow { position:absolute; width:60vw; max-width:800px; height:60vw; max-height:800px; left:50%; top:38%; transform:translate(-50%,-50%);
+        background:radial-gradient(circle, color-mix(in srgb, var(--c) 40%, transparent), transparent 62%); filter:blur(40px); opacity:.55; z-index:1; }
+    .hero-cine-inner { position:relative; z-index:2; max-width:940px; padding:0 1.4rem; }
+    .hero-cine h1 { font-size:clamp(3rem, 8vw, 6.4rem); font-weight:800; letter-spacing:-.03em; margin:.6rem 0 1rem; text-shadow:0 6px 40px rgba(0,0,0,.4); }
+    .hero-cine .tag { font-weight:300; font-size:1.25rem; max-width:600px; margin:0 auto; opacity:.92; }
+    .hero-badge { display:inline-flex; align-items:center; gap:.5rem; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.2); backdrop-filter:blur(8px); padding:.45rem 1.1rem; border-radius:100px; font-size:.82rem; letter-spacing:.06em; }
 
-    /* Barre de réservation */
-    .hero-search { margin:2.8rem auto 0; background:#fff; border:1px solid var(--line); border-radius:20px;
-        padding:16px; display:grid; grid-template-columns:1fr 1fr .9fr auto; gap:14px; align-items:end; box-shadow:0 30px 60px -40px rgba(0,0,0,.3); position:relative; z-index:1; }
+    /* Barre de réservation — verre dépoli */
+    .hero-search { margin:2.6rem auto 0; max-width:880px; background:rgba(255,255,255,.09); backdrop-filter:blur(18px);
+        border:1px solid rgba(255,255,255,.22); border-radius:18px; padding:15px;
+        display:grid; grid-template-columns:1fr 1fr .9fr auto; gap:12px; align-items:end; box-shadow:0 40px 90px -40px rgba(0,0,0,.7); }
     .hero-search .hs-field { text-align:left; }
-    .hero-search label { display:block; font-size:.66rem; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--ink2); margin-bottom:7px; }
-    .hero-search input, .hero-search select { width:100%; padding:12px 13px; border:1.5px solid var(--line); border-radius:12px; font-family:var(--sans); font-size:.95rem; color:var(--ink); background:var(--paper); }
-    .hero-search input:focus, .hero-search select:focus { outline:none; border-color:var(--c); box-shadow:0 0 0 3px color-mix(in srgb, var(--c) 16%, transparent); }
-    .hs-btn { border:0; border-radius:12px; background:var(--c); color:#fff; padding:13px 24px; height:48px; font-weight:600; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:8px; transition:.25s; }
-    .hs-btn:hover { filter:brightness(1.08); transform:translateY(-1px); }
-
-    @media (max-width:900px){ .hero-ed-grid { grid-template-columns:1fr; gap:2.2rem; } .hero-ed-media { order:-1; } .hero-ed-img{ aspect-ratio:16/10; } }
+    .hero-search label { display:block; font-size:.66rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:#fff; opacity:.85; margin-bottom:7px; }
+    .hero-search input, .hero-search select { width:100%; padding:12px 13px; border:0; border-radius:11px; font-family:var(--sans); font-size:.95rem; color:var(--ink); background:rgba(255,255,255,.94); }
+    .hero-search input:focus, .hero-search select:focus { outline:2px solid var(--c); }
+    .hs-btn { border:0; border-radius:11px; background:var(--c); color:#fff; padding:12px 24px; height:47px; font-weight:600; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:8px; transition:.25s; box-shadow:0 12px 30px -10px var(--c); }
+    .hs-btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
     @media (max-width:780px){ .hero-search { grid-template-columns:1fr 1fr; } .hs-btn{ grid-column:1/-1; justify-content:center; } }
     @media (max-width:480px){ .hero-search { grid-template-columns:1fr; } }
+
+    .hero-quicklinks { margin-top:1.6rem; display:flex; gap:1.6rem; justify-content:center; flex-wrap:wrap; }
+    .hero-quicklinks a { color:rgba(255,255,255,.85); font-size:.9rem; letter-spacing:.04em; border-bottom:1px solid transparent; padding-bottom:2px; transition:.25s; }
+    .hero-quicklinks a:hover { color:#fff; border-color:rgba(255,255,255,.6); }
+    .scroll-ind { position:absolute; bottom:26px; left:50%; transform:translateX(-50%); z-index:2; color:#fff; opacity:.8; animation:bob 2s infinite; }
+    @keyframes bob { 0%,100%{ transform:translate(-50%,0) } 50%{ transform:translate(-50%,10px) } }
 </style>
 @endpush
 
-<section class="hero-ed" id="accueil">
-    <div class="container">
-        <div class="hero-ed-grid">
-            <div class="hero-ed-left" data-aos="fade-up">
-                <span class="eyebrow hero-ed-eyebrow">
-                    @if($hotel->address)<i class="fas fa-location-dot"></i> {{ $hotel->address }}@else <i class="fas fa-star"></i> Bienvenue @endif
-                </span>
-                <h1 class="hero-ed-title">{{ $hotel->name }}</h1>
-                @if ($hotel->tagline)
-                    <p class="hero-ed-tag">{{ $hotel->tagline }}</p>
-                @endif
-                <div class="hero-ed-cta">
-                    @if ($hotel->show_rooms)<a href="{{ route('public.hotel.availability', $hotel->slug) }}" class="btn-c"><i class="fas fa-calendar-check"></i> Réserver un séjour</a>@endif
-                    @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}" class="btn-ghost">Voir les chambres</a>@endif
-                </div>
-            </div>
+<section class="hero-cine" id="accueil">
+    <div class="hero-cine-bg" style="background-image:url('{{ $cover }}');"></div>
+    <div class="hero-cine-ov"></div>
+    <div class="hero-cine-glow"></div>
 
-            <div class="hero-ed-media" data-aos="fade-left" data-aos-delay="120">
-                <div class="hero-ed-img" style="background-image:url('{{ $cover }}');"></div>
-                @if ($hotel->contact_phone)
-                    <div class="hero-ed-badge">
-                        <span class="n"><i class="fas fa-phone" style="font-size:1.1rem;"></i></span>
-                        <div><small style="display:block;font-size:.7rem;">Réservez par téléphone</small><strong style="font-size:.92rem;">{{ $hotel->contact_phone }}</strong></div>
-                    </div>
-                @endif
-            </div>
+    <div class="hero-cine-inner">
+        <div class="hero-badge" data-aos="fade-down">
+            @if($hotel->address)<i class="fas fa-location-dot"></i> {{ $hotel->address }}@else <i class="fas fa-star"></i> Bienvenue @endif
         </div>
+        <h1 class="display-serif" data-aos="fade-up" data-aos-delay="100">{{ $hotel->name }}</h1>
+        <div class="hero-divider" data-aos="fade" data-aos-delay="250" style="background:#fff;box-shadow:0 0 18px rgba(255,255,255,.6);"></div>
+        @if ($hotel->tagline)
+            <p class="tag" data-aos="fade-up" data-aos-delay="300">{{ $hotel->tagline }}</p>
+        @endif
 
-        {{-- Recherche de disponibilité --}}
         @if ($hotel->show_rooms)
-        <form class="hero-search" method="GET" action="{{ route('public.hotel.availability', $hotel->slug) }}" data-aos="fade-up" data-aos-delay="200">
+        <form class="hero-search" method="GET" action="{{ route('public.hotel.availability', $hotel->slug) }}" data-aos="fade-up" data-aos-delay="380">
             <div class="hs-field">
                 <label><i class="fas fa-calendar-day me-1"></i> Arrivée</label>
                 <input type="date" name="check_in" min="{{ now()->format('Y-m-d') }}" value="{{ now()->format('Y-m-d') }}" required>
@@ -82,5 +69,13 @@
             <button type="submit" class="hs-btn"><i class="fas fa-search"></i> Rechercher</button>
         </form>
         @endif
+
+        <div class="hero-quicklinks" data-aos="fade" data-aos-delay="480">
+            @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}">Voir les chambres</a>@endif
+            <a href="#apropos">Découvrir l'hôtel</a>
+            @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}">Nous contacter</a>@endif
+        </div>
     </div>
+
+    <a href="#apropos" class="scroll-ind"><i class="fas fa-chevron-down fa-lg"></i></a>
 </section>
