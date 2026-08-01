@@ -74,6 +74,11 @@ class OnlineCheckinController extends Controller
                 'arrival_time' => $data['arrival_time'] ?? null,
                 'special_requests' => $data['special_requests'] ?? null,
             ],
+            // Renseigne aussi les colonnes de check-in -> pièce d'identité pré-remplie
+            // à l'accueil (le "NIC/ID" de la fiche se remplit).
+            'id_type' => $data['id_type'],
+            'id_number' => $data['id_number'],
+            'special_requests' => $data['special_requests'] ?? $tx->special_requests,
             'pre_checkin_completed_at' => now(),
         ]);
 
