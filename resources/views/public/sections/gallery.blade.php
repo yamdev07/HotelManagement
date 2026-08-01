@@ -1,5 +1,6 @@
-@php $gallery = config('vitrine.gallery'); @endphp
-<section class="section" id="galerie">
+@php $gallery = ($gallery ?? collect()); @endphp
+@if ($gallery->isNotEmpty())
+<section class="section" id="galerie" style="background:#faf9f7;">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
             <div class="eyebrow mb-2">Galerie</div>
@@ -16,3 +17,4 @@
         </div>
     </div>
 </section>
+@endif

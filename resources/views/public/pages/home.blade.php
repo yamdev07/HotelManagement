@@ -42,6 +42,7 @@
 
     @include('public.sections.amenities')
     @include('public.sections.gallery')
+    @include('public.sections.location')
     @include('public.sections.testimonials')
     @include('public.sections.faq')
 

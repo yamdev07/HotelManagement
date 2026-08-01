@@ -188,7 +188,17 @@ class PublicSiteController extends Controller
             ->where('room_status_id', Room::STATUS_AVAILABLE)
             ->limit(3)->get();
 
-        return view('public.pages.home', compact('hotel', 'rooms'));
+        // Galerie réelle : photos des chambres uploadées par l'hôtelier.
+        $gallery = collect();
+        foreach (Room::with('images')->get() as $r) {
+            foreach ($r->images as $img) {
+                $img->setRelation('room', $r);
+                $gallery->push($img->getRoomImage());
+            }
+        }
+        $gallery = $gallery->filter()->unique()->take(10)->values();
+
+        return view('public.pages.home', compact('hotel', 'rooms', 'gallery'));
     }
 
     public function rooms(string $slug)
