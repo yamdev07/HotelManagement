@@ -5,51 +5,51 @@
 <style>
     .book-wrap { max-width: 1100px; margin: 0 auto; }
     .search-bar {
-        background: #fff; border: 1px solid #e8eaf0; border-radius: 18px;
-        box-shadow: 0 24px 60px -30px rgba(20,30,50,.25);
+        background: var(--card); border: 1px solid var(--line); border-radius: 18px; backdrop-filter: blur(14px);
+        box-shadow: 0 30px 70px -40px rgba(0,0,0,.7);
         padding: 18px; display: grid; grid-template-columns: 1fr 1fr .8fr auto; gap: 14px; align-items: end;
         margin-top: -46px; position: relative; z-index: 5;
     }
     @media (max-width: 780px) { .search-bar { grid-template-columns: 1fr 1fr; } }
     @media (max-width: 480px) { .search-bar { grid-template-columns: 1fr; } }
-    .sb-field label { display:block; font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #8891a3; margin-bottom: 6px; }
+    .sb-field label { display:block; font-size: .7rem; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: var(--ink2); margin-bottom: 6px; }
     .sb-field input, .sb-field select {
-        width: 100%; padding: 11px 13px; border: 1.5px solid #e3e6ee; border-radius: 11px;
-        font-size: .95rem; color: #1f2733; background: #fff; font-family: inherit;
+        width: 100%; padding: 12px 13px; border: 1px solid var(--line); border-radius: 11px;
+        font-size: .95rem; color: var(--ink); background: rgba(255,255,255,.06); font-family: inherit;
     }
-    .sb-field input:focus, .sb-field select:focus { outline: none; border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent); }
-    .sb-submit { display:inline-flex; align-items:center; justify-content:center; gap:8px; background: var(--c); color:#fff; border:0; border-radius:11px; padding:12px 22px; font-weight:700; font-size:.95rem; cursor:pointer; height: 46px; white-space:nowrap; }
-    .sb-submit:hover { filter: brightness(1.06); }
+    .sb-field input:focus, .sb-field select:focus { outline: none; border-color: var(--c); box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 22%, transparent); }
+    .sb-submit { display:inline-flex; align-items:center; justify-content:center; gap:8px; background: var(--c); color:#fff; border:0; border-radius:11px; padding:12px 22px; font-weight:600; font-size:.95rem; cursor:pointer; height: 46px; white-space:nowrap; box-shadow:0 12px 30px -10px var(--c); }
+    .sb-submit:hover { filter: brightness(1.1); }
 
-    .book-alert { background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; border-radius:12px; padding:12px 16px; margin: 22px 0; font-size:.9rem; }
+    .book-alert { background:rgba(220,60,50,.12); border:1px solid rgba(220,60,50,.35); color:#ff8f85; border-radius:12px; padding:12px 16px; margin: 22px 0; font-size:.9rem; }
     .book-alert ul { margin:0; padding-left:18px; }
 
     .res-head { display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap; margin: 34px 0 18px; }
-    .res-head h2 { font-size: 1.4rem; margin:0; }
-    .res-head .meta { color:#6b7280; font-size:.9rem; }
+    .res-head h2 { font-size: 1.5rem; margin:0; }
+    .res-head .meta { color:var(--ink2); font-size:.9rem; }
 
     .rgrid { display:grid; grid-template-columns: repeat(3,1fr); gap: 22px; }
     @media (max-width: 900px){ .rgrid { grid-template-columns: repeat(2,1fr); } }
     @media (max-width: 600px){ .rgrid { grid-template-columns: 1fr; } }
-    .rcard { border:1px solid #ececf2; border-radius:16px; overflow:hidden; background:#fff; box-shadow:0 10px 30px -22px rgba(20,30,50,.35); display:flex; flex-direction:column; transition:transform .18s, box-shadow .18s; }
-    .rcard:hover { transform:translateY(-4px); box-shadow:0 22px 46px -26px rgba(20,30,50,.4); }
-    .rcard .media { height:180px; background-size:cover; background-position:center; position:relative; }
-    .rcard .cap-badge { position:absolute; top:12px; left:12px; background:rgba(255,255,255,.92); color:#1f2733; font-size:.75rem; font-weight:700; padding:5px 11px; border-radius:20px; display:inline-flex; align-items:center; gap:6px; }
+    .rcard { border:1px solid var(--line); border-radius:18px; overflow:hidden; background:var(--card); backdrop-filter:blur(8px); display:flex; flex-direction:column; transition:transform .25s, box-shadow .25s, border-color .25s; }
+    .rcard:hover { transform:translateY(-6px); box-shadow:0 30px 60px -34px rgba(0,0,0,.6); border-color:color-mix(in srgb, var(--c) 45%, transparent); }
+    .rcard .media { height:190px; background-size:cover; background-position:center; position:relative; }
+    .rcard .cap-badge { position:absolute; top:12px; left:12px; background:rgba(11,13,17,.7); backdrop-filter:blur(6px); color:#fff; font-size:.75rem; font-weight:600; padding:5px 11px; border-radius:20px; display:inline-flex; align-items:center; gap:6px; border:1px solid rgba(255,255,255,.15); }
     .rcard .body { padding:16px 18px 18px; display:flex; flex-direction:column; gap:6px; flex:1; }
-    .rcard .rtype { font-size:.78rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--c); }
-    .rcard .rname { font-size:1.05rem; font-weight:700; color:#1f2733; }
-    .rcard .rdesc { font-size:.85rem; color:#6b7280; line-height:1.5; }
-    .rcard .price-row { margin-top:auto; padding-top:12px; display:flex; align-items:flex-end; justify-content:space-between; gap:10px; border-top:1px solid #f1f2f6; }
-    .rcard .ppn { font-size:1.15rem; font-weight:800; color:#1f2733; }
-    .rcard .ppn small { font-size:.72rem; font-weight:500; color:#9aa1ad; }
-    .rcard .ptotal { font-size:.78rem; color:#6b7280; }
-    .rcard .cta { display:inline-flex; align-items:center; justify-content:center; gap:8px; margin-top:14px; background:var(--c); color:#fff; border-radius:11px; padding:11px 14px; font-weight:700; font-size:.9rem; text-decoration:none; }
-    .rcard .cta:hover { filter:brightness(1.06); color:#fff; }
-    .rcard .cta.wa { background:#25d366; }
+    .rcard .rtype { font-size:.76rem; font-weight:600; text-transform:uppercase; letter-spacing:.08em; color:var(--c); }
+    .rcard .rname { font-size:1.1rem; font-weight:700; color:var(--ink); font-family:var(--disp); }
+    .rcard .rdesc { font-size:.85rem; color:var(--ink2); line-height:1.5; }
+    .rcard .price-row { margin-top:auto; padding-top:12px; display:flex; align-items:flex-end; justify-content:space-between; gap:10px; border-top:1px solid var(--line); }
+    .rcard .ppn { font-size:1.2rem; font-weight:800; color:var(--ink); font-family:var(--disp); }
+    .rcard .ppn small { font-size:.72rem; font-weight:400; color:var(--ink2); }
+    .rcard .ptotal { font-size:.78rem; color:var(--ink2); }
+    .rcard .cta { display:inline-flex; align-items:center; justify-content:center; gap:8px; margin-top:14px; background:var(--c); color:#fff; border-radius:11px; padding:11px 14px; font-weight:600; font-size:.9rem; text-decoration:none; box-shadow:0 10px 26px -12px var(--c); }
+    .rcard .cta:hover { filter:brightness(1.1); color:#fff; }
+    .rcard .cta.wa { background:#25d366; box-shadow:none; }
 
-    .empty-book { text-align:center; padding:52px 20px; color:#6b7280; }
-    .empty-book .ic { width:66px; height:66px; border-radius:50%; background:#f3f4f8; display:grid; place-items:center; font-size:1.5rem; color:#aab2c0; margin:0 auto 14px; }
-    .empty-book h3 { color:#1f2733; margin:0 0 6px; }
+    .empty-book { text-align:center; padding:52px 20px; color:var(--ink2); }
+    .empty-book .ic { width:66px; height:66px; border-radius:50%; background:var(--card); border:1px solid var(--line); display:grid; place-items:center; font-size:1.5rem; color:var(--c); margin:0 auto 14px; }
+    .empty-book h3 { color:var(--ink); margin:0 0 6px; font-family:var(--disp); }
 </style>
 @endpush
 
@@ -146,12 +146,12 @@
                             </div>
                         @endforeach
                     </div>
-                    <p style="text-align:center; color:#9aa1ad; font-size:.82rem; margin-top:26px;">
+                    <p style="text-align:center; color:var(--ink2); font-size:.82rem; margin-top:26px;">
                         <i class="fas fa-lock"></i> Paiement en ligne sécurisé bientôt disponible.
                     </p>
                 @endif
             @else
-                <p style="text-align:center; color:#6b7280; margin-top:34px;">
+                <p style="text-align:center; color:var(--ink2); margin-top:34px;">
                     Choisissez vos dates ci-dessus pour voir les chambres réellement disponibles.
                 </p>
             @endif
