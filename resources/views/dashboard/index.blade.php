@@ -221,7 +221,7 @@ html[data-theme="dark"] .db-page .btn-db-icon {
   background: #232b26; border-color: #3a453e; color: #d3dad5;
 }
 html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-color: var(--acc); }
-.action-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.action-group { display: flex; align-items: center; gap: 8px; flex-wrap: nowrap; justify-content: flex-end; }
 .btn-refresh-full {
   display: inline-flex; align-items: center; justify-content: center; gap: 7px; width: 100%;
   background: var(--card); border: 1px solid var(--line); border-radius: 9px;
@@ -253,7 +253,9 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
   text-align: left; font-size: .66rem; text-transform: uppercase; letter-spacing: .05em;
   color: var(--ink3); font-weight: 700; padding: 10px 14px; border-bottom: 1px solid var(--line);
 }
-.db-table td { padding: 12px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.db-table td { padding: 14px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+/* Cellule solde : badge + total + bouton bien aérés et alignés */
+.balance-cell { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 7px; }
 .db-table tbody tr:last-child td { border-bottom: 0; }
 .db-table tbody tr:hover { background: var(--tint); }
 .guest-avatar {
@@ -278,7 +280,7 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
 .checkout-today-tag { background: var(--warn-t); color: var(--warn); }
 .balance-paid { background: var(--ok-t); color: var(--ok); }
 .balance-due-amount { background: var(--bad-t); color: var(--bad); }
-.balance-total { font-weight: 680; font-family: 'DM Mono', monospace; }
+.balance-total { font-weight: 600; font-family: 'DM Mono', monospace; font-size: .74rem; color: var(--ink3); }
 .status-list, .status-row { display: flex; align-items: center; gap: 8px; }
 
 /* ── empty state ── */
@@ -617,11 +619,13 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
                                     @if($balance <= 0)
                                         <span class="balance-paid"><i class="fas fa-check fa-xs"></i> {{ __('dashboard.settled') }}</span>
                                     @else
-                                        <div class="balance-due-amount">{{ $balanceFmt }}</div>
-                                        <div class="balance-total">{{ __('dashboard.total_label', ['amount' => $totalFmt]) }}</div>
-                                        <a href="{{ route('transaction.payment.create', ['transaction' => $transaction->id]) }}" class="btn-pay-now">
-                                            <i class="fas fa-credit-card fa-xs"></i> {{ __('dashboard.collect') }}
-                                        </a>
+                                        <div class="balance-cell">
+                                            <div class="balance-due-amount">{{ $balanceFmt }}</div>
+                                            <div class="balance-total">{{ __('dashboard.total_label', ['amount' => $totalFmt]) }}</div>
+                                            <a href="{{ route('transaction.payment.create', ['transaction' => $transaction->id]) }}" class="btn-pay-now">
+                                                <i class="fas fa-credit-card fa-xs"></i> {{ __('dashboard.collect') }}
+                                            </a>
+                                        </div>
                                     @endif
                                 </td>
 
