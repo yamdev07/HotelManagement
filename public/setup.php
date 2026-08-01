@@ -14,7 +14,9 @@
 |--------------------------------------------------------------------------
 */
 
-$SECRET = 'checkinhub-setup-2026';   // change-le si tu veux
+// Clé d'accès : depuis la variable d'environnement SETUP_KEY si définie (recommandé),
+// sinon valeur par défaut. ⚠️ Change-la et SUPPRIME ce fichier après le déploiement.
+$SECRET = getenv('SETUP_KEY') ?: 'checkinhub-setup-2026';
 $SU_EMAIL = 'admin@checkinhub.com';
 $SU_PASS = 'CheckinHub@2026';
 $SU_NAME = 'Direction';
@@ -238,14 +240,22 @@ echo "   $nBiz hôtel(s) démo passé(s) en Business\n\n";
 
 echo "4) Compte Super-Admin plateforme (création OU réinitialisation)...\n";
 $u = User::firstOrNew(['email' => $SU_EMAIL]);
+$isNew = ! $u->exists;
 $u->name = $SU_NAME;
 $u->role = 'Super';
 $u->hotel_id = null;                 // plateforme = sans hôtel
-$u->password = Hash::make($SU_PASS); // (ré)initialise le mot de passe à chaque exécution
+if ($isNew) {
+    // Le mot de passe n'est défini QU'À LA CRÉATION : ré-exécuter setup.php ne
+    // réinitialise jamais un Super existant (pas de porte dérobée).
+    $u->password = Hash::make($SU_PASS);
+}
 $u->random_key = $u->random_key ?: Str::random(60);
 $u->save();
-$check = Hash::check($SU_PASS, $u->fresh()->password) ? 'OK' : 'ECHEC';
-echo "   Identifiants -> $SU_EMAIL / $SU_PASS   (vérif mot de passe: $check)\n\n";
+if ($isNew) {
+    echo "   Compte créé -> $SU_EMAIL / $SU_PASS   (⚠️ change ce mot de passe après la 1re connexion)\n\n";
+} else {
+    echo "   Compte Super déjà existant : mot de passe INCHANGÉ (sécurité).\n\n";
+}
 
 echo "5) Lien web/storage...\n";
 $target = realpath(__DIR__.'/../private/storage/app/public');

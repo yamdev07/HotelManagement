@@ -131,7 +131,8 @@ Route::get('/api/available-rooms', [FrontendController::class, 'availableRooms']
 Route::get('/login', function () {
     return auth()->check() ? redirect('/home') : view('auth.login');
 })->name('login.index');
-Route::post('/login', [AuthController::class, 'login'])->name('login');
+// Anti-force-brute : 10 tentatives / minute / IP.
+Route::post('/login', [AuthController::class, 'login'])->name('login')->middleware('throttle:10,1');
 Route::get('/register', function () {
     return auth()->check() ? redirect('/home') : view('auth.register');
 })->name('register.index');
