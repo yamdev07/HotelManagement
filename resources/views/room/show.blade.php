@@ -354,6 +354,25 @@
     padding: 16px 20px;
 }
 
+/* Uploader d'image (glisser-déposer + aperçu + progression) */
+.upl-drop { position: relative; border: 2px dashed var(--s200); border-radius: 14px; padding: 26px 18px; text-align: center; cursor: pointer; transition: border-color .15s, background .15s; background: var(--surface); }
+.upl-drop:hover, .upl-drop.dragover { border-color: var(--g500); background: color-mix(in srgb, var(--g500) 7%, var(--surface)); }
+.upl-empty .upl-ic { width: 56px; height: 56px; border-radius: 50%; margin: 0 auto 10px; display: grid; place-items: center; font-size: 1.35rem; background: color-mix(in srgb, var(--g500) 13%, var(--white)); color: var(--g600, var(--g500)); }
+.upl-title { font-weight: 700; color: var(--s800); font-size: .95rem; }
+.upl-sub { font-size: .85rem; color: var(--s500); margin-top: 2px; }
+.upl-link { color: var(--g600, var(--g500)); font-weight: 600; text-decoration: underline; }
+.upl-formats { font-size: .74rem; color: var(--s400); margin-top: 8px; }
+.upl-preview { display: flex; align-items: center; gap: 12px; text-align: left; }
+.upl-preview img { width: 72px; height: 72px; object-fit: cover; border-radius: 10px; flex: none; border: 1px solid var(--s200); }
+.upl-info { flex: 1; min-width: 0; }
+.upl-name { font-weight: 600; color: var(--s800); font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.upl-size { font-size: .78rem; color: var(--s500); margin-top: 2px; }
+.upl-remove { flex: none; border: 0; background: var(--s100); color: var(--s600); width: 34px; height: 34px; border-radius: 9px; cursor: pointer; font-size: .95rem; }
+.upl-remove:hover { background: color-mix(in srgb, #b4342a 16%, var(--white)); color: #b4342a; }
+.upl-bar { height: 8px; border-radius: 99px; background: var(--s100); overflow: hidden; margin-top: 14px; }
+.upl-bar span { display: block; height: 100%; width: 0; background: var(--g500); transition: width .15s; }
+.upl-error { display: none; background: color-mix(in srgb, #b4342a 12%, var(--white)); color: #b4342a; border-radius: 9px; padding: 9px 12px; font-size: .82rem; margin-top: 12px; }
+
 /* Form elements */
 .form-label-db {
     font-size: .7rem; font-weight: 600; color: var(--s600);
@@ -614,26 +633,32 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <form action="{{ route('image.store', ['room' => $room->id]) }}" method="POST" enctype="multipart/form-data">
+                <form id="imgUploadForm" action="{{ route('image.store', ['room' => $room->id]) }}" method="POST" enctype="multipart/form-data">
                     @csrf
-                    <div style="margin-bottom:16px">
-                        <label for="image" class="form-label-db">{{ __('room.modal_label_image') }}</label>
-                        <input type="file" 
-                               class="form-control-db @error('image') is-invalid @enderror" 
-                               name="image" 
-                               id="image" 
-                               accept="image/*" 
-                               required>
-                        @error('image')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                        <div class="form-text-db">
-                            {{ __('room.modal_formats') }}
+                    <div id="uplDrop" class="upl-drop">
+                        <input type="file" name="image" id="image" accept="image/png,image/jpeg,image/webp" hidden required>
+                        <div class="upl-empty" id="uplEmpty">
+                            <div class="upl-ic"><i class="fas fa-cloud-arrow-up"></i></div>
+                            <div class="upl-title">{{ __('room.upl_drop_title') }}</div>
+                            <div class="upl-sub">{{ __('room.upl_drop_or') }} <span class="upl-link">{{ __('room.upl_drop_browse') }}</span></div>
+                            <div class="upl-formats">{{ __('room.modal_formats') }}</div>
+                        </div>
+                        <div class="upl-preview" id="uplPreview" hidden>
+                            <img id="uplImg" alt="">
+                            <div class="upl-info">
+                                <div class="upl-name" id="uplName"></div>
+                                <div class="upl-size" id="uplSize"></div>
+                            </div>
+                            <button type="button" class="upl-remove" id="uplRemove" title="{{ __('room.upl_remove') }}"><i class="fas fa-xmark"></i></button>
                         </div>
                     </div>
-                    <button type="submit" class="btn-db btn-db-primary w-100">
-                        <i class="fas fa-upload me-2"></i>
-                        {{ __('room.modal_upload_btn') }}
+
+                    <div class="upl-bar" id="uplBar" hidden><span id="uplBarFill"></span></div>
+                    <div class="upl-error" id="uplError" hidden></div>
+                    @error('image')<div class="upl-error" style="display:block">{{ $message }}</div>@enderror
+
+                    <button type="submit" class="btn-db btn-db-primary w-100" id="uplSubmit" disabled>
+                        <i class="fas fa-upload me-2"></i>{{ __('room.modal_upload_btn') }}
                     </button>
                 </form>
             </div>
@@ -668,6 +693,73 @@ function openImageModal(imageUrl) {
     const modal = new bootstrap.Modal(document.getElementById('imageViewModal'));
     modal.show();
 }
+
+// ── Uploader d'image : glisser-déposer, aperçu, validation, progression ──
+(function () {
+    var form = document.getElementById('imgUploadForm');
+    if (!form) return;
+    var input = document.getElementById('image'),
+        drop = document.getElementById('uplDrop'),
+        empty = document.getElementById('uplEmpty'),
+        preview = document.getElementById('uplPreview'),
+        img = document.getElementById('uplImg'),
+        nameEl = document.getElementById('uplName'),
+        sizeEl = document.getElementById('uplSize'),
+        removeBtn = document.getElementById('uplRemove'),
+        submit = document.getElementById('uplSubmit'),
+        errEl = document.getElementById('uplError'),
+        bar = document.getElementById('uplBar'),
+        barFill = document.getElementById('uplBarFill');
+    var MAX = 4 * 1024 * 1024, OK = ['image/png', 'image/jpeg', 'image/webp'];
+    var MSG = {
+        type: @json(__('room.image_err_type')),
+        size: @json(__('room.image_err_size')),
+        generic: @json(__('flash.generic_error')),
+        btn: @json(__('room.modal_upload_btn'))
+    };
+    function human(b) { return b < 1024 ? b + ' o' : b < 1048576 ? (b / 1024).toFixed(0) + ' Ko' : (b / 1048576).toFixed(1) + ' Mo'; }
+    function showErr(m) { errEl.textContent = m; errEl.style.display = 'block'; }
+    function clearErr() { errEl.style.display = 'none'; }
+    function reset() { input.value = ''; preview.hidden = true; empty.hidden = false; submit.disabled = true; if (img.src) { URL.revokeObjectURL(img.src); img.src = ''; } }
+    function pick(file) {
+        clearErr();
+        if (!file) return;
+        if (OK.indexOf(file.type) === -1) { showErr(MSG.type); reset(); return; }
+        if (file.size > MAX) { showErr(MSG.size); reset(); return; }
+        img.src = URL.createObjectURL(file); nameEl.textContent = file.name; sizeEl.textContent = human(file.size);
+        empty.hidden = true; preview.hidden = false; submit.disabled = false;
+    }
+    drop.addEventListener('click', function (e) { if (e.target !== removeBtn && !removeBtn.contains(e.target)) input.click(); });
+    input.addEventListener('change', function () { pick(input.files[0]); });
+    removeBtn.addEventListener('click', function (e) { e.stopPropagation(); reset(); clearErr(); });
+    ['dragenter', 'dragover'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.classList.add('dragover'); }); });
+    ['dragleave', 'dragend'].forEach(function (ev) { drop.addEventListener(ev, function () { drop.classList.remove('dragover'); }); });
+    drop.addEventListener('drop', function (e) { e.preventDefault(); drop.classList.remove('dragover'); if (e.dataTransfer.files[0]) { input.files = e.dataTransfer.files; pick(e.dataTransfer.files[0]); } });
+
+    form.addEventListener('submit', function (e) {
+        if (!input.files[0]) return;
+        e.preventDefault();
+        clearErr(); submit.disabled = true; submit.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>';
+        bar.hidden = false; barFill.style.width = '0';
+        function done() { submit.disabled = false; submit.innerHTML = '<i class="fas fa-upload me-2"></i>' + MSG.btn; bar.hidden = true; barFill.style.width = '0'; }
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', form.action);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.upload.onprogress = function (ev) { if (ev.lengthComputable) barFill.style.width = Math.round(ev.loaded / ev.total * 100) + '%'; };
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) { barFill.style.width = '100%'; window.location.reload(); return; }
+            if (xhr.status === 422) {
+                var d = {}; try { d = JSON.parse(xhr.responseText); } catch (_) {}
+                showErr((d.errors && d.errors.image && d.errors.image[0]) || MSG.type);
+            } else if (xhr.status === 413) { showErr(MSG.size); }
+            else { showErr(MSG.generic); }
+            done();
+        };
+        xhr.onerror = function () { showErr(MSG.generic); done(); };
+        xhr.send(new FormData(form));
+    });
+})();
 
 @if(session('success'))
     toastr.success("{{ session('success') }}", "{{ __('room.toast_success') }}");
