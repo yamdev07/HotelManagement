@@ -212,10 +212,15 @@ html[data-theme="dark"] .db-page {
 .btn-db-ghost:hover { background: var(--tint); color: var(--ink); border-color: var(--line2); }
 .btn-db-icon, .btn-db-icon-green {
   width: 32px; height: 32px; padding: 0; justify-content: center; border-radius: 8px;
-  background: var(--card); border: 1px solid var(--line); color: var(--ink2);
+  background: var(--tint); border: 1px solid var(--line2); color: var(--ink);
 }
 .btn-db-icon-green { background: var(--acc-t); border-color: transparent; color: var(--acc); }
-.btn-db-icon:hover { color: var(--ink); border-color: var(--line2); }
+.btn-db-icon:hover { color: var(--acc); border-color: var(--acc); }
+/* Contraste renforcé en mode sombre : les boutons ressortent de la carte. */
+html[data-theme="dark"] .db-page .btn-db-icon {
+  background: #232b26; border-color: #3a453e; color: #d3dad5;
+}
+html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-color: var(--acc); }
 .action-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .btn-refresh-full {
   display: inline-flex; align-items: center; justify-content: center; gap: 7px; width: 100%;
