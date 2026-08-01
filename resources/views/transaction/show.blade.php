@@ -801,6 +801,8 @@
             $waReminder = $waHotel ? \App\Support\GuestMessages::link($waPhone, \App\Support\GuestMessages::checkInReminder($waHotel, $transaction)) : null;
             $waPayment = ($waHotel && (float) ($transaction->total_payment ?? 0) > 0)
                 ? \App\Support\GuestMessages::link($waPhone, \App\Support\GuestMessages::paymentReceived($waHotel, $transaction)) : null;
+            $waCheckin = ($waHotel && $transaction->status === 'reservation' && ! $transaction->preCheckinDone())
+                ? \App\Support\GuestMessages::link($waPhone, \App\Support\GuestMessages::preCheckinInvite($waHotel, $transaction)) : null;
         @endphp
         @if($waConfirm)
             <div class="dropdown d-inline">
@@ -813,8 +815,17 @@
                     @if($waPayment)
                         <li><a class="dropdown-item" href="{{ $waPayment }}" target="_blank" rel="noopener"><i class="fas fa-coins me-2 text-primary"></i>{{ __('show.whatsapp_payment') ?? 'Accusé de paiement' }}</a></li>
                     @endif
+                    @if($waCheckin)
+                        <li><a class="dropdown-item" href="{{ $waCheckin }}" target="_blank" rel="noopener"><i class="fas fa-id-card me-2" style="color:#6366f1"></i>Inviter au pré-check-in</a></li>
+                    @endif
                 </ul>
             </div>
+            @if($waHotel && in_array($transaction->status, ['reservation','reserved_waiting']))
+                <button type="button" class="btn-modern btn-outline-modern" data-bs-toggle="modal" data-bs-target="#preCheckinModal">
+                    <i class="fas fa-qrcode me-1"></i>Pré-check-in
+                    @if($transaction->preCheckinDone())<span class="badge bg-success ms-1">Fait</span>@endif
+                </button>
+            @endif
         @endif
 
         @if($transaction->status == 'reservation')
@@ -1948,10 +1959,50 @@ function checkLateCheckoutStatus(transactionId) {
         .catch(() => {}); // silence · non-critique
 }
 </script>
+
+@if(auth()->user()->hotel && in_array($transaction->status, ['reservation','reserved_waiting']))
+<!-- Modal Pré-check-in -->
+<div class="modal fade" id="preCheckinModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-id-card me-2"></i>Pré-check-in en ligne</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+                @if($transaction->preCheckinDone())
+                    <div class="alert alert-success mb-3"><i class="fas fa-check-circle me-1"></i> Complété le {{ $transaction->pre_checkin_completed_at->format('d/m/Y à H:i') }}</div>
+                @else
+                    <p class="text-muted small mb-3">Le client scanne ce QR (ou reçoit le lien) et remplit ses informations avant d'arriver.</p>
+                @endif
+                <div id="preCheckinQr" style="display:flex;justify-content:center;margin:4px 0 16px;"></div>
+                <div class="input-group mb-2">
+                    <input type="text" class="form-control" id="preCheckinLink" value="{{ $transaction->checkinUrl() }}" readonly onclick="this.select()">
+                    <button class="btn btn-outline-secondary" type="button" onclick="copyPreCheckin()"><i class="fas fa-copy"></i></button>
+                </div>
+                @if($waCheckin)
+                    <a href="{{ $waCheckin }}" target="_blank" rel="noopener" class="btn w-100 mt-1" style="background:#25d366;color:#fff"><i class="fab fa-whatsapp me-1"></i> Envoyer le lien sur WhatsApp</a>
+                @endif
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 
 @section('footer')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var el = document.getElementById('preCheckinQr');
+        if (el && window.QRCode) { new QRCode(el, { text: {!! json_encode($transaction->checkinUrl()) !!}, width: 176, height: 176 }); }
+    });
+    function copyPreCheckin() {
+        var i = document.getElementById('preCheckinLink'); if (!i) return;
+        i.select(); if (navigator.clipboard) navigator.clipboard.writeText(i.value);
+    }
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Initialiser les tooltips Bootstrap

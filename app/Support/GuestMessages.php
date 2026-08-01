@@ -62,6 +62,16 @@ class GuestMessages
             'À très bientôt !'.self::signature($hotel);
     }
 
+    /** Invitation à remplir le pré-check-in en ligne (avec le lien). */
+    public static function preCheckinInvite(Hotel $hotel, Transaction $tx): string
+    {
+        return "Bonjour {$tx->customer->name},\n\n".
+            "Pour un check-in *express* à votre arrivée chez *{$hotel->name}*, ".
+            "remplissez votre pré-enregistrement en 1 minute ici :\n".
+            $tx->checkinUrl()."\n\n".
+            'Merci et à bientôt !'.self::signature($hotel);
+    }
+
     /** Message de rappel la veille de l'arrivée. */
     public static function checkInReminder(Hotel $hotel, Transaction $tx): string
     {
