@@ -160,6 +160,12 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::delete('/mon-etablissement/supprimer', [\App\Http\Controllers\HotelSettingsController::class, 'destroyAccount'])->name('hotel.account.destroy');
 });
 
+// ==================== DASHBOARD REVENUS (pilotage financier) ====================
+// Réservé au propriétaire (Admin) et à la Direction (Manager, via le middleware).
+Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
+    Route::get('/revenus', [\App\Http\Controllers\RevenueController::class, 'index'])->name('revenue.index');
+});
+
 // ==================== SYNCHRONISATION CALENDRIERS (OTA : Booking/Airbnb) ====================
 Route::middleware(['auth', 'checkrole:Super,Admin'])->prefix('canaux')->name('channels.')->group(function () {
     Route::get('/', [\App\Http\Controllers\ChannelSyncController::class, 'index'])->name('index');

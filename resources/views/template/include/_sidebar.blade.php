@@ -62,6 +62,17 @@
                         </div>
                     </a>
 
+                    @if (Route::has('revenue.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
+                        <a href="{{ route('revenue.index') }}" class="nav-item restricted {{ $activeClass('revenue.') }}"
+                            data-tooltip="Revenus">
+                            <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
+                            <div class="nav-content">
+                                <div class="nav-title">Revenus</div>
+                                <div class="nav-subtitle">Pilotage financier</div>
+                            </div>
+                        </a>
+                    @endif
+
                     @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Manager', 'Receptionist']))
                         @if (Route::has('availability.dashboard'))
                             <a href="{{ route('availability.dashboard') }}"
