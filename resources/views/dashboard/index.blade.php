@@ -837,18 +837,35 @@ setInterval(() => {
 }, 30000);
 
 /* ── Dropdown ── */
+function closeDropdowns() {
+    document.querySelectorAll('.db-dropdown-menu.open').forEach(m => {
+        m.classList.remove('open');
+        m.style.position = ''; m.style.top = ''; m.style.left = ''; m.style.right = '';
+    });
+}
 function toggleDropdown(id) {
     const el = document.getElementById(id);
     if (!el) return;
     const menu = el.querySelector('.db-dropdown-menu');
     if (!menu) return;
     const isOpen = menu.classList.contains('open');
-    document.querySelectorAll('.db-dropdown-menu.open').forEach(m => m.classList.remove('open'));
-    if (!isOpen) menu.classList.add('open');
+    closeDropdowns();
+    if (!isOpen) {
+        menu.classList.add('open');
+        // Position fixe calculée : le menu échappe à l'overflow:hidden des cartes.
+        const btn = el.querySelector('button') || el;
+        const r = btn.getBoundingClientRect();
+        const w = menu.offsetWidth || 210;
+        menu.style.position = 'fixed';
+        menu.style.right = (window.innerWidth - r.right) + 'px';
+        menu.style.left = 'auto';
+        // S'il n'y a pas la place en bas, on ouvre vers le haut.
+        const openUp = (window.innerHeight - r.bottom) < (menu.offsetHeight + 20);
+        menu.style.top = openUp ? (r.top - menu.offsetHeight - 6) + 'px' : (r.bottom + 6) + 'px';
+    }
 }
 document.addEventListener('click', function(e) {
-    if (!e.target.closest('.db-dropdown'))
-        document.querySelectorAll('.db-dropdown-menu.open').forEach(m => m.classList.remove('open'));
+    if (!e.target.closest('.db-dropdown')) closeDropdowns();
 });
 
 /* ── Refresh ── */
