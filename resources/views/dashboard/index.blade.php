@@ -271,14 +271,17 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
 
 /* ── status / balance chips ── */
 .status-badge, .status-info, .status-key, .status-neutral, .status-normal,
-.status-online, .tag-new, .row-new, .checkout-today-tag, .balance-paid, .balance-due-amount {
+.status-online, .tag-new, .checkout-today-tag, .balance-paid, .balance-due-amount {
   display: inline-flex; align-items: center; gap: 5px; font-size: .7rem; font-weight: 650;
   padding: 3px 10px; border-radius: 20px; white-space: nowrap;
 }
 .status-online, .status-normal { background: var(--acc-t); color: var(--acc); }
 .status-info { background: var(--info-t); color: var(--info); }
 .status-neutral, .status-key { background: var(--tint); color: var(--ink2); }
-.tag-new, .row-new { background: var(--info-t); color: var(--info); }
+.tag-new { background: var(--info-t); color: var(--info); }
+/* Surlignage d'une ligne « nouvelle arrivée » : reste une vraie ligne de table */
+.db-table tr.row-new td { background: color-mix(in srgb, var(--info) 8%, var(--card)); }
+.db-table tr.row-new td:first-child { box-shadow: inset 3px 0 0 var(--info); }
 .checkout-today-tag { background: var(--warn-t); color: var(--warn); }
 .balance-paid { background: var(--ok-t); color: var(--ok); }
 .balance-due-amount { background: var(--bad-t); color: var(--bad); }
