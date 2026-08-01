@@ -32,6 +32,11 @@
     .promo-box button:hover { background:var(--c); color:#fff; }
     .promo-err { margin-top:8px; font-size:.82rem; color:#b91c1c; }
     .promo-ok { margin-top:8px; font-size:.82rem; color:#16a34a; font-weight:600; }
+    .sum-dates { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0 4px; }
+    .sum-dates .sd-field:last-child { grid-column:1 / -1; }
+    .sd-field label { display:block; font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:#8891a3; margin-bottom:5px; }
+    .sd-field input, .sd-field select { width:100%; padding:10px 12px; border:1.5px solid #e3e6ee; border-radius:10px; font-size:.92rem; color:#1f2733; font-family:inherit; background:#fff; }
+    .sd-field input:focus, .sd-field select:focus { outline:none; border-color:var(--c); box-shadow:0 0 0 3px color-mix(in srgb, var(--c) 18%, transparent); }
 
     /* Form */
     .bk-field { margin-bottom:14px; }
@@ -65,11 +70,8 @@
                 <div class="bk-card">
                     <div class="hd"><i class="fas fa-user"></i> Vos coordonnées</div>
                     <div class="bk-body">
-                        <form method="POST" action="{{ route('public.hotel.booking.store', [$hotel->slug, $roomModel->id]) }}">
+                        <form id="bookingForm" method="POST" action="{{ route('public.hotel.booking.store', [$hotel->slug, $roomModel->id]) }}">
                             @csrf
-                            <input type="hidden" name="check_in" value="{{ $checkIn }}">
-                            <input type="hidden" name="check_out" value="{{ $checkOut }}">
-                            <input type="hidden" name="guests" value="{{ $guests }}">
                             <input type="hidden" name="promo_code" value="{{ $promo?->code ?? '' }}">
 
                             <div class="bk-field">
@@ -107,10 +109,25 @@
                             </div>
                         </div>
 
+                        <div class="sum-dates">
+                            <div class="sd-field">
+                                <label>Arrivée</label>
+                                <input type="date" name="check_in" form="bookingForm" id="bkCheckIn" value="{{ $checkIn }}" min="{{ now()->format('Y-m-d') }}" required>
+                            </div>
+                            <div class="sd-field">
+                                <label>Départ</label>
+                                <input type="date" name="check_out" form="bookingForm" id="bkCheckOut" value="{{ $checkOut }}" min="{{ now()->addDay()->format('Y-m-d') }}" required>
+                            </div>
+                            <div class="sd-field">
+                                <label>Voyageurs</label>
+                                <select name="guests" form="bookingForm" id="bkGuests">
+                                    @for ($i = 1; $i <= $roomModel->capacity; $i++)<option value="{{ $i }}" {{ (int)$guests === $i ? 'selected' : '' }}>{{ $i }}</option>@endfor
+                                </select>
+                            </div>
+                        </div>
+
                         <div class="sum-lines">
-                            <div class="sum-line"><span>Arrivée</span> <strong>{{ \Carbon\Carbon::parse($checkIn)->translatedFormat('D d M Y') }}</strong></div>
-                            <div class="sum-line"><span>Départ</span> <strong>{{ \Carbon\Carbon::parse($checkOut)->translatedFormat('D d M Y') }}</strong></div>
-                            <div class="sum-line"><span>{{ number_format($roomModel->price, 0, ',', ' ') }} {{ $hotel->currency }} × {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}</span> <strong>{{ number_format($total, 0, ',', ' ') }} {{ $hotel->currency }}</strong></div>
+                            <div class="sum-line"><span id="bkNightsLabel">{{ number_format($roomModel->price, 0, ',', ' ') }} {{ $hotel->currency }} × {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }}</span> <strong id="bkSubtotal">{{ number_format($total, 0, ',', ' ') }} {{ $hotel->currency }}</strong></div>
                             @if (($discount ?? 0) > 0)
                                 <div class="sum-line" style="color:#16a34a"><span><i class="fas fa-tag"></i> Code « {{ $promo->code }} »</span> <strong style="color:#16a34a">− {{ number_format($discount, 0, ',', ' ') }} {{ $hotel->currency }}</strong></div>
                             @endif
@@ -118,9 +135,9 @@
 
                         {{-- Code promo --}}
                         <form method="GET" action="{{ route('public.hotel.booking', [$hotel->slug, $roomModel->id]) }}" class="promo-box">
-                            <input type="hidden" name="check_in" value="{{ $checkIn }}">
-                            <input type="hidden" name="check_out" value="{{ $checkOut }}">
-                            <input type="hidden" name="guests" value="{{ $guests }}">
+                            <input type="hidden" name="check_in" id="bkPromoCi" value="{{ $checkIn }}">
+                            <input type="hidden" name="check_out" id="bkPromoCo" value="{{ $checkOut }}">
+                            <input type="hidden" name="guests" id="bkPromoGuests" value="{{ $guests }}">
                             <input type="text" name="promo" value="{{ $promoRaw ?? '' }}" placeholder="Code promo" maxlength="40" style="text-transform:uppercase">
                             <button type="submit">{{ ($discount ?? 0) > 0 ? 'Modifier' : 'Appliquer' }}</button>
                         </form>
@@ -134,12 +151,12 @@
                             <span class="lbl">Total du séjour</span>
                             <span class="val">
                                 @if (($discount ?? 0) > 0)<span style="font-size:.9rem;font-weight:600;color:#9aa1ad;text-decoration:line-through;margin-right:6px">{{ number_format($total, 0, ',', ' ') }}</span>@endif
-                                {{ number_format($finalTotal ?? $total, 0, ',', ' ') }} {{ $hotel->currency }}
+                                <span id="bkTotal">{{ number_format($finalTotal ?? $total, 0, ',', ' ') }}</span> {{ $hotel->currency }}
                             </span>
                         </div>
 
                         <div class="sum-deposit">
-                            <i class="fas fa-coins"></i> Acompte suggéré (15 %) : <b>{{ number_format($deposit, 0, ',', ' ') }} {{ $hotel->currency }}</b><br>
+                            <i class="fas fa-coins"></i> Acompte suggéré (15 %) : <b><span id="bkDeposit">{{ number_format($deposit, 0, ',', ' ') }}</span> {{ $hotel->currency }}</b><br>
                             Le solde se règle à l'arrivée.
                         </div>
                     </div>
@@ -147,4 +164,34 @@
             </div>
         </div>
     </section>
+
+    <script>
+    (function () {
+        var price = {{ (float) $roomModel->price }};
+        var cur = @json($hotel->currency);
+        var ci = document.getElementById('bkCheckIn'), co = document.getElementById('bkCheckOut'), gu = document.getElementById('bkGuests');
+        if (!ci || !co) return;
+        var nightsLabel = document.getElementById('bkNightsLabel'), subtotalEl = document.getElementById('bkSubtotal'),
+            totalEl = document.getElementById('bkTotal'), depositEl = document.getElementById('bkDeposit'),
+            pCi = document.getElementById('bkPromoCi'), pCo = document.getElementById('bkPromoCo'), pGu = document.getElementById('bkPromoGuests');
+        function fmt(n) { return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+        function nextDay(v) { var x = new Date(v); x.setDate(x.getDate() + 1); return x.toISOString().slice(0, 10); }
+        function recompute() {
+            if (!ci.value) return;
+            co.min = nextDay(ci.value);
+            if (!co.value || co.value <= ci.value) co.value = nextDay(ci.value);
+            var nights = Math.round((new Date(co.value) - new Date(ci.value)) / 86400000);
+            if (!(nights > 0)) nights = 1;
+            var subtotal = price * nights;
+            nightsLabel.textContent = fmt(price) + ' ' + cur + ' × ' + nights + ' nuit' + (nights > 1 ? 's' : '');
+            subtotalEl.textContent = fmt(subtotal) + ' ' + cur;
+            totalEl.textContent = fmt(subtotal);
+            depositEl.textContent = fmt(subtotal * 0.15);
+            if (pCi) pCi.value = ci.value; if (pCo) pCo.value = co.value; if (pGu && gu) pGu.value = gu.value;
+        }
+        ci.addEventListener('change', recompute);
+        co.addEventListener('change', recompute);
+        if (gu) gu.addEventListener('change', function () { if (pGu) pGu.value = gu.value; });
+    })();
+    </script>
 @endsection
