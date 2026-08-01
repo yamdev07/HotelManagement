@@ -160,7 +160,7 @@
                             <img src="{{ $roomImage }}" 
                                  alt="{{ $room->name }}"
                                  class="room-image"
-                                 onerror="this.onerror=null; this.src='{{ asset('img/room/gamesetting.png') }}';">
+                                 onerror="this.onerror=null; this.src='{{ asset('img/default/default-room.png') }}';">
                                  
                             <div class="room-status">
                                 @php

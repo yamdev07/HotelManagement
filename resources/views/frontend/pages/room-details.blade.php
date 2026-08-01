@@ -28,7 +28,7 @@
     min-height: 72vh;
     display: flex;
     align-items: flex-end;
-    background: url('{{ $room->first_image_url ?? asset('img/room/gamesetting.png') }}') center/cover no-repeat;
+    background: url('{{ $room->first_image_url ?? asset('img/default/default-room.png') }}') center/cover no-repeat;
     background-attachment: fixed;
     overflow: hidden;
 }
@@ -670,7 +670,7 @@ const images = [
     @if($room->images && $room->images->count() > 0)
         @foreach($room->images as $image)
         @php $imgPath = 'img/room/' . $room->number . '/' . $image->url; @endphp
-        '{{ file_exists(public_path($imgPath)) ? asset($imgPath) : asset('img/room/gamesetting.png') }}',
+        '{{ file_exists(public_path($imgPath)) ? asset($imgPath) : asset('img/default/default-room.png') }}',
         @endforeach
     @else
         '{{ asset('img/default/default-room.png') }}'

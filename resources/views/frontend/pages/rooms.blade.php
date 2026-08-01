@@ -852,7 +852,7 @@
                         @endphp
                         <img src="{{ $imageUrl }}"
                              alt="{{ $room->name }}"
-                             onerror="this.onerror=null;this.src='{{ asset('img/room/gamesetting.png') }}';">
+                             onerror="this.onerror=null;this.src='{{ asset('img/default/default-room.png') }}';">
 
                         {{-- Status badge --}}
                         <span class="room-badge-status {{ $room->is_available_today ? 'available' : 'unavailable' }}">
