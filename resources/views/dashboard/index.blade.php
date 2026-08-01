@@ -215,6 +215,7 @@ html[data-theme="dark"] .db-page {
   background: var(--tint); border: 1px solid var(--line2); color: var(--ink);
 }
 .btn-db-icon-green { background: var(--acc-t); border-color: transparent; color: var(--acc); }
+.btn-db-icon i, .btn-db-icon-green i { font-size: .82rem; line-height: 1; }
 .btn-db-icon:hover { color: var(--acc); border-color: var(--acc); }
 /* Contraste renforcé en mode sombre : les boutons ressortent de la carte. */
 html[data-theme="dark"] .db-page .btn-db-icon {
@@ -536,7 +537,7 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
 
         {{-- LEFT : Table clients actifs --}}
         <div class="anim-4">
-            <div class="db-card">
+            <div class="db-card" style="overflow:visible;">
                 <div class="db-card-header">
                     <div>
                         <h2 class="db-card-title">
@@ -838,10 +839,7 @@ setInterval(() => {
 
 /* ── Dropdown ── */
 function closeDropdowns() {
-    document.querySelectorAll('.db-dropdown-menu.open').forEach(m => {
-        m.classList.remove('open');
-        m.style.position = ''; m.style.top = ''; m.style.left = ''; m.style.right = '';
-    });
+    document.querySelectorAll('.db-dropdown-menu.open').forEach(m => m.classList.remove('open'));
 }
 function toggleDropdown(id) {
     const el = document.getElementById(id);
@@ -850,19 +848,7 @@ function toggleDropdown(id) {
     if (!menu) return;
     const isOpen = menu.classList.contains('open');
     closeDropdowns();
-    if (!isOpen) {
-        menu.classList.add('open');
-        // Position fixe calculée : le menu échappe à l'overflow:hidden des cartes.
-        const btn = el.querySelector('button') || el;
-        const r = btn.getBoundingClientRect();
-        const w = menu.offsetWidth || 210;
-        menu.style.position = 'fixed';
-        menu.style.right = (window.innerWidth - r.right) + 'px';
-        menu.style.left = 'auto';
-        // S'il n'y a pas la place en bas, on ouvre vers le haut.
-        const openUp = (window.innerHeight - r.bottom) < (menu.offsetHeight + 20);
-        menu.style.top = openUp ? (r.top - menu.offsetHeight - 6) + 'px' : (r.bottom + 6) + 'px';
-    }
+    if (!isOpen) menu.classList.add('open');
 }
 document.addEventListener('click', function(e) {
     if (!e.target.closest('.db-dropdown')) closeDropdowns();
