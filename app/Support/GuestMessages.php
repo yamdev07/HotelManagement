@@ -34,7 +34,18 @@ class GuestMessages
         return "Bonjour {$tx->customer->name},\n\n".
             'Votre réservation *'.self::ref($tx)."* chez *{$hotel->name}* est confirmée ✅\n\n".
             "🛏️ Chambre {$room}\n📅 Du {$ci} au {$co}\n💰 Total : {$total} {$currency}\n\n".
-            'Merci et à bientôt !';
+            'Merci et à bientôt !'.self::signature($hotel);
+    }
+
+    /** Signature de l'établissement (nom + contact) apposée à chaque message. */
+    private static function signature(Hotel $hotel): string
+    {
+        $sig = "\n\n— *{$hotel->name}*";
+        if (! empty($hotel->contact_phone)) {
+            $sig .= "\n📞 {$hotel->contact_phone}";
+        }
+
+        return $sig;
     }
 
     /** Message d'accusé de paiement (acompte / règlement reçu). */
@@ -48,7 +59,7 @@ class GuestMessages
             'Nous confirmons la réception de votre paiement de *'.$paid." {$currency}* ".
             'pour la réservation *'.self::ref($tx)."*.\n".
             "Solde restant : {$balance} {$currency} (à régler à l'arrivée).\n\n".
-            "À très bientôt chez *{$hotel->name}* !";
+            'À très bientôt !'.self::signature($hotel);
     }
 
     /** Message de rappel la veille de l'arrivée. */
@@ -60,7 +71,7 @@ class GuestMessages
         return "Bonjour {$tx->customer->name} 👋\n\n".
             "Petit rappel : votre arrivée chez *{$hotel->name}* est prévue le *{$ci}* ".
             '(réservation '.self::ref($tx).", chambre {$room}).\n\n".
-            'Nous avons hâte de vous accueillir ! 😊';
+            'Nous avons hâte de vous accueillir ! 😊'.self::signature($hotel);
     }
 
     /**
