@@ -696,23 +696,25 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function markAllInspected() {
-    if (!confirm(@json(__('housekeeping.inspections.confirm_mark_all')))) return;
+    window.confirmAction(@json(__('housekeeping.inspections.confirm_mark_all')), function () {
     fetch('{{ route("housekeeping.bulk-complete-inspections") }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
         body: JSON.stringify({ room_ids: Array.from(document.querySelectorAll('.room-checkbox')).map(cb => cb.value) })
     }).then(r => r.json()).then(d => { if(d.success) location.reload(); });
+    });
 }
 
 function markSelectedInspected() {
     const ids = Array.from(document.querySelectorAll('.room-checkbox:checked')).map(cb => cb.value);
     if(ids.length === 0) return alert(@json(__('housekeeping.inspections.alert_select_room')));
-    if(!confirm(@json(__('housekeeping.inspections.confirm_mark_selected')))) return;
+    window.confirmAction(@json(__('housekeeping.inspections.confirm_mark_selected')), function () {
     fetch('{{ route("housekeeping.bulk-complete-inspections") }}', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
         body: JSON.stringify({ room_ids: ids })
     }).then(r => r.json()).then(d => { if(d.success) location.reload(); });
+    });
 }
 
 function showInspectionModal(roomId) {

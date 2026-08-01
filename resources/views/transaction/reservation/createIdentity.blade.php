@@ -818,11 +818,14 @@ document.getElementById('customerForm').addEventListener('submit', function(e) {
     
     // Vérifier si on veut confirmer pour un client existant
     const existingCustomerDiv = document.getElementById('existingCustomerInfo');
-    if (existingCustomerDiv.style.display === 'block') {
-        if (!confirm('{{ __("reservation.confirm_existing") }}')) {
-            e.preventDefault();
-            return false;
-        }
+    if (existingCustomerDiv.style.display === 'block' && !this.__confirmedExisting) {
+        e.preventDefault();
+        const form = this;
+        window.confirmAction('{{ __("reservation.confirm_existing") }}', function () {
+            form.__confirmedExisting = true;
+            form.submit();
+        });
+        return false;
     }
 });
 

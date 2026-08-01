@@ -1538,7 +1538,7 @@ function showToast(msg, type = 'success') {
 
 /* ── Quick check-in (rapide) ───────────────────── */
 function quickCheckIn(id, btn) {
-    if (!confirm('{{ __('checkin.quick_checkin_confirm') }}')) return;
+    window.confirmAction('{{ __('checkin.quick_checkin_confirm') }}', function () {
 
     const orig = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -1568,11 +1568,12 @@ function quickCheckIn(id, btn) {
         btn.innerHTML = orig;
         btn.disabled = false;
     });
+    });
 }
 
 /* ── Notifier housekeeping ─────────────────────── */
 function notifyHousekeeping(roomId, btn) {
-    if (!confirm('{{ __('checkin.notify_housekeeping_confirm') }}')) return;
+    window.confirmAction('{{ __('checkin.notify_housekeeping_confirm') }}', function () {
 
     const orig = btn.innerHTML;
     const origClass = btn.className;
@@ -1613,6 +1614,7 @@ function notifyHousekeeping(roomId, btn) {
         showToast('❌ {{ __('checkin.notify_error') }}', 'error');
         btn.innerHTML = orig;
         btn.disabled = false;
+    });
     });
 }
 

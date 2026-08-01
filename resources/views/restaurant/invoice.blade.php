@@ -236,15 +236,21 @@
         window.onload = function () {
             // Demander le nom si vide ou générique
             let currentName = "{{ $order->customer_name }}";
-            let namePrompted = false;
+            const needsName = (!currentName || currentName === "" || currentName.toLowerCase().includes('client table') || currentName.toLowerCase().includes('room service'));
 
-            if (!currentName || currentName === "" || currentName.toLowerCase().includes('client table') || currentName.toLowerCase().includes('room service')) {
-                let name = prompt("{{ __('restaurant.invoice.prompt_name') }}", "");
+            function triggerPrint() {
+                setTimeout(function () {
+                    document.execCommand('print', false, null) || print();
+                }, 300);
+            }
+
+            if (!needsName) { triggerPrint(); return; }
+
+            window.promptAction("{{ __('restaurant.invoice.prompt_name') }}", function (name) {
                 if (name && name.trim() !== "") {
                     document.getElementById('customer-name-display').innerText = name;
-                    namePrompted = true;
-                    
-                    // Sauvegarder dans la commande via API
+
+                    // Sauvegarder dans la commande via API, puis imprimer
                     fetch("{{ route('restaurant.orders.update-customer-name', $order->id) }}", {
                         method: 'POST',
                         headers: {
@@ -253,24 +259,16 @@
                         },
                         body: JSON.stringify({ customer_name: name })
                     }).then(() => {
-                         // Déclencher l'impression après la sauvegarde (ou presque)
-                         setTimeout(triggerPrint, 300);
+                        setTimeout(triggerPrint, 300);
                     });
+                } else {
+                    triggerPrint();
                 }
-            }
-
-            if (!namePrompted) {
-                triggerPrint();
-            }
-
-            function triggerPrint() {
-                setTimeout(function () {
-                    document.execCommand('print', false, null) || print();
-                }, 300);
-            }
+            });
         };
     </script>
 
 </div>
+@include('partials.swal-helpers')
 </body>
 </html>

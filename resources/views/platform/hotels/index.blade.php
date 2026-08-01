@@ -104,7 +104,8 @@
                                     <input type="hidden" name="reason" value="">
                                     @if ($hotel->is_active)
                                         <button class="btn btn-sm btn-outline-warning" title="Suspendre"
-                                                onclick="var r=prompt('Raison de la suspension de « {{ $hotel->name }} » (visible par l\'hôtelier) :','Non-paiement de l\'abonnement'); if(r===null)return false; this.form.reason.value=r; return true;">
+                                                data-hotel="{{ $hotel->name }}"
+                                                onclick="return suspendHotelPrompt(this);">
                                             <i class="fas fa-ban"></i>
                                         </button>
                                     @else
@@ -156,5 +157,17 @@
                 }
             }
         });
+
+        // Demande le motif de suspension via une jolie pop-up (au lieu de prompt()).
+        function suspendHotelPrompt(btn) {
+            var form = btn.form;
+            var name = btn.getAttribute('data-hotel') || '';
+            window.promptAction('Raison de la suspension de « ' + name + " » (visible par l'hôtelier) :", function (r) {
+                if (r === null) return;
+                form.reason.value = r;
+                form.submit();
+            }, { default: "Non-paiement de l'abonnement", required: true });
+            return false;
+        }
     </script>
 @endsection

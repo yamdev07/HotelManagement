@@ -995,10 +995,10 @@
 
     function selectAlternativeRoomFromBlocked(roomId) {
         // Rediriger vers une nouvelle réservation avec cette chambre
-        if (confirm('Voulez-vous changer pour cette chambre ?')) {
+        window.confirmAction('Voulez-vous changer pour cette chambre ?', function () {
             // Logique pour changer de chambre depuis la page bloquée
             window.location.href = '/checkin/{{ $transaction->id }}/change-room/' + roomId;
-        }
+        });
     }
     </script>
 @endsection
@@ -1073,13 +1073,17 @@ function nextStep(next) {
                 return;
             }
             
-            // 🔴 Vérifier si chambre sale
-            if (selectedRoomDirty) {
-                if (!confirm('⚠️ La chambre sélectionnée est sale. Le check-in ne sera possible qu\'après nettoyage. Voulez-vous continuer ?')) {
-                    return;
-                }
+            // 🔴 Vérifier si chambre sale (confirmation SweetAlert : on relance
+            // l'étape une fois confirmée pour poursuivre le flux normalement).
+            if (selectedRoomDirty && !nextStep.__dirtyConfirmed) {
+                window.confirmAction('⚠️ La chambre sélectionnée est sale. Le check-in ne sera possible qu\'après nettoyage. Voulez-vous continuer ?', function () {
+                    nextStep.__dirtyConfirmed = true;
+                    nextStep(next);
+                }, { icon: 'warning' });
+                return;
             }
-            
+            nextStep.__dirtyConfirmed = false;
+
             // Vérifier si changement de prix confirmé
             const priceDifferenceElement = document.getElementById('price-difference');
             const priceDifferenceText = priceDifferenceElement.textContent.replace('CFA', '').replace(/\s/g, '');
@@ -1220,7 +1224,7 @@ function formatCFA(amount) {
 }
 
 function quickCheckIn() {
-    if (confirm('Effectuer un check-in rapide sans formulaire détaillé ?\n\nLe client sera enregistré avec les informations de base et la chambre originale.')) {
+    window.confirmAction('Effectuer un check-in rapide sans formulaire détaillé ? Le client sera enregistré avec les informations de base et la chambre originale.', function () {
         fetch(`/checkin/{{ $transaction->id }}/quick`, {
             method: 'POST',
             headers: {
@@ -1253,7 +1257,7 @@ function quickCheckIn() {
             console.error('Error:', error);
             alert('Une erreur est survenue lors du check-in rapide');
         });
-    }
+    });
 }
 
 // Initialiser le stepper

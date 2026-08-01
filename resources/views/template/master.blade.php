@@ -479,6 +479,73 @@
     </script>
 
     <script>
+    // ── Confirmation JS universelle (remplace les confirm() natifs dans le code) ──
+    // window.confirm() ne peut pas être overridé de façon transparente (il est
+    // synchrone, SweetAlert est asynchrone). On expose donc un helper à callback.
+    window.confirmAction = function (message, onConfirm, opts) {
+        opts = opts || {};
+        var isEn = (document.documentElement.lang || 'fr').slice(0, 2) === 'en';
+        function brand() {
+            var c = getComputedStyle(document.documentElement).getPropertyValue('--hotel-primary');
+            return (c && c.trim()) || '#2e8540';
+        }
+        if (!window.Swal) {
+            if (window.confirm(message)) { if (typeof onConfirm === 'function') onConfirm(); }
+            return;
+        }
+        Swal.fire({
+            icon: opts.icon || 'warning',
+            title: opts.title || (isEn ? 'Please confirm' : 'Confirmation'),
+            text: message,
+            showCancelButton: true,
+            confirmButtonText: opts.confirmText || (isEn ? 'Yes' : 'Oui'),
+            cancelButtonText: opts.cancelText || (isEn ? 'Cancel' : 'Annuler'),
+            confirmButtonColor: opts.danger ? '#dc2626' : brand(),
+            cancelButtonColor: '#94a3b8',
+            reverseButtons: true,
+            heightAuto: false
+        }).then(function (r) {
+            if (r.isConfirmed) { if (typeof onConfirm === 'function') onConfirm(); }
+            else if (typeof opts.onCancel === 'function') opts.onCancel();
+        });
+    };
+
+    // Saisie de texte via SweetAlert (remplace prompt()). Callback avec la valeur
+    // saisie, ou null si annulé.
+    window.promptAction = function (message, onValue, opts) {
+        opts = opts || {};
+        var isEn = (document.documentElement.lang || 'fr').slice(0, 2) === 'en';
+        function brand() {
+            var c = getComputedStyle(document.documentElement).getPropertyValue('--hotel-primary');
+            return (c && c.trim()) || '#2e8540';
+        }
+        if (!window.Swal) {
+            var v = window.prompt(message, opts.default || '');
+            if (typeof onValue === 'function') onValue(v);
+            return;
+        }
+        Swal.fire({
+            title: opts.title || message,
+            input: opts.input || 'text',
+            inputValue: opts.default || '',
+            inputPlaceholder: opts.placeholder || '',
+            showCancelButton: true,
+            confirmButtonText: opts.confirmText || (isEn ? 'OK' : 'Valider'),
+            cancelButtonText: opts.cancelText || (isEn ? 'Cancel' : 'Annuler'),
+            confirmButtonColor: brand(),
+            cancelButtonColor: '#94a3b8',
+            reverseButtons: true,
+            heightAuto: false,
+            inputValidator: opts.required ? function (val) {
+                if (!val) return (isEn ? 'This field is required' : 'Ce champ est requis');
+            } : undefined
+        }).then(function (r) {
+            if (typeof onValue === 'function') onValue(r.isConfirmed ? r.value : null);
+        });
+    };
+    </script>
+
+    <script>
     (function () {
         'use strict';
 

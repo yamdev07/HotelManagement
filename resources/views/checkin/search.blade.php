@@ -927,8 +927,8 @@ function setFilter(type) {
 }
 
 function quickCheckIn(id) {
-    if (!confirm('Effectuer un check-in rapide ?')) return;
-    
+    window.confirmAction('Effectuer un check-in rapide ?', function () {
+
     const loader = document.getElementById('loading-indicator');
     loader.classList.add('active');
     
@@ -957,6 +957,7 @@ function quickCheckIn(id) {
         loader.classList.remove('active');
         console.error('Erreur:', error);
         alert('Erreur réseau lors du check-in');
+    });
     });
 }
 

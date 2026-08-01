@@ -670,7 +670,7 @@
             <form action="{{ route('transaction.updateStatus', $transaction) }}" method="POST" class="d-inline">
                 @csrf
                 @method('PUT')
-                <select name="status" class="status-select" onchange="this.form.submit()">
+                <select name="status" class="status-select">
                     <option value="reservation" {{ $transaction->status == 'reservation' ? 'selected' : '' }}>{{ __('show.status_reservation') }}</option>
                     <option value="active" {{ $transaction->status == 'active' ? 'selected' : '' }}>{{ __('show.status_active') }}</option>
                     <option value="completed" {{ $transaction->status == 'completed' ? 'selected' : '' }}>{{ __('show.status_completed') }}</option>
@@ -1869,12 +1869,9 @@ document.addEventListener('DOMContentLoaded', function () {
 {{-- Script pour marquer un paiement comme payé --}}
 <script>
 function markPaymentAsPaid(paymentId) {
-    if (!confirm('{{ __("show.confirm_payment") }}')) {
-        return;
-    }
-    
-    // Afficher un indicateur de chargement
     const btn = event.target;
+    window.confirmAction('{{ __("show.confirm_payment") }}', function () {
+    // Afficher un indicateur de chargement
     const originalText = btn.innerHTML;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __("show.processing") }}';
     btn.disabled = true;
@@ -1921,6 +1918,7 @@ function markPaymentAsPaid(paymentId) {
         btn.disabled = false;
         
         showToast('error', '{{ __("show.communication_error") }}', error.toString());
+    });
     });
 }
 
@@ -2011,25 +2009,28 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Tooltip(el);
     });
     
-    // Gestionnaire pour le changement de statut
+    // Gestionnaire pour le changement de statut (confirmation via SweetAlert)
     document.querySelectorAll('.status-select').forEach(select => {
-        select.addEventListener('change', function(e) {
+        select.__prev = select.value;
+        select.addEventListener('change', function () {
             const newStatus = this.value;
-            const oldStatus = this.options[this.selectedIndex].dataset.oldStatus || this.value;
-            
-            if (newStatus === 'cancelled') {
-                if (!confirm('{{ __("show.confirm_cancel_status") }}')) {
-                    this.value = oldStatus;
-                    return false;
-                }
-            }
-            
-            if (newStatus === 'no_show') {
-                if (!confirm('{{ __("show.confirm_no_show_status") }}')) {
-                    this.value = oldStatus;
-                    return false;
-                }
-            }
+            const oldStatus = this.__prev;
+            const self = this;
+            const form = this.closest('form');
+
+            const needConfirm = (newStatus === 'cancelled' || newStatus === 'no_show');
+            if (!needConfirm) { self.__prev = newStatus; form.submit(); return; }
+
+            const msg = newStatus === 'cancelled'
+                ? '{{ __("show.confirm_cancel_status") }}'
+                : '{{ __("show.confirm_no_show_status") }}';
+
+            self.value = oldStatus; // annule visuellement en attendant la confirmation
+            window.confirmAction(msg, function () {
+                self.value = newStatus;
+                self.__prev = newStatus;
+                form.submit();
+            }, { danger: true });
         });
     });
     

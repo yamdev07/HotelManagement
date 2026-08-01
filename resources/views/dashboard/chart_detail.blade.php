@@ -300,10 +300,10 @@
     }
 
     function confirmCheckout(transactionId) {
-        if (confirm('Are you sure you want to process early checkout? This action cannot be undone.')) {
+        window.confirmAction('Are you sure you want to process early checkout? This action cannot be undone.', function () {
             // À implémenter : logique de checkout anticipé
             alert('Early checkout for transaction #' + transactionId + ' will be processed.');
-        }
+        }, { danger: true });
     }
 </script>
 @endsection

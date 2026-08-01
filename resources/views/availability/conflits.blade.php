@@ -757,9 +757,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const reserveButton = document.querySelector('a[href*="reservation.createIdentity"]');
     if (reserveButton) {
         reserveButton.addEventListener('click', function(e) {
-            if (!confirm('Êtes-vous sûr de vouloir réserver cette chambre pour cette période ?')) {
-                e.preventDefault();
-            }
+            e.preventDefault();
+            var href = this.href;
+            window.confirmAction('Êtes-vous sûr de vouloir réserver cette chambre pour cette période ?', function () {
+                window.location.href = href;
+            });
         });
     }
 });

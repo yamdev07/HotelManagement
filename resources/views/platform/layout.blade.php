@@ -182,5 +182,6 @@
     bd.onclick=()=>{ side.classList.remove('open'); bd.classList.remove('show'); };
 </script>
 @stack('scripts')
+@include('partials.swal-helpers')
 </body>
 </html>

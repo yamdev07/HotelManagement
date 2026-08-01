@@ -1544,18 +1544,17 @@ window.checkAllAvailability = function() {
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
     
-    const checkIn = prompt('Date d\'arrivée (YYYY-MM-DD):', today);
-    if (!checkIn) return;
-    
-    const checkOut = prompt('Date de départ (YYYY-MM-DD):', tomorrow);
-    if (!checkOut) return;
-    
-    if (new Date(checkOut) <= new Date(checkIn)) {
-        alert('❌ La date de départ doit être après l\'arrivée');
-        return;
-    }
-    
-    window.location.href = `/availability/search?check_in=${checkIn}&check_out=${checkOut}`;
+    window.promptAction('Date d\'arrivée', function (checkIn) {
+        if (!checkIn) return;
+        window.promptAction('Date de départ', function (checkOut) {
+            if (!checkOut) return;
+            if (new Date(checkOut) <= new Date(checkIn)) {
+                alert('❌ La date de départ doit être après l\'arrivée');
+                return;
+            }
+            window.location.href = `/availability/search?check_in=${checkIn}&check_out=${checkOut}`;
+        }, { input: 'date', default: tomorrow });
+    }, { input: 'date', default: today });
 };
 
 /**

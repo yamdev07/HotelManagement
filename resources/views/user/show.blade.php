@@ -789,9 +789,14 @@ document.addEventListener('DOMContentLoaded', function() {
     const actionButtons = document.querySelectorAll('.btn-db-outline-danger, .btn-db-outline-warning');
     actionButtons.forEach(button => {
         button.addEventListener('click', function(e) {
-            if (!confirm('Êtes-vous sûr de vouloir effectuer cette action ?')) {
-                e.preventDefault();
-            }
+            if (button.__ok) { button.__ok = false; return; }
+            e.preventDefault();
+            window.confirmAction('Êtes-vous sûr de vouloir effectuer cette action ?', function () {
+                button.__ok = true;
+                if (button.tagName === 'A' && button.getAttribute('href')) { window.location.href = button.href; }
+                else if (button.form) { button.form.submit(); }
+                else { button.click(); }
+            }, { danger: true });
         });
     });
 });

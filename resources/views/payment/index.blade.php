@@ -776,7 +776,9 @@ function filterPayments() {
 }
 
 function exportPayments() {
-    if (confirm('{{ __("payment.js_export_confirm") }}')) window.location.href = '{{ route("transaction.export", "payments") }}';
+    window.confirmAction('{{ __("payment.js_export_confirm") }}', function () {
+        window.location.href = '{{ route("transaction.export", "payments") }}';
+    });
 }
 
 function showPaymentDetails(id) {
