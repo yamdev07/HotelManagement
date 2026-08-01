@@ -90,6 +90,10 @@ Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(func
 Route::get('/calendar/{token}.ics', [\App\Http\Controllers\IcalController::class, 'export'])
     ->name('ical.export');
 
+// Pré-check-in en ligne du voyageur (accès par jeton, sans compte).
+Route::get('/pre-checkin/{token}', [\App\Http\Controllers\OnlineCheckinController::class, 'show'])->name('public.checkin.show');
+Route::post('/pre-checkin/{token}', [\App\Http\Controllers\OnlineCheckinController::class, 'store'])->name('public.checkin.store');
+
 // ==================== INSCRIPTION SELF-SERVICE (essai gratuit) ====================
 // PAS de middleware "guest" : un utilisateur déjà connecté doit quand même pouvoir
 // ouvrir le formulaire et créer un nouvel établissement (sinon il était renvoyé

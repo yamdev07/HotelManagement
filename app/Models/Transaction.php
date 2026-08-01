@@ -32,6 +32,9 @@ class Transaction extends Model
         'total_payment',
         'promo_code',
         'discount_amount',
+        'checkin_token',
+        'pre_checkin',
+        'pre_checkin_completed_at',
         'cancelled_at',
         'cancelled_by',
         'cancel_reason',
@@ -61,7 +64,31 @@ class Transaction extends Model
         'total_payment' => 'decimal:2',
         'actual_check_in' => 'datetime',
         'actual_check_out' => 'datetime',
+        'pre_checkin' => 'array',
+        'pre_checkin_completed_at' => 'datetime',
     ];
+
+    /** Jeton de pré-check-in (généré et persisté à la première demande). */
+    public function checkinToken(): string
+    {
+        if (empty($this->checkin_token)) {
+            $this->forceFill(['checkin_token' => \Illuminate\Support\Str::random(32)])->save();
+        }
+
+        return $this->checkin_token;
+    }
+
+    /** URL publique du pré-check-in en ligne (à envoyer au client). */
+    public function checkinUrl(): string
+    {
+        return route('public.checkin.show', ['token' => $this->checkinToken()]);
+    }
+
+    /** Le voyageur a-t-il déjà complété son pré-check-in ? */
+    public function preCheckinDone(): bool
+    {
+        return $this->pre_checkin_completed_at !== null;
+    }
 
     // Constantes pour les statuts
     const STATUS_RESERVATION = 'reservation';
