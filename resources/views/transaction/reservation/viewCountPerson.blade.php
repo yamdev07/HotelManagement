@@ -417,7 +417,7 @@
         <!-- Profil client -->
         <div class="col-md-4">
             <div class="profile-card anim-5">
-                <img src="{{ $customer->user->getAvatar() }}" class="profile-image" alt="{{ $customer->name }}">
+                <img src="{{ $customer->avatar_url }}" class="profile-image" alt="{{ $customer->name }}">
                 <div class="profile-info">
                     <h5 style="font-size:1rem; font-weight:600; color:var(--s800); margin-bottom:12px;">
                         <i class="fas fa-user-circle me-2" style="color:var(--g500);"></i>

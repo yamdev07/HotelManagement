@@ -972,8 +972,8 @@
                         <td>
                             <div class="client-info">
                                 <div class="client-avatar">
-                                    @if($transaction->customer->user && $transaction->customer->user->getAvatar())
-                                        <img src="{{ $transaction->customer->user->getAvatar() }}" alt="{{ $transaction->customer->name }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                    @if($transaction->customer->avatar)
+                                        <img src="{{ $transaction->customer->avatar_url }}" alt="{{ $transaction->customer->name }}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
                                     @else
                                         {{ strtoupper(substr($transaction->customer->name, 0, 1)) }}{{ strtoupper(substr(strstr($transaction->customer->name, ' ', true) ?: substr($transaction->customer->name, 1, 1), 0, 1)) }}
                                     @endif

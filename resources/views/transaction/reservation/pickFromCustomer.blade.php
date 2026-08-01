@@ -34,7 +34,7 @@
             @foreach ($customers as $customer)
                 <div class="col-lg-3 col-md-4 col-sm-6 my-1">
                     <div class="card shadow-sm justify-content-start" style="min-height:350px; ">
-                        <img class="myImages" src="{{ $customer->user->getAvatar() }}"
+                        <img class="myImages" src="{{ $customer->avatar_url }}"
                             style="object-fit: cover; height:250px; border-top-right-radius: 0.5rem; border-top-left-radius: 0.5rem;">
                         <div class="card-body">
                             <div class="card-text">

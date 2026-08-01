@@ -319,15 +319,13 @@ class Customer extends Model
             }
         }
 
-        // 2) Sinon, l'avatar du compte de connexion lié (s'il existe)
-        if ($this->user && $this->user->avatar) {
-            return $this->user->getAvatar();
-        }
-
-        // 3) Sinon, un avatar généré à partir du nom
-        $name = urlencode($this->name);
-        $colors = ['4ecdc4', '45b7d1', '96c93d', 'a363d9', 'e74a3b'];
-        $color = $colors[array_rand($colors)];
+        // 2) Sinon, un avatar généré à partir des initiales du client.
+        //    (On NE retombe PAS sur l'avatar du compte staff lié : sinon tous les
+        //     clients créés par le même agent afficheraient le même visage.)
+        //    Couleur stable, déduite du nom (pas d'aléatoire à chaque affichage).
+        $name = urlencode($this->name ?: '?');
+        $palette = ['4ecdc4', '45b7d1', '96c93d', 'a363d9', 'e74a3b', 'f59e0b', '2e8540'];
+        $color = $palette[abs(crc32((string) $this->name)) % count($palette)];
 
         return "https://ui-avatars.com/api/?name={$name}&background={$color}&color=fff&size=150&bold=true";
     }

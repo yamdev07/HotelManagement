@@ -60,7 +60,7 @@
                             <div class="card-body px-4 pt-0">
                                 <div class="d-flex align-items-center mb-4">
                                     <div class="avatar avatar-lg me-3">
-                                        <img src="{{ $transaction->customer->user->getAvatar() ?? 'https://ui-avatars.com/api/?name=' . urlencode($transaction->customer->name) . '&background=random' }}"
+                                        <img src="{{ $transaction->customer->avatar_url }}"
                                              class="rounded-circle border" 
                                              alt="{{ $transaction->customer->name }}">
                                     </div>

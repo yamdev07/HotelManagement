@@ -448,7 +448,7 @@
                 </div>
                 <div class="details-card-body">
                     <img class="guest-avatar" 
-                         src="{{ $customer->user->getAvatar() }}" 
+                         src="{{ $customer->avatar_url }}" 
                          alt="{{ $customer->name }}">
                     <h4 class="guest-name">{{ $customer->name }}</h4>
                     <div class="guest-info">

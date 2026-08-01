@@ -500,7 +500,7 @@ textarea.form-control {
                         
                         {{-- Avatar preview --}}
                         @php
-                            $avatarUrl = $customer->user ? $customer->user->getAvatar() : null;
+                            $avatarUrl = $customer->avatar_url; // photo du client, ou initiales générées
                         @endphp
                         
                         <div class="avatar-preview">

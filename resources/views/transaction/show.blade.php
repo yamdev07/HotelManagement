@@ -992,8 +992,8 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center gap-4 mb-4">
                         <div class="client-avatar">
-                            @if($transaction->customer->user && $transaction->customer->user->getAvatar())
-                                <img src="{{ $transaction->customer->user->getAvatar() }}" alt="{{ $transaction->customer->name }}">
+                            @if($transaction->customer->avatar)
+                                <img src="{{ $transaction->customer->avatar_url }}" alt="{{ $transaction->customer->name }}">
                             @else
                                 {{ strtoupper(substr($transaction->customer->name, 0, 1)) }}
                             @endif
