@@ -138,6 +138,7 @@ return [
     'billing_session_not_found' => 'Payment session not found. If you were charged, contact us.',
     'billing_payment_failed' => 'Payment did not go through. No amount was charged.',
     'billing_confirmed' => 'Payment confirmed! Your subscription is active until :date.',
+    'generic_error' => 'Something went wrong. Please try again; if the problem persists, contact support.',
     'channel_feed_added' => 'Calendar added. Synchronisation will run automatically.',
     'channel_feed_removed' => 'Calendar removed.',
     'billing_downgrade_scheduled' => 'Switch to the :plan plan scheduled for :date. You keep your current plan until then, nothing to pay now.',

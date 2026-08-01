@@ -73,7 +73,7 @@ class CashierSessionController extends Controller
 
             return view('cashier.sessions.index', compact('sessions', 'user'));
         } catch (\Throwable $e) {
-            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_load_error').': '.$e->getMessage());
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_load_error'));
         }
     }
 
@@ -124,7 +124,7 @@ class CashierSessionController extends Controller
 
             return redirect()->route('cashier.dashboard')->with('success', __('flash.session_started', ['id' => $session->id, 'time' => $now->format('H:i')]));
         } catch (\Throwable $e) {
-            return redirect()->back()->with('error', __('flash.session_start_error').': '.$e->getMessage())->withInput();
+            return redirect()->back()->with('error', __('flash.session_start_error'))->withInput();
         }
     }
 
@@ -159,7 +159,7 @@ class CashierSessionController extends Controller
 
             return view('cashier.sessions.show', compact('cashierSession', 'payments', 'stats', 'paymentMethods', 'user'));
         } catch (\Throwable $e) {
-            return redirect()->route('cashier.sessions.index')->with('error', __('flash.session_load_detail_error').': '.$e->getMessage());
+            return redirect()->route('cashier.sessions.index')->with('error', __('flash.session_load_detail_error'));
         }
     }
 
@@ -193,7 +193,7 @@ class CashierSessionController extends Controller
 
             return redirect()->route('cashier.sessions.show', $cashierSession)->with('success', __('flash.session_updated'));
         } catch (\Throwable $e) {
-            return redirect()->back()->with('error', __('flash.session_update_error').': '.$e->getMessage());
+            return redirect()->back()->with('error', __('flash.session_update_error'));
         }
     }
 
@@ -226,7 +226,7 @@ class CashierSessionController extends Controller
 
             return redirect()->route('cashier.dashboard')->with('success', $message);
         } catch (\Throwable $e) {
-            return redirect()->back()->with('error', __('flash.session_close_error').': '.$e->getMessage());
+            return redirect()->back()->with('error', __('flash.session_close_error'));
         }
     }
 
@@ -248,7 +248,7 @@ class CashierSessionController extends Controller
                 'timestamp' => now()->toDateTimeString(),
             ]);
         } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'message' => 'Erreur: '.$e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => 'Erreur: '], 500);
         }
     }
 
@@ -329,7 +329,7 @@ class CashierSessionController extends Controller
 
             return view('cashier.reports.index', compact('receptionists', 'user'));
         } catch (\Throwable $e) {
-            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_report_error').': '.$e->getMessage());
+            return redirect()->route('cashier.dashboard')->with('error', __('flash.session_report_error'));
         }
     }
 

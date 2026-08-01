@@ -38,7 +38,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('Housekeeping index: '.$e->getMessage());
 
-            return back()->with('error', __('flash.housekeeping_load_error').': '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_load_error'));
         }
     }
 
@@ -178,7 +178,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('startCleaning: '.$e->getMessage());
 
-            return back()->with('error', __('flash.housekeeping_cleaning_start_error').': '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_cleaning_start_error'));
         }
     }
 
@@ -192,7 +192,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('finishCleaning: '.$e->getMessage());
 
-            return back()->with('error', __('flash.housekeeping_mark_clean_error').': '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_mark_clean_error'));
         }
     }
 
@@ -231,7 +231,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('markMaintenance: '.$e->getMessage());
 
-            return back()->with('error', __('flash.housekeeping_maintenance_error').': '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_maintenance_error'));
         }
     }
 
@@ -304,7 +304,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('markInspection: '.$e->getMessage());
 
-            return back()->with('error', __('flash.housekeeping_inspection_start_error').': '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_inspection_start_error'));
         }
     }
 
@@ -351,7 +351,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('completeInspection: '.$e->getMessage());
 
-            return back()->with('error', __('flash.housekeeping_inspection_end_error').': '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_inspection_end_error'));
         }
     }
 
@@ -386,7 +386,7 @@ class HousekeepingController extends Controller
                 'todayDepartures' => collect(),
             ]);
         } catch (\Throwable $e) {
-            return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
+            return redirect()->route('housekeeping.index')->with('error', __('flash.generic_error'));
         }
     }
 
@@ -402,7 +402,7 @@ class HousekeepingController extends Controller
                 'todayArrivals' => collect(),
             ]);
         } catch (\Throwable $e) {
-            return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
+            return redirect()->route('housekeeping.index')->with('error', __('flash.generic_error'));
         }
     }
 
@@ -416,7 +416,7 @@ class HousekeepingController extends Controller
 
             return view('housekeeping.index', compact('roomsByStatus', 'stats', 'todayDepartures', 'todayArrivals'));
         } catch (\Throwable $e) {
-            return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
+            return redirect()->route('housekeeping.index')->with('error', __('flash.generic_error'));
         }
     }
 
@@ -447,7 +447,7 @@ class HousekeepingController extends Controller
 
             return view('housekeeping.index', compact('roomsByStatus', 'stats', 'todayDepartures', 'todayArrivals'));
         } catch (\Throwable $e) {
-            return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
+            return redirect()->route('housekeeping.index')->with('error', __('flash.generic_error'));
         }
     }
 
@@ -475,7 +475,7 @@ class HousekeepingController extends Controller
 
             return redirect()->route('housekeeping.index')->with(compact('stats'));
         } catch (\Throwable $e) {
-            return redirect()->route('housekeeping.index')->with('error', $e->getMessage());
+            return redirect()->route('housekeeping.index')->with('error', __('flash.generic_error'));
         }
     }
 
@@ -520,7 +520,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('dailyReport: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur: '.$e->getMessage());
+            return back()->with('error', 'Erreur: ');
         }
     }
 
@@ -561,7 +561,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('reports: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur: '.$e->getMessage());
+            return back()->with('error', 'Erreur: ');
         }
     }
 
@@ -620,7 +620,7 @@ class HousekeepingController extends Controller
         } catch (\Throwable $e) {
             Log::error('monthlyStats: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur: '.$e->getMessage());
+            return back()->with('error', 'Erreur: ');
         }
     }
 
@@ -650,7 +650,7 @@ class HousekeepingController extends Controller
                 'room' => ['id' => $room->id, 'number' => $room->number],
             ]);
         } catch (\Throwable $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+            return response()->json(['success' => false, 'message' => __('flash.generic_error')], 500);
         }
     }
 
@@ -673,7 +673,7 @@ class HousekeepingController extends Controller
 
             return back()->with('success', __('flash.housekeeping_assignment_saved'));
         } catch (\Throwable $e) {
-            return back()->with('error', 'Erreur: '.$e->getMessage());
+            return back()->with('error', 'Erreur: ');
         }
     }
 
@@ -692,7 +692,7 @@ class HousekeepingController extends Controller
 
             return back()->with('success', __('flash.housekeeping_status_updated'));
         } catch (\Throwable $e) {
-            return back()->with('error', 'Erreur: '.$e->getMessage());
+            return back()->with('error', 'Erreur: ');
         }
     }
 
@@ -720,7 +720,7 @@ class HousekeepingController extends Controller
                 'Content-Disposition' => 'attachment; filename="housekeeping-'.$date->format('Y-m-d').'.csv"',
             ]);
         } catch (\Throwable $e) {
-            return back()->with('error', __('flash.housekeeping_export_error').': '.$e->getMessage());
+            return back()->with('error', __('flash.housekeeping_export_error'));
         }
     }
 }

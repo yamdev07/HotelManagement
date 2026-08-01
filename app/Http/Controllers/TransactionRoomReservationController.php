@@ -444,7 +444,7 @@ class TransactionRoomReservationController extends Controller
                 ]);
 
                 return redirect()->back()
-                    ->with('error', __('flash.reservation_error').': '.$e->getMessage())
+                    ->with('error', __('flash.reservation_error'))
                     ->withInput();
             }
 
@@ -473,7 +473,7 @@ class TransactionRoomReservationController extends Controller
             \Log::error('Erreur générale réservation: '.$e->getMessage());
 
             return redirect()->back()
-                ->with('error', __('flash.reservation_error').': '.$e->getMessage())
+                ->with('error', __('flash.reservation_error'))
                 ->withInput();
         }
     }
@@ -514,7 +514,7 @@ class TransactionRoomReservationController extends Controller
         } catch (\Exception $e) {
             \Log::error('Erreur lors de l\'envoi des notifications', [
                 'transaction_id' => $transaction->id ?? 'N/A',
-                'error' => $e->getMessage(),
+                'error' => __('flash.generic_error'),
             ]);
         }
     }
@@ -736,12 +736,12 @@ class TransactionRoomReservationController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Erreur récupération chambres à libérer:', [
-                'error' => $e->getMessage(),
+                'error' => __('flash.generic_error'),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur: '.$e->getMessage(),
+                'message' => 'Erreur: ',
             ], 500);
         }
     }
@@ -874,12 +874,12 @@ class TransactionRoomReservationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Erreur création réservation en attente:', [
-                'error' => $e->getMessage(),
+                'error' => __('flash.generic_error'),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur: '.$e->getMessage(),
+                'message' => 'Erreur: ',
             ], 500);
         }
     }

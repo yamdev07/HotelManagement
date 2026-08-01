@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTypeRequest;
 use App\Models\Type;
+use Illuminate\Support\Facades\Log;
 
 class TypeController extends Controller
 {
@@ -61,14 +62,14 @@ class TypeController extends Controller
                 ->with('success', 'Type "'.$type->name.'" created successfully!');
 
         } catch (\Exception $e) {
+            Log::error('Type store failed: '.$e->getMessage());
+            $friendly = __('type.save_error');
+
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error creating type: '.$e->getMessage(),
-                ], 500);
+                return response()->json(['success' => false, 'message' => $friendly], 500);
             }
 
-            return back()->withInput()->with('error', 'Error creating type: '.$e->getMessage());
+            return back()->withInput()->with('error', $friendly);
         }
     }
 
@@ -110,14 +111,14 @@ class TypeController extends Controller
                 ->with('success', 'Type "'.$type->name.'" updated successfully!');
 
         } catch (\Exception $e) {
+            Log::error('Type update failed: '.$e->getMessage());
+            $friendly = __('type.save_error');
+
             if ($request->ajax() || $request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error updating type: '.$e->getMessage(),
-                ], 500);
+                return response()->json(['success' => false, 'message' => $friendly], 500);
             }
 
-            return back()->withInput()->with('error', 'Error updating type: '.$e->getMessage());
+            return back()->withInput()->with('error', $friendly);
         }
     }
 
@@ -155,11 +156,11 @@ class TypeController extends Controller
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Error deleting type: '.$e->getMessage(),
+                    'message' => 'Error deleting type: ',
                 ], 500);
             }
 
-            return back()->with('error', 'Error deleting type: '.$e->getMessage());
+            return back()->with('error', 'Error deleting type: ');
         }
     }
 }

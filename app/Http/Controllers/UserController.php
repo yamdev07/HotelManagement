@@ -181,7 +181,7 @@ class UserController extends Controller
 
         } catch (\Exception $e) {
             return redirect()->route('user.index')
-                ->with('error', 'Impossible de supprimer '.$user->name.'. Erreur: '.$e->getMessage());
+                ->with('error', 'Impossible de supprimer '.$user->name);
         }
     }
 
@@ -215,7 +215,7 @@ class UserController extends Controller
             return redirect()->route('user.show', $user)->with('success', 'Mot de passe réinitialisé avec succès.');
 
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erreur lors de la réinitialisation : '.$e->getMessage());
+            return redirect()->back()->with('error', 'Erreur lors de la réinitialisation : ');
         }
     }
 
@@ -235,7 +235,7 @@ class UserController extends Controller
             return redirect()->back()->with('success', "Utilisateur {$label} avec succès.");
 
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Erreur lors du changement de statut : '.$e->getMessage());
+            return redirect()->back()->with('error', 'Erreur lors du changement de statut : ');
         }
     }
 

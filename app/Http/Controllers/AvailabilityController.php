@@ -411,7 +411,7 @@ class AvailabilityController extends Controller
             \Log::error('Trace: '.$e->getTraceAsString());
 
             return redirect()->route('availability.search')
-                ->with('error', 'Une erreur est survenue: '.$e->getMessage())
+                ->with('error', 'Une erreur est survenue: ')
                 ->withInput($request->all());
         }
     }
@@ -654,7 +654,7 @@ class AvailabilityController extends Controller
         } catch (\Exception $e) {
             \Log::error('Dashboard error: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur: '.$e->getMessage());
+            return back()->with('error', 'Erreur: ');
         }
     }
 
@@ -1036,7 +1036,7 @@ class AvailabilityController extends Controller
         } catch (\Exception $e) {
             \Log::error('Check availability error: '.$e->getMessage());
 
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => __('flash.generic_error')], 500);
         }
     }
 
@@ -1079,7 +1079,7 @@ class AvailabilityController extends Controller
         } catch (\Exception $e) {
             \Log::error('Calendar cell details error: '.$e->getMessage());
 
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => __('flash.generic_error')], 500);
         }
     }
 
@@ -1306,7 +1306,7 @@ class AvailabilityController extends Controller
         } catch (\Exception $e) {
             \Log::error('Export availability error: '.$e->getMessage());
 
-            return back()->with('error', 'Erreur lors de l\'export: '.$e->getMessage());
+            return back()->with('error', 'Erreur lors de l\'export: ');
         }
     }
 
@@ -1422,7 +1422,7 @@ class AvailabilityController extends Controller
         } catch (\Exception $e) {
             \Log::error('Get available periods error: '.$e->getMessage());
 
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => __('flash.generic_error')], 500);
         }
     }
 }

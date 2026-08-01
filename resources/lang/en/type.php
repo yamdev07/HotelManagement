@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'save_error' => 'Could not save the room type. Please check the details and try again.',
     // Index page
     'page_title' => 'Room Types',
     'header_title' => 'Room <em>Types</em>',

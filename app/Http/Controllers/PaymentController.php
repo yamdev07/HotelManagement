@@ -130,10 +130,10 @@ class PaymentController extends Controller
 
         } catch (HotelException $e) {
             if ($request->expectsJson()) {
-                return response()->json(['success' => false, 'message' => $e->getMessage()], $e->httpStatusCode());
+                return response()->json(['success' => false, 'message' => __('flash.generic_error')], $e->httpStatusCode());
             }
 
-            return redirect()->back()->with('error', $e->getMessage())->withInput();
+            return redirect()->back()->with('error', __('flash.generic_error'))->withInput();
 
         } catch (\Exception $e) {
             Log::error('Erreur paiement', ['transaction_id' => $transaction->id, 'error' => $e->getMessage()]);
@@ -174,7 +174,7 @@ class PaymentController extends Controller
             return redirect()->route('payments.index')->with('success', __('flash.payment_cancelled_success'));
 
         } catch (HotelException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', __('flash.generic_error'));
         } catch (\Exception $e) {
             Log::error('Erreur annulation paiement', ['payment_id' => $payment->id, 'error' => $e->getMessage()]);
 

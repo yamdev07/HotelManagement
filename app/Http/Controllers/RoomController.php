@@ -257,7 +257,7 @@ class RoomController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Error: '.$e->getMessage(),
+                'message' => 'Error: ',
             ], 500);
         }
     }
@@ -431,12 +431,12 @@ class RoomController extends Controller
 
             Log::error('❌ Erreur lors du marquage de la chambre comme sale:', [
                 'room_id' => $room->id,
-                'error' => $e->getMessage(),
+                'error' => __('flash.generic_error'),
                 'trace' => $e->getTraceAsString(),
             ]);
 
             return redirect()->back()
-                ->with('error', 'Erreur lors du marquage de la chambre: '.$e->getMessage());
+                ->with('error', 'Erreur lors du marquage de la chambre: ');
         }
     }
 
@@ -507,11 +507,11 @@ class RoomController extends Controller
 
             Log::error('❌ Erreur lors du marquage de la chambre comme propre:', [
                 'room_id' => $room->id,
-                'error' => $e->getMessage(),
+                'error' => __('flash.generic_error'),
             ]);
 
             return redirect()->back()
-                ->with('error', __('flash.room_mark_error').': '.$e->getMessage());
+                ->with('error', __('flash.room_mark_error'));
         }
     }
 

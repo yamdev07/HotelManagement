@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'save_error' => "Impossible d'enregistrer le type de chambre. Vérifiez les informations et réessayez.",
     // Index page
     'page_title' => 'Types de Chambres',
     'header_title' => 'Types de <em>chambres</em>',

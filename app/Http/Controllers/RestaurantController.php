@@ -349,7 +349,7 @@ class RestaurantController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Erreur lors de la création de la commande: '.$e->getMessage(),
+                'message' => 'Erreur lors de la création de la commande: ',
             ], 500);
         }
     }

@@ -138,6 +138,7 @@ return [
     'billing_session_not_found' => 'Session de paiement introuvable. Si vous avez été débité, contactez-nous.',
     'billing_payment_failed' => 'Le paiement n\'a pas abouti. Aucun montant n\'a été prélevé.',
     'billing_confirmed' => 'Paiement confirmé ! Votre abonnement est actif jusqu\'au :date.',
+    'generic_error' => "Une erreur est survenue. Veuillez réessayer ; si le problème persiste, contactez le support.",
     'channel_feed_added' => 'Calendrier ajouté. La synchronisation se fera automatiquement.',
     'channel_feed_removed' => 'Calendrier retiré.',
     'billing_downgrade_scheduled' => 'Passage à la formule :plan programmé le :date. Vous gardez votre formule actuelle jusque-là, rien à payer maintenant.',

@@ -881,7 +881,7 @@ class FrontendController extends Controller
             DB::rollBack();
             Log::error('ERREUR SQL:', [
                 'code' => $e->getCode(),
-                'message' => $e->getMessage(),
+                'message' => __('flash.generic_error'),
             ]);
 
             return response()->json([

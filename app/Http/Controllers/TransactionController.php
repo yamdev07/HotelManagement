@@ -98,7 +98,7 @@ class TransactionController extends Controller
             return redirect()->route('transaction.show', $updated)->with('success', $message);
 
         } catch (HotelException $e) {
-            return redirect()->back()->with('error', $e->getMessage())->withInput();
+            return redirect()->back()->with('error', __('flash.generic_error'))->withInput();
         } catch (\Exception $e) {
             Log::error('Erreur modification transaction', ['id' => $transaction->id, 'error' => $e->getMessage()]);
 
@@ -151,10 +151,10 @@ class TransactionController extends Controller
 
         } catch (HotelException $e) {
             if ($request->ajax()) {
-                return response()->json(['error' => $e->getMessage()], $e->httpStatusCode());
+                return response()->json(['error' => __('flash.generic_error')], $e->httpStatusCode());
             }
 
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', __('flash.generic_error'));
         } catch (\Exception $e) {
             Log::error('Erreur statut transaction', ['id' => $transaction->id, 'error' => $e->getMessage()]);
             if ($request->ajax()) {
@@ -185,7 +185,7 @@ class TransactionController extends Controller
                 ->with('success', __('flash.transaction_cancelled'));
 
         } catch (HotelException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', __('flash.generic_error'));
         }
     }
 
@@ -202,7 +202,7 @@ class TransactionController extends Controller
                 ->with('success', __('flash.transaction_no_show'));
 
         } catch (HotelException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', __('flash.generic_error'));
         }
     }
 
@@ -217,7 +217,7 @@ class TransactionController extends Controller
                 ->with('success', __('flash.transaction_restored'));
 
         } catch (HotelException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', __('flash.generic_error'));
         }
     }
 
@@ -616,7 +616,7 @@ class TransactionController extends Controller
                 __('flash.transaction_checkin_done', ['room' => $transaction->room->number])
             );
         } catch (HotelException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', __('flash.generic_error'));
         }
     }
 
@@ -638,7 +638,7 @@ class TransactionController extends Controller
             return redirect()->back()->with('success', __('flash.transaction_checkout_done'));
 
         } catch (HotelException $e) {
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->with('error', __('flash.generic_error'));
         }
     }
 
