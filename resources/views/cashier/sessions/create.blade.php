@@ -627,15 +627,26 @@
     
     form.addEventListener('submit', function(e) {
         e.preventDefault();
-        
-        if (!confirm('{{ __('cashier-sessions.confirm_start') }}')) {
-            return;
+
+        var start = function () {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __('cashier-sessions.starting') }}';
+            form.submit(); // submit natif : ne re-déclenche pas ce handler
+        };
+
+        if (window.Swal) {
+            Swal.fire({
+                icon: 'question',
+                title: '{{ __('cashier-sessions.confirm_start') }}',
+                showCancelButton: true,
+                confirmButtonText: 'Oui, démarrer',
+                cancelButtonText: 'Annuler',
+                confirmButtonColor: (getComputedStyle(document.documentElement).getPropertyValue('--hotel-primary') || '#2e8540').trim(),
+                heightAuto: false
+            }).then(function (r) { if (r.isConfirmed) start(); });
+        } else {
+            start();
         }
-        
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> {{ __('cashier-sessions.starting') }}';
-        
-        form.submit();
     });
     
 })();
