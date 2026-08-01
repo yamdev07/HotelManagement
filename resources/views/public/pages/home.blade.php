@@ -23,10 +23,11 @@
                                     <div class="img" style="background-image: url('{{ $img }}');"></div>
                                     <span class="room-price">{{ number_format($room->price, 0, ',', ' ') }} {{ $hotel->currency }}</span>
                                 </div>
-                                <div class="p-4">
+                                <div class="p-4 d-flex flex-column h-100">
                                     @if ($room->type)<div class="eyebrow mb-1">{{ $room->type->name }}</div>@endif
                                     <h4 class="serif mb-2" style="font-size:1.4rem;">{{ $room->name ?: 'Chambre '.$room->number }}</h4>
-                                    <p class="text-secondary small mb-0"><i class="fas fa-user-group me-1 text-c"></i> {{ $room->capacity }} personnes</p>
+                                    <p class="text-secondary small mb-3"><i class="fas fa-user-group me-1 text-c"></i> {{ $room->capacity }} personnes</p>
+                                    <a href="{{ route('public.hotel.availability', $hotel->slug) }}" class="btn-c mt-auto" style="padding:.6rem 1.4rem;font-size:.9rem;text-align:center;">Réserver</a>
                                 </div>
                             </div>
                         </div>
@@ -39,6 +40,7 @@
         </section>
     @endif
 
+    @include('public.sections.amenities')
     @include('public.sections.gallery')
     @include('public.sections.testimonials')
     @include('public.sections.faq')
