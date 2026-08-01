@@ -105,6 +105,18 @@
                 </div>
             @endif
 
+            @if (! $tx->preCheckinDone())
+                <a href="{{ route('public.checkin.show', $tx->checkinToken()) }}"
+                   style="display:flex;align-items:center;gap:14px;margin-top:22px;padding:16px 18px;border-radius:14px;text-decoration:none;background:color-mix(in srgb, var(--c) 10%, #fff);border:1px solid color-mix(in srgb, var(--c) 30%, #fff);">
+                    <span style="width:44px;height:44px;border-radius:11px;background:var(--c);color:#fff;display:grid;place-items:center;font-size:1.15rem;flex:none;"><i class="fas fa-id-card"></i></span>
+                    <span style="flex:1;text-align:left;">
+                        <strong style="display:block;color:#1f2733;">Pré-enregistrez-vous en 1 minute</strong>
+                        <small style="color:#6b7280;">Renseignez vos infos maintenant → check-in express à l'arrivée</small>
+                    </span>
+                    <i class="fas fa-arrow-right" style="color:var(--c);"></i>
+                </a>
+            @endif
+
             <div class="cf-actions">
                 @if ($wa)
                     <a class="cf-btn wa" target="_blank" rel="noopener"
