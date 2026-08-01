@@ -27,6 +27,47 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+    <style>
+        /* ── Thème global des pop-ups (SweetAlert2) : arrondi, marque, clair/sombre ── */
+        .swal2-popup {
+            border-radius: 18px !important;
+            padding: 26px 24px 22px !important;
+            box-shadow: 0 24px 60px -24px rgba(20, 40, 30, .28), 0 8px 20px -12px rgba(20, 40, 30, .18) !important;
+            font-family: inherit !important;
+            background: var(--white, #fff) !important;
+        }
+        .swal2-title { font-size: 1.28rem !important; font-weight: 800 !important; color: var(--s900, #12332a) !important; }
+        .swal2-html-container { font-size: .98rem !important; color: var(--s600, #52616b) !important; margin-top: .4em !important; }
+        .swal2-actions { gap: 10px !important; margin-top: 1.4em !important; }
+        .swal2-styled {
+            border-radius: 12px !important;
+            padding: 11px 26px !important;
+            font-weight: 700 !important;
+            font-size: .95rem !important;
+            box-shadow: none !important;
+            transition: filter .15s, transform .1s !important;
+        }
+        .swal2-styled:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--hotel-primary, #2e8540) 30%, transparent) !important; }
+        .swal2-styled:hover { filter: brightness(1.06); }
+        .swal2-styled:active { transform: translateY(1px); }
+        .swal2-styled.swal2-confirm { background: var(--hotel-primary, #2e8540) !important; }
+        .swal2-styled.swal2-cancel {
+            background: transparent !important;
+            color: var(--s600, #52616b) !important;
+            border: 1.5px solid var(--s200, #dbe2de) !important;
+        }
+        .swal2-icon { margin-top: .8em !important; }
+        /* Toasts (validations) : compacts */
+        .swal2-popup.swal2-toast { padding: 14px 18px !important; border-radius: 14px !important; box-shadow: 0 12px 32px -14px rgba(20, 40, 30, .3) !important; }
+        .swal2-popup.swal2-toast .swal2-title { font-size: .95rem !important; font-weight: 700 !important; margin: 0 !important; }
+        .swal2-timer-progress-bar { background: color-mix(in srgb, var(--hotel-primary, #2e8540) 55%, transparent) !important; }
+
+        /* Mode sombre : fond et textes lisibles */
+        html[data-theme="dark"] .swal2-popup { background: #161b18 !important; }
+        html[data-theme="dark"] .swal2-title { color: #eef2ee !important; }
+        html[data-theme="dark"] .swal2-html-container { color: #b7c0b9 !important; }
+        html[data-theme="dark"] .swal2-styled.swal2-cancel { color: #c7cec8 !important; border-color: #37423b !important; }
+    </style>
     @stack('styles')
     <title>@yield('title') - {{ $currentHotel->name ?? 'Hotel Admin' }}</title>
     @yield('head')
@@ -390,7 +431,13 @@
                 else if (/^[✅🎉👍]/.test(s) || /(succ[eè]s|success|enregistr|cré[eé]|ajout[ée]?|mis[e]?\s*à\s*jour|supprim|envoy|termin)/i.test(s)) icon = 'success';
                 else if (/^[⚠]/.test(s) || /(attention|warning|avertiss)/i.test(s)) icon = 'warning';
                 var clean = s.replace(/^([❌⛔🚫✅🎉👍⚠]️?\s*)+/, '').trim();
-                Swal.fire({ icon: icon, text: clean || s, confirmButtonText: 'OK', confirmButtonColor: brand(), heightAuto: false });
+                if (icon === 'success') {
+                    // Validation : toast discret en haut à droite, auto-disparition.
+                    Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: clean || s,
+                        showConfirmButton: false, timer: 3200, timerProgressBar: true, heightAuto: false });
+                } else {
+                    Swal.fire({ icon: icon, text: clean || s, confirmButtonText: 'OK', confirmButtonColor: brand(), heightAuto: false });
+                }
             } catch (err) { nativeAlert(msg); }
         };
 
