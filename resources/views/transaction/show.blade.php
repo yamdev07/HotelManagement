@@ -801,7 +801,7 @@
             $waReminder = $waHotel ? \App\Support\GuestMessages::link($waPhone, \App\Support\GuestMessages::checkInReminder($waHotel, $transaction)) : null;
             $waPayment = ($waHotel && (float) ($transaction->total_payment ?? 0) > 0)
                 ? \App\Support\GuestMessages::link($waPhone, \App\Support\GuestMessages::paymentReceived($waHotel, $transaction)) : null;
-            $waCheckin = ($waHotel && $transaction->status === 'reservation' && ! $transaction->preCheckinDone())
+            $waCheckin = ($waHotel && ! in_array($transaction->status, ['completed','cancelled','no_show']) && ! $transaction->preCheckinDone())
                 ? \App\Support\GuestMessages::link($waPhone, \App\Support\GuestMessages::preCheckinInvite($waHotel, $transaction)) : null;
         @endphp
         @if($waConfirm)
@@ -820,7 +820,7 @@
                     @endif
                 </ul>
             </div>
-            @if($waHotel && in_array($transaction->status, ['reservation','reserved_waiting']))
+            @if($waHotel && ! in_array($transaction->status, ['completed','cancelled','no_show']))
                 <button type="button" class="btn-modern btn-outline-modern" data-bs-toggle="modal" data-bs-target="#preCheckinModal">
                     <i class="fas fa-qrcode me-1"></i>Pré-check-in
                     @if($transaction->preCheckinDone())<span class="badge bg-success ms-1">Fait</span>@endif
@@ -1960,7 +1960,7 @@ function checkLateCheckoutStatus(transactionId) {
 }
 </script>
 
-@if(auth()->user()->hotel && in_array($transaction->status, ['reservation','reserved_waiting']))
+@if(auth()->user()->hotel && ! in_array($transaction->status, ['completed','cancelled','no_show']))
 <!-- Modal Pré-check-in -->
 <div class="modal fade" id="preCheckinModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">

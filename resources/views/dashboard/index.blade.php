@@ -657,7 +657,7 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
                                                 </a>
                                                 @php
                                                     $ciHotel = auth()->user()->hotel;
-                                                    $isPre = in_array($transaction->status, ['reservation','reserved_waiting']) && ! $transaction->preCheckinDone();
+                                                    $isPre = ! in_array($transaction->status, ['completed','cancelled','no_show']) && ! $transaction->preCheckinDone();
                                                     $ciWa = ($ciHotel && $isPre && optional($transaction->customer)->phone)
                                                         ? \App\Support\GuestMessages::link($transaction->customer->phone, \App\Support\GuestMessages::preCheckinInvite($ciHotel, $transaction)) : null;
                                                 @endphp
