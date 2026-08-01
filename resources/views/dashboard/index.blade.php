@@ -236,7 +236,7 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
   background: var(--card); border: 1px solid var(--line); border-radius: var(--r-sm);
   box-shadow: 0 10px 30px rgba(0,0,0,.12); padding: 6px; display: none;
 }
-.db-dropdown.open .db-dropdown-menu, .db-dropdown-menu.show { display: block; }
+.db-dropdown.open .db-dropdown-menu, .db-dropdown-menu.show, .db-dropdown-menu.open { display: block; }
 .db-dropdown-item {
   display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 7px;
   font-size: .8rem; color: var(--ink2); cursor: pointer;
@@ -248,6 +248,8 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
 .db-dropdown-divider { height: 1px; background: var(--line); margin: 6px 4px; }
 
 /* ── table ── */
+.db-tbl-scroll { overflow: visible; }
+@media (max-width: 760px) { .db-tbl-scroll { overflow-x: auto; } }
 .db-table { width: 100%; border-collapse: collapse; font-size: .83rem; }
 .db-table th {
   text-align: left; font-size: .66rem; text-transform: uppercase; letter-spacing: .05em;
@@ -569,7 +571,7 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
                 </div>
 
                 @if($transactions->count() > 0)
-                <div style="overflow-x:auto;">
+                <div class="db-tbl-scroll">
                     <table class="db-table">
                         <thead>
                             <tr>
