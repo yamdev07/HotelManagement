@@ -655,6 +655,17 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
                                                 <a class="db-dropdown-item" href="{{ route('transaction.invoice', ['transaction' => $transaction->id]) }}">
                                                     <i class="fas fa-file-invoice fa-xs"></i> {{ __('dashboard.invoice') }}
                                                 </a>
+                                                @php
+                                                    $ciHotel = auth()->user()->hotel;
+                                                    $isPre = in_array($transaction->status, ['reservation','reserved_waiting']) && ! $transaction->preCheckinDone();
+                                                    $ciWa = ($ciHotel && $isPre && optional($transaction->customer)->phone)
+                                                        ? \App\Support\GuestMessages::link($transaction->customer->phone, \App\Support\GuestMessages::preCheckinInvite($ciHotel, $transaction)) : null;
+                                                @endphp
+                                                @if($isPre)
+                                                <a class="db-dropdown-item" href="{{ $ciWa ?? route('transaction.show', ['transaction' => $transaction->id]) }}" @if($ciWa) target="_blank" rel="noopener" @endif>
+                                                    <i class="fas fa-id-card fa-xs"></i> Pré-check-in
+                                                </a>
+                                                @endif
                                                 @if($transaction->canBeCancelled())
                                                 <div class="db-dropdown-divider"></div>
                                                 <button class="db-dropdown-item db-dropdown-item-danger"
