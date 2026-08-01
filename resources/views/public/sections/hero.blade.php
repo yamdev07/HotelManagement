@@ -2,8 +2,13 @@
 @push('head')
 <style>
     .hero-cine { height:100vh; min-height:660px; position:relative; display:flex; align-items:center; justify-content:center; text-align:center; color:#fff; overflow:hidden; }
-    .hero-cine-bg { position:absolute; inset:0; background-size:cover; background-position:center; transform:scale(1.1); animation:cineZoom 16s ease-out forwards; }
-    @keyframes cineZoom { to { transform:scale(1); } }
+    .hero-cine-bg { position:absolute; inset:-4%; background-size:cover; background-position:center; will-change:transform;
+        animation: kenburns 30s ease-in-out infinite alternate; }
+    @keyframes kenburns {
+        0%   { transform: scale(1.12) translate(0, 0); }
+        50%  { transform: scale(1.18) translate(-1.5%, -1%); }
+        100% { transform: scale(1.24) translate(1.5%, -2%); }
+    }
     .hero-cine-ov { position:absolute; inset:0; background:
         radial-gradient(120% 90% at 50% 10%, transparent, rgba(0,0,0,.35) 60%),
         linear-gradient(180deg, rgba(11,13,17,.55) 0%, rgba(11,13,17,.25) 35%, color-mix(in srgb, var(--bg) 92%, transparent) 100%); }
