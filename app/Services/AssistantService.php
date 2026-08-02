@@ -75,6 +75,42 @@ class AssistantService
         }
     }
 
+    /**
+     * Transcrit un message vocal en texte via Groq Whisper.
+     *
+     * @return array{ok:bool,text:string}
+     */
+    public function transcribe(string $audioContents, string $filename = 'audio.webm'): array
+    {
+        if (! $this->isConfigured()) {
+            return ['ok' => false, 'text' => ''];
+        }
+
+        try {
+            $response = Http::withToken(config('services.groq.key'))
+                ->timeout(30)
+                ->asMultipart()
+                ->post(rtrim(config('services.groq.base_url'), '/').'/audio/transcriptions', [
+                    ['name' => 'file', 'contents' => $audioContents, 'filename' => $filename],
+                    ['name' => 'model', 'contents' => config('services.groq.whisper_model')],
+                    ['name' => 'response_format', 'contents' => 'json'],
+                    ['name' => 'temperature', 'contents' => '0'],
+                ]);
+
+            if (! $response->successful()) {
+                Log::warning('Groq Whisper: réponse non OK', ['status' => $response->status(), 'body' => $response->body()]);
+
+                return ['ok' => false, 'text' => ''];
+            }
+
+            return ['ok' => true, 'text' => trim((string) data_get($response->json(), 'text', ''))];
+        } catch (\Throwable $e) {
+            Log::error('Groq Whisper: exception', ['error' => $e->getMessage()]);
+
+            return ['ok' => false, 'text' => ''];
+        }
+    }
+
     /** Prompt système : rôle de l'assistant + état réel de l'établissement + repères de navigation. */
     private function systemPrompt(User $user): string
     {

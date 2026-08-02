@@ -32,4 +32,22 @@ class AssistantController extends Controller
             'reply' => $result['reply'],
         ]);
     }
+
+    /** Transcrit un message vocal (Groq Whisper) et renvoie le texte. */
+    public function transcribe(Request $request): JsonResponse
+    {
+        abort_unless($this->assistant->isConfigured(), 404);
+
+        $request->validate([
+            'audio' => ['required', 'file', 'max:25600'], // 25 Mo max
+        ]);
+
+        $file = $request->file('audio');
+        $result = $this->assistant->transcribe($file->get(), $file->getClientOriginalName() ?: 'audio.webm');
+
+        return response()->json([
+            'ok' => $result['ok'],
+            'text' => $result['text'],
+        ]);
+    }
 }

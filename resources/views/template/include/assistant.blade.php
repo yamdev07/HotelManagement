@@ -1,6 +1,6 @@
 @auth
 @if (! empty(config('services.groq.key')))
-<div id="aiAssistant" class="aia-wrap" data-endpoint="{{ route('assistant.chat') }}">
+<div id="aiAssistant" class="aia-wrap" data-endpoint="{{ route('assistant.chat') }}" data-transcribe="{{ route('assistant.transcribe') }}">
     <button type="button" class="aia-fab" id="aiaFab" aria-label="Assistant IA" title="Assistant IA">
         <i class="fas fa-wand-magic-sparkles"></i>
         <span class="aia-dot"></span>
@@ -13,7 +13,8 @@
                 <div class="aia-name">Assistant IA</div>
                 <div class="aia-sub">Votre copilote de gestion</div>
             </div>
-            <button type="button" class="aia-close" id="aiaClose" aria-label="Fermer"><i class="fas fa-times"></i></button>
+            <button type="button" class="aia-hbtn" id="aiaSpeaker" aria-label="Lecture vocale" title="Lire les réponses à voix haute"><i class="fas fa-volume-xmark"></i></button>
+            <button type="button" class="aia-hbtn aia-close" id="aiaClose" aria-label="Fermer"><i class="fas fa-times"></i></button>
         </div>
 
         <div class="aia-body" id="aiaBody">
@@ -26,8 +27,9 @@
         </div>
 
         <form class="aia-input" id="aiaForm" autocomplete="off">
-            <input type="text" id="aiaText" placeholder="Écrivez votre message…" maxlength="1000" required>
-            <button type="submit" aria-label="Envoyer"><i class="fas fa-paper-plane"></i></button>
+            <button type="button" class="aia-mic" id="aiaMic" aria-label="Message vocal" title="Parler"><i class="fas fa-microphone"></i></button>
+            <input type="text" id="aiaText" placeholder="Écrivez ou parlez…" maxlength="1000">
+            <button type="submit" class="aia-send" aria-label="Envoyer"><i class="fas fa-paper-plane"></i></button>
         </form>
     </div>
 </div>
@@ -54,8 +56,10 @@
     .aia-ava{ width:36px; height:36px; border-radius:50%; background:rgba(255,255,255,.18); display:grid; place-items:center; }
     .aia-name{ font-weight:700; font-size:.95rem; line-height:1.1; }
     .aia-sub{ font-size:.74rem; opacity:.8; }
-    .aia-close{ margin-left:auto; background:transparent; border:none; color:#fff; opacity:.85; font-size:1rem; cursor:pointer; padding:6px; }
-    .aia-close:hover{ opacity:1; }
+    .aia-hbtn{ background:transparent; border:none; color:#fff; opacity:.85; font-size:1rem; cursor:pointer; padding:6px; }
+    .aia-hbtn:hover{ opacity:1; }
+    #aiaSpeaker{ margin-left:auto; }
+    #aiaSpeaker.on{ color:#c9f5d8; opacity:1; }
 
     .aia-body{ flex:1; overflow-y:auto; padding:15px; display:flex; flex-direction:column; gap:10px; background:var(--aia-panel); }
     .aia-msg{ max-width:85%; padding:10px 13px; border-radius:13px; font-size:.9rem; line-height:1.5; white-space:pre-wrap; word-wrap:break-word; }
@@ -72,7 +76,12 @@
     .aia-input{ display:flex; gap:8px; padding:11px; border-top:1px solid var(--aia-line); background:var(--aia-panel); }
     .aia-input input{ flex:1; background:transparent; border:1px solid var(--aia-line); border-radius:11px; padding:10px 12px; color:var(--aia-ink); font-size:.9rem; }
     .aia-input input:focus{ outline:none; border-color:var(--aia); }
-    .aia-input button{ width:42px; border:none; border-radius:11px; background:var(--aia); color:#fff; cursor:pointer; transition:.2s; }
+    .aia-input button{ width:42px; flex:0 0 42px; border-radius:11px; cursor:pointer; transition:.2s; border:none; }
+    .aia-input .aia-send{ background:var(--aia); color:#fff; }
+    .aia-input .aia-mic{ background:transparent; color:var(--aia); border:1px solid var(--aia-line); }
+    .aia-input .aia-mic:hover{ background:var(--aia); color:#fff; }
+    .aia-input .aia-mic.rec{ background:#dc2626; color:#fff; border-color:#dc2626; animation:aiaRec 1s infinite; }
+    @keyframes aiaRec{ 0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.5)} 50%{box-shadow:0 0 0 7px rgba(220,38,38,0)} }
     .aia-input button:disabled{ opacity:.5; cursor:default; }
 </style>
 
@@ -86,15 +95,41 @@
     var body = document.getElementById('aiaBody');
     var form = document.getElementById('aiaForm');
     var input = document.getElementById('aiaText');
-    var sendBtn = form.querySelector('button');
+    var sendBtn = form.querySelector('.aia-send');
+    var micBtn = document.getElementById('aiaMic');
+    var speakerBtn = document.getElementById('aiaSpeaker');
+    var transcribeUrl = wrap.dataset.transcribe;
     var csrf = document.querySelector('meta[name="csrf-token"]');
     csrf = csrf ? csrf.getAttribute('content') : '';
     var history = [];
     var busy = false;
 
+    // ── Lecture vocale (synthèse du navigateur) ──
+    var speakOn = localStorage.getItem('aiaSpeak') === '1';
+    function renderSpeaker() {
+        speakerBtn.classList.toggle('on', speakOn);
+        speakerBtn.querySelector('i').className = speakOn ? 'fas fa-volume-high' : 'fas fa-volume-xmark';
+    }
+    renderSpeaker();
+    function speak(text) {
+        if (!speakOn || !('speechSynthesis' in window)) return;
+        window.speechSynthesis.cancel();
+        var u = new SpeechSynthesisUtterance(text);
+        // Détection simple FR/EN pour la voix.
+        u.lang = (/\b(the|you|your|are|room|hello|price|available|today)\b/i.test(text) && !/[àâçéèêëîïôûùü]/i.test(text)) ? 'en-US' : 'fr-FR';
+        window.speechSynthesis.speak(u);
+    }
+    speakerBtn.addEventListener('click', function () {
+        speakOn = !speakOn;
+        localStorage.setItem('aiaSpeak', speakOn ? '1' : '0');
+        if (!speakOn && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+        renderSpeaker();
+    });
+
     function toggle(open) {
         panel.classList.toggle('open', open);
         if (open) setTimeout(function () { input.focus(); }, 100);
+        else if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     }
     fab.addEventListener('click', function () { toggle(!panel.classList.contains('open')); });
     document.getElementById('aiaClose').addEventListener('click', function () { toggle(false); });
@@ -133,6 +168,7 @@
             var reply = (d && d.reply) ? d.reply : "Désolé, je n'ai pas pu répondre.";
             bubble(reply, 'bot');
             if (d && d.ok) history.push({ role: 'assistant', content: reply });
+            speak(reply);
         })
         .catch(function () { typing(false); bubble("Erreur réseau. Réessayez.", 'bot'); })
         .finally(function () { busy = false; sendBtn.disabled = false; input.focus(); });
@@ -146,6 +182,43 @@
     });
     body.addEventListener('click', function (e) {
         if (e.target.classList.contains('aia-chip')) send(e.target.textContent.trim());
+    });
+
+    // ── Message vocal (enregistrement -> Groq Whisper -> texte) ──
+    var mediaRec = null, chunks = [], recording = false;
+    micBtn.addEventListener('click', function () {
+        if (busy) return;
+        if (recording) { if (mediaRec) mediaRec.stop(); return; }
+        if (!navigator.mediaDevices || !window.MediaRecorder) {
+            bubble("La saisie vocale n'est pas supportée par ce navigateur.", 'bot');
+            return;
+        }
+        navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+            chunks = [];
+            mediaRec = new MediaRecorder(stream);
+            mediaRec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+            mediaRec.onstop = function () {
+                recording = false; micBtn.classList.remove('rec');
+                stream.getTracks().forEach(function (t) { t.stop(); });
+                var blob = new Blob(chunks, { type: (mediaRec && mediaRec.mimeType) || 'audio/webm' });
+                if (!blob.size) return;
+                var fd = new FormData();
+                fd.append('audio', blob, 'message.webm');
+                micBtn.disabled = true; input.placeholder = 'Transcription…';
+                fetch(transcribeUrl, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' }, body: fd })
+                    .then(function (r) { return r.json(); })
+                    .then(function (d) {
+                        if (d && d.ok && d.text) send(d.text);
+                        else bubble("Je n'ai pas compris l'audio. Réessayez.", 'bot');
+                    })
+                    .catch(function () { bubble("Erreur lors de la transcription.", 'bot'); })
+                    .finally(function () { micBtn.disabled = false; input.placeholder = 'Écrivez ou parlez…'; });
+            };
+            mediaRec.start();
+            recording = true; micBtn.classList.add('rec');
+        }).catch(function () {
+            bubble("Micro inaccessible. Autorisez le micro dans votre navigateur.", 'bot');
+        });
     });
 })();
 </script>
