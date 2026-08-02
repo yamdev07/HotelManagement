@@ -30,6 +30,9 @@ return [
     'sec_bookings' => 'Réservations & check-in',
     'sec_bookings_sub' => 'Le cœur du métier',
     'sec_bookings_desc' => "Enregistrez une réservation, effectuez le check-in à l'arrivée du client et le check-out au départ, en quelques clics.",
+    'sec_precheckin' => 'Check-in en ligne',
+    'sec_precheckin_sub' => 'Pré-enregistrement du client',
+    'sec_precheckin_desc' => "Envoyez un lien ou un QR code au client : il remplit ses informations (identité, arrivée) avant de venir. L'accueil devient instantané.",
     'sec_cashier' => 'La caisse',
     'sec_cashier_sub' => 'Encaissements',
     'sec_cashier_desc' => 'Ouvrez votre caisse en début de service, encaissez les paiements, puis fermez la caisse en fin de journée pour le rapprochement.',
@@ -42,6 +45,9 @@ return [
     'sec_site' => 'Votre site web',
     'sec_site_sub' => 'Vitrine & réservations en ligne',
     'sec_site_desc' => "Chaque établissement dispose d'un mini-site à ses couleurs pour présenter ses chambres et recevoir des réservations en ligne.",
+    'sec_reviews' => 'Avis clients',
+    'sec_reviews_sub' => 'Réputation & modération',
+    'sec_reviews_desc' => "Recueillez les avis de vos clients depuis votre vitrine, modérez-les et répondez-y. Les avis approuvés renforcent votre réputation en ligne.",
     'sec_reports' => 'Rapports',
     'sec_reports_sub' => 'Pilotage',
     'sec_reports_desc' => 'Suivez votre occupation, vos revenus et la performance de votre établissement. (Offres Pro & Business)',
@@ -87,6 +93,13 @@ return [
     'bookings_step5' => '<b>Check-out (départ)</b> · au départ, cliquez sur <b>Check-out</b>. La note finale (chambre + extras) est calculée, puis encaissée en caisse. La chambre bascule en « à nettoyer ».',
     'bookings_tip' => "Un client se présente <b>sans réservation</b> ? Utilisez le <b>check-in direct</b> : la réservation et l'arrivée se font en une seule étape.",
 
+    'precheckin_intro' => "Le <b>pré-check-in</b> permet au client de <b>remplir ses informations avant son arrivée</b>, via un lien ou un QR code. Résultat : à l'accueil, tout est déjà saisi, le check-in prend quelques secondes.",
+    'precheckin_step1' => "<b>Ouvrez une réservation à venir</b> — sur sa fiche, cliquez sur <b>« Pré-check-in »</b> pour obtenir le lien et le QR code.",
+    'precheckin_step2' => "<b>Envoyez-le au client</b> — par WhatsApp, email ou en affichant le QR code. Aucun compte n'est nécessaire pour le client.",
+    'precheckin_step3' => "<b>Le client remplit</b> — nom, téléphone, <b>pièce d'identité</b> et heure d'arrivée prévue, depuis son téléphone.",
+    'precheckin_step4' => "<b>À l'arrivée</b> — les informations sont déjà sur la fiche (le « NIC/ID » est pré-rempli) : validez simplement l'arrivée.",
+    'precheckin_tip' => "Idéal pour les <b>réservations en ligne</b> : le client réserve, pré-remplit, puis n'a plus qu'à récupérer sa clé en arrivant.",
+
     // Cashier detail
     'cashier_intro' => "La caisse suit tout l'argent encaissé pendant un service, avec ouverture et clôture pour le rapprochement.",
     'cashier_step1' => '<b>Ouvrir la caisse</b> · en début de service, Menu <b>Caisse → Ouvrir la caisse</b>. Saisissez le <b>fond de caisse</b> (montant de départ).',
@@ -118,6 +131,13 @@ return [
     'site_step3' => '<b>Partagez le lien</b> — votre vitrine a une <b>adresse publique</b> ; partagez-la à vos clients (réseaux, WhatsApp, carte de visite).',
     'site_step4' => '<b>Recevez des réservations</b> — les visiteurs consultent vos chambres et réservent en ligne ; la réservation arrive directement dans votre espace.',
     'site_tip' => 'Le bouton <b>« Voir mon site »</b> ouvre la vitrine telle que la voient vos clients, pour vérifier le rendu.',
+
+    'reviews_intro' => "Les <b>avis clients</b> s'affichent sur votre vitrine (note moyenne + commentaires). Vous gardez la main : si la modération est activée, chaque avis passe par vous avant d'être publié.",
+    'reviews_step1' => "<b>Activez les avis</b> — depuis <b>Mon établissement → Sections vitrine</b>, activez « Avis clients » (et « Modérer avant publication » pour valider chaque avis).",
+    'reviews_step2' => '<b>Vos clients déposent un avis</b> — directement depuis votre vitrine (note en étoiles + commentaire).',
+    'reviews_step3' => "<b>Vous modérez</b> — depuis le menu <b>« Avis clients »</b> : approuvez, rejetez, <b>répondez</b> ou supprimez chaque avis.",
+    'reviews_step4' => '<b>Publication automatique</b> — un avis approuvé apparaît aussitôt sur votre vitrine, avec votre réponse éventuelle affichée dessous.',
+    'reviews_tip' => "Répondre aux avis (même critiques) <b>inspire confiance</b> aux futurs clients : montrez que vous êtes à l'écoute.",
 
     // Reports detail
     'reports_intro' => 'Pilotez la performance de votre établissement avec des chiffres clairs. <i>(Offres Pro & Business)</i>',

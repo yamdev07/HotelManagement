@@ -30,6 +30,9 @@ return [
     'sec_bookings' => 'Reservations & Check-in',
     'sec_bookings_sub' => 'The core of the business',
     'sec_bookings_desc' => 'Record a reservation, check in the guest on arrival and check out on departure, in just a few clicks.',
+    'sec_precheckin' => 'Online Check-in',
+    'sec_precheckin_sub' => 'Guest pre-registration',
+    'sec_precheckin_desc' => 'Send a link or QR code to your guest: they fill in their details (ID, arrival) before coming. Front-desk check-in becomes instant.',
     'sec_cashier' => 'Cash Register',
     'sec_cashier_sub' => 'Payments',
     'sec_cashier_desc' => 'Open your register at shift start, collect payments, then close it at end of day for reconciliation.',
@@ -42,6 +45,9 @@ return [
     'sec_site' => 'Your Website',
     'sec_site_sub' => 'Showcase & online bookings',
     'sec_site_desc' => 'Each property gets a branded mini-site to showcase rooms and accept online reservations.',
+    'sec_reviews' => 'Guest Reviews',
+    'sec_reviews_sub' => 'Reputation & moderation',
+    'sec_reviews_desc' => 'Collect guest reviews from your showcase, moderate them and reply. Approved reviews boost your online reputation.',
     'sec_reports' => 'Reports',
     'sec_reports_sub' => 'Analytics',
     'sec_reports_desc' => 'Track occupancy, revenue and property performance. (Pro & Business plans)',
@@ -87,6 +93,13 @@ return [
     'bookings_step5' => '<b>Check-out (departure)</b> · at departure, click <b>Check-out</b>. The final bill (room + extras) is calculated, then collected at the register. The room switches to "to clean".',
     'bookings_tip' => 'A guest arrives <b>without a reservation</b>? Use <b>direct check-in</b>: the reservation and arrival happen in one step.',
 
+    'precheckin_intro' => 'Online <b>pre-check-in</b> lets the guest <b>fill in their details before arrival</b>, via a link or QR code. At the front desk, everything is already entered — check-in takes seconds.',
+    'precheckin_step1' => 'Open an <b>upcoming reservation</b> and click <b>"Pre-check-in"</b> to get the link and QR code.',
+    'precheckin_step2' => '<b>Send it to the guest</b> — by WhatsApp, email or by showing the QR code. No account needed for the guest.',
+    'precheckin_step3' => '<b>The guest fills in</b> — name, phone, <b>ID document</b> and expected arrival time, from their phone.',
+    'precheckin_step4' => '<b>On arrival</b> — the details are already on the record (the "NIC/ID" is pre-filled): just confirm the arrival.',
+    'precheckin_tip' => 'Perfect for <b>online bookings</b>: the guest books, pre-fills, then simply picks up their key on arrival.',
+
     // Cashier detail
     'cashier_intro' => 'The register tracks all money collected during a shift, with opening and closing for reconciliation.',
     'cashier_step1' => '<b>Open the register</b> · at shift start, Menu <b>Register → Open register</b>. Enter the <b>float</b> (starting amount).',
@@ -118,6 +131,13 @@ return [
     'site_step3' => '<b>Share the link</b> — your showcase has a <b>public URL</b>; share it with guests (social media, business card, WhatsApp).',
     'site_step4' => '<b>Receive reservations</b> — visitors browse your rooms and book online; the reservation arrives directly in your dashboard.',
     'site_tip' => 'The <b>"View my site"</b> button opens the showcase as your guests see it, to verify the result.',
+
+    'reviews_intro' => '<b>Guest reviews</b> appear on your showcase (average rating + comments). You stay in control: when moderation is on, each review goes through you before being published.',
+    'reviews_step1' => '<b>Enable reviews</b> — from <b>My property → Showcase sections</b>, turn on "Guest reviews" (and "Moderate before publishing" to approve each one).',
+    'reviews_step2' => '<b>Guests leave a review</b> — right from your showcase (star rating + comment).',
+    'reviews_step3' => '<b>You moderate</b> — from the <b>"Guest reviews"</b> menu: approve, reject, <b>reply</b> or delete each review.',
+    'reviews_step4' => '<b>Automatic publishing</b> — an approved review instantly appears on your showcase, with your reply shown below it if any.',
+    'reviews_tip' => 'Replying to reviews (even critical ones) <b>builds trust</b> with future guests: show that you listen.',
 
     // Reports detail
     'reports_intro' => 'Drive your property\'s performance with clear numbers. <i>(Pro & Business plans)</i>',

@@ -132,10 +132,12 @@
         ['brand','fa-palette',__('guide.sec_brand'),__('guide.sec_brand_sub'),__('guide.sec_brand_desc')],
         ['rooms','fa-bed',__('guide.sec_rooms'),__('guide.sec_rooms_sub'),__('guide.sec_rooms_desc')],
         ['bookings','fa-calendar-check',__('guide.sec_bookings'),__('guide.sec_bookings_sub'),__('guide.sec_bookings_desc')],
+        ['precheckin','fa-mobile-screen-button',__('guide.sec_precheckin'),__('guide.sec_precheckin_sub'),__('guide.sec_precheckin_desc')],
         ['cashier','fa-cash-register',__('guide.sec_cashier'),__('guide.sec_cashier_sub'),__('guide.sec_cashier_desc')],
         ['housekeeping','fa-broom',__('guide.sec_housekeeping'),__('guide.sec_housekeeping_sub'),__('guide.sec_housekeeping_desc')],
         ['restaurant','fa-utensils',__('guide.sec_restaurant'),__('guide.sec_restaurant_sub'),__('guide.sec_restaurant_desc')],
         ['site','fa-globe',__('guide.sec_site'),__('guide.sec_site_sub'),__('guide.sec_site_desc')],
+        ['reviews','fa-star',__('guide.sec_reviews'),__('guide.sec_reviews_sub'),__('guide.sec_reviews_desc')],
         ['reports','fa-chart-line',__('guide.sec_reports'),__('guide.sec_reports_sub'),__('guide.sec_reports_desc')],
         ['staff','fa-user-tie',__('guide.sec_staff'),__('guide.sec_staff_sub'),__('guide.sec_staff_desc')],
         ['billing','fa-credit-card',__('guide.sec_billing'),__('guide.sec_billing_sub'),__('guide.sec_billing_desc')],
@@ -221,6 +223,19 @@
             <div class="tip"><i class="fas fa-lightbulb"></i><div>{!! __('guide.bookings_tip') !!}</div></div>
         </section>
 
+        <!-- Pré-check-in / Check-in en ligne -->
+        <section class="doc" id="precheckin">
+            <h2><span class="sico"><i class="fas fa-mobile-screen-button"></i></span> {{ __('guide.sec_precheckin') }}</h2>
+            <p>{!! __('guide.precheckin_intro') !!}</p>
+            <ol class="steps">
+                <li>{!! __('guide.precheckin_step1') !!}</li>
+                <li>{!! __('guide.precheckin_step2') !!}</li>
+                <li>{!! __('guide.precheckin_step3') !!}</li>
+                <li>{!! __('guide.precheckin_step4') !!}</li>
+            </ol>
+            <div class="tip"><i class="fas fa-lightbulb"></i><div>{!! __('guide.precheckin_tip') !!}</div></div>
+        </section>
+
         <!-- Cashier -->
         <section class="doc" id="cashier">
             <h2><span class="sico"><i class="fas fa-cash-register"></i></span> {{ __('guide.sec_cashier') }}</h2>
@@ -271,6 +286,19 @@
                 <li>{!! __('guide.site_step4') !!}</li>
             </ol>
             <div class="tip"><i class="fas fa-lightbulb"></i><div>{!! __('guide.site_tip') !!}</div></div>
+        </section>
+
+        <!-- Avis clients -->
+        <section class="doc" id="reviews">
+            <h2><span class="sico"><i class="fas fa-star"></i></span> {{ __('guide.sec_reviews') }}</h2>
+            <p>{!! __('guide.reviews_intro') !!}</p>
+            <ol class="steps">
+                <li>{!! __('guide.reviews_step1') !!}</li>
+                <li>{!! __('guide.reviews_step2') !!}</li>
+                <li>{!! __('guide.reviews_step3') !!}</li>
+                <li>{!! __('guide.reviews_step4') !!}</li>
+            </ol>
+            <div class="tip"><i class="fas fa-lightbulb"></i><div>{!! __('guide.reviews_tip') !!}</div></div>
         </section>
 
         <!-- Reports -->
