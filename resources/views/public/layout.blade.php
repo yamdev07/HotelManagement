@@ -179,6 +179,5 @@
     addEventListener('scroll', onScroll, { passive:true }); onScroll();
     toTop.onclick = () => scrollTo({ top:0, behavior:'smooth' });
 </script>
-@include('public.partials.assistant')
 </body>
 </html>

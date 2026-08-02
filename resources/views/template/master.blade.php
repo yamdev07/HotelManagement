@@ -672,5 +672,6 @@
         }
     })();
     </script>
+    @include('template.include.assistant')
 </body>
 </html>

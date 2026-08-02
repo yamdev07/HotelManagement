@@ -2,18 +2,23 @@
 
 namespace App\Services;
 
+use App\Enums\RoomStatus;
 use App\Models\Hotel;
+use App\Models\Payment;
+use App\Models\Review;
 use App\Models\Room;
+use App\Models\Transaction;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Assistant IA de la vitrine, propulsé par Groq (API compatible OpenAI).
+ * Assistant IA du back-office (app de gestion), propulsé par Groq
+ * (API compatible OpenAI).
  *
- * L'assistant ne connaît QUE les données réelles de l'hôtel (injectées dans le
- * prompt système) : il ne peut donc pas inventer de prix ou de prestations.
- * Non configuré (clé absente) => isConfigured() renvoie false et l'assistant
- * n'est pas affiché.
+ * Il aide l'hôtelier à utiliser l'application et répond sur l'état réel de son
+ * établissement (chambres libres, arrivées du jour, encaissements…), injecté
+ * dans le prompt système. Non configuré (clé absente) => l'assistant est masqué.
  */
 class AssistantService
 {
@@ -23,19 +28,19 @@ class AssistantService
     }
 
     /**
-     * Répond au dernier message du visiteur.
+     * Répond à l'utilisateur du back-office.
      *
-     * @param  array<int,array{role:string,content:string}>  $history  Historique court (visiteur/assistant).
+     * @param  array<int,array{role:string,content:string}>  $history
      * @return array{ok:bool,reply:string}
      */
-    public function reply(Hotel $hotel, array $history): array
+    public function reply(User $user, array $history): array
     {
         if (! $this->isConfigured()) {
             return ['ok' => false, 'reply' => "L'assistant n'est pas disponible pour le moment."];
         }
 
         $messages = array_merge(
-            [['role' => 'system', 'content' => $this->systemPrompt($hotel)]],
+            [['role' => 'system', 'content' => $this->systemPrompt($user)]],
             $this->sanitizeHistory($history),
         );
 
@@ -47,7 +52,7 @@ class AssistantService
                     'model' => config('services.groq.model'),
                     'messages' => $messages,
                     'temperature' => 0.3,
-                    'max_tokens' => 500,
+                    'max_tokens' => 600,
                 ]);
 
             if (! $response->successful()) {
@@ -70,67 +75,72 @@ class AssistantService
         }
     }
 
-    /** Contexte injecté : identité, prestations et chambres réelles de l'hôtel. */
-    private function systemPrompt(Hotel $hotel): string
+    /** Prompt système : rôle de l'assistant + état réel de l'établissement + repères de navigation. */
+    private function systemPrompt(User $user): string
     {
-        $rooms = Room::with('type')
-            ->where('room_status_id', '!=', 0)
-            ->orderBy('price')
-            ->get()
-            ->map(function (Room $r) {
-                $type = $r->type->name ?? 'Chambre';
-                $price = number_format((float) $r->price, 0, ',', ' ');
-
-                return "- {$type} (n°{$r->number}) : {$price} FCFA/nuit, {$r->capacity} pers. max";
-            })
-            ->implode("\n");
-
-        $services = collect($hotel->siteServices())
-            ->map(fn ($s) => is_array($s) ? ($s['title'] ?? null) : $s)
-            ->filter()
-            ->implode(', ');
+        $hotel = $user->hotel;
+        $hotelName = $hotel?->name ?? 'votre établissement';
 
         $lines = [
-            "Tu es l'assistant virtuel de l'hôtel « {$hotel->name} ». Tu réponds aux visiteurs de son site web.",
+            "Tu es l'assistant de gestion de l'application hôtelière checkinHub.",
+            "Tu aides {$user->name} ({$user->role}) à gérer l'hôtel « {$hotelName} ».",
             '',
             'RÈGLES :',
-            "- Réponds UNIQUEMENT à propos de cet hôtel, à partir des informations ci-dessous. N'invente jamais de prix, de chambre ou de service.",
-            "- Si tu ne sais pas, dis-le et invite à utiliser le formulaire de contact ou à réserver en ligne.",
-            "- Réponds dans la langue du visiteur (français ou anglais), de façon chaleureuse, concise et professionnelle.",
-            "- Pour réserver, invite à cliquer sur « Réserver » sur le site. Ne prétends pas enregistrer une réservation toi-même.",
-            "- Les prix sont en FCFA.",
+            "- Réponds de façon concise, professionnelle et actionnable, dans la langue de l'utilisateur (français ou anglais).",
+            "- Utilise les CHIFFRES ci-dessous pour répondre aux questions sur l'état de l'hôtel. Ne les invente jamais.",
+            "- Pour une action, indique clairement le menu où aller (voir NAVIGATION).",
+            "- Si une information n'est pas disponible, dis-le simplement.",
+            '- Les montants sont en FCFA.',
             '',
-            "INFORMATIONS SUR L'HÔTEL :",
-            "Nom : {$hotel->name}",
+            $this->liveSnapshot(),
+            '',
+            'NAVIGATION (où faire quoi dans l\'app) :',
+            '- Réservations, check-in (arrivée) et check-out (départ) : menu « Réservations ».',
+            '- Encaisser un paiement, ouvrir/clôturer la caisse : menu « Caisse ».',
+            '- Ajouter ou modifier une chambre : menu « Chambres ».',
+            '- Nettoyage des chambres : menu « Ménage ».',
+            '- Modérer les avis clients : menu « Avis clients ».',
+            '- Suivre les revenus et rapports : menu « Revenus ».',
+            '- Codes promo : menu « Codes promo ».',
+            '- Réglages de l\'hôtel et de la vitrine : « Mon établissement ».',
+            '- Gérer le personnel : menu « Personnel ».',
         ];
-
-        if ($hotel->address) {
-            $lines[] = "Adresse : {$hotel->address}";
-        }
-        if ($hotel->contact_phone) {
-            $lines[] = "Téléphone : {$hotel->contact_phone}";
-        }
-        if ($hotel->contact_email) {
-            $lines[] = "Email : {$hotel->contact_email}";
-        }
-        if ($hotel->about_text) {
-            $lines[] = "À propos : {$hotel->about_text}";
-        }
-        if ($services !== '') {
-            $lines[] = "Services : {$services}";
-        }
-        $lines[] = '';
-        $lines[] = 'CHAMBRES DISPONIBLES :';
-        $lines[] = $rooms !== '' ? $rooms : '(aucune chambre renseignée)';
-        $lines[] = '';
-        $lines[] = 'Check-in à partir de 12h, check-out avant 12h (indicatif).';
 
         return implode("\n", $lines);
     }
 
+    /** Instantané chiffré de l'établissement (scopé au tenant courant). */
+    private function liveSnapshot(): string
+    {
+        $today = today();
+
+        $roomsTotal = Room::count();
+        $available  = Room::where('room_status_id', RoomStatus::Available->value)->count();
+        $occupied   = Room::where('room_status_id', RoomStatus::Occupied->value)->count();
+        $toClean    = Room::whereIn('room_status_id', [RoomStatus::Dirty->value, RoomStatus::Cleaning->value])->count();
+
+        $arrivals   = Transaction::where('status', 'reservation')->whereDate('check_in', $today)->count();
+        $departures = Transaction::where('status', 'active')->whereDate('check_out', $today)->count();
+        $active     = Transaction::where('status', 'active')->count();
+
+        $pendingReviews = Review::pending()->count();
+
+        $revenueToday = (float) Payment::where('status', Payment::STATUS_COMPLETED)
+            ->whereDate('payment_date', $today)->sum('amount');
+        $revenueFmt = number_format($revenueToday, 0, ',', ' ');
+
+        return implode("\n", [
+            'ÉTAT ACTUEL DE L\'HÔTEL (aujourd\'hui '.$today->format('d/m/Y').') :',
+            "- Chambres : {$roomsTotal} au total · {$available} disponibles · {$occupied} occupées · {$toClean} à nettoyer.",
+            "- Arrivées prévues aujourd'hui : {$arrivals}.",
+            "- Départs prévus aujourd'hui : {$departures}.",
+            "- Séjours en cours : {$active}.",
+            "- Avis en attente de modération : {$pendingReviews}.",
+            "- Encaissé aujourd'hui : {$revenueFmt} FCFA.",
+        ]);
+    }
+
     /**
-     * Ne garde que les rôles user/assistant, limite la longueur et l'historique.
-     *
      * @param  array<int,mixed>  $history
      * @return array<int,array{role:string,content:string}>
      */

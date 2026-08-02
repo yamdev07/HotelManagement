@@ -434,7 +434,6 @@ html[data-theme="dark"] .settings-page {
                             'show_services'   => __('hotel-settings.section_services'),
                             'show_contact'    => __('hotel-settings.section_contact'),
                             'show_reviews'    => 'Avis clients',
-                            'show_assistant'  => 'Assistant IA',
                         ];
                     @endphp
                     @foreach ($sections as $field => $label)
