@@ -536,6 +536,75 @@
     border-color: var(--green-400);
     box-shadow: 0 0 0 3px rgb(from var(--g500) r g b / .1);
 }
+
+/* ══════════════════════════════════════════════
+   RAFFINEMENTS VISUELS (design only) + MODE SOMBRE
+══════════════════════════════════════════════ */
+/* Nuances de vert manquantes (dérivées de la couleur de marque) */
+.dash-page, #closeModal {
+    --green-200: color-mix(in srgb, var(--green-500) 26%, #fff);
+    --green-300: color-mix(in srgb, var(--green-500) 46%, #fff);
+    --green-400: color-mix(in srgb, var(--green-500) 68%, #fff);
+}
+
+/* Mode sombre — scopé à la page + modale (n'affecte pas la barre latérale) */
+html[data-theme="dark"] .dash-page,
+html[data-theme="dark"] #closeModal {
+    --white:#171d19; --surface:#0e1210;
+    --gray-50:#1c231e; --gray-100:#212822; --gray-200:#2b332d; --gray-300:#3b433d;
+    --gray-400:#6c756e; --gray-500:#9aa39c; --gray-600:#b7beb8; --gray-700:#d5dad6;
+    --gray-800:#e9eee9; --gray-900:#f4f7f4;
+    --red-50:rgba(248,113,113,.14); --red-100:rgba(248,113,113,.32); --red-500:#f87171; --red-600:#fca5a5;
+    --shadow-xs:0 1px 2px rgba(0,0,0,.3);
+    --shadow-sm:0 2px 12px rgba(0,0,0,.4);
+    --shadow-md:0 10px 30px rgba(0,0,0,.5);
+}
+html[data-theme="dark"] .dash-page { background: var(--surface); }
+
+/* Boutons : légère profondeur + retour au clic */
+.btn-green { box-shadow:0 8px 18px -8px var(--green-600); }
+.btn-red   { box-shadow:0 8px 18px -8px var(--red-500); }
+.btn:active { transform: translateY(0); }
+
+/* Cartes de stats : accent latéral au survol + chiffres monospace */
+.stat-card { box-shadow: var(--shadow-xs); position: relative; overflow: hidden; }
+.stat-card::after {
+    content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background: linear-gradient(var(--green-500), var(--green-600));
+    transform: scaleY(0); transform-origin: top; transition: transform .25s ease;
+}
+.stat-card:hover::after { transform: scaleY(1); }
+.stat-value { font-family:'DM Mono', ui-monospace, monospace; letter-spacing:-.5px; }
+
+/* Session active : dégradé subtil */
+.session-card.active { background: linear-gradient(135deg, var(--green-50), var(--white)); box-shadow: var(--shadow-sm); }
+.session-card.inactive { background: var(--gray-50); }
+
+/* Onglets : compteur lisible (corrige le blanc-sur-blanc) */
+.nav-tabs { box-shadow: var(--shadow-xs); }
+.nav-tab .badge { background: var(--gray-100); color: var(--gray-600); border: none; }
+.nav-tab.active .badge { background: rgba(255,255,255,.22); color:#fff; }
+
+/* ── Modale de clôture raffinée ── */
+.modal-content { background: var(--white); color: var(--gray-800); border:1px solid var(--gray-200); box-shadow:0 30px 70px -20px rgba(0,0,0,.4); overflow:hidden; }
+.modal-header { background: var(--gray-50); }
+.modal-title { font-weight:700; color: var(--gray-900); font-size:1.05rem; display:flex; align-items:center; }
+#closeModal .modal-title .fa-lock {
+    width:34px; height:34px; border-radius:10px; background: var(--red-50); color: var(--red-500);
+    display:inline-flex; align-items:center; justify-content:center; font-size:.95rem; margin-right:12px !important;
+}
+html[data-theme="dark"] #closeModal .btn-close { filter: invert(1) grayscale(1) brightness(1.6); }
+.alert-warning { font-size:.85rem; font-weight:500; align-items:center; }
+.summary-card { background: var(--white); box-shadow: var(--shadow-xs); padding:18px 20px; }
+.summary-card h6 { font-size:.68rem !important; text-transform:uppercase; letter-spacing:.05em; color:var(--gray-500); }
+.summary-item { padding:10px 0; font-size:.85rem; }
+.summary-item > span:first-child { color: var(--gray-500); }
+.summary-item > span:last-child { font-weight:600; }
+.modal-body .form-control { background: var(--white); color: var(--gray-800); padding:12px 14px; }
+.modal-body input[name="final_balance"] { font-family:'DM Mono', ui-monospace, monospace; font-size:1.2rem; font-weight:700; color: var(--gray-900); }
+.modal-footer .btn { padding:10px 22px; font-size:.85rem; }
+.modal-footer .btn-red { box-shadow:0 10px 22px -8px var(--red-500); }
+textarea.form-control { resize: vertical; }
 </style>
 @endpush
 
