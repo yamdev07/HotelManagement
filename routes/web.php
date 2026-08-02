@@ -89,6 +89,11 @@ Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(func
         ->middleware('throttle:6,1');
 });
 
+// Assistant IA de la vitrine (chat), limité pour maîtriser les coûts/abus.
+Route::post('/h/{slug}/assistant', [\App\Http\Controllers\AssistantController::class, 'chat'])
+    ->name('public.hotel.assistant')
+    ->middleware('throttle:20,1');
+
 // Flux iCal d'une chambre (export vers Booking.com / Airbnb), accès par jeton.
 Route::get('/calendar/{token}.ics', [\App\Http\Controllers\IcalController::class, 'export'])
     ->name('ical.export');

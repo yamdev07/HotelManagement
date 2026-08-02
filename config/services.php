@@ -54,4 +54,14 @@ return [
         'default_country' => env('WHATSAPP_DEFAULT_COUNTRY', '229'), // Bénin par défaut
     ],
 
+    /*
+    | Groq — assistant IA de la vitrine (API compatible OpenAI, très rapide).
+    | Clé sur https://console.groq.com. Non configuré (clé vide) => assistant masqué.
+    */
+    'groq' => [
+        'key' => env('GROQ_API_KEY'),
+        'model' => env('GROQ_MODEL', 'llama-3.3-70b-versatile'),
+        'base_url' => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
+    ],
+
 ];

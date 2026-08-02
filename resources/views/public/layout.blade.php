@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', $hotel->name)@hasSection('title') · {{ $hotel->name }}@endif</title>
     <meta name="description" content="{{ $hotel->tagline ?? $hotel->name }}">
     <link rel="icon" href="{{ $hotel->logoUrl() ?? asset('favicon.svg') }}">
@@ -178,5 +179,6 @@
     addEventListener('scroll', onScroll, { passive:true }); onScroll();
     toTop.onclick = () => scrollTo({ top:0, behavior:'smooth' });
 </script>
+@include('public.partials.assistant')
 </body>
 </html>
