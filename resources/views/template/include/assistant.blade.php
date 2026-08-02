@@ -105,25 +105,55 @@
     var busy = false;
 
     // ── Lecture vocale (synthèse du navigateur) ──
+    var ttsOK = ('speechSynthesis' in window) && ('SpeechSynthesisUtterance' in window);
     var speakOn = localStorage.getItem('aiaSpeak') === '1';
+    var voices = [];
+    function loadVoices() { if (ttsOK) { voices = window.speechSynthesis.getVoices() || []; } }
+    if (ttsOK) { loadVoices(); window.speechSynthesis.onvoiceschanged = loadVoices; }
+    var MALE_HINTS = ['david','mark','george','paul','henri','alain','claude','thomas','guillaume','male','homme','fritz','christopher','ryan','guy','eric','brian','james','william','antoine','nicolas','remy','jean'];
+    function isMale(v) { var n = (v.name || '').toLowerCase(); return MALE_HINTS.some(function (h) { return n.indexOf(h) > -1; }); }
+    function pickVoice(lang) {
+        if (!voices.length) loadVoices();
+        var p = lang.slice(0, 2).toLowerCase();
+        var forLang = voices.filter(function (v) { return v.lang && v.lang.toLowerCase().indexOf(p) === 0; });
+        return forLang.filter(isMale)[0]   // 1) voix d'homme dans la bonne langue (idéal)
+            || voices.filter(isMale)[0]     // 2) sinon n'importe quelle voix d'homme (l'utilisateur veut un homme)
+            || forLang[0]                   // 3) sinon une voix de la langue
+            || voices.filter(function (v) { return v.default; })[0]
+            || voices[0] || null;
+    }
+    function detectLang(text) {
+        return (/\b(the|you|your|are|room|hello|price|available|today|rooms)\b/i.test(text) && !/[àâçéèêëîïôûùü]/i.test(text)) ? 'en-US' : 'fr-FR';
+    }
     function renderSpeaker() {
         speakerBtn.classList.toggle('on', speakOn);
         speakerBtn.querySelector('i').className = speakOn ? 'fas fa-volume-high' : 'fas fa-volume-xmark';
     }
     renderSpeaker();
     function speak(text) {
-        if (!speakOn || !('speechSynthesis' in window)) return;
-        window.speechSynthesis.cancel();
-        var u = new SpeechSynthesisUtterance(text);
-        // Détection simple FR/EN pour la voix.
-        u.lang = (/\b(the|you|your|are|room|hello|price|available|today)\b/i.test(text) && !/[àâçéèêëîïôûùü]/i.test(text)) ? 'en-US' : 'fr-FR';
-        window.speechSynthesis.speak(u);
+        if (!speakOn || !ttsOK || !text) return;
+        try {
+            // On n'annule que si nécessaire (cancel()+speak() immédiat casse Chrome).
+            if (window.speechSynthesis.speaking || window.speechSynthesis.pending) window.speechSynthesis.cancel();
+            var lang = detectLang(text);
+            var u = new SpeechSynthesisUtterance(text);
+            u.lang = lang;
+            var v = pickVoice(lang);
+            if (v) u.voice = v;
+            u.rate = 1; u.pitch = 1; u.volume = 1;
+            window.speechSynthesis.speak(u); // synchrone => reste dans le geste utilisateur
+        } catch (e) {}
     }
     speakerBtn.addEventListener('click', function () {
         speakOn = !speakOn;
         localStorage.setItem('aiaSpeak', speakOn ? '1' : '0');
-        if (!speakOn && 'speechSynthesis' in window) window.speechSynthesis.cancel();
         renderSpeaker();
+        if (speakOn) {
+            if (!ttsOK) { bubble("La lecture vocale n'est pas supportée par ce navigateur.", 'bot'); return; }
+            speak('Lecture vocale activée.'); // retour immédiat (dans le geste => fiable)
+        } else if (ttsOK) {
+            window.speechSynthesis.cancel();
+        }
     });
 
     function toggle(open) {
