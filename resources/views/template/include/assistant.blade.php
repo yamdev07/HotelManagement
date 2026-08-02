@@ -64,6 +64,9 @@
     .aia-body{ flex:1; overflow-y:auto; padding:15px; display:flex; flex-direction:column; gap:10px; background:var(--aia-panel); }
     .aia-msg{ max-width:85%; padding:10px 13px; border-radius:13px; font-size:.9rem; line-height:1.5; white-space:pre-wrap; word-wrap:break-word; }
     .aia-bot{ align-self:flex-start; background:var(--aia-bot); color:var(--aia-ink); border-bottom-left-radius:4px; }
+    .aia-readbtn{ border:none; background:transparent; color:var(--aia); cursor:pointer; font-size:.78rem; margin-left:6px; padding:2px 6px; border-radius:6px; opacity:.5; transition:.15s; vertical-align:baseline; }
+    .aia-readbtn:hover{ opacity:1; background:color-mix(in srgb, var(--aia) 14%, transparent); }
+    .aia-readbtn.playing{ opacity:1; color:#dc2626; }
     .aia-user{ align-self:flex-end; background:var(--aia); color:#fff; border-bottom-right-radius:4px; }
     .aia-sugg{ display:flex; flex-wrap:wrap; gap:6px; }
     .aia-chip{ border:1px solid var(--aia-line); background:transparent; color:var(--aia); border-radius:100px; padding:6px 11px; font-size:.78rem; font-weight:600; cursor:pointer; transition:.15s; }
@@ -138,8 +141,9 @@
         speakerBtn.querySelector('i').className = speakOn ? 'fas fa-volume-high' : 'fas fa-volume-xmark';
     }
     renderSpeaker();
-    function speak(text) {
-        if (!speakOn || !ttsOK || !text) return;
+    // Lecture immédiate d'un texte (à la demande) — ignore le réglage auto.
+    function doSpeak(text, onDone) {
+        if (!ttsOK || !text) { if (onDone) onDone(); return; }
         try {
             // On n'annule que si nécessaire (cancel()+speak() immédiat casse Chrome).
             if (window.speechSynthesis.speaking || window.speechSynthesis.pending) window.speechSynthesis.cancel();
@@ -149,9 +153,12 @@
             var v = pickVoice(lang);
             if (v) u.voice = v;
             u.rate = 1; u.pitch = 1; u.volume = 1;
+            if (onDone) { u.onend = onDone; u.onerror = onDone; }
             window.speechSynthesis.speak(u); // synchrone => reste dans le geste utilisateur
-        } catch (e) {}
+        } catch (e) { if (onDone) onDone(); }
     }
+    // Lecture automatique (seulement si l'option est activée).
+    function speak(text) { if (speakOn) doSpeak(text); }
     speakerBtn.addEventListener('click', function () {
         speakOn = !speakOn;
         localStorage.setItem('aiaSpeak', speakOn ? '1' : '0');
@@ -175,7 +182,31 @@
     function bubble(text, who) {
         var d = document.createElement('div');
         d.className = 'aia-msg ' + (who === 'user' ? 'aia-user' : 'aia-bot');
-        d.textContent = text;
+        if (who !== 'bot' || !ttsOK) {
+            d.textContent = text;
+        } else {
+            // Message de l'assistant : texte + bouton « lire ce message ».
+            var span = document.createElement('span');
+            span.className = 'aia-msg-txt';
+            span.textContent = text;
+            var read = document.createElement('button');
+            read.className = 'aia-readbtn';
+            read.type = 'button';
+            read.title = 'Lire ce message';
+            read.setAttribute('aria-label', 'Lire ce message');
+            read.innerHTML = '<i class="fas fa-volume-high"></i>';
+            read.addEventListener('click', function () {
+                var wasPlaying = read.classList.contains('playing');
+                // Réinitialise les autres boutons + coupe la lecture en cours.
+                Array.prototype.forEach.call(body.querySelectorAll('.aia-readbtn.playing'), function (b) { b.classList.remove('playing'); });
+                if (ttsOK) window.speechSynthesis.cancel();
+                if (wasPlaying) return; // re-clic = stop
+                read.classList.add('playing');
+                doSpeak(text, function () { read.classList.remove('playing'); });
+            });
+            d.appendChild(span);
+            d.appendChild(read);
+        }
         body.appendChild(d);
         body.scrollTop = body.scrollHeight;
     }
