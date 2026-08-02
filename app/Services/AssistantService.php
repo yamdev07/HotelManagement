@@ -49,25 +49,32 @@ class AssistantService
         );
         $tools = $this->actions->definitions();
 
-        // Boucle d'appels d'outils (bornée) : le modèle peut enchaîner des
-        // lectures avant de répondre, ou proposer une écriture (-> confirmation).
+        // Boucle d'appels d'outils (bornée). Après un premier tour d'outils, on
+        // force une réponse en texte : certains modèles Llama réémettent sinon
+        // la syntaxe d'appel d'outil au lieu de répondre.
         for ($i = 0; $i < 4; $i++) {
-            $res = $this->call($messages, $tools);
+            $res = $this->call($messages, $tools, $i > 0);
             if (! $res['ok']) {
                 return ['ok' => false, 'reply' => $res['reply']];
             }
 
             $message = $res['message'];
+            $content = (string) ($message['content'] ?? '');
             $toolCalls = $message['tool_calls'] ?? [];
 
+            // Repli : certains modèles écrivent l'appel dans le texte
+            // (<function=nom>{...}</function>) au lieu du champ structuré.
             if (empty($toolCalls)) {
-                $text = trim((string) ($message['content'] ?? ''));
+                $toolCalls = $this->extractInlineToolCalls($content);
+            }
+
+            if (empty($toolCalls)) {
+                $text = $this->cleanContent($content);
 
                 return ['ok' => true, 'reply' => $text !== '' ? $text : "D'accord."];
             }
 
-            // On rejoue le message de l'assistant (avec ses tool_calls).
-            $messages[] = ['role' => 'assistant', 'content' => $message['content'] ?? '', 'tool_calls' => $toolCalls];
+            $messages[] = ['role' => 'assistant', 'content' => $this->cleanContent($content), 'tool_calls' => $toolCalls];
 
             foreach ($toolCalls as $tc) {
                 $name = $tc['function']['name'] ?? '';
@@ -79,7 +86,7 @@ class AssistantService
 
                     return [
                         'ok' => true,
-                        'reply' => trim((string) ($message['content'] ?? '')) ?: $summary,
+                        'reply' => $this->cleanContent($content) ?: $summary,
                         'pending' => ['tool' => $name, 'args' => $args, 'summary' => $summary],
                     ];
                 }
@@ -96,12 +103,39 @@ class AssistantService
         return ['ok' => true, 'reply' => "Je n'ai pas pu finaliser la réponse. Reformulez ?"];
     }
 
+    /** Extrait les appels d'outils écrits en texte (<function=nom>{...}</function>). */
+    private function extractInlineToolCalls(string $content): array
+    {
+        if (stripos($content, '<function') === false) {
+            return [];
+        }
+
+        preg_match_all('/<function\s*=\s*([a-zA-Z0-9_]+)\s*>\s*(\{[\s\S]*?\})?\s*<\/function>/', $content, $m, PREG_SET_ORDER);
+
+        $calls = [];
+        foreach ($m as $i => $set) {
+            $calls[] = [
+                'id' => 'inline_'.$i,
+                'type' => 'function',
+                'function' => ['name' => $set[1], 'arguments' => ($set[2] ?? '') !== '' ? $set[2] : '{}'],
+            ];
+        }
+
+        return $calls;
+    }
+
+    /** Retire les balises d'appel d'outil qui auraient fuité dans le texte. */
+    private function cleanContent(string $content): string
+    {
+        return trim((string) preg_replace('/<function[\s\S]*?<\/function>/', '', $content));
+    }
+
     /**
      * Un appel à l'API Groq (chat completions).
      *
      * @return array{ok:bool,message?:array,reply?:string}
      */
-    private function call(array $messages, array $tools): array
+    private function call(array $messages, array $tools, bool $forceText = false): array
     {
         try {
             $payload = [
@@ -112,7 +146,8 @@ class AssistantService
             ];
             if (! empty($tools)) {
                 $payload['tools'] = $tools;
-                $payload['tool_choice'] = 'auto';
+                // 'none' force une réponse en texte (après un 1er tour d'outils).
+                $payload['tool_choice'] = $forceText ? 'none' : 'auto';
             }
 
             $response = Http::withToken(config('services.groq.key'))

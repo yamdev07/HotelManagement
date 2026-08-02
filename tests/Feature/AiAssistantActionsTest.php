@@ -99,6 +99,24 @@ class AiAssistantActionsTest extends TestCase
         ])->assertOk()->assertJson(['ok' => true, 'reply' => 'Il y a 1 chambre disponible : la 101.']);
     }
 
+    public function test_inline_function_syntax_in_text_is_handled(): void
+    {
+        [$admin] = $this->make();
+        // Le modèle écrit l'appel dans le TEXTE (au lieu du champ structuré).
+        Http::fake(['api.groq.com/*' => Http::sequence()
+            ->push($this->finalText('<function=list_available_rooms>{}</function>'))
+            ->push($this->finalText('Il y a 1 chambre disponible : la 101.')),
+        ]);
+
+        $res = $this->actingAs($admin)->postJson(route('assistant.chat'), [
+            'messages' => [['role' => 'user', 'content' => 'chambres dispo ?']],
+        ])->assertOk();
+
+        $res->assertJson(['ok' => true, 'reply' => 'Il y a 1 chambre disponible : la 101.']);
+        // La syntaxe brute ne doit jamais apparaître.
+        $this->assertStringNotContainsString('<function', $res->json('reply'));
+    }
+
     public function test_write_action_returns_pending_without_executing(): void
     {
         [$admin, $room] = $this->make();
