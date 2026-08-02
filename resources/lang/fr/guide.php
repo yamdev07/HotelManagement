@@ -18,6 +18,9 @@ return [
     'sec_start' => 'Premiers pas',
     'sec_start_sub' => 'Après votre inscription',
     'sec_start_desc' => "Dès la validation de votre essai (ou de votre paiement), vous recevez vos identifiants par email · pensez à vérifier vos spams. Connectez-vous sur la page /login avec l'email et le mot de passe reçus.",
+    'sec_assistant' => 'Assistant IA',
+    'sec_assistant_sub' => 'Votre copilote de gestion',
+    'sec_assistant_desc' => "Un assistant intelligent, disponible sur toutes les pages, qui répond à vos questions sur l'état de l'hôtel et peut exécuter des actions pour vous.",
     'sec_process' => "Le parcours d'un séjour",
     'sec_process_sub' => 'Le processus métier au quotidien',
     'sec_process_desc' => "De la réservation au départ du client, puis à la remise en état de la chambre : voici le déroulé complet géré par l'application.",
@@ -65,6 +68,13 @@ return [
     'start_step3' => "<b>Personnalisez votre site</b> via l'assistant de bienvenue (nom, logo, couleurs).",
     'start_step4' => '<b>Ajoutez vos chambres</b> et commencez à enregistrer vos réservations.',
     'start_tip' => 'Changez votre mot de passe après la première connexion depuis <b>Profil → Changer le mot de passe</b>.',
+
+    'assistant_intro' => "En bas à droite de chaque page, la <b>bulle ✨ Assistant IA</b> est votre copilote. Il connaît l'état réel de votre hôtel (chambres libres, arrivées du jour, encaissements…), vous guide dans l'application, et peut même <b>exécuter des actions</b> à votre place.",
+    'assistant_step1' => "<b>Ouvrez l'assistant</b> — cliquez sur la bulle ✨ en bas à droite (présente sur toutes les pages du back-office).",
+    'assistant_step2' => "<b>Posez vos questions</b> — par exemple « Combien de chambres sont libres ? », « Qui arrive aujourd'hui ? », « Combien ai-je encaissé ? ». Il répond avec vos vrais chiffres.",
+    'assistant_step3' => "<b>Demandez des actions</b> — « Fais le check-in de la réservation 42 », « Marque la chambre 101 comme propre ». Une <b>confirmation</b> vous est demandée avant toute action, et il respecte vos permissions.",
+    'assistant_step4' => "<b>Au clavier ou à la voix</b> — écrivez, ou cliquez sur le <b>micro 🎤</b> pour parler. Le bouton 🔊 sur chaque réponse la lit à voix haute.",
+    'assistant_tip' => "L'assistant nécessite d'être activé par l'administrateur de la plateforme (clé IA). S'il n'apparaît pas, contactez le support.",
 
     // Process section
     'process_intro' => "Voici comment l'application accompagne le cycle de vie complet d'un séjour, de la réservation jusqu'à la remise en état de la chambre.",

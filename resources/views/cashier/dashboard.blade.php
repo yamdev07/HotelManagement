@@ -605,6 +605,46 @@ html[data-theme="dark"] #closeModal .btn-close { filter: invert(1) grayscale(1) 
 .modal-footer .btn { padding:10px 22px; font-size:.85rem; }
 .modal-footer .btn-red { box-shadow:0 10px 22px -8px var(--red-500); }
 textarea.form-control { resize: vertical; }
+
+/* ══════════════════════════════════════════════
+   CARTES DE STATS VIVANTES + PROFONDEUR (design only)
+══════════════════════════════════════════════ */
+.stats-grid { gap: 18px; }
+.stats-grid .stat-card {
+    padding: 22px 22px 18px;
+    border-radius: 18px;
+    border: 1px solid var(--gray-200);
+    box-shadow: 0 6px 22px -10px rgba(20,30,25,.14);
+}
+.stats-grid .stat-card:hover { transform: translateY(-4px); box-shadow: 0 14px 32px -12px rgba(20,30,25,.22); }
+/* on désactive l'ancien liseré au profit d'une pastille d'icône */
+.stats-grid .stat-card::after { display: none; }
+.stats-grid .stat-card::before {
+    font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 1.05rem;
+    position: absolute; top: 18px; right: 18px;
+    width: 44px; height: 44px; border-radius: 13px;
+    display: grid; place-items: center;
+}
+.stats-grid .stat-card:nth-child(1)::before { content:"\f274"; background: color-mix(in srgb, #6366f1 15%, transparent); color:#6366f1; }
+.stats-grid .stat-card:nth-child(2)::before { content:"\f51e"; background: color-mix(in srgb, #16a34a 15%, transparent); color:#16a34a; }
+.stats-grid .stat-card:nth-child(3)::before { content:"\f2f6"; background: color-mix(in srgb, #0ea5e9 15%, transparent); color:#0ea5e9; }
+.stats-grid .stat-card:nth-child(4)::before { content:"\f017"; background: color-mix(in srgb, #f59e0b 18%, transparent); color:#d97706; }
+
+/* Chiffres nets (plus de zéro barré du monospace) */
+.stat-value { font-family: var(--font); font-variant-numeric: tabular-nums; font-size: 2.15rem; letter-spacing: -1px; }
+.stat-label { letter-spacing: .06em; }
+
+/* Cartes/blocs : coins plus doux + ombres modernes */
+.session-card, .nav-tabs, .table-card { box-shadow: 0 6px 22px -12px rgba(20,30,25,.14); }
+.session-card.active { border-radius: 20px; }
+.session-card.inactive { border: 1.5px solid var(--gray-200); background: var(--white); }
+.session-icon { border-radius: 14px; }
+
+/* État vide : pastille à la couleur de marque */
+.empty-icon { background: color-mix(in srgb, var(--green-500) 12%, transparent); color: var(--green-600); }
+
+/* En-tête : léger fond dégradé */
+.dash-header { background: linear-gradient(180deg, color-mix(in srgb, var(--green-500) 5%, var(--white)), var(--white)); border-radius: 0 0 18px 18px; padding-left: 22px; padding-right: 22px; }
 </style>
 @endpush
 

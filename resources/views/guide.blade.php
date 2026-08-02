@@ -128,6 +128,7 @@
 @php
     $sections = [
         ['start','fa-flag-checkered',__('guide.sec_start'),__('guide.sec_start_sub'),__('guide.sec_start_desc')],
+        ['assistant','fa-wand-magic-sparkles',__('guide.sec_assistant'),__('guide.sec_assistant_sub'),__('guide.sec_assistant_desc')],
         ['process','fa-diagram-project',__('guide.sec_process'),__('guide.sec_process_sub'),__('guide.sec_process_desc')],
         ['brand','fa-palette',__('guide.sec_brand'),__('guide.sec_brand_sub'),__('guide.sec_brand_desc')],
         ['rooms','fa-bed',__('guide.sec_rooms'),__('guide.sec_rooms_sub'),__('guide.sec_rooms_desc')],
@@ -179,6 +180,19 @@
                 <li>{!! __('guide.start_step4') !!}</li>
             </ol>
             <div class="tip"><i class="fas fa-lightbulb"></i><div>{!! __('guide.start_tip') !!}</div></div>
+        </section>
+
+        <!-- Assistant IA -->
+        <section class="doc" id="assistant">
+            <h2><span class="sico"><i class="fas fa-wand-magic-sparkles"></i></span> {{ __('guide.sec_assistant') }}</h2>
+            <p>{!! __('guide.assistant_intro') !!}</p>
+            <ol class="steps">
+                <li>{!! __('guide.assistant_step1') !!}</li>
+                <li>{!! __('guide.assistant_step2') !!}</li>
+                <li>{!! __('guide.assistant_step3') !!}</li>
+                <li>{!! __('guide.assistant_step4') !!}</li>
+            </ol>
+            <div class="tip"><i class="fas fa-lightbulb"></i><div>{!! __('guide.assistant_tip') !!}</div></div>
         </section>
 
         <!-- Processus métier (détaillé) -->
