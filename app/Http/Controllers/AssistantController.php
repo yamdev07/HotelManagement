@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AssistantActions;
 use App\Services\AssistantService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,6 +31,7 @@ class AssistantController extends Controller
         return response()->json([
             'ok' => $result['ok'],
             'reply' => $result['reply'],
+            'pending' => $result['pending'] ?? null,
         ]);
     }
 
@@ -49,5 +51,26 @@ class AssistantController extends Controller
             'ok' => $result['ok'],
             'text' => $result['text'],
         ]);
+    }
+
+    /**
+     * Exécute une action confirmée par l'utilisateur (après proposition de l'IA).
+     * La sécurité repose ici : chaque action revérifie les permissions.
+     */
+    public function execute(Request $request, AssistantActions $actions): JsonResponse
+    {
+        abort_unless($this->assistant->isConfigured(), 404);
+
+        $data = $request->validate([
+            'tool' => ['required', 'string', 'max:60'],
+            'args' => ['array'],
+        ]);
+
+        // Seules les actions d'écriture connues passent par ici.
+        abort_unless($actions->isWrite($data['tool']), 422);
+
+        [$ok, $message] = $actions->execute($request->user(), $data['tool'], $data['args'] ?? []);
+
+        return response()->json(['ok' => $ok, 'message' => $message]);
     }
 }

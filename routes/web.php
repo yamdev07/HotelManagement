@@ -93,6 +93,7 @@ Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(func
 Route::middleware(['auth', 'throttle:30,1'])->group(function () {
     Route::post('/assistant/chat', [\App\Http\Controllers\AssistantController::class, 'chat'])->name('assistant.chat');
     Route::post('/assistant/transcribe', [\App\Http\Controllers\AssistantController::class, 'transcribe'])->name('assistant.transcribe');
+    Route::post('/assistant/execute', [\App\Http\Controllers\AssistantController::class, 'execute'])->name('assistant.execute');
 });
 
 // Flux iCal d'une chambre (export vers Booking.com / Airbnb), accès par jeton.

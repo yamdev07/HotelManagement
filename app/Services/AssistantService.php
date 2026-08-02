@@ -22,16 +22,20 @@ use Illuminate\Support\Facades\Log;
  */
 class AssistantService
 {
+    public function __construct(private AssistantActions $actions) {}
+
     public function isConfigured(): bool
     {
         return ! empty(config('services.groq.key'));
     }
 
     /**
-     * Répond à l'utilisateur du back-office.
+     * Répond à l'utilisateur du back-office. Peut déclencher des OUTILS :
+     * - lecture (liste chambres/arrivées) : exécutée directement,
+     * - écriture (check-in, ménage) : renvoyée en « pending » pour confirmation.
      *
      * @param  array<int,array{role:string,content:string}>  $history
-     * @return array{ok:bool,reply:string}
+     * @return array{ok:bool,reply:string,pending?:array{tool:string,args:array,summary:string}}
      */
     public function reply(User $user, array $history): array
     {
@@ -43,17 +47,77 @@ class AssistantService
             [['role' => 'system', 'content' => $this->systemPrompt($user)]],
             $this->sanitizeHistory($history),
         );
+        $tools = $this->actions->definitions();
 
+        // Boucle d'appels d'outils (bornée) : le modèle peut enchaîner des
+        // lectures avant de répondre, ou proposer une écriture (-> confirmation).
+        for ($i = 0; $i < 4; $i++) {
+            $res = $this->call($messages, $tools);
+            if (! $res['ok']) {
+                return ['ok' => false, 'reply' => $res['reply']];
+            }
+
+            $message = $res['message'];
+            $toolCalls = $message['tool_calls'] ?? [];
+
+            if (empty($toolCalls)) {
+                $text = trim((string) ($message['content'] ?? ''));
+
+                return ['ok' => true, 'reply' => $text !== '' ? $text : "D'accord."];
+            }
+
+            // On rejoue le message de l'assistant (avec ses tool_calls).
+            $messages[] = ['role' => 'assistant', 'content' => $message['content'] ?? '', 'tool_calls' => $toolCalls];
+
+            foreach ($toolCalls as $tc) {
+                $name = $tc['function']['name'] ?? '';
+                $args = json_decode($tc['function']['arguments'] ?? '{}', true) ?: [];
+
+                // Action d'écriture : on N'EXÉCUTE PAS, on demande confirmation.
+                if ($this->actions->isWrite($name)) {
+                    $summary = $this->actions->summary($name, $args);
+
+                    return [
+                        'ok' => true,
+                        'reply' => trim((string) ($message['content'] ?? '')) ?: $summary,
+                        'pending' => ['tool' => $name, 'args' => $args, 'summary' => $summary],
+                    ];
+                }
+
+                // Action de lecture : exécutée, résultat renvoyé au modèle.
+                $messages[] = [
+                    'role' => 'tool',
+                    'tool_call_id' => $tc['id'] ?? '',
+                    'content' => $this->actions->runRead($user, $name, $args),
+                ];
+            }
+        }
+
+        return ['ok' => true, 'reply' => "Je n'ai pas pu finaliser la réponse. Reformulez ?"];
+    }
+
+    /**
+     * Un appel à l'API Groq (chat completions).
+     *
+     * @return array{ok:bool,message?:array,reply?:string}
+     */
+    private function call(array $messages, array $tools): array
+    {
         try {
+            $payload = [
+                'model' => config('services.groq.model'),
+                'messages' => $messages,
+                'temperature' => 0.3,
+                'max_tokens' => 700,
+            ];
+            if (! empty($tools)) {
+                $payload['tools'] = $tools;
+                $payload['tool_choice'] = 'auto';
+            }
+
             $response = Http::withToken(config('services.groq.key'))
-                ->timeout(20)
-                ->acceptJson()
-                ->post(rtrim(config('services.groq.base_url'), '/').'/chat/completions', [
-                    'model' => config('services.groq.model'),
-                    'messages' => $messages,
-                    'temperature' => 0.3,
-                    'max_tokens' => 600,
-                ]);
+                ->timeout(25)->acceptJson()
+                ->post(rtrim(config('services.groq.base_url'), '/').'/chat/completions', $payload);
 
             if (! $response->successful()) {
                 Log::warning('Groq assistant: réponse non OK', ['status' => $response->status(), 'body' => $response->body()]);
@@ -61,13 +125,7 @@ class AssistantService
                 return ['ok' => false, 'reply' => "Désolé, je n'ai pas pu répondre. Réessayez dans un instant."];
             }
 
-            $text = trim((string) data_get($response->json(), 'choices.0.message.content', ''));
-
-            if ($text === '') {
-                return ['ok' => false, 'reply' => "Désolé, je n'ai pas de réponse. Réessayez dans un instant."];
-            }
-
-            return ['ok' => true, 'reply' => $text];
+            return ['ok' => true, 'message' => (array) data_get($response->json(), 'choices.0.message', [])];
         } catch (\Throwable $e) {
             Log::error('Groq assistant: exception', ['error' => $e->getMessage()]);
 
@@ -124,7 +182,9 @@ class AssistantService
             'RÈGLES :',
             "- Réponds de façon concise, professionnelle et actionnable, dans la langue de l'utilisateur (français ou anglais).",
             "- Utilise les CHIFFRES ci-dessous pour répondre aux questions sur l'état de l'hôtel. Ne les invente jamais.",
-            "- Pour une action, indique clairement le menu où aller (voir NAVIGATION).",
+            "- Tu peux EXÉCUTER certaines actions via les outils disponibles (lister les chambres/arrivées, faire un check-in, marquer une chambre propre). Utilise-les quand l'utilisateur le demande.",
+            "- Pour les actions qui modifient des données (check-in, ménage), une confirmation sera demandée automatiquement à l'utilisateur : appelle l'outil dès que la demande est claire, sans redemander toi-même.",
+            "- Pour ce qui n'est pas couvert par un outil, indique le menu où aller (voir NAVIGATION).",
             "- Si une information n'est pas disponible, dis-le simplement.",
             '- Les montants sont en FCFA.',
             '',

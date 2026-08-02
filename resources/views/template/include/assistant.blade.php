@@ -1,6 +1,6 @@
 @auth
 @if (! empty(config('services.groq.key')))
-<div id="aiAssistant" class="aia-wrap" data-endpoint="{{ route('assistant.chat') }}" data-transcribe="{{ route('assistant.transcribe') }}">
+<div id="aiAssistant" class="aia-wrap" data-endpoint="{{ route('assistant.chat') }}" data-transcribe="{{ route('assistant.transcribe') }}" data-execute="{{ route('assistant.execute') }}">
     <button type="button" class="aia-fab" id="aiaFab" aria-label="Assistant IA" title="Assistant IA">
         <i class="fas fa-wand-magic-sparkles"></i>
         <span class="aia-dot"></span>
@@ -68,6 +68,13 @@
     .aia-sugg{ display:flex; flex-wrap:wrap; gap:6px; }
     .aia-chip{ border:1px solid var(--aia-line); background:transparent; color:var(--aia); border-radius:100px; padding:6px 11px; font-size:.78rem; font-weight:600; cursor:pointer; transition:.15s; }
     .aia-chip:hover{ background:var(--aia); color:#fff; }
+    .aia-confirm{ align-self:stretch; background:var(--aia-bot); border:1px solid var(--aia-line); border-radius:13px; padding:12px 14px; }
+    .aia-confirm-txt{ font-size:.9rem; color:var(--aia-ink); line-height:1.45; }
+    .aia-confirm-txt i{ color:#d99e00; margin-right:4px; }
+    .aia-confirm-btns{ display:flex; gap:8px; justify-content:flex-end; margin-top:11px; }
+    .aia-cbtn{ border:1px solid var(--aia-line); background:transparent; color:var(--aia-ink2); border-radius:9px; padding:7px 14px; font-size:.83rem; font-weight:700; cursor:pointer; }
+    .aia-cbtn.ok{ background:var(--aia); color:#fff; border-color:transparent; }
+    .aia-cbtn:disabled{ opacity:.6; cursor:default; }
     .aia-typing{ align-self:flex-start; color:var(--aia-ink2); font-size:.85rem; padding:4px 2px; }
     .aia-typing span{ display:inline-block; width:6px; height:6px; margin:0 1px; border-radius:50%; background:currentColor; animation:aiaBlink 1.2s infinite; }
     .aia-typing span:nth-child(2){ animation-delay:.2s } .aia-typing span:nth-child(3){ animation-delay:.4s }
@@ -99,6 +106,7 @@
     var micBtn = document.getElementById('aiaMic');
     var speakerBtn = document.getElementById('aiaSpeaker');
     var transcribeUrl = wrap.dataset.transcribe;
+    var executeUrl = wrap.dataset.execute;
     var csrf = document.querySelector('meta[name="csrf-token"]');
     csrf = csrf ? csrf.getAttribute('content') : '';
     var history = [];
@@ -199,9 +207,46 @@
             bubble(reply, 'bot');
             if (d && d.ok) history.push({ role: 'assistant', content: reply });
             speak(reply);
+            if (d && d.pending) confirmCard(d.pending);
         })
         .catch(function () { typing(false); bubble("Erreur réseau. Réessayez.", 'bot'); })
         .finally(function () { busy = false; sendBtn.disabled = false; input.focus(); });
+    }
+
+    // Carte de confirmation avant une action qui modifie des données.
+    function confirmCard(pending) {
+        var card = document.createElement('div');
+        card.className = 'aia-confirm';
+        var txt = document.createElement('div');
+        txt.className = 'aia-confirm-txt';
+        txt.innerHTML = '<i class="fas fa-triangle-exclamation"></i> ' + (pending.summary || 'Confirmer cette action ?');
+        var btns = document.createElement('div');
+        btns.className = 'aia-confirm-btns';
+        var ok = document.createElement('button');
+        ok.className = 'aia-cbtn ok'; ok.innerHTML = '<i class="fas fa-check"></i> Confirmer';
+        var no = document.createElement('button');
+        no.className = 'aia-cbtn no'; no.textContent = 'Annuler';
+        btns.appendChild(no); btns.appendChild(ok);
+        card.appendChild(txt); card.appendChild(btns);
+        body.appendChild(card); body.scrollTop = body.scrollHeight;
+
+        no.addEventListener('click', function () { card.remove(); bubble('Action annulée.', 'bot'); });
+        ok.addEventListener('click', function () {
+            ok.disabled = true; no.disabled = true; ok.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            fetch(executeUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                body: JSON.stringify({ tool: pending.tool, args: pending.args || {} })
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (d) {
+                card.remove();
+                var msg = (d && d.message) ? d.message : ((d && d.ok) ? 'Action effectuée.' : "L'action a échoué.");
+                bubble(msg, 'bot'); speak(msg);
+                history.push({ role: 'assistant', content: msg });
+            })
+            .catch(function () { card.remove(); bubble("Erreur lors de l'exécution.", 'bot'); });
+        });
     }
 
     form.addEventListener('submit', function (e) {
