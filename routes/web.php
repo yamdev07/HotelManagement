@@ -89,7 +89,7 @@ Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(func
         ->middleware('throttle:6,1');
 });
 
-// Assistant IA du back-office (app de gestion) — réservé au personnel connecté.
+// Assistant IA du back-office (app de gestion), réservé au personnel connecté.
 Route::middleware(['auth', 'throttle:30,1'])->group(function () {
     Route::post('/assistant/chat', [\App\Http\Controllers\AssistantController::class, 'chat'])->name('assistant.chat');
     Route::post('/assistant/transcribe', [\App\Http\Controllers\AssistantController::class, 'transcribe'])->name('assistant.transcribe');
@@ -206,7 +206,7 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->prefix('canaux')->name('ch
 });
 
 // ==================== ABONNEMENT / PAIEMENT EN LIGNE (FedaPay) ====================
-// Accessible même si l'abonnement a expiré (régularisation) — cf. EnsureHotelActive.
+// Accessible même si l'abonnement a expiré (régularisation), cf. EnsureHotelActive.
 Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::get('/abonnement', [\App\Http\Controllers\BillingController::class, 'show'])->name('billing.show');
     Route::post('/abonnement/payer', [\App\Http\Controllers\BillingController::class, 'checkout'])->name('billing.checkout');
@@ -688,7 +688,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeep
             Route::delete('/categorie/{id}', [RestaurantCategoryController::class, 'destroy'])->name('categories.destroy');
         });
 
-        // Suivi des ventes — Super, Admin
+        // Suivi des ventes, Super, Admin
         Route::middleware('checkrole:Super,Admin')->group(function () {
             Route::get('/sales', [RestaurantController::class, 'sales'])->name('sales');
         });

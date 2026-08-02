@@ -2,7 +2,7 @@
 
 /*
 |--------------------------------------------------------------------------
-| Vitrine — images premium par défaut
+| Vitrine, images premium par défaut
 |--------------------------------------------------------------------------
 | Utilisées quand l'hôtelier n'a pas encore uploadé ses propres visuels,
 | pour que la vitrine soit toujours élégante (au lieu de blocs de couleur).

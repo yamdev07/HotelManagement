@@ -2,7 +2,7 @@
 
 return [
     // Page title
-    'page_title' => 'Compte Séjour – Chambre :room',
+    'page_title' => 'Compte Séjour - Chambre :room',
     'page_heading' => 'Compte Séjour · Chambre :room',
     'back' => 'Retour',
     'final_invoice' => 'Facture finale',

@@ -19,7 +19,7 @@ use Tests\TestCase;
  * Le motif est désormais obligatoire (traçabilité).
  *
  * NB : par règle métier existante (CheckAdminRestriction), seul le Super peut
- * annuler une réservation — c'est donc lui qu'on utilise ici.
+ * annuler une réservation, c'est donc lui qu'on utilise ici.
  */
 class ReservationCancellationTest extends TestCase
 {

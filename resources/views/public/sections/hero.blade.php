@@ -19,7 +19,7 @@
     .hero-cine .tag { font-weight:300; font-size:1.25rem; max-width:600px; margin:0 auto; opacity:.92; }
     .hero-badge { display:inline-flex; align-items:center; gap:.5rem; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.2); backdrop-filter:blur(8px); padding:.45rem 1.1rem; border-radius:100px; font-size:.82rem; letter-spacing:.06em; }
 
-    /* Barre de réservation — verre dépoli */
+    /* Barre de réservation, verre dépoli */
     .hero-search { margin:2.6rem auto 0; max-width:880px; background:rgba(255,255,255,.09); backdrop-filter:blur(18px);
         border:1px solid rgba(255,255,255,.22); border-radius:18px; padding:15px;
         display:grid; grid-template-columns:1fr 1fr .9fr auto; gap:12px; align-items:end; box-shadow:0 40px 90px -40px rgba(0,0,0,.7); }

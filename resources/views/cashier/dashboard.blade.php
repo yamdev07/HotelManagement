@@ -547,7 +547,7 @@
     --green-400: color-mix(in srgb, var(--green-500) 68%, #fff);
 }
 
-/* Mode sombre — scopé à la page + modale (n'affecte pas la barre latérale) */
+/* Mode sombre, scopé à la page + modale (n'affecte pas la barre latérale) */
 html[data-theme="dark"] .dash-page,
 html[data-theme="dark"] #closeModal {
     --white:#171d19; --surface:#0e1210;

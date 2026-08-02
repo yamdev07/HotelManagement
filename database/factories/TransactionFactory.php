@@ -12,7 +12,7 @@ class TransactionFactory extends Factory
 
     public function definition(): array
     {
-        // Lightweight defaults — no sub-factories so make() never touches the DB.
+        // Lightweight defaults, no sub-factories so make() never touches the DB.
         return [
             'user_id' => 1,
             'customer_id' => 1,

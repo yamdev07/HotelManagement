@@ -355,8 +355,8 @@
                     <h4>Horaires</h4>
                     <p>
                         Réception : <strong style="color:var(--cactus-green);">24h/24</strong><br>
-                        Restaurant : 7h – 23h<br>
-                        Spa : 8h – 21h
+                        Restaurant : 7h - 23h<br>
+                        Spa : 8h - 21h
                     </p>
                 </div>
             </div>

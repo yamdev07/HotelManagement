@@ -56,7 +56,7 @@ class AssistantActions
                 return "Check-in : réservation introuvable.";
             }
 
-            return "Faire le check-in de la réservation #{$tx->id} — "
+            return "Faire le check-in de la réservation #{$tx->id}, "
                 .($tx->customer->name ?? 'client').', chambre '.($tx->room->number ?? '?').'.';
         }
 
@@ -106,7 +106,7 @@ class AssistantActions
         }
 
         return $rooms->map(function (Room $r) {
-            return 'Chambre '.$r->number.' ('.($r->type->name ?? '').') — '
+            return 'Chambre '.$r->number.' ('.($r->type->name ?? '').'), '
                 .number_format((float) $r->price, 0, ',', ' ').' FCFA';
         })->implode("\n");
     }
@@ -122,7 +122,7 @@ class AssistantActions
         }
 
         return $txs->map(function (Transaction $t) {
-            return 'Réservation #'.$t->id.' — '.($t->customer->name ?? 'client')
+            return 'Réservation #'.$t->id.', '.($t->customer->name ?? 'client')
                 .', chambre '.($t->room->number ?? '?');
         })->implode("\n");
     }
@@ -145,7 +145,7 @@ class AssistantActions
         try {
             $this->checkIn->checkIn($tx);
 
-            return [true, '✅ Check-in effectué — chambre '.($tx->room->number ?? '?').'.'];
+            return [true, '✅ Check-in effectué, chambre '.($tx->room->number ?? '?').'.'];
         } catch (HotelException $e) {
             return [false, 'Impossible : '.$e->getMessage()];
         }

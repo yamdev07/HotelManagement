@@ -589,7 +589,7 @@
                         <div class="booking-footer">
                             <div class="info-row">
                                 <i class="fas fa-clock"></i>
-                                <span>Check-in : 15h00 – 22h00</span>
+                                <span>Check-in : 15h00 - 22h00</span>
                             </div>
                             <div class="info-row">
                                 <i class="fas fa-clock"></i>

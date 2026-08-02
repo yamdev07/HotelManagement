@@ -141,7 +141,7 @@
         speakerBtn.querySelector('i').className = speakOn ? 'fas fa-volume-high' : 'fas fa-volume-xmark';
     }
     renderSpeaker();
-    // Lecture immédiate d'un texte (à la demande) — ignore le réglage auto.
+    // Lecture immédiate d'un texte (à la demande), ignore le réglage auto.
     function doSpeak(text, onDone) {
         if (!ttsOK || !text) { if (onDone) onDone(); return; }
         try {

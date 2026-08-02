@@ -103,7 +103,7 @@ html[data-theme="dark"] .bill-page{
                 <i class="fas fa-clock" style="margin-top:2px"></i>
                 <div>Changement programmé : passage à la formule
                     <strong>{{ config('plans.tiers.'.$hotel->pending_plan.'.name', ucfirst($hotel->pending_plan)) }}</strong>
-                    le <strong>{{ $hotel->pending_plan_effective_at?->format('d/m/Y') ?? '—' }}</strong>.
+                    le <strong>{{ $hotel->pending_plan_effective_at?->format('d/m/Y') ?? '-' }}</strong>.
                     Vous gardez votre formule actuelle jusque-là.</div>
             </div>
             <form method="POST" action="{{ route('billing.cancelChange') }}">
@@ -122,7 +122,7 @@ html[data-theme="dark"] .bill-page{
         </div>
         <div class="stat">
             <div class="lbl">{{ __('billing.card_due_date') }}</div>
-            <div class="val">{{ $hotel->subscription_ends_at?->format('d/m/Y') ?? '—' }}</div>
+            <div class="val">{{ $hotel->subscription_ends_at?->format('d/m/Y') ?? '-' }}</div>
             <div class="sub {{ $expired ? 'bad' : '' }}">
                 @if ($expired) {{ __('billing.card_expired') }}
                 @elseif ($daysLeft !== null) {{ __('billing.card_days_left', ['count' => $daysLeft]) }} @endif

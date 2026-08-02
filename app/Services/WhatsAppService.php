@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
  * Principe (comme FedaPayService) : tout passe par le client HTTP de Laravel,
  * aucun SDK à installer (déploiement FTP). Le service est « gated » par la
  * config : si le token/phone_id ne sont pas renseignés, aucun envoi n'est
- * tenté (dégradation silencieuse) — le tunnel de réservation n'est jamais
+ * tenté (dégradation silencieuse), le tunnel de réservation n'est jamais
  * bloqué par WhatsApp.
  *
  * Doc : https://developers.facebook.com/docs/whatsapp/cloud-api

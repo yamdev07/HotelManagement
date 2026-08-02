@@ -13,7 +13,7 @@ class NotificationsController extends Controller
         $user = auth()->user();
 
         // Issue #198 : on capture les notifications NON LUES avant de les marquer
-        // lues, pour pouvoir les mettre en avant (« Nouveau ») sur cette page —
+        // lues, pour pouvoir les mettre en avant (« Nouveau ») sur cette page -
         // tout en vidant le badge rouge (issue #196).
         $newIds = $user->unreadNotifications->pluck('id')->all();
 

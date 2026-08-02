@@ -60,7 +60,7 @@
             </div>
         @else
             <p class="text-center serif" style="opacity:.7;font-size:1.15rem;" data-aos="fade-up">
-                Aucun avis pour le moment — soyez le premier à partager votre expérience.
+                Aucun avis pour le moment, soyez le premier à partager votre expérience.
             </p>
         @endif
 

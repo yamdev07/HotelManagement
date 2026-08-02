@@ -438,7 +438,7 @@
                     </p>
                     <div class="hero-stats-bar">
                         <div class="hero-stat-item">
-                            <div class="num">7h–23h</div>
+                            <div class="num">7h-23h</div>
                             <div class="lbl">Horaires</div>
                         </div>
                         <div class="hero-stat-item">
@@ -498,15 +498,15 @@
                     <ul class="horaires-list mb-4">
                         <li>
                             <span class="service"><i class="fas fa-coffee"></i>Petit-déjeuner</span>
-                            <span class="hours">7h00 – 11h00</span>
+                            <span class="hours">7h00 - 11h00</span>
                         </li>
                         <li>
                             <span class="service"><i class="fas fa-sun"></i>Déjeuner</span>
-                            <span class="hours">12h00 – 15h00</span>
+                            <span class="hours">12h00 - 15h00</span>
                         </li>
                         <li>
                             <span class="service"><i class="fas fa-moon"></i>Dîner</span>
-                            <span class="hours">19h00 – 23h00</span>
+                            <span class="hours">19h00 - 23h00</span>
                         </li>
                         <li>
                             <span class="service"><i class="fas fa-concierge-bell"></i>Room Service</span>

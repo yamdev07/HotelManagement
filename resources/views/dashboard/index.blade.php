@@ -4,7 +4,7 @@
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   Dashboard — design épuré (maquette validée). Ne cible que les
+   Dashboard, design épuré (maquette validée). Ne cible que les
    classes déjà présentes dans le markup : aucune donnée/route/i18n
    touchée. Accent = couleur de l'hôtel (--g*), thème clair & sombre.
    ═══════════════════════════════════════════════════════════════ */

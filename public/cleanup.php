@@ -2,7 +2,7 @@
 
 /*
 |--------------------------------------------------------------------------
-| checkinHub — Nettoyage (garde uniquement Cactus Hotel)
+| checkinHub, Nettoyage (garde uniquement Cactus Hotel)
 |--------------------------------------------------------------------------
 | À UPLOADER dans web/ puis visiter :
 |     https://demo.anyxtech.com/cleanup.php?key=checkinhub-cleanup-2026

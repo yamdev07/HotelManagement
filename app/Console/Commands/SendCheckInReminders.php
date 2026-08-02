@@ -24,7 +24,7 @@ class SendCheckInReminders extends Command
     public function handle(WhatsAppService $whatsapp): int
     {
         if (! $whatsapp->isConfigured()) {
-            $this->warn('WhatsApp non configuré (WHATSAPP_TOKEN/PHONE_ID) — aucun rappel envoyé.');
+            $this->warn('WhatsApp non configuré (WHATSAPP_TOKEN/PHONE_ID), aucun rappel envoyé.');
 
             return self::SUCCESS;
         }

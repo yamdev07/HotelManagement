@@ -310,7 +310,7 @@ class PublicSiteController extends Controller
     }
 
     /**
-     * LOT 1 — Recherche de disponibilité publique (voyageur sans compte).
+     * LOT 1, Recherche de disponibilité publique (voyageur sans compte).
      * Le tenant est fixé sur l'hôtel (resolve) : Room/Transaction sont scopés.
      */
     public function availability(Request $request, string $slug)
@@ -383,7 +383,7 @@ class PublicSiteController extends Controller
     }
 
     /**
-     * LOT 2 — Récapitulatif de réservation d'une chambre (dates, nuits, total, acompte)
+     * LOT 2, Récapitulatif de réservation d'une chambre (dates, nuits, total, acompte)
      * + formulaire des coordonnées du voyageur.
      */
     public function booking(Request $request, string $slug, $room)
@@ -436,7 +436,7 @@ class PublicSiteController extends Controller
         ]);
     }
 
-    /** LOT 2 — Enregistre la réservation (statut "reservation", en attente de paiement). */
+    /** LOT 2, Enregistre la réservation (statut "reservation", en attente de paiement). */
     public function storeBooking(Request $request, string $slug, $room)
     {
         $hotel = $this->resolve($slug);
@@ -508,7 +508,7 @@ class PublicSiteController extends Controller
         return redirect()->route('public.hotel.booking.confirmed', [$hotel->slug, $tx->id]);
     }
 
-    /** LOT 2 — Page de confirmation (référence + prochaines étapes). */
+    /** LOT 2, Page de confirmation (référence + prochaines étapes). */
     public function bookingConfirmed(string $slug, $transaction)
     {
         $hotel = $this->resolve($slug);
@@ -525,7 +525,7 @@ class PublicSiteController extends Controller
     }
 
     /**
-     * LOT 3 — Initie le paiement en ligne de l'acompte (FedaPay) et redirige
+     * LOT 3, Initie le paiement en ligne de l'acompte (FedaPay) et redirige
      * vers la page de paiement hébergée.
      */
     public function payDeposit(Request $request, string $slug, $transaction)
@@ -555,7 +555,7 @@ class PublicSiteController extends Controller
                 plan: 'reservation-deposit',
                 amount: $deposit,
                 currency: $hotel->currency ?: 'XOF',
-                description: "Acompte réservation {$ref} — {$hotel->name}",
+                description: "Acompte réservation {$ref}, {$hotel->name}",
                 callbackUrl: route('public.hotel.payment.return', [$hotel->slug, $tx->id]),
                 customerEmail: $tx->customer->email ?? 'client@example.com',
                 customerName: $tx->customer->name ?? 'Client',
@@ -577,7 +577,7 @@ class PublicSiteController extends Controller
     }
 
     /**
-     * LOT 3 — Retour de FedaPay : vérifie le statut ('approved') et enregistre
+     * LOT 3, Retour de FedaPay : vérifie le statut ('approved') et enregistre
      * l'acompte comme paiement en ligne (hors caisse) sur la réservation.
      */
     public function paymentReturn(Request $request, string $slug, $transaction)

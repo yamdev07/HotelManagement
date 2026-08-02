@@ -40,7 +40,7 @@ class GuestMessages
     /** Signature de l'établissement (nom + contact) apposée à chaque message. */
     private static function signature(Hotel $hotel): string
     {
-        $sig = "\n\n— *{$hotel->name}*";
+        $sig = "\n\n- *{$hotel->name}*";
         if (! empty($hotel->contact_phone)) {
             $sig .= "\n📞 {$hotel->contact_phone}";
         }

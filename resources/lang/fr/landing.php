@@ -18,7 +18,7 @@ return [
     'hero_badge' => 'Plateforme SaaS multi-établissements',
     'hero_title_1' => 'Gérez vos hôtels,',
     'hero_title_2' => 'sans la complexité.',
-    'hero_description' => 'Réservations, check-in, caisse, restaurant, housekeeping et rapports — le tout dans une seule plateforme, pour un hôtel comme pour tout un groupe.',
+    'hero_description' => 'Réservations, check-in, caisse, restaurant, housekeeping et rapports, le tout dans une seule plateforme, pour un hôtel comme pour tout un groupe.',
     'hero_cta_start' => 'Commencer gratuitement',
     'hero_cta_demo' => 'Voir une démo',
     'hero_check_1' => 'Sans engagement',

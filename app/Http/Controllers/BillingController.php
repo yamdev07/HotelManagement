@@ -80,7 +80,7 @@ class BillingController extends Controller
 
             return redirect()->route('billing.show')->with('success', __('flash.billing_downgrade_scheduled', [
                 'plan' => config('plans.tiers.'.$plan.'.name'),
-                'date' => $hotel->pending_plan_effective_at?->format('d/m/Y') ?? '—',
+                'date' => $hotel->pending_plan_effective_at?->format('d/m/Y') ?? '-',
             ]));
         }
 

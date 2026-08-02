@@ -31,7 +31,7 @@ return [
     ],
 
     /*
-    | FedaPay — paiement des abonnements SaaS (Afrique de l'Ouest).
+    | FedaPay, paiement des abonnements SaaS (Afrique de l'Ouest).
     | env : 'sandbox' (test) ou 'live' (production).
     | On appelle l'API REST via le client HTTP de Laravel (pas de SDK à installer).
     */
@@ -42,7 +42,7 @@ return [
     ],
 
     /*
-    | WhatsApp — notifications automatiques (Meta WhatsApp Cloud API, officiel/gratuit).
+    | WhatsApp, notifications automatiques (Meta WhatsApp Cloud API, officiel/gratuit).
     | On appelle l'API Graph via le client HTTP de Laravel (pas de SDK).
     | Non configuré (token/phone_id vides) => aucun envoi (dégradation silencieuse).
     | 'templates' : noms des modèles approuvés (envoi business-initiated). Vide => texte simple.
@@ -55,7 +55,7 @@ return [
     ],
 
     /*
-    | Groq — assistant IA de la vitrine (API compatible OpenAI, très rapide).
+    | Groq, assistant IA de la vitrine (API compatible OpenAI, très rapide).
     | Clé sur https://console.groq.com. Non configuré (clé vide) => assistant masqué.
     */
     'groq' => [

@@ -52,7 +52,7 @@
                 <div class="hd"><i class="fas fa-bed"></i> Votre séjour</div>
                 <div class="ci-body">
                     <div class="ci-recap">
-                        <span><i class="fas fa-door-closed"></i> {{ $tx->room->type->name ?? 'Chambre' }} · n°{{ $tx->room->number ?? '—' }}</span>
+                        <span><i class="fas fa-door-closed"></i> {{ $tx->room->type->name ?? 'Chambre' }} · n°{{ $tx->room->number ?? '-' }}</span>
                         <span><i class="fas fa-calendar-day"></i> {{ $ci->translatedFormat('d M') }} → {{ $co->translatedFormat('d M Y') }}</span>
                         <span><i class="fas fa-user"></i> {{ $tx->person_count }} voyageur{{ $tx->person_count > 1 ? 's' : '' }}</span>
                     </div>

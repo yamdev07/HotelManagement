@@ -27,7 +27,7 @@ return [
     */
     'default_country' => 'BJ',
 
-    // coef = multiplicateur appliqué au prix de base (Bénin) — intègre coût de la vie + devise.
+    // coef = multiplicateur appliqué au prix de base (Bénin), intègre coût de la vie + devise.
     // round = pas d'arrondi dans la devise du pays. Ajuste ces valeurs à ta convenance.
     'countries' => [
         'BJ' => ['name' => 'Bénin',           'currency' => 'XOF', 'coef' => 1.00,   'round' => 100],

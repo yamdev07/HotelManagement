@@ -2,7 +2,7 @@
 
 return [
     // Page title
-    'page_title' => 'Stay Account – Room :room',
+    'page_title' => 'Stay Account - Room :room',
     'page_heading' => 'Stay Account · Room :room',
     'back' => 'Back',
     'final_invoice' => 'Final Invoice',

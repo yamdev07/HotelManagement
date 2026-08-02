@@ -17,13 +17,13 @@ return [
     // Sections
     'sec_start' => 'Getting Started',
     'sec_start_sub' => 'After signing up',
-    'sec_start_desc' => 'Once your trial (or payment) is confirmed, you receive your credentials by email — check your spam folder. Log in at /login with the email and password you received.',
+    'sec_start_desc' => 'Once your trial (or payment) is confirmed, you receive your credentials by email, check your spam folder. Log in at /login with the email and password you received.',
     'sec_assistant' => 'AI Assistant',
     'sec_assistant_sub' => 'Your management copilot',
     'sec_assistant_desc' => 'A smart assistant, available on every page, that answers questions about your hotel and can perform actions for you.',
     'sec_process' => 'The Stay Lifecycle',
     'sec_process_sub' => 'The business process day to day',
-    'sec_process_desc' => 'From reservation to guest checkout and room cleaning — here is the complete workflow managed by the application.',
+    'sec_process_desc' => 'From reservation to guest checkout and room cleaning, here is the complete workflow managed by the application.',
     'sec_brand' => 'Customize Your Property',
     'sec_brand_sub' => 'Colors, logo & website',
     'sec_brand_desc' => 'On first login, a wizard helps you set your display name, logo and colors. You can return to it anytime from "My Property".',
@@ -70,10 +70,10 @@ return [
     'start_tip' => 'Change your password after first login from <b>Profile → Change Password</b>.',
 
     'assistant_intro' => "At the bottom-right of every page, the <b>✨ AI Assistant</b> bubble is your copilot. It knows your hotel's real status (free rooms, today's arrivals, revenue…), guides you through the app, and can even <b>perform actions</b> for you.",
-    'assistant_step1' => '<b>Open the assistant</b> — click the ✨ bubble at the bottom-right (on every back-office page).',
-    'assistant_step2' => '<b>Ask questions</b> — e.g. "How many rooms are free?", "Who arrives today?", "How much did I collect?". It answers with your real figures.',
-    'assistant_step3' => '<b>Request actions</b> — "Check in reservation 42", "Mark room 101 as clean". A <b>confirmation</b> is always asked before any action, and it respects your permissions.',
-    'assistant_step4' => '<b>Type or talk</b> — write, or click the <b>mic 🎤</b> to speak. The 🔊 button on each reply reads it aloud.',
+    'assistant_step1' => '<b>Open the assistant</b>, click the ✨ bubble at the bottom-right (on every back-office page).',
+    'assistant_step2' => '<b>Ask questions</b>, e.g. "How many rooms are free?", "Who arrives today?", "How much did I collect?". It answers with your real figures.',
+    'assistant_step3' => '<b>Request actions</b>, "Check in reservation 42", "Mark room 101 as clean". A <b>confirmation</b> is always asked before any action, and it respects your permissions.',
+    'assistant_step4' => '<b>Type or talk</b>, write, or click the <b>mic 🎤</b> to speak. The 🔊 button on each reply reads it aloud.',
     'assistant_tip' => 'The assistant must be enabled by the platform administrator (AI key). If it does not appear, contact support.',
 
     // Process section
@@ -103,11 +103,11 @@ return [
     'bookings_step5' => '<b>Check-out (departure)</b> · at departure, click <b>Check-out</b>. The final bill (room + extras) is calculated, then collected at the register. The room switches to "to clean".',
     'bookings_tip' => 'A guest arrives <b>without a reservation</b>? Use <b>direct check-in</b>: the reservation and arrival happen in one step.',
 
-    'precheckin_intro' => 'Online <b>pre-check-in</b> lets the guest <b>fill in their details before arrival</b>, via a link or QR code. At the front desk, everything is already entered — check-in takes seconds.',
+    'precheckin_intro' => 'Online <b>pre-check-in</b> lets the guest <b>fill in their details before arrival</b>, via a link or QR code. At the front desk, everything is already entered, check-in takes seconds.',
     'precheckin_step1' => 'Open an <b>upcoming reservation</b> and click <b>"Pre-check-in"</b> to get the link and QR code.',
-    'precheckin_step2' => '<b>Send it to the guest</b> — by WhatsApp, email or by showing the QR code. No account needed for the guest.',
-    'precheckin_step3' => '<b>The guest fills in</b> — name, phone, <b>ID document</b> and expected arrival time, from their phone.',
-    'precheckin_step4' => '<b>On arrival</b> — the details are already on the record (the "NIC/ID" is pre-filled): just confirm the arrival.',
+    'precheckin_step2' => '<b>Send it to the guest</b>, by WhatsApp, email or by showing the QR code. No account needed for the guest.',
+    'precheckin_step3' => '<b>The guest fills in</b>, name, phone, <b>ID document</b> and expected arrival time, from their phone.',
+    'precheckin_step4' => '<b>On arrival</b>, the details are already on the record (the "NIC/ID" is pre-filled): just confirm the arrival.',
     'precheckin_tip' => 'Perfect for <b>online bookings</b>: the guest books, pre-fills, then simply picks up their key on arrival.',
 
     // Cashier detail
@@ -120,41 +120,41 @@ return [
 
     // Housekeeping detail
     'housekeeping_intro' => 'The module tracks each room\'s state and organizes the cleaning team\'s work. <i>(Pro & Business plans)</i>',
-    'housekeeping_step1' => '<b>Find rooms to process</b> — Menu <b>Housekeeping</b>: after each departure, the room appears "to clean". You see at a glance what needs to be done.',
-    'housekeeping_step2' => '<b>Start cleaning</b> — when an agent begins, mark the room <b>"cleaning"</b>. The team knows what\'s in progress.',
-    'housekeeping_step3' => '<b>Mark "clean"</b> — once done, switch the room to <b>"clean / available"</b>: it becomes immediately reservable again.',
-    'housekeeping_step4' => '<b>Report maintenance</b> — if a room needs repair, set it to <b>"maintenance"</b> to make it unavailable during repairs.',
+    'housekeeping_step1' => '<b>Find rooms to process</b>, Menu <b>Housekeeping</b>: after each departure, the room appears "to clean". You see at a glance what needs to be done.',
+    'housekeeping_step2' => '<b>Start cleaning</b>, when an agent begins, mark the room <b>"cleaning"</b>. The team knows what\'s in progress.',
+    'housekeeping_step3' => '<b>Mark "clean"</b>, once done, switch the room to <b>"clean / available"</b>: it becomes immediately reservable again.',
+    'housekeeping_step4' => '<b>Report maintenance</b>, if a room needs repair, set it to <b>"maintenance"</b> to make it unavailable during repairs.',
     'housekeeping_tip' => 'The <b>dashboard</b> displays in real time the number of rooms to clean, to prioritize the day\'s arrivals.',
 
     // Restaurant detail
     'restaurant_intro' => 'Manage your menu, dine-in orders and room service. <i>(Pro & Business plans)</i>',
-    'restaurant_step1' => '<b>Create your menu</b> — Menu <b>Restaurant → Menus</b>: add your dishes (name, price) and organize them by <b>categories</b> (starters, mains, drinks…).',
-    'restaurant_step2' => '<b>Take an order</b> — create an order and assign it to a <b>table</b> or a <b>room</b> (room service).',
-    'restaurant_step3' => '<b>Track service</b> — the order progresses through statuses (pending, preparing, served), visible to the team.',
-    'restaurant_step4' => '<b>Bill it</b> — the amount is <b>added to the guest\'s bill</b> (room service, paid at checkout) or <b>collected directly at the register</b>.',
+    'restaurant_step1' => '<b>Create your menu</b>, Menu <b>Restaurant → Menus</b>: add your dishes (name, price) and organize them by <b>categories</b> (starters, mains, drinks…).',
+    'restaurant_step2' => '<b>Take an order</b>, create an order and assign it to a <b>table</b> or a <b>room</b> (room service).',
+    'restaurant_step3' => '<b>Track service</b>, the order progresses through statuses (pending, preparing, served), visible to the team.',
+    'restaurant_step4' => '<b>Bill it</b>, the amount is <b>added to the guest\'s bill</b> (room service, paid at checkout) or <b>collected directly at the register</b>.',
     'restaurant_tip' => 'A <b>room service</b> order is linked to the guest\'s current stay: everything is settled in one go at check-out.',
 
     // Site detail
     'site_intro' => 'Each property gets a <b>branded public mini-site</b> to showcase rooms and accept online reservations.',
-    'site_step1' => '<b>Enable sections</b> — from <b>My Property</b>, enable the pages you want (rooms, restaurant, services, contact).',
-    'site_step2' => '<b>Customize</b> — colors, logo, cover image, texts (about, services) and social media links.',
-    'site_step3' => '<b>Share the link</b> — your showcase has a <b>public URL</b>; share it with guests (social media, business card, WhatsApp).',
-    'site_step4' => '<b>Receive reservations</b> — visitors browse your rooms and book online; the reservation arrives directly in your dashboard.',
+    'site_step1' => '<b>Enable sections</b>, from <b>My Property</b>, enable the pages you want (rooms, restaurant, services, contact).',
+    'site_step2' => '<b>Customize</b>, colors, logo, cover image, texts (about, services) and social media links.',
+    'site_step3' => '<b>Share the link</b>, your showcase has a <b>public URL</b>; share it with guests (social media, business card, WhatsApp).',
+    'site_step4' => '<b>Receive reservations</b>, visitors browse your rooms and book online; the reservation arrives directly in your dashboard.',
     'site_tip' => 'The <b>"View my site"</b> button opens the showcase as your guests see it, to verify the result.',
 
     'reviews_intro' => '<b>Guest reviews</b> appear on your showcase (average rating + comments). You stay in control: when moderation is on, each review goes through you before being published.',
-    'reviews_step1' => '<b>Enable reviews</b> — from <b>My property → Showcase sections</b>, turn on "Guest reviews" (and "Moderate before publishing" to approve each one).',
-    'reviews_step2' => '<b>Guests leave a review</b> — right from your showcase (star rating + comment).',
-    'reviews_step3' => '<b>You moderate</b> — from the <b>"Guest reviews"</b> menu: approve, reject, <b>reply</b> or delete each review.',
-    'reviews_step4' => '<b>Automatic publishing</b> — an approved review instantly appears on your showcase, with your reply shown below it if any.',
+    'reviews_step1' => '<b>Enable reviews</b>, from <b>My property → Showcase sections</b>, turn on "Guest reviews" (and "Moderate before publishing" to approve each one).',
+    'reviews_step2' => '<b>Guests leave a review</b>, right from your showcase (star rating + comment).',
+    'reviews_step3' => '<b>You moderate</b>, from the <b>"Guest reviews"</b> menu: approve, reject, <b>reply</b> or delete each review.',
+    'reviews_step4' => '<b>Automatic publishing</b>, an approved review instantly appears on your showcase, with your reply shown below it if any.',
     'reviews_tip' => 'Replying to reviews (even critical ones) <b>builds trust</b> with future guests: show that you listen.',
 
     // Reports detail
     'reports_intro' => 'Drive your property\'s performance with clear numbers. <i>(Pro & Business plans)</i>',
-    'reports_step1' => '<b>Open Reports</b> — Menu <b>Reports</b>.',
-    'reports_step2' => '<b>Choose the period</b> — day, week or month, depending on what you want to analyze.',
-    'reports_step3' => '<b>Analyze</b> — <b>occupancy rate</b>, <b>revenue</b>, number of reservations and payment method breakdown.',
-    'reports_step4' => '<b>Decide</b> — adjust your rates and organization based on observed trends.',
+    'reports_step1' => '<b>Open Reports</b>, Menu <b>Reports</b>.',
+    'reports_step2' => '<b>Choose the period</b>, day, week or month, depending on what you want to analyze.',
+    'reports_step3' => '<b>Analyze</b>, <b>occupancy rate</b>, <b>revenue</b>, number of reservations and payment method breakdown.',
+    'reports_step4' => '<b>Decide</b>, adjust your rates and organization based on observed trends.',
     'reports_tip' => 'The <b>dashboard</b> already gives a daily overview (occupancy, revenue, arrivals/departures) without opening reports.',
 
     // Support

@@ -2,7 +2,7 @@
 
 /*
 |--------------------------------------------------------------------------
-| checkinHub — Installation via navigateur (hébergement FTP sans SSH)
+| checkinHub, Installation via navigateur (hébergement FTP sans SSH)
 |--------------------------------------------------------------------------
 | À UPLOADER dans web/  puis visiter :
 |     https://tondomaine/setup.php?key=checkinhub-setup-2026
@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
-echo "===== checkinHub — installation =====\n\n";
+echo "===== checkinHub, installation =====\n\n";
 
 echo "0) Rafraîchissement des caches (config/routes/vues)...\n";
 foreach (['config:clear', 'route:clear', 'view:clear'] as $cmd) {

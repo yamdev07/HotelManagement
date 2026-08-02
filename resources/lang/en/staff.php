@@ -30,7 +30,7 @@ return [
     'form_email' => 'Email * <span class="text-muted">(login identifier)</span>',
     'form_phone' => 'Phone',
     'form_role' => 'Role *',
-    'form_role_placeholder' => '— Choose —',
+    'form_role_placeholder' => '- Choose -',
     'form_password' => 'Password *',
     'form_password_placeholder' => '8+ chars, letters + numbers',
 

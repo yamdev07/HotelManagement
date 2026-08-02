@@ -119,11 +119,11 @@ html[data-theme="dark"] .promo-page{
                         <tr>
                             <td><span class="code">{{ $c->code }}</span></td>
                             <td><span class="disc">{{ $c->label() }}{{ $c->type === 'fixed' ? ' '.($currentHotel->currency ?? 'XOF') : '' }}</span></td>
-                            <td>{{ $c->min_nights > 1 ? $c->min_nights.' nuits min.' : '—' }}</td>
+                            <td>{{ $c->min_nights > 1 ? $c->min_nights.' nuits min.' : '-' }}</td>
                             <td>
                                 @if ($c->starts_at || $c->ends_at)
                                     {{ $c->starts_at?->format('d/m/y') ?? '…' }} → {{ $c->ends_at?->format('d/m/y') ?? '…' }}
-                                @else — @endif
+                                @else, @endif
                             </td>
                             <td>{{ $c->used_count }}{{ $c->max_uses ? ' / '.$c->max_uses : '' }}</td>
                             <td><span class="pill {{ $c->is_active ? 'on' : 'off' }}">{{ $c->is_active ? 'Actif' : 'Inactif' }}</span></td>

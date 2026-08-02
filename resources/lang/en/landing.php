@@ -18,7 +18,7 @@ return [
     'hero_badge' => 'Multi-property SaaS platform',
     'hero_title_1' => 'Manage your hotels,',
     'hero_title_2' => 'without the complexity.',
-    'hero_description' => 'Reservations, check-in, cashier, restaurant, housekeeping and reports — all in a single platform, for one hotel or an entire group.',
+    'hero_description' => 'Reservations, check-in, cashier, restaurant, housekeeping and reports, all in a single platform, for one hotel or an entire group.',
     'hero_cta_start' => 'Get started for free',
     'hero_cta_demo' => 'Watch a demo',
     'hero_check_1' => 'No commitment',

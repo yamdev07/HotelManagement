@@ -22,7 +22,7 @@ use Tests\TestCase;
  * départ (check-out), annulation.
  *
  * Le temps est figé à 13h00 aujourd'hui : le check-in est autorisé (>= 12h)
- * et le check-out l'est aussi (fenêtre 12h–14h).
+ * et le check-out l'est aussi (fenêtre 12h-14h).
  */
 class StayLifecycleTest extends TestCase
 {

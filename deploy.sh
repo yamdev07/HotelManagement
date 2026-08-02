@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Script de déploiement — à exécuter EN SSH depuis le dossier "private/"
+# Script de déploiement, à exécuter EN SSH depuis le dossier "private/"
 # (la racine Laravel sur le serveur), après avoir uploadé les fichiers.
 #
 #   Hébergement mutualisé type cPanel/DirectAdmin :
@@ -15,7 +15,7 @@ echo "==> 1. Dépendances PHP (prod)"
 if command -v composer >/dev/null 2>&1; then
     composer install --no-dev --optimize-autoloader --no-interaction
 else
-    echo "   composer introuvable — assure-toi d'avoir uploadé le dossier vendor/."
+    echo "   composer introuvable, assure-toi d'avoir uploadé le dossier vendor/."
 fi
 
 echo "==> 2. Assets front (Vite)"
@@ -25,7 +25,7 @@ if command -v npm >/dev/null 2>&1; then
     echo "   -> copie public/build vers la racine web/"
     mkdir -p ../web/build && cp -r public/build/* ../web/build/
 else
-    echo "   npm introuvable — build en local puis uploade public/build/ dans web/build/."
+    echo "   npm introuvable, build en local puis uploade public/build/ dans web/build/."
 fi
 
 echo "==> 3. Base de données (migrations)"
@@ -36,7 +36,7 @@ echo "==> 4. Lien symbolique du stockage (logos, couvertures)"
 if [ ! -e ../web/storage ]; then
     ln -s "$(pwd)/storage/app/public" ../web/storage \
         && echo "   -> lien créé : web/storage" \
-        || echo "   !! Impossible de créer le lien — crée-le à la main via le gestionnaire de fichiers."
+        || echo "   !! Impossible de créer le lien, crée-le à la main via le gestionnaire de fichiers."
 else
     echo "   -> web/storage existe déjà."
 fi

@@ -59,7 +59,7 @@ html[data-theme="dark"] .rev-page{
 <div class="rev-page">
     <div class="rev-head">
         <h1><span class="ic"><i class="fas fa-chart-line"></i></span> Revenus</h1>
-        <p>Pilotage financier de votre établissement — encaissements, occupation et tendances.</p>
+        <p>Pilotage financier de votre établissement, encaissements, occupation et tendances.</p>
     </div>
 
     {{-- Chiffres clés --}}
@@ -88,7 +88,7 @@ html[data-theme="dark"] .rev-page{
 
     {{-- Graphe 14 jours --}}
     <div class="panel">
-        <div class="hd"><i class="fas fa-chart-column" style="color:var(--acc)"></i> Encaissements — 14 derniers jours
+        <div class="hd"><i class="fas fa-chart-column" style="color:var(--acc)"></i> Encaissements, 14 derniers jours
             <small>max {{ $fmt($dailyMax) }} {{ $currency }}</small></div>
         <div class="bd">
             <div class="chart">

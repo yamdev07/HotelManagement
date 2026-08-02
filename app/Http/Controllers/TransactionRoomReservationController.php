@@ -55,8 +55,8 @@ class TransactionRoomReservationController extends Controller
         ]);
 
         // Issue #189 : si on revient en arrière modifier le client déjà saisi
-        // (customer_id transmis), on ÉDITE ce client — même si le nom/email a
-        // changé — au lieu d'en créer un doublon.
+        // (customer_id transmis), on ÉDITE ce client, même si le nom/email a
+        // changé, au lieu d'en créer un doublon.
         $existingCustomer = null;
         if ($request->filled('customer_id')) {
             $existingCustomer = Customer::find($request->input('customer_id'));

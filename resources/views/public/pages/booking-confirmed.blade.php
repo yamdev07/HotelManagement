@@ -56,7 +56,7 @@
             <div class="cf-card">
                 <div class="hd">Détails</div>
                 <div class="cf-body">
-                    <div class="cf-line"><span>Chambre</span> <strong>{{ $tx->room->type->name ?? 'Chambre' }} · n°{{ $tx->room->number ?? '—' }}</strong></div>
+                    <div class="cf-line"><span>Chambre</span> <strong>{{ $tx->room->type->name ?? 'Chambre' }} · n°{{ $tx->room->number ?? '-' }}</strong></div>
                     <div class="cf-line"><span>Arrivée</span> <strong>{{ $ci->translatedFormat('D d M Y') }}</strong></div>
                     <div class="cf-line"><span>Départ</span> <strong>{{ $co->translatedFormat('D d M Y') }}</strong></div>
                     <div class="cf-line"><span>Voyageurs</span> <strong>{{ $tx->person_count }}</strong></div>

@@ -600,7 +600,7 @@
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   SIDEBAR — design épuré clair (maquette). Comportement (repli 64px,
+   SIDEBAR, design épuré clair (maquette). Comportement (repli 64px,
    mobile, tooltips) préservé ; couleurs = neutres propres + accent de
    l'hôtel (--g*). Thème clair & sombre.
    ═══════════════════════════════════════════════════════════════ */
@@ -826,7 +826,7 @@ html[data-theme="dark"] .nav-item--logout:hover { background: #2a1714; color: #e
 @media (max-width: 380px) { .sidebar { width: 92vw; max-width: none; } }
 
 /* ═══════════ Popup de déconnexion (SweetAlert habillé, épuré, theme-aware) ═══════════ */
-/* On n'habille que l'apparence — les boutons restent gérés par SweetAlert (interaction OK). */
+/* On n'habille que l'apparence, les boutons restent gérés par SweetAlert (interaction OK). */
 .swal-logout { border-radius: 20px !important; font-family: 'DM Sans', system-ui, sans-serif !important; padding-bottom: 8px !important; }
 .swal-logout .swal2-icon { border: 0 !important; width: 62px; height: 62px;
   background: color-mix(in srgb, var(--g600, #2e8540) 15%, transparent) !important;

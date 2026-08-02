@@ -4,7 +4,7 @@
 
 @section('content')
 <style>
-/* ═══════════ Mon établissement — design épuré ═══════════ */
+/* ═══════════ Mon établissement, design épuré ═══════════ */
 .settings-page {
   --card:#fff; --page:#f8faf9; --line:#e9edea; --line2:#dce2de;
   --ink:#181d1a; --ink2:#5c655f; --ink3:#98a19b; --tint:#f4f7f5;
@@ -82,7 +82,7 @@ html[data-theme="dark"] .settings-page {
 .appear-opt .check { margin-left:auto; width:9px; height:9px; border-radius:50%; background:var(--acc); opacity:0; }
 .appear-opt.on .check { opacity:1; }
 
-/* Palette presets — cartes étiquetées (comme le screenshot) */
+/* Palette presets, cartes étiquetées (comme le screenshot) */
 .pal-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
 @media(max-width:560px){ .pal-grid { grid-template-columns:1fr 1fr; } }
 .pal-card {
@@ -96,7 +96,7 @@ html[data-theme="dark"] .settings-page {
 .pal-card.on { border-color:var(--acc); background:var(--acc-t); }
 .pal-card.on .pcheck { opacity:1; }
 
-/* Background — cartes vignettes */
+/* Background, cartes vignettes */
 .bg-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
 @media(max-width:900px){ .bg-grid { grid-template-columns:repeat(3,1fr); } }
 @media(max-width:640px){ .bg-grid { grid-template-columns:1fr 1fr; } }

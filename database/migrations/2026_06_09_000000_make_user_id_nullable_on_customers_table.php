@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Rend customers.user_id nullable : une fiche client peut exister sans compte
- * de connexion global (multi-tenant — le même client peut être présent dans
+ * de connexion global (multi-tenant, le même client peut être présent dans
  * plusieurs hôtels sans dupliquer un compte à email globalement unique).
  */
 return new class extends Migration

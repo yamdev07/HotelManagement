@@ -33,7 +33,7 @@ return new class extends Migration
             $table->boolean('is_active')->default(true);
             $table->timestamp('subscription_ends_at')->nullable();
 
-            // Propriétaire (admin de l'hôtel) — FK ajoutée après hotel_id sur users
+            // Propriétaire (admin de l'hôtel), FK ajoutée après hotel_id sur users
             $table->unsignedBigInteger('owner_user_id')->nullable();
 
             $table->json('metadata')->nullable();

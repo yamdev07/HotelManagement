@@ -17,7 +17,7 @@ class RoomSeeder extends Seeder
             ['room_id' => null, 'layout' => [], 'updated_by' => null],
         ];
 
-        // Rien à créer ici par défaut — les plans sont créés via l'interface admin.
+        // Rien à créer ici par défaut, les plans sont créés via l'interface admin.
         // Anciennement ce seeder créait des Room avec des noms de salles de restaurant,
         // ce qui était incorrect. Le modèle FloorPlan gère les plans de salle.
     }

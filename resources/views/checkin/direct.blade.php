@@ -734,7 +734,7 @@
                             </div>
                             <div style="font-size:.75rem;color:var(--slate-400);margin-top:5px;">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Arrivée – Départ du séjour
+                                Arrivée - Départ du séjour
                             </div>
                         </div>
                     </div>

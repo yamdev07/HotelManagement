@@ -146,7 +146,7 @@ return [
     'go_to_payment' => 'Go to payment',
     'cancel' => 'Cancel',
 
-    // Step 2 – Dates & persons
+    // Step 2 - Dates & persons
     'step2_page_title' => 'Number of guests',
     'step2_breadcrumb' => 'Dates & guests',
     'step2_title_1' => 'Dates &',
@@ -162,7 +162,7 @@ return [
     'js_past_arrival' => 'The arrival date is in the past: it will be refused at the next step.',
     'js_departure_before_arrival' => 'The departure date must be after the arrival date.',
 
-    // Step 3 – Choose room
+    // Step 3 - Choose room
     'step3_page_title' => 'Room selection',
     'step3_breadcrumb_room' => 'Choose room',
     'step3_title' => 'Choose a <em>room</em>',
@@ -191,7 +191,7 @@ return [
     'profile_birth' => 'Birthdate',
     'profile_address' => 'Address',
 
-    // Step 4 – Confirmation
+    // Step 4 - Confirmation
     'step4_page_title' => 'Reservation Confirmation',
     'step4_breadcrumb_confirm' => 'Confirmation',
     'step4_title_1' => 'Reservation',

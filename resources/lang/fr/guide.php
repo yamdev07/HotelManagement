@@ -70,10 +70,10 @@ return [
     'start_tip' => 'Changez votre mot de passe après la première connexion depuis <b>Profil → Changer le mot de passe</b>.',
 
     'assistant_intro' => "En bas à droite de chaque page, la <b>bulle ✨ Assistant IA</b> est votre copilote. Il connaît l'état réel de votre hôtel (chambres libres, arrivées du jour, encaissements…), vous guide dans l'application, et peut même <b>exécuter des actions</b> à votre place.",
-    'assistant_step1' => "<b>Ouvrez l'assistant</b> — cliquez sur la bulle ✨ en bas à droite (présente sur toutes les pages du back-office).",
-    'assistant_step2' => "<b>Posez vos questions</b> — par exemple « Combien de chambres sont libres ? », « Qui arrive aujourd'hui ? », « Combien ai-je encaissé ? ». Il répond avec vos vrais chiffres.",
-    'assistant_step3' => "<b>Demandez des actions</b> — « Fais le check-in de la réservation 42 », « Marque la chambre 101 comme propre ». Une <b>confirmation</b> vous est demandée avant toute action, et il respecte vos permissions.",
-    'assistant_step4' => "<b>Au clavier ou à la voix</b> — écrivez, ou cliquez sur le <b>micro 🎤</b> pour parler. Le bouton 🔊 sur chaque réponse la lit à voix haute.",
+    'assistant_step1' => "<b>Ouvrez l'assistant</b>, cliquez sur la bulle ✨ en bas à droite (présente sur toutes les pages du back-office).",
+    'assistant_step2' => "<b>Posez vos questions</b>, par exemple « Combien de chambres sont libres ? », « Qui arrive aujourd'hui ? », « Combien ai-je encaissé ? ». Il répond avec vos vrais chiffres.",
+    'assistant_step3' => "<b>Demandez des actions</b>, « Fais le check-in de la réservation 42 », « Marque la chambre 101 comme propre ». Une <b>confirmation</b> vous est demandée avant toute action, et il respecte vos permissions.",
+    'assistant_step4' => "<b>Au clavier ou à la voix</b>, écrivez, ou cliquez sur le <b>micro 🎤</b> pour parler. Le bouton 🔊 sur chaque réponse la lit à voix haute.",
     'assistant_tip' => "L'assistant nécessite d'être activé par l'administrateur de la plateforme (clé IA). S'il n'apparaît pas, contactez le support.",
 
     // Process section
@@ -104,10 +104,10 @@ return [
     'bookings_tip' => "Un client se présente <b>sans réservation</b> ? Utilisez le <b>check-in direct</b> : la réservation et l'arrivée se font en une seule étape.",
 
     'precheckin_intro' => "Le <b>pré-check-in</b> permet au client de <b>remplir ses informations avant son arrivée</b>, via un lien ou un QR code. Résultat : à l'accueil, tout est déjà saisi, le check-in prend quelques secondes.",
-    'precheckin_step1' => "<b>Ouvrez une réservation à venir</b> — sur sa fiche, cliquez sur <b>« Pré-check-in »</b> pour obtenir le lien et le QR code.",
-    'precheckin_step2' => "<b>Envoyez-le au client</b> — par WhatsApp, email ou en affichant le QR code. Aucun compte n'est nécessaire pour le client.",
-    'precheckin_step3' => "<b>Le client remplit</b> — nom, téléphone, <b>pièce d'identité</b> et heure d'arrivée prévue, depuis son téléphone.",
-    'precheckin_step4' => "<b>À l'arrivée</b> — les informations sont déjà sur la fiche (le « NIC/ID » est pré-rempli) : validez simplement l'arrivée.",
+    'precheckin_step1' => "<b>Ouvrez une réservation à venir</b>, sur sa fiche, cliquez sur <b>« Pré-check-in »</b> pour obtenir le lien et le QR code.",
+    'precheckin_step2' => "<b>Envoyez-le au client</b>, par WhatsApp, email ou en affichant le QR code. Aucun compte n'est nécessaire pour le client.",
+    'precheckin_step3' => "<b>Le client remplit</b>, nom, téléphone, <b>pièce d'identité</b> et heure d'arrivée prévue, depuis son téléphone.",
+    'precheckin_step4' => "<b>À l'arrivée</b>, les informations sont déjà sur la fiche (le « NIC/ID » est pré-rempli) : validez simplement l'arrivée.",
     'precheckin_tip' => "Idéal pour les <b>réservations en ligne</b> : le client réserve, pré-remplit, puis n'a plus qu'à récupérer sa clé en arrivant.",
 
     // Cashier detail
@@ -120,41 +120,41 @@ return [
 
     // Housekeeping detail
     'housekeeping_intro' => "Le module suit l'état de chaque chambre et organise le travail de l'équipe de ménage. <i>(Offres Pro & Business)</i>",
-    'housekeeping_step1' => 'Repérez les chambres à traiter — Menu <b>Housekeeping</b> : après chaque départ, la chambre apparaît « à nettoyer ». Vous voyez dun coup dœil ce quil reste à faire.',
-    'housekeeping_step2' => '<b>Démarrez le nettoyage</b> — quand un agent commence, marquez la chambre <b>« en nettoyage »</b>. L\'équipe sait ainsi ce qui est en cours.',
-    'housekeeping_step3' => '<b>Marquez « propre »</b> — une fois terminée, passez la chambre en <b>« propre / disponible »</b> : elle redevient immédiatement réservable.',
-    'housekeeping_step4' => '<b>Signalez la maintenance</b> — si une chambre nécessite une réparation, mettez-la en <b>« maintenance »</b> pour la rendre indisponible le temps des travaux.',
+    'housekeeping_step1' => 'Repérez les chambres à traiter, Menu <b>Housekeeping</b> : après chaque départ, la chambre apparaît « à nettoyer ». Vous voyez dun coup dœil ce quil reste à faire.',
+    'housekeeping_step2' => '<b>Démarrez le nettoyage</b>, quand un agent commence, marquez la chambre <b>« en nettoyage »</b>. L\'équipe sait ainsi ce qui est en cours.',
+    'housekeeping_step3' => '<b>Marquez « propre »</b>, une fois terminée, passez la chambre en <b>« propre / disponible »</b> : elle redevient immédiatement réservable.',
+    'housekeeping_step4' => '<b>Signalez la maintenance</b>, si une chambre nécessite une réparation, mettez-la en <b>« maintenance »</b> pour la rendre indisponible le temps des travaux.',
     'housekeeping_tip' => 'Le <b>tableau de bord</b> affiche en temps réel le nombre de chambres à nettoyer, pour prioriser les arrivées du jour.',
 
     // Restaurant detail
     'restaurant_intro' => 'Gérez votre carte, les commandes en salle et le service en chambre. <i>(Offres Pro & Business)</i>',
-    'restaurant_step1' => '<b>Créez votre carte</b> — Menu <b>Restaurant → Menus</b> : ajoutez vos plats (nom, prix) et organisez-les par <b>catégories</b> (entrées, plats, boissons…).',
-    'restaurant_step2' => '<b>Prenez une commande</b> — créez une commande et associez-la à une <b>table</b> ou à une <b>chambre</b> (room service).',
-    'restaurant_step3' => '<b>Suivez le service</b> — la commande évolue par statuts (en attente, en préparation, servie), visibles par l\'équipe.',
-    'restaurant_step4' => '<b>Facturez</b> — le montant s\'<b>ajoute à la note du client</b> (room service, réglé au départ) ou s\'<b>encaisse directement en caisse</b>.',
+    'restaurant_step1' => '<b>Créez votre carte</b>, Menu <b>Restaurant → Menus</b> : ajoutez vos plats (nom, prix) et organisez-les par <b>catégories</b> (entrées, plats, boissons…).',
+    'restaurant_step2' => '<b>Prenez une commande</b>, créez une commande et associez-la à une <b>table</b> ou à une <b>chambre</b> (room service).',
+    'restaurant_step3' => '<b>Suivez le service</b>, la commande évolue par statuts (en attente, en préparation, servie), visibles par l\'équipe.',
+    'restaurant_step4' => '<b>Facturez</b>, le montant s\'<b>ajoute à la note du client</b> (room service, réglé au départ) ou s\'<b>encaisse directement en caisse</b>.',
     'restaurant_tip' => 'Une commande en <b>room service</b> se rattache au séjour en cours du client : tout est réglé en une fois au check-out.',
 
     // Site detail
     'site_intro' => "Chaque établissement dispose d'un <b>mini-site public</b> à ses couleurs, pour présenter ses chambres et recevoir des réservations en ligne.",
-    'site_step1' => '<b>Activez les sections</b> — depuis <b>Mon établissement</b>, activez les pages voulues (chambres, restaurant, services, contact).',
-    'site_step2' => '<b>Personnalisez</b> — couleurs, logo, image de couverture, textes (à propos, services) et liens vers vos réseaux sociaux.',
-    'site_step3' => '<b>Partagez le lien</b> — votre vitrine a une <b>adresse publique</b> ; partagez-la à vos clients (réseaux, WhatsApp, carte de visite).',
-    'site_step4' => '<b>Recevez des réservations</b> — les visiteurs consultent vos chambres et réservent en ligne ; la réservation arrive directement dans votre espace.',
+    'site_step1' => '<b>Activez les sections</b>, depuis <b>Mon établissement</b>, activez les pages voulues (chambres, restaurant, services, contact).',
+    'site_step2' => '<b>Personnalisez</b>, couleurs, logo, image de couverture, textes (à propos, services) et liens vers vos réseaux sociaux.',
+    'site_step3' => '<b>Partagez le lien</b>, votre vitrine a une <b>adresse publique</b> ; partagez-la à vos clients (réseaux, WhatsApp, carte de visite).',
+    'site_step4' => '<b>Recevez des réservations</b>, les visiteurs consultent vos chambres et réservent en ligne ; la réservation arrive directement dans votre espace.',
     'site_tip' => 'Le bouton <b>« Voir mon site »</b> ouvre la vitrine telle que la voient vos clients, pour vérifier le rendu.',
 
     'reviews_intro' => "Les <b>avis clients</b> s'affichent sur votre vitrine (note moyenne + commentaires). Vous gardez la main : si la modération est activée, chaque avis passe par vous avant d'être publié.",
-    'reviews_step1' => "<b>Activez les avis</b> — depuis <b>Mon établissement → Sections vitrine</b>, activez « Avis clients » (et « Modérer avant publication » pour valider chaque avis).",
-    'reviews_step2' => '<b>Vos clients déposent un avis</b> — directement depuis votre vitrine (note en étoiles + commentaire).',
-    'reviews_step3' => "<b>Vous modérez</b> — depuis le menu <b>« Avis clients »</b> : approuvez, rejetez, <b>répondez</b> ou supprimez chaque avis.",
-    'reviews_step4' => '<b>Publication automatique</b> — un avis approuvé apparaît aussitôt sur votre vitrine, avec votre réponse éventuelle affichée dessous.',
+    'reviews_step1' => "<b>Activez les avis</b>, depuis <b>Mon établissement → Sections vitrine</b>, activez « Avis clients » (et « Modérer avant publication » pour valider chaque avis).",
+    'reviews_step2' => '<b>Vos clients déposent un avis</b>, directement depuis votre vitrine (note en étoiles + commentaire).',
+    'reviews_step3' => "<b>Vous modérez</b>, depuis le menu <b>« Avis clients »</b> : approuvez, rejetez, <b>répondez</b> ou supprimez chaque avis.",
+    'reviews_step4' => '<b>Publication automatique</b>, un avis approuvé apparaît aussitôt sur votre vitrine, avec votre réponse éventuelle affichée dessous.',
     'reviews_tip' => "Répondre aux avis (même critiques) <b>inspire confiance</b> aux futurs clients : montrez que vous êtes à l'écoute.",
 
     // Reports detail
     'reports_intro' => 'Pilotez la performance de votre établissement avec des chiffres clairs. <i>(Offres Pro & Business)</i>',
-    'reports_step1' => '<b>Ouvrez les Rapports</b> — Menu <b>Rapports</b>.',
-    'reports_step2' => '<b>Choisissez la période</b> — jour, semaine ou mois, selon ce que vous voulez analyser.',
-    'reports_step3' => '<b>Analysez</b> — <b>taux d\'occupation</b>, <b>revenus</b>, nombre de réservations et répartition des moyens de paiement.',
-    'reports_step4' => '<b>Décidez</b> — ajustez vos tarifs et votre organisation en fonction des tendances observées.',
+    'reports_step1' => '<b>Ouvrez les Rapports</b>, Menu <b>Rapports</b>.',
+    'reports_step2' => '<b>Choisissez la période</b>, jour, semaine ou mois, selon ce que vous voulez analyser.',
+    'reports_step3' => '<b>Analysez</b>, <b>taux d\'occupation</b>, <b>revenus</b>, nombre de réservations et répartition des moyens de paiement.',
+    'reports_step4' => '<b>Décidez</b>, ajustez vos tarifs et votre organisation en fonction des tendances observées.',
     'reports_tip' => "Le <b>tableau de bord</b> donne déjà un aperçu quotidien (occupation, chiffre d'affaires, arrivées/départs) sans ouvrir les rapports.",
 
     // Support

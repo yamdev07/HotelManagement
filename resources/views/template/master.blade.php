@@ -126,7 +126,7 @@
         .table-responsive { overflow-x: auto; }
 
         /* ═══════════════════════════════════════════════════
-   DARK MODE — JS resolves "system" → "dark" or "light"
+   DARK MODE, JS resolves "system" → "dark" or "light"
    ═══════════════════════════════════════════════════ */
 
         /* ── CSS Variables ── */
@@ -171,7 +171,7 @@
             --slate-900: #eef2ee;
             /* Échelle « green » (--green-*) : les teintes claires (50-300) donnaient des
                ronds/badges BLANCS en sombre -> on les rend sombres. Les verts moyens/foncés
-               (400-900) restent (accents, en-têtes) — lisibles sur fond sombre. */
+               (400-900) restent (accents, en-têtes), lisibles sur fond sombre. */
             --green-50:  #14181c;
             --green-100: #191f26;
             --green-200: #202834;
@@ -317,7 +317,7 @@
         document.documentElement.setAttribute('data-theme', resolved);
     })();
 
-    // Fond d'établissement (préférence locale par appareil) — appliqué sur toutes les pages
+    // Fond d'établissement (préférence locale par appareil), appliqué sur toutes les pages
     window.__APPBG = @json(collect(config('appearance.backgrounds', []))->map(fn ($b) => $b['css']));
     window.applyAppBg = function () {
         try {

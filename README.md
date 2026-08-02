@@ -3,7 +3,7 @@
 # 🏨 Hotel Management System
 
 **A production-grade hotel management platform built with Laravel.**
-Reservations, check-in/out, payments, housekeeping, and a public website — all in one system.
+Reservations, check-in/out, payments, housekeeping, and a public website, all in one system.
 
 [![Laravel](https://img.shields.io/badge/Laravel-10.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.1+-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
@@ -13,7 +13,7 @@ Reservations, check-in/out, payments, housekeeping, and a public website — all
 [![Lint](https://github.com/yamdev07/HotelManagement/actions/workflows/ci.yml/badge.svg)](https://github.com/yamdev07/HotelManagement/actions/workflows/ci.yml)
 [![Tests](https://github.com/yamdev07/HotelManagement/actions/workflows/tests.yml/badge.svg)](https://github.com/yamdev07/HotelManagement/actions/workflows/tests.yml)
 
-[🌐 Live Demo — lecactushotel.bj](https://lecactushotel.bj) · [🐛 Report a Bug](https://github.com/yamdev07/HotelManagement/issues) · [💡 Request Feature](https://github.com/yamdev07/HotelManagement/issues)
+[🌐 Live Demo, lecactushotel.bj](https://lecactushotel.bj) · [🐛 Report a Bug](https://github.com/yamdev07/HotelManagement/issues) · [💡 Request Feature](https://github.com/yamdev07/HotelManagement/issues)
 
 </div>
 
@@ -39,7 +39,7 @@ Reservations, check-in/out, payments, housekeeping, and a public website — all
 
 **Hotel Management System** is a full-featured, production-oriented platform currently live and used by **Cactus Hotel** ([lecactushotel.bj](https://lecactushotel.bj)).
 
-It covers both the **public-facing hotel website** for customers and a **secured back-office dashboard** for hotel staff — handling the entire operational lifecycle from room search to checkout.
+It covers both the **public-facing hotel website** for customers and a **secured back-office dashboard** for hotel staff, handling the entire operational lifecycle from room search to checkout.
 
 > ✅ Currently running in production. Not a demo project.
 
@@ -278,7 +278,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
 
 ## 📜 License
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License**, see the [LICENSE](LICENSE) file for details.
 
 ---
 

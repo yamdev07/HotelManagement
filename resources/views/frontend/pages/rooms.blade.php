@@ -818,7 +818,7 @@
                     <button class="btn-sort sort-btn" data-sort="price_asc">Prix ↑</button>
                     <button class="btn-sort sort-btn" data-sort="price_desc">Prix ↓</button>
                     <button class="btn-sort sort-btn" data-sort="capacity_desc">Capacité</button>
-                    <button class="btn-sort sort-btn" data-sort="name_asc">A–Z</button>
+                    <button class="btn-sort sort-btn" data-sort="name_asc">A-Z</button>
                 </div>
                 <div class="d-flex gap-1">
                     <button class="btn-view view-btn active" data-view="grid" title="Vue grille"><i class="fas fa-th-large"></i></button>
