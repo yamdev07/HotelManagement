@@ -433,6 +433,28 @@
 .security-note i {
     color: var(--green-500);
 }
+
+/* ══════════════════════════════════════════════
+   RAFFINEMENTS VISUELS (design only) + MODE SOMBRE
+══════════════════════════════════════════════ */
+.create-page {
+    --green-200: color-mix(in srgb, var(--green-500) 26%, #fff);
+    --green-300: color-mix(in srgb, var(--green-500) 46%, #fff);
+    --green-400: color-mix(in srgb, var(--green-500) 68%, #fff);
+}
+html[data-theme="dark"] .create-page {
+    --white:#171d19; --surface:#0e1210;
+    --gray-50:#1c231e; --gray-100:#212822; --gray-200:#2b332d; --gray-300:#3b433d;
+    --gray-400:#6c756e; --gray-500:#9aa39c; --gray-600:#b7beb8; --gray-700:#d5dad6;
+    --gray-800:#e9eee9; --gray-900:#f4f7f4;
+    --red-50:rgba(248,113,113,.14); --red-100:rgba(248,113,113,.32); --red-500:#f87171; --red-600:#fca5a5;
+    --shadow-xs:0 1px 2px rgba(0,0,0,.3); --shadow-sm:0 2px 12px rgba(0,0,0,.4); --shadow-md:0 10px 30px rgba(0,0,0,.5);
+    background: var(--surface);
+}
+.create-page .btn-green { box-shadow:0 8px 18px -8px var(--green-600); }
+.create-page .btn:active { transform: translateY(0); }
+.create-page .form-control { background: var(--white); color: var(--gray-800); }
+.create-page textarea.form-control { resize: vertical; }
 </style>
 @endpush
 

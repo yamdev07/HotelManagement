@@ -441,6 +441,54 @@
     border-color: var(--green-400);
     box-shadow: 0 0 0 3px rgb(from var(--g500) r g b / .1);
 }
+
+/* ══════════════════════════════════════════════
+   RAFFINEMENTS VISUELS (design only) + MODE SOMBRE
+══════════════════════════════════════════════ */
+.show-page, #closeModal {
+    --green-200: color-mix(in srgb, var(--green-500) 26%, #fff);
+    --green-300: color-mix(in srgb, var(--green-500) 46%, #fff);
+    --green-400: color-mix(in srgb, var(--green-500) 68%, #fff);
+}
+html[data-theme="dark"] .show-page,
+html[data-theme="dark"] #closeModal {
+    --white:#171d19; --surface:#0e1210;
+    --gray-50:#1c231e; --gray-100:#212822; --gray-200:#2b332d; --gray-300:#3b433d;
+    --gray-400:#6c756e; --gray-500:#9aa39c; --gray-600:#b7beb8; --gray-700:#d5dad6;
+    --gray-800:#e9eee9; --gray-900:#f4f7f4;
+    --red-50:rgba(248,113,113,.14); --red-100:rgba(248,113,113,.32); --red-500:#f87171; --red-600:#fca5a5;
+    --shadow-xs:0 1px 2px rgba(0,0,0,.3); --shadow-sm:0 2px 12px rgba(0,0,0,.4); --shadow-md:0 10px 30px rgba(0,0,0,.5);
+}
+html[data-theme="dark"] .show-page { background: var(--surface); }
+
+/* Boutons + cartes de stats */
+.show-page .btn-green { box-shadow:0 8px 18px -8px var(--green-600); }
+.show-page .btn-red   { box-shadow:0 8px 18px -8px var(--red-500); }
+.show-page .btn:active { transform: translateY(0); }
+.show-page .stat-card { box-shadow: var(--shadow-xs); position: relative; overflow: hidden; }
+.show-page .stat-card::after {
+    content:''; position:absolute; left:0; top:0; bottom:0; width:3px;
+    background: linear-gradient(var(--green-500), var(--green-600));
+    transform: scaleY(0); transform-origin: top; transition: transform .25s ease;
+}
+.show-page .stat-card:hover::after { transform: scaleY(1); }
+.show-page .stat-value { font-family:'DM Mono', ui-monospace, monospace; letter-spacing:-.5px; }
+.show-page .summary-box { box-shadow: var(--shadow-xs); }
+.show-page .form-control { background: var(--white); color: var(--gray-800); }
+.show-page textarea.form-control { resize: vertical; }
+
+/* Modale de clôture (identique au dashboard) */
+#closeModal .modal-content { background: var(--white); color: var(--gray-800); border:1px solid var(--gray-200); box-shadow:0 30px 70px -20px rgba(0,0,0,.4); overflow:hidden; }
+#closeModal .modal-header { background: var(--gray-50); }
+#closeModal .modal-title { font-weight:700; color: var(--gray-900); display:flex; align-items:center; }
+#closeModal .modal-title .fa-lock {
+    width:34px; height:34px; border-radius:10px; background: var(--red-50); color: var(--red-500);
+    display:inline-flex; align-items:center; justify-content:center; font-size:.95rem; margin-right:12px !important;
+}
+#closeModal .modal-body .form-control { background: var(--white); color: var(--gray-800); }
+#closeModal input[name="final_balance"] { font-family:'DM Mono', ui-monospace, monospace; font-size:1.15rem; font-weight:700; color: var(--gray-900); }
+#closeModal .modal-footer .btn-red { box-shadow:0 10px 22px -8px var(--red-500); }
+html[data-theme="dark"] #closeModal .btn-close { filter: invert(1) grayscale(1) brightness(1.6); }
 </style>
 @endpush
 
