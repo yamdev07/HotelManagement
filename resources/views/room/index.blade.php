@@ -562,11 +562,12 @@
 
     <!-- Statistiques -->
     @php
-        $totalRooms = $rooms->total();
-        $availableRooms = $rooms->where('roomStatus.name', 'Available')->count();
-        $occupiedRooms = $rooms->where('roomStatus.name', 'Occupied')->count();
-        $maintenanceRooms = $rooms->where('roomStatus.name', 'Maintenance')->count();
-        $dirtyRooms = $rooms->where('roomStatus.name', 'Dirty')->count();
+        // Comptes calculés côté serveur sur TOUTES les chambres (voir RoomController).
+        $totalRooms = $statusCounts['total'] ?? $rooms->total();
+        $availableRooms = $statusCounts['available'] ?? 0;
+        $occupiedRooms = $statusCounts['occupied'] ?? 0;
+        $maintenanceRooms = $statusCounts['maintenance'] ?? 0;
+        $dirtyRooms = $statusCounts['dirty'] ?? 0;
     @endphp
 
     <div class="stats-grid anim-2">

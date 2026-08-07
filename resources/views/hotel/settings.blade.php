@@ -13,9 +13,9 @@
   --acc2: var(--g500, #2e8540);
   --acc-t: color-mix(in srgb, var(--g500, #2e8540) 13%, var(--card));
   --r:12px; --r-sm:9px; --sh:0 1px 2px rgba(20,40,30,.05);
-  display:flex; flex-direction:column; gap:18px;
+  display:flex; flex-direction:column; gap:22px;
   font-family:'DM Sans',system-ui,sans-serif; color:var(--ink);
-  max-width:1080px;
+  width:100%;   /* remplit le panneau, plus de vide à droite */
 }
 html[data-theme="dark"] .settings-page {
   --card:#161b18; --page:#0f1311; --line:#262e29; --line2:#323b35;

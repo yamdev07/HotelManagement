@@ -42,10 +42,22 @@ class RoomController extends Controller
                 ->where('check_out', '>=', now());
         }])->paginate(10);
 
+        // Comptes par statut sur TOUTES les chambres (et pas seulement la page
+        // courante paginée) -> les cartes reflètent bien le vrai statut.
+        $statusCounts = [
+            'total'       => Room::count(),
+            'available'   => Room::where('room_status_id', RoomStatusEnum::Available->value)->count(),
+            'occupied'    => Room::where('room_status_id', RoomStatusEnum::Occupied->value)->count(),
+            'maintenance' => Room::where('room_status_id', RoomStatusEnum::Maintenance->value)->count(),
+            'dirty'       => Room::whereIn('room_status_id', [RoomStatusEnum::Dirty->value, RoomStatusEnum::Cleaning->value])->count(),
+            'reserved'    => Room::where('room_status_id', RoomStatusEnum::Reserved->value)->count(),
+        ];
+
         return view('room.index', [
             'rooms' => $rooms,
             'types' => $types,
             'roomStatuses' => $roomStatuses,
+            'statusCounts' => $statusCounts,
         ]);
     }
 

@@ -93,33 +93,50 @@
         ═══════════════════════════════════════════════════
         */
 
-        /* Desktop · sidebar ouverte (272px) */
+        /* Canvas derrière les panneaux flottants : LÉGÈREMENT plus foncé/gris que
+           les panneaux, pour que l'écart (l'espace) soit visible même sans image. */
+        html, body { background: #e6eaf1; }
+        html[data-theme="dark"], html[data-theme="dark"] body { background: #070a0f; }
+
+        /* Desktop · contenu en panneau flottant arrondi (assorti à la sidebar) */
         #page-content-wrapper {
-            margin-left: 272px;
+            margin: 20px 20px 20px 312px;
             width: auto;          /* NE PAS mettre 100% : block auto = viewport - margin-left */
-            min-height: 100vh;
+            min-height: calc(100vh - 40px);
             background: #f5f7fb;
+            border: 1px solid rgba(20,30,25,.07);
+            border-radius: 18px;
+            box-shadow: 0 20px 55px -30px rgba(20,30,25,.22);
             transition: margin-left 0.3s cubic-bezier(.4,0,.2,1);
             overflow-x: hidden;   /* Sécurité pour les tableaux très larges */
             box-sizing: border-box;
         }
+        html[data-theme="dark"] #page-content-wrapper {
+            border-color: rgba(255,255,255,.06);
+            box-shadow: 0 20px 55px -30px rgba(0,0,0,.6);
+        }
 
-        /* Desktop · sidebar collapsed (64px) */
+        /* Desktop · sidebar collapsed (64px + marges) */
         body.sidebar-is-collapsed #page-content-wrapper {
-            margin-left: 64px;
+            margin-left: 104px;
         }
 
         /* Mobile ≤768px · sidebar en overlay, contenu pleine largeur */
         @media (max-width: 768px) {
             #page-content-wrapper {
-                margin-left: 0 !important;
+                margin: 0 !important;      /* plein écran sur mobile, pas de panneau flottant */
+                border: none;
+                border-radius: 0;
+                min-height: 100vh;
                 padding-top: 56px; /* hauteur du mobile header */
             }
         }
 
         #page-content-wrapper > .p-3 {
-            padding: 24px;
+            padding: 28px;
         }
+        /* Centre le contenu qui a une largeur max (les pages pleine largeur ne bougent pas) */
+        #page-content-wrapper > .p-3 > * { margin-inline: auto; }
 
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: var(--g500); border-radius: 10px; }
@@ -185,8 +202,19 @@
         html[data-theme="dark"] #page-content-wrapper > .p-3 { color: #e4e9e5; }
 
         /* Fond d'établissement (préférence locale) : voile pour garder la lisibilité */
-        html.has-app-bg #page-content-wrapper { background: rgba(248,250,249,.82) !important; backdrop-filter: blur(8px); }
-        html.has-app-bg[data-theme="dark"] #page-content-wrapper { background: rgba(15,19,17,.84) !important; }
+        /* Liquid glass : contenu translucide, fort flou + saturation, bord et reflet */
+        html.has-app-bg #page-content-wrapper {
+            background: rgba(255,255,255,.62) !important;
+            backdrop-filter: blur(26px) saturate(165%);
+            -webkit-backdrop-filter: blur(26px) saturate(165%);
+            border: 1px solid rgba(255,255,255,.55);
+            box-shadow: 0 24px 60px -30px rgba(20,30,25,.35), inset 0 1px 0 rgba(255,255,255,.65);
+        }
+        html.has-app-bg[data-theme="dark"] #page-content-wrapper {
+            background: rgba(18,22,30,.52) !important;
+            border-color: rgba(255,255,255,.12);
+            box-shadow: 0 24px 60px -30px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.14);
+        }
 
         /* ── Page-specific backgrounds ── */
         html[data-theme="dark"] .act-page { background: #0f172a; }
@@ -321,7 +349,7 @@
     window.__APPBG = @json(collect(config('appearance.backgrounds', []))->map(fn ($b) => $b['css']));
     window.applyAppBg = function () {
         try {
-            var key = localStorage.getItem('app-bg') || 'none';
+            var key = localStorage.getItem('app-bg') || 'golden';
             var css = key === 'custom'
                 ? 'url("' + (localStorage.getItem('app-bg-custom') || '') + '")'
                 : (window.__APPBG[key] || '');
@@ -338,7 +366,7 @@
             }
         } catch (e) {}
     };
-    (function(){ try { if ((localStorage.getItem('app-bg') || 'none') !== 'none') document.documentElement.classList.add('has-app-bg'); } catch (e) {} })();
+    (function(){ try { if ((localStorage.getItem('app-bg') || 'golden') !== 'none') document.documentElement.classList.add('has-app-bg'); } catch (e) {} })();
     document.addEventListener('DOMContentLoaded', window.applyAppBg);
     </script>
 </head>
@@ -673,5 +701,36 @@
     })();
     </script>
     @include('template.include.assistant')
+
+    {{-- Toasts globaux : chaque message flash (confirmation d'action) s'affiche
+         en pop-up 3s en haut à droite, sur toutes les pages. --}}
+    @php
+        $flashToasts = [];
+        foreach (['success' => 'success', 'error' => 'error', 'warning' => 'warning', 'info' => 'info'] as $k => $icon) {
+            if (session()->has($k) && is_string(session($k)) && trim(session($k)) !== '') {
+                $flashToasts[] = ['icon' => $icon, 'text' => strip_tags(session($k))];
+            }
+        }
+    @endphp
+    @if (! empty($flashToasts))
+    <script>
+    (function () {
+        var flashes = @json($flashToasts);
+        function show() {
+            if (!window.Swal) { setTimeout(show, 120); return; }
+            flashes.forEach(function (f, i) {
+                setTimeout(function () {
+                    window.Swal.fire({
+                        toast: true, position: 'top-end',
+                        icon: f.icon, title: f.text,
+                        showConfirmButton: false, timer: 3000, timerProgressBar: true, heightAuto: false
+                    });
+                }, i * 350);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', show);
+    })();
+    </script>
+    @endif
 </body>
 </html>

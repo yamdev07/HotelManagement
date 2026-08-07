@@ -67,7 +67,7 @@
                             data-tooltip="Revenus">
                             <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
                             <div class="nav-content">
-                                <div class="nav-title">Revenus</div>
+                                <div class="nav-title">{{ __('sidebar.revenue_title') }}</div>
                                 <div class="nav-subtitle">Pilotage financier</div>
                             </div>
                         </a>
@@ -78,7 +78,7 @@
                             data-tooltip="Codes promo">
                             <div class="nav-icon"><i class="fas fa-tags"></i></div>
                             <div class="nav-content">
-                                <div class="nav-title">Codes promo</div>
+                                <div class="nav-title">{{ __('sidebar.promo_title') }}</div>
                                 <div class="nav-subtitle">Réductions vitrine</div>
                             </div>
                         </a>
@@ -89,7 +89,7 @@
                             data-tooltip="Avis clients">
                             <div class="nav-icon"><i class="fas fa-star"></i></div>
                             <div class="nav-content">
-                                <div class="nav-title">Avis clients</div>
+                                <div class="nav-title">{{ __('sidebar.reviews_title') }}</div>
                                 <div class="nav-subtitle">Modération vitrine</div>
                             </div>
                         </a>
@@ -242,7 +242,7 @@
                                 data-tooltip="Synchronisation Booking/Airbnb">
                                 <div class="nav-icon"><i class="fas fa-arrows-rotate"></i></div>
                                 <div class="nav-content">
-                                    <div class="nav-title">Synchronisation</div>
+                                    <div class="nav-title">{{ __('sidebar.sync_title') }}</div>
                                     <div class="nav-subtitle">Booking · Airbnb</div>
                                 </div>
                             </a>
@@ -605,14 +605,16 @@
    l'hôtel (--g*). Thème clair & sombre.
    ═══════════════════════════════════════════════════════════════ */
 .sidebar {
+  /* Clair par défaut, sombre en mode sombre (suit le thème de l'app) */
   --sb-surface: #ffffff;
-  --sb-line: #eaeeeb;
-  --sb-ink: #232a26;
-  --sb-ink2: #667069;
-  --sb-ink3: #9aa39c;
-  --sb-tint: #f4f7f5;
-  --sb-acc: var(--g600, #2e8540);
-  --sb-acc-tint: color-mix(in srgb, var(--g500, #2e8540) 13%, #fff);
+  --sb-surface-2: #f6f8fb;
+  --sb-line: #e8ecef;
+  --sb-ink: #232a33;
+  --sb-ink2: #5b6470;
+  --sb-ink3: #98a2ad;
+  --sb-tint: #f2f5f8;
+  --sb-acc: var(--g600, #5b60e6);
+  --sb-acc-tint: color-mix(in srgb, var(--g500, #6366f1) 12%, #fff);
 
   width: 272px;
   background: var(--sb-surface);
@@ -620,16 +622,45 @@
   position: fixed; left: 0; top: 0; height: 100vh; z-index: 1001;
   transition: width .3s cubic-bezier(.4,0,.2,1);
   display: flex; flex-direction: column;
-  border-right: 1px solid var(--sb-line);
-  box-shadow: 0 0 1px rgba(0,0,0,.02);
   overflow: hidden;
   font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 html[data-theme="dark"] .sidebar {
-  --sb-surface: #12171400; --sb-line: #232a26; --sb-ink: #e7ece9;
-  --sb-ink2: #97a29b; --sb-ink3: #6c766f; --sb-tint: #1b211d;
-  --sb-acc-tint: color-mix(in srgb, var(--g500, #4fb268) 22%, #12171e);
-  background: #12171e;
+  --sb-surface: #12151e;
+  --sb-surface-2: #181c27;
+  --sb-line: rgba(255,255,255,.07);
+  --sb-ink: #e7eaf3;
+  --sb-ink2: #98a0b3;
+  --sb-ink3: #6b7284;
+  --sb-tint: rgba(255,255,255,.055);
+  --sb-acc: var(--g500, #6366f1);
+  --sb-acc-tint: color-mix(in srgb, var(--g500, #6366f1) 20%, transparent);
+}
+
+/* ── Sidebar flottante à coins arrondis (desktop) ── */
+@media (min-width: 769px) {
+  .sidebar {
+    top: 20px; left: 20px;
+    height: calc(100vh - 40px);
+    border: 1px solid var(--sb-line);
+    border-radius: 18px;
+    box-shadow: 0 16px 44px -26px rgba(20,30,25,.25);
+  }
+  html[data-theme="dark"] .sidebar { box-shadow: 0 20px 55px -24px rgba(0,0,0,.6); }
+}
+
+/* Liquid glass : sidebar translucide, fort flou + saturation, bord et reflet */
+html.has-app-bg .sidebar {
+  background: color-mix(in srgb, var(--sb-surface) 64%, transparent);
+  backdrop-filter: blur(24px) saturate(165%);
+  -webkit-backdrop-filter: blur(24px) saturate(165%);
+  border-color: color-mix(in srgb, #ffffff 22%, transparent);
+  box-shadow: 0 16px 44px -22px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25);
+}
+/* Carte utilisateur en bas : verre elle aussi */
+html.has-app-bg .user-profile {
+  background: color-mix(in srgb, var(--sb-surface-2) 55%, transparent);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 
 /* ── logo ── */
@@ -658,48 +689,48 @@ html[data-theme="dark"] .sidebar {
 .sidebar-header-mobile { display: none; }
 .sidebar-body {
   flex: 1; overflow-y: auto; overflow-x: hidden; padding: 8px 0 8px;
-  scrollbar-width: thin; scrollbar-color: var(--sb-line) transparent;
+  scrollbar-width: none; -ms-overflow-style: none;   /* aucune barre visible (scroll conservé) */
 }
-.sidebar-body::-webkit-scrollbar { width: 4px; }
-.sidebar-body::-webkit-scrollbar-thumb { background: var(--sb-line); border-radius: 4px; }
+.sidebar-body::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none; }
 
 /* ── sections ── */
 .nav-menu { padding: 0; }
-.nav-section { margin-bottom: 4px; }
+.nav-section { margin-bottom: 10px; }
 .nav-section-title {
-  font-size: .64rem; text-transform: uppercase; letter-spacing: .07em;
-  color: var(--sb-ink3); padding: 12px 20px 4px; font-weight: 700;
+  font-size: .63rem; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--sb-ink3); padding: 20px 24px 9px; font-weight: 700;
 }
 
 /* ── nav items ── */
 .nav-item {
   display: flex; align-items: center; gap: 2px;
-  padding: 8px 12px; margin: 1px 10px; border-radius: 9px;
+  padding: 12px 14px; margin: 4px 12px; border-radius: 11px;
   color: var(--sb-ink2); text-decoration: none; cursor: pointer; position: relative;
   transition: background .16s, color .16s;
 }
 .nav-item:hover { color: var(--sb-ink); background: var(--sb-tint); text-decoration: none; }
-.nav-item.active { color: var(--sb-acc); background: var(--sb-acc-tint); font-weight: 600; }
+.nav-item.active { color: var(--sb-acc); background: var(--sb-acc-tint); font-weight: 600; box-shadow: inset 3px 0 0 0 var(--sb-acc); }
+html[data-theme="dark"] .nav-item.active { color: #fff; }
 .nav-item--highlight .nav-title { font-weight: 600; }
-.nav-item--highlight .nav-icon { background: var(--sb-acc-tint); color: var(--sb-acc); }
+.nav-item--highlight .nav-icon { color: var(--sb-acc); }
 .nav-item--logout { color: var(--sb-ink2); }
-.nav-item--logout:hover { background: #fbe9e7; color: #b4342a; }
-html[data-theme="dark"] .nav-item--logout:hover { background: #2a1714; color: #e27469; }
-.nav-item--readonly .nav-icon { background: var(--sb-tint); color: var(--sb-ink3); }
+.nav-item--logout:hover { background: color-mix(in srgb, #ef4444 12%, transparent); color: #dc2626; }
+html[data-theme="dark"] .nav-item--logout:hover { color: #f87171; }
+.nav-item--readonly .nav-icon { color: var(--sb-ink3); }
 
 .nav-icon {
-  width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
-  margin-right: 10px; background: var(--sb-tint); border-radius: 8px; font-size: .82rem;
-  flex-shrink: 0; color: var(--sb-ink2); transition: background .16s, color .16s, transform .16s;
+  width: 24px; display: flex; align-items: center; justify-content: center;
+  margin-right: 12px; font-size: .95rem;
+  flex-shrink: 0; color: var(--sb-ink2); transition: color .16s;
 }
 .nav-item:hover .nav-icon { color: var(--sb-ink); }
-.nav-item.active .nav-icon { background: var(--sb-acc); color: #fff; }
+.nav-item.active .nav-icon { color: var(--sb-acc); }
+html[data-theme="dark"] .nav-item.active .nav-icon { color: #fff; }
 
 .nav-content { min-width: 0; flex: 1; }
-.nav-title { font-size: .84rem; font-weight: 550; color: inherit; line-height: 1.25;
+.nav-title { font-size: .86rem; font-weight: 500; color: inherit; line-height: 1.3;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.nav-subtitle { font-size: .68rem; color: var(--sb-ink3); margin-top: 1px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-subtitle { display: none; } /* rail épuré : une seule ligne par item */
 
 .nav-badge {
   position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
@@ -714,13 +745,14 @@ html[data-theme="dark"] .nav-item--logout:hover { background: #2a1714; color: #e
 .readonly-tag { font-size: .65rem; margin-left: auto; opacity: .5; }
 
 /* ── footer ── */
-.sidebar-footer { padding: 12px 14px; border-top: 1px solid var(--sb-line); flex-shrink: 0; }
-.user-profile { display: flex; align-items: center; gap: 10px; }
-.user-avatar { width: 36px; height: 36px; flex-shrink: 0; }
+.sidebar-footer { padding: 10px 12px 12px; border-top: 1px solid var(--sb-line); flex-shrink: 0; }
+.user-profile { display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border-radius: 12px; background: var(--sb-surface-2); border: 1px solid var(--sb-line); }
+.user-avatar { width: 34px; height: 34px; flex-shrink: 0; }
 .user-avatar img { width: 100%; height: 100%; border-radius: 9px; object-fit: cover; border: 1px solid var(--sb-line); }
 .avatar-placeholder {
-  width: 100%; height: 100%; border-radius: 9px; background: var(--sb-acc-tint);
-  display: flex; align-items: center; justify-content: center; color: var(--sb-acc);
+  width: 100%; height: 100%; border-radius: 9px; background: var(--sb-acc);
+  display: flex; align-items: center; justify-content: center; color: #fff;
   font-size: .9rem; font-weight: 700;
 }
 .user-info { flex: 1; min-width: 0; }
@@ -774,8 +806,8 @@ html[data-theme="dark"] .nav-item--logout:hover { background: #2a1714; color: #e
 .sidebar.collapsed .restricted::after,
 .sidebar.collapsed .readonly-tag { display: none; }
 .sidebar.collapsed .sidebar-logo { justify-content: center; padding: 16px 8px; }
-.sidebar.collapsed .nav-item { justify-content: center; padding: 10px 0; margin: 2px 8px; }
-.sidebar.collapsed .nav-icon { margin-right: 0; width: 36px; height: 36px; }
+.sidebar.collapsed .nav-item { justify-content: center; padding: 11px 0; margin: 6px 10px; }
+.sidebar.collapsed .nav-icon { margin-right: 0; width: 38px; height: 38px; }
 .sidebar.collapsed .user-profile { justify-content: center; }
 .sidebar.collapsed .user-avatar { margin: 0; }
 .sidebar.collapsed .sidebar-footer { padding: 12px 8px; }
@@ -895,10 +927,10 @@ html[data-theme="dark"] .swal-logout .swal2-html-container { color: #e9eeeb !imp
             sidebar.classList.toggle('collapsed', collapsed);
             localStorage.setItem('sidebarCollapsed', collapsed);
 
-            /* ← CORRECTION PRINCIPALE : on met à jour le contenu */
-            if (content) {
-                content.style.marginLeft = collapsed ? '64px' : '272px';
-            }
+            /* On NE fixe PAS la marge en dur : le CSS (body.sidebar-is-collapsed)
+               gère margin-left (312px ouverte / 104px repliée). On efface tout
+               résidu inline pour que le CSS prime. */
+            if (content) { content.style.marginLeft = ''; }
 
             if (toggleDesktop) {
                 toggleDesktop.querySelector('i').className = collapsed ?
@@ -971,8 +1003,8 @@ html[data-theme="dark"] .swal-logout .swal2-html-container { color: #e9eeeb !imp
                 var saved = localStorage.getItem('sidebarCollapsed') === 'true';
                 setCollapsed(saved);
             } else {
-                /* Mobile : contenu pleine largeur */
-                if (content) content.style.marginLeft = '0';
+                /* Mobile : le CSS gère (margin 0). On efface tout inline résiduel. */
+                if (content) content.style.marginLeft = '';
             }
         });
 

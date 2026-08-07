@@ -8,7 +8,11 @@ return [
 
     // Dashboard section
     'section_dashboard' => 'Tableau de Bord',
-    'dashboard_title' => 'Dashboard',
+    'dashboard_title' => 'Tableau de bord',
+    'revenue_title' => 'Revenus',
+    'promo_title' => 'Codes promo',
+    'reviews_title' => 'Avis clients',
+    'sync_title' => 'Synchronisation',
     'dashboard_subtitle' => 'Vue d\'ensemble',
     'availability_title' => 'Disponibilité',
     'availability_subtitle' => 'Inventaire en temps réel',

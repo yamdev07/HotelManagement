@@ -9,6 +9,10 @@ return [
     // Dashboard section
     'section_dashboard' => 'Dashboard',
     'dashboard_title' => 'Dashboard',
+    'revenue_title' => 'Revenue',
+    'promo_title' => 'Promo codes',
+    'reviews_title' => 'Reviews',
+    'sync_title' => 'Sync',
     'dashboard_subtitle' => 'Overview',
     'availability_title' => 'Availability',
     'availability_subtitle' => 'Real-time inventory',

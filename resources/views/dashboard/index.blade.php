@@ -29,7 +29,7 @@
   --r: 12px; --r-sm: 9px;
   --sh: 0 1px 2px rgba(20,40,30,.05);
 
-  display: flex; flex-direction: column; gap: 18px;
+  display: flex; flex-direction: column; gap: 24px;
   font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
   color: var(--ink);
   font-variant-numeric: tabular-nums;
@@ -88,13 +88,13 @@ html[data-theme="dark"] .db-page {
 .btn-site:hover { border-color: var(--line2); color: var(--ink); }
 
 /* ══════════ STAT CARDS ══════════ */
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 @media (max-width: 1100px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .stats-grid { grid-template-columns: 1fr; } }
 
 .stat-card {
   background: var(--card); border: 1px solid var(--line); border-radius: var(--r);
-  padding: 16px; display: flex; flex-direction: column; gap: 9px;
+  padding: 20px; display: flex; flex-direction: column; gap: 9px;
   box-shadow: var(--sh); transition: border-color .15s, transform .15s;
 }
 .stat-card:hover { border-color: var(--line2); transform: translateY(-1px); }
