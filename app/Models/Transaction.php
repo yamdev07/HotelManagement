@@ -592,6 +592,9 @@ class Transaction extends Model
 
             DB::commit();
 
+            // Cloche : arrivée (check-in) effectuée -> notifier le personnel de l'hôtel.
+            User::notifyStaff($this->hotel_id, new \App\Notifications\CheckInNotification($this->fresh()));
+
             return [
                 'success' => true,
                 'transaction' => $this->fresh(),
@@ -662,6 +665,9 @@ class Transaction extends Model
                 ->log('a effectué le check-out');
 
             DB::commit();
+
+            // Cloche : départ (check-out) effectué -> chambre à nettoyer.
+            User::notifyStaff($this->hotel_id, new \App\Notifications\CheckOutNotification($this->fresh()));
 
             return [
                 'success' => true,

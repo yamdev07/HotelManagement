@@ -323,8 +323,10 @@ class User extends Authenticatable
         }
 
         try {
-            static::staff()->where('hotel_id', $hotelId)->get()
-                ->each(fn ($staff) => $staff->notify($notification));
+            $staff = static::staff()->where('hotel_id', $hotelId)->get();
+            // UNIQUEMENT le canal 'database' (la cloche) : pas d'email à tout le
+            // personnel à chaque action (lent + dépend du SMTP).
+            \Illuminate\Support\Facades\Notification::sendNow($staff, $notification, ['database']);
         } catch (\Throwable $e) {
             \Illuminate\Support\Facades\Log::warning('notifyStaff: '.$e->getMessage());
         }
