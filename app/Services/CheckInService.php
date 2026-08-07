@@ -117,6 +117,9 @@ class CheckInService
                 'room' => optional($transaction->room)->number,
             ]);
 
+            // Cloche : départ effectué -> chambre à nettoyer (housekeeping).
+            \App\Models\User::notifyStaff($transaction->hotel_id, new \App\Notifications\CheckOutNotification($transaction));
+
             return $transaction->refresh();
         });
     }

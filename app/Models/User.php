@@ -311,6 +311,25 @@ class User extends Authenticatable
         return $query->whereIn('role', UserRole::staffValues());
     }
 
+    /**
+     * Notifie tout le personnel d'un hôtel (cloche). Isolation multi-tenant :
+     * on ne notifie que les membres de cet hôtel. Échec silencieux (jamais
+     * bloquer l'action métier à cause d'une notif).
+     */
+    public static function notifyStaff(?int $hotelId, $notification): void
+    {
+        if (! $hotelId) {
+            return;
+        }
+
+        try {
+            static::staff()->where('hotel_id', $hotelId)->get()
+                ->each(fn ($staff) => $staff->notify($notification));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('notifyStaff: '.$e->getMessage());
+        }
+    }
+
     public function getFormattedRoleAttribute(): string
     {
         return $this->roleEnum?->label() ?? (string) $this->role;

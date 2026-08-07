@@ -52,6 +52,9 @@ class PublicSiteController extends Controller
      */
     private function notifyBookingCreated(Hotel $hotel, Transaction $tx): void
     {
+        // Cloche : notifier le personnel de l'hôtel (toujours, même sans WhatsApp).
+        User::notifyStaff($hotel->id, new \App\Notifications\ReservationNotification($tx));
+
         if (! $this->whatsapp->isConfigured()) {
             return;
         }

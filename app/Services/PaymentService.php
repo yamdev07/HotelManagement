@@ -61,6 +61,9 @@ class PaymentService
 
             $transaction->logPayment($payment, Auth::user());
 
+            // Cloche : notifier le personnel de l'hôtel du paiement encaissé.
+            \App\Models\User::notifyStaff($transaction->hotel_id, new \App\Notifications\PaymentNotification($payment, $transaction));
+
             Log::info("Paiement #{$payment->id} créé pour transaction #{$transaction->id}", [
                 'amount' => $amount,
                 'method' => $method->value,
