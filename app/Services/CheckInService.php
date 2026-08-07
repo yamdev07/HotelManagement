@@ -66,6 +66,9 @@ class CheckInService
                 'room' => optional($transaction->room)->number,
             ]);
 
+            // Cloche : arrivée (check-in) effectuée.
+            \App\Models\User::notifyStaff($transaction->hotel_id, new \App\Notifications\CheckInNotification($transaction));
+
             return $transaction;
         });
     }
