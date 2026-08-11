@@ -418,7 +418,7 @@
             </div>
             <div class="col-lg-4">
                 <h6 class="fw-semibold mb-3">{{ __('landing.footer_contact') }}</h6>
-                <p class="text-secondary small mb-1"><i class="fas fa-envelope me-2"></i>contact@myhotel.com</p>
+                <p class="text-secondary small mb-1"><i class="fas fa-envelope me-2"></i>contact@checkinhub.com</p>
                 <p class="text-secondary small"><i class="fas fa-phone me-2"></i>+229 00 00 00 00</p>
             </div>
         </div>
