@@ -13,7 +13,8 @@ class Customer extends Model
 {
     use \App\Models\Concerns\BelongsToHotel, HasFactory, LogsActivity, Notifiable;
 
-    protected static $recordEvents = [];
+    // Journal : tracer l'ajout, la modification et la suppression d'un client.
+    protected static $recordEvents = ['created', 'updated', 'deleted'];
 
     protected $fillable = [
         'name',

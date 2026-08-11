@@ -12,7 +12,11 @@ class Room extends Model
 {
     use \App\Models\Concerns\BelongsToHotel, HasFactory, LogsActivity;
 
-    protected static $recordEvents = [];
+    // Journal : on trace la création et la suppression d'une chambre. Les
+    // changements de statut (nettoyage, maintenance...) sont déjà journalisés
+    // manuellement plus bas avec plus de contexte, on n'active donc pas 'updated'
+    // ici pour éviter des doublons dans le journal.
+    protected static $recordEvents = ['created', 'deleted'];
 
     protected $fillable = [
         'number',

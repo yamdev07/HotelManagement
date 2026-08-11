@@ -749,6 +749,7 @@
                     <select name="subject_type" class="form-select">
                         <option value="">{{ __('activity.filter_all') }}</option>
                         <option value="App\Models\User" {{ request('subject_type') == 'App\Models\User' ? 'selected' : '' }}>Utilisateurs</option>
+                        <option value="App\Models\Customer" {{ request('subject_type') == 'App\Models\Customer' ? 'selected' : '' }}>Clients</option>
                         <option value="App\Models\Room" {{ request('subject_type') == 'App\Models\Room' ? 'selected' : '' }}>Chambres</option>
                         <option value="App\Models\Transaction" {{ request('subject_type') == 'App\Models\Transaction' ? 'selected' : '' }}>Transactions</option>
                     </select>
