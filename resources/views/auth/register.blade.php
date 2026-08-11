@@ -211,13 +211,15 @@
     </div>
 
     <style>
+        /* Aligné sur la couleur de marque du site (indigo) au lieu d'un vert
+           qui tranchait avec le reste de la vitrine et la page de connexion. */
         .auth-submit-btn.btn-success {
-            background: linear-gradient(135deg, #28a745, #20c997);
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
             border: none;
         }
 
         .auth-submit-btn.btn-success:hover {
-            background: linear-gradient(135deg, #218838, #1ea581);
+            background: linear-gradient(135deg, #4338ca, #4f46e5);
             transform: translateY(-2px);
         }
 
@@ -234,8 +236,8 @@
         }
 
         .form-check-input:checked {
-            background-color: #28a745;
-            border-color: #28a745;
+            background-color: #4f46e5;
+            border-color: #4f46e5;
         }
 
         .form-check-label {
