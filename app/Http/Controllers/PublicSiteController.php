@@ -59,29 +59,36 @@ class PublicSiteController extends Controller
             return;
         }
 
-        $ref = $this->bookingRef($tx);
-        $ci = Carbon::parse($tx->check_in)->format('d/m/Y');
-        $co = Carbon::parse($tx->check_out)->format('d/m/Y');
-        $room = $tx->room->number ?? '';
-        $currency = $hotel->currency ?: 'XOF';
-        $total = number_format((float) $tx->total_price, 0, ',', ' ');
+        // Un échec d'envoi WhatsApp (API indisponible, mauvaise config...) ne doit
+        // JAMAIS casser la finalisation de la réservation : la transaction est déjà
+        // enregistrée, le client doit voir sa page de confirmation, pas une erreur 500.
+        try {
+            $ref = $this->bookingRef($tx);
+            $ci = Carbon::parse($tx->check_in)->format('d/m/Y');
+            $co = Carbon::parse($tx->check_out)->format('d/m/Y');
+            $room = $tx->room->number ?? '';
+            $currency = $hotel->currency ?: 'XOF';
+            $total = number_format((float) $tx->total_price, 0, ',', ' ');
 
-        // Au client
-        $this->whatsapp->sendText(
-            $tx->customer->phone ?? null,
-            "Bonjour {$tx->customer->name},\n\n".
-            "Votre réservation *{$ref}* chez *{$hotel->name}* est bien enregistrée ✅\n\n".
-            "🛏️ Chambre {$room}\n📅 Du {$ci} au {$co}\n💰 Total : {$total} {$currency}\n\n".
-            'Nous revenons vers vous très vite. Merci !'
-        );
+            // Au client
+            $this->whatsapp->sendText(
+                $tx->customer->phone ?? null,
+                "Bonjour {$tx->customer->name},\n\n".
+                "Votre réservation *{$ref}* chez *{$hotel->name}* est bien enregistrée ✅\n\n".
+                "🛏️ Chambre {$room}\n📅 Du {$ci} au {$co}\n💰 Total : {$total} {$currency}\n\n".
+                'Nous revenons vers vous très vite. Merci !'
+            );
 
-        // À l'hôtelier
-        $this->whatsapp->sendText(
-            $this->hotelWhatsApp($hotel),
-            "🔔 Nouvelle réservation en ligne *{$ref}*\n\n".
-            "👤 {$tx->customer->name} ({$tx->customer->phone})\n🛏️ Chambre {$room}\n".
-            "📅 {$ci} → {$co}\n💰 {$total} {$currency}"
-        );
+            // À l'hôtelier
+            $this->whatsapp->sendText(
+                $this->hotelWhatsApp($hotel),
+                "🔔 Nouvelle réservation en ligne *{$ref}*\n\n".
+                "👤 {$tx->customer->name} ({$tx->customer->phone})\n🛏️ Chambre {$room}\n".
+                "📅 {$ci} → {$co}\n💰 {$total} {$currency}"
+            );
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('notifyBookingCreated WhatsApp: '.$e->getMessage());
+        }
     }
 
     /** Notifie le client que l'acompte a été reçu et la réservation confirmée. */
