@@ -758,6 +758,10 @@
                                 <input type="hidden" name="check_out" value="{{ $stayUntil }}">
                                 <input type="hidden" name="person_count" value="1">
                                 <input type="hidden" name="downPayment" id="downPaymentHidden" value="0">
+                                {{-- Le mode de paiement choisi doit réellement être envoyé au serveur
+                                     (les <select> ci-dessous n'ont pas d'attribut name) : on le
+                                     synchronise dans ce champ caché. --}}
+                                <input type="hidden" name="payment_method" id="paymentMethodHidden" value="cash">
 
                                 <div class="payment-options">
                                     <!-- Option 1 : Sans acompte -->
@@ -991,6 +995,9 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const downPaymentHidden = document.getElementById('downPaymentHidden');
+    const paymentMethodHidden = document.getElementById('paymentMethodHidden');
+    const paymentMethodSelect = document.getElementById('payment_method');
+    const paymentMethodFull = document.getElementById('payment_method_full');
     const depositAmount = document.getElementById('deposit_amount');
     const depositSlider = document.getElementById('deposit_slider');
     const summaryText = document.getElementById('summaryText');
@@ -1028,12 +1035,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 summary = "{{ __('reservation.js_deposit_of', ['amount' => '']) }}" + formatCurrency(paymentAmount);
                 amountDetails.style.display = 'block';
                 downPaymentHidden.value = paymentAmount;
+                if (paymentMethodSelect) paymentMethodHidden.value = paymentMethodSelect.value;
                 break;
             case 'pay_full':
                 paymentAmount = totalPrice;
                 summary = "{{ __('reservation.js_full_payment') }}";
                 amountDetails.style.display = 'block';
                 downPaymentHidden.value = paymentAmount;
+                if (paymentMethodFull) paymentMethodHidden.value = paymentMethodFull.value;
                 break;
         }
 
@@ -1055,14 +1064,16 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             submitText.innerHTML = '{{ __("reservation.confirm_reservation") }}';
         }
-
-        submitBtn.disabled = !termsCheckbox.checked;
     }
 
     // Écouteurs
     document.querySelectorAll('input[name="payment_option"]').forEach(radio => {
         radio.addEventListener('change', updatePaymentSummary);
     });
+
+    // Le mode de paiement choisi doit remonter dans le champ caché envoyé au serveur.
+    if (paymentMethodSelect) paymentMethodSelect.addEventListener('change', updatePaymentSummary);
+    if (paymentMethodFull) paymentMethodFull.addEventListener('change', updatePaymentSummary);
 
     // Issue #169 : saisir un montant sélectionne automatiquement « Payer un acompte »
     // (avant : montant tapé + option « sans acompte » cochée = état incohérent)
@@ -1085,12 +1096,20 @@ document.addEventListener('DOMContentLoaded', function() {
         updatePaymentSummary();
     });
 
-    termsCheckbox.addEventListener('change', function() {
-        submitBtn.disabled = !this.checked;
-    });
-
-    // Anti double-clic (issue #170) : un seul envoi possible
-    document.getElementById('reservationForm').addEventListener('submit', function () {
+    // Le bouton reste cliquable : si les conditions ne sont pas cochées, on
+    // bloque l'envoi avec un message clair au lieu d'un bouton grisé sans retour
+    // (avant : le formulaire semblait « bloqué » sans explication · audit).
+    document.getElementById('reservationForm').addEventListener('submit', function (e) {
+        if (!termsCheckbox.checked) {
+            e.preventDefault();
+            termsCheckbox.focus();
+            termsCheckbox.closest('.form-check').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            if (window.Swal) {
+                Swal.fire({ icon: 'info', title: "{{ __('reservation.terms_label') }}", toast: true, position: 'top-end', timer: 3000, showConfirmButton: false });
+            }
+            return;
+        }
+        // Anti double-clic (issue #170) : un seul envoi possible
         submitBtn.disabled = true;
         const st = document.getElementById('submitText');
         if (st) st.textContent = "{{ __('reservation.saving_in_progress') }}";
