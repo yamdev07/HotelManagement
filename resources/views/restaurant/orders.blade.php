@@ -79,12 +79,15 @@
         <div class="qr-info">
             <h3>{{ __('restaurant.orders.qr_title') }} <span class="badge-qr">FLASH ORDER</span></h3>
             <p>{{ __('restaurant.orders.qr_desc') }}</p>
-            <div class="qr-url">{{ rtrim(config('app.url'), '/') . '/menu' }}</div>
+            @php $menuUrl = optional(auth()->user()->hotel)->slug
+                ? route('public.hotel.menu', auth()->user()->hotel->slug)
+                : rtrim(config('app.url'), '/').'/menu'; @endphp
+            <div class="qr-url">{{ $menuUrl }}</div>
         </div>
         <div class="qr-download-container">
             <div class="qr-image-wrap">
                 @php
-                    $qrUrl = rtrim(config('app.url'), '/') . '/menu';
+                    $qrUrl = $menuUrl;
                 @endphp
                 <img id="qrCodeImage" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data={{ urlencode($qrUrl) }}" alt="QR Code Menu">
             </div>

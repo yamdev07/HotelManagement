@@ -82,6 +82,8 @@ Route::controller(\App\Http\Controllers\PublicSiteController::class)->group(func
     Route::get('/h/{slug}/reservation/{transaction}/retour', 'paymentReturn')->name('public.hotel.payment.return');
     Route::get('/h/{slug}/chambres', 'rooms')->name('public.hotel.rooms');
     Route::get('/h/{slug}/restaurant', 'restaurant')->name('public.hotel.restaurant');
+    // Menu accessible au QR code (client non connecté).
+    Route::get('/h/{slug}/menu', 'menuQr')->name('public.hotel.menu');
     Route::get('/h/{slug}/services', 'services')->name('public.hotel.services');
     Route::get('/h/{slug}/contact', 'contact')->name('public.hotel.contact');
     // Dépôt d'un avis client (limité pour éviter le spam).

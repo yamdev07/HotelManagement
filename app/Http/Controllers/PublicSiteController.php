@@ -297,6 +297,26 @@ class PublicSiteController extends Controller
         return view('public.pages.restaurant', compact('hotel', 'menus'));
     }
 
+    /**
+     * Menu « flash order » scanné au QR code par un client (non connecté).
+     * Le QR encode /h/{slug}/menu : le slug résout l'hôtel et fixe le tenant,
+     * ce qui permet à un visiteur d'accéder au menu sans être authentifié
+     * (issue #211 : l'ancien /menu exigeait un tenant et renvoyait au landing).
+     */
+    public function menuQr(string $slug)
+    {
+        $hotel = $this->resolve($slug);
+        if (! $hotel instanceof Hotel) {
+            return $hotel;
+        }
+        abort_unless($hotel->show_restaurant, 404);
+
+        $categories = \App\Models\Category::all();
+        $menus = Menu::with('category')->latest()->get();
+
+        return view('frontend.pages.menu-qr', compact('categories', 'menus', 'hotel'));
+    }
+
     public function services(string $slug)
     {
         $hotel = $this->resolve($slug);
