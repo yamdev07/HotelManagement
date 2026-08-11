@@ -95,6 +95,18 @@
             .gcontent{margin-left:0;padding:26px 20px 80px;}
             .gburger{display:grid;}
         }
+        /* Défilement fluide entre les sections (audit : défilement mobile) */
+        html{scroll-behavior:smooth;}
+        section.doc{scroll-margin-top:76px;}
+        /* Voile derrière le sommaire ouvert sur mobile */
+        .gside-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:25;}
+        .gside-overlay.show{display:block;}
+        /* Bouton « Retour en haut » */
+        .to-top{position:fixed;right:20px;bottom:20px;width:46px;height:46px;border:none;border-radius:50%;
+            background:var(--brand);color:#fff;box-shadow:0 12px 26px -10px rgba(124,131,255,.8);cursor:pointer;
+            display:grid;place-items:center;opacity:0;pointer-events:none;transform:translateY(10px);
+            transition:opacity .25s,transform .25s;z-index:40;}
+        .to-top.show{opacity:1;pointer-events:auto;transform:none;}
     </style>
     <script>
         // Applique le thème avant le rendu (évite le flash)
@@ -402,6 +414,31 @@
             setIcon();
         });
     }
+
+    // Sommaire mobile : ouverture/fermeture avec voile, et fermeture auto au clic
+    // sur un lien (audit : navigation mobile peu pratique une fois défilé).
+    const gside = document.querySelector('.gside');
+    const gburger = document.querySelector('.gburger');
+    const overlay = document.getElementById('gsideOverlay');
+    const closeDrawer = () => { gside && gside.classList.remove('open'); overlay && overlay.classList.remove('show'); };
+    const openDrawer = () => { gside && gside.classList.add('open'); overlay && overlay.classList.add('show'); };
+    if (gburger) {
+        gburger.onclick = () => gside.classList.contains('open') ? closeDrawer() : openDrawer();
+    }
+    if (overlay) overlay.addEventListener('click', closeDrawer);
+    links.forEach(l => l.addEventListener('click', closeDrawer));
+
+    // Bouton « Retour en haut »
+    const toTop = document.getElementById('toTop');
+    if (toTop) {
+        window.addEventListener('scroll', () => {
+            toTop.classList.toggle('show', window.scrollY > 400);
+        }, { passive: true });
+        toTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    }
 </script>
+
+<div class="gside-overlay" id="gsideOverlay"></div>
+<button class="to-top" id="toTop" type="button" aria-label="{{ __('landing.scroll_to_top') }}"><i class="fas fa-arrow-up"></i></button>
 </body>
 </html>
