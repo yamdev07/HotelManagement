@@ -80,26 +80,26 @@ class CustomerController extends Controller
             // Sauvegarde du nom pour le message
             $customerName = $customer->name;
 
-            // Vérifiez et supprimez l'avatar si le user existe
-            if ($customer->user) {
-                $user = $customer->user;
-                $avatar_path = public_path('img/user/'.$user->name.'-'.$user->id);
-
-                // Supprimez l'avatar s'il existe
-                if (file_exists($avatar_path) && is_dir($avatar_path)) {
-                    try {
-                        $imageRepository->destroy($avatar_path);
-                    } catch (\Exception $e) {
-                        \Log::warning('Could not delete avatar: '.$e->getMessage());
-                    }
-                }
-
-                // Supprimez l'utilisateur
-                $user->delete();
-            }
-
-            // Supprimez le customer
+            // Suppression LOGIQUE (SoftDeletes) : la fiche disparaît des listes mais
+            // la ligne reste en base, donc les réservations liées gardent leur
+            // référence et l'historique est préservé (issue #202 : avant, la FK
+            // RESTRICT empêchait toute suppression d'un client ayant des résas).
             $customer->delete();
+
+            // Best-effort : retirer le compte de connexion lié + son avatar. Si ce
+            // compte est référencé ailleurs, on n'échoue pas la suppression du client.
+            if ($customer->user) {
+                try {
+                    $user = $customer->user;
+                    $avatar_path = public_path('img/user/'.$user->name.'-'.$user->id);
+                    if (file_exists($avatar_path) && is_dir($avatar_path)) {
+                        $imageRepository->destroy($avatar_path);
+                    }
+                    $user->delete();
+                } catch (\Throwable $e) {
+                    \Log::warning('Compte de connexion lié non supprimé: '.$e->getMessage());
+                }
+            }
 
             return redirect('customer')->with('success', __('flash.customer_deleted', ['name' => $customerName]));
 
