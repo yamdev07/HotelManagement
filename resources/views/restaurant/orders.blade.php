@@ -505,10 +505,14 @@ function initOrdersPage() {
         });
     });
 
-    // Auto-refresh every 30 seconds for real-time updates
+    // Rafraîchissement doux (issue #217 : la page se rechargeait toutes les 30 s
+    // et interrompait le cuisinier). On ne recharge que si l'onglet est visible ET
+    // qu'aucune fenêtre modale n'est ouverte, et moins souvent.
     setInterval(function() {
+        if (document.hidden) return;
+        if (document.querySelector('.modal.show')) return;
         location.reload();
-    }, 30000);
+    }, 60000);
 }
 initOrdersPage();
 </script>
