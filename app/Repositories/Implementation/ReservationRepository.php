@@ -24,8 +24,13 @@ class ReservationRepository implements ReservationRepositoryInterface
         // Résolu par CODE, pas par ID en dur (les IDs varient selon les installs).
         $outOfService = RoomStatus::whereIn('code', ['MNT'])->pluck('id')->all();
 
+        // count_person peut être absent (ex : retour arrière depuis l'étape 4, où
+        // le lien ne repasse pas ce paramètre) : on retombe sur 1 pour ne pas
+        // renvoyer une liste vide (capacity >= NULL ne matche aucune chambre).
+        $minCapacity = (int) ($request->count_person ?? 1) ?: 1;
+
         return Room::with('type', 'roomStatus')
-            ->where('capacity', '>=', $request->count_person)
+            ->where('capacity', '>=', $minCapacity)
             ->whereNotIn('id', $occupiedRoomId)
             ->when(! empty($outOfService), fn ($q) => $q->whereNotIn('room_status_id', $outOfService));
     }
