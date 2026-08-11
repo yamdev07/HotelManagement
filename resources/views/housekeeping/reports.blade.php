@@ -644,8 +644,8 @@
                         <div class="mt-3">
                             @foreach($cleanedByUser as $item)
                             <div class="d-flex justify-content-between py-1">
-                                <span>{{ $item['name'] }}</span>
-                                <span class="fw-bold">{{ $item['count'] }}</span>
+                                <span>{{ $item->name }}</span>
+                                <span class="fw-bold">{{ $item->cleaned_count }}</span>
                             </div>
                             @endforeach
                         </div>
@@ -726,7 +726,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (emp) {
         @if(isset($cleanedByUser) && $cleanedByUser->count() > 0)
             const labels = {!! json_encode($cleanedByUser->pluck('name')) !!};
-            const data = {!! json_encode($cleanedByUser->pluck('count')) !!};
+            const data = {!! json_encode($cleanedByUser->pluck('cleaned_count')) !!};
             new Chart(emp, {
                 type: 'doughnut',
                 data: { labels, datasets: [{ data, backgroundColor: ['var(--g600)','var(--g600)','var(--g600)','var(--g600)','var(--g600)'] }] },
