@@ -143,12 +143,16 @@ Route::get('/api/available-rooms', [FrontendController::class, 'availableRooms']
 // Un utilisateur DÉJÀ connecté ne doit pas atteindre le formulaire de connexion
 // (sinon il peut se connecter à un AUTRE compte sans se déconnecter) · issue #183.
 Route::get('/login', function () {
-    return auth()->check() ? redirect('/home') : view('auth.login');
+    return auth()->check()
+        ? redirect()->route(\App\Helpers\Helper::homeRouteFor(auth()->user()))
+        : view('auth.login');
 })->name('login.index');
 // Anti-force-brute : 10 tentatives / minute / IP.
 Route::post('/login', [AuthController::class, 'login'])->name('login')->middleware('throttle:10,1');
 Route::get('/register', function () {
-    return auth()->check() ? redirect('/home') : view('auth.register');
+    return auth()->check()
+        ? redirect()->route(\App\Helpers\Helper::homeRouteFor(auth()->user()))
+        : view('auth.register');
 })->name('register.index');
 Route::post('/register', [AuthController::class, 'register'])->name('register');
 

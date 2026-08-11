@@ -13,6 +13,30 @@ class Helper
     const CFA_EXCHANGE_RATE = 655.957;
 
     /**
+     * Route d'accueil correcte selon le rôle de l'utilisateur.
+     * Évite d'envoyer un rôle vers /home s'il n'y a pas accès (ex : le caissier,
+     * absent du groupe /home, tombait dans une boucle de redirection · issue #216).
+     */
+    public static function homeRouteFor($user): string
+    {
+        if (! $user) {
+            return 'login.index';
+        }
+
+        if ($user->hotel_id === null && $user->role === 'Super') {
+            return 'platform.hotels.index';
+        }
+
+        return match ($user->role) {
+            'Customer' => 'transaction.myReservations',
+            'Servant', 'Cuisiner' => 'restaurant.orders',
+            'Cashier' => 'cashier.dashboard',
+            // Les autres rôles passent par /home (qui re-dirige vers leur espace).
+            default => 'home',
+        };
+    }
+
+    /**
      * Formater un montant en Francs CFA
      */
     public static function formatCFA($amount, $decimals = 0, $showSymbol = true)

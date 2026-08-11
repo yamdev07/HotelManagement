@@ -22,21 +22,10 @@ class AuthController extends Controller
         if (Auth::attempt(['email' => $email, 'password' => $request->password])) {
             activity()->causedBy(auth()->user())->log('User logged into the portal');
 
-            // Super-Admin plateforme (sans hôtel) -> dashboard de gestion des hôtels
-            if (auth()->user()->hotel_id === null && auth()->user()->role === 'Super') {
-                return redirect()->route('platform.hotels.index')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
-            }
-
-            // Redirection intelligente selon le rôle
-            if (auth()->user()->role === 'Customer') {
-                return redirect()->route('transaction.myReservations')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
-            }
-
-            if (in_array(auth()->user()->role, ['Servant', 'Cuisiner'])) {
-                return redirect()->route('restaurant.orders')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
-            }
-
-            return redirect('/home')->with('success', __('flash.login_welcome').' '.auth()->user()->name);
+            // Redirection selon le rôle (le caissier a sa propre destination :
+            // il n'a pas accès à /home et bouclait sinon · issue #216).
+            return redirect()->route(\App\Helpers\Helper::homeRouteFor(auth()->user()))
+                ->with('success', __('flash.login_welcome').' '.auth()->user()->name);
         }
 
         return redirect('login')->with('failed', __('flash.login_invalid'));
