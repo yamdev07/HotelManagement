@@ -861,7 +861,7 @@
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
 <script>
     // ================================================
@@ -894,6 +894,30 @@
     const roomStatusData = @json($roomStatusData ?? []);
     
     const checkoutTimesData = @json($checkoutTimesData ?? [0, 0, 0]);
+
+    // ================================================
+    // REPLI SANS CHART.JS
+    // Si la librairie de graphiques n'est pas disponible (CDN bloqué), on
+    // remplace chaque graphe par ses données en clair : Statuts, Occupation et
+    // Horaires restent ainsi consultables (audit : « non disponibles »).
+    // ================================================
+    if (typeof Chart === 'undefined') {
+        const fallbacks = {
+            revenueChart: revenueData && revenueData.length ? 'Revenus par jour disponibles sur la période.' : 'Aucun revenu sur la période.',
+            paymentChart: (paymentLabels || []).map((l, i) => `${l} : <b>${new Intl.NumberFormat('fr-FR').format(paymentData[i] || 0)}</b>`).join(' &middot; ') || 'Aucun paiement sur la période.',
+            occupancyChart: `Occupées : <b>${occupied}</b> &middot; Disponibles : <b>${available}</b>`,
+            roomStatusChart: (roomStatusLabels || []).map((l, i) => `${l} : <b>${roomStatusData[i] || 0}</b>`).join(' &middot; '),
+            checkoutTimesChart: `Avant 12h : <b>${checkoutTimesData[0] || 0}</b> &middot; 12h-14h : <b>${checkoutTimesData[1] || 0}</b> &middot; Après 14h : <b>${checkoutTimesData[2] || 0}</b>`,
+        };
+        Object.keys(fallbacks).forEach(id => {
+            const canvas = document.getElementById(id);
+            if (!canvas) return;
+            const box = document.createElement('div');
+            box.style.cssText = 'padding:18px;font-size:.9rem;color:#4b5563;line-height:2;text-align:center;';
+            box.innerHTML = fallbacks[id];
+            canvas.replaceWith(box);
+        });
+    }
 
     // ================================================
     // CHART 1: REVENUE LINE CHART
@@ -1140,6 +1164,12 @@
     // EXPORT PDF FUNCTION
     // ================================================
     document.getElementById('exportPdf')?.addEventListener('click', function() {
+        // Repli fiable : si la librairie html2pdf n'a pas pu se charger (CDN bloqué),
+        // on ouvre la boîte d'impression du navigateur (« Enregistrer en PDF »).
+        if (typeof html2pdf === 'undefined') {
+            window.print();
+            return;
+        }
         const element = document.querySelector('.reports-page');
         const opt = {
             margin: [0.5, 0.5, 0.5, 0.5],
@@ -1148,7 +1178,11 @@
             html2canvas: { scale: 2, letterRendering: true },
             jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
         };
-        html2pdf().set(opt).from(element).save();
+        try {
+            html2pdf().set(opt).from(element).save();
+        } catch (e) {
+            window.print();
+        }
     });
 
 </script>
