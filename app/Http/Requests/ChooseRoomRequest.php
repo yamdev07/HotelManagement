@@ -24,7 +24,10 @@ class ChooseRoomRequest extends FormRequest
     public function rules()
     {
         return [
-            'count_person' => 'required|numeric',
+            // Optionnel : la sélection de chambre ne dépend que des dates. Le rendre
+            // obligatoire cassait le bouton « Retour » depuis l'étape 4 (dont les
+            // liens ne repassent pas count_person) · le retour ne fonctionnait pas.
+            'count_person' => 'nullable|numeric',
             'check_in' => 'required|date|after_or_equal:today',
             'check_out' => 'required|date|after:check_in',
         ];
