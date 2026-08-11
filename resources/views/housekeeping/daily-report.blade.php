@@ -655,24 +655,30 @@ textarea.form-control {
             <i class="fas fa-sticky-note"></i> {!! __('housekeeping.dailyreport.notes_title') !!}
         </div>
         <div class="card-body">
-            <div class="row g-4">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label">{{ __('housekeeping.dailyreport.observations_label') }}</label>
-                        <textarea class="form-control" rows="3" placeholder="{{ __('housekeeping.dailyreport.observations_placeholder') }}"></textarea>
+            @if(session('success'))
+                <div class="alert alert-success py-2">{{ session('success') }}</div>
+            @endif
+            <form method="POST" action="{{ route('housekeeping.daily-report.notes') }}">
+                @csrf
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">{{ __('housekeeping.dailyreport.observations_label') }}</label>
+                            <textarea class="form-control" name="observations" rows="3" placeholder="{{ __('housekeeping.dailyreport.observations_placeholder') }}">{{ old('observations', $note->observations ?? '') }}</textarea>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="form-label">{{ __('housekeeping.dailyreport.suggestions_label') }}</label>
+                            <textarea class="form-control" name="suggestions" rows="3" placeholder="{{ __('housekeeping.dailyreport.suggestions_placeholder') }}">{{ old('suggestions', $note->suggestions ?? '') }}</textarea>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label">{{ __('housekeeping.dailyreport.suggestions_label') }}</label>
-                        <textarea class="form-control" rows="3" placeholder="{{ __('housekeeping.dailyreport.suggestions_placeholder') }}"></textarea>
-                    </div>
+                <div class="d-flex justify-content-between mt-3">
+                    <button type="submit" class="btn btn-outline"><i class="fas fa-save"></i> {!! __('housekeeping.dailyreport.btn_save') !!}</button>
+                    <button type="button" class="btn btn-green" onclick="window.print()"><i class="fas fa-file-pdf"></i> {!! __('housekeeping.dailyreport.btn_pdf') !!}</button>
                 </div>
-            </div>
-            <div class="d-flex justify-content-between mt-3">
-                <button class="btn btn-outline"><i class="fas fa-save"></i> {!! __('housekeeping.dailyreport.btn_save') !!}</button>
-                <button class="btn btn-green"><i class="fas fa-file-pdf"></i> {!! __('housekeeping.dailyreport.btn_pdf') !!}</button>
-            </div>
+            </form>
         </div>
     </div>
 

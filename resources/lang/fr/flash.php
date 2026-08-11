@@ -230,6 +230,8 @@ return [
     'housekeeping_load_error' => 'Erreur lors du chargement.',
     'housekeeping_room_cleaned' => 'Chambre nettoyée avec succès.',
     'housekeeping_cleaning_started' => 'Nettoyage démarré.',
+    'housekeeping_notes_saved' => 'Notes du rapport enregistrées.',
+    'housekeeping_notes_error' => 'Impossible d\'enregistrer les notes.',
     'housekeeping_inspection_requested' => 'Inspection demandée.',
     'housekeeping_task_completed' => 'Tâche complétée.',
     'housekeeping_assignment_saved' => 'Assignation sauvegardée.',

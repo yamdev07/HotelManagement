@@ -516,11 +516,42 @@ class HousekeepingController extends Controller
                 'cleaned_by_user' => $cleanedByUser,
             ];
 
-            return view('housekeeping.daily-report', compact('today', 'stats', 'cleanedToday', 'toClean'));
+            // Note du jour (observations + suggestions), si déjà saisie · issue #222.
+            $note = \App\Models\HousekeepingNote::where('report_date', $today->toDateString())->first();
+
+            return view('housekeeping.daily-report', compact('today', 'stats', 'cleanedToday', 'toClean', 'note'));
         } catch (\Throwable $e) {
             Log::error('dailyReport: '.$e->getMessage());
 
             return back()->with('error', 'Erreur: ');
+        }
+    }
+
+    /**
+     * Enregistre (ou met à jour) les observations/suggestions du jour. Issue #222.
+     */
+    public function saveDailyNotes(Request $request)
+    {
+        $data = $request->validate([
+            'observations' => 'nullable|string|max:5000',
+            'suggestions' => 'nullable|string|max:5000',
+        ]);
+
+        try {
+            \App\Models\HousekeepingNote::updateOrCreate(
+                ['report_date' => Carbon::today()->toDateString()],
+                [
+                    'observations' => $data['observations'] ?? null,
+                    'suggestions' => $data['suggestions'] ?? null,
+                    'user_id' => Auth::id(),
+                ]
+            );
+
+            return back()->with('success', __('flash.housekeeping_notes_saved'));
+        } catch (\Throwable $e) {
+            Log::error('saveDailyNotes: '.$e->getMessage());
+
+            return back()->with('error', __('flash.housekeeping_notes_error'));
         }
     }
 

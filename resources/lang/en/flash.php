@@ -230,6 +230,8 @@ return [
     'housekeeping_load_error' => 'Error while loading.',
     'housekeeping_room_cleaned' => 'Room cleaned successfully.',
     'housekeeping_cleaning_started' => 'Cleaning started.',
+    'housekeeping_notes_saved' => 'Report notes saved.',
+    'housekeeping_notes_error' => 'Could not save the notes.',
     'housekeeping_inspection_requested' => 'Inspection requested.',
     'housekeeping_task_completed' => 'Task completed.',
     'housekeeping_assignment_saved' => 'Assignment saved.',

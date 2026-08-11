@@ -813,6 +813,7 @@ Route::prefix('housekeeping')->name('housekeeping.')->middleware(['auth', 'check
     // Rapports et statistiques
     Route::get('/reports', [HousekeepingController::class, 'reports'])->name('reports');
     Route::get('/daily-report', [HousekeepingController::class, 'dailyReport'])->name('daily-report');
+    Route::post('/daily-report/notes', [HousekeepingController::class, 'saveDailyNotes'])->name('daily-report.notes');
     Route::get('/stats', [HousekeepingController::class, 'stats'])->name('stats');
     Route::get('/schedule', [HousekeepingController::class, 'schedule'])->name('schedule');
     Route::get('/monthly-stats', [HousekeepingController::class, 'monthlyStats'])->name('monthly-stats');
