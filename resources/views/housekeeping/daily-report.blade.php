@@ -507,8 +507,15 @@ textarea.form-control {
                                     <td>{{ $room->type->name ?? 'Standard' }}</td>
                                     <td>{{ $room->last_cleaned_at ? \Carbon\Carbon::parse($room->last_cleaned_at)->format('H:i') : 'N/A' }}</td>
                                     <td>
-                                        @if($room->cleaning_started_at && $room->cleaning_completed_at)
-                                            {{ \Carbon\Carbon::parse($room->cleaning_started_at)->diffInMinutes($room->cleaning_completed_at) }} min
+                                        @php
+                                            // Fin de nettoyage : cleaning_completed_at si présent, sinon
+                                            // on retombe sur last_cleaned_at (toujours renseigné).
+                                            $cleanStart = $room->cleaning_started_at;
+                                            $cleanEnd = $room->cleaning_completed_at ?: $room->last_cleaned_at;
+                                        @endphp
+                                        @if($cleanStart && $cleanEnd)
+                                            @php $mins = (int) round(\Carbon\Carbon::parse($cleanStart)->diffInMinutes($cleanEnd)); @endphp
+                                            {{ $mins < 1 ? '< 1' : $mins }} min
                                         @else
                                             N/A
                                         @endif

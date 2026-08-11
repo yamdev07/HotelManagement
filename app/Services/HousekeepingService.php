@@ -73,6 +73,12 @@ class HousekeepingService
                 'needs_cleaning' => 0,
             ];
 
+            // Nettoyage terminé en une seule action (sans clic préalable sur
+            // « Démarrer ») : on renseigne quand même un début pour que la durée
+            // soit calculable dans le rapport (au lieu d'un « N/A »).
+            if (Schema::hasColumn('rooms', 'cleaning_started_at') && empty($room->cleaning_started_at)) {
+                $data['cleaning_started_at'] = now();
+            }
             if (Schema::hasColumn('rooms', 'cleaning_completed_at')) {
                 $data['cleaning_completed_at'] = now();
             }
