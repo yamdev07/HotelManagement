@@ -17,8 +17,8 @@ return [
     // Form
     'form_title' => 'Bon retour 👋',
     'form_description' => 'Connectez-vous à votre espace.',
-    'field_email' => 'Email',
-    'field_email_placeholder' => 'vous@exemple.com',
+    'field_email' => 'Email ou téléphone',
+    'field_email_placeholder' => 'vous@exemple.com ou +229 01 02 03 04',
     'field_password' => 'Mot de passe',
     'field_password_placeholder' => '••••••••',
     'field_password_toggle' => 'Afficher le mot de passe',

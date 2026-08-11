@@ -17,9 +17,12 @@ class AuthController extends Controller
 {
     public function login(LoginRequest $request)
     {
-        $email = trim((string) $request->input('email'));
+        $identifier = trim((string) $request->input('email'));
 
-        if (Auth::attempt(['email' => $email, 'password' => $request->password])) {
+        // Connexion par email OU par numéro de téléphone (issue #165).
+        $field = filter_var($identifier, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+
+        if (Auth::attempt([$field => $identifier, 'password' => $request->password])) {
             activity()->causedBy(auth()->user())->log('User logged into the portal');
 
             // Redirection selon le rôle (le caissier a sa propre destination :

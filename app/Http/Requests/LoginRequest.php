@@ -24,9 +24,11 @@ class LoginRequest extends FormRequest
     public function rules()
     {
         return [
+            // Identifiant : email OU numéro de téléphone (issue #165). Le champ
+            // s'appelle toujours "email" côté formulaire pour compatibilité.
             'email' => [
                 'required',
-                'email',
+                'string',
             ],
             'password' => [
                 'required',
