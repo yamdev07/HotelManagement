@@ -57,7 +57,19 @@ class CustomerController extends Controller
 
     public function update(Customer $customer, StoreCustomerRequest $request)
     {
-        $customer->update($request->all());
+        $data = $request->validated();
+
+        // Prise en charge de la nouvelle photo (issue #204 : la mise à jour de
+        // l'avatar était ignorée, seul le flux réservation la gérait).
+        unset($data['avatar']);
+        if ($request->hasFile('avatar')) {
+            if ($customer->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($customer->avatar)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($customer->avatar);
+            }
+            $data['avatar'] = $request->file('avatar')->store('avatars', 'public');
+        }
+
+        $customer->update($data);
 
         return redirect('customer')->with('success', __('flash.customer_updated', ['name' => $customer->name]));
     }
