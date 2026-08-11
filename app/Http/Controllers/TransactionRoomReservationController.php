@@ -590,7 +590,9 @@ class TransactionRoomReservationController extends Controller
     private function isRoomOccupied($roomId, $checkIn, $checkOut)
     {
         return Transaction::where('room_id', $roomId)
-            ->where('status', '!=', 'cancelled')
+            // Une réservation annulée / no-show / déjà terminée ne bloque pas la
+            // chambre (aligné sur le calendrier de disponibilité · issue #210).
+            ->whereNotIn('status', ['cancelled', 'no_show', 'completed'])
             ->where(function ($query) use ($checkIn, $checkOut) {
                 $query->whereBetween('check_in', [$checkIn, $checkOut])
                     ->orWhereBetween('check_out', [$checkIn, $checkOut])
@@ -607,7 +609,9 @@ class TransactionRoomReservationController extends Controller
      */
     private function getOccupiedRoomID($stayFrom, $stayUntil)
     {
-        return Transaction::where('status', '!=', 'cancelled')
+        // Mêmes statuts non bloquants que le calendrier (issue #210) : une chambre
+        // dont le seul chevauchement est une résa annulée/no-show/terminée reste libre.
+        return Transaction::whereNotIn('status', ['cancelled', 'no_show', 'completed'])
             ->where(function ($query) use ($stayFrom, $stayUntil) {
                 $query->where('check_in', '<', $stayUntil)
                     ->where('check_out', '>', $stayFrom);
