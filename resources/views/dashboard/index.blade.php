@@ -379,6 +379,10 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
                 <i class="fas fa-arrow-up fa-xs"></i>
                 {{ __('dashboard.new_arrivals', ['count' => $stats['todayArrivals'] ?? 0]) }}
             </div>
+            <div class="stat-card-meta">
+                <i class="fas fa-address-book fa-xs"></i>
+                {{ $stats['clientsTotal'] ?? 0 }} {{ __('customer.total_clients') }}
+            </div>
         </a>
 
         <a href="{{ route('transaction.index') }}?status=completed&date_filter=today" class="stat-card stat-card--secondary">

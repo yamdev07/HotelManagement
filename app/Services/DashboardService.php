@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\RoomStatus;
+use App\Models\Customer;
 use App\Models\Room;
 use App\Models\Transaction;
 use Carbon\Carbon;
@@ -46,6 +47,10 @@ class DashboardService
 
         return [
             'activeGuests' => $transactions->count(),
+            // Total des clients enregistrés (hôtel courant) : se met à jour dès
+            // qu'un client est ajouté, contrairement à activeGuests qui ne compte
+            // que les séjours en cours (audit : « ajout client sans mise à jour »).
+            'clientsTotal' => Customer::count(),
             'completedToday' => $transactions->filter(fn ($t) => Carbon::parse($t->check_out)->isSameDay($today) && $this->calculateBalance($t) <= 0)->count(),
             'pendingPayments' => $pendingPaymentTransactions->count(),
             'urgentPayments' => $pendingPaymentTransactions->filter(function ($t) use ($now) {
