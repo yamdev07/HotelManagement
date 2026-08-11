@@ -506,7 +506,7 @@
                                     <td>
                                         <div class="date-info">
                                             <span class="date-main">{{ $reservation->check_in->format('d/m/Y') }} → {{ $reservation->check_out->format('d/m/Y') }}</span>
-                                            <span class="date-range">{{ $reservation->check_in->format('d M') }} - {{ $reservation->check_out->format('d M Y') }}</span>
+                                            <span class="date-range">{{ $reservation->check_in->translatedFormat('d M') }} - {{ $reservation->check_out->translatedFormat('d M Y') }}</span>
                                             <span class="nights-badge">
                                                 <i class="fas fa-moon"></i> {{ __('customer-reservations.nights_count', ['count' => $reservation->check_in->diffInDays($reservation->check_out)]) }}
                                             </span>

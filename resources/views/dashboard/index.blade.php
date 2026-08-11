@@ -433,7 +433,7 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
                 <a href="{{ route('checkin.index') }}?date=today" class="date-card date-card--today">
                     <div class="date-card-head">
                         <span class="date-card-name">{{ __('dashboard.today') }}</span>
-                        <span class="date-card-pill">{{ now()->format('d M') }}</span>
+                        <span class="date-card-pill">{{ now()->translatedFormat('d M') }}</span>
                     </div>
                     <div class="date-card-rows">
                         <div class="date-card-row">
@@ -456,7 +456,7 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
                 <a href="{{ route('checkin.index') }}?date=tomorrow" class="date-card">
                     <div class="date-card-head">
                         <span class="date-card-name">{{ __('dashboard.tomorrow') }}</span>
-                        <span class="date-card-pill">{{ now()->addDay()->format('d M') }}</span>
+                        <span class="date-card-pill">{{ now()->addDay()->translatedFormat('d M') }}</span>
                     </div>
                     <div class="date-card-rows">
                         <div class="date-card-row">
@@ -479,7 +479,7 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
                 <a href="{{ route('checkin.index') }}?date=day+2" class="date-card">
                     <div class="date-card-head">
                         <span class="date-card-name">{{ __('dashboard.day_2') }}</span>
-                        <span class="date-card-pill">{{ now()->addDays(2)->format('d M') }}</span>
+                        <span class="date-card-pill">{{ now()->addDays(2)->translatedFormat('d M') }}</span>
                     </div>
                     <div class="date-card-rows">
                         <div class="date-card-row">

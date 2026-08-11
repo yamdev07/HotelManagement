@@ -687,7 +687,7 @@ textarea.form-control {
 <script>
 function updateClock() {
     const clocks = document.querySelectorAll('.clock');
-    clocks.forEach(c => c.textContent = new Date().toLocaleTimeString());
+    clocks.forEach(c => c.textContent = new Date().toLocaleTimeString('{{ app()->getLocale() }}'));
 }
 setInterval(updateClock, 60000);
 updateClock();

@@ -554,7 +554,7 @@
                 <div class="header-icon"><i class="fas fa-broom"></i></div>
                 <div class="header-text">
                     <h1>Housekeeping</h1>
-                    <p>{{ now()->format('l d F Y') }}</p>
+                    <p>{{ now()->translatedFormat('l d F Y') }}</p>
                 </div>
             </div>
             <div class="header-actions">
