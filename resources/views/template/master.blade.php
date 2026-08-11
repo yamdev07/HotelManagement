@@ -609,6 +609,15 @@
                 document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
                     try { new bootstrap.Tooltip(el); } catch (e) {}
                 });
+                // Infobulles d'aide sur toutes les actions à icône (boutons /
+                // liens porteurs d'un attribut title) sans avoir à annoter chaque
+                // vue (audit : « manque d'infobulles / textes d'aide »).
+                document.querySelectorAll('#page-content-wrapper a[title], #page-content-wrapper button[title]').forEach(function (el) {
+                    if (el.getAttribute('data-bs-toggle')) return;      // déjà géré
+                    if (!el.getAttribute('title').trim()) return;
+                    el.setAttribute('data-bs-placement', 'top');
+                    try { new bootstrap.Tooltip(el); } catch (e) {}
+                });
             } else if (tries > 20) {
                 clearInterval(bsCheck);
             }
