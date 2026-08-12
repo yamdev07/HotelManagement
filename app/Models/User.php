@@ -149,6 +149,22 @@ class User extends Authenticatable
     }
 
     /**
+     * L'utilisateur peut-il voir/utiliser un module (restaurant, housekeeping,
+     * reports) selon l'abonnement de SON hôtel ? Sert à n'afficher dans le menu
+     * que ce qui est réellement payé. Le Super-Admin plateforme (sans hôtel)
+     * voit tout. Basé sur l'hôtel de l'utilisateur (fiable), pas sur une variable
+     * de vue.
+     */
+    public function canUseModule(string $module): bool
+    {
+        if ($this->hotel_id === null) {
+            return true; // Super-Admin plateforme
+        }
+
+        return (bool) optional($this->hotel)->hasModule($module);
+    }
+
+    /**
      * Relation avec les sessions de caisse
      */
     public function cashierSessions()

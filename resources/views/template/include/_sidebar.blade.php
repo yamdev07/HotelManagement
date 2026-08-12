@@ -182,7 +182,7 @@
                             </a>
                         @endif
 
-                        @if (Route::has('restaurant.index') && (($currentHotel ?? null)?->hasModule('restaurant') ?? true))
+                        @if (Route::has('restaurant.index') && auth()->user()->canUseModule('restaurant'))
                             @php $pendingOrdersCount = \App\Models\RestaurantOrder::where('status', 'pending')->count(); @endphp
                             <a href="{{ route('restaurant.index') }}"
                                 class="nav-item {{ $activeClass('restaurant.', false) }}" data-tooltip="{{ __('sidebar.restaurant_title') }}">
@@ -311,7 +311,7 @@
                 @endif
 
                 <!-- NETTOYAGE -->
-                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Manager', 'Housekeeping', 'Receptionist']) && (($currentHotel ?? null)?->hasModule('housekeeping') ?? true))
+                @if (in_array(auth()->user()->role, ['Super', 'Admin', 'Manager', 'Housekeeping', 'Receptionist']) && auth()->user()->canUseModule('housekeeping'))
                     <div class="nav-section">
                         <div class="nav-section-title">{{ __('sidebar.section_housekeeping') }}</div>
 
@@ -404,7 +404,7 @@
                             </a>
                         @endif
 
-                        @if (Route::has('reports.index') && (($currentHotel ?? null)?->hasModule('reports') ?? true))
+                        @if (Route::has('reports.index') && auth()->user()->canUseModule('reports'))
                             <a href="{{ route('reports.index') }}"
                                 class="nav-item {{ $activeClass('reports.index') }}" data-tooltip="{{ __('sidebar.reports_title') }}">
                                 <div class="nav-icon"><i class="fas fa-file-alt"></i></div>

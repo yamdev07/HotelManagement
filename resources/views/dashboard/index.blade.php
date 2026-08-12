@@ -522,7 +522,8 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
                     <div class="room-stat-sub">{{ __('dashboard.right_now') }}</div>
                 </a>
 
-                <a href="{{ route('reports.index') }}" class="room-stat-card">
+                @php $canReports = auth()->user()->canUseModule('reports'); @endphp
+                <{{ $canReports ? 'a' : 'div' }} @if($canReports) href="{{ route('reports.index') }}" @endif class="room-stat-card">
                     <div class="room-stat-label">
                         {{ __('dashboard.occupancy_rate') }}
                         <span class="room-stat-badge rsb-light">{{ __('dashboard.today_badge') }}</span>
@@ -531,7 +532,7 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
                     <div class="occ-bar">
                         <div class="occ-fill" style="width:{{ $stats['occupancyRate'] ?? 0 }}%"></div>
                     </div>
-                </a>
+                </{{ $canReports ? 'a' : 'div' }}>
 
             </div>
         </div>
@@ -763,10 +764,12 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
                             <span class="qa-item-icon"><i class="fas fa-money-bill-wave fa-xs"></i></span>
                             {{ __('dashboard.payments_link') }}
                         </a>
+                        @if(auth()->user()->canUseModule('reports'))
                         <a href="{{ route('reports.index') }}" class="qa-item">
                             <span class="qa-item-icon"><i class="fas fa-chart-bar fa-xs"></i></span>
                             {{ __('dashboard.reports_link') }}
                         </a>
+                        @endif
                         @if(auth()->user()->isAdmin() || auth()->user()->role === 'Super')
                         <a href="{{ route('cashier.dashboard') }}" class="qa-item">
                             <span class="qa-item-icon"><i class="fas fa-cash-register fa-xs"></i></span>
