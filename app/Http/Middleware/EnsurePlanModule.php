@@ -36,7 +36,15 @@ class EnsurePlanModule
                 abort(403, $message);
             }
 
-            return redirect()->route('billing.show')->with('error', $message);
+            // Seuls Admin/Super peuvent gérer l'abonnement. Renvoyer les autres
+            // rôles (Serveur, Cuisinier, Caissier...) vers billing.show — auquel
+            // ils n'ont pas accès — créait une boucle de redirection à la connexion
+            // (« page indisponible »). On leur montre un message clair à la place.
+            if (in_array($user->role, ['Super', 'Admin'], true)) {
+                return redirect()->route('billing.show')->with('error', $message);
+            }
+
+            abort(403, $message);
         }
 
         return $next($request);
