@@ -13,8 +13,8 @@
             <div class="card-body text-center p-5">
                 @php
                     $hotel = auth()->user()?->hotel;
-                    $moduleLabel = session('module_label', __('modules.this_feature'));
-                    $planName = session('plan_name');
+                    $moduleLabel = $moduleLabel ?? session('module_label', __('modules.this_feature'));
+                    $planName = $planName ?? session('plan_name');
                 @endphp
 
                 <div class="mb-3">

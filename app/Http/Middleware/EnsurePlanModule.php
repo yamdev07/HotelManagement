@@ -5,6 +5,8 @@ namespace App\Http\Middleware;
 use App\Models\Hotel;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\View;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -36,17 +38,29 @@ class EnsurePlanModule
                 abort(403, $message);
             }
 
-            // Seuls Admin/Super peuvent gérer l'abonnement -> page de facturation.
-            if (in_array($user->role, ['Super', 'Admin'], true)) {
+            // Seuls Admin/Super peuvent gérer l'abonnement -> page de facturation
+            // (uniquement si la route existe, pour ne jamais planter).
+            if (in_array($user->role, ['Super', 'Admin'], true) && \Illuminate\Support\Facades\Route::has('billing.show')) {
                 return redirect()->route('billing.show')->with('error', $message);
             }
 
             // Les autres rôles (Serveur, Cuisinier, Caissier...) ne peuvent pas
-            // payer : au lieu d'une boucle ou d'un 403 brut, on affiche une page
-            // propre expliquant que le module n'est pas inclus dans l'abonnement.
-            return redirect()->route('module.unavailable')
-                ->with('module_label', $label)
-                ->with('plan_name', $hotel->planName());
+            // payer. On rend la page « module non inclus » DIRECTEMENT (pas via une
+            // route nommée : évite tout « Route not defined » si routes/web.php
+            // n'est pas à jour). Repli ultra-robuste si la vue manque : déconnexion
+            // + message sur la page de connexion.
+            if (View::exists('errors.module-unavailable')) {
+                return response()->view('errors.module-unavailable', [
+                    'moduleLabel' => $label,
+                    'planName' => $hotel->planName(),
+                ], 403);
+            }
+
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login.index')->with('failed', $message);
         }
 
         return $next($request);
