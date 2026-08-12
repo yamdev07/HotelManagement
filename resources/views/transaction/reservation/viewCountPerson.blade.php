@@ -379,6 +379,19 @@
                             @enderror
                         </div>
 
+                        <!-- Heure d'arrivée prévue (issue #212) -->
+                        <div class="form-group">
+                            <label for="check_in_time" class="form-label">
+                                <i class="fas fa-clock"></i>
+                                {{ __('reservation.arrival_time') }}
+                            </label>
+                            <input type="time"
+                                   class="form-control"
+                                   id="check_in_time"
+                                   name="check_in_time"
+                                   value="{{ old('check_in_time', '14:00') }}">
+                        </div>
+
                         <!-- Date de départ -->
                         <div class="form-group">
                             <label for="check_out" class="form-label">

@@ -171,7 +171,7 @@ class TransactionRoomReservationController extends Controller
     /**
      * Afficher la confirmation de réservation
      */
-    public function confirmation(Customer $customer, Room $room, $stayFrom, $stayUntil)
+    public function confirmation(Customer $customer, Room $room, $stayFrom, $stayUntil, Request $request)
     {
         // Calculer le prix
         $price = $room->price;
@@ -179,6 +179,9 @@ class TransactionRoomReservationController extends Controller
         $downPayment = ($price * $dayDifference) * 0.15;
 
         $existingReservationsCount = $customer->transactions()->count();
+
+        // Heure d'arrivée choisie à l'étape 2 (issue #212), défaut 14:00.
+        $checkInTime = $request->input('check_in_time') ?: '14:00';
 
         return view('transaction.reservation.confirmation', [
             'customer' => $customer,
@@ -188,6 +191,7 @@ class TransactionRoomReservationController extends Controller
             'downPayment' => $downPayment,
             'dayDifference' => $dayDifference,
             'existingReservationsCount' => $existingReservationsCount,
+            'checkInTime' => $checkInTime,
         ]);
     }
 
@@ -232,6 +236,7 @@ class TransactionRoomReservationController extends Controller
             $validator = \Validator::make($request->all(), [
                 'check_in' => 'required|date',
                 'check_out' => 'required|date|after:check_in',
+                'check_in_time' => 'nullable|date_format:H:i',
                 'downPayment' => 'nullable|numeric|min:0',
                 'person_count' => 'nullable|integer|min:1|max:'.$room->capacity,
                 'payment_method' => 'nullable|string|in:cash,card,mobile_money',
@@ -302,6 +307,7 @@ class TransactionRoomReservationController extends Controller
                     'room_id' => $room->id,
                     'check_in' => $checkIn,
                     'check_out' => $checkOut,
+                    'check_in_time' => ($validated['check_in_time'] ?? '14:00').':00',
                     'person_count' => $personCount,
                     'total_price' => $totalPrice,
                     'total_payment' => $downPayment,

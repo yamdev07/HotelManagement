@@ -502,10 +502,11 @@
                                 </div>
 
                                 <a href="{{ route('transaction.reservation.confirmation', [
-                                    'customer' => $customer->id, 
-                                    'room' => $room->id, 
-                                    'from' => request()->input('check_in'), 
-                                    'to' => request()->input('check_out')
+                                    'customer' => $customer->id,
+                                    'room' => $room->id,
+                                    'from' => request()->input('check_in'),
+                                    'to' => request()->input('check_out'),
+                                    'check_in_time' => request()->input('check_in_time'),
                                 ]) }}" class="choose-btn">
                                     <i class="fas fa-check-circle"></i>
                                     {{ __('reservation.choose_this_room') }}

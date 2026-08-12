@@ -26,6 +26,7 @@ class Transaction extends Model
         'room_id',
         'check_in',
         'check_out',
+        'check_in_time',
         'status',
         'person_count',
         'total_price',

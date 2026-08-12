@@ -180,6 +180,7 @@ return [
     'count_person' => 'Nombre de personnes',
     'max_persons' => 'Maximum 10 personnes',
     'arrival_date' => 'Date d\'arrivée',
+    'arrival_time' => 'Heure d\'arrivée prévue',
     'departure_date' => 'Date de départ',
     'see_available_rooms' => 'Voir les chambres disponibles',
     'created_on' => 'Créé le :date',

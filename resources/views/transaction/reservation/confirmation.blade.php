@@ -692,7 +692,7 @@
                                         <div class="timeline-marker"></div>
                                         <div class="timeline-content">
                                             <h6>{{ __('reservation.arrival') }}</h6>
-                                            <p>{{ \Carbon\Carbon::parse($stayFrom)->format('d/m/Y') }} • <span style="color:var(--g600);">14:00</span></p>
+                                            <p>{{ \Carbon\Carbon::parse($stayFrom)->format('d/m/Y') }} • <span style="color:var(--g600);">{{ $checkInTime ?? '14:00' }}</span></p>
                                         </div>
                                     </div>
                                     <div class="timeline-item">
@@ -756,6 +756,7 @@
 
                                 <input type="hidden" name="check_in" value="{{ $stayFrom }}">
                                 <input type="hidden" name="check_out" value="{{ $stayUntil }}">
+                                <input type="hidden" name="check_in_time" value="{{ $checkInTime ?? '14:00' }}">
                                 <input type="hidden" name="person_count" value="1">
                                 <input type="hidden" name="downPayment" id="downPaymentHidden" value="0">
                                 {{-- Le mode de paiement choisi doit réellement être envoyé au serveur

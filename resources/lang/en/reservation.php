@@ -156,6 +156,7 @@ return [
     'count_person' => 'Number of guests',
     'max_persons' => 'Maximum 10 guests',
     'arrival_date' => 'Arrival date',
+    'arrival_time' => 'Expected arrival time',
     'departure_date' => 'Departure date',
     'see_available_rooms' => 'See available rooms',
     'created_on' => 'Created on :date',
