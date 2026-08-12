@@ -585,7 +585,7 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
 });
 
 // ==================== DASHBOARD (RESTEINT) ====================
-Route::prefix('dashboard')->name('dashboard.')->middleware('checkrole:Super,Admin,Housekeeping,Receptionist')->group(function () {
+Route::prefix('dashboard')->name('dashboard.')->middleware('checkrole:Super,Admin,Manager,Housekeeping,Receptionist')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('index');
     Route::get('/data', [DashboardController::class, 'getDashboardData'])->name('data');
     Route::get('/stats', [DashboardController::class, 'updateStats'])->name('stats');
@@ -593,7 +593,7 @@ Route::prefix('dashboard')->name('dashboard.')->middleware('checkrole:Super,Admi
 });
 
 // ==================== ROUTES POUR TOUS LES UTILISATEURS AUTHENTIFIÉS ====================
-Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Customer,Housekeeping,Receptionist,Servant,Cuisiner']], function () {
+Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Manager,Customer,Housekeeping,Receptionist,Servant,Cuisiner']], function () {
 
     Route::get('/home', function () {
         $user = auth()->user();
