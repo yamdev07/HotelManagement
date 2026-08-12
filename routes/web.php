@@ -166,6 +166,14 @@ Route::view('/compte-suspendu', 'errors.hotel-suspended')
     ->middleware('auth')
     ->name('hotel.suspended');
 
+// ==================== MODULE NON INCLUS DANS LE PLAN ====================
+// Page propre affichée à un membre du personnel (serveur, cuisinier, caissier...)
+// quand son rôle vise un module non payé. Accessible à tout utilisateur connecté
+// (aucun checkrole/plan.module qui rebouclerait) · issue #216 / abonnement.
+Route::view('/fonctionnalite-indisponible', 'errors.module-unavailable')
+    ->middleware('auth')
+    ->name('module.unavailable');
+
 // ==================== ONBOARDING (personnalisation initiale) ====================
 Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
     Route::get('/bienvenue', [\App\Http\Controllers\OnboardingController::class, 'show'])->name('onboarding.show');

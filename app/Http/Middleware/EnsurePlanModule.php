@@ -36,15 +36,17 @@ class EnsurePlanModule
                 abort(403, $message);
             }
 
-            // Seuls Admin/Super peuvent gérer l'abonnement. Renvoyer les autres
-            // rôles (Serveur, Cuisinier, Caissier...) vers billing.show — auquel
-            // ils n'ont pas accès — créait une boucle de redirection à la connexion
-            // (« page indisponible »). On leur montre un message clair à la place.
+            // Seuls Admin/Super peuvent gérer l'abonnement -> page de facturation.
             if (in_array($user->role, ['Super', 'Admin'], true)) {
                 return redirect()->route('billing.show')->with('error', $message);
             }
 
-            abort(403, $message);
+            // Les autres rôles (Serveur, Cuisinier, Caissier...) ne peuvent pas
+            // payer : au lieu d'une boucle ou d'un 403 brut, on affiche une page
+            // propre expliquant que le module n'est pas inclus dans l'abonnement.
+            return redirect()->route('module.unavailable')
+                ->with('module_label', $label)
+                ->with('plan_name', $hotel->planName());
         }
 
         return $next($request);
