@@ -554,8 +554,16 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
     Route::get('/get-dialy-guest-chart-data', [ChartController::class, 'dailyGuestPerMonth']);
     Route::get('/get-dialy-guest/{year}/{month}/{day}', [ChartController::class, 'dailyGuest'])->name('chart.dailyGuest');
 
-    // ==================== CAISSE (ACCESSIBLE AUX RÉCEPTIONNISTES) ====================
-    Route::prefix('cashier')->name('cashier.')->group(function () {
+});
+
+// ==================== CAISSE ====================
+// Groupe AUTONOME (issue #216) : le rôle Cashier doit pouvoir y accéder. Ces
+// routes étaient imbriquées dans un groupe dont le checkrole excluait Cashier,
+// donc le parent refusait le caissier AVANT d'atteindre /dashboard -> boucle de
+// redirection ("site inaccessible") à la connexion. On sort le groupe et on
+// ajoute Cashier au checkrole (mêmes autres middlewares qu'avant).
+Route::middleware(['auth', 'checkrole:Super,Admin,Receptionist,Servant,Cuisiner,Cashier', 'admin.restrict', 'receptionist.restrict'])
+    ->prefix('cashier')->name('cashier.')->group(function () {
         // Routes sans paramètres d'abord
         Route::get('/sessions', [CashierSessionController::class, 'index'])->name('sessions.index');
         Route::get('/sessions/create', [CashierSessionController::class, 'create'])->name('sessions.create');
@@ -567,7 +575,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
             Route::get('/', [CashierSessionController::class, 'show'])->name('sessions.show');
             Route::put('/close', [CashierSessionController::class, 'close'])->name('sessions.close');
 
-            // ✅ CORRIGÉ : Ajout du middleware checkrole pour les réceptionnistes
             Route::delete('/', [CashierSessionController::class, 'destroy'])->name('sessions.destroy')
                 ->middleware('checkrole:Super,Admin,Receptionist,Servant,Cuisiner');
 
@@ -582,7 +589,6 @@ Route::group(['middleware' => ['auth', 'checkrole:Super,Admin,Receptionist,Serva
         Route::get('/current-session', [CashierSessionController::class, 'getCurrentSession'])->name('current-session');
         Route::get('/session-summary', [CashierSessionController::class, 'sessionSummary'])->name('session-summary');
     });
-});
 
 // ==================== DASHBOARD (RESTEINT) ====================
 Route::prefix('dashboard')->name('dashboard.')->middleware('checkrole:Super,Admin,Manager,Housekeeping,Receptionist')->group(function () {
