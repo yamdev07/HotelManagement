@@ -86,6 +86,9 @@
                             <select name="role" class="search-input" required>
                                 <option value="">{{ __('staff.form_role_placeholder') }}</option>
                                 @foreach ($roles as $key => $label)
+                                    {{-- On ne propose pas les rôles liés à un module non inclus dans l'abonnement --}}
+                                    @continue($key === 'Housekeeping' && ! auth()->user()->canUseModule('housekeeping'))
+                                    @continue(in_array($key, ['Servant', 'Cuisiner'], true) && ! auth()->user()->canUseModule('restaurant'))
                                     <option value="{{ $key }}" {{ old('role') === $key ? 'selected' : '' }}>{{ $roleMeta[$key][0] ?? $label }}</option>
                                 @endforeach
                             </select></div>

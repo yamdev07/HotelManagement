@@ -499,18 +499,22 @@
                                         <option value="Receptionist" @if(old('role') == 'Receptionist') selected @endif>
                                             🎯 Réceptionniste
                                         </option>
+                                        @if(auth()->user()->canUseModule('housekeeping'))
                                         <option value="Housekeeping" @if(old('role') == 'Housekeeping') selected @endif>
                                             🧹 Femme de ménage
                                         </option>
+                                        @endif
                                         <option value="Customer" @if(old('role') == 'Customer') selected @endif>
                                             👤 Client
                                         </option>
+                                        @if(auth()->user()->canUseModule('restaurant'))
                                         <option value="Servant" @if(old('role') == 'Servant') selected @endif>
                                             🍳 Serveur
                                         </option>
                                         <option value="Cuisiner" @if(old('role') == 'Cuisiner') selected @endif>
                                             👨‍🍳 Cuisinier
                                         </option>
+                                        @endif
                                     </select>
                                 </div>
                                 @error('role')

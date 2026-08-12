@@ -55,6 +55,17 @@ class StaffController extends Controller
             $roles['Manager'] = 'Direction';
         }
 
+        // On ne propose (et n'autorise à la validation) que les rôles dont le
+        // module est inclus dans l'abonnement de l'hôtel. Ainsi on ne crée pas de
+        // serveur/cuisinier/nettoyeur sur un plan qui n'a pas le module.
+        $user = auth()->user();
+        if (! $user->canUseModule('housekeeping')) {
+            unset($roles['Housekeeping']);
+        }
+        if (! $user->canUseModule('restaurant')) {
+            unset($roles['Servant'], $roles['Cuisiner']);
+        }
+
         return $roles;
     }
 
