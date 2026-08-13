@@ -25,7 +25,10 @@
         display:grid; grid-template-columns:1fr 1fr .9fr auto; gap:12px; align-items:end; box-shadow:0 40px 90px -40px rgba(0,0,0,.7); }
     .hero-search .hs-field { text-align:left; }
     .hero-search label { display:block; font-size:.66rem; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:#fff; opacity:.85; margin-bottom:7px; }
-    .hero-search input, .hero-search select { width:100%; padding:12px 13px; border:0; border-radius:11px; font-family:var(--sans); font-size:.95rem; color:var(--ink); background:rgba(255,255,255,.94); }
+    /* Fond blanc -> texte foncé (avant : var(--ink) = quasi-blanc, donc texte
+       invisible tant qu'on n'avait pas cliqué dans le champ). */
+    .hero-search input, .hero-search select { width:100%; padding:12px 13px; border:0; border-radius:11px; font-family:var(--sans); font-size:.95rem; color:#1f2937; background:rgba(255,255,255,.94); }
+    .hero-search input::placeholder { color:#6b7280; }
     .hero-search input:focus, .hero-search select:focus { outline:2px solid var(--c); }
     .hs-btn { border:0; border-radius:11px; background:var(--c); color:#fff; padding:12px 24px; height:47px; font-weight:600; cursor:pointer; white-space:nowrap; display:inline-flex; align-items:center; gap:8px; transition:.25s; box-shadow:0 12px 30px -10px var(--c); }
     .hs-btn:hover { filter:brightness(1.1); transform:translateY(-1px); }
