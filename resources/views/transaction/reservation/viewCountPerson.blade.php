@@ -281,7 +281,7 @@
     <div class="count-breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('transaction.reservation.createIdentity') }}">{{ __('reservation.step_identity') }}</a>
+        <a href="{{ route('transaction.reservation.createIdentity', $customer->id) }}">{{ __('reservation.step_identity') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">{{ __('reservation.step2_breadcrumb') }}</span>
     </div>
@@ -298,7 +298,8 @@
             </div>
         </div>
         <div class="count-header-actions">
-            <a href="{{ route('transaction.reservation.createIdentity') }}" class="btn-db btn-db-ghost">
+<<<<<<< HEAD
+            <a href="{{ route('transaction.reservation.createIdentity', $customer->id) }}" class="btn-db btn-db-ghost">
                 <i class="fas fa-arrow-left me-2"></i> {{ __('reservation.back') }}
             </a>
         </div>

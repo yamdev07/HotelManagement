@@ -4,15 +4,19 @@
 
 @section('content')
 @php
+    // Méta d'affichage (libellé court, icône, couleur de la marque de l'hôtel).
     $roleMeta = [
+        'Manager'      => [__('staff.role_manager'),       'fa-user-tie',       'var(--g700)'],
         'Receptionist' => [__('staff.role_receptionist'), 'fa-bell-concierge', 'var(--g600)'],
         'Cashier'      => [__('staff.role_cashier'),      'fa-cash-register',  'var(--g500)'],
         'Housekeeping' => [__('staff.role_housekeeping'), 'fa-broom',          'var(--g400)'],
         'Servant'      => [__('staff.role_servant'),      'fa-utensils',       'var(--g300)'],
         'Cuisiner'     => [__('staff.role_cuisinier'),    'fa-kitchen-set',    'var(--g600)'],
     ];
+    // $roles vient du contrôleur : rôles que l'utilisateur courant peut réellement gérer
+    // (la Direction n'apparaît que pour l'Admin/Super).
     $counts = [];
-    foreach ($roleMeta as $key => $m) { $counts[$key] = $staff->where('role', $key)->count(); }
+    foreach ($roles as $key => $label) { $counts[$key] = $staff->where('role', $key)->count(); }
 @endphp
 
 <div class="sp-wrap">
@@ -51,7 +55,8 @@
             <div class="stat-card-label">{{ __('staff.stat_total_members') }}</div>
             <div class="stat-card-footer"><i class="fas fa-user-shield"></i> {{ __('staff.stat_your_team') }}</div>
         </div>
-        @foreach ($roleMeta as $key => $m)
+        @foreach ($roles as $key => $label)
+            @php $m = $roleMeta[$key] ?? [$label, 'fa-user', 'var(--g600)']; @endphp
             <div class="stat-card" style="--bar-c: {{ $m[2] }};">
                 <div class="stat-card-head"><span class="stat-card-icon" style="background:var(--g50);color:{{ $m[2] }}"><i class="fas {{ $m[1] }}"></i></span></div>
                 <div class="stat-card-value">{{ $counts[$key] }}</div>
@@ -80,8 +85,8 @@
                         <div class="col-md-4"><label class="sp-label">{{ __('staff.form_role') }}</label>
                             <select name="role" class="search-input" required>
                                 <option value="">{{ __('staff.form_role_placeholder') }}</option>
-                                @foreach ($roleMeta as $key => $m)
-                                    <option value="{{ $key }}" {{ old('role') === $key ? 'selected' : '' }}>{{ $m[0] }}</option>
+                                @foreach ($roles as $key => $label)
+                                    <option value="{{ $key }}" {{ old('role') === $key ? 'selected' : '' }}>{{ $roleMeta[$key][0] ?? $label }}</option>
                                 @endforeach
                             </select></div>
                         <div class="col-md-4"><label class="sp-label">{{ __('staff.form_password') }}</label>

@@ -671,11 +671,20 @@
                 @csrf
                 @method('PUT')
                 <select name="status" class="status-select" onchange="this.form.submit()">
+<<<<<<< HEAD
                     <option value="reservation" {{ $transaction->status == 'reservation' ? 'selected' : '' }}>{{ __('show.status_reservation') }}</option>
                     <option value="active" {{ $transaction->status == 'active' ? 'selected' : '' }}>{{ __('show.status_active') }}</option>
                     <option value="completed" {{ $transaction->status == 'completed' ? 'selected' : '' }}>{{ __('show.status_completed') }}</option>
                     <option value="cancelled" {{ $transaction->status == 'cancelled' ? 'selected' : '' }}>{{ __('show.status_cancelled') }}</option>
                     <option value="no_show" {{ $transaction->status == 'no_show' ? 'selected' : '' }}>{{ __('show.status_no_show') }}</option>
+=======
+                    {{-- Options texte (les <option> ne rendent pas les icônes) · issue #185 --}}
+                    <option value="reservation" {{ $transaction->status == 'reservation' ? 'selected' : '' }}>Réservation</option>
+                    <option value="active" {{ $transaction->status == 'active' ? 'selected' : '' }}>Dans l'hôtel</option>
+                    <option value="completed" {{ $transaction->status == 'completed' ? 'selected' : '' }}>Terminé</option>
+                    <option value="cancelled" {{ $transaction->status == 'cancelled' ? 'selected' : '' }}>Annulée</option>
+                    <option value="no_show" {{ $transaction->status == 'no_show' ? 'selected' : '' }}>No Show</option>
+>>>>>>> origin/feature/saas-multitenant
                 </select>
             </form>
             @endif

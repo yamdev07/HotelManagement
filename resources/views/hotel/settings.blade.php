@@ -35,19 +35,22 @@
                         <div class="row g-3">
                             <div class="col-md-8">
                                 <label class="form-label">{{ __('hotel-settings.label_name') }}</label>
-                                <input type="text" name="name" class="form-control" value="{{ old('name', $hotel->name) }}" required>
+                                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', $hotel->name) }}" maxlength="255" required>
+                                @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label">{{ __('hotel-settings.label_currency') }}</label>
-                                <input type="text" name="currency" class="form-control" value="{{ old('currency', $hotel->currency) }}">
+                                <input type="text" name="currency" class="form-control" value="{{ old('currency', $hotel->currency) }}" maxlength="10">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('hotel-settings.label_email') }}</label>
-                                <input type="email" name="contact_email" class="form-control" value="{{ old('contact_email', $hotel->contact_email) }}">
+                                <input type="email" name="contact_email" class="form-control @error('contact_email') is-invalid @enderror" value="{{ old('contact_email', $hotel->contact_email) }}">
+                                @error('contact_email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('hotel-settings.label_phone') }}</label>
-                                <input type="text" name="contact_phone" class="form-control" value="{{ old('contact_phone', $hotel->contact_phone) }}">
+                                <input type="tel" name="contact_phone" class="form-control @error('contact_phone') is-invalid @enderror" value="{{ old('contact_phone', $hotel->contact_phone) }}" placeholder="+229 01 02 03 04" pattern="[0-9+\s().\-]{6,20}" maxlength="20">
+                                @error('contact_phone')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-12">
                                 <label class="form-label">{{ __('hotel-settings.label_address') }}</label>
@@ -234,6 +237,55 @@
         </div>
     </form>
 </div>
+
+@if (auth()->user()->id === $hotel->owner_user_id)
+    {{-- Zone de danger : clôture de l'établissement, réservée au propriétaire (issue #191) --}}
+    <div class="card border-danger mt-4" style="max-width:100%;">
+        <div class="card-header bg-danger text-white">
+            <i class="fas fa-triangle-exclamation me-1"></i> Zone de danger
+        </div>
+        <div class="card-body">
+            <h6 class="fw-bold mb-1">Supprimer définitivement mon établissement</h6>
+            <p class="text-muted mb-3" style="font-size:.9rem;">
+                Cette action est <strong>irréversible</strong>. Elle supprime votre établissement
+                « {{ $hotel->name }} » et <strong>toutes</strong> ses données (comptes du personnel,
+                chambres, clients, réservations, paiements, historique). Vos accès seront immédiatement révoqués.
+            </p>
+
+            @if ($errors->hasAny(['password', 'confirmation']))
+                <div class="alert alert-danger py-2">
+                    <ul class="mb-0">
+                        @foreach ($errors->get('password') as $e)<li>{{ $e }}</li>@endforeach
+                        @foreach ($errors->get('confirmation') as $e)<li>{{ $e }}</li>@endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="collapse" data-bs-target="#dangerDelete">
+                <i class="fas fa-trash me-1"></i> Supprimer mon établissement
+            </button>
+
+            <div class="collapse mt-3 {{ $errors->hasAny(['password', 'confirmation']) ? 'show' : '' }}" id="dangerDelete">
+                <form method="POST" action="{{ route('hotel.account.destroy') }}" class="border rounded p-3">
+                    @csrf
+                    @method('DELETE')
+                    <div class="mb-2">
+                        <label class="form-label mb-1">Votre mot de passe</label>
+                        <input type="password" name="password" class="form-control" required autocomplete="current-password">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label mb-1">Tapez <strong>SUPPRIMER</strong> pour confirmer</label>
+                        <input type="text" name="confirmation" class="form-control" placeholder="SUPPRIMER" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger"
+                            onclick="return confirm('Dernière confirmation : supprimer définitivement « {{ $hotel->name }} » et toutes ses données ?');">
+                        <i class="fas fa-trash me-1"></i> Je supprime définitivement
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+@endif
 
 <script>
     (function () {

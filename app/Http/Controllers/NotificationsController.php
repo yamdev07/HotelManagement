@@ -11,6 +11,12 @@ class NotificationsController extends Controller
     public function index()
     {
         $user = auth()->user();
+
+        // Issue #198 : on capture les notifications NON LUES avant de les marquer
+        // lues, pour pouvoir les mettre en avant (« Nouveau ») sur cette page —
+        // tout en vidant le badge rouge (issue #196).
+        $newIds = $user->unreadNotifications->pluck('id')->all();
+
         $user->unreadNotifications->markAsRead();
 
         // Rafraîchit les relations en cache pour que le badge (non lues) tombe à 0
@@ -19,7 +25,9 @@ class NotificationsController extends Controller
             ->unsetRelation('readNotifications')
             ->unsetRelation('unreadNotifications');
 
-        return view('notification.index');
+        $notifications = $user->notifications()->latest()->get();
+
+        return view('notification.index', compact('notifications', 'newIds'));
     }
 
     public function markAllAsRead()

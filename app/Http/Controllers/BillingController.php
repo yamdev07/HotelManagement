@@ -19,7 +19,18 @@ class BillingController extends Controller
 
     private const SESSION_KEY = 'billing.pending';
 
-    public function __construct(private FedaPayService $fedapay) {}
+    public function __construct(private FedaPayService $fedapay)
+    {
+        $this->middleware(function ($request, $next) {
+            abort_if(
+                $request->user()?->roleEnum === \App\Enums\UserRole::Manager,
+                403,
+                "La gestion de l'abonnement est réservée à l'administrateur de l'établissement."
+            );
+
+            return $next($request);
+        });
+    }
 
     /** Page « Mon abonnement » : état courant + formules payables. */
     public function show(Request $request)

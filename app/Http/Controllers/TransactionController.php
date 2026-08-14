@@ -169,8 +169,12 @@ class TransactionController extends Controller
     {
         $this->authorize('cancel', $transaction);
 
+        // Issue #187 : un motif d'annulation est désormais obligatoire (traçabilité).
         $request->validate([
-            'cancel_reason' => ['nullable', 'string', 'max:500'],
+            'cancel_reason' => ['required', 'string', 'min:3', 'max:500', new \App\Rules\NoEmoji],
+        ], [
+            'cancel_reason.required' => "Veuillez indiquer le motif de l'annulation.",
+            'cancel_reason.min'      => 'Le motif doit comporter au moins 3 caractères.',
         ]);
 
         try {
@@ -297,7 +301,8 @@ class TransactionController extends Controller
         $this->authorize('view', $transaction);
         $transaction->load(['customer.user', 'room.type', 'user', 'payments']);
 
-        $histories = \Spatie\Activitylog\Models\Activity::where('subject_type', Transaction::class)
+        // Modèle scopé par hôtel (défense en profondeur) plutôt que le modèle Spatie brut.
+        $histories = \App\Models\Activity::where('subject_type', Transaction::class)
             ->where('subject_id', $transaction->id)
             ->orderByDesc('created_at')
             ->get();

@@ -1246,7 +1246,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     icon: 'success',
                     confirmButtonText: 'Retour sur le dashboard'
                 }).then(() => {
-                    window.location.href = `/transactions/${transactionId}`;
+                    // URL correcte : la route est /transaction/{id} (singulier) · issue #182
+                    window.location.href = "{{ route('transaction.show', $transaction) }}";
                 });
             } else {
                 throw new Error(data.message || 'Erreur lors du paiement');
@@ -1269,7 +1270,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Rafraîchissement périodique
     setInterval(async () => {
         try {
-            const response = await fetch(`/api/transactions/${transactionId}/check-status`);
+            const response = await fetch("{{ route('transaction.payment.check-status', $transaction) }}");
             const data = await response.json();
             
             if (data.success && data.transaction.remaining !== currentRemaining) {
@@ -1301,7 +1302,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (document.getElementById('show-api')) {
             document.getElementById('show-api').addEventListener('click', async function() {
                 try {
-                    const response = await fetch(`/api/transactions/${transactionId}/check-status`);
+                    const response = await fetch("{{ route('transaction.payment.check-status', $transaction) }}");
                     const data = await response.json();
                     
                     document.getElementById('apiResponseContent').textContent = JSON.stringify(data, null, 2);

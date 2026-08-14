@@ -39,21 +39,23 @@ class RegisterHotelController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'company_name' => ['required', 'string', 'max:255', new \App\Rules\NoEmoji],
-            'plan' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
-            'country' => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.countries')))],
-            'contact_phone' => ['nullable', 'string', 'max:50'],
-            // 'file' plutôt que 'image' : 'image' (getimagesize) rejette les SVG.
-            'logo' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:4096'],
-            'admin_name' => ['required', 'string', 'max:255', new \App\Rules\NoEmoji],
-            'admin_email' => ['required', 'email', 'max:255'],
+            'company_name'  => ['required', 'string', 'max:255', new \App\Rules\SafeName],
+            'plan'          => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
+            'country'       => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.countries')))],
+            'contact_phone' => ['nullable', 'string', 'regex:/^[0-9+\s().\-]{6,20}$/'],
+            'logo'          => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,svg', 'max:4096'],
+            'admin_name'    => ['required', 'string', 'max:255', new \App\Rules\SafeName],
+            'admin_email'   => ['required', 'email', 'max:255', 'unique:users,email'],
         ], [
+            'contact_phone.regex' => 'Le téléphone ne doit contenir que des chiffres (6 à 20), espaces, +, -, ( ).',
             'logo.mimes' => 'Le logo doit être une image JPG, PNG, WEBP ou SVG.',
             'logo.max' => 'Le logo est trop lourd (4 Mo maximum). Réduisez sa taille et réessayez.',
             'logo.file' => "Le logo n'a pas pu être lu. Réessayez avec une image JPG ou PNG.",
         ], [
-            'company_name' => "nom de l'établissement",
-            'admin_name' => 'nom complet',
+            'company_name'  => "nom de l'établissement",
+            'admin_name'    => 'nom complet',
+            'admin_email'   => 'email',
+            'contact_phone' => 'téléphone',
         ]);
 
         // Si l'email existe déjà (l'utilisateur revient en arrière pour changer de plan),
