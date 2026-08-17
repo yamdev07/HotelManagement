@@ -138,12 +138,23 @@
         .hx-cval { font-family:'Space Grotesk'; font-weight:700; color:#fff; font-size:.95rem; line-height:1; }
         .hx-cval small { font-size:.5rem; color:var(--muted); }
         .hx-cup { font-size:.52rem; color:#29e0c8; margin-top:3px; }
-        .hx-charts { display:grid; grid-template-columns:1.5fr 1fr; gap:7px; }
+        .hx-charts { display:grid; grid-template-columns:1.3fr .95fr .95fr; gap:7px; align-items:start; }
         .hx-chart { background:var(--white, #fff); border:1px solid var(--border); border-radius:10px; padding:9px; }
-        .hx-ctitle { font-size:.6rem; color:var(--muted); margin-bottom:6px; }
+        .hx-ctitle { font-size:.6rem; color:var(--muted); margin-bottom:6px; display:flex; justify-content:space-between; align-items:center; gap:6px; }
+        .hx-ctitle span { font-size:.48rem; color:var(--muted); font-weight:400; white-space:nowrap; }
+        /* Graphe avec axes */
+        .hx-plot { display:flex; gap:4px; }
+        .hx-yax { display:flex; flex-direction:column; justify-content:space-between; font-size:.42rem; color:var(--muted); height:70px; text-align:right; }
+        .hx-xax { display:flex; justify-content:space-between; font-size:.42rem; color:var(--muted); margin-top:3px; padding-left:18px; }
+        /* Colonne Nouvelle réservation (3e colonne, plus de carte flottante) */
+        .hx-resv .hx-ctitle { color:#fff; font-weight:600; }
+        .hx-resv .hx-ctitle i { color:var(--brand); }
+        .hx-rf { background:rgba(255,255,255,.05); border:1px solid var(--border); border-radius:7px; padding:5px 8px; margin-bottom:6px; }
+        .hx-rf label { font-size:.46rem; color:var(--muted); display:block; }
+        .hx-rf div { font-size:.58rem; color:#fff; display:flex; justify-content:space-between; align-items:center; }
         .hx-donut-wrap { display:flex; align-items:center; gap:9px; }
         .hx-donut { width:66px; height:66px; border-radius:50%; flex-shrink:0;
-            background:conic-gradient(#7c83ff 0 62%, #29e0c8 62% 90%, #b06bff 90% 100%);
+            background:conic-gradient(#7c83ff 0 65%, #29e0c8 65% 90%, #b06bff 90% 100%);
             -webkit-mask:radial-gradient(circle 19px at center, transparent 98%, #000 100%);
             mask:radial-gradient(circle 19px at center, transparent 98%, #000 100%); }
         .hx-legend { font-size:.57rem; color:var(--muted); flex:1; }
@@ -259,36 +270,42 @@
                                 </div>
                                 <div class="hx-charts">
                                     <div class="hx-chart">
-                                        <div class="hx-ctitle">Évolution des réservations</div>
-                                        <svg viewBox="0 0 260 110" preserveAspectRatio="none" style="width:100%;height:110px;">
-                                            <defs><linearGradient id="hxg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c83ff" stop-opacity=".35"/><stop offset="1" stop-color="#7c83ff" stop-opacity="0"/></linearGradient></defs>
-                                            <polyline points="0,80 37,70 74,74 111,55 148,60 185,40 222,44 260,25" fill="none" stroke="#7c83ff" stroke-width="2.5" stroke-linejoin="round"/>
-                                            <polygon points="0,80 37,70 74,74 111,55 148,60 185,40 222,44 260,25 260,110 0,110" fill="url(#hxg)"/>
-                                            <circle cx="260" cy="25" r="3.5" fill="#7c83ff"/>
-                                        </svg>
+                                        <div class="hx-ctitle">Évolution des réservations <span>7 derniers jours</span></div>
+                                        <div class="hx-plot">
+                                            <div class="hx-yax"><span>100</span><span>75</span><span>50</span><span>25</span><span>0</span></div>
+                                            <svg viewBox="0 0 240 70" preserveAspectRatio="none" style="width:100%;height:70px;">
+                                                <defs><linearGradient id="hxg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c83ff" stop-opacity=".35"/><stop offset="1" stop-color="#7c83ff" stop-opacity="0"/></linearGradient></defs>
+                                                <polygon points="0,52 34,46 68,49 102,34 137,38 171,22 205,26 240,12 240,70 0,70" fill="url(#hxg)"/>
+                                                <polyline points="0,52 34,46 68,49 102,34 137,38 171,22 205,26 240,12" fill="none" stroke="#7c83ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                                                <circle cx="102" cy="34" r="2.6" fill="#fff" stroke="#7c83ff" stroke-width="1.5"/>
+                                                <circle cx="171" cy="22" r="2.6" fill="#fff" stroke="#7c83ff" stroke-width="1.5"/>
+                                                <circle cx="240" cy="12" r="3" fill="#7c83ff"/>
+                                            </svg>
+                                        </div>
+                                        <div class="hx-xax"><span>Sam</span><span>Dim</span><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span></div>
                                     </div>
                                     <div class="hx-chart">
                                         <div class="hx-ctitle">Répartition des chambres</div>
                                         <div class="hx-donut-wrap">
                                             <div class="hx-donut"></div>
                                             <div class="hx-legend">
-                                                <div><span style="background:#7c83ff"></span>Occupées <b>62%</b></div>
-                                                <div><span style="background:#29e0c8"></span>Disponibles <b>28%</b></div>
+                                                <div><span style="background:#7c83ff"></span>Occupées <b>65%</b></div>
+                                                <div><span style="background:#29e0c8"></span>Disponibles <b>25%</b></div>
                                                 <div><span style="background:#b06bff"></span>Réservées <b>10%</b></div>
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="hx-chart hx-resv">
+                                        <div class="hx-ctitle"><i class="fas fa-plus"></i> Nouvelle réservation</div>
+                                        <div class="hx-rf"><label>Arrivée</label><div>21/06/2024 <i class="fas fa-calendar"></i></div></div>
+                                        <div class="hx-rf"><label>Départ</label><div>24/06/2024 <i class="fas fa-calendar"></i></div></div>
+                                        <div class="hx-rf"><label>Chambres</label><div>2 <i class="fas fa-chevron-down"></i></div></div>
+                                        <div class="hx-pbtn">Rechercher</div>
+                                        <div class="hx-phint" style="text-align:left;">Voir toutes les réservations →</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="hx-phone">
-                        <div class="hx-ptop">‹ Nouvelle réservation</div>
-                        <div class="hx-pfield"><label>Arrivée</label><div>18 Mai 2024</div></div>
-                        <div class="hx-pfield"><label>Départ</label><div>20 Mai 2024</div></div>
-                        <div class="hx-pfield"><label>Chambres</label><div>1 chambre, 2 adultes</div></div>
-                        <div class="hx-pbtn">Rechercher</div>
-                        <div class="hx-phint">12 chambres disponibles</div>
                     </div>
                 </div>
             </div>
