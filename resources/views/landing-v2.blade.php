@@ -26,7 +26,10 @@
         body { background: var(--bg); color: var(--txt); overflow-x: hidden; }
         h1,h2,h3,h4,.display-font { font-family: 'Space Grotesk', sans-serif; letter-spacing: -.5px; color: var(--head); }
         /* La maquette du dashboard reste sombre (capture produit) dans les deux thèmes */
-        .hx-wrap { --txt:#e8ecf6; --muted:#9aa6c2; --head:#ffffff; --border:rgba(255,255,255,.10); --card:rgba(255,255,255,.05); }
+        .hx-wrap { --txt:#e8ecf6; --muted:#9aa6c2; --head:#ffffff; --border:rgba(255,255,255,.10); --card:rgba(255,255,255,.05);
+            /* Cartes de l'aperçu = sombres translucides (et non blanches) pour que
+               les chiffres blancs (12, 24, CA...) restent visibles · fix #landing. */
+            --white:rgba(255,255,255,.06); }
         :root[data-theme="light"] .text-white { color: var(--head) !important; }
         :root[data-theme="light"] .stars { display: none; }
         :root[data-theme="light"] .cosmos { background:

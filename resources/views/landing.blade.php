@@ -10,313 +10,155 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root{
-            --bg:#07071a; --bg2:#0b0b22;
-            --panel:rgba(255,255,255,.035); --panel2:rgba(255,255,255,.06);
-            --line:rgba(255,255,255,.09); --line2:rgba(255,255,255,.14);
-            --txt:#ecefff; --muted:#9aa1bd; --muted2:#7b82a3;
-            --v1:#8b5cf6; --v2:#6366f1; --v3:#a855f7; --pink:#d946ef;
-            --grad:linear-gradient(135deg,#7c3aed 0%,#6366f1 100%);
-            --grad-text:linear-gradient(90deg,#a855f7 0%,#8b5cf6 45%,#6366f1 100%);
-            --sans:'Inter',system-ui,sans-serif; --disp:'Sora','Inter',sans-serif;
+        :root {
+            --brand: #4f46e5;
+            --brand-dark: #4338ca;
+            --ink: #0f172a;
         }
-        *{font-family:var(--sans);box-sizing:border-box;}
-        html{scroll-behavior:smooth;}
-        body{background:var(--bg);color:var(--txt);overflow-x:hidden;}
-        a{text-decoration:none;}
-        .container{max-width:1220px;}
+        * { font-family: 'Inter', system-ui, sans-serif; }
+        body { color: var(--ink); }
+        .navbar-brand { font-weight: 800; letter-spacing: -.5px; }
+        .text-brand { color: var(--brand) !important; }
+        .btn-brand { background: var(--brand); border-color: var(--brand); color: #fff; }
+        .btn-brand:hover { background: var(--brand-dark); border-color: var(--brand-dark); color: #fff; }
+        .btn-outline-brand { color: var(--brand); border-color: var(--brand); }
+        .btn-outline-brand:hover { background: var(--brand); color: #fff; }
 
-        /* Ambient glow + dotted backdrop */
-        .bg-fx{position:fixed;inset:0;z-index:-2;background:
-            radial-gradient(900px 520px at 78% -6%, rgba(124,58,237,.28), transparent 60%),
-            radial-gradient(760px 460px at 8% 8%, rgba(99,102,241,.20), transparent 62%),
-            radial-gradient(700px 500px at 60% 108%, rgba(168,85,247,.14), transparent 60%),
-            var(--bg);}
-        .bg-dots{position:fixed;inset:0;z-index:-1;opacity:.5;pointer-events:none;
-            background-image:radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
-            background-size:26px 26px;
-            -webkit-mask-image:radial-gradient(1200px 700px at 75% 22%, #000 0%, transparent 72%);
-            mask-image:radial-gradient(1200px 700px at 75% 22%, #000 0%, transparent 72%);}
-
-        /* ===== NAV ===== */
-        .nav-c{position:sticky;top:0;z-index:60;padding:16px 0;transition:.3s;}
-        .nav-c.scrolled{background:rgba(9,9,26,.82);backdrop-filter:blur(16px) saturate(160%);border-bottom:1px solid var(--line);padding:11px 0;}
-        .nav-in{display:flex;align-items:center;gap:20px;}
-        .brand{display:flex;align-items:center;gap:9px;font-family:var(--disp);font-weight:800;font-size:1.28rem;color:#fff;letter-spacing:-.4px;}
-        .brand .pin{width:30px;height:30px;border-radius:9px;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:.85rem;box-shadow:0 8px 22px -8px var(--v2);}
-        .brand span{color:var(--v3);}
-        .nav-links{display:flex;align-items:center;gap:28px;margin:0 auto;}
-        .nav-links a{color:#c3c8e0;font-size:.94rem;font-weight:500;transition:.2s;}
-        .nav-links a:hover{color:#fff;}
-        .nav-actions{display:flex;align-items:center;gap:10px;}
-        .pill{border:1px solid var(--line2);border-radius:10px;padding:8px 13px;color:#d7dbf0;font-size:.86rem;font-weight:600;background:transparent;cursor:pointer;transition:.2s;display:inline-flex;align-items:center;gap:6px;}
-        .pill:hover{border-color:var(--v2);color:#fff;}
-        .icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--line2);background:transparent;color:#c3c8e0;display:grid;place-items:center;cursor:pointer;transition:.2s;}
-        .icon-btn:hover{color:#fff;border-color:var(--v2);}
-        .btn-grad{background:var(--grad);color:#fff;border:0;border-radius:11px;padding:9px 18px;font-weight:700;font-size:.9rem;display:inline-flex;align-items:center;gap:8px;box-shadow:0 12px 30px -10px rgba(124,58,237,.7);transition:transform .18s, box-shadow .2s;}
-        .btn-grad:hover{transform:translateY(-2px);color:#fff;box-shadow:0 18px 40px -12px rgba(124,58,237,.85);}
-        .btn-ghost2{border:1px solid var(--line2);border-radius:11px;padding:9px 18px;color:#e6e9fb;font-weight:600;font-size:.9rem;display:inline-flex;align-items:center;gap:8px;transition:.2s;}
-        .btn-ghost2:hover{border-color:var(--v2);color:#fff;background:var(--panel);}
-
-        /* ===== HERO ===== */
-        .hero{padding:64px 0 40px;position:relative;}
-        .eyebrow{display:inline-flex;align-items:center;gap:9px;border:1px solid var(--line2);background:var(--panel);border-radius:999px;padding:7px 15px;font-size:.82rem;color:#cfd4ef;}
-        .eyebrow b{color:#fff;font-weight:700;}
-        .eyebrow .tag{background:rgba(124,58,237,.22);color:#c4b5fd;border-radius:999px;padding:2px 9px;font-weight:700;font-size:.74rem;}
-        .h1{font-family:var(--disp);font-weight:800;font-size:clamp(2.5rem,4.9vw,4rem);line-height:1.03;letter-spacing:-1.6px;color:#fff;margin:22px 0 18px;}
-        .h1 .grad{background:var(--grad-text);-webkit-background-clip:text;background-clip:text;color:transparent;}
-        .lead{font-size:1.12rem;color:var(--muted);max-width:520px;line-height:1.6;}
-        .rating{display:flex;align-items:center;gap:11px;margin:20px 0 26px;}
-        .rating .stars{color:#fbbf24;letter-spacing:2px;font-size:1rem;}
-        .rating .rtxt{color:#c3c8e0;font-size:.92rem;}
-        .rating .rtxt b{color:#fff;}
-        .cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
-        .btn-lg-grad{background:var(--grad);color:#fff;border:0;border-radius:14px;padding:15px 26px;font-weight:700;font-size:1rem;display:inline-flex;align-items:center;gap:11px;box-shadow:0 16px 40px -12px rgba(124,58,237,.75);transition:transform .18s,box-shadow .2s;}
-        .btn-lg-grad:hover{transform:translateY(-2px);color:#fff;box-shadow:0 24px 55px -14px rgba(124,58,237,.9);}
-        .btn-lg-grad small,.btn-lg-ghost small{display:block;font-weight:500;font-size:.72rem;opacity:.8;margin-top:1px;}
-        .btn-lg-ghost{border:1px solid var(--line2);border-radius:14px;padding:15px 24px;color:#eceeff;font-weight:700;font-size:1rem;display:inline-flex;align-items:center;gap:11px;background:var(--panel);transition:.2s;}
-        .btn-lg-ghost:hover{border-color:var(--v2);color:#fff;}
-        .btn-lg-ghost .pc{width:34px;height:34px;border-radius:50%;background:var(--panel2);display:grid;place-items:center;color:var(--v3);}
-        .checks{display:flex;flex-wrap:wrap;gap:20px;color:#b9bfda;font-size:.9rem;margin-bottom:26px;}
-        .checks span{display:inline-flex;align-items:center;gap:8px;}
-        .checks i{color:#34d399;}
-        .checks .i2{color:#fbbf24;} .checks .i3{color:#22c55e;}
-        .countries{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:16px 18px;max-width:540px;}
-        .countries .ct-h{font-size:.82rem;color:var(--muted);font-weight:600;margin-bottom:11px;}
-        .flags{display:flex;flex-wrap:wrap;gap:9px;}
-        .flag-chip{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);border-radius:999px;padding:5px 12px;font-size:.84rem;color:#e2e5f7;background:rgba(255,255,255,.03);}
-        .flag-chip .fl{font-size:1rem;line-height:1;}
-
-        /* ===== DASHBOARD PREVIEW ===== */
-        .dashwrap{position:relative;}
-        .dashwrap::before{content:"";position:absolute;inset:-30px -20px;background:radial-gradient(closest-side,rgba(124,58,237,.35),transparent 75%);filter:blur(20px);z-index:0;}
-        .dash{position:relative;z-index:1;border:1px solid var(--line2);border-radius:20px;background:linear-gradient(160deg,#12122e 0%,#0c0c22 100%);box-shadow:0 40px 90px -30px rgba(0,0,0,.7), 0 0 0 1px rgba(124,58,237,.15);overflow:hidden;display:grid;grid-template-columns:150px 1fr;animation:floaty 7s ease-in-out infinite;}
-        @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
-        .dsb{background:rgba(255,255,255,.02);border-right:1px solid var(--line);padding:14px 10px;}
-        .dsb-logo{display:flex;align-items:center;gap:6px;font-weight:800;font-size:.82rem;color:#fff;margin:2px 4px 14px;font-family:var(--disp);}
-        .dsb-logo i{color:var(--v3);}
-        .dsb a{display:flex;align-items:center;gap:9px;color:#8b91af;font-size:.74rem;padding:7px 9px;border-radius:8px;margin-bottom:2px;font-weight:500;}
-        .dsb a i{width:14px;text-align:center;font-size:.72rem;}
-        .dsb a.on{background:var(--grad);color:#fff;box-shadow:0 8px 18px -8px var(--v2);}
-        .dmn{padding:13px 14px;min-width:0;}
-        .dtop{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
-        .dsearch{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:9px;padding:7px 11px;color:#7b82a3;font-size:.72rem;display:flex;align-items:center;gap:7px;}
-        .dbell{position:relative;color:#c3c8e0;font-size:.85rem;}
-        .dbell b{position:absolute;top:-6px;right:-7px;background:#ef4444;color:#fff;font-size:.55rem;width:14px;height:14px;border-radius:50%;display:grid;place-items:center;font-weight:700;}
-        .duser{display:flex;align-items:center;gap:7px;}
-        .duser .av{width:26px;height:26px;border-radius:50%;background:var(--grad);display:grid;place-items:center;color:#fff;font-size:.7rem;font-weight:700;}
-        .duser .nm{font-size:.68rem;color:#fff;font-weight:600;line-height:1.1;}
-        .duser .nm small{display:block;color:#7b82a3;font-weight:400;font-size:.6rem;}
-        .dstats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:11px;}
-        .dstat{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:11px;padding:9px 10px;}
-        .dstat .lb{font-size:.58rem;color:#8b91af;margin-bottom:4px;}
-        .dstat .vl{font-size:1rem;font-weight:800;color:#fff;font-family:var(--disp);letter-spacing:-.3px;}
-        .dstat .vl small{font-size:.55rem;color:#8b91af;font-weight:500;}
-        .dstat .up{font-size:.55rem;color:#34d399;margin-top:3px;}
-        .dpanels{display:grid;grid-template-columns:1.35fr 1fr;gap:9px;margin-bottom:10px;}
-        .dcard{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:11px 12px;}
-        .dcard .ttl{display:flex;justify-content:space-between;align-items:center;font-size:.66rem;color:#c3c8e0;font-weight:600;margin-bottom:8px;}
-        .dcard .ttl span{font-size:.55rem;color:#7b82a3;font-weight:400;}
-        .spark svg{width:100%;height:56px;display:block;}
-        .donutwrap{display:flex;align-items:center;gap:11px;}
-        .donut{width:74px;height:74px;border-radius:50%;flex-shrink:0;
-            background:conic-gradient(#8b5cf6 0 65%, #22c55e 65% 90%, #6366f1 90% 100%);
-            -webkit-mask:radial-gradient(circle 20px at center, transparent 98%, #000 100%);
-            mask:radial-gradient(circle 20px at center, transparent 98%, #000 100%);}
-        .dleg{font-size:.6rem;color:#c3c8e0;display:flex;flex-direction:column;gap:5px;}
-        .dleg i{width:7px;height:7px;border-radius:2px;display:inline-block;margin-right:5px;}
-        .dform{background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:12px;padding:11px 12px;}
-        .dform .ttl{font-size:.66rem;color:#c3c8e0;font-weight:600;margin-bottom:9px;}
-        .dform label{font-size:.55rem;color:#8b91af;display:block;margin-bottom:3px;}
-        .dfield{background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:7px;padding:6px 8px;font-size:.62rem;color:#e2e5f7;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
-        .dform .go{background:var(--grad);color:#fff;text-align:center;border-radius:8px;padding:7px;font-size:.66rem;font-weight:700;}
-
-        /* ===== STAT CARDS (metrics) ===== */
-        .metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;padding:14px 0 4px;}
-        .metric{border:1px solid var(--line);background:var(--panel);border-radius:18px;padding:22px;position:relative;overflow:hidden;transition:.25s;}
-        .metric:hover{transform:translateY(-4px);border-color:var(--line2);}
-        .metric .mi{width:52px;height:52px;border-radius:14px;display:grid;place-items:center;font-size:1.25rem;margin-bottom:14px;}
-        .metric .mv{font-family:var(--disp);font-weight:800;font-size:2.5rem;line-height:1;color:#fff;letter-spacing:-1.5px;}
-        .metric .ml{color:var(--muted);font-size:.92rem;margin-top:6px;}
-        .metric .ms{position:absolute;right:16px;bottom:14px;opacity:.9;}
-
-        /* ===== TRUST ===== */
-        .trust{padding:40px 0 20px;text-align:center;}
-        .trust-h{color:var(--muted);font-size:.92rem;margin-bottom:22px;}
-        .logos{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:38px 46px;}
-        .logos .lg{font-family:var(--disp);font-weight:700;color:#aab0cf;opacity:.75;letter-spacing:1px;font-size:1.05rem;transition:.2s;filter:grayscale(1);}
-        .logos .lg small{display:block;font-size:.55rem;letter-spacing:3px;font-weight:600;opacity:.8;}
-        .logos .lg:hover{opacity:1;color:#fff;}
-
-        /* ===== GENERIC SECTIONS (dark) ===== */
-        .section{padding:80px 0;position:relative;}
-        .sec-badge{display:inline-block;border:1px solid var(--line2);background:var(--panel);color:#c4b5fd;border-radius:999px;padding:6px 15px;font-size:.8rem;font-weight:600;margin-bottom:14px;}
-        .sec-title{font-family:var(--disp);font-weight:800;font-size:clamp(1.8rem,3.4vw,2.6rem);color:#fff;letter-spacing:-1px;}
-        .sec-sub{color:var(--muted);max-width:620px;margin:10px auto 0;}
-        .glass{border:1px solid var(--line);background:var(--panel);border-radius:18px;transition:.25s;height:100%;}
-        .glass:hover{transform:translateY(-5px);border-color:var(--line2);box-shadow:0 30px 60px -30px rgba(124,58,237,.4);}
-        .feat-ic{width:54px;height:54px;border-radius:14px;display:grid;place-items:center;font-size:1.3rem;color:#fff;background:var(--grad);box-shadow:0 12px 26px -12px var(--v2);}
-        .step-n{width:46px;height:46px;border-radius:13px;background:var(--grad);color:#fff;display:grid;place-items:center;font-weight:800;font-family:var(--disp);flex-shrink:0;box-shadow:0 12px 26px -12px var(--v2);}
-        .price{border:1px solid var(--line);background:var(--panel);border-radius:20px;padding:28px;height:100%;transition:.25s;}
-        .price:hover{transform:translateY(-6px);border-color:var(--line2);}
-        .price.pop{border:1.5px solid var(--v2);background:linear-gradient(180deg,rgba(124,58,237,.14),var(--panel));box-shadow:0 30px 70px -30px rgba(124,58,237,.6);}
-        .price .amt{font-family:var(--disp);font-size:2.3rem;font-weight:800;color:#fff;letter-spacing:-1px;}
-        .price ul{list-style:none;padding:0;margin:18px 0 22px;}
-        .price li{color:#c3c8e0;font-size:.92rem;margin-bottom:9px;display:flex;gap:9px;align-items:flex-start;}
-        .price li i{color:#34d399;margin-top:3px;}
-        .form-select.cs{background:var(--panel2);border:1px solid var(--line2);color:#fff;}
-        .cta-band{background:var(--grad);border-radius:26px;padding:56px;text-align:center;box-shadow:0 40px 90px -34px rgba(124,58,237,.8);}
-        .foot{border-top:1px solid var(--line);padding:52px 0 30px;margin-top:40px;}
-        .foot a{color:#9aa1bd;font-size:.9rem;} .foot a:hover{color:#fff;}
-        .to-top{position:fixed;right:22px;bottom:22px;width:48px;height:48px;border:0;border-radius:14px;background:var(--grad);color:#fff;box-shadow:0 14px 34px -10px rgba(124,58,237,.8);opacity:0;pointer-events:none;transition:.25s;z-index:80;}
-        .to-top.show{opacity:1;pointer-events:auto;}
-
-        @media(max-width:991px){
-            .nav-links{display:none;}
-            .dash{grid-template-columns:120px 1fr;}
-            .metrics{grid-template-columns:repeat(2,1fr);}
-            .hero{padding:34px 0 20px;}
+        .hero {
+            background: radial-gradient(1200px 500px at 70% -10%, #e0e7ff 0%, rgba(224,231,255,0) 60%),
+                        linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+            padding: 6rem 0 5rem;
         }
-        @media(max-width:575px){
-            .metrics{grid-template-columns:1fr;}
-            .dstats{grid-template-columns:repeat(2,1fr);}
-            .dpanels{grid-template-columns:1fr;}
+        .hero h1 { font-weight: 800; font-size: clamp(2.2rem, 5vw, 3.6rem); line-height: 1.05; letter-spacing: -1.5px; }
+        .badge-soft { background: #eef2ff; color: var(--brand); font-weight: 600; padding: .5rem 1rem; border-radius: 999px; }
+
+        .hero-mock {
+            border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 30px 60px -20px rgba(79,70,229,.35);
+            overflow: hidden; background: var(--white, #fff);
         }
-        @media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important;}[data-aos]{opacity:1!important;transform:none!important;}}
+        .hero-mock .bar { height: 36px; background: #f1f5f9; display: flex; align-items: center; gap: 6px; padding: 0 12px; }
+        .hero-mock .dot { width: 10px; height: 10px; border-radius: 50%; background: #cbd5e1; }
+
+        .feature-icon {
+            width: 52px; height: 52px; border-radius: 12px; display: grid; place-items: center;
+            background: #eef2ff; color: var(--brand); font-size: 1.3rem;
+        }
+        .card-feature { border: 1px solid #eef0f4; border-radius: 16px; transition: .2s; height: 100%; }
+        .card-feature:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -24px rgba(15,23,42,.25); }
+
+        .step-num { width: 44px; height: 44px; border-radius: 50%; background: var(--brand); color: #fff; display: grid; place-items: center; font-weight: 700; }
+
+        .price-card { border: 1px solid #e8eaf0; border-radius: 18px; height: 100%; transition: transform .25s, box-shadow .25s, border-color .25s; }
+        .price-card:hover { transform: translateY(-8px); box-shadow: 0 30px 55px -30px rgba(15,23,42,.4); border-color: #c7d2fe; }
+        .price-card.popular { border: 2px solid var(--brand); box-shadow: 0 24px 50px -28px rgba(79,70,229,.5); transform: scale(1.04); animation: pulseGlow 3s infinite; }
+        .price-card.popular:hover { transform: scale(1.04) translateY(-8px); }
+        .price-amount { font-size: 2.4rem; font-weight: 800; letter-spacing: -1px; }
+
+        .cta-band { background: linear-gradient(120deg, var(--brand) 0%, #7c3aed 100%); color: #fff; border-radius: 24px; background-size: 200% 200%; animation: gradientShift 8s ease infinite; }
+        footer a { color: #cbd5e1; text-decoration: none; }
+        footer a:hover { color: #fff; }
+        .section { padding: 5rem 0; }
+
+        /* ===== Animations ===== */
+        @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+        @keyframes float { 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-18px) } }
+        @keyframes floatSlow { 0%,100%{ transform: translateY(0) rotate(0) } 50%{ transform: translateY(-26px) rotate(8deg) } }
+        @keyframes pulseGlow { 0%,100%{ box-shadow: 0 0 0 0 rgba(79,70,229,.45) } 50%{ box-shadow: 0 0 0 16px rgba(79,70,229,0) } }
+        @keyframes fadeUp { from{ opacity:0; transform: translateY(24px) } to{ opacity:1; transform: none } }
+        @keyframes shimmer { 0%{ background-position: -400px 0 } 100%{ background-position: 400px 0 } }
+        @keyframes marquee { from{ transform: translateX(0) } to{ transform: translateX(-50%) } }
+        @keyframes blob { 0%,100%{ border-radius: 42% 58% 63% 37% / 42% 45% 55% 58% } 50%{ border-radius: 58% 42% 38% 62% / 60% 38% 62% 40% } }
+
+        /* Navbar dynamique au scroll */
+        .navbar.scrolled { box-shadow: 0 8px 30px -18px rgba(15,23,42,.35); backdrop-filter: blur(8px); background: var(--white, #fff) !important; }
+        .navbar { transition: box-shadow .25s, background .25s; }
+
+        /* Blobs décoratifs */
+        .blob { position: absolute; filter: blur(14px); opacity: .5; animation: blob 14s ease-in-out infinite, floatSlow 12s ease-in-out infinite; z-index: 0; }
+
+        /* Boutons animés */
+        .btn-brand { transition: transform .15s, box-shadow .2s, background .2s; }
+        .btn-brand:hover { transform: translateY(-2px); }
+        .btn-pulse { animation: pulseGlow 2.4s infinite; }
+
+        /* Cartes feature : hover plus riche */
+        .card-feature:hover .feature-icon { transform: scale(1.12) rotate(-6deg); }
+        .feature-icon { transition: transform .25s; }
+
+        /* Réduction d'animation si l'utilisateur le demande */
+        @media (prefers-reduced-motion: reduce) {
+            * { animation: none !important; transition: none !important; }
+            [data-aos] { opacity: 1 !important; transform: none !important; }
+        }
     </style>
 </head>
 <body>
-<div class="bg-fx"></div>
-<div class="bg-dots"></div>
 
-<!-- ===== NAV ===== -->
-<nav class="nav-c" id="nav">
-    <div class="container nav-in">
-        <a href="{{ route('landing') }}" class="brand"><span class="pin"><i class="fas fa-location-dot"></i></span>check<span>inHub</span></a>
-        <div class="nav-links">
-            <a href="#features">{{ __('landing.nav_features') }}</a>
-            <a href="#how">{{ __('landing.nav_how') }}</a>
-            <a href="#pricing">{{ __('landing.nav_pricing') }}</a>
-            <a href="{{ route('guide') }}">Ressources</a>
-            <a href="#faq">FAQ</a>
-        </div>
-        <div class="nav-actions">
-            <a href="{{ route('lang.switch', app()->getLocale() === 'fr' ? 'en' : 'fr') }}" class="pill">{{ strtoupper(app()->getLocale()) }} <i class="fas fa-chevron-down" style="font-size:.6rem;"></i></a>
-            <button class="icon-btn" id="themeToggle" type="button" aria-label="Thème"><i class="fas fa-moon"></i></button>
-            <a href="{{ route('login.index') }}" class="btn-ghost2">{{ __('landing.nav_login') }}</a>
-            <a href="{{ route('hotel.register') }}" class="btn-grad"><i class="fas fa-rocket"></i> {{ __('landing.nav_free_trial') }}</a>
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top">
+    <div class="container">
+        <a class="navbar-brand" href="{{ route('landing') }}">
+            <i class="fas fa-hotel text-brand me-1"></i> {{ config('app.name', 'checkinHub') }}
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav mx-auto gap-lg-3">
+                <li class="nav-item"><a class="nav-link" href="#features">{{ __('landing.nav_features') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#how">{{ __('landing.nav_how') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#pricing">{{ __('landing.nav_pricing') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url('/h/cactus-hotel') }}" target="_blank" rel="noopener noreferrer">{{ __('landing.nav_demo') }}</a></li>
+            </ul>
+            <div class="d-flex gap-2 align-items-center">
+                <a href="{{ route('lang.switch', app()->getLocale() === 'fr' ? 'en' : 'fr') }}" class="btn btn-outline-secondary btn-sm fw-semibold">{{ __('landing.nav_switch_lang') }}</a>
+                <a href="{{ route('login.index') }}" class="btn btn-outline-brand">{{ __('landing.nav_login') }}</a>
+                <a href="{{ route('hotel.register') }}" class="btn btn-brand">{{ __('landing.nav_free_trial') }}</a>
+            </div>
         </div>
     </div>
 </nav>
 
-<!-- ===== HERO ===== -->
-<header class="hero">
-    <div class="container">
+<!-- HERO -->
+<header class="hero position-relative overflow-hidden">
+    <!-- Blobs décoratifs animés -->
+    <div class="blob" style="width:280px;height:280px;background:#c7d2fe;top:-60px;left:-40px;"></div>
+    <div class="blob" style="width:220px;height:220px;background:#ddd6fe;bottom:-40px;right:8%;animation-delay:-4s;"></div>
+    <div class="blob" style="width:120px;height:120px;background:#a5b4fc;top:40%;right:38%;animation-delay:-8s;"></div>
+
+    <div class="container position-relative" style="z-index:1;">
         <div class="row align-items-center g-5">
             <div class="col-lg-6">
-                <div class="eyebrow" data-aos="fade-up">
-                    <span class="tag"><i class="fas fa-sparkles"></i> Nouveau</span>
-                    <span>🔥 <b>Essai gratuit 14 jours</b> sans carte bancaire</span>
+                <span class="badge-soft mb-3 d-inline-block" data-aos="fade-up"><i class="fas fa-bolt me-1"></i> {{ __('landing.hero_badge') }}</span>
+                <h1 class="mb-3" data-aos="fade-up" data-aos-delay="80">{{ __('landing.hero_title_1') }}<br><span class="text-brand">{{ __('landing.hero_title_2') }}</span></h1>
+                <p class="fs-5 text-secondary mb-4" data-aos="fade-up" data-aos-delay="160">
+                    {{ __('landing.hero_description') }}
+                </p>
+                <div class="d-flex flex-wrap gap-2 mb-4" data-aos="fade-up" data-aos-delay="240">
+                    <a href="{{ route('hotel.register') }}" class="btn btn-brand btn-lg px-4 btn-pulse"><i class="fas fa-rocket me-2"></i>{{ __('landing.hero_cta_start') }}</a>
+                    <a href="{{ url('/h/cactus-hotel') }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-brand btn-lg px-4"><i class="fas fa-play me-2"></i>{{ __('landing.hero_cta_demo') }}</a>
                 </div>
-                <h1 class="h1" data-aos="fade-up" data-aos-delay="60">La gestion hôtelière,<br><span class="grad">réinventée</span> pour<br>l'Afrique.</h1>
-                <p class="lead" data-aos="fade-up" data-aos-delay="120">Centralisez vos réservations, votre caisse, le housekeeping et votre site web sur une seule plateforme pensée pour les hôtels africains.</p>
-
-                <div class="rating" data-aos="fade-up" data-aos-delay="160">
-                    <span class="stars">★★★★★</span>
-                    <span class="rtxt"><b>4,9/5</b> sur plus de 120 avis</span>
-                </div>
-
-                <div class="cta-row" data-aos="fade-up" data-aos-delay="200">
-                    <a href="{{ route('hotel.register') }}" class="btn-lg-grad">
-                        <i class="fas fa-rocket"></i>
-                        <span>Essayer gratuitement<small>14 jours sans engagement</small></span>
-                    </a>
-                    <a href="{{ url('/h/cactus-hotel') }}" target="_blank" rel="noopener noreferrer" class="btn-lg-ghost">
-                        <span class="pc"><i class="fas fa-play"></i></span>
-                        <span>Voir une démo<small>En 2 minutes</small></span>
-                    </a>
-                </div>
-
-                <div class="checks" data-aos="fade-up" data-aos-delay="240">
-                    <span><i class="fas fa-check"></i> Sans engagement</span>
-                    <span><i class="fas fa-bolt i2"></i> Installation en 5 min</span>
-                    <span><i class="fab fa-whatsapp i3"></i> Support WhatsApp 24/7</span>
-                </div>
-
-                <div class="countries" data-aos="fade-up" data-aos-delay="280">
-                    <div class="ct-h">Déjà adopté dans 12 pays africains</div>
-                    <div class="flags">
-                        <span class="flag-chip"><span class="fl">🇸🇳</span> Sénégal</span>
-                        <span class="flag-chip"><span class="fl">🇨🇮</span> Côte d'Ivoire</span>
-                        <span class="flag-chip"><span class="fl">🇧🇯</span> Bénin</span>
-                        <span class="flag-chip"><span class="fl">🇹🇬</span> Togo</span>
-                        <span class="flag-chip"><span class="fl">🇧🇫</span> Burkina Faso</span>
-                    </div>
+                <div class="d-flex flex-wrap gap-4 text-secondary small" data-aos="fade-up" data-aos-delay="320">
+                    <span><i class="fas fa-check text-success me-1"></i> {{ __('landing.hero_check_1') }}</span>
+                    <span><i class="fas fa-check text-success me-1"></i> {{ __('landing.hero_check_2') }}</span>
+                    <span><i class="fas fa-check text-success me-1"></i> {{ __('landing.hero_check_3') }}</span>
                 </div>
             </div>
-
-            <!-- Dashboard preview -->
-            <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="150">
-                <div class="dashwrap">
-                    <div class="dash">
-                        <aside class="dsb">
-                            <div class="dsb-logo"><i class="fas fa-location-dot"></i> checkinHub</div>
-                            <a class="on"><i class="fas fa-gauge-high"></i> Dashboard</a>
-                            <a><i class="fas fa-calendar-check"></i> Réservations</a>
-                            <a><i class="fas fa-calendar-days"></i> Calendrier</a>
-                            <a><i class="fas fa-users"></i> Clients</a>
-                            <a><i class="fas fa-cash-register"></i> Caisse</a>
-                            <a><i class="fas fa-broom"></i> Housekeeping</a>
-                            <a><i class="fas fa-chart-line"></i> Rapports</a>
-                            <a><i class="fas fa-globe"></i> Site Web</a>
-                            <a><i class="fas fa-gear"></i> Paramètres</a>
-                        </aside>
-                        <div class="dmn">
-                            <div class="dtop">
-                                <div class="dsearch"><i class="fas fa-magnifying-glass"></i> Rechercher une réservation, un client…</div>
-                                <div class="dbell"><i class="fas fa-bell"></i><b>3</b></div>
-                                <div class="duser"><span class="av">M</span><span class="nm">Marie K.<small>Réception</small></span></div>
-                            </div>
-                            <div class="dstats">
-                                <div class="dstat"><div class="lb">Arrivées aujourd'hui</div><div class="vl">12</div><div class="up">↑ 12% vs hier</div></div>
-                                <div class="dstat"><div class="lb">Départs</div><div class="vl">7</div><div class="up">↑ 8% vs hier</div></div>
-                                <div class="dstat"><div class="lb">Clients</div><div class="vl">24</div><div class="up">↑ 15% vs hier</div></div>
-                                <div class="dstat"><div class="lb">Chiffre d'affaires</div><div class="vl">2,45M <small>FCFA</small></div><div class="up">↑ 18% vs hier</div></div>
-                            </div>
-                            <div class="dpanels">
-                                <div class="dcard">
-                                    <div class="ttl">Évolution des réservations <span>7 derniers jours</span></div>
-                                    <div class="spark">
-                                        <svg viewBox="0 0 260 56" preserveAspectRatio="none">
-                                            <defs><linearGradient id="ln" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset="0" stop-color="#8b5cf6" stop-opacity=".45"/><stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/></linearGradient></defs>
-                                            <path d="M0,46 L36,40 L74,44 L112,30 L150,34 L188,18 L226,22 L260,8 L260,56 L0,56 Z" fill="url(#ln)"/>
-                                            <path d="M0,46 L36,40 L74,44 L112,30 L150,34 L188,18 L226,22 L260,8" fill="none" stroke="#a855f7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                    </div>
+            <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="200">
+                <div class="hero-mock" style="animation: float 6s ease-in-out infinite;">
+                    <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                    <div class="p-3">
+                        <div class="row g-3">
+                            <div class="col-4"><div class="p-3 rounded-3 bg-light text-center"><div class="fs-4 fw-bold text-brand">128</div><div class="small text-secondary">{{ __('landing.mock_rooms') }}</div></div></div>
+                            <div class="col-4"><div class="p-3 rounded-3 bg-light text-center"><div class="fs-4 fw-bold text-brand">94%</div><div class="small text-secondary">{{ __('landing.mock_occupancy') }}</div></div></div>
+                            <div class="col-4"><div class="p-3 rounded-3 bg-light text-center"><div class="fs-4 fw-bold text-brand">3</div><div class="small text-secondary">{{ __('landing.mock_hotels') }}</div></div></div>
+                            <div class="col-12">
+                                <div class="p-3 rounded-3 border">
+                                    <div class="d-flex justify-content-between mb-2"><span class="fw-semibold">{{ __('landing.mock_daily_revenue') }}</span><span class="text-success fw-bold">+ 1 240 000 CFA</span></div>
+                                    <div class="progress" style="height:8px"><div class="progress-bar" style="width:72%;background:var(--brand)"></div></div>
                                 </div>
-                                <div class="dcard">
-                                    <div class="ttl">Répartition des chambres</div>
-                                    <div class="donutwrap">
-                                        <div class="donut"></div>
-                                        <div class="dleg">
-                                            <div><i style="background:#8b5cf6"></i>Occupées 65%</div>
-                                            <div><i style="background:#22c55e"></i>Disponibles 25%</div>
-                                            <div><i style="background:#6366f1"></i>Réservées 10%</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="dform">
-                                <div class="ttl"><i class="fas fa-plus"></i> Nouvelle réservation</div>
-                                <div class="row g-2">
-                                    <div class="col-4"><label>Arrivée</label><div class="dfield">21/06 <i class="fas fa-calendar"></i></div></div>
-                                    <div class="col-4"><label>Départ</label><div class="dfield">24/06 <i class="fas fa-calendar"></i></div></div>
-                                    <div class="col-4"><label>Chambres</label><div class="dfield">2 <i class="fas fa-chevron-down"></i></div></div>
-                                </div>
-                                <div class="go">Rechercher</div>
                             </div>
                         </div>
                     </div>
@@ -326,54 +168,48 @@
     </div>
 </header>
 
-<!-- ===== METRICS ===== -->
-<section class="container">
-    <div class="metrics">
-        @php
-            $metrics = [
-                ['fa-hotel','#a855f7','rgba(168,85,247,.15)',16,'Établissements actifs','#a855f7'],
-                ['fa-globe-africa','#22c55e','rgba(34,197,94,.15)',12,'Pays disponibles','#22c55e'],
-                ['fa-bed','#f59e0b','rgba(245,158,11,.15)',93,'Chambres gérées','#f59e0b'],
-                ['fa-calendar-check','#6366f1','rgba(99,102,241,.15)',59,'Réservations traitées','#6366f1'],
-            ];
-        @endphp
-        @foreach($metrics as $i => [$ic,$col,$bg,$val,$lbl,$sc])
-            <div class="metric" data-aos="fade-up" data-aos-delay="{{ $i*90 }}">
-                <div class="mi" style="background:{{ $bg }};color:{{ $col }};"><i class="fas {{ $ic }}"></i></div>
-                <div class="mv"><span class="counter" data-target="{{ $val }}">0</span></div>
-                <div class="ml">{{ $lbl }}</div>
-                <svg class="ms" width="72" height="34" viewBox="0 0 72 34" fill="none">
-                    <path d="M2,28 L14,22 L26,25 L38,14 L50,17 L62,6 L70,10" stroke="{{ $sc }}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
-                </svg>
-            </div>
-        @endforeach
-    </div>
-</section>
-
-<!-- ===== TRUST ===== -->
-<section class="trust">
+<!-- STATS animées -->
+<section class="py-5 border-bottom">
     <div class="container">
-        <div class="trust-h">Ils nous font confiance</div>
-        <div class="logos">
-            <span class="lg">AZALAÏ<small>HOTELS</small></span>
-            <span class="lg">ONOMO<small>HOTELS</small></span>
-            <span class="lg">NOOM<small>HÔTEL</small></span>
-            <span class="lg">SAFARI<small>LODGE</small></span>
-            <span class="lg">HÔTEL<small>KIRIKOU</small></span>
-            <span class="lg" style="font-style:italic;">La Résidence</span>
-            <span class="lg">MABONZO<small>HÔTEL</small></span>
-            <span class="lg" style="filter:none;color:var(--muted);">+ 50 autres</span>
+        <div class="row text-center g-4">
+            @php
+                $stats = [
+                    ['value' => 320, 'suffix' => '+', 'label' => __('landing.stat_rooms')],
+                    ['value' => 18,  'suffix' => '', 'label' => __('landing.stat_hotels')],
+                    ['value' => 99,  'suffix' => '%', 'label' => __('landing.stat_availability')],
+                    ['value' => 24,  'suffix' => '/7', 'label' => __('landing.stat_support')],
+                ];
+            @endphp
+            @foreach ($stats as $i => $s)
+                <div class="col-6 col-md-3" data-aos="fade-up" data-aos-delay="{{ $i * 100 }}">
+                    <div class="display-5 fw-bold text-brand">
+                        <span class="counter" data-target="{{ $s['value'] }}">0</span>{{ $s['suffix'] }}
+                    </div>
+                    <div class="text-secondary">{{ $s['label'] }}</div>
+                </div>
+            @endforeach
         </div>
     </div>
 </section>
 
-<!-- ===== FEATURES ===== -->
+<!-- BARRE DE CONFIANCE (marquee) -->
+<div class="py-4 bg-light overflow-hidden">
+    <div style="display:flex; width:max-content; animation: marquee 22s linear infinite; gap:3rem;">
+        @for ($k = 0; $k < 2; $k++)
+            @foreach (['landing.marquee_reception', 'landing.marquee_cashier', 'landing.marquee_restaurant', 'landing.marquee_housekeeping', 'landing.marquee_reservations', 'landing.marquee_reports', 'landing.marquee_multi_hotels', 'landing.marquee_checkin_express'] as $key)
+                <span class="text-secondary fw-semibold text-uppercase" style="letter-spacing:1px;"><i class="fas fa-circle-check text-brand me-2"></i>{{ __($key) }}</span>
+            @endforeach
+        @endfor
+    </div>
+</div>
+
+<!-- FEATURES -->
 <section class="section" id="features">
     <div class="container">
         <div class="text-center mb-5">
-            <span class="sec-badge">{{ __('landing.features_badge') }}</span>
-            <h2 class="sec-title">{{ __('landing.features_title') }}</h2>
-            <p class="sec-sub">{{ __('landing.features_description') }}</p>
+            <span class="badge-soft mb-2 d-inline-block">{{ __('landing.features_badge') }}</span>
+            <h2 class="fw-bold">{{ __('landing.features_title') }}</h2>
+            <p class="text-secondary">{{ __('landing.features_description') }}</p>
         </div>
         <div class="row g-4">
             @php
@@ -387,11 +223,11 @@
                 ];
             @endphp
             @foreach ($features as $i => [$icon, $title, $desc])
-                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ ($i % 3) * 100 }}">
-                    <div class="glass p-4">
-                        <div class="feat-ic mb-3"><i class="fas {{ $icon }}"></i></div>
-                        <h5 class="fw-bold" style="color:#fff;">{{ $title }}</h5>
-                        <p style="color:var(--muted);" class="mb-0">{{ $desc }}</p>
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ ($i % 3) * 120 }}">
+                    <div class="card-feature p-4">
+                        <div class="feature-icon mb-3"><i class="fas {{ $icon }}"></i></div>
+                        <h5 class="fw-bold">{{ $title }}</h5>
+                        <p class="text-secondary mb-0">{{ $desc }}</p>
                     </div>
                 </div>
             @endforeach
@@ -399,12 +235,12 @@
     </div>
 </section>
 
-<!-- ===== HOW ===== -->
-<section class="section" id="how">
+<!-- HOW IT WORKS -->
+<section class="section bg-light" id="how">
     <div class="container">
         <div class="text-center mb-5">
-            <span class="sec-badge">{{ __('landing.how_badge') }}</span>
-            <h2 class="sec-title">{{ __('landing.how_title') }}</h2>
+            <span class="badge-soft mb-2 d-inline-block">{{ __('landing.how_badge') }}</span>
+            <h2 class="fw-bold">{{ __('landing.how_title') }}</h2>
         </div>
         <div class="row g-4">
             @php
@@ -415,12 +251,15 @@
                 ];
             @endphp
             @foreach ($steps as $i => [$title, $desc])
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ $i * 130 }}">
-                    <div class="glass p-4 d-flex align-items-start gap-3">
-                        <div class="step-n">{{ $i + 1 }}</div>
+                <div class="col-md-4 position-relative" data-aos="fade-up" data-aos-delay="{{ $i * 150 }}">
+                    @if ($i < count($steps) - 1)
+                        <div class="d-none d-md-block position-absolute" style="top:22px;left:60%;right:-40%;height:2px;background:repeating-linear-gradient(90deg,var(--brand) 0 8px,transparent 8px 16px);opacity:.4;"></div>
+                    @endif
+                    <div class="d-flex align-items-start gap-3 position-relative">
+                        <div class="step-num flex-shrink-0 btn-pulse">{{ $i + 1 }}</div>
                         <div>
-                            <h5 class="fw-bold mb-1" style="color:#fff;">{{ $title }}</h5>
-                            <p class="mb-0" style="color:var(--muted);">{{ $desc }}</p>
+                            <h5 class="fw-bold mb-1">{{ $title }}</h5>
+                            <p class="text-secondary mb-0">{{ $desc }}</p>
                         </div>
                     </div>
                 </div>
@@ -429,16 +268,41 @@
     </div>
 </section>
 
-<!-- ===== PRICING ===== -->
+<!-- PRÉSENCE / GLOBE 3D -->
+<section class="section" id="presence" style="background:radial-gradient(700px 400px at 75% 40%, #e0e7ff 0%, rgba(224,231,255,0) 65%), linear-gradient(180deg,#f7f8ff 0%,#eef2ff 100%);">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-5" data-aos="fade-right">
+                <span class="badge-soft mb-2 d-inline-block">Couverture</span>
+                <h2 class="fw-bold">Déjà pensé pour <span class="text-brand">votre pays</span></h2>
+                <p class="text-secondary">
+                    checkinHub est disponible dans <strong>{{ count(config('plans.countries')) }} pays</strong>,
+                    avec des tarifs adaptés au coût de la vie et à la devise locale.
+                    Faites tourner le globe 🌍
+                </p>
+                <div class="d-flex flex-wrap gap-2 mt-3" id="country-badges">
+                    @foreach (config('plans.countries') as $code => $c)
+                        <span class="badge rounded-pill" style="background:#eef2ff;color:var(--brand);font-weight:600;padding:.5rem .9rem;">{{ $c['name'] }}</span>
+                    @endforeach
+                </div>
+            </div>
+            <div class="col-lg-7" data-aos="fade-left">
+                <div id="globe" style="width:100%;height:560px;max-width:680px;margin:0 auto;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PRICING -->
 <section class="section" id="pricing">
     <div class="container">
         <div class="text-center mb-4">
-            <span class="sec-badge">{{ __('landing.pricing_badge') }}</span>
-            <h2 class="sec-title">{{ __('landing.pricing_title') }}</h2>
-            <p class="sec-sub">{{ __('landing.pricing_description') }}</p>
-            <div class="d-inline-flex align-items-center gap-2 mt-3">
-                <i class="fas fa-earth-africa" style="color:var(--v3);"></i>
-                <select id="pricing-country" class="form-select cs" style="width:auto;">
+            <span class="badge-soft mb-2 d-inline-block">{{ __('landing.pricing_badge') }}</span>
+            <h2 class="fw-bold">{{ __('landing.pricing_title') }}</h2>
+            <p class="text-secondary">{{ __('landing.pricing_description') }}</p>
+            <div class="d-inline-flex align-items-center gap-2 mt-2">
+                <i class="fas fa-earth-africa text-brand"></i>
+                <select id="pricing-country" class="form-select" style="width:auto;">
                     @foreach (config('plans.countries') as $code => $c)
                         <option value="{{ $code }}" {{ $code === config('plans.default_country') ? 'selected' : '' }}>{{ $c['name'] }}</option>
                     @endforeach
@@ -450,23 +314,26 @@
                 @php
                     $popular = ! empty($tier['popular']);
                     $taglines = ['starter' => __('flash.plan_starter_tagline'), 'pro' => __('flash.plan_pro_tagline'), 'business' => __('flash.plan_business_tagline')];
-                    $feats = ['starter' => [__('flash.plan_starter_f1'), __('flash.plan_starter_f2'), __('flash.plan_starter_f3'), __('flash.plan_starter_f4')], 'pro' => [__('flash.plan_pro_f1'), __('flash.plan_pro_f2'), __('flash.plan_pro_f3'), __('flash.plan_pro_f4')], 'business' => [__('flash.plan_business_f1'), __('flash.plan_business_f2'), __('flash.plan_business_f3'), __('flash.plan_business_f4')]];
+                    $features = ['starter' => [__('flash.plan_starter_f1'), __('flash.plan_starter_f2'), __('flash.plan_starter_f3'), __('flash.plan_starter_f4')], 'pro' => [__('flash.plan_pro_f1'), __('flash.plan_pro_f2'), __('flash.plan_pro_f3'), __('flash.plan_pro_f4')], 'business' => [__('flash.plan_business_f1'), __('flash.plan_business_f2'), __('flash.plan_business_f3'), __('flash.plan_business_f4')]];
                 @endphp
-                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index * 110 }}">
-                    <div class="price {{ $popular ? 'pop' : '' }}" data-base="{{ $tier['price'] }}">
-                        @if ($popular)<span class="sec-badge" style="color:#fff;background:var(--grad);border:0;">{{ __('flash.plan_popular') }}</span>@endif
-                        <h4 class="fw-bold mt-1" style="color:#fff;">{{ $tier['name'] }}</h4>
-                        <p style="color:var(--muted);font-size:.9rem;">{{ $taglines[$key] ?? ($tier['tagline'] ?? '') }}</p>
-                        <div class="amt">
+                <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index * 130 }}">
+                    <div class="price-card p-4 h-100 {{ $popular ? 'popular' : '' }}" data-base="{{ $tier['price'] }}">
+                        @if ($popular)
+                            <span class="badge text-white mb-2" style="background:var(--brand)">{{ __('flash.plan_popular') }}</span>
+                        @endif
+                        <h4 class="fw-bold">{{ $tier['name'] }}</h4>
+                        <p class="text-secondary small">{{ $taglines[$key] ?? $tier['tagline'] }}</p>
+                        <div class="price-amount mb-1">
                             <span class="pr-amount">{{ number_format($tier['price'], 0, ',', ' ') }}</span>
-                            <span style="font-size:.9rem;color:var(--muted);font-weight:400;"><span class="pr-cur">XOF</span> {{ __('flash.plan_per_month') }}</span>
+                            <span class="fs-6 text-secondary fw-normal"><span class="pr-cur">XOF</span> {{ __('flash.plan_per_month') }}</span>
                         </div>
-                        <ul>
-                            @foreach (($feats[$key] ?? $tier['features']) as $item)
-                                <li><i class="fas fa-check"></i>{{ $item }}</li>
+                        <hr>
+                        <ul class="list-unstyled mb-4">
+                            @foreach (($features[$key] ?? $tier['features']) as $item)
+                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>{{ $item }}</li>
                             @endforeach
                         </ul>
-                        <a href="{{ route('hotel.register', ['plan' => $key]) }}" class="{{ $popular ? 'btn-lg-grad' : 'btn-lg-ghost' }} w-100" style="justify-content:center;padding:12px;">
+                        <a href="{{ route('hotel.register', ['plan' => $key]) }}" class="btn {{ $popular ? 'btn-brand' : 'btn-outline-brand' }} w-100">
                             {{ __('landing.pricing_choose') }} {{ $tier['name'] }}
                         </a>
                     </div>
@@ -476,12 +343,12 @@
     </div>
 </section>
 
-<!-- ===== TESTIMONIALS ===== -->
-<section class="section">
+<!-- TÉMOIGNAGES -->
+<section class="section bg-light">
     <div class="container">
-        <div class="text-center mb-5">
-            <span class="sec-badge">{{ __('landing.testimonials_badge') }}</span>
-            <h2 class="sec-title">{{ __('landing.testimonials_title') }}</h2>
+        <div class="text-center mb-5" data-aos="fade-up">
+            <span class="badge-soft mb-2 d-inline-block">{{ __('landing.testimonials_badge') }}</span>
+            <h2 class="fw-bold">{{ __('landing.testimonials_title') }}</h2>
         </div>
         @php
             $testimonials = [
@@ -492,15 +359,17 @@
         @endphp
         <div class="row g-4">
             @foreach ($testimonials as $i => [$name, $role, $quote])
-                <div class="col-md-4" data-aos="zoom-in" data-aos-delay="{{ $i * 110 }}">
-                    <div class="glass p-4 h-100">
-                        <div style="color:#fbbf24;letter-spacing:2px;" class="mb-2">★★★★★</div>
-                        <p class="mb-3" style="color:#d7dbf0;">“{{ $quote }}”</p>
-                        <div class="d-flex align-items-center gap-2">
-                            <div class="step-n" style="width:40px;height:40px;border-radius:50%;font-size:.9rem;">{{ substr($name, 0, 1) }}</div>
-                            <div>
-                                <div class="fw-semibold" style="color:#fff;">{{ $name }}</div>
-                                <div class="small" style="color:var(--muted);">{{ $role }}</div>
+                <div class="col-md-4" data-aos="zoom-in" data-aos-delay="{{ $i * 120 }}">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-body p-4">
+                            <div class="text-warning mb-2">@for($s=0;$s<5;$s++)<i class="fas fa-star"></i>@endfor</div>
+                            <p class="mb-3">“{{ $quote }}”</p>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="feature-icon" style="width:42px;height:42px;">{{ substr($name, 0, 1) }}</div>
+                                <div>
+                                    <div class="fw-semibold">{{ $name }}</div>
+                                    <div class="small text-secondary">{{ $role }}</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -510,30 +379,30 @@
     </div>
 </section>
 
-<!-- ===== CTA ===== -->
+<!-- CTA BAND -->
 <section class="pb-5">
     <div class="container">
-        <div class="cta-band" data-aos="zoom-in">
-            <h2 class="fw-bold mb-2" style="color:#fff;font-family:var(--disp);">{{ __('landing.cta_title') }}</h2>
-            <p class="mb-4" style="color:rgba(255,255,255,.85);">{{ __('landing.cta_description') }} {{ config('app.name', 'checkinHub') }}.</p>
-            <a href="{{ route('hotel.register') }}" class="btn-lg-ghost" style="background:#fff;color:#4c1d95;border:0;font-weight:800;">
-                <i class="fas fa-rocket"></i> {{ __('landing.cta_button') }}
+        <div class="cta-band p-5 text-center" data-aos="zoom-in">
+            <h2 class="fw-bold mb-2">{{ __('landing.cta_title') }}</h2>
+            <p class="mb-4 opacity-75">{{ __('landing.cta_description') }} {{ config('app.name', 'checkinHub') }}.</p>
+            <a href="{{ route('hotel.register') }}" class="btn btn-light btn-lg px-4 text-brand fw-semibold btn-pulse">
+                <i class="fas fa-rocket me-2"></i>{{ __('landing.cta_button') }}
             </a>
         </div>
     </div>
 </section>
 
-<!-- ===== FOOTER ===== -->
-<footer class="foot">
+<!-- FOOTER -->
+<footer class="bg-dark text-light pt-5 pb-4">
     <div class="container">
         <div class="row g-4">
             <div class="col-lg-4">
-                <a href="{{ route('landing') }}" class="brand mb-3"><span class="pin"><i class="fas fa-location-dot"></i></span>check<span>inHub</span></a>
-                <p style="color:var(--muted);font-size:.9rem;" class="mt-2">{{ __('landing.footer_description') }}</p>
+                <h5 class="fw-bold mb-3"><i class="fas fa-hotel text-brand me-1"></i> {{ config('app.name', 'checkinHub') }}</h5>
+                <p class="text-secondary small">{{ __('landing.footer_description') }}</p>
             </div>
             <div class="col-6 col-lg-2">
-                <h6 class="fw-semibold mb-3" style="color:#fff;">{{ __('landing.footer_product') }}</h6>
-                <ul class="list-unstyled">
+                <h6 class="fw-semibold mb-3">{{ __('landing.footer_product') }}</h6>
+                <ul class="list-unstyled small">
                     <li class="mb-2"><a href="#features">{{ __('landing.footer_features') }}</a></li>
                     <li class="mb-2"><a href="#pricing">{{ __('landing.footer_pricing') }}</a></li>
                     <li class="mb-2"><a href="{{ route('hotel.register') }}">{{ __('landing.footer_free_trial') }}</a></li>
@@ -541,77 +410,178 @@
                 </ul>
             </div>
             <div class="col-6 col-lg-2">
-                <h6 class="fw-semibold mb-3" style="color:#fff;">{{ __('landing.footer_account') }}</h6>
-                <ul class="list-unstyled">
+                <h6 class="fw-semibold mb-3">{{ __('landing.footer_account') }}</h6>
+                <ul class="list-unstyled small">
                     <li class="mb-2"><a href="{{ route('login.index') }}">{{ __('landing.footer_login') }}</a></li>
-                    <li class="mb-2"><a href="{{ route('guide') }}">Ressources</a></li>
+                    <li class="mb-2"><a href="#pricing">{{ __('landing.footer_free_trial') }}</a></li>
                 </ul>
             </div>
             <div class="col-lg-4">
-                <h6 class="fw-semibold mb-3" style="color:#fff;">{{ __('landing.footer_contact') }}</h6>
-                <p style="color:var(--muted);font-size:.9rem;" class="mb-1"><i class="fas fa-envelope me-2"></i>contact@checkinhub.com</p>
-                <p style="color:var(--muted);font-size:.9rem;"><i class="fab fa-whatsapp me-2"></i>+229 00 00 00 00</p>
+                <h6 class="fw-semibold mb-3">{{ __('landing.footer_contact') }}</h6>
+                <p class="text-secondary small mb-1"><i class="fas fa-envelope me-2"></i>contact@checkinhub.com</p>
+                <p class="text-secondary small"><i class="fas fa-phone me-2"></i>+229 00 00 00 00</p>
             </div>
         </div>
-        <hr style="border-color:var(--line);">
-        <div class="text-center" style="color:var(--muted);font-size:.85rem;">
+        <hr class="border-secondary">
+        <div class="text-center text-secondary small">
             &copy; {{ date('Y') }} {{ config('app.name', 'checkinHub') }}. {{ __('landing.footer_rights') }}
         </div>
     </div>
 </footer>
 
-<button id="scrollTop" class="to-top" aria-label="{{ __('landing.scroll_to_top') }}"><i class="fas fa-arrow-up"></i></button>
+<!-- Bouton retour en haut -->
+<button id="scrollTop" aria-label="{{ __('landing.scroll_to_top') }}"
+        style="position:fixed;right:22px;bottom:22px;width:46px;height:46px;border:none;border-radius:50%;background:var(--brand);color:#fff;box-shadow:0 10px 24px -8px rgba(79,70,229,.7);opacity:0;pointer-events:none;transition:opacity .25s, transform .25s;z-index:1000;">
+    <i class="fas fa-arrow-up"></i>
+</button>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<!-- globe.gl (Three.js) : globe 3D photoréaliste des pays desservis -->
+<script src="https://unpkg.com/globe.gl"></script>
 <script>
-    if (window.AOS) AOS.init({ duration: 650, once: true, easing: 'ease-out-cubic', offset: 70 });
+    // Animations au scroll
+    AOS.init({ duration: 700, once: true, easing: 'ease-out-cubic', offset: 80 });
 
-    const nav = document.getElementById('nav');
-    const topBtn = document.getElementById('scrollTop');
+    // Navbar dynamique
+    const nav = document.querySelector('.navbar');
+    const scrollTopBtn = document.getElementById('scrollTop');
     const onScroll = () => {
-        nav.classList.toggle('scrolled', window.scrollY > 30);
-        topBtn.classList.toggle('show', window.scrollY > 400);
+        nav.classList.toggle('scrolled', window.scrollY > 40);
+        const show = window.scrollY > 400;
+        scrollTopBtn.style.opacity = show ? '1' : '0';
+        scrollTopBtn.style.pointerEvents = show ? 'auto' : 'none';
+        scrollTopBtn.style.transform = show ? 'translateY(0)' : 'translateY(10px)';
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
-    topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-    // Compteurs animés
+    // Compteurs animés (count-up au scroll)
     const counters = document.querySelectorAll('.counter');
-    const run = (el) => {
-        const target = +el.dataset.target, dur = 1300, s = performance.now();
-        const tick = (n) => { const p = Math.min((n - s) / dur, 1); el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(tick); };
+    const animateCounter = (el) => {
+        const target = +el.dataset.target;
+        const duration = 1400;
+        const start = performance.now();
+        const tick = (now) => {
+            const p = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            el.textContent = Math.round(target * eased);
+            if (p < 1) requestAnimationFrame(tick);
+        };
         requestAnimationFrame(tick);
     };
     if ('IntersectionObserver' in window) {
-        const ob = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { run(e.target); ob.unobserve(e.target); } }), { threshold: .5 });
-        counters.forEach(c => ob.observe(c));
-    } else counters.forEach(c => c.textContent = c.dataset.target);
-
-    // Prix ajustés selon le pays
-    const plansCountries = @json(config('plans.countries'));
-    const sel = document.getElementById('pricing-country');
-    if (sel) {
-        const fmt = n => n.toLocaleString('fr-FR');
-        const upd = () => {
-            const c = plansCountries[sel.value]; if (!c) return;
-            document.querySelectorAll('.price[data-base]').forEach(card => {
-                const base = +card.dataset.base;
-                const price = Math.round(base * c.coef / c.round) * c.round;
-                const a = card.querySelector('.pr-amount'), cur = card.querySelector('.pr-cur');
-                if (a) a.textContent = fmt(price); if (cur) cur.textContent = c.currency;
-            });
-        };
-        sel.addEventListener('change', upd); upd();
+        const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => { if (e.isIntersecting) { animateCounter(e.target); obs.unobserve(e.target); } });
+        }, { threshold: .6 });
+        counters.forEach(c => obs.observe(c));
+    } else {
+        counters.forEach(c => c.textContent = c.dataset.target);
     }
 
-    // Bascule thème (clair) optionnelle
-    const tgl = document.getElementById('themeToggle');
-    if (tgl) tgl.addEventListener('click', () => {
-        document.body.classList.toggle('theme-light');
-        tgl.querySelector('i').className = document.body.classList.contains('theme-light') ? 'fas fa-sun' : 'fas fa-moon';
-    });
+    // Prix ajustés selon le pays (coût de la vie)
+    const plansCountries = @json(config('plans.countries'));
+    const pricingSel = document.getElementById('pricing-country');
+    if (pricingSel) {
+        const fmt = n => n.toLocaleString('fr-FR');
+        const updatePricing = () => {
+            const c = plansCountries[pricingSel.value];
+            if (!c) return;
+            document.querySelectorAll('.price-card[data-base]').forEach(card => {
+                const base = +card.dataset.base;
+                const price = Math.round(base * c.coef / c.round) * c.round;
+                const amt = card.querySelector('.pr-amount');
+                const cur = card.querySelector('.pr-cur');
+                if (amt) amt.textContent = fmt(price);
+                if (cur) cur.textContent = c.currency;
+            });
+        };
+        pricingSel.addEventListener('change', updatePricing);
+        updatePricing();
+    }
+</script>
+
+<!-- Globe 3D photoréaliste · bloc isolé (indépendant du reste du JS) -->
+<script>
+(function () {
+    const servedData = @json(config('plans.countries'));
+    // Coordonnées (lat/long) des pays desservis.
+    const coords = {
+        BJ:[9.3,2.3], TG:[8.6,0.8], CI:[7.5,-5.5], SN:[14.5,-14.5], BF:[12.2,-1.5],
+        ML:[17.0,-4.0], NE:[17.6,8.0], CM:[5.7,12.5], GA:[-0.8,11.6], NG:[9.1,8.7],
+        GH:[7.9,-1.0], FR:[46.6,2.2]
+    };
+
+    function build() {
+        const el = document.getElementById('globe');
+        if (!el) return;
+
+        if (typeof Globe === 'undefined') {
+            // globe.gl non chargé (CDN bloqué) : la liste des pays reste visible.
+            el.style.display = 'none';
+            console.warn('Globe: globe.gl non disponible (CDN bloqué ?).');
+            return;
+        }
+
+        try {
+            const points = Object.keys(servedData)
+                .filter(c => coords[c])
+                .map(c => ({ code: c, name: servedData[c].name, lat: coords[c][0], lng: coords[c][1] }));
+
+            const TEX = 'https://unpkg.com/three-globe/example/img/';
+
+            const globe = Globe()(el)
+                .backgroundColor('rgba(0,0,0,0)')
+                .globeImageUrl(TEX + 'earth-blue-marble.jpg')
+                .bumpImageUrl(TEX + 'earth-topology.png')
+                .showAtmosphere(true)
+                .atmosphereColor('#6366f1')
+                .atmosphereAltitude(0.2)
+                // Halos pulsants sur chaque pays
+                .ringsData(points)
+                .ringColor(() => (t) => `rgba(129,140,248,${Math.sqrt(1 - t)})`)
+                .ringMaxRadius(4)
+                .ringPropagationSpeed(2.2)
+                .ringRepeatPeriod(900)
+                // Points brillants
+                .pointsData(points)
+                .pointColor(() => '#c7d2fe')
+                .pointAltitude(0.02)
+                .pointRadius(0.35)
+                // Étiquettes des pays
+                .labelsData(points)
+                .labelText('name')
+                .labelSize(1.1)
+                .labelDotRadius(0.4)
+                .labelColor(() => '#ffffff')
+                .labelResolution(2);
+
+            const resize = () => { globe.width(el.clientWidth).height(el.clientHeight); };
+            resize();
+            window.addEventListener('resize', resize);
+
+            // Vue centrée sur l'Afrique de l'Ouest + rotation automatique
+            globe.pointOfView({ lat: 8, lng: 4, altitude: 1.65 }, 0);
+            const controls = globe.controls();
+            controls.autoRotate = true;
+            controls.autoRotateSpeed = 0.7;
+            controls.enableZoom = true;      // molette / pinch pour zoomer
+            controls.minDistance = 160;      // zoom avant max (proche)
+            controls.maxDistance = 450;      // zoom arrière max (loin)
+            controls.zoomSpeed = 0.8;
+        } catch (e) {
+            console.error('Globe 3D:', e);
+            el.style.display = 'none';
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', build);
+    } else {
+        build();
+    }
+})();
 </script>
 </body>
 </html>
