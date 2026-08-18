@@ -120,16 +120,17 @@
         .hx-wrap::after { content:""; position:absolute; inset:-26px -20px; z-index:0; pointer-events:none; border-radius:34px;
             background:radial-gradient(closest-side, rgba(124,131,255,.42), rgba(176,107,255,.18) 62%, transparent 80%);
             filter:blur(26px); }
-        /* Carte de l'Afrique en pointillés */
-        .afrique-map { position:absolute; top:1.5rem; left:31%; width:min(700px,50vw); height:auto; z-index:0; opacity:.66;
-            pointer-events:none; filter:drop-shadow(0 0 24px rgba(124,131,255,.5)); }
-        .af-nodes circle { filter:drop-shadow(0 0 5px currentColor); animation:afpulse 3.5s ease-in-out infinite; }
-        .af-star { animation:afstar 3.4s ease-in-out infinite; filter:drop-shadow(0 0 8px rgba(139,107,255,.8)); }
-        @keyframes afstar { 0%,100%{ opacity:1; } 50%{ opacity:.7; } }
-        .af-nodes circle:nth-child(2){ animation-delay:.8s; } .af-nodes circle:nth-child(3){ animation-delay:1.6s; }
-        .af-nodes circle:nth-child(4){ animation-delay:2.2s; } .af-nodes circle:nth-child(5){ animation-delay:1.1s; }
-        @keyframes afpulse { 0%,100%{ opacity:.55; } 50%{ opacity:1; } }
-        @media (max-width:991px){ .afrique-map{ display:none; } }
+        /* Carte de l'Afrique en réseau */
+        .afrique-map { position:absolute; top:-2rem; right:-4%; width:min(760px,52vw); height:auto; z-index:0; opacity:.9;
+            pointer-events:none; user-select:none; animation:affloat 12s ease-in-out infinite; }
+        .afrique-glow { position:absolute; top:6rem; right:6%; width:min(520px,38vw); height:min(520px,38vw); z-index:0;
+            pointer-events:none; border-radius:50%;
+            background:radial-gradient(circle, rgba(124,131,255,.30) 0%, rgba(124,131,255,.10) 42%, transparent 70%);
+            filter:blur(40px); animation:afpulse 6s ease-in-out infinite; }
+        @keyframes affloat { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-14px); } }
+        @keyframes afpulse { 0%,100%{ opacity:.7; } 50%{ opacity:1; } }
+        @media (prefers-reduced-motion:reduce){ .afrique-map,.afrique-glow{ animation:none; } }
+        @media (max-width:991px){ .afrique-map,.afrique-glow{ display:none; } }
         .hx-top { display:flex; align-items:center; gap:12px; padding:11px 14px; border-bottom:1px solid var(--border); }
         .hx-brand { font-family:'Space Grotesk'; font-weight:700; font-size:.85rem; color:#fff; white-space:nowrap; }
         .hx-brand i { color:var(--brand); }
@@ -222,45 +223,9 @@
 
 <!-- HERO avec maquette du produit -->
 <header style="padding:8.5rem 0 4rem; position:relative; overflow:hidden;">
-    <!-- Carte de l'Afrique en pointillés (décor de fond) -->
-    <svg class="afrique-map" viewBox="0 0 1000 1000" aria-hidden="true">
-        <defs>
-            <pattern id="afdots" width="13" height="13" patternUnits="userSpaceOnUse">
-                <circle cx="1.8" cy="1.8" r="1.7" fill="#7c83ff"/>
-            </pattern>
-            <radialGradient id="afStar" cx="50%" cy="50%" r="50%">
-                <stop offset="0" stop-color="#ffffff"/><stop offset="22%" stop-color="#c9c3ff"/>
-                <stop offset="55%" stop-color="#8b6bff" stop-opacity=".55"/><stop offset="100%" stop-color="#8b6bff" stop-opacity="0"/>
-            </radialGradient>
-            <clipPath id="afclip">
-                <path d="M232,205 L300,190 L420,168 L452,158 L500,195 L540,178 L600,175 L650,168 L688,190 L700,220 L712,300 L735,360 L752,388 L800,388 L838,400 L800,445 L740,500 L712,540 L708,585 L712,630 L700,675 L672,720 L620,760 L560,792 L498,800 L455,770 L438,690 L430,620 L438,570 L432,545 L428,520 L440,505 L415,522 L360,535 L315,540 L262,528 L235,505 L215,478 L188,452 L205,400 L215,340 L222,280 L228,235 Z"/>
-                <path d="M792,632 L814,662 L820,708 L806,748 L790,712 L784,668 Z"/>
-            </clipPath>
-        </defs>
-        <g clip-path="url(#afclip)"><rect width="1000" height="1000" fill="url(#afdots)"/></g>
-        <g class="af-lines" stroke="#7c83ff" stroke-width="1.5" opacity=".3" fill="none" stroke-linecap="round">
-            <polyline points="300,300 430,250 560,240 660,320 700,470 640,500 600,560 470,540 340,470 250,420 300,300"/>
-            <line x1="500" y1="380" x2="640" y2="500"/>
-            <line x1="500" y1="380" x2="430" y2="250"/>
-            <line x1="470" y1="540" x2="600" y2="560"/>
-            <line x1="340" y1="470" x2="500" y2="380"/>
-            <line x1="660" y1="320" x2="640" y2="500"/>
-        </g>
-        <g class="af-nodes">
-            <circle cx="430" cy="250" r="4.4" fill="#b06bff"/>
-            <circle cx="560" cy="240" r="4" fill="#8b9bff"/>
-            <circle cx="660" cy="320" r="4.2" fill="#7c83ff"/>
-            <circle cx="700" cy="470" r="4" fill="#b06bff"/>
-            <circle cx="340" cy="470" r="3.8" fill="#29e0c8"/>
-            <circle cx="250" cy="420" r="4" fill="#c9c3ff"/>
-            <circle cx="600" cy="560" r="3.6" fill="#8b9bff"/>
-        </g>
-        <g class="af-star" transform="translate(640,500)">
-            <circle r="34" fill="url(#afStar)"/>
-            <path d="M0,-30 L3.5,-5 L30,0 L3.5,5 L0,30 L-3.5,5 L-30,0 L-3.5,-5 Z" fill="#eae7ff" opacity=".9"/>
-            <circle r="5" fill="#ffffff"/>
-        </g>
-    </svg>
+    <!-- Carte de l'Afrique en réseau (décor de fond) -->
+    <img class="afrique-map" src="{{ asset('img/carte-afrique-reseau.svg') }}" alt="" aria-hidden="true">
+    <div class="afrique-glow" aria-hidden="true"></div>
     <div class="container" style="position:relative; z-index:2;">
         <div class="row align-items-center g-5">
             <div class="col-lg-5" data-aos="fade-up">
