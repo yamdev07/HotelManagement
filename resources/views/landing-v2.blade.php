@@ -121,7 +121,7 @@
             background:radial-gradient(closest-side, rgba(124,131,255,.42), rgba(176,107,255,.18) 62%, transparent 80%);
             filter:blur(26px); }
         /* Carte de l'Afrique en réseau */
-        .afrique-map { position:absolute; top:-2rem; right:-4%; width:min(760px,52vw); height:auto; z-index:0; opacity:.9;
+        .afrique-map { position:absolute; top:-2rem; right:-4%; width:min(760px,52vw); height:auto; z-index:0; opacity:1;
             pointer-events:none; user-select:none; animation:affloat 12s ease-in-out infinite; }
         .afrique-glow { position:absolute; top:6rem; right:6%; width:min(520px,38vw); height:min(520px,38vw); z-index:0;
             pointer-events:none; border-radius:50%;
