@@ -12,9 +12,9 @@ use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
- * Issue #144 : le journal d'activité d'un hôtelier affichait les activités
- * des autres hôtels. Chaque activité est désormais rattachée à son hôtel et
- * le journal est filtré sur l'hôtel courant.
+ * Issue #144 : le journal d'activite d'un hotelier affichait les activites
+ * des autres hotels. Chaque activite est desormais rattachee a son hotel et
+ * le journal est filtre sur l'hotel courant.
  */
 class ActivityLogIsolationTest extends TestCase
 {
@@ -23,23 +23,23 @@ class ActivityLogIsolationTest extends TestCase
     private function hotel(string $name): Hotel
     {
         return Hotel::create([
-            'name'                    => $name,
-            'slug'                    => Str::slug($name.' '.Str::random(4)),
-            'is_active'               => true,
+            'name' => $name,
+            'slug' => Str::slug($name . ' ' . Str::random(4)),
+            'is_active' => true,
             'onboarding_completed_at' => now(),
-            'subscription_ends_at'    => now()->addMonth(),
+            'subscription_ends_at' => now()->addMonth(),
         ]);
     }
 
     private function logFor(int $hotelId, string $description): int
     {
         return DB::table('activity_log')->insertGetId([
-            'log_name'    => 'default',
+            'log_name' => 'default',
             'description' => $description,
-            'hotel_id'    => $hotelId,
-            'properties'  => '{}',
-            'created_at'  => now(),
-            'updated_at'  => now(),
+            'hotel_id' => $hotelId,
+            'properties' => '{}',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
     }
 
@@ -52,14 +52,12 @@ class ActivityLogIsolationTest extends TestCase
         $this->logFor($hotelA->id, 'OPERATION_HOTEL_A');
         $bId = $this->logFor($hotelB->id, 'OPERATION_HOTEL_B');
 
-        // Le tenant se résout depuis l'utilisateur de la requête.
         app(TenantManager::class)->forget();
         $res = $this->actingAs($adminA)->get(route('activity.index'));
         $res->assertOk();
         $res->assertSee('OPERATION_HOTEL_A');
-        $res->assertDontSee('OPERATION_HOTEL_B'); // fuite inter-hôtels : interdit
+        $res->assertDontSee('OPERATION_HOTEL_B');
 
-        // Accès direct à une activité d'un autre hôtel : 404 (pas d'IDOR).
         app(TenantManager::class)->forget();
         $this->actingAs($adminA)->get(route('activity.show', $bId))->assertNotFound();
     }
@@ -79,19 +77,16 @@ class ActivityLogIsolationTest extends TestCase
         $tm->setHotelId($hotelB->id);
         activity()->causedBy($userB)->log('Action Hotel B');
 
-        // Vue côté hôtel A : ne voit que ses propres activités
         $tm->setHotelId($hotelA->id);
         $descA = Activity::pluck('description');
         $this->assertContains('Action Hotel A', $descA);
         $this->assertNotContains('Action Hotel B', $descA);
 
-        // Vue côté hôtel B : symétrique
         $tm->setHotelId($hotelB->id);
         $descB = Activity::pluck('description');
         $this->assertContains('Action Hotel B', $descB);
         $this->assertNotContains('Action Hotel A', $descB);
 
-        // Super-Admin plateforme (sans hôtel) : voit tout
         $tm->setHotelId(null);
         $tm->forget();
         $all = Activity::pluck('description');
