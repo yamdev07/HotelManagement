@@ -39,9 +39,10 @@
 
         /* Fond cosmique animé */
         .cosmos { position: fixed; inset: 0; z-index: -2; background:
-            radial-gradient(900px 500px at 80% -5%, rgba(124,131,255,.28), transparent 60%),
-            radial-gradient(800px 500px at 10% 10%, rgba(176,107,255,.20), transparent 55%),
-            radial-gradient(700px 600px at 50% 110%, rgba(41,224,200,.14), transparent 60%),
+            radial-gradient(1150px 640px at 78% -6%, rgba(124,131,255,.42), transparent 58%),
+            radial-gradient(720px 520px at 94% 22%, rgba(176,107,255,.34), transparent 55%),
+            radial-gradient(820px 540px at 4% 12%, rgba(176,107,255,.20), transparent 55%),
+            radial-gradient(760px 620px at 50% 112%, rgba(41,224,200,.15), transparent 60%),
             linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%); }
         .stars { position: fixed; inset: 0; z-index: -1; opacity:.5;
             background-image: radial-gradient(1px 1px at 20% 30%, #fff, transparent), radial-gradient(1px 1px at 60% 70%, #fff, transparent),
@@ -113,8 +114,20 @@
 
         /* ===== Maquette dashboard (hero) ===== */
         .hx-wrap { position: relative; }
-        .hx-dash { background:#0d1426; border:1px solid var(--border); border-radius:16px; overflow:hidden;
-            box-shadow:0 40px 80px -30px rgba(0,0,0,.7); }
+        .hx-dash { position:relative; z-index:1; background:#0d1426; border:1px solid rgba(124,131,255,.28); border-radius:16px; overflow:hidden;
+            box-shadow:0 40px 90px -28px rgba(0,0,0,.75), 0 0 0 1px rgba(124,131,255,.15), 0 0 60px -8px rgba(124,131,255,.45); }
+        /* Halo lumineux violet autour du dashboard */
+        .hx-wrap::after { content:""; position:absolute; inset:-26px -20px; z-index:0; pointer-events:none; border-radius:34px;
+            background:radial-gradient(closest-side, rgba(124,131,255,.42), rgba(176,107,255,.18) 62%, transparent 80%);
+            filter:blur(26px); }
+        /* Carte de l'Afrique en pointillés */
+        .afrique-map { position:absolute; top:5.5rem; left:34%; width:min(600px,44vw); height:auto; z-index:0; opacity:.6;
+            pointer-events:none; filter:drop-shadow(0 0 22px rgba(124,131,255,.45)); }
+        .af-nodes circle { filter:drop-shadow(0 0 5px currentColor); animation:afpulse 3.5s ease-in-out infinite; }
+        .af-nodes circle:nth-child(2){ animation-delay:.8s; } .af-nodes circle:nth-child(3){ animation-delay:1.6s; }
+        .af-nodes circle:nth-child(4){ animation-delay:2.2s; } .af-nodes circle:nth-child(5){ animation-delay:1.1s; }
+        @keyframes afpulse { 0%,100%{ opacity:.55; } 50%{ opacity:1; } }
+        @media (max-width:991px){ .afrique-map{ display:none; } }
         .hx-top { display:flex; align-items:center; gap:12px; padding:11px 14px; border-bottom:1px solid var(--border); }
         .hx-brand { font-family:'Space Grotesk'; font-weight:700; font-size:.85rem; color:#fff; white-space:nowrap; }
         .hx-brand i { color:var(--brand); }
@@ -206,8 +219,27 @@
 </nav>
 
 <!-- HERO avec maquette du produit -->
-<header style="padding:8.5rem 0 4rem;">
-    <div class="container">
+<header style="padding:8.5rem 0 4rem; position:relative; overflow:hidden;">
+    <!-- Carte de l'Afrique en pointillés (décor de fond) -->
+    <svg class="afrique-map" viewBox="0 0 400 420" aria-hidden="true">
+        <defs>
+            <pattern id="afdots" width="8" height="8" patternUnits="userSpaceOnUse">
+                <circle cx="1.6" cy="1.6" r="1" fill="#9aa2ff"/>
+            </pattern>
+            <clipPath id="afclip">
+                <path d="M150,30 L210,25 L250,40 L275,35 L285,60 L300,95 L320,140 L355,165 L360,180 L335,195 L305,215 L300,255 L305,300 L290,340 L255,375 L225,382 L205,350 L200,310 L180,272 L192,250 L165,256 L120,258 L90,246 L68,214 L58,184 L74,150 L86,110 L112,70 Z"/>
+            </clipPath>
+        </defs>
+        <g clip-path="url(#afclip)"><rect width="400" height="420" fill="url(#afdots)"/></g>
+        <g class="af-nodes">
+            <circle cx="112" cy="92" r="2.6" fill="#b06bff"/>
+            <circle cx="250" cy="108" r="2.6" fill="#7c83ff"/>
+            <circle cx="150" cy="160" r="2.2" fill="#29e0c8"/>
+            <circle cx="300" cy="160" r="2.4" fill="#7c83ff"/>
+            <circle cx="205" cy="300" r="2.4" fill="#b06bff"/>
+        </g>
+    </svg>
+    <div class="container" style="position:relative; z-index:2;">
         <div class="row align-items-center g-5">
             <div class="col-lg-5" data-aos="fade-up">
                 <span class="chip mb-3"><i class="fas fa-gem" style="color:var(--accent);font-size:.7rem"></i> {{ __('landing_v2.hero_chip', ['text' => config('plans.trial_days', 14)]) }}</span>
