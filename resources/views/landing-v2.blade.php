@@ -121,8 +121,8 @@
             background:radial-gradient(closest-side, rgba(124,131,255,.42), rgba(176,107,255,.18) 62%, transparent 80%);
             filter:blur(26px); }
         /* Carte de l'Afrique en pointillés */
-        .afrique-map { position:absolute; top:5.5rem; left:34%; width:min(600px,44vw); height:auto; z-index:0; opacity:.6;
-            pointer-events:none; filter:drop-shadow(0 0 22px rgba(124,131,255,.45)); }
+        .afrique-map { position:absolute; top:1.5rem; left:31%; width:min(700px,50vw); height:auto; z-index:0; opacity:.66;
+            pointer-events:none; filter:drop-shadow(0 0 24px rgba(124,131,255,.5)); }
         .af-nodes circle { filter:drop-shadow(0 0 5px currentColor); animation:afpulse 3.5s ease-in-out infinite; }
         .af-nodes circle:nth-child(2){ animation-delay:.8s; } .af-nodes circle:nth-child(3){ animation-delay:1.6s; }
         .af-nodes circle:nth-child(4){ animation-delay:2.2s; } .af-nodes circle:nth-child(5){ animation-delay:1.1s; }
@@ -221,22 +221,31 @@
 <!-- HERO avec maquette du produit -->
 <header style="padding:8.5rem 0 4rem; position:relative; overflow:hidden;">
     <!-- Carte de l'Afrique en pointillés (décor de fond) -->
-    <svg class="afrique-map" viewBox="0 0 400 420" aria-hidden="true">
+    <svg class="afrique-map" viewBox="0 0 1000 1000" aria-hidden="true">
         <defs>
-            <pattern id="afdots" width="8" height="8" patternUnits="userSpaceOnUse">
-                <circle cx="1.6" cy="1.6" r="1" fill="#9aa2ff"/>
+            <pattern id="afdots" width="15" height="15" patternUnits="userSpaceOnUse">
+                <circle cx="2" cy="2" r="1.7" fill="#7c83ff"/>
             </pattern>
             <clipPath id="afclip">
-                <path d="M150,30 L210,25 L250,40 L275,35 L285,60 L300,95 L320,140 L355,165 L360,180 L335,195 L305,215 L300,255 L305,300 L290,340 L255,375 L225,382 L205,350 L200,310 L180,272 L192,250 L165,256 L120,258 L90,246 L68,214 L58,184 L74,150 L86,110 L112,70 Z"/>
+                <path d="M250,175 L470,120 L620,150 L690,195 L720,300 L760,360 L830,400 L760,460 L720,520 L712,585 L722,660 L688,722 L600,790 L520,802 L470,728 L450,640 L432,558 L400,548 L330,562 L250,548 L210,500 L175,445 L200,372 L216,300 L235,230 Z"/>
+                <path d="M812,628 L838,662 L836,712 L816,744 L800,712 L806,660 Z"/>
             </clipPath>
         </defs>
-        <g clip-path="url(#afclip)"><rect width="400" height="420" fill="url(#afdots)"/></g>
+        <g clip-path="url(#afclip)"><rect width="1000" height="1000" fill="url(#afdots)"/></g>
+        <g class="af-lines" stroke="#7c83ff" stroke-width="1.6" opacity=".32" fill="none" stroke-linecap="round">
+            <polyline points="300,300 500,250 650,320 700,480 550,420 300,300"/>
+            <line x1="550" y1="420" x2="520" y2="600"/>
+            <line x1="520" y1="600" x2="480" y2="660"/>
+            <line x1="300" y1="450" x2="300" y2="300"/>
+            <line x1="175" y1="445" x2="300" y2="450"/>
+        </g>
         <g class="af-nodes">
-            <circle cx="112" cy="92" r="2.6" fill="#b06bff"/>
-            <circle cx="250" cy="108" r="2.6" fill="#7c83ff"/>
-            <circle cx="150" cy="160" r="2.2" fill="#29e0c8"/>
-            <circle cx="300" cy="160" r="2.4" fill="#7c83ff"/>
-            <circle cx="205" cy="300" r="2.4" fill="#b06bff"/>
+            <circle cx="500" cy="250" r="4.6" fill="#b06bff"/>
+            <circle cx="650" cy="320" r="4" fill="#7c83ff"/>
+            <circle cx="700" cy="480" r="4.6" fill="#8b9bff"/>
+            <circle cx="520" cy="600" r="4" fill="#b06bff"/>
+            <circle cx="300" cy="450" r="3.6" fill="#29e0c8"/>
+            <circle cx="175" cy="445" r="4.2" fill="#c9c3ff"/>
         </g>
     </svg>
     <div class="container" style="position:relative; z-index:2;">
