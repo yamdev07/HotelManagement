@@ -114,23 +114,20 @@
 
         /* ===== Maquette dashboard (hero) ===== */
         .hx-wrap { position: relative; }
-        .hx-dash { position:relative; z-index:1; background:#0d1426; border:1px solid rgba(124,131,255,.28); border-radius:16px; overflow:hidden;
-            box-shadow:0 40px 90px -28px rgba(0,0,0,.75), 0 0 0 1px rgba(124,131,255,.15), 0 0 60px -8px rgba(124,131,255,.45); }
-        /* Halo lumineux violet autour du dashboard */
-        .hx-wrap::after { content:""; position:absolute; inset:-26px -20px; z-index:0; pointer-events:none; border-radius:34px;
-            background:radial-gradient(closest-side, rgba(124,131,255,.42), rgba(176,107,255,.18) 62%, transparent 80%);
-            filter:blur(26px); }
+        .hx-dash { position:relative; z-index:1; background:#0d1426; border:1px solid rgba(140,150,255,.55); border-radius:16px; overflow:hidden;
+            box-shadow:0 40px 90px -28px rgba(0,0,0,.75), 0 0 0 1px rgba(140,150,255,.4),
+                0 0 30px -2px rgba(124,131,255,.85), 0 0 80px 0 rgba(150,110,255,.5); }
+        /* Halo lumineux fluo autour du dashboard */
+        .hx-wrap::after { content:""; position:absolute; inset:-40px -34px; z-index:0; pointer-events:none; border-radius:40px;
+            background:radial-gradient(closest-side, rgba(120,130,255,.85), rgba(150,110,255,.5) 46%, rgba(45,224,200,.18) 70%, transparent 84%);
+            filter:blur(30px) saturate(1.5); animation:hx-halo 4.5s ease-in-out infinite; }
+        @keyframes hx-halo { 0%,100%{ opacity:.75; transform:scale(1); } 50%{ opacity:1; transform:scale(1.04); } }
+        @media (prefers-reduced-motion:reduce){ .hx-wrap::after{ animation:none; } }
         /* Carte de l'Afrique en réseau */
-        .afrique-map { position:absolute; top:-2rem; right:-4%; width:min(760px,52vw); height:auto; z-index:0; opacity:1;
-            pointer-events:none; user-select:none; animation:affloat 12s ease-in-out infinite; }
-        .afrique-glow { position:absolute; top:6rem; right:6%; width:min(520px,38vw); height:min(520px,38vw); z-index:0;
-            pointer-events:none; border-radius:50%;
-            background:radial-gradient(circle, rgba(124,131,255,.30) 0%, rgba(124,131,255,.10) 42%, transparent 70%);
-            filter:blur(40px); animation:afpulse 6s ease-in-out infinite; }
-        @keyframes affloat { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-14px); } }
-        @keyframes afpulse { 0%,100%{ opacity:.7; } 50%{ opacity:1; } }
-        @media (prefers-reduced-motion:reduce){ .afrique-map,.afrique-glow{ animation:none; } }
-        @media (max-width:991px){ .afrique-map,.afrique-glow{ display:none; } }
+        .afrique-map { position:absolute; top:40%; left:36%; transform:translate(-50%,-50%);
+            width:min(470px,32vw); height:auto; z-index:0; opacity:1; pointer-events:none; user-select:none;
+            filter:hue-rotate(-18deg) saturate(1.8) brightness(1.75) contrast(1.2) drop-shadow(0 0 14px rgba(96,140,255,.6)); }
+        @media (max-width:991px){ .afrique-map{ display:none; } }
         .hx-top { display:flex; align-items:center; gap:12px; padding:11px 14px; border-bottom:1px solid var(--border); }
         .hx-brand { font-family:'Space Grotesk'; font-weight:700; font-size:.85rem; color:#fff; white-space:nowrap; }
         .hx-brand i { color:var(--brand); }
@@ -188,6 +185,30 @@
         .hx-phint { font-size:.5rem; color:var(--muted); text-align:center; margin-top:6px; }
         @media (max-width:991px) { .hx-phone { display:none; } .hx-side { width:120px; } }
         @media (max-width:575px) { .hx-side { display:none; } .hx-stats { grid-template-columns:repeat(2,1fr); } .hx-charts { grid-template-columns:1fr; } }
+        /* ---- Tableau de bord animé ---- */
+        @keyframes hx-float { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-9px); } }
+        .hx-dash { animation:hx-float 7s ease-in-out infinite; }
+        @keyframes hx-rise { from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:translateY(0); } }
+        .hx-card { opacity:0; animation:hx-rise .55s ease-out forwards; }
+        .hx-card:nth-child(1){ animation-delay:.15s; } .hx-card:nth-child(2){ animation-delay:.30s; }
+        .hx-card:nth-child(3){ animation-delay:.45s; } .hx-card:nth-child(4){ animation-delay:.60s; }
+        .hx-line { stroke-dasharray:260; stroke-dashoffset:260; animation:hx-draw 2.2s ease-out .5s forwards; }
+        @keyframes hx-draw { to{ stroke-dashoffset:0; } }
+        .hx-area { opacity:0; animation:hx-appear 1.1s ease-out 2s forwards; }
+        @keyframes hx-appear { to{ opacity:1; } }
+        .hx-end { animation:hx-ping 2.2s ease-in-out 2.4s infinite; }
+        @keyframes hx-ping { 0%,100%{ r:3; filter:drop-shadow(0 0 1px rgba(124,131,255,.6)); }
+            50%{ r:4; filter:drop-shadow(0 0 6px rgba(124,131,255,1)); } }
+        .hx-donut { animation:hx-donut-in 1.5s cubic-bezier(.2,.8,.2,1) .4s both; }
+        @keyframes hx-donut-in { from{ transform:rotate(-140deg) scale(.55); opacity:0; } to{ transform:rotate(0) scale(1); opacity:1; } }
+        .hx-nav.active { position:relative; animation:hx-glow 3s ease-in-out infinite; }
+        @keyframes hx-glow { 0%,100%{ box-shadow:0 0 0 0 rgba(124,131,255,0); } 50%{ box-shadow:0 0 14px -2px rgba(124,131,255,.55); } }
+        .hx-user .fa-bell { animation:hx-bell 4s ease-in-out infinite; transform-origin:top center; }
+        @keyframes hx-bell { 0%,88%,100%{ transform:rotate(0); } 90%{ transform:rotate(12deg); } 94%{ transform:rotate(-10deg); } 97%{ transform:rotate(6deg); } }
+        @media (prefers-reduced-motion:reduce){
+            .hx-dash,.hx-card,.hx-line,.hx-area,.hx-end,.hx-donut,.hx-nav.active,.hx-user .fa-bell{ animation:none; }
+            .hx-card{ opacity:1; } .hx-line{ stroke-dashoffset:0; } .hx-area{ opacity:1; }
+        }
     </style>
     <script>
         // Thème appliqué avant le rendu (évite le flash). Défaut : sombre.
@@ -224,8 +245,7 @@
 <!-- HERO avec maquette du produit -->
 <header style="padding:8.5rem 0 4rem; position:relative; overflow:hidden;">
     <!-- Carte de l'Afrique en réseau (décor de fond) -->
-    <img class="afrique-map" src="{{ asset('img/carte-afrique-reseau.svg') }}" alt="" aria-hidden="true">
-    <div class="afrique-glow" aria-hidden="true"></div>
+    <img class="afrique-map" src="{{ asset('img/carte-afrique-reseau.svg') }}?v={{ @filemtime(public_path('img/carte-afrique-reseau.svg')) ?: '1' }}" alt="" aria-hidden="true">
     <div class="container" style="position:relative; z-index:2;">
         <div class="row align-items-center g-5">
             <div class="col-lg-5" data-aos="fade-up">
@@ -282,10 +302,10 @@
                             </div>
                             <div class="hx-main">
                                 <div class="hx-stats">
-                                    <div class="hx-card"><div class="hx-clab">Réservations aujourd'hui</div><div class="hx-cval">24</div><div class="hx-cup">↑ 12% vs hier</div></div>
-                                    <div class="hx-card"><div class="hx-clab">Arrivées</div><div class="hx-cval">12</div><div class="hx-cup">↑ 8% vs hier</div></div>
-                                    <div class="hx-card"><div class="hx-clab">Départs</div><div class="hx-cval">8</div><div class="hx-cup">↑ 5% vs hier</div></div>
-                                    <div class="hx-card"><div class="hx-clab">Chiffre d'affaires</div><div class="hx-cval">1 250 000 <small>FCFA</small></div><div class="hx-cup">↑ 15% vs hier</div></div>
+                                    <div class="hx-card"><div class="hx-clab">Réservations aujourd'hui</div><div class="hx-cval"><span class="hx-num" data-to="24">0</span></div><div class="hx-cup">↑ 12% vs hier</div></div>
+                                    <div class="hx-card"><div class="hx-clab">Arrivées</div><div class="hx-cval"><span class="hx-num" data-to="12">0</span></div><div class="hx-cup">↑ 8% vs hier</div></div>
+                                    <div class="hx-card"><div class="hx-clab">Départs</div><div class="hx-cval"><span class="hx-num" data-to="8">0</span></div><div class="hx-cup">↑ 5% vs hier</div></div>
+                                    <div class="hx-card"><div class="hx-clab">Chiffre d'affaires</div><div class="hx-cval"><span class="hx-num" data-to="1250000" data-sep="1">0</span> <small>FCFA</small></div><div class="hx-cup">↑ 15% vs hier</div></div>
                                 </div>
                                 <div class="hx-charts">
                                     <div class="hx-chart">
@@ -294,11 +314,11 @@
                                             <div class="hx-yax"><span>100</span><span>75</span><span>50</span><span>25</span><span>0</span></div>
                                             <svg viewBox="0 0 240 70" preserveAspectRatio="none" style="width:100%;height:70px;">
                                                 <defs><linearGradient id="hxg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7c83ff" stop-opacity=".35"/><stop offset="1" stop-color="#7c83ff" stop-opacity="0"/></linearGradient></defs>
-                                                <polygon points="0,52 34,46 68,49 102,34 137,38 171,22 205,26 240,12 240,70 0,70" fill="url(#hxg)"/>
-                                                <polyline points="0,52 34,46 68,49 102,34 137,38 171,22 205,26 240,12" fill="none" stroke="#7c83ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+                                                <polygon class="hx-area" points="0,52 34,46 68,49 102,34 137,38 171,22 205,26 240,12 240,70 0,70" fill="url(#hxg)"/>
+                                                <polyline class="hx-line" points="0,52 34,46 68,49 102,34 137,38 171,22 205,26 240,12" fill="none" stroke="#7c83ff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
                                                 <circle cx="102" cy="34" r="2.6" fill="#fff" stroke="#7c83ff" stroke-width="1.5"/>
                                                 <circle cx="171" cy="22" r="2.6" fill="#fff" stroke="#7c83ff" stroke-width="1.5"/>
-                                                <circle cx="240" cy="12" r="3" fill="#7c83ff"/>
+                                                <circle class="hx-end" cx="240" cy="12" r="3" fill="#7c83ff"/>
                                             </svg>
                                         </div>
                                         <div class="hx-xax"><span>Sam</span><span>Dim</span><span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span></div>
@@ -565,6 +585,27 @@
 <script src="https://unpkg.com/globe.gl"></script>
 <script>
     try { AOS.init({ duration: 700, once: true, offset: 60 }); } catch(e){}
+
+    // Compteurs animés du tableau de bord (aperçu du hero)
+    (function () {
+        var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var nums = document.querySelectorAll('.hx-num');
+        var fmt = function (n, sep) { n = Math.round(n); return sep ? n.toLocaleString('fr-FR').replace(/ |,/g, ' ') : String(n); };
+        nums.forEach(function (el) {
+            var to = parseInt(el.getAttribute('data-to'), 10) || 0;
+            var sep = el.getAttribute('data-sep') === '1';
+            if (reduce) { el.textContent = fmt(to, sep); return; }
+            var dur = 1400, start = null;
+            function step(ts) {
+                if (start === null) start = ts;
+                var p = Math.min((ts - start) / dur, 1);
+                var eased = 1 - Math.pow(1 - p, 3);
+                el.textContent = fmt(to * eased, sep);
+                if (p < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        });
+    })();
 
     // Bascule clair / sombre
     (function () {
