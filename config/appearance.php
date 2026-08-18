@@ -23,18 +23,18 @@ $mtn = function (string $sky1, string $sky2, string $m1, string $m2, string $m3)
 
 return [
     'backgrounds' => [
-        'neon'      => ['label' => 'Néon',
+        'neon'      => ['label' => 'Neon',
             'css' => 'radial-gradient(60% 80% at 18% 12%, rgba(124,58,237,.85), transparent 60%), radial-gradient(65% 85% at 85% 16%, rgba(219,39,119,.8), transparent 60%), radial-gradient(85% 90% at 60% 100%, rgba(37,99,235,.7), transparent 60%), #0b0b1f'],
-        'sunset'    => ['label' => 'Coucher de soleil',
+        'sunset'    => ['label' => 'Sunset',
             'css' => 'linear-gradient(180deg, #1e3a8a 0%, #6d28d9 34%, #db2777 66%, #f59e0b 100%)'],
         'pastel'    => ['label' => 'Pastel',
             'css' => 'radial-gradient(60% 70% at 80% 16%, rgba(251,207,232,.85), transparent 60%), radial-gradient(70% 75% at 12% 88%, rgba(191,219,254,.75), transparent 60%), linear-gradient(135deg, #eef2ff, #f0fdf4)'],
-        'spectrum'  => ['label' => 'Spectre',
+        'spectrum'  => ['label' => 'Spectrum',
             'css' => 'radial-gradient(70% 90% at 26% 16%, rgba(37,99,235,.9), transparent 60%), radial-gradient(70% 90% at 72% 22%, rgba(16,185,129,.85), transparent 60%), radial-gradient(95% 90% at 50% 100%, rgba(245,158,11,.7), transparent 60%), #0a0f1a'],
-        'golden'    => ['label' => 'Aube dorée',    'css' => $mtn('#fbd38d', '#f6a86b', '#5b7ea6', '#3c5a7d', '#22384f')],
-        'mauve'     => ['label' => 'Brume mauve',   'css' => $mtn('#efe3ff', '#cbb6ef', '#9d86c9', '#6f5aa0', '#463869')],
-        'bluedusk'  => ['label' => 'Crépuscule bleu','css' => $mtn('#cfe9ec', '#9dc7cf', '#5f9aa6', '#3d7280', '#244a56')],
-        'moonlight' => ['label' => 'Clair de lune',
+        'golden'    => ['label' => 'Golden Dawn',    'css' => $mtn('#fbd38d', '#f6a86b', '#5b7ea6', '#3c5a7d', '#22384f')],
+        'mauve'     => ['label' => 'Mauve Mist',   'css' => $mtn('#efe3ff', '#cbb6ef', '#9d86c9', '#6f5aa0', '#463869')],
+        'bluedusk'  => ['label' => 'Blue Dusk','css' => $mtn('#cfe9ec', '#9dc7cf', '#5f9aa6', '#3d7280', '#244a56')],
+        'moonlight' => ['label' => 'Moonlight',
             'css' => 'radial-gradient(circle at 28% 30%, rgba(255,255,255,.92) 0%, rgba(253,230,200,.5) 8%, transparent 22%), linear-gradient(180deg, #fbcfe8 0%, #fde7c8 100%)'],
     ],
 ];

@@ -6,7 +6,7 @@
     {{-- OBLIGATOIRE pour la sauvegarde AJAX --}}
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }} - Administration</title>
+    <title>{{ __('layouts.admin_panel', ['app' => config('app.name', 'Laravel')]) }}</title>
 
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -49,27 +49,27 @@
                             @if(auth()->user()->role !== 'Customer')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('dashboard.index') }}">
-                                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                                    <i class="fas fa-tachometer-alt"></i> {{ __('layouts.dashboard') }}
                                 </a>
                             </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                    <i class="fas fa-bed"></i> Hébergement
+                                    <i class="fas fa-bed"></i> {{ __('layouts.accommodation') }}
                                 </a>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="{{ route('room.index') }}">Chambres</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('type.index') }}">Types</a></li>
-                                    <li><a class="dropdown-item" href="{{ route('roomstatus.index') }}">Statuts</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('room.index') }}">{{ __('layouts.rooms') }}</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('type.index') }}">{{ __('layouts.types') }}</a></li>
+                                    <li><a class="dropdown-item" href="{{ route('roomstatus.index') }}">{{ __('layouts.statuses') }}</a></li>
                                 </ul>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('transaction.index') }}">
-                                    <i class="fas fa-exchange-alt"></i> Transactions
+                                    <i class="fas fa-exchange-alt"></i> {{ __('layouts.transactions') }}
                                 </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('customer.index') }}">
-                                    <i class="fas fa-users"></i> Clients
+                                    <i class="fas fa-users"></i> {{ __('layouts.customers') }}
                                 </a>
                             </li>
                             @endif
@@ -90,12 +90,12 @@
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     <a class="dropdown-item" href="{{ route('profile.index') }}">
-                                        <i class="fas fa-id-card"></i> Mon Profil
+                                        <i class="fas fa-id-card"></i> {{ __('layouts.my_profile') }}
                                     </a>
                                     
                                     @if(auth()->user()->role === 'Super')
                                     <a class="dropdown-item" href="{{ route('user.index') }}">
-                                        <i class="fas fa-user-cog"></i> Utilisateurs
+                                        <i class="fas fa-user-cog"></i> {{ __('layouts.users') }}
                                     </a>
                                     @endif
                                     
@@ -141,16 +141,16 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Vérifier Bootstrap
             if (typeof bootstrap === 'undefined') {
-                console.error('⚠️ Bootstrap non chargé, tentative de reload...');
+                console.error('{{ __('layouts.bootstrap_not_loaded') }}');
                 var script = document.createElement('script');
                 script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js';
                 script.onload = function() {
-                    console.log('✅ Bootstrap rechargé');
+                    console.log('{{ __('layouts.bootstrap_reloaded') }}');
                     initBootstrap();
                 };
                 document.head.appendChild(script);
             } else {
-                console.log('✅ Bootstrap chargé');
+                console.log('{{ __('layouts.bootstrap_loaded') }}');
                 initBootstrap();
             }
         });
@@ -180,7 +180,7 @@
                 return new bootstrap.Dropdown(dropdown);
             });
 
-            console.log('🚀 Bootstrap initialisé');
+            console.log('{{ __('layouts.bootstrap_initialized') }}');
         }
     </script>
 </body>

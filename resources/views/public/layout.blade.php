@@ -114,12 +114,12 @@
             <span>{{ $hotel->name }}</span>
         </a>
         <div class="d-none d-lg-flex align-items-center">
-            <a href="{{ route('public.hotel', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel') ? 'active' : '' }}">Accueil</a>
-            @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.rooms') ? 'active' : '' }}">Chambres</a>@endif
-            @if ($hotel->show_restaurant)<a href="{{ route('public.hotel.restaurant', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.restaurant') ? 'active' : '' }}">Restaurant</a>@endif
-            @if ($hotel->show_services)<a href="{{ route('public.hotel.services', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.services') ? 'active' : '' }}">Services</a>@endif
-            @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.contact') ? 'active' : '' }}">Contact</a>@endif
-            <a href="{{ route('public.hotel.availability', $hotel->slug) }}" class="btn-nav">Réserver</a>
+            <a href="{{ route('public.hotel', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel') ? 'active' : '' }}">{{ __('public.nav_home') }}</a>
+            @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.rooms') ? 'active' : '' }}">{{ __('public.nav_rooms') }}</a>@endif
+            @if ($hotel->show_restaurant)<a href="{{ route('public.hotel.restaurant', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.restaurant') ? 'active' : '' }}">{{ __('public.nav_restaurant') }}</a>@endif
+            @if ($hotel->show_services)<a href="{{ route('public.hotel.services', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.services') ? 'active' : '' }}">{{ __('public.nav_services') }}</a>@endif
+            @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}" class="nav-link2 {{ request()->routeIs('public.hotel.contact') ? 'active' : '' }}">{{ __('public.nav_contact') }}</a>@endif
+            <a href="{{ route('public.hotel.availability', $hotel->slug) }}" class="btn-nav">{{ __('public.nav_book') }}</a>
         </div>
     </div>
 </nav>
@@ -145,26 +145,26 @@
                 @endif
             </div>
             <div class="col-lg-4">
-                <div class="eyebrow mb-3" style="color:#fff;opacity:.5;">Navigation</div>
+                <div class="eyebrow mb-3" style="color:#fff;opacity:.5;">{{ __('public.footer_nav') }}</div>
                 <div class="d-flex flex-column gap-2 small">
-                    <a href="{{ route('public.hotel', $hotel->slug) }}">Accueil</a>
-                    @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}">Chambres</a>@endif
-                    @if ($hotel->show_restaurant)<a href="{{ route('public.hotel.restaurant', $hotel->slug) }}">Restaurant</a>@endif
-                    @if ($hotel->show_services)<a href="{{ route('public.hotel.services', $hotel->slug) }}">Services</a>@endif
-                    @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}">Contact</a>@endif
+                    <a href="{{ route('public.hotel', $hotel->slug) }}">{{ __('public.nav_home') }}</a>
+                    @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}">{{ __('public.nav_rooms') }}</a>@endif
+                    @if ($hotel->show_restaurant)<a href="{{ route('public.hotel.restaurant', $hotel->slug) }}">{{ __('public.nav_restaurant') }}</a>@endif
+                    @if ($hotel->show_services)<a href="{{ route('public.hotel.services', $hotel->slug) }}">{{ __('public.nav_services') }}</a>@endif
+                    @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}">{{ __('public.nav_contact') }}</a>@endif
                 </div>
             </div>
             <div class="col-lg-3 text-lg-end">
                 @if ($hotel->contact_phone)<p class="small mb-2"><i class="fas fa-phone me-2 text-c"></i>{{ $hotel->contact_phone }}</p>@endif
                 @if ($hotel->contact_email)<p class="small mb-2"><i class="fas fa-envelope me-2 text-c"></i>{{ $hotel->contact_email }}</p>@endif
                 <p class="small mb-0 mt-3" style="opacity:.5;">© {{ date('Y') }} {{ $hotel->name }}</p>
-                <p class="small" style="opacity:.35;">Propulsé par {{ config('app.name', 'checkinHub') }}</p>
+                <p class="small" style="opacity:.35;">{{ __('public.footer_powered_by') }} {{ config('app.name', 'checkinHub') }}</p>
             </div>
         </div>
     </div>
 </footer>
 
-<button id="toTop" aria-label="Haut"><i class="fas fa-arrow-up"></i></button>
+<button id="toTop" aria-label="{{ __('public.scroll_to_top') }}"><i class="fas fa-arrow-up"></i></button>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>

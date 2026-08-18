@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Rapports & Analytics')
+@section('title', __('reports.page_title'))
 
 @section('content')
 
@@ -325,7 +325,7 @@
     <div class="reports-breadcrumb anim-1">
         <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Rapports & Analytics</span>
+        <span class="current">{{ __('reports.breadcrumb') }}</span>
     </div>
 
     <!-- Header -->
@@ -333,18 +333,18 @@
         <div class="reports-brand">
             <div class="reports-brand-icon"><i class="fas fa-chart-line"></i></div>
             <div>
-                <h1 class="reports-header-title">Rapports & <em>Analytics</em></h1>
+                <h1 class="reports-header-title">{!! __('reports.heading') !!}</h1>
                 <p class="reports-header-sub">
-                    <i class="fas fa-chart-pie me-1"></i> Performance · Finances · Opérations · Tendances
+                    <i class="fas fa-chart-pie me-1"></i> {{ __('reports.subtitle') }}
                 </p>
             </div>
         </div>
         <div class="reports-header-actions">
             <button class="btn-db btn-db-outline-primary" onclick="window.print()">
-                <i class="fas fa-print me-2"></i> Imprimer
+                <i class="fas fa-print me-2"></i> {{ __('reports.btn_print') }}
             </button>
             <button class="btn-db btn-db-primary" id="exportPdf">
-                <i class="fas fa-download me-2"></i> Export PDF
+                <i class="fas fa-download me-2"></i> {{ __('reports.btn_export_pdf') }}
             </button>
         </div>
     </div>
@@ -354,28 +354,28 @@
         <div class="filter-card-body">
             <form method="GET" action="{{ route('reports.index') }}" class="row g-3 align-items-end">
                 <div class="col-md-3">
-                    <label class="form-label">Période</label>
+                    <label class="form-label">{{ __('reports.label_period') }}</label>
                     <select name="period" class="form-select" id="periodSelect">
-                        <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>Aujourd'hui</option>
-                        <option value="yesterday" {{ request('period') == 'yesterday' ? 'selected' : '' }}>Hier</option>
-                        <option value="week" {{ request('period') == 'week' ? 'selected' : '' }}>Cette semaine</option>
-                        <option value="month" {{ request('period') == 'month' ? 'selected' : '' }}>Ce mois</option>
-                        <option value="quarter" {{ request('period') == 'quarter' ? 'selected' : '' }}>Ce trimestre</option>
-                        <option value="year" {{ request('period') == 'year' ? 'selected' : '' }}>Cette année</option>
-                        <option value="custom" {{ request('period') == 'custom' ? 'selected' : '' }}>Personnalisé</option>
+                        <option value="today" {{ request('period') == 'today' ? 'selected' : '' }}>{{ __('reports.period_today') }}</option>
+                        <option value="yesterday" {{ request('period') == 'yesterday' ? 'selected' : '' }}>{{ __('reports.period_yesterday') }}</option>
+                        <option value="week" {{ request('period') == 'week' ? 'selected' : '' }}>{{ __('reports.period_week') }}</option>
+                        <option value="month" {{ request('period') == 'month' ? 'selected' : '' }}>{{ __('reports.period_month') }}</option>
+                        <option value="quarter" {{ request('period') == 'quarter' ? 'selected' : '' }}>{{ __('reports.period_quarter') }}</option>
+                        <option value="year" {{ request('period') == 'year' ? 'selected' : '' }}>{{ __('reports.period_year') }}</option>
+                        <option value="custom" {{ request('period') == 'custom' ? 'selected' : '' }}>{{ __('reports.period_custom') }}</option>
                     </select>
                 </div>
                 <div class="col-md-3" id="dateRangeStart" style="{{ request('period') == 'custom' ? '' : 'display: none;' }}">
-                    <label class="form-label">Date début</label>
+                    <label class="form-label">{{ __('reports.label_date_from') }}</label>
                     <input type="date" name="date_from" class="form-control" value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}">
                 </div>
                 <div class="col-md-3" id="dateRangeEnd" style="{{ request('period') == 'custom' ? '' : 'display: none;' }}">
-                    <label class="form-label">Date fin</label>
+                    <label class="form-label">{{ __('reports.label_date_to') }}</label>
                     <input type="date" name="date_to" class="form-control" value="{{ request('date_to', now()->format('Y-m-d')) }}">
                 </div>
                 <div class="col-md-3">
                     <button type="submit" class="btn-db btn-db-primary w-100">
-                        <i class="fas fa-filter me-2"></i> Appliquer
+                        <i class="fas fa-filter me-2"></i> {{ __('reports.btn_apply') }}
                     </button>
                 </div>
             </form>
@@ -391,7 +391,7 @@
                     <i class="fas fa-wallet"></i>
                 </div>
                 <div>
-                    <div class="kpi-label">Chiffre d'affaires</div>
+                    <div class="kpi-label">{{ __('reports.kpi_revenue') }}</div>
                     <div class="kpi-value">{{ number_format($totalRevenue ?? 0, 0, ',', ' ') }} CFA</div>
                 </div>
             </div>
@@ -404,9 +404,9 @@
                     <i class="fas fa-credit-card"></i>
                 </div>
                 <div>
-                    <div class="kpi-label">Paiements encaissés</div>
+                    <div class="kpi-label">{{ __('reports.kpi_payments') }}</div>
                     <div class="kpi-value">{{ number_format($totalPaymentsAmount ?? 0, 0, ',', ' ') }} CFA</div>
-                    <div class="kpi-meta">{{ $paymentsCount ?? 0 }} transactions</div>
+                    <div class="kpi-meta">{{ $paymentsCount ?? 0 }} {{ __('reports.kpi_transactions') }}</div>
                 </div>
             </div>
         </div>
@@ -418,7 +418,7 @@
                     <i class="fas fa-moon"></i>
                 </div>
                 <div>
-                    <div class="kpi-label">Prix moyen / nuit</div>
+                    <div class="kpi-label">{{ __('reports.kpi_avg_night') }}</div>
                     <div class="kpi-value">{{ number_format($averageNightRate ?? 0, 0, ',', ' ') }} CFA</div>
                 </div>
             </div>
@@ -447,9 +447,9 @@
                     <i class="fas fa-bed"></i>
                 </div>
                 <div>
-                    <div class="kpi-label">Taux d'occupation</div>
+                    <div class="kpi-label">{{ __('reports.kpi_occupancy') }}</div>
                     <div class="kpi-value">{{ $occupancyRate ?? 0 }}%</div>
-                    <div class="kpi-meta">{{ $occupiedRooms ?? 0 }}/{{ $totalRooms ?? 0 }} chambres</div>
+                    <div class="kpi-meta">{{ $occupiedRooms ?? 0 }}/{{ $totalRooms ?? 0 }} {{ __('reports.kpi_rooms_unit') }}</div>
                 </div>
             </div>
         </div>
@@ -461,7 +461,7 @@
                     <i class="fas fa-exchange-alt"></i>
                 </div>
                 <div>
-                    <div class="kpi-label">Arrivées / Départs</div>
+                    <div class="kpi-label">{{ __('reports.kpi_checkins') }}</div>
                     <div class="kpi-value">{{ $checkinsCount ?? 0 }} / {{ $checkoutsCount ?? 0 }}</div>
                 </div>
             </div>
@@ -474,7 +474,7 @@
                     <i class="fas fa-sun"></i>
                 </div>
                 <div>
-                    <div class="kpi-label">Nuitées vendues</div>
+                    <div class="kpi-label">{{ __('reports.kpi_nights') }}</div>
                     <div class="kpi-value">{{ $totalNights ?? 0 }}</div>
                 </div>
             </div>
@@ -487,8 +487,8 @@
                     <i class="fas fa-clock"></i>
                 </div>
                 <div>
-                    <div class="kpi-label">Séjour moyen</div>
-                    <div class="kpi-value">{{ $averageStayLength ?? 0 }} nuits</div>
+                    <div class="kpi-label">{{ __('reports.kpi_avg_stay') }}</div>
+                    <div class="kpi-value">{{ $averageStayLength ?? 0 }} {{ __('reports.kpi_nights_unit') }}</div>
                 </div>
             </div>
         </div>
@@ -502,9 +502,9 @@
                 <div class="report-card-header">
                     <h5 class="report-card-title">
                         <i class="fas fa-chart-line"></i>
-                        Évolution du chiffre d'affaires
+                        {{ __('reports.chart_revenue_title') }}
                     </h5>
-                    <span class="report-card-badge">{{ $periodLabel ?? 'Période sélectionnée' }}</span>
+                    <span class="report-card-badge">{{ $periodLabel ?? __('reports.chart_revenue_badge') }}</span>
                 </div>
                 <div class="report-card-body">
                     <canvas id="revenueChart" style="height: 300px;"></canvas>
@@ -518,7 +518,7 @@
                 <div class="report-card-header">
                     <h5 class="report-card-title">
                         <i class="fas fa-chart-pie"></i>
-                        Répartition des paiements
+                        {{ __('reports.chart_payments_title') }}
                     </h5>
                 </div>
                 <div class="report-card-body">
@@ -544,7 +544,7 @@
                 <div class="report-card-header">
                     <h5 class="report-card-title">
                         <i class="fas fa-chart-pie"></i>
-                        Occupation des chambres
+                        {{ __('reports.chart_occupancy_title') }}
                     </h5>
                 </div>
                 <div class="report-card-body">
@@ -559,7 +559,7 @@
                 <div class="report-card-header">
                     <h5 class="report-card-title">
                         <i class="fas fa-chart-bar"></i>
-                        Statut des chambres
+                        {{ __('reports.chart_status_title') }}
                     </h5>
                 </div>
                 <div class="report-card-body">
@@ -574,7 +574,7 @@
                 <div class="report-card-header">
                     <h5 class="report-card-title">
                         <i class="fas fa-chart-pie"></i>
-                        Horaires de départ
+                        {{ __('reports.chart_checkout_title') }}
                     </h5>
                 </div>
                 <div class="report-card-body">
@@ -592,19 +592,19 @@
                 <div class="report-card-header">
                     <h5 class="report-card-title">
                         <i class="fas fa-trophy"></i>
-                        Top 5 chambres les plus rentables
+                        {{ __('reports.top_rooms_title') }}
                     </h5>
-                    <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost" style="padding:4px 12px;">Voir tout</a>
+                    <a href="{{ route('room.index') }}" class="btn-db btn-db-ghost" style="padding:4px 12px;">{{ __('reports.top_rooms_view_all') }}</a>
                 </div>
                 <div class="report-card-body-p0">
                     <div style="overflow-x:auto;">
                         <table class="report-table">
                             <thead>
                                 <tr>
-                                    <th>Chambre</th>
-                                    <th>Type</th>
-                                    <th>Nuitées</th>
-                                    <th class="text-end">Revenu</th>
+                                    <th>{{ __('reports.th_room') }}</th>
+                                    <th>{{ __('reports.th_type') }}</th>
+                                    <th>{{ __('reports.th_nights') }}</th>
+                                    <th class="text-end">{{ __('reports.th_revenue') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -623,7 +623,7 @@
                                 @empty
                                 <tr>
                                     <td colspan="4" class="text-center py-4" style="color:var(--s400);">
-                                        <i class="fas fa-info-circle me-2"></i>Aucune donnée disponible
+                                        <i class="fas fa-info-circle me-2"></i>{{ __('reports.empty_data') }}
                                     </td>
                                 </tr>
                                 @endforelse
@@ -640,19 +640,19 @@
                 <div class="report-card-header">
                     <h5 class="report-card-title">
                         <i class="fas fa-users"></i>
-                        Top 5 clients
+                        {{ __('reports.top_customers_title') }}
                     </h5>
-                    <a href="{{ route('customer.index') }}" class="btn-db btn-db-ghost" style="padding:4px 12px;">Voir tout</a>
+                    <a href="{{ route('customer.index') }}" class="btn-db btn-db-ghost" style="padding:4px 12px;">{{ __('reports.top_customers_view_all') }}</a>
                 </div>
                 <div class="report-card-body-p0">
                     <div style="overflow-x:auto;">
                         <table class="report-table">
                             <thead>
                                 <tr>
-                                    <th>Client</th>
-                                    <th>Séjours</th>
-                                    <th>Nuitées</th>
-                                    <th class="text-end">Dépenses totales</th>
+                                    <th>{{ __('reports.th_customer') }}</th>
+                                    <th>{{ __('reports.th_stays') }}</th>
+                                    <th>{{ __('reports.th_nights') }}</th>
+                                    <th class="text-end">{{ __('reports.th_expenses') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -671,7 +671,7 @@
                                 @empty
                                 <tr>
                                     <td colspan="4" class="text-center py-4" style="color:var(--s400);">
-                                        <i class="fas fa-info-circle me-2"></i>Aucune donnée disponible
+                                        <i class="fas fa-info-circle me-2"></i>{{ __('reports.empty_data') }}
                                     </td>
                                 </tr>
                                 @endforelse
@@ -690,22 +690,22 @@
                 <div class="report-card-header">
                     <h5 class="report-card-title">
                         <i class="fas fa-user-tie"></i>
-                        Performance des réceptionnistes
+                        {{ __('reports.staff_title') }}
                     </h5>
-                    <a href="{{ route('receptionist.stats') }}" class="btn-db btn-db-ghost" style="padding:4px 12px;">Détails</a>
+                    <a href="{{ route('receptionist.stats') }}" class="btn-db btn-db-ghost" style="padding:4px 12px;">{{ __('reports.staff_view_all') }}</a>
                 </div>
                 <div class="report-card-body-p0">
                     <div style="overflow-x:auto;">
                         <table class="report-table">
                             <thead>
                                 <tr>
-                                    <th>Réceptionniste</th>
-                                    <th>Sessions</th>
+                                    <th>{{ __('reports.th_receptionist') }}</th>
+                                    <th>{{ __('reports.th_sessions') }}</th>
                                     <th>Check-ins</th>
                                     <th>Check-outs</th>
                                     <th>Réservations</th>
-                                    <th class="text-end">Encaissé</th>
-                                    <th class="text-center">Productivité</th>
+                                    <th class="text-end">{{ __('reports.th_collected') }}</th>
+                                    <th class="text-center">{{ __('reports.th_productivity') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -728,7 +728,7 @@
                                 @empty
                                 <tr>
                                     <td colspan="7" class="text-center py-4" style="color:var(--s400);">
-                                        <i class="fas fa-info-circle me-2"></i>Aucune donnée disponible
+                                        <i class="fas fa-info-circle me-2"></i>{{ __('reports.empty_data') }}
                                     </td>
                                 </tr>
                                 @endforelse
@@ -747,20 +747,20 @@
                 <div class="report-card-header">
                     <h5 class="report-card-title">
                         <i class="fas fa-money-bill-wave"></i>
-                        Synthèse détaillée des paiements
+                        {{ __('reports.payments_detail_title') }}
                     </h5>
-                    <a href="{{ route('payment.index') }}" class="btn-db btn-db-ghost" style="padding:4px 12px;">Voir tout</a>
+                    <a href="{{ route('payment.index') }}" class="btn-db btn-db-ghost" style="padding:4px 12px;">{{ __('reports.payments_detail_view_all') }}</a>
                 </div>
                 <div class="report-card-body-p0">
                     <div style="overflow-x:auto;">
                         <table class="report-table">
                             <thead>
                                 <tr>
-                                    <th>Méthode</th>
-                                    <th class="text-end">Montant</th>
+                                    <th>{{ __('reports.th_method') }}</th>
+                                    <th class="text-end">{{ __('reports.th_amount') }}</th>
                                     <th class="text-end">%</th>
                                     <th class="text-end">Transactions</th>
-                                    <th class="text-end">Moyenne par transaction</th>
+                                    <th class="text-end">{{ __('reports.th_avg_per_tx') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -779,7 +779,7 @@
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td><strong style="color:var(--s800);">TOTAL</strong></td>
+                                    <td><strong style="color:var(--s800);">{{ __('reports.total') }}</strong></td>
                                     <td class="text-end fw-bold" style="color:var(--s800); font-family:var(--mono);">{{ number_format($totalPaymentsAmount ?? 0, 0, ',', ' ') }} CFA</td>
                                     <td class="text-end fw-bold" style="color:var(--s800);">100%</td>
                                     <td class="text-end fw-bold" style="color:var(--s800);">{{ $paymentsCount ?? 0 }}</td>
@@ -800,9 +800,9 @@
                 <div class="report-card-header">
                     <h5 class="report-card-title">
                         <i class="fas fa-history"></i>
-                        Dernières transactions
+                        {{ __('reports.transactions_title') }}
                     </h5>
-                    <a href="{{ route('transaction.index') }}" class="btn-db btn-db-ghost" style="padding:4px 12px;">Voir tout</a>
+                    <a href="{{ route('transaction.index') }}" class="btn-db btn-db-ghost" style="padding:4px 12px;">{{ __('reports.transactions_view_all') }}</a>
                 </div>
                 <div class="report-card-body-p0">
                     <div style="overflow-x:auto;">
@@ -810,12 +810,12 @@
                             <thead>
                                 <tr>
                                     <th>ID</th>
-                                    <th>Client</th>
-                                    <th>Chambre</th>
-                                    <th>Arrivée</th>
-                                    <th>Départ</th>
-                                    <th class="text-end">Montant</th>
-                                    <th>Statut</th>
+                                    <th>{{ __('reports.th_customer') }}</th>
+                                    <th>{{ __('reports.th_room') }}</th>
+                                    <th>{{ __('reports.th_arrival') }}</th>
+                                    <th>{{ __('reports.th_departure') }}</th>
+                                    <th class="text-end">{{ __('reports.th_amount') }}</th>
+                                    <th>{{ __('reports.th_status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -845,7 +845,7 @@
                                 @empty
                                 <tr>
                                     <td colspan="7" class="text-center py-4" style="color:var(--s400);">
-                                        <i class="fas fa-info-circle me-2"></i>Aucune transaction récente
+                                        <i class="fas fa-info-circle me-2"></i>{{ __('reports.empty_transactions') }}
                                     </td>
                                 </tr>
                                 @endforelse
@@ -864,6 +864,24 @@
 <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
 
 <script>
+    const jsTranslations = {
+        no_revenue: @json(__('reports.js_no_revenue')),
+        no_payments: @json(__('reports.js_no_payments')),
+        no_data_period: @json(__('reports.js_no_data_period')),
+        revenue_label: @json(__('reports.js_revenue_label')),
+        no_payment_period: @json(__('reports.js_no_payment_period')),
+        no_room_available: @json(__('reports.js_no_room_available')),
+        occupied: @json(__('reports.js_occupied')),
+        available: @json(__('reports.js_available')),
+        rooms_unit: @json(__('reports.js_rooms_unit')),
+        no_status_data: @json(__('reports.js_no_status_data')),
+        rooms_count: @json(__('reports.js_rooms_count')),
+        no_checkout: @json(__('reports.js_no_checkout')),
+        before_12h: @json(__('reports.js_before_12h')),
+        h12_14: @json(__('reports.js_12h_14h')),
+        after_14h: @json(__('reports.js_after_14h')),
+    };
+
     // ================================================
     // DATE RANGE TOGGLE
     // ================================================
@@ -903,11 +921,11 @@
     // ================================================
     if (typeof Chart === 'undefined') {
         const fallbacks = {
-            revenueChart: revenueData && revenueData.length ? 'Revenus par jour disponibles sur la période.' : 'Aucun revenu sur la période.',
-            paymentChart: (paymentLabels || []).map((l, i) => `${l} : <b>${new Intl.NumberFormat('fr-FR').format(paymentData[i] || 0)}</b>`).join(' &middot; ') || 'Aucun paiement sur la période.',
-            occupancyChart: `Occupées : <b>${occupied}</b> &middot; Disponibles : <b>${available}</b>`,
+            revenueChart: revenueData && revenueData.length ? 'Revenus par jour disponibles sur la période.' : jsTranslations.no_revenue,
+            paymentChart: (paymentLabels || []).map((l, i) => `${l} : <b>${new Intl.NumberFormat('fr-FR').format(paymentData[i] || 0)}</b>`).join(' &middot; ') || jsTranslations.no_payments,
+            occupancyChart: `${jsTranslations.occupied} : <b>${occupied}</b> &middot; ${jsTranslations.available} : <b>${available}</b>`,
             roomStatusChart: (roomStatusLabels || []).map((l, i) => `${l} : <b>${roomStatusData[i] || 0}</b>`).join(' &middot; '),
-            checkoutTimesChart: `Avant 12h : <b>${checkoutTimesData[0] || 0}</b> &middot; 12h-14h : <b>${checkoutTimesData[1] || 0}</b> &middot; Après 14h : <b>${checkoutTimesData[2] || 0}</b>`,
+            checkoutTimesChart: `${jsTranslations.before_12h} : <b>${checkoutTimesData[0] || 0}</b> &middot; ${jsTranslations.h12_14} : <b>${checkoutTimesData[1] || 0}</b> &middot; ${jsTranslations.after_14h} : <b>${checkoutTimesData[2] || 0}</b>`,
         };
         Object.keys(fallbacks).forEach(id => {
             const canvas = document.getElementById(id);
@@ -929,14 +947,14 @@
             ctx.font = '14px DM Sans';
             ctx.fillStyle = '#737873';
             ctx.textAlign = 'center';
-            ctx.fillText('Aucune donnée disponible pour cette période', ctx.canvas.width/2, ctx.canvas.height/2);
+            ctx.fillText(jsTranslations.no_data_period, ctx.canvas.width/2, ctx.canvas.height/2);
         } else {
             new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: revenueLabels,
                     datasets: [{
-                        label: 'Chiffre d\'affaires (CFA)',
+                        label: jsTranslations.revenue_label,
                         data: revenueData,
                         borderWidth: 3,
                         borderColor: 'var(--g500)',
@@ -989,7 +1007,7 @@
             ctx.font = '14px DM Sans';
             ctx.fillStyle = '#737873';
             ctx.textAlign = 'center';
-            ctx.fillText('Aucun paiement pour cette période', ctx.canvas.width/2, ctx.canvas.height/2);
+            ctx.fillText(jsTranslations.no_payment_period, ctx.canvas.width/2, ctx.canvas.height/2);
         } else {
             new Chart(ctx, {
                 type: 'doughnut',
@@ -1043,12 +1061,12 @@
             ctx.font = '14px DM Sans';
             ctx.fillStyle = '#737873';
             ctx.textAlign = 'center';
-            ctx.fillText('Aucune chambre disponible', ctx.canvas.width/2, ctx.canvas.height/2);
+            ctx.fillText(jsTranslations.no_room_available, ctx.canvas.width/2, ctx.canvas.height/2);
         } else {
             new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Occupées', 'Disponibles'],
+                    labels: [jsTranslations.occupied, jsTranslations.available],
                     datasets: [{
                         data: [occupied, available],
                         backgroundColor: ['#dc3545', 'var(--g500)'],
@@ -1067,7 +1085,7 @@
                                     let value = context.raw || 0;
                                     let total = occupied + available;
                                     let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                                    return `${label}: ${value} chambres (${percentage}%)`;
+                                    return `${label}: ${value} ${jsTranslations.rooms_unit} (${percentage}%)`;
                                 }
                             }
                         }
@@ -1088,14 +1106,14 @@
             ctx.font = '14px DM Sans';
             ctx.fillStyle = '#737873';
             ctx.textAlign = 'center';
-            ctx.fillText('Aucune donnée de statut', ctx.canvas.width/2, ctx.canvas.height/2);
+            ctx.fillText(jsTranslations.no_status_data, ctx.canvas.width/2, ctx.canvas.height/2);
         } else {
             new Chart(ctx, {
                 type: 'bar',
                 data: {
                     labels: roomStatusLabels,
                     datasets: [{
-                        label: 'Nombre de chambres',
+                        label: jsTranslations.rooms_count,
                         data: roomStatusData,
                         backgroundColor: [
                             'var(--g500)', // disponible - green
@@ -1137,12 +1155,12 @@
             ctx.font = '14px DM Sans';
             ctx.fillStyle = '#737873';
             ctx.textAlign = 'center';
-            ctx.fillText('Aucun départ enregistré', ctx.canvas.width/2, ctx.canvas.height/2);
+            ctx.fillText(jsTranslations.no_checkout, ctx.canvas.width/2, ctx.canvas.height/2);
         } else {
             new Chart(ctx, {
                 type: 'pie',
                 data: {
-                    labels: ['Avant 12h', '12h-14h (largesse)', 'Après 14h (late checkout)'],
+                    labels: [jsTranslations.before_12h, jsTranslations.h12_14, jsTranslations.after_14h],
                     datasets: [{
                         data: checkoutTimesData,
                         backgroundColor: ['var(--g500)', '#ffc107', '#dc3545'],

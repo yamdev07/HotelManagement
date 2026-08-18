@@ -181,7 +181,7 @@ html[data-theme="dark"] .settings-page {
                     <span class="lbl">{{ __('hotel-settings.theme_label') ?? "Thème de l'interface" }}</span>
                     @php $tm = old('theme_mode', $hotel->themeMode()); @endphp
                     <div class="appearance">
-                        @foreach ([['light','fa-sun','Clair','Fond clair'],['dark','fa-moon','Sombre','Fond sombre'],['system','fa-desktop','Système','Selon l\'appareil']] as $opt)
+                        @foreach ([['light','fa-sun',__('hotel-settings.theme_light'),__('hotel-settings.theme_light_sub')],['dark','fa-moon',__('hotel-settings.theme_dark'),__('hotel-settings.theme_dark_sub')],['system','fa-desktop',__('hotel-settings.theme_system'),__('hotel-settings.theme_system_sub')]] as $opt)
                             <label class="appear-opt {{ $tm === $opt[0] ? 'on' : '' }}" data-theme-opt="{{ $opt[0] }}">
                                 <input type="radio" name="theme_mode" value="{{ $opt[0] }}" {{ $tm === $opt[0] ? 'checked' : '' }}>
                                 <span class="ai"><i class="fas {{ $opt[1] }}"></i></span>
@@ -233,7 +233,7 @@ html[data-theme="dark"] .settings-page {
             <div class="panel-head">
                 <div class="panel-title"><span class="ic"><i class="fas fa-images"></i></span>
                     <div>{{ __('hotel-settings.card_background') ?? 'Fond' }}
-                        <div class="panel-sub">Habillez votre espace d'un fond intégré ou de votre image. Un léger voile garde la lisibilité.</div>
+                        <div class="panel-sub">{{ __('hotel-settings.bg_subtitle') }}</div>
                     </div>
                 </div>
             </div>
@@ -241,7 +241,7 @@ html[data-theme="dark"] .settings-page {
                 <div class="bg-grid" id="bgGrid">
                     <button type="button" class="bg-card" data-bg="none">
                         <div class="thumb none"></div>
-                        <div class="cap"><span>Aucun</span><span class="bgcheck"></span></div>
+                        <div class="cap"><span>{{ __('hotel-settings.bg_none') }}</span><span class="bgcheck"></span></div>
                     </button>
                     @foreach ($backgrounds as $key => $b)
                         <button type="button" class="bg-card" data-bg="{{ $key }}">
@@ -251,14 +251,14 @@ html[data-theme="dark"] .settings-page {
                     @endforeach
                     <button type="button" class="bg-card" data-bg="custom" id="bgCustomCard">
                         <div class="thumb" id="bgCustomThumb" style="background:linear-gradient(135deg,#c7d2fe,#a5b4fc)"></div>
-                        <div class="cap"><span>Mon image</span><span class="bgcheck"></span></div>
+                        <div class="cap"><span>{{ __('hotel-settings.bg_my_image') }}</span><span class="bgcheck"></span></div>
                     </button>
                 </div>
                 <label class="btn-ghost bg-import" style="cursor:pointer">
-                    <i class="fas fa-image"></i> Importer une image
+                    <i class="fas fa-image"></i> {{ __('hotel-settings.bg_import') }}
                     <input type="file" id="bgFile" accept="image/*" hidden>
                 </label>
-                <div class="hint" style="margin-top:8px">L'image reste sur cet appareil (préférence locale, non envoyée au serveur).</div>
+                <div class="hint" style="margin-top:8px">{{ __('hotel-settings.bg_local_hint') }}</div>
             </div>
         </section>
 
@@ -329,12 +329,12 @@ html[data-theme="dark"] .settings-page {
             <div class="panel-body">
                 <div class="field">
                     <span class="lbl">{{ __('hotel-settings.label_tagline') }}</span>
-                    <input type="text" name="tagline" class="inp @error('tagline') is-invalid @enderror" value="{{ old('tagline', $hotel->tagline) }}" placeholder="Ex : Votre confort, notre priorité">
+                    <input type="text" name="tagline" class="inp @error('tagline') is-invalid @enderror" value="{{ old('tagline', $hotel->tagline) }}" placeholder="{{ __('hotel-settings.placeholder_tagline') }}">
                     @error('tagline')<div class="err-txt">{{ $message }}</div>@enderror
                 </div>
                 <div class="field">
                     <span class="lbl">{{ __('hotel-settings.label_description') }}</span>
-                    <textarea name="description" class="inp" rows="3" placeholder="Présentez votre établissement…">{{ old('description', $hotel->description) }}</textarea>
+                    <textarea name="description" class="inp" rows="3" placeholder="{{ __('hotel-settings.placeholder_description') }}">{{ old('description', $hotel->description) }}</textarea>
                 </div>
                 <div class="grid g2" style="align-items:center;">
                     <div class="field">
@@ -346,7 +346,7 @@ html[data-theme="dark"] .settings-page {
                         @if ($hotel->coverUrl())
                             <img src="{{ $hotel->coverUrl() }}" alt="Couverture">
                         @else
-                            <span style="color:var(--ink3);font-size:.8rem">Aucune image de couverture</span>
+                            <span style="color:var(--ink3);font-size:.8rem">{{ __('hotel-settings.no_cover_image') }}</span>
                         @endif
                     </div>
                 </div>
@@ -360,12 +360,12 @@ html[data-theme="dark"] .settings-page {
                 <div class="grid g2">
                     <div class="field">
                         <span class="lbl">{{ __('hotel-settings.label_about_title') }}</span>
-                        <input type="text" name="about_title" class="inp @error('about_title') is-invalid @enderror" value="{{ old('about_title', $hotel->about_title) }}" placeholder="Une expérience d'exception">
+                        <input type="text" name="about_title" class="inp @error('about_title') is-invalid @enderror" value="{{ old('about_title', $hotel->about_title) }}" placeholder="{{ __('hotel-settings.placeholder_about_title') }}">
                         @error('about_title')<div class="err-txt">{{ $message }}</div>@enderror
                     </div>
                     <div class="field">
                         <span class="lbl">{{ __('hotel-settings.label_about_text') }}</span>
-                        <textarea name="about_text" class="inp" rows="2" placeholder="Décrivez votre établissement…">{{ old('about_text', $hotel->about_text) }}</textarea>
+                        <textarea name="about_text" class="inp" rows="2" placeholder="{{ __('hotel-settings.placeholder_about_text') }}">{{ old('about_text', $hotel->about_text) }}</textarea>
                     </div>
                 </div>
             </div>
@@ -384,8 +384,8 @@ html[data-theme="dark"] .settings-page {
                     @foreach ($svcRows as $i => $svc)
                         <div class="svc-row">
                             <input type="text" name="services[{{ $i }}][icon]" class="inp" value="{{ $svc['icon'] ?? '' }}" placeholder="fa-star">
-                            <input type="text" name="services[{{ $i }}][title]" class="inp" value="{{ $svc['title'] ?? '' }}" placeholder="Titre">
-                            <input type="text" name="services[{{ $i }}][description]" class="inp" value="{{ $svc['description'] ?? '' }}" placeholder="Description">
+                            <input type="text" name="services[{{ $i }}][title]" class="inp" value="{{ $svc['title'] ?? '' }}" placeholder="{{ __('hotel-settings.service_placeholder_title') }}">
+                            <input type="text" name="services[{{ $i }}][description]" class="inp" value="{{ $svc['description'] ?? '' }}" placeholder="{{ __('hotel-settings.service_placeholder_description') }}">
                             <button type="button" class="icon-btn-sm remove-service"><i class="fas fa-trash"></i></button>
                         </div>
                     @endforeach
@@ -414,7 +414,7 @@ html[data-theme="dark"] .settings-page {
                         <input type="text" name="socials[whatsapp]" class="inp" value="{{ $soc['whatsapp'] ?? '' }}" placeholder="https://wa.me/229…">
                     </div>
                     <div class="field">
-                        <span class="lbl"><i class="fas fa-globe" style="color:var(--ink3)"></i> Site web</span>
+                        <span class="lbl"><i class="fas fa-globe" style="color:var(--ink3)"></i> {{ __('hotel-settings.social_website') }}</span>
                         <input type="text" name="socials[website]" class="inp @error('socials.website') is-invalid @enderror" value="{{ $soc['website'] ?? '' }}" placeholder="https://…">
                         @error('socials.website')<div class="err-txt">{{ $message }}</div>@enderror
                     </div>
@@ -433,7 +433,7 @@ html[data-theme="dark"] .settings-page {
                             'show_restaurant' => __('hotel-settings.section_restaurant'),
                             'show_services'   => __('hotel-settings.section_services'),
                             'show_contact'    => __('hotel-settings.section_contact'),
-                            'show_reviews'    => 'Avis clients',
+                            'show_reviews'    => __('hotel-settings.section_reviews'),
                         ];
                     @endphp
                     @foreach ($sections as $field => $label)
@@ -454,7 +454,7 @@ html[data-theme="dark"] .settings-page {
                             <input type="checkbox" id="reviews_moderation" name="reviews_moderation" value="1" {{ old('reviews_moderation', $hotel->reviews_moderation ?? true) ? 'checked' : '' }}>
                             <span class="track"></span>
                         </span>
-                        <label for="reviews_moderation">Modérer les avis avant publication</label>
+                        <label for="reviews_moderation">{{ __('hotel-settings.section_reviews_moderation') }}</label>
                     </div>
                 </div>
             </div>
@@ -468,13 +468,11 @@ html[data-theme="dark"] .settings-page {
     @if (auth()->user()->id === $hotel->owner_user_id)
         {{-- Zone de danger : clôture de l'établissement (issue #191) --}}
         <div class="danger">
-            <div class="danger-head"><i class="fas fa-triangle-exclamation"></i> Zone de danger</div>
+            <div class="danger-head"><i class="fas fa-triangle-exclamation"></i> {{ __('hotel-settings.danger_zone') }}</div>
             <div class="danger-body">
-                <h3 style="margin:0 0 6px;font-size:.95rem;font-weight:680;">Supprimer définitivement mon établissement</h3>
+                <h3 style="margin:0 0 6px;font-size:.95rem;font-weight:680;">{{ __('hotel-settings.danger_title') }}</h3>
                 <p style="color:var(--ink2);font-size:.85rem;margin:0 0 14px;">
-                    Cette action est <strong>irréversible</strong>. Elle supprime votre établissement
-                    « {{ $hotel->name }} » et <strong>toutes</strong> ses données (personnel, chambres, clients,
-                    réservations, paiements, historique). Vos accès seront immédiatement révoqués.
+                    {!! __('hotel-settings.danger_desc', ['name' => $hotel->name]) !!}
                 </p>
                 @if ($errors->hasAny(['password', 'confirmation']))
                     <div class="set-alert err" style="margin-bottom:12px;">
@@ -485,23 +483,23 @@ html[data-theme="dark"] .settings-page {
                     </div>
                 @endif
                 <button type="button" class="btn-danger-outline" onclick="document.getElementById('dangerDelete').style.display='block';this.style.display='none';">
-                    <i class="fas fa-trash"></i> Supprimer mon établissement
+                    <i class="fas fa-trash"></i> {{ __('hotel-settings.btn_delete_property') }}
                 </button>
                 <div id="dangerDelete" style="display:{{ $errors->hasAny(['password','confirmation']) ? 'block' : 'none' }};margin-top:14px;">
                     <form method="POST" action="{{ route('hotel.account.destroy') }}" style="border:1px solid var(--line);border-radius:var(--r-sm);padding:16px;max-width:420px;display:flex;flex-direction:column;gap:12px;">
                         @csrf @method('DELETE')
                         <div class="field">
-                            <span class="lbl">Votre mot de passe</span>
+                            <span class="lbl">{{ __('hotel-settings.label_password') }}</span>
                             <input type="password" name="password" class="inp" required autocomplete="current-password">
                         </div>
                         <div class="field">
-                            <span class="lbl">Tapez <strong>SUPPRIMER</strong> pour confirmer</span>
-                            <input type="text" name="confirmation" class="inp" placeholder="SUPPRIMER" required>
+                            <span class="lbl">{!! __('hotel-settings.label_type_delete') !!}</span>
+                            <input type="text" name="confirmation" class="inp" placeholder="{{ __('hotel-settings.placeholder_delete') }}" required>
                         </div>
                         <div>
                             <button type="submit" class="btn-danger"
-                                    onclick="return confirm('Dernière confirmation : supprimer définitivement « {{ $hotel->name }} » et toutes ses données ?');">
-                                <i class="fas fa-trash"></i> Je supprime définitivement
+                                    onclick="return confirm('{{ __('hotel-settings.confirm_delete_text', ['name' => $hotel->name]) }}');">
+                                <i class="fas fa-trash"></i> {{ __('hotel-settings.btn_confirm_delete') }}
                             </button>
                         </div>
                     </form>

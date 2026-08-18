@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Restaurant Gastronomique · Cactus Palace 5 Étoiles')
+@section('title', __('frontend_restaurant.hero_badge'))
 
 @push('styles')
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -425,29 +425,27 @@
                 <div class="col-lg-8" data-aos="fade-right">
                     <div class="hero-eyebrow">
                         <i class="fas fa-utensils" style="font-size:10px;"></i>
-                        Restaurant Gastronomique · Cactus Palace
+                        {{ __('frontend_restaurant.hero_badge') }}
                         <i class="fas fa-utensils" style="font-size:10px;"></i>
                     </div>
                     <h1>
-                        L'Art culinaire<br>
-                        <em>à son sommet</em>
+                        {!! __('frontend_restaurant.hero_title') !!}
                     </h1>
                     <p class="hero-lead">
-                        Sous la direction de notre chef étoilé, découvrez une cuisine raffinée qui célèbre
-                        les saveurs africaines et internationales dans un cadre d'exception.
+                        {{ __('frontend_restaurant.hero_lead') }}
                     </p>
                     <div class="hero-stats-bar">
                         <div class="hero-stat-item">
                             <div class="num">7h-23h</div>
-                            <div class="lbl">Horaires</div>
+                            <div class="lbl">{{ __('frontend_restaurant.hours') }}</div>
                         </div>
                         <div class="hero-stat-item">
                             <div class="num">120+</div>
-                            <div class="lbl">Couverts</div>
+                            <div class="lbl">{{ __('frontend_restaurant.covers') }}</div>
                         </div>
                         <div class="hero-stat-item">
                             <div class="num">5★</div>
-                            <div class="lbl">Note moyenne</div>
+                            <div class="lbl">{{ __('frontend_restaurant.avg_rating') }}</div>
                         </div>
                         <div class="hero-stat-item">
                             <div class="num">24/7</div>
@@ -470,42 +468,37 @@
                         <div class="intro-badge">
                             <div class="ib-icon"><i class="fas fa-award"></i></div>
                             <div>
-                                <div class="ib-lbl">Distinction</div>
-                                <div class="ib-val">Chef étoilé</div>
+                                <div class="ib-lbl">{{ __('frontend_restaurant.distinction') }}</div>
+                                <div class="ib-val">{{ __('frontend_restaurant.starred_chef') }}</div>
                             </div>
                         </div>
                         <div class="rating-badge">
                             <div class="stars">★★★★★</div>
-                            <div class="rt">Note clients</div>
+                            <div class="rt">{{ __('frontend_restaurant.client_rating') }}</div>
                         </div>
                     </div>
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
-                    <span class="section-tag">Art Culinaire</span>
-                    <h2 class="section-title">Gastronomie &<br>Saveurs d'Exception</h2>
+                    <span class="section-tag">{{ __('frontend_restaurant.art_culinary') }}</span>
+                    <h2 class="section-title">{!! __('frontend_restaurant.gastronomy_title') !!}</h2>
                     <p style="font-size:1rem;color:var(--text-gray);line-height:1.85;margin-bottom:20px;">
-                        Notre restaurant vous invite à un voyage culinaire exceptionnel. Sous la direction de notre chef
-                        étoilé,
-                        nous proposons une cuisine contemporaine qui met en valeur les produits frais et les saveurs
-                        béninoises
-                        mêlées aux grandes traditions gastronomiques.
+                        {{ __('frontend_restaurant.intro_desc1') }}
                     </p>
                     <p style="font-size:1rem;color:var(--text-gray);line-height:1.85;margin-bottom:30px;">
-                        Avec une vue imprenable sur les jardins de l'hôtel, le restaurant offre une ambiance élégante
-                        et chaleureuse, parfaite pour un dîner romantique, un repas d'affaires ou une célébration familiale.
+                        {{ __('frontend_restaurant.intro_desc2') }}
                     </p>
 
                     <ul class="horaires-list mb-4">
                         <li>
-                            <span class="service"><i class="fas fa-coffee"></i>Petit-déjeuner</span>
+                            <span class="service"><i class="fas fa-coffee"></i>{{ __('frontend_restaurant.breakfast') }}</span>
                             <span class="hours">7h00 - 11h00</span>
                         </li>
                         <li>
-                            <span class="service"><i class="fas fa-sun"></i>Déjeuner</span>
+                            <span class="service"><i class="fas fa-sun"></i>{{ __('frontend_restaurant.lunch') }}</span>
                             <span class="hours">12h00 - 15h00</span>
                         </li>
                         <li>
-                            <span class="service"><i class="fas fa-moon"></i>Dîner</span>
+                            <span class="service"><i class="fas fa-moon"></i>{{ __('frontend_restaurant.dinner') }}</span>
                             <span class="hours">19h00 - 23h00</span>
                         </li>
                         <li>
@@ -515,7 +508,7 @@
                     </ul>
 
                     <a href="#menuSection" class="btn-see-menu">
-                        <i class="fas fa-book-open"></i> Voir notre carte
+                        <i class="fas fa-book-open"></i> {{ __('frontend_restaurant.see_menu') }}
                     </a>
                 </div>
             </div>
@@ -534,57 +527,57 @@
                 <div class="col-lg-8" data-aos="fade-up">
                     <div class="resa-card">
                         <div class="resa-card-header">
-                            <h3>Réservation de table</h3>
-                            <p>Réservez votre table pour une expérience culinaire inoubliable</p>
+                            <h3>{{ __('frontend_restaurant.reservation_title') }}</h3>
+                            <p>{{ __('frontend_restaurant.reservation_desc') }}</p>
                         </div>
                         <div class="resa-card-body">
                             <form id="reservationForm">
                                 @csrf
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="resa-label">Nom complet *</label>
+                                        <label class="resa-label">{{ __('frontend_restaurant.full_name') }}</label>
                                         <input type="text" class="resa-input" name="name"
                                             placeholder="Jean Dupont" required>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="resa-label">Téléphone *</label>
+                                        <label class="resa-label">{{ __('frontend_restaurant.phone') }}</label>
                                         <input type="tel" class="resa-input" name="phone"
                                             placeholder="+229 01 23 45 67" required>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="resa-label">Date *</label>
+                                        <label class="resa-label">{{ __('frontend_restaurant.date') }}</label>
                                         <input type="date" class="resa-input" name="date" required>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="resa-label">Heure *</label>
+                                        <label class="resa-label">{{ __('frontend_restaurant.time') }}</label>
                                         <input type="time" class="resa-input" name="time" required>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="resa-label">Nombre de personnes *</label>
+                                        <label class="resa-label">{{ __('frontend_restaurant.num_persons') }}</label>
                                         <select class="resa-input resa-select" name="persons" required>
                                             @for ($i = 1; $i <= 10; $i++)
                                                 <option value="{{ $i }}" {{ $i == 2 ? 'selected' : '' }}>
-                                                    {{ $i }} personne{{ $i > 1 ? 's' : '' }}</option>
+                                                    {{ $i }} {{ __('frontend_restaurant.persons') }}{{ $i > 1 ? 's' : '' }}</option>
                                             @endfor
                                         </select>
                                     </div>
                                     <div class="col-md-6">
-                                        <label class="resa-label">Type de table</label>
+                                        <label class="resa-label">{{ __('frontend_restaurant.table_type') }}</label>
                                         <select class="resa-input resa-select" name="table_type">
-                                            <option value="standard">Standard</option>
-                                            <option value="window">Fenêtre vue jardin</option>
-                                            <option value="terrace">Terrasse extérieure</option>
-                                            <option value="private">Salle privée</option>
+                                            <option value="standard">{{ __('frontend_restaurant.standard') }}</option>
+                                            <option value="window">{{ __('frontend_restaurant.window_garden') }}</option>
+                                            <option value="terrace">{{ __('frontend_restaurant.outdoor_terrace') }}</option>
+                                            <option value="private">{{ __('frontend_restaurant.private_room') }}</option>
                                         </select>
                                     </div>
                                     <div class="col-12">
-                                        <label class="resa-label">Notes spéciales</label>
+                                        <label class="resa-label">{{ __('frontend_restaurant.special_notes') }}</label>
                                         <textarea class="resa-input" name="notes" rows="3"
-                                            placeholder="Allergies, préférences alimentaires, occasion spéciale…" style="resize:vertical;min-height:90px;"></textarea>
+                                            placeholder="{{ __('frontend_restaurant.notes_placeholder') }}" style="resize:vertical;min-height:90px;"></textarea>
                                     </div>
                                     <div class="col-12 text-center pt-2">
                                         <button type="submit" class="btn-resa">
-                                            <i class="fas fa-calendar-check"></i> Réserver ma table
+                                            <i class="fas fa-calendar-check"></i> {{ __('frontend_restaurant.book_table') }}
                                         </button>
                                     </div>
                                 </div>
@@ -624,8 +617,8 @@
                     success: function() {
                         Swal.fire({
                                 icon: 'success',
-                                title: 'Réservation envoyée !',
-                                text: 'Nous vous confirmerons par téléphone.',
+                                title: '{{ __("frontend_restaurant.reservation_sent") }}',
+                                text: '{{ __("frontend_restaurant.confirmation_by_phone") }}',
                                 timer: 3000
                             })
                             .then(() => {
@@ -635,8 +628,8 @@
                     error: function() {
                         Swal.fire({
                             icon: 'error',
-                            title: 'Erreur',
-                            text: 'Une erreur est survenue. Veuillez réessayer.'
+                            title: '{{ __("frontend_restaurant.error") }}',
+                            text: '{{ __("frontend_restaurant.error_retry") }}'
                         });
                     }
                 });

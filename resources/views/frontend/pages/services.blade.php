@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Nos Services - Cactus Palace 5 Étoiles')
+@section('title', __('frontend_services.hero_badge'))
 
 @push('styles')
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -849,41 +849,39 @@
             <div class="col-lg-8" data-aos="fade-right">
                 <div class="hero-eyebrow">
                     <i class="fas fa-star"></i>
-                    Hôtel 5 Étoiles · Cotonou, Bénin
+                    {!! __('frontend_services.hero_badge') !!}
                     <i class="fas fa-star"></i>
                 </div>
                 <h1>
-                    L'excellence à votre<br>
-                    <em>service, 24h/24</em>
+                    {!! __('frontend_services.hero_title') !!}
                 </h1>
                 <p class="hero-lead">
-                    Du restaurant gastronomique au bar lounge, du service client personnalisé à la piscine ·
-                    chaque service du Cactus Palace est conçu pour dépasser vos attentes et sublimer votre séjour.
+                    {{ __('frontend_services.hero_lead') }}
                 </p>
                 <div class="d-flex flex-wrap gap-3">
                     <a href="{{ route('frontend.reservation') }}" class="btn-cta-gold">
-                        <i class="fas fa-calendar-check"></i> Réserver mon séjour
+                        <i class="fas fa-calendar-check"></i> {{ __('frontend_services.book_stay') }}
                     </a>
                     <a href="{{ route('frontend.contact') }}" class="btn-cta-white">
-                        <i class="fas fa-headset"></i> Contacter le service client
+                        <i class="fas fa-headset"></i> {{ __('frontend_services.contact_service') }}
                     </a>
                 </div>
                 <div class="hero-stats-bar">
                     <div class="hero-stat">
                         <div class="number">24/7</div>
-                        <div class="label">Service Client</div>
+                        <div class="label">{{ __('frontend_services.service_client') }}</div>
                     </div>
                     <div class="hero-stat">
                         <div class="number">5+</div>
-                        <div class="label">Services Premium</div>
+                        <div class="label">{{ __('frontend_services.premium_services') }}</div>
                     </div>
                     <div class="hero-stat">
                         <div class="number">5★</div>
-                        <div class="label">Classement Officiel</div>
+                        <div class="label">{{ __('frontend_services.official_rating') }}</div>
                     </div>
                     <div class="hero-stat">
                         <div class="number">30+</div>
-                        <div class="label">Ans d'Excellence</div>
+                        <div class="label">{{ __('frontend_services.years_excellence') }}</div>
                     </div>
                 </div>
             </div>
@@ -895,11 +893,10 @@
 <section class="services-overview py-section">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <span class="section-tag">Ce que nous offrons</span>
-            <h2 class="section-title">Une Expérience 5 Étoiles <br>dans chaque détail</h2>
+            <span class="section-tag">{{ __('frontend_services.overview_tag') }}</span>
+            <h2 class="section-title">{!! __('frontend_services.overview_title') !!}</h2>
             <p class="section-subtitle mx-auto">
-                Nos équipes dédiées veillent à ce que chaque instant de votre séjour soit parfait,
-                de votre arrivée à votre départ.
+                {{ __('frontend_services.overview_desc') }}
             </p>
         </div>
 
@@ -910,8 +907,8 @@
                     <div class="service-icon-wrap">
                         <i class="fas fa-headset text-success"></i>
                     </div>
-                    <h4>Service Client 24/7</h4>
-                    <p>Une équipe dédiée disponible nuit et jour pour répondre à toutes vos demandes.</p>
+                    <h4>{{ __('frontend_services.service_24_7') }}</h4>
+                    <p>{{ __('frontend_services.service_24_7_desc') }}</p>
                 </div>
             </div>
             {{-- Card 2 --}}
@@ -920,8 +917,8 @@
                     <div class="service-icon-wrap">
                         <i class="fas fa-utensils text-success"></i>
                     </div>
-                    <h4>Restaurant</h4>
-                    <p>Restaurant gastronomique avec room service, carte raffinée et produits frais.</p>
+                    <h4>{{ __('frontend_services.restaurant') }}</h4>
+                    <p>{{ __('frontend_services.restaurant_desc') }}</p>
                 </div>
             </div>
             {{-- Card 3 --}}
@@ -930,8 +927,8 @@
                     <div class="service-icon-wrap">
                         <i class="fas fa-cocktail text-success"></i>
                     </div>
-                    <h4>Bar & Cocktails</h4>
-                    <p>Bar lounge avec cocktails signature, whiskies rares et ambiance feutrée.</p>
+                    <h4>{{ __('frontend_services.bar_cocktails') }}</h4>
+                    <p>{{ __('frontend_services.bar_desc') }}</p>
                 </div>
             </div>
             {{-- Card 4 --}}
@@ -940,8 +937,8 @@
                     <div class="service-icon-wrap">
                         <i class="fas fa-swimming-pool text-success"></i>
                     </div>
-                    <h4>Piscine & Fitness</h4>
-                    <p>Piscine extérieure chauffée, salle de sport équipée et cours collectifs.</p>
+                    <h4>{{ __('frontend_services.pool_fitness') }}</h4>
+                    <p>{{ __('frontend_services.pool_desc') }}</p>
                 </div>
             </div>
             {{-- Card 5 --}}
@@ -950,8 +947,8 @@
                     <div class="service-icon-wrap">
                         <i class="fas fa-wifi text-success"></i>
                     </div>
-                    <h4>Wi-Fi Haut Débit</h4>
-                    <p>Connexion fibre optique ultra-rapide dans toutes les chambres et espaces communs.</p>
+                    <h4>{{ __('frontend_services.wifi') }}</h4>
+                    <p>{{ __('frontend_services.wifi_desc') }}</p>
                 </div>
             </div>
         </div>
@@ -969,35 +966,33 @@
                     <div class="service-badge-overlay">
                         <div class="icon-circle"><i class="fas fa-headset"></i></div>
                         <div>
-                            <div class="badge-label">Disponibilité</div>
+                            <div class="badge-label">{{ __('frontend_services.availability') }}</div>
                             <div class="badge-value">24h/24 · 7j/7</div>
                         </div>
                     </div>
                     <div class="service-rating-overlay">
                         <div class="stars">★★★★★</div>
-                        <div class="rating-text">Service Client</div>
+                        <div class="badge-label">{{ __('frontend_services.service_client') }}</div>
                     </div>
                 </div>
             </div>
             <div class="col-lg-6" data-aos="fade-left">
                 <div class="service-content-block">
                     <div class="service-number">01</div>
-                    <span class="section-tag">Service Signature</span>
-                    <h2>Service Client<br>Disponible 24h/24</h2>
+                    <span class="section-tag">{{ __('frontend_services.service_client') }}</span>
+                    <h2>{!! __('frontend_services.service_client_title') !!}</h2>
                     <p class="service-desc">
-                        Notre équipe de service client est à votre disposition à toute heure pour répondre
-                        à vos demandes, résoudre vos problèmes et garantir un séjour parfait du début
-                        à la fin de votre visite.
+                        {{ __('frontend_services.service_client_desc') }}
                     </p>
                     <ul class="service-features-list">
-                        <li><span class="check-icon"><i class="fas fa-check"></i></span>Accueil personnalisé à l'arrivée et accompagnement</li>
-                        <li><span class="check-icon"><i class="fas fa-check"></i></span>Assistance pour toutes vos demandes et besoins</li>
-                        <li><span class="check-icon"><i class="fas fa-check"></i></span>Informations sur les activités et lieux à Cotonou</li>
-                        <li><span class="check-icon"><i class="fas fa-check"></i></span>Gestion des bagages et service de portier</li>
-                        <li><span class="check-icon"><i class="fas fa-check"></i></span>Support multilingue pour nos clients internationaux</li>
+                        <li><span class="check-icon"><i class="fas fa-check"></i></span>{{ __('frontend_services.feature_1') }}</li>
+                        <li><span class="check-icon"><i class="fas fa-check"></i></span>{{ __('frontend_services.feature_2') }}</li>
+                        <li><span class="check-icon"><i class="fas fa-check"></i></span>{{ __('frontend_services.feature_3') }}</li>
+                        <li><span class="check-icon"><i class="fas fa-check"></i></span>{{ __('frontend_services.feature_4') }}</li>
+                        <li><span class="check-icon"><i class="fas fa-check"></i></span>{{ __('frontend_services.feature_5') }}</li>
                     </ul>
                     <a href="{{ route('frontend.contact') }}" class="btn-service">
-                        Contacter le service client <i class="fas fa-arrow-right"></i>
+                        {{ __('frontend_services.contact_team') }} <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
             </div>
@@ -1011,11 +1006,10 @@
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
             <div class="service-number text-center" style="font-family:'Playfair Display',serif;font-size:5rem;font-weight:700;color:rgba(26,71,42,0.06);line-height:1;margin-bottom:-20px;">02</div>
-            <span class="section-tag">Art Culinaire</span>
-            <h2 class="section-title">Gastronomie & Bar Lounge</h2>
+            <span class="section-tag">{{ __('frontend_services.gastro_tag') }}</span>
+            <h2 class="section-title">{{ __('frontend_services.gastro_title') }}</h2>
             <p class="section-subtitle mx-auto">
-                De l'aube au crépuscule, nos espaces de restauration offrent une carte qui célèbre
-                les saveurs africaines et internationales avec une exigence gastronomique.
+                {{ __('frontend_services.gastro_desc') }}
             </p>
         </div>
         <div class="row g-4">
@@ -1024,9 +1018,9 @@
                     <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
                          alt="Restaurant Gastronomique">
                     <div class="dining-card-overlay">
-                        <span class="tag">Restaurant Étoilé</span>
-                        <h4>Le Cactus Gastronomique</h4>
-                        <p>Cuisine raffinée, produits locaux d'exception &amp; cave à vins de 500 références</p>
+                        <span class="tag">{{ __('frontend_services.restaurant_stellar_tag') }}</span>
+                        <h4>{{ __('frontend_services.restaurant_stellar_name') }}</h4>
+                        <p>{{ __('frontend_services.restaurant_stellar_desc') }}</p>
                     </div>
                 </div>
             </div>
@@ -1037,9 +1031,9 @@
                             <img src="https://images.unsplash.com/photo-1559329007-40df8a9345d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
                                  alt="Bar Lounge">
                             <div class="dining-card-overlay">
-                                <span class="tag">Bar & Cocktails</span>
-                                <h4>Le Bar du Palace</h4>
-                                <p>Cocktails signature & whiskies rares</p>
+                                <span class="tag">{{ __('frontend_services.bar_lounge_tag') }}</span>
+                                <h4>{{ __('frontend_services.bar_lounge_name') }}</h4>
+                                <p>{{ __('frontend_services.bar_lounge_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -1048,9 +1042,9 @@
                             <img src="https://images.unsplash.com/photo-1533777857889-4be7c70b33f7?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
                                  alt="Terrasse">
                             <div class="dining-card-overlay">
-                                <span class="tag">Terrasse</span>
-                                <h4>La Terrasse Verte</h4>
-                                <p>Petit-déjeuner & dîners en plein air</p>
+                                <span class="tag">{{ __('frontend_services.terrace_tag') }}</span>
+                                <h4>{{ __('frontend_services.terrace_name') }}</h4>
+                                <p>{{ __('frontend_services.terrace_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -1059,9 +1053,9 @@
                             <img src="https://images.unsplash.com/photo-1476224203421-9ac39bcb3327?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
                                  alt="Room Service">
                             <div class="dining-card-overlay">
-                                <span class="tag">In-Room Dining</span>
-                                <h4>Room Service 24/7</h4>
-                                <p>Carte complète livrée en chambre</p>
+                                <span class="tag">{{ __('frontend_services.in_room_dining_tag') }}</span>
+                                <h4>{{ __('frontend_services.in_room_dining_name') }}</h4>
+                                <p>{{ __('frontend_services.room_service_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -1070,9 +1064,9 @@
                             <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80"
                                  alt="Chef privé">
                             <div class="dining-card-overlay">
-                                <span class="tag">Exclusif</span>
-                                <h4>Chef Privé en Suite</h4>
-                                <p>Dîner privatif avec notre chef étoilé</p>
+                                <span class="tag">{{ __('frontend_services.exclusive_tag') }}</span>
+                                <h4>{{ __('frontend_services.private_chef_name') }}</h4>
+                                <p>{{ __('frontend_services.private_chef_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -1081,7 +1075,7 @@
         </div>
         <div class="text-center mt-5" data-aos="fade-up">
             <a href="{{ route('frontend.restaurant') }}" class="btn-service me-3">
-                <i class="fas fa-utensils"></i> Voir le menu complet
+                <i class="fas fa-utensils"></i> {{ __('frontend_services.see_full_menu') }}
             </a>
         </div>
     </div>
@@ -1092,34 +1086,34 @@
 <section class="additional-services py-section">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <span class="section-tag" style="background:rgba(201,169,97,0.12);color:var(--gold-accent);">Prestations Complètes</span>
-            <h2 class="section-title" style="color:var(--white);">Tous les Services<br>Inclus dans votre Séjour</h2>
+            <span class="section-tag" style="background:rgba(201,169,97,0.12);color:var(--gold-accent);">{{ __('frontend_services.additional_tag') }}</span>
+            <h2 class="section-title" style="color:var(--white);">{!! __('frontend_services.additional_title') !!}</h2>
             <p class="section-subtitle mx-auto" style="color:rgba(255,255,255,0.6);">
-                Parce que le luxe est dans les détails · découvrez l'ensemble de nos prestations pensées pour votre confort absolu.
+                {{ __('frontend_services.additional_desc') }}
             </p>
         </div>
         <div class="row g-4">
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="0">
                 <div class="add-service-card">
                     <div class="icon-ring"><i class="fas fa-dumbbell"></i></div>
-                    <h5>Salle de Sport</h5>
-                    <p>Équipements de dernière génération, coaching personnel disponible sur demande.</p>
+                    <h5>{{ __('frontend_services.gym') }}</h5>
+                    <p>{{ __('frontend_services.gym_desc') }}</p>
                     <div class="availability"><span class="dot"></span>6h · 22h</div>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="60">
                 <div class="add-service-card">
                     <div class="icon-ring"><i class="fas fa-swimming-pool"></i></div>
-                    <h5>Piscine Extérieure</h5>
-                    <p>Piscine chauffée avec vue panoramique, bar piscine et transats réservables.</p>
+                    <h5>{{ __('frontend_services.outdoor_pool') }}</h5>
+                    <p>{{ __('frontend_services.outdoor_pool_desc') }}</p>
                     <div class="availability"><span class="dot"></span>7h · 21h</div>
                 </div>
             </div>
             <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="120">
                 <div class="add-service-card">
                     <div class="icon-ring"><i class="fas fa-wifi"></i></div>
-                    <h5>Wi-Fi Haut Débit</h5>
-                    <p>Connexion fibre optique ultra-rapide dans toutes les chambres et espaces communs.</p>
+                    <h5>{{ __('frontend_services.wifi_high_speed') }}</h5>
+                    <p>{{ __('frontend_services.wifi_hd_desc') }}</p>
                     <div class="availability"><span class="dot"></span>24h/24</div>
                 </div>
             </div>
@@ -1132,36 +1126,36 @@
 <section class="process-section py-section" style="background:var(--light-bg);">
     <div class="container">
         <div class="text-center mb-6" data-aos="fade-up">
-            <span class="section-tag">Simple & Rapide</span>
-            <h2 class="section-title">Comment Profiter<br>de nos Services ?</h2>
+            <span class="section-tag">{{ __('frontend_services.process_tag') }}</span>
+            <h2 class="section-title">{!! __('frontend_services.process_title') !!}</h2>
         </div>
         <div class="row g-4 mt-2">
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="0">
                 <div class="process-step">
                     <div class="step-number">1</div>
-                    <h5>Choisissez votre service</h5>
-                    <p>Parcourez notre catalogue de prestations et sélectionnez ce qui correspond à vos envies.</p>
+                    <h5>{{ __('frontend_services.step_1_title') }}</h5>
+                    <p>{{ __('frontend_services.step_1_desc') }}</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
                 <div class="process-step">
                     <div class="step-number">2</div>
-                    <h5>Contactez le service client</h5>
-                    <p>Appelez, écrivez ou passez en personne à notre desk disponible 24h/24.</p>
+                    <h5>{{ __('frontend_services.step_2_title') }}</h5>
+                    <p>{{ __('frontend_services.step_2_desc') }}</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
                 <div class="process-step">
                     <div class="step-number">3</div>
-                    <h5>Personnalisez votre demande</h5>
-                    <p>Nos conseillers s'adaptent à vos préférences et créent une expérience sur mesure.</p>
+                    <h5>{{ __('frontend_services.step_3_title') }}</h5>
+                    <p>{{ __('frontend_services.step_3_desc') }}</p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
                 <div class="process-step">
                     <div class="step-number">4</div>
-                    <h5>Profitez & nous évaluez</h5>
-                    <p>Vivez l'expérience 5 étoiles. Votre retour nous aide à nous améliorer sans cesse.</p>
+                    <h5>{{ __('frontend_services.step_4_title') }}</h5>
+                    <p>{{ __('frontend_services.step_4_desc') }}</p>
                 </div>
             </div>
         </div>
@@ -1173,22 +1167,21 @@
     <div class="container">
         <div class="text-center" data-aos="fade-up">
             <span class="section-tag" style="background:rgba(201,169,97,0.15);color:var(--gold-accent);">
-                Prêt pour l'excellence ?
+                {{ __('frontend_services.cta_tag') }}
             </span>
-            <h2>Réservez votre Séjour au<br>Cactus Palace</h2>
+            <h2>{!! __('frontend_services.cta_title') !!}</h2>
             <p>
-                Offrez-vous ou offrez à vos proches une expérience hôtelière inoubliable dans le seul
-                hôtel 5 étoiles de Haie Vive, Cotonou. Nos équipes attendent votre appel.
+                {{ __('frontend_services.cta_desc') }}
             </p>
             <div class="d-flex justify-content-center gap-3 flex-wrap">
                 <a href="{{ route('frontend.reservation') }}" class="btn-cta-gold">
-                    <i class="fas fa-calendar-check"></i> Réserver maintenant
+                    <i class="fas fa-calendar-check"></i> {{ __('frontend_services.book_now') }}
                 </a>
                 <a href="{{ route('frontend.contact') }}" class="btn-cta-white">
-                    <i class="fas fa-phone"></i> Nous appeler
+                    <i class="fas fa-phone"></i> {{ __('frontend_services.call_us') }}
                 </a>
                 <a href="{{ route('frontend.rooms') }}" class="btn-cta-white" style="background:transparent;color:rgba(255,255,255,0.8);border-color:rgba(255,255,255,0.3);">
-                    <i class="fas fa-bed"></i> Voir les chambres
+                    <i class="fas fa-bed"></i> {{ __('frontend_services.view_rooms') }}
                 </a>
             </div>
         </div>

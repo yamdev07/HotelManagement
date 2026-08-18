@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Contact · Cactus Palace 5 Étoiles')
+@section('title', __('frontend_contact.title'))
 
 @push('styles')
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -284,25 +284,24 @@
                     <i class="fas fa-star" style="font-size:9px;"></i>
                 </div>
                 <h1>
-                    Entrer en<br>
-                    <em>contact avec nous</em>
+                    {{ __('frontend_contact.hero_title_line1') }}<br>
+                    <em>{{ __('frontend_contact.hero_title_line2') }}</em>
                 </h1>
                 <p class="hero-lead">
-                    Notre équipe est à votre disposition 24h/24 pour répondre à toutes vos questions,
-                    prendre vos réservations et vous offrir l'accompagnement que vous méritez.
+                    {{ __('frontend_contact.hero_lead') }}
                 </p>
                 <div class="hero-stat-bar">
                     <div class="hero-stat">
                         <div class="num">24/7</div>
-                        <div class="lbl">Disponible</div>
+                        <div class="lbl">{{ __('frontend_contact.available') }}</div>
                     </div>
                     <div class="hero-stat">
                         <div class="num">&lt; 2h</div>
-                        <div class="lbl">Réponse moyenne</div>
+                        <div class="lbl">{{ __('frontend_contact.avg_response') }}</div>
                     </div>
                     <div class="hero-stat">
                         <div class="num">5★</div>
-                        <div class="lbl">Service client</div>
+                        <div class="lbl">{{ __('frontend_contact.customer_service') }}</div>
                     </div>
                 </div>
             </div>
@@ -314,35 +313,35 @@
 <section class="contact-info-section py-section">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <span class="section-tag">Où nous trouver</span>
-            <h2 class="section-title">Nos coordonnées</h2>
+            <span class="section-tag">{{ __('frontend_contact.find_us') }}</span>
+            <h2 class="section-title">{{ __('frontend_contact.our_coordinates') }}</h2>
             <p class="section-subtitle mx-auto" style="max-width:560px;">
-                Que vous souhaitiez nous appeler, nous écrire ou nous rendre visite, voici toutes les façons de nous joindre.
+                {{ __('frontend_contact.coordinates_subtitle') }}
             </p>
         </div>
         <div class="row g-4">
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="0">
                 <div class="contact-info-card">
                     <div class="contact-icon-wrap"><i class="fas fa-map-marker-alt"></i></div>
-                    <h4>Adresse</h4>
-                    <p>Haie Vive, Cotonou<br>République du Bénin<br><a href="https://maps.google.com" target="_blank">Voir sur la carte <i class="fas fa-external-link-alt ms-1"></i></a></p>
+                    <h4>{{ __('frontend_contact.address') }}</h4>
+                    <p>Haie Vive, Cotonou<br>République du Bénin<br><a href="https://maps.google.com" target="_blank">{{ __('frontend_contact.view_on_map') }} <i class="fas fa-external-link-alt ms-1"></i></a></p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="80">
                 <div class="contact-info-card">
                     <div class="contact-icon-wrap"><i class="fas fa-phone"></i></div>
-                    <h4>Téléphone</h4>
+                    <h4>{{ __('frontend_contact.phone') }}</h4>
                     <p>
                         <a href="tel:+22901900000000">+229 01 90 00 00 00</a><br>
                         <a href="tel:+22902900000000">+229 02 90 00 00 00</a><br>
-                        <span style="font-size:12px;color:var(--text-gray);">Disponible 24h/24 · 7j/7</span>
+                        <span style="font-size:12px;color:var(--text-gray);">{{ __('frontend_contact.available_24_7') }}</span>
                     </p>
                 </div>
             </div>
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="160">
                 <div class="contact-info-card">
                     <div class="contact-icon-wrap"><i class="fas fa-envelope"></i></div>
-                    <h4>Email</h4>
+                    <h4>{{ __('frontend_contact.email') }}</h4>
                     <p>
                         <a href="mailto:contact@cactushotel.com">contact@cactushotel.com</a><br>
                         <a href="mailto:reservation@cactushotel.com">reservation@cactushotel.com</a>
@@ -352,11 +351,11 @@
             <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="240">
                 <div class="contact-info-card">
                     <div class="contact-icon-wrap"><i class="fas fa-clock"></i></div>
-                    <h4>Horaires</h4>
+                    <h4>{{ __('frontend_contact.hours') }}</h4>
                     <p>
-                        Réception : <strong style="color:var(--cactus-green);">24h/24</strong><br>
-                        Restaurant : 7h - 23h<br>
-                        Spa : 8h - 21h
+                        {{ __('frontend_contact.reception') }} : <strong style="color:var(--cactus-green);">24h/24</strong><br>
+                        {{ __('frontend_contact.restaurant') }} : 7h - 23h<br>
+                        {{ __('frontend_contact.spa') }} : 8h - 21h
                     </p>
                 </div>
             </div>
@@ -373,8 +372,8 @@
             <div class="col-lg-7" data-aos="fade-right">
                 <div class="contact-form-wrap">
                     <div class="form-header">
-                        <h3>Envoyez-nous un message</h3>
-                        <p>Remplissez le formulaire ci-dessous et nous vous répondrons dans les plus brefs délais.</p>
+                        <h3>{{ __('frontend_contact.form_title') }}</h3>
+                        <p>{{ __('frontend_contact.form_subtitle') }}</p>
                     </div>
                     <div class="form-body">
 
@@ -396,52 +395,52 @@
                             @csrf
                             <div class="row g-3">
                                 <div class="col-md-6">
-                                    <label class="cf-label" for="name"><i class="fas fa-user me-1"></i>Nom complet *</label>
+                                    <label class="cf-label" for="name"><i class="fas fa-user me-1"></i>{{ __('frontend_contact.full_name') }} *</label>
                                     <input type="text" class="cf-input" id="name" name="name"
-                                           placeholder="Jean Dupont" required value="{{ old('name') }}">
+                                           placeholder="{{ __('frontend_contact.name_placeholder') }}" required value="{{ old('name') }}">
                                     @error('name')<span style="font-size:12px;color:#dc2626;margin-top:4px;display:block;">{{ $message }}</span>@enderror
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="cf-label" for="email"><i class="fas fa-envelope me-1"></i>Adresse email *</label>
+                                    <label class="cf-label" for="email"><i class="fas fa-envelope me-1"></i>{{ __('frontend_contact.email') }} *</label>
                                     <input type="email" class="cf-input" id="email" name="email"
-                                           placeholder="jean@exemple.com" required value="{{ old('email') }}">
+                                           placeholder="{{ __('frontend_contact.email_placeholder') }}" required value="{{ old('email') }}">
                                     @error('email')<span style="font-size:12px;color:#dc2626;margin-top:4px;display:block;">{{ $message }}</span>@enderror
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="cf-label" for="phone"><i class="fas fa-phone me-1"></i>Téléphone</label>
+                                    <label class="cf-label" for="phone"><i class="fas fa-phone me-1"></i>{{ __('frontend_contact.phone') }}</label>
                                     <input type="tel" class="cf-input" id="phone" name="phone"
-                                           placeholder="+229 01 23 45 67" value="{{ old('phone') }}">
+                                           placeholder="{{ __('frontend_contact.phone_placeholder') }}" value="{{ old('phone') }}">
                                     @error('phone')<span style="font-size:12px;color:#dc2626;margin-top:4px;display:block;">{{ $message }}</span>@enderror
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="cf-label" for="subject"><i class="fas fa-tag me-1"></i>Sujet *</label>
+                                    <label class="cf-label" for="subject"><i class="fas fa-tag me-1"></i>{{ __('frontend_contact.subject') }} *</label>
                                     <select class="cf-input cf-select" id="subject" name="subject" required>
-                                        <option value="" disabled selected>Sélectionnez un sujet</option>
-                                        <option value="reservation" {{ old('subject')=='reservation'?'selected':'' }}>Réservation chambre</option>
-                                        <option value="information" {{ old('subject')=='information'?'selected':'' }}>Demande d'information</option>
-                                        <option value="group"       {{ old('subject')=='group'?'selected':'' }}>Événement de groupe</option>
-                                        <option value="restaurant"  {{ old('subject')=='restaurant'?'selected':'' }}>Réservation restaurant</option>
-                                        <option value="spa"         {{ old('subject')=='spa'?'selected':'' }}>Spa & Bien-être</option>
-                                        <option value="other"       {{ old('subject')=='other'?'selected':'' }}>Autre</option>
+                                        <option value="" disabled selected>{{ __('frontend_contact.select_subject') }}</option>
+                                        <option value="reservation" {{ old('subject')=='reservation'?'selected':'' }}>{{ __('frontend_contact.subject_reservation') }}</option>
+                                        <option value="information" {{ old('subject')=='information'?'selected':'' }}>{{ __('frontend_contact.subject_information') }}</option>
+                                        <option value="group"       {{ old('subject')=='group'?'selected':'' }}>{{ __('frontend_contact.subject_group') }}</option>
+                                        <option value="restaurant"  {{ old('subject')=='restaurant'?'selected':'' }}>{{ __('frontend_contact.subject_restaurant') }}</option>
+                                        <option value="spa"         {{ old('subject')=='spa'?'selected':'' }}>{{ __('frontend_contact.subject_spa') }}</option>
+                                        <option value="other"       {{ old('subject')=='other'?'selected':'' }}>{{ __('frontend_contact.subject_other') }}</option>
                                     </select>
                                     @error('subject')<span style="font-size:12px;color:#dc2626;margin-top:4px;display:block;">{{ $message }}</span>@enderror
                                 </div>
                                 <div class="col-12">
-                                    <label class="cf-label" for="message"><i class="fas fa-comment me-1"></i>Message *</label>
+                                    <label class="cf-label" for="message"><i class="fas fa-comment me-1"></i>{{ __('frontend_contact.message') }} *</label>
                                     <textarea class="cf-input cf-textarea" id="message" name="message"
-                                              rows="5" placeholder="Votre message..." required>{{ old('message') }}</textarea>
+                                              rows="5" placeholder="{{ __('frontend_contact.message_placeholder') }}" required>{{ old('message') }}</textarea>
                                     @error('message')<span style="font-size:12px;color:#dc2626;margin-top:4px;display:block;">{{ $message }}</span>@enderror
                                 </div>
                                 <div class="col-12">
                                     <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.875rem;color:var(--text-gray);">
                                         <input type="checkbox" name="newsletter" {{ old('newsletter')?'checked':'' }}
                                                style="width:16px;height:16px;accent-color:var(--cactus-green);">
-                                        Je souhaite recevoir les offres spéciales et actualités du Cactus Palace
+                                        {{ __('frontend_contact.newsletter_text') }}
                                     </label>
                                 </div>
                                 <div class="col-12 pt-2">
                                     <button type="submit" class="btn-send">
-                                        <i class="fas fa-paper-plane"></i> Envoyer le message
+                                        <i class="fas fa-paper-plane"></i> {{ __('frontend_contact.send_message') }}
                                     </button>
                                 </div>
                             </div>
@@ -453,9 +452,9 @@
             {{-- Sidebar info --}}
             <div class="col-lg-5" data-aos="fade-left" data-aos-delay="100">
                 <div class="mb-4">
-                    <span class="section-tag">Réponse rapide</span>
-                    <h2 class="section-title" style="font-size:clamp(1.5rem,2.5vw,2rem);">Nous répondons<br>dans les 2 heures</h2>
-                    <p class="section-subtitle">Notre équipe dédiée traite chaque message avec soin et vous répond rapidement.</p>
+                    <span class="section-tag">{{ __('frontend_contact.quick_response') }}</span>
+                    <h2 class="section-title" style="font-size:clamp(1.5rem,2.5vw,2rem);">{!! __('frontend_contact.response_title') !!}</h2>
+                    <p class="section-subtitle">{{ __('frontend_contact.response_subtitle') }}</p>
                 </div>
 
                 <div style="display:flex;flex-direction:column;gap:16px;">
@@ -464,7 +463,7 @@
                             <i class="fas fa-headset"></i>
                         </div>
                         <div>
-                            <div style="font-weight:700;color:var(--text-dark);font-size:0.9rem;">Ligne directe</div>
+                            <div style="font-weight:700;color:var(--text-dark);font-size:0.9rem;">{{ __('frontend_contact.direct_line') }}</div>
                             <div style="font-size:0.85rem;color:var(--text-gray);">+229 01 90 00 00 00 · 24h/24</div>
                         </div>
                     </div>
@@ -474,7 +473,7 @@
                         </div>
                         <div>
                             <div style="font-weight:700;color:var(--text-dark);font-size:0.9rem;">WhatsApp</div>
-                            <div style="font-size:0.85rem;color:var(--text-gray);">Réponse instantanée</div>
+                            <div style="font-size:0.85rem;color:var(--text-gray);">{{ __('frontend_contact.instant_response') }}</div>
                         </div>
                     </div>
                     <div style="display:flex;align-items:center;gap:16px;padding:20px;background:var(--light-bg);border-radius:14px;border:1px solid var(--border-color);">
@@ -482,7 +481,7 @@
                             <i class="fas fa-envelope"></i>
                         </div>
                         <div>
-                            <div style="font-weight:700;color:var(--text-dark);font-size:0.9rem;">Email prioritaire</div>
+                            <div style="font-weight:700;color:var(--text-dark);font-size:0.9rem;">{{ __('frontend_contact.priority_email') }}</div>
                             <div style="font-size:0.85rem;color:var(--text-gray);">reservation@cactushotel.com</div>
                         </div>
                     </div>
@@ -495,7 +494,7 @@
                     <div style="color:rgba(255,255,255,0.55);font-size:0.82rem;">Haie Vive, Cotonou · Bénin</div>
                     <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;color:rgba(255,255,255,0.5);">
                         <i class="fas fa-award me-2" style="color:var(--gold-accent);"></i>
-                        Hôtel certifié 5 étoiles depuis 1995
+                        {{ __('frontend_contact.certified_hotel') }}
                     </div>
                 </div>
             </div>
@@ -507,9 +506,9 @@
 <section class="map-section py-section">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <span class="section-tag">Localisation</span>
-            <h2 class="section-title">Notre emplacement</h2>
-            <p class="section-subtitle mx-auto" style="max-width:520px;">Situé au cœur de Haie Vive, le quartier premium de Cotonou, au Bénin.</p>
+            <span class="section-tag">{{ __('frontend_contact.location_tag') }}</span>
+            <h2 class="section-title">{{ __('frontend_contact.location_title') }}</h2>
+            <p class="section-subtitle mx-auto" style="max-width:520px;">{{ __('frontend_contact.location_subtitle') }}</p>
         </div>
 
         <div class="map-wrapper mb-4" data-aos="fade-up" data-aos-delay="80">
@@ -523,31 +522,31 @@
         <div class="row g-4 mt-2">
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="0">
                 <div class="access-card">
-                    <h5><i class="fas fa-taxi"></i>Taxi / Transport</h5>
+                    <h5><i class="fas fa-taxi"></i>{{ __('frontend_contact.taxi_transport') }}</h5>
                     <ul>
-                        <li><i class="fas fa-circle"></i>Station de taxis devant l'hôtel</li>
-                        <li><i class="fas fa-circle"></i>Service de transfert aéroport disponible</li>
-                        <li><i class="fas fa-circle"></i>Zémidjan (moto-taxi) à proximité</li>
+                        <li><i class="fas fa-circle"></i>{{ __('frontend_contact.taxi_front') }}</li>
+                        <li><i class="fas fa-circle"></i>{{ __('frontend_contact.airport_transfer') }}</li>
+                        <li><i class="fas fa-circle"></i>{{ __('frontend_contact.zemidjan') }}</li>
                     </ul>
                 </div>
             </div>
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="80">
                 <div class="access-card">
-                    <h5><i class="fas fa-car"></i>En voiture</h5>
+                    <h5><i class="fas fa-car"></i>{{ __('frontend_contact.by_car') }}</h5>
                     <ul>
-                        <li><i class="fas fa-circle"></i>Parking sécurisé sur place</li>
-                        <li><i class="fas fa-circle"></i>Service valet disponible</li>
-                        <li><i class="fas fa-circle"></i>Accès facilité depuis l'aéroport</li>
+                        <li><i class="fas fa-circle"></i>{{ __('frontend_contact.secured_parking') }}</li>
+                        <li><i class="fas fa-circle"></i>{{ __('frontend_contact.valet_service') }}</li>
+                        <li><i class="fas fa-circle"></i>{{ __('frontend_contact.easy_access_airport') }}</li>
                     </ul>
                 </div>
             </div>
             <div class="col-md-4" data-aos="fade-up" data-aos-delay="160">
                 <div class="access-card">
-                    <h5><i class="fas fa-plane"></i>Depuis l'aéroport</h5>
+                    <h5><i class="fas fa-plane"></i>{{ __('frontend_contact.from_airport') }}</h5>
                     <ul>
-                        <li><i class="fas fa-circle"></i>Aéroport Cadjehoun : 15 min</li>
-                        <li><i class="fas fa-circle"></i>Navette privée sur réservation</li>
-                        <li><i class="fas fa-circle"></i>Accueil VIP disponible</li>
+                        <li><i class="fas fa-circle"></i>{{ __('frontend_contact.cadjehoun_airport') }}</li>
+                        <li><i class="fas fa-circle"></i>{{ __('frontend_contact.private_shuttle') }}</li>
+                        <li><i class="fas fa-circle"></i>{{ __('frontend_contact.vip_reception') }}</li>
                     </ul>
                 </div>
             </div>
@@ -560,67 +559,67 @@
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
             <span class="section-tag">FAQ</span>
-            <h2 class="section-title">Questions fréquentes</h2>
-            <p class="section-subtitle mx-auto" style="max-width:520px;">Trouvez rapidement des réponses à vos questions les plus courantes.</p>
+            <h2 class="section-title">{{ __('frontend_contact.faq_title') }}</h2>
+            <p class="section-subtitle mx-auto" style="max-width:520px;">{{ __('frontend_contact.faq_subtitle') }}</p>
         </div>
         <div class="row justify-content-center">
             <div class="col-lg-9" data-aos="fade-up" data-aos-delay="60">
 
                 <div class="faq-item">
                     <button class="faq-btn" onclick="toggleFaq(this)">
-                        <div class="faq-question"><i class="fas fa-clock"></i>Quels sont les horaires de check-in et check-out ?</div>
+                        <div class="faq-question"><i class="fas fa-clock"></i>{{ __('frontend_contact.faq_q1') }}</div>
                         <div class="faq-toggle"><i class="fas fa-plus"></i></div>
                     </button>
                     <div class="faq-body">
-                        <div class="faq-body-inner">Le check-in est disponible à partir de 15h00. Le check-out doit être effectué avant 13h00. Un check-in anticipé ou un check-out tardif peut être organisé sous réserve de disponibilité. Contactez la réception pour plus d'informations.</div>
+                        <div class="faq-body-inner">{{ __('frontend_contact.faq_a1') }}</div>
                     </div>
                 </div>
 
                 <div class="faq-item">
                     <button class="faq-btn" onclick="toggleFaq(this)">
-                        <div class="faq-question"><i class="fas fa-paw"></i>L'hôtel accepte-t-il les animaux de compagnie ?</div>
+                        <div class="faq-question"><i class="fas fa-paw"></i>{{ __('frontend_contact.faq_q2') }}</div>
                         <div class="faq-toggle"><i class="fas fa-plus"></i></div>
                     </button>
                     <div class="faq-body">
-                        <div class="faq-body-inner">Oui, le Cactus Palace accueille les animaux de compagnie de petite taille (chiens et chats jusqu'à 8 kg). Des frais de 25 000 FCFA par nuit sont applicables. Un lit et des gamelles sont fournis sur demande.</div>
+                        <div class="faq-body-inner">{{ __('frontend_contact.faq_a2') }}</div>
                     </div>
                 </div>
 
                 <div class="faq-item">
                     <button class="faq-btn" onclick="toggleFaq(this)">
-                        <div class="faq-question"><i class="fas fa-plane"></i>Proposez-vous un service de transfert depuis l'aéroport ?</div>
+                        <div class="faq-question"><i class="fas fa-plane"></i>{{ __('frontend_contact.faq_q3') }}</div>
                         <div class="faq-toggle"><i class="fas fa-plus"></i></div>
                     </button>
                     <div class="faq-body">
-                        <div class="faq-body-inner">Oui, nous proposons un service de navette privée depuis l'aéroport international Cadjehoun de Cotonou (à 15 minutes). Le service doit être réservé au moins 48 heures à l'avance. Des véhicules berline et 4x4 sont disponibles.</div>
+                        <div class="faq-body-inner">{{ __('frontend_contact.faq_a3') }}</div>
                     </div>
                 </div>
 
                 <div class="faq-item">
                     <button class="faq-btn" onclick="toggleFaq(this)">
-                        <div class="faq-question"><i class="fas fa-credit-card"></i>Quels sont les moyens de paiement acceptés ?</div>
+                        <div class="faq-question"><i class="fas fa-credit-card"></i>{{ __('frontend_contact.faq_q4') }}</div>
                         <div class="faq-toggle"><i class="fas fa-plus"></i></div>
                     </button>
                     <div class="faq-body">
-                        <div class="faq-body-inner">Nous acceptons les paiements par carte (Visa, MasterCard), espèces en FCFA, virement bancaire pour les réservations de groupe, et Mobile Money (MTN MoMo, Moov Money).</div>
+                        <div class="faq-body-inner">{{ __('frontend_contact.faq_a4') }}</div>
                     </div>
                 </div>
 
                 <div class="faq-item">
                     <button class="faq-btn" onclick="toggleFaq(this)">
-                        <div class="faq-question"><i class="fas fa-wifi"></i>Le Wi-Fi est-il inclus ?</div>
+                        <div class="faq-question"><i class="fas fa-wifi"></i>{{ __('frontend_contact.faq_q5') }}</div>
                         <div class="faq-toggle"><i class="fas fa-plus"></i></div>
                     </button>
                     <div class="faq-body">
-                        <div class="faq-body-inner">Oui, une connexion Wi-Fi haut débit en fibre optique est disponible gratuitement dans toutes les chambres et les espaces communs de l'hôtel, 24h/24.</div>
+                        <div class="faq-body-inner">{{ __('frontend_contact.faq_a5') }}</div>
                     </div>
                 </div>
 
                 <div class="text-center mt-5">
-                    <p style="font-size:0.9rem;color:var(--text-gray);margin-bottom:16px;">Vous ne trouvez pas la réponse à votre question ?</p>
+                    <p style="font-size:0.9rem;color:var(--text-gray);margin-bottom:16px;">{{ __('frontend_contact.faq_not_found') }}</p>
                     <a href="#contactForm" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:var(--cactus-green);color:white;border-radius:10px;font-size:0.9rem;font-weight:600;text-decoration:none;transition:var(--transition);"
                        onmouseover="this.style.background='var(--cactus-light)'" onmouseout="this.style.background='var(--cactus-green)'">
-                        <i class="fas fa-envelope"></i> Nous écrire directement
+                        <i class="fas fa-envelope"></i> {{ __('frontend_contact.write_to_us') }}
                     </a>
                 </div>
 

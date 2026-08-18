@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'Votre réservation',
+    'back' => 'Retour aux chambres',
+    'finalize' => 'Finaliser votre réservation',
+    'your_details' => 'Vos coordonnées',
+    'full_name' => 'Nom complet *',
+    'full_name_placeholder' => 'Prénom Nom',
+    'email' => 'Email *',
+    'email_placeholder' => 'vous@exemple.com',
+    'phone' => 'Téléphone / WhatsApp *',
+    'confirm_booking' => 'Confirmer ma réservation',
+    'booking_note' => 'Réservation sans engagement · l\'hôtel vous contacte pour l\'acompte (paiement en ligne bientôt).',
+    'summary' => 'Récapitulatif',
+    'room_default' => 'Chambre',
+    'arrival' => 'Arrivée',
+    'departure' => 'Départ',
+    'guests' => 'Voyageurs',
+    'promo_code' => 'Code promo',
+    'apply' => 'Appliquer',
+    'modify' => 'Modifier',
+    'total_stay' => 'Total du séjour',
+    'suggested_deposit' => 'Acompte suggéré (15 %)',
+    'balance_arrival' => 'Le solde se règle à l\'arrivée.',
+];

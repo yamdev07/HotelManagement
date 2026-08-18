@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Réservation en ligne - Hôtel Cactus Palace')
+@section('title', __('frontend_reservation.page_title'))
 
 @push('styles')
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -226,9 +226,9 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
 <section class="hero-reservation">
     <div class="container">
-        <div class="eyebrow-badge"><i class="fas fa-star me-2"></i>Hôtel Cactus Palace 5★</div>
-        <h1>Réservez votre <em>séjour</em></h1>
-        <p class="lead">Choisissez votre chambre et confirmez en quelques clics</p>
+        <div class="eyebrow-badge"><i class="fas fa-star me-2"></i>{!! __('frontend_reservation.hero_badge') !!}</div>
+        <h1>{!! __('frontend_reservation.hero_title') !!}</h1>
+        <p class="lead">{{ __('frontend_reservation.hero_lead') }}</p>
     </div>
 </section>
 
@@ -241,19 +241,19 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                 <div class="progress-fill" id="progressFill"></div>
                 <div class="step active" id="step1">
                     <div class="step-circle">1</div>
-                    <span class="step-label">Infos</span>
+                    <span class="step-label">{{ __('frontend_reservation.step_info') }}</span>
                 </div>
                 <div class="step" id="step2">
                     <div class="step-circle">2</div>
-                    <span class="step-label">Dates</span>
+                    <span class="step-label">{{ __('frontend_reservation.step_dates') }}</span>
                 </div>
                 <div class="step" id="step3">
                     <div class="step-circle">3</div>
-                    <span class="step-label">Chambre</span>
+                    <span class="step-label">{{ __('frontend_reservation.step_room') }}</span>
                 </div>
                 <div class="step" id="step4">
                     <div class="step-circle"><i class="fas fa-check" style="font-size:.6rem"></i></div>
-                    <span class="step-label">Confirmation</span>
+                    <span class="step-label">{{ __('frontend_reservation.step_confirm') }}</span>
                 </div>
             </div>
         </div>
@@ -266,14 +266,14 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                     {{-- SECTION 1 · Infos personnelles --}}
                     <div class="card">
                         <div class="card-header">
-                            <h4><i class="fas fa-user me-2"></i>Vos informations</h4>
+                            <h4><i class="fas fa-user me-2"></i>{{ __('frontend_reservation.your_info') }}</h4>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
 
                                 <div class="col-md-6">
                                     <label class="form-label" for="f_name">
-                                        <i class="label-icon fas fa-user"></i> Nom complet <span class="text-danger">*</span>
+                                        <i class="label-icon fas fa-user"></i> {{ __('frontend_reservation.full_name') }} <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-wrapper">
                                         <i class="fas fa-user input-icon"></i>
@@ -285,7 +285,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
                                 <div class="col-md-6">
                                     <label class="form-label" for="f_email">
-                                        <i class="label-icon fas fa-envelope"></i> Email <span class="text-danger">*</span>
+                                        <i class="label-icon fas fa-envelope"></i> {{ __('frontend_reservation.email') }} <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-wrapper">
                                         <i class="fas fa-envelope input-icon"></i>
@@ -297,64 +297,64 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
                                 <div class="col-md-6">
                                     <label class="form-label" for="f_phone">
-                                        <i class="label-icon fas fa-phone"></i> Téléphone <span class="text-danger">*</span>
+                                        <i class="label-icon fas fa-phone"></i> {{ __('frontend_reservation.phone') }} <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-wrapper">
                                         <i class="fas fa-phone input-icon"></i>
                                         <input type="tel" class="form-control" id="f_phone" name="phone"
                                                placeholder="+229 01 23 45 67" autocomplete="tel" required>
                                     </div>
-                                    <div class="field-hint">Ex : +229 01 23 45 67 ou 01 23 45 67</div>
+                                    <div class="field-hint">{{ __('frontend_reservation.phone_hint') }}</div>
                                     <div class="field-error" id="f_phone-err"><i class="fas fa-exclamation-circle"></i><span></span></div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label" for="f_address">
-                                        <i class="label-icon fas fa-map-marker-alt"></i> Adresse <span class="text-danger">*</span>
+                                        <i class="label-icon fas fa-map-marker-alt"></i> {{ __('frontend_reservation.address') }} <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-wrapper">
                                         <i class="fas fa-map-marker-alt input-icon"></i>
                                         <input type="text" class="form-control" id="f_address" name="address"
-                                               placeholder="Ville / Quartier" autocomplete="street-address" required>
+                                               placeholder="{{ __('frontend_reservation.address_placeholder') }}" autocomplete="street-address" required>
                                     </div>
                                     <div class="field-error" id="f_address-err"><i class="fas fa-exclamation-circle"></i><span></span></div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label" for="f_gender">
-                                        <i class="label-icon fas fa-venus-mars"></i> Genre <span class="text-danger">*</span>
+                                        <i class="label-icon fas fa-venus-mars"></i> {{ __('frontend_reservation.gender') }} <span class="text-danger">*</span>
                                     </label>
                                     <select class="form-select" id="f_gender" name="gender" required>
-                                        <option value="">Sélectionnez</option>
-                                        <option value="Homme">Homme</option>
-                                        <option value="Femme">Femme</option>
-                                        <option value="Autre">Autre</option>
+                                        <option value="">{{ __('frontend_reservation.select') }}</option>
+                                        <option value="Homme">{{ __('frontend_reservation.male') }}</option>
+                                        <option value="Femme">{{ __('frontend_reservation.female') }}</option>
+                                        <option value="Autre">{{ __('frontend_reservation.other') }}</option>
                                     </select>
                                     <div class="field-error" id="f_gender-err"><i class="fas fa-exclamation-circle"></i><span></span></div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label" for="f_job">
-                                        <i class="label-icon fas fa-briefcase"></i> Profession <span class="text-danger">*</span>
+                                        <i class="label-icon fas fa-briefcase"></i> {{ __('frontend_reservation.profession') }} <span class="text-danger">*</span>
                                     </label>
                                     <div class="input-wrapper">
                                         <i class="fas fa-briefcase input-icon"></i>
                                         <input type="text" class="form-control" id="f_job" name="job"
-                                               placeholder="Votre métier" required>
+                                               placeholder="{{ __('frontend_reservation.profession_placeholder') }}" required>
                                     </div>
                                     <div class="field-error" id="f_job-err"><i class="fas fa-exclamation-circle"></i><span></span></div>
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label" for="f_birthdate">
-                                        <i class="label-icon fas fa-birthday-cake"></i> Date de naissance <span class="text-danger">*</span>
+                                        <i class="label-icon fas fa-birthday-cake"></i> {{ __('frontend_reservation.birthdate') }} <span class="text-danger">*</span>
                                     </label>
                                     <input type="date" class="form-control" id="f_birthdate" name="birthdate"
                                            required
                                            min="1900-01-01"
                                            max="{{ date('Y-m-d', strtotime('-18 years')) }}"
                                            value="{{ date('Y-m-d', strtotime('-30 years')) }}">
-                                    <div class="field-hint">Minimum 18 ans requis</div>
+                                    <div class="field-hint">{{ __('frontend_reservation.min_age') }}</div>
                                     <div class="field-error" id="f_birthdate-err"><i class="fas fa-exclamation-circle"></i><span></span></div>
                                 </div>
 
@@ -365,26 +365,26 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                     {{-- SECTION 2 · Dates --}}
                     <div class="card">
                         <div class="card-header">
-                            <h4><i class="fas fa-calendar me-2"></i>Dates du séjour</h4>
+                            <h4><i class="fas fa-calendar me-2"></i>{{ __('frontend_reservation.stay_dates') }}</h4>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-4">
-                                    <label class="form-label" for="check_in">Arrivée <span class="text-danger">*</span></label>
+                                    <label class="form-label" for="check_in">{{ __('frontend_reservation.arrival') }} <span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" id="check_in" name="check_in" required>
                                     <div class="field-error" id="check_in-err"><i class="fas fa-exclamation-circle"></i><span></span></div>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label" for="check_out">Départ <span class="text-danger">*</span></label>
+                                    <label class="form-label" for="check_out">{{ __('frontend_reservation.departure') }} <span class="text-danger">*</span></label>
                                     <input type="date" class="form-control" id="check_out" name="check_out" required>
                                     <div class="field-error" id="check_out-err"><i class="fas fa-exclamation-circle"></i><span></span></div>
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label" for="adults">Personnes</label>
+                                    <label class="form-label" for="adults">{{ __('frontend_reservation.persons') }}</label>
                                     <select class="form-select" id="adults" name="adults">
                                         @for($i = 1; $i <= 6; $i++)
                                             <option value="{{ $i }}" {{ $i == 2 ? 'selected' : '' }}>
-                                                {{ $i }} personne{{ $i > 1 ? 's' : '' }}
+                                                {{ $i }} {{ __('frontend_reservation.persons') }}{{ $i > 1 ? 's' : '' }}
                                             </option>
                                         @endfor
                                     </select>
@@ -397,7 +397,7 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
 
                             <div class="mt-3">
                                 <button type="button" class="btn btn-primary w-100" id="checkAvailability">
-                                    <i class="fas fa-search me-2"></i>Rechercher les chambres disponibles
+                                    <i class="fas fa-search me-2"></i>{{ __('frontend_reservation.search_rooms') }}
                                 </button>
                                 <div class="field-error mt-2" id="dates-err"><i class="fas fa-exclamation-circle"></i><span></span></div>
                             </div>
@@ -407,19 +407,19 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                     {{-- SECTION 3 · Chambre --}}
                     <div class="card">
                         <div class="card-header">
-                            <h4><i class="fas fa-bed me-2"></i>Choisissez votre chambre</h4>
+                            <h4><i class="fas fa-bed me-2"></i>{{ __('frontend_reservation.choose_room') }}</h4>
                         </div>
                         <div class="card-body">
                             <div id="roomFilters" style="display:none">
                                 <div class="row g-2 mb-3">
                                     <div class="col-md-6">
                                         <select class="form-select form-select-sm" id="typeFilter">
-                                            <option value="">Tous les types</option>
+                                            <option value="">{{ __('frontend_reservation.all_types') }}</option>
                                         </select>
                                     </div>
                                     <div class="col-md-6">
                                         <select class="form-select form-select-sm" id="priceFilter">
-                                            <option value="">Tous les prix</option>
+                                            <option value="">{{ __('frontend_reservation.all_prices') }}</option>
                                             <option value="50000">≤ 50 000 FCFA</option>
                                             <option value="100000">≤ 100 000 FCFA</option>
                                             <option value="150000">≤ 150 000 FCFA</option>
@@ -429,14 +429,14 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                                 </div>
                                 <div class="alert alert-info small mb-3">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    <span id="roomCount">0 chambre(s) disponible(s)</span>
+                                    <span id="roomCount">{{ __('frontend_reservation.no_rooms_available') }}</span>
                                 </div>
                             </div>
 
                             <div id="roomsList" style="max-height:400px; overflow-y:auto;">
                                 <div class="empty-state">
                                     <i class="fas fa-search"></i>
-                                    <p class="text-muted">Cliquez sur "Rechercher" pour voir les chambres disponibles</p>
+                                    <p class="text-muted">{{ __('frontend_reservation.click_search') }}</p>
                                 </div>
                             </div>
                             <input type="hidden" name="room_id" id="selected_room_id">
@@ -449,32 +449,32 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                         <div class="card-body">
                             <label class="form-label" for="notes">
                                 <i class="label-icon fas fa-comment-alt"></i>
-                                Demandes spéciales <small class="text-muted fw-normal">(optionnel)</small>
+                                {{ __('frontend_reservation.special_requests') }} <small class="text-muted fw-normal">({{ __('frontend_reservation.optional') }})</small>
                             </label>
                             <textarea class="form-control" id="notes" name="notes" rows="3" maxlength="500"
-                                      placeholder="Lit bébé, étage préféré, heure d'arrivée..."></textarea>
-                            <div class="char-counter"><span id="notesCount">0</span> / 500 caractères</div>
+                                      placeholder="{{ __('frontend_reservation.notes_placeholder') }}"></textarea>
+                            <div class="char-counter"><span id="notesCount">0</span> / 500 {{ __('frontend_reservation.characters') }}</div>
 
                             <div id="summary" class="summary-box mt-4" style="display:none">
-                                <h6 class="fw-bold mb-3"><i class="fas fa-receipt me-2" style="color:var(--primary)"></i>Récapitulatif</h6>
-                                <div class="summary-row"><span>Chambre :</span><strong id="sumRoom">-</strong></div>
-                                <div class="summary-row"><span>Dates :</span><strong id="sumDates">-</strong></div>
-                                <div class="summary-row"><span>Nuits :</span><strong id="sumNights">0</strong></div>
-                                <div class="summary-row"><span>Prix/nuit :</span><strong id="sumPrice">-</strong></div>
+                                <h6 class="fw-bold mb-3"><i class="fas fa-receipt me-2" style="color:var(--primary)"></i>{{ __('frontend_reservation.summary') }}</h6>
+                                <div class="summary-row"><span>{{ __('frontend_reservation.summary_room') }}</span><strong id="sumRoom">-</strong></div>
+                                <div class="summary-row"><span>{{ __('frontend_reservation.summary_dates') }}</span><strong id="sumDates">-</strong></div>
+                                <div class="summary-row"><span>{{ __('frontend_reservation.summary_nights') }}</span><strong id="sumNights">0</strong></div>
+                                <div class="summary-row"><span>{{ __('frontend_reservation.summary_price') }}</span><strong id="sumPrice">-</strong></div>
                                 <hr>
                                 <div class="summary-row">
-                                    <span class="fw-bold">Total :</span>
+                                    <span class="fw-bold">{{ __('frontend_reservation.summary_total') }}</span>
                                     <span class="summary-total" id="sumTotal">0 FCFA</span>
                                 </div>
                             </div>
 
                             <div class="d-grid mt-4">
                                 <button type="submit" class="btn btn-primary btn-lg" id="submitBtn" disabled>
-                                    <i class="fas fa-check-circle me-2"></i>Confirmer ma réservation
+                                    <i class="fas fa-check-circle me-2"></i>{{ __('frontend_reservation.confirm_booking') }}
                                 </button>
                             </div>
                             <p class="text-center text-muted small mt-3">
-                                <i class="fas fa-lock me-1"></i>Réservation 100% sécurisée
+                                <i class="fas fa-lock me-1"></i>{{ __('frontend_reservation.secure_booking') }}
                             </p>
                         </div>
                     </div>
@@ -488,32 +488,32 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
                     <div class="card-body">
                         <h5 class="fw-bold mb-4">
                             <i class="fas fa-info-circle me-2" style="color:var(--primary)"></i>
-                            Pourquoi réserver chez nous ?
+                            {{ __('frontend_reservation.why_book') }}
                         </h5>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-check"></i></div>
-                            <div class="feature-content"><h6>Meilleur tarif garanti</h6><small>Prix les plus bas du marché</small></div>
+                            <div class="feature-content"><h6>{{ __('frontend_reservation.best_rate') }}</h6><small>{{ __('frontend_reservation.best_rate_desc') }}</small></div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-undo"></i></div>
-                            <div class="feature-content"><h6>Annulation gratuite</h6><small>Jusqu'à 48h avant l'arrivée</small></div>
+                            <div class="feature-content"><h6>{{ __('frontend_reservation.free_cancel') }}</h6><small>{{ __('frontend_reservation.free_cancel_desc') }}</small></div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-ban"></i></div>
-                            <div class="feature-content"><h6>Sans frais cachés</h6><small>Prix transparent</small></div>
+                            <div class="feature-content"><h6>{{ __('frontend_reservation.no_fees') }}</h6><small>{{ __('frontend_reservation.no_fees_desc') }}</small></div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon"><i class="fas fa-headset"></i></div>
-                            <div class="feature-content"><h6>Support 24/7</h6><small>Équipe disponible</small></div>
+                            <div class="feature-content"><h6>{{ __('frontend_reservation.support_24_7') }}</h6><small>{{ __('frontend_reservation.support_desc') }}</small></div>
                         </div>
                         <hr class="my-4">
-                        <h6 class="fw-bold mb-3">Besoin d'aide ?</h6>
+                        <h6 class="fw-bold mb-3">{{ __('frontend_reservation.need_help') }}</h6>
                         <div class="d-grid gap-2">
                             <a href="https://wa.me/229XXXXX" target="_blank" class="btn btn-primary">
                                 <i class="fab fa-whatsapp me-2"></i>WhatsApp
                             </a>
                             <a href="tel:+229XXXXX" class="btn" style="border:2px solid var(--primary);color:var(--primary);font-weight:600;">
-                                <i class="fas fa-phone me-2"></i>Appeler
+                                <i class="fas fa-phone me-2"></i>{{ __('frontend_reservation.call') }}
                             </a>
                         </div>
                     </div>
@@ -528,23 +528,23 @@ body { font-family: 'Plus Jakarta Sans', sans-serif; }
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header" style="background:linear-gradient(135deg,#1A472A,#0F2918);color:white;border:none">
-                <h5 class="modal-title" style="font-family:'Playfair Display',serif;"><i class="fas fa-check-circle me-2" style="color:#C9A961"></i>Réservation confirmée !</h5>
+                <h5 class="modal-title" style="font-family:'Playfair Display',serif;"><i class="fas fa-check-circle me-2" style="color:#C9A961"></i>{{ __('frontend_reservation.booking_confirmed') }}</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body text-center p-4">
                 <i class="fas fa-check-circle fa-4x mb-3" style="color:#C9A961"></i>
-                <h4>Merci pour votre réservation !</h4>
+                <h4>{{ __('frontend_reservation.thanks_booking') }}</h4>
                 <p id="modalMessage" class="text-muted"></p>
                 <div id="modalDetails" class="alert alert-success text-start" style="display:none">
-                    <p class="mb-1"><strong>Réf :</strong> <span id="refNumber"></span></p>
-                    <p class="mb-1"><strong>Client :</strong> <span id="modalName"></span></p>
-                    <p class="mb-1"><strong>Arrivée :</strong> <span id="modalCheckIn"></span></p>
-                    <p class="mb-1"><strong>Départ :</strong> <span id="modalCheckOut"></span></p>
-                    <p class="mb-0"><strong>Total :</strong> <span id="modalTotal"></span></p>
+                    <p class="mb-1"><strong>{{ __('frontend_reservation.ref') }} :</strong> <span id="refNumber"></span></p>
+                    <p class="mb-1"><strong>{{ __('frontend_reservation.client') }} :</strong> <span id="modalName"></span></p>
+                    <p class="mb-1"><strong>{{ __('frontend_reservation.arrival') }} :</strong> <span id="modalCheckIn"></span></p>
+                    <p class="mb-1"><strong>{{ __('frontend_reservation.departure') }} :</strong> <span id="modalCheckOut"></span></p>
+                    <p class="mb-0"><strong>{{ __('frontend_reservation.total') }} :</strong> <span id="modalTotal"></span></p>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">{{ __('frontend_reservation.close') }}</button>
             </div>
         </div>
     </div>
@@ -562,21 +562,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const RULES = {
         f_name:      { required: true, minLen: 3, maxLen: 80,
                        pattern: /^[a-zA-ZÀ-ÿ\s\-'\.]+$/,
-                       msgs: { required: 'Le nom complet est obligatoire.', minLen: 'Minimum 3 caractères requis.', maxLen: 'Maximum 80 caractères.', pattern: 'Le nom ne peut pas contenir de chiffres ou caractères spéciaux.' } },
+                       msgs: { required: '{{ __("frontend_reservation.validation_name_required") }}', minLen: '{{ __("frontend_reservation.validation_name_min") }}', maxLen: '{{ __("frontend_reservation.validation_name_max") }}', pattern: '{{ __("frontend_reservation.validation_name_pattern") }}' } },
         f_email:     { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/,
-                       msgs: { required: 'L\'adresse email est obligatoire.', pattern: 'Email invalide (ex: jean@exemple.com).' } },
+                       msgs: { required: '{{ __("frontend_reservation.validation_email_required") }}', pattern: '{{ __("frontend_reservation.validation_email_pattern") }}' } },
         f_phone:     { required: true, pattern: /^(\+?229\s?)?\d{2}(\s?\d{2}){3,4}$/,
-                       msgs: { required: 'Le téléphone est obligatoire.', pattern: 'Format invalide. Ex : +229 01 23 45 67' } },
+                       msgs: { required: '{{ __("frontend_reservation.validation_phone_required") }}', pattern: '{{ __("frontend_reservation.validation_phone_pattern") }}' } },
         f_address:   { required: true, minLen: 3,
-                       msgs: { required: 'L\'adresse est obligatoire.', minLen: 'Minimum 3 caractères.' } },
+                       msgs: { required: '{{ __("frontend_reservation.validation_address_required") }}', minLen: '{{ __("frontend_reservation.validation_address_min") }}' } },
         f_gender:    { required: true,
-                       msgs: { required: 'Veuillez sélectionner votre genre.' } },
+                       msgs: { required: '{{ __("frontend_reservation.validation_gender_required") }}' } },
         f_job:       { required: true, minLen: 2,
-                       msgs: { required: 'La profession est obligatoire.', minLen: 'Minimum 2 caractères.' } },
+                       msgs: { required: '{{ __("frontend_reservation.validation_job_required") }}', minLen: '{{ __("frontend_reservation.validation_job_min") }}' } },
         f_birthdate: { required: true, minAge: 18,
-                       msgs: { required: 'La date de naissance est obligatoire.', minAge: 'Vous devez avoir au moins 18 ans.' } },
-        check_in:    { required: true, msgs: { required: 'La date d\'arrivée est obligatoire.' } },
-        check_out:   { required: true, msgs: { required: 'La date de départ est obligatoire.' } },
+                       msgs: { required: '{{ __("frontend_reservation.validation_birthdate_required") }}', minAge: '{{ __("frontend_reservation.validation_birthdate_min_age") }}' } },
+        check_in:    { required: true, msgs: { required: '{{ __("frontend_reservation.validation_checkin_required") }}' } },
+        check_out:   { required: true, msgs: { required: '{{ __("frontend_reservation.validation_checkout_required") }}' } },
     };
 
     /* ── helpers DOM ── */
@@ -686,7 +686,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!checkIn.value || !checkOut.value) { stayInfo.style.display='none'; return; }
         const nights = Math.ceil((new Date(checkOut.value) - new Date(checkIn.value)) / 86400000);
         if (nights > 0) {
-            $('stayInfoText').textContent = `Séjour de ${nights} nuit${nights>1?'s':''} · du ${fmtDate(checkIn.value)} au ${fmtDate(checkOut.value)}`;
+            $('stayInfoText').textContent = `{{ __("frontend_reservation.stay_info", [":nights" => ""]) }}${nights} nuit${nights>1?'s':''} · du ${fmtDate(checkIn.value)} au ${fmtDate(checkOut.value)}`;
             stayInfo.style.display = 'block';
         } else {
             stayInfo.style.display = 'none';
@@ -704,7 +704,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     checkOut.addEventListener('change', function () {
         if (this.value <= checkIn.value) {
-            setInvalid('check_out', 'La date de départ doit être postérieure à l\'arrivée.');
+            setInvalid('check_out', '{{ __("frontend_reservation.validation_checkout_after") }}');
         } else {
             setValid('check_out');
             refreshStayInfo();
@@ -757,13 +757,13 @@ document.addEventListener('DOMContentLoaded', function () {
     if (preSelectedRoomId) checkBtn.click();
 
     checkBtn.addEventListener('click', async function () {
-        if (!checkIn.value)  { setInvalid('check_in',  'Veuillez sélectionner la date d\'arrivée.'); return; }
-        if (!checkOut.value) { setInvalid('check_out', 'Veuillez sélectionner la date de départ.'); return; }
-        if (checkOut.value <= checkIn.value) { setInvalid('check_out', 'La date de départ doit être après l\'arrivée.'); return; }
+        if (!checkIn.value)  { setInvalid('check_in',  '{{ __("frontend_reservation.validation_checkin_required") }}'); return; }
+        if (!checkOut.value) { setInvalid('check_out', '{{ __("frontend_reservation.validation_checkout_required") }}'); return; }
+        if (checkOut.value <= checkIn.value) { setInvalid('check_out', '{{ __("frontend_reservation.validation_checkout_after") }}'); return; }
 
         this.disabled = true;
-        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Recherche...';
-        roomsList.innerHTML = '<div class="loading-state"><div class="spinner-border" style="color:#1A472A"></div><p class="mt-2 text-muted">Recherche des chambres...</p></div>';
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ __("frontend_reservation.searching") }}';
+        roomsList.innerHTML = '<div class="loading-state"><div class="spinner-border" style="color:#1A472A"></div><p class="mt-2 text-muted">{{ __("frontend_reservation.searching_rooms") }}</p></div>';
 
         try {
             const p = new URLSearchParams({ check_in: checkIn.value, check_out: checkOut.value, adults: $('adults').value });
@@ -773,7 +773,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (data.rooms && data.rooms.length > 0) {
                 allRooms = data.rooms;
                 const types = [...new Set(data.rooms.map(r => r.type_name))];
-                typeFilter.innerHTML = '<option value="">Tous les types</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
+                typeFilter.innerHTML = '<option value="">{{ __("frontend_reservation.all_types") }}</option>' + types.map(t => `<option value="${t}">${t}</option>`).join('');
                 roomFilters.style.display = 'block';
                 displayRooms(data.rooms);
                 if (preSelectedRoomId) {
@@ -784,23 +784,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             } else {
                 roomFilters.style.display = 'none';
-                roomsList.innerHTML = `<div class="empty-state"><i class="fas fa-bed text-warning"></i><h5>Aucune chambre disponible</h5><p class="text-muted">Essayez d'autres dates.</p></div>`;
+                roomsList.innerHTML = `<div class="empty-state"><i class="fas fa-bed text-warning"></i><h5>{{ __("frontend_reservation.no_rooms_available") }}</h5><p class="text-muted">{{ __("frontend_reservation.try_other_dates") }}</p></div>`;
             }
         } catch {
             roomFilters.style.display = 'none';
-            roomsList.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle text-danger"></i><h5>Erreur de connexion</h5><p class="text-muted">Vérifiez votre réseau et réessayez.</p></div>`;
+            roomsList.innerHTML = `<div class="empty-state"><i class="fas fa-exclamation-triangle text-danger"></i><h5>{{ __("frontend_reservation.connection_error") }}</h5><p class="text-muted">{{ __("frontend_reservation.check_network") }}</p></div>`;
         }
 
         this.disabled = false;
-        this.innerHTML = '<i class="fas fa-search me-2"></i>Rechercher les chambres disponibles';
+        this.innerHTML = '<i class="fas fa-search me-2"></i>{{ __("frontend_reservation.search_rooms") }}';
     });
 
     function displayRooms(rooms) {
         const nights = Math.ceil((new Date(checkOut.value) - new Date(checkIn.value)) / 86400000);
-        $('roomCount').textContent = `${rooms.length} chambre(s) disponible(s)`;
+        $('roomCount').textContent = `${rooms.length} {{ __('frontend_reservation.rooms_found') }}`;
 
         if (!rooms.length) {
-            roomsList.innerHTML = `<div class="empty-state"><i class="fas fa-filter"></i><p class="text-muted">Aucune chambre pour ces filtres.</p></div>`;
+            roomsList.innerHTML = `<div class="empty-state"><i class="fas fa-filter"></i><p class="text-muted">{{ __("frontend_reservation.no_rooms_for_filters") }}</p></div>`;
             return;
         }
 
@@ -814,7 +814,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <div class="room-card-header">
                     <div>
                         <div class="room-name">${room.name}</div>
-                        <div class="room-number">Chambre ${room.number} · ${room.type_name || 'Standard'}</div>
+                        <div class="room-number">{{ __("frontend_reservation.step_room") }} ${room.number} · ${room.type_name || 'Standard'}</div>
                     </div>
                     <span class="badge-room-capacity"><i class="fas fa-users me-1"></i>${room.capacity} pers.</span>
                 </div>
@@ -863,7 +863,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function updateSummary() {
         const nights = Math.ceil((new Date(checkOut.value) - new Date(checkIn.value)) / 86400000);
         const total  = selectedRoom.price * nights;
-        $('sumRoom').textContent   = `${selectedRoom.name} (Chambre ${selectedRoom.number})`;
+        $('sumRoom').textContent   = `${selectedRoom.name} ({{ __("frontend_reservation.step_room") }} ${selectedRoom.number})`;
         $('sumDates').textContent  = `${fmtDate(checkIn.value)} → ${fmtDate(checkOut.value)}`;
         $('sumNights').textContent = nights;
         $('sumPrice').textContent  = selectedRoom.price.toLocaleString() + ' FCFA';
@@ -885,7 +885,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (!selectedRoom) {
             const re = $('room-err');
-            re.querySelector('span').textContent = 'Veuillez sélectionner une chambre avant de confirmer.';
+            re.querySelector('span').textContent = '{{ __("frontend_reservation.error_select_room") }}';
             re.classList.add('show');
             ok = false;
             $('roomsList').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -898,7 +898,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Traitement en cours...';
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ __("frontend_reservation.processing") }}';
 
         const fd = new FormData(this);
         try {
@@ -906,7 +906,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const data = await res.json();
 
             if (data.success) {
-                $('modalMessage').textContent = data.message || 'Votre réservation a été enregistrée.';
+                $('modalMessage').textContent = data.message || '{{ __("frontend_reservation.success_message") }}';
                 if (data.transaction) {
                     $('modalDetails').style.display = 'block';
                     $('refNumber').textContent    = 'RES-' + String(data.transaction.id).padStart(6,'0');
@@ -921,7 +921,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 this.reset();
                 summary.style.display = 'none'; roomFilters.style.display = 'none';
                 $('stayInfo').style.display = 'none';
-                roomsList.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><p class="text-muted">Recherchez des chambres</p></div>';
+                roomsList.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><p class="text-muted">{{ __("frontend_reservation.search_rooms_link") }}</p></div>';
                 submitBtn.disabled = true; selectedRoom = null; allRooms = [];
                 $('notesCount').textContent = '0';
                 document.querySelectorAll('.form-control,.form-select').forEach(el => el.classList.remove('is-valid','is-invalid'));
@@ -939,15 +939,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     const first = document.querySelector('.is-invalid');
                     if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else {
-                    alert('Erreur : ' + (data.message || 'Veuillez réessayer.'));
+                    alert('{{ __("frontend_reservation.connection_error") }} : ' + (data.message || '{{ __("frontend_reservation.try_other_dates") }}'));
                 }
             }
         } catch {
-            alert('Erreur de connexion. Vérifiez votre réseau et réessayez.');
+            alert('{{ __("frontend_reservation.connection_error") }}. {{ __("frontend_reservation.check_network") }}');
         }
 
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Confirmer ma réservation';
+        submitBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>{{ __("frontend_reservation.confirm_booking") }}';
     });
 
     refreshProgress();

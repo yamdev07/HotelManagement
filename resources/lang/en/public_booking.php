@@ -1,0 +1,26 @@
+<?php
+
+return [
+    'title' => 'Your reservation',
+    'back' => 'Back to rooms',
+    'finalize' => 'Finalize your reservation',
+    'your_details' => 'Your details',
+    'full_name' => 'Full name *',
+    'full_name_placeholder' => 'First Last',
+    'email' => 'Email *',
+    'email_placeholder' => 'you@example.com',
+    'phone' => 'Phone / WhatsApp *',
+    'confirm_booking' => 'Confirm my reservation',
+    'booking_note' => 'Booking without commitment · the hotel contacts you for the deposit (online payment soon).',
+    'summary' => 'Summary',
+    'room_default' => 'Room',
+    'arrival' => 'Arrival',
+    'departure' => 'Departure',
+    'guests' => 'Guests',
+    'promo_code' => 'Promo code',
+    'apply' => 'Apply',
+    'modify' => 'Modify',
+    'total_stay' => 'Total stay',
+    'suggested_deposit' => 'Suggested deposit (15%)',
+    'balance_arrival' => 'Balance is paid at check-in.',
+];

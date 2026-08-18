@@ -1,18 +1,18 @@
 @extends('platform.layout')
 
-@section('title', 'Hôtels')
+@section('title', __('platform.hotels_title'))
 
 @section('content')
     {{-- ===== Synthèse ===== --}}
     <div class="row g-3 mb-4">
         @php
             $cards = [
-                ['Inscriptions ce mois', $summary['this_month'], 'fa-user-plus', '#a9b0ff', 'rgba(124,131,255,.18)'],
-                ['Revenus totaux', number_format($summary['revenue'], 0, ',', ' ').' F', 'fa-sack-dollar', 'var(--g400)', 'rgb(from var(--g400) r g b / .16)'],
-                ['Revenu mensuel', number_format($summary['mrr'], 0, ',', ' ').' F', 'fa-arrow-trend-up', '#38bdf8', 'rgba(56,189,248,.16)'],
-                ['Hôtels actifs', $summary['active'].' / '.$summary['total'], 'fa-circle-check', '#c4b5fd', 'rgba(176,107,255,.18)'],
-                ['Réabonnements', $summary['renewals'], 'fa-rotate', '#fbbf24', 'rgba(251,191,36,.16)'],
-                ['Expirés / suspendus', $summary['expired'], 'fa-triangle-exclamation', '#fb7185', 'rgba(251,113,133,.16)'],
+                [__('platform.signups_this_month'), $summary['this_month'], 'fa-user-plus', '#a9b0ff', 'rgba(124,131,255,.18)'],
+                [__('platform.total_revenue'), number_format($summary['revenue'], 0, ',', ' ').' F', 'fa-sack-dollar', 'var(--g400)', 'rgb(from var(--g400) r g b / .16)'],
+                [__('platform.monthly_revenue'), number_format($summary['mrr'], 0, ',', ' ').' F', 'fa-arrow-trend-up', '#38bdf8', 'rgba(56,189,248,.16)'],
+                [__('platform.active_hotels'), $summary['active'].' / '.$summary['total'], 'fa-circle-check', '#c4b5fd', 'rgba(176,107,255,.18)'],
+                [__('platform.renewals'), $summary['renewals'], 'fa-rotate', '#fbbf24', 'rgba(251,191,36,.16)'],
+                [__('platform.expired_suspended'), $summary['expired'], 'fa-triangle-exclamation', '#fb7185', 'rgba(251,113,133,.16)'],
             ];
         @endphp
         @foreach ($cards as [$label, $value, $icon, $c, $bg])
@@ -34,7 +34,7 @@
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="fw-semibold mb-0"><i class="fas fa-chart-column me-2 text-primary"></i>Inscriptions · 6 derniers mois</h6>
+                <h6 class="fw-semibold mb-0"><i class="fas fa-chart-column me-2 text-primary"></i>{{ __('platform.signups_6_months') }}</h6>
             </div>
             <canvas id="regChart" height="90"></canvas>
         </div>
@@ -43,21 +43,21 @@
     {{-- ===== Liste ===== --}}
     <div class="card border-0 shadow-sm">
         <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
-            <span><i class="fas fa-list me-2 text-primary"></i>Tous les hôtels</span>
+            <span><i class="fas fa-list me-2 text-primary"></i>{{ __('platform.all_hotels') }}</span>
             <span class="badge bg-light text-dark border">{{ $hotels->count() }}</span>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>Hôtel</th>
-                        <th>Contact</th>
-                        <th class="text-center">Statut</th>
-                        <th>Formule</th>
-                        <th>Abonnement</th>
-                        <th class="text-center">Chambres</th>
-                        <th>Inscrit</th>
-                        <th class="text-end">Actions</th>
+                        <th>{{ __('platform.hotel') }}</th>
+                        <th>{{ __('platform.contact') }}</th>
+                        <th class="text-center">{{ __('platform.status') }}</th>
+                        <th>{{ __('platform.plan_label') }}</th>
+                        <th>{{ __('platform.subscription_label') }}</th>
+                        <th class="text-center">{{ __('platform.rooms_label') }}</th>
+                        <th>{{ __('platform.signed_up') }}</th>
+                        <th class="text-end">{{ __('platform.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -80,11 +80,11 @@
                             </td>
                             <td class="text-center">
                                 @if ($hotel->hasActiveAccess())
-                                    <span class="badge bg-success-subtle text-success">Actif</span>
+                                    <span class="badge bg-success-subtle text-success">{{ __('platform.active') }}</span>
                                 @elseif (! $hotel->is_active)
-                                    <span class="badge bg-danger-subtle text-danger">Suspendu</span>
+                                    <span class="badge bg-danger-subtle text-danger">{{ __('platform.suspended') }}</span>
                                 @else
-                                    <span class="badge bg-warning-subtle text-warning">Expiré</span>
+                                    <span class="badge bg-warning-subtle text-warning">{{ __('platform.expired') }}</span>
                                 @endif
                             </td>
                             <td><span class="badge bg-light text-dark border">{{ $hotel->planName() }}</span></td>
@@ -92,34 +92,34 @@
                                 @if ($hotel->subscription_ends_at)
                                     <span class="{{ $hotel->isSubscriptionExpired() ? 'text-danger fw-semibold' : 'text-muted' }}">{{ $hotel->subscription_ends_at->format('d/m/Y') }}</span>
                                 @else
-                                    <span class="text-muted">illimité</span>
+                                    <span class="text-muted">{{ __('platform.unlimited') }}</span>
                                 @endif
                             </td>
                             <td class="text-center">{{ $hotel->rooms_count }}</td>
                             <td class="small text-muted">{{ $hotel->created_at?->format('d/m/Y') }}</td>
                             <td class="text-end text-nowrap">
-                                <a href="{{ route('platform.hotels.show', $hotel) }}" class="btn btn-sm btn-outline-primary" title="Détails"><i class="fas fa-eye"></i></a>
+                                <a href="{{ route('platform.hotels.show', $hotel) }}" class="btn btn-sm btn-outline-primary" title="{{ __('platform.details') }}"><i class="fas fa-eye"></i></a>
                                 <form action="{{ route('platform.hotels.toggle', $hotel) }}" method="POST" class="d-inline">
                                     @csrf @method('PATCH')
                                     <input type="hidden" name="reason" value="">
                                     @if ($hotel->is_active)
-                                        <button class="btn btn-sm btn-outline-warning" title="Suspendre"
+                                        <button class="btn btn-sm btn-outline-warning" title="{{ __('platform.suspend') }}"
                                                 data-hotel="{{ $hotel->name }}"
                                                 onclick="return suspendHotelPrompt(this);">
                                             <i class="fas fa-ban"></i>
                                         </button>
                                     @else
-                                        <button class="btn btn-sm btn-outline-success" title="Réactiver"><i class="fas fa-check"></i></button>
+                                        <button class="btn btn-sm btn-outline-success" title="{{ __('platform.reactivate') }}"><i class="fas fa-check"></i></button>
                                     @endif
                                 </form>
                                 <form action="{{ route('platform.hotels.destroy', $hotel) }}" method="POST" class="d-inline">
                                     @csrf @method('DELETE')
-                                    <button class="btn btn-sm btn-outline-danger" title="Supprimer" onclick="return confirm('SUPPRIMER définitivement {{ $hotel->name }} et ses {{ $hotel->users_count }} utilisateur(s) ? Irréversible.')"><i class="fas fa-trash"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger" title="{{ __('platform.delete') }}" onclick="return confirm('{{ __('platform.delete_confirm', ['name' => $hotel->name, 'count' => $hotel->users_count]) }}')"><i class="fas fa-trash"></i></button>
                                 </form>
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" class="text-center text-muted py-4">Aucun hôtel pour le moment.</td></tr>
+                        <tr><td colspan="8" class="text-center text-muted py-4">{{ __('platform.no_hotels') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -162,11 +162,13 @@
         function suspendHotelPrompt(btn) {
             var form = btn.form;
             var name = btn.getAttribute('data-hotel') || '';
-            window.promptAction('Raison de la suspension de « ' + name + " » (visible par l'hôtelier) :", function (r) {
+            var promptMsg = @json(__('platform.suspension_reason', ['name' => '« X »']));
+            promptMsg = promptMsg.replace('« X »', '« ' + name + ' »');
+            window.promptAction(promptMsg, function (r) {
                 if (r === null) return;
                 form.reason.value = r;
                 form.submit();
-            }, { default: "Non-paiement de l'abonnement", required: true });
+            }, { default: @json(__('platform.non_payment_default')), required: true });
             return false;
         }
     </script>

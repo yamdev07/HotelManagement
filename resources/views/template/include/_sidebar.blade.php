@@ -64,33 +64,33 @@
 
                     @if (Route::has('revenue.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
                         <a href="{{ route('revenue.index') }}" class="nav-item restricted {{ $activeClass('revenue.') }}"
-                            data-tooltip="Revenus">
+                            data-tooltip="{{ __('sidebar.revenue_title') }}">
                             <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
                             <div class="nav-content">
                                 <div class="nav-title">{{ __('sidebar.revenue_title') }}</div>
-                                <div class="nav-subtitle">Pilotage financier</div>
+                                <div class="nav-subtitle">{{ __('sidebar.revenue_subtitle') }}</div>
                             </div>
                         </a>
                     @endif
 
                     @if (Route::has('promo.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
                         <a href="{{ route('promo.index') }}" class="nav-item restricted {{ $activeClass('promo.') }}"
-                            data-tooltip="Codes promo">
+                            data-tooltip="{{ __('sidebar.promo_title') }}">
                             <div class="nav-icon"><i class="fas fa-tags"></i></div>
                             <div class="nav-content">
                                 <div class="nav-title">{{ __('sidebar.promo_title') }}</div>
-                                <div class="nav-subtitle">Réductions vitrine</div>
+                                <div class="nav-subtitle">{{ __('sidebar.promo_subtitle') }}</div>
                             </div>
                         </a>
                     @endif
 
                     @if (Route::has('reviews.index') && in_array(auth()->user()->role, ['Super', 'Admin', 'Manager']))
                         <a href="{{ route('reviews.index') }}" class="nav-item restricted {{ $activeClass('reviews.') }}"
-                            data-tooltip="Avis clients">
+                            data-tooltip="{{ __('sidebar.reviews_title') }}">
                             <div class="nav-icon"><i class="fas fa-star"></i></div>
                             <div class="nav-content">
                                 <div class="nav-title">{{ __('sidebar.reviews_title') }}</div>
-                                <div class="nav-subtitle">Modération vitrine</div>
+                                <div class="nav-subtitle">{{ __('sidebar.reviews_subtitle') }}</div>
                             </div>
                         </a>
                     @endif
@@ -239,11 +239,11 @@
                         @if (Route::has('channels.index') && in_array(auth()->user()->role, ['Super', 'Admin']))
                             <a href="{{ route('channels.index') }}"
                                 class="nav-item restricted {{ $activeClass('channels.') }}"
-                                data-tooltip="Synchronisation Booking/Airbnb">
+                                data-tooltip="{{ __('sidebar.sync_title') }}">
                                 <div class="nav-icon"><i class="fas fa-arrows-rotate"></i></div>
                                 <div class="nav-content">
                                     <div class="nav-title">{{ __('sidebar.sync_title') }}</div>
-                                    <div class="nav-subtitle">Booking · Airbnb</div>
+                                    <div class="nav-subtitle">{{ __('sidebar.sync_subtitle') }}</div>
                                 </div>
                             </a>
                         @endif
@@ -537,7 +537,7 @@
                             @break
 
                             @case('Manager')
-                                <span class="role-pill role-admin">Direction</span>
+                                <span class="role-pill role-admin">{{ __('sidebar.role_manager') }}</span>
                             @break
 
                             @case('Receptionist')

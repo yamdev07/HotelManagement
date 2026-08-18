@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Synchronisation des calendriers')
+@section('title', __('channels.page_title'))
 
 @section('content')
 <style>
@@ -53,15 +53,15 @@ html[data-theme="dark"] .chan-page{
 <div class="chan-page">
     <div class="chan-head">
         <div>
-            <h1><span class="ic"><i class="fas fa-arrows-rotate"></i></span> Synchronisation des calendriers</h1>
-            <p>Évitez les doubles réservations entre votre site et Booking.com / Airbnb.
-               Donnez le <strong>lien iCal</strong> de chaque chambre à ces plateformes, et collez ici les leurs :
-               les dates vendues ailleurs se bloquent automatiquement chez vous.</p>
+            <h1><span class="ic"><i class="fas fa-arrows-rotate"></i></span> {{ __('channels.heading') }}</h1>
+            <p>{!! __('channels.description_line1') !!}
+               {!! __('channels.description_line2') !!}
+               {{ __('channels.description_line3') }}</p>
         </div>
         @if ($rooms->flatMap->calendarFeeds->isNotEmpty())
             <form method="POST" action="{{ route('channels.sync') }}">
                 @csrf
-                <button type="submit" class="chan-btn"><i class="fas fa-arrows-rotate"></i> Synchroniser maintenant</button>
+                <button type="submit" class="chan-btn"><i class="fas fa-arrows-rotate"></i> {{ __('channels.btn_sync') }}</button>
             </form>
         @endif
     </div>
@@ -72,21 +72,21 @@ html[data-theme="dark"] .chan-page{
 
     @if ($rooms->isEmpty())
         <div class="chan-empty">
-            <p>Ajoutez d'abord des chambres pour gérer leurs calendriers.</p>
-            <a href="{{ route('room.index') }}" class="chan-btn ghost"><i class="fas fa-bed"></i> Mes chambres</a>
+            <p>{{ __('channels.empty_rooms') }}</p>
+            <a href="{{ route('room.index') }}" class="chan-btn ghost"><i class="fas fa-bed"></i> {{ __('channels.btn_my_rooms') }}</a>
         </div>
     @else
         <div class="chan-grid">
             @foreach ($rooms as $room)
                 <div class="room-card">
                     <div class="rc-hd"><i class="fas fa-bed" style="color:var(--ink3)"></i>
-                        {{ $room->name ?: ('Chambre '.$room->number) }}
+                        {{ $room->name ?: (__('channels.room_label').' '.$room->number) }}
                         <span class="num">n°{{ $room->number }}</span>
                     </div>
                     <div class="rc-body">
                         {{-- Export : lien à donner aux OTA --}}
                         <div>
-                            <div class="rc-lbl"><i class="fas fa-arrow-up-from-bracket"></i> Lien à donner à Booking / Airbnb</div>
+                            <div class="rc-lbl"><i class="fas fa-arrow-up-from-bracket"></i> {{ __('channels.link_ota') }}</div>
                             <div class="copy-row">
                                 <input type="text" readonly value="{{ $room->icalUrl() }}" onclick="this.select()">
                                 <button type="button" class="copy-btn" data-copy="{{ $room->icalUrl() }}"><i class="fas fa-copy"></i></button>
@@ -95,7 +95,7 @@ html[data-theme="dark"] .chan-page{
 
                         {{-- Import : calendriers OTA configurés --}}
                         <div>
-                            <div class="rc-lbl"><i class="fas fa-arrow-down-to-bracket"></i> Calendriers importés</div>
+                            <div class="rc-lbl"><i class="fas fa-arrow-down-to-bracket"></i> {{ __('channels.imported_feeds') }}</div>
                             <div style="display:flex;flex-direction:column;gap:7px">
                                 @forelse ($room->calendarFeeds as $feed)
                                     <div class="feed">
@@ -106,17 +106,17 @@ html[data-theme="dark"] .chan-page{
                                             @elseif ($feed->last_synced_at)
                                                 <div class="meta"><i class="fas fa-check"></i> Sync {{ $feed->last_synced_at->diffForHumans() }}</div>
                                             @else
-                                                <div class="meta">En attente de première sync…</div>
+                                                <div class="meta">{{ __('channels.first_sync_pending') }}</div>
                                             @endif
                                         </div>
                                         <form method="POST" action="{{ route('channels.feed.destroy', $feed) }}"
-                                              onsubmit="return confirm('Retirer ce calendrier ?')">
+                                              onsubmit="return confirm('{{ __('channels.confirm_remove_feed') }}')">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="del" title="Retirer"><i class="fas fa-trash-can"></i></button>
+                                            <button type="submit" class="del" title="{{ __('channels.btn_remove') }}"><i class="fas fa-trash-can"></i></button>
                                         </form>
                                     </div>
                                 @empty
-                                    <div class="feed-empty">Aucun calendrier importé pour l'instant.</div>
+                                    <div class="feed-empty">{{ __('channels.empty_feeds') }}</div>
                                 @endforelse
                             </div>
                         </div>
@@ -128,9 +128,9 @@ html[data-theme="dark"] .chan-page{
                                 <option value="Booking.com">Booking.com</option>
                                 <option value="Airbnb">Airbnb</option>
                                 <option value="Expedia">Expedia</option>
-                                <option value="Autre">Autre</option>
+                                <option value="Autre">{{ __('channels.option_other') }}</option>
                             </select>
-                            <input type="url" name="url" placeholder="Coller le lien iCal (https://…)" required>
+                            <input type="url" name="url" placeholder="{{ __('channels.placeholder_ical') }}" required>
                             <button type="submit"><i class="fas fa-plus"></i></button>
                         </form>
                     </div>

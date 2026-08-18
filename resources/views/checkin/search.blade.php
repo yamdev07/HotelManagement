@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Check-in · Recherche')
+@section('title', __('checkin.search_title') . ' · ' . __('checkin.checkin'))
 @section('content')
 
 <style>
@@ -562,11 +562,11 @@
 
     {{-- Breadcrumb --}}
     <div class="breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('checkin.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('checkin.index') }}">Check-in</a>
+        <a href="{{ route('checkin.index') }}">{{ __('checkin.checkin') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="active">Recherche</span>
+        <span class="active">{{ __('checkin.search_title') }}</span>
     </div>
 
     {{-- En-tête --}}
@@ -574,18 +574,18 @@
         <div>
             <div class="header-title">
                 <span class="header-icon"><i class="fas fa-search"></i></span>
-                <h1>Recherche de <em>réservations</em></h1>
+                <h1>{!! __('checkin.search_heading', ['term' => '<em>' . __('checkin.search_heading_em') . '</em>') !!}</h1>
             </div>
-            <p class="header-subtitle">Trouvez rapidement une réservation pour le check-in</p>
+            <p class="header-subtitle">{{ __('checkin.search_subtitle') }}</p>
         </div>
         <a href="{{ route('checkin.index') }}" class="btn btn-gray">
-            <i class="fas fa-arrow-left"></i> Retour
+            <i class="fas fa-arrow-left"></i> {{ __('checkin.back') }}
         </a>
     </div>
 
     {{-- Barre de recherche --}}
     <div class="search-container anim-3">
-        <h4><i class="fas fa-search"></i>Rechercher une réservation</h4>
+        <h4><i class="fas fa-search"></i>{{ __('checkin.search_reservation') }}</h4>
         <form method="GET" action="{{ route('checkin.search') }}" id="search-form">
             <div class="row g-3">
                 <div class="col-md-8">
@@ -594,16 +594,16 @@
                         <input type="text" 
                                name="search" 
                                id="search-input"
-                               placeholder="Nom, téléphone, email, chambre..."
+                               placeholder="{{ __('checkin.search_placeholder_long') }}"
                                value="{{ $search ?? '' }}"
                                autocomplete="off"
                                autofocus>
-                        <button type="submit">Rechercher</button>
+                        <button type="submit">{{ __('checkin.search_button_long') }}</button>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <button type="submit" class="btn btn-green w-100">
-                        <i class="fas fa-search"></i> Rechercher
+                        <i class="fas fa-search"></i> {{ __('checkin.search_button_long') }}
                     </button>
                 </div>
             </div>
@@ -611,22 +611,22 @@
             {{-- Filtres rapides --}}
             <div class="quick-filters">
                 <span class="filter-badge" onclick="setFilter('arrivals-today')">
-                    <i class="fas fa-calendar-day"></i>Arrivées aujourd'hui
+                    <i class="fas fa-calendar-day"></i>{{ __('checkin.arrivals_today_filter') }}
                 </span>
                 <span class="filter-badge" onclick="setFilter('departures-today')">
-                    <i class="fas fa-sign-out-alt"></i>Départs aujourd'hui
+                    <i class="fas fa-sign-out-alt"></i>{{ __('checkin.departures_today_filter') }}
                 </span>
                 <span class="filter-badge" onclick="setFilter('reservation')">
-                    <i class="fas fa-calendar-check"></i>Réservations
+                    <i class="fas fa-calendar-check"></i>{{ __('checkin.reservations_filter') }}
                 </span>
                 <span class="filter-badge" onclick="setFilter('active')">
-                    <i class="fas fa-bed"></i>Dans l'hôtel
+                    <i class="fas fa-bed"></i>{{ __('checkin.in_hotel_filter') }}
                 </span>
                 <span class="filter-badge" onclick="setFilter('cancelled')">
-                    <i class="fas fa-ban"></i>Annulées
+                    <i class="fas fa-ban"></i>{{ __('checkin.cancelled_filter') }}
                 </span>
                 <span class="filter-badge" onclick="setFilter('no_show')">
-                    <i class="fas fa-user-slash"></i>No Show
+                    <i class="fas fa-user-slash"></i>{{ __('checkin.no_show_filter') }}
                 </span>
             </div>
         </form>
@@ -636,19 +636,19 @@
     <div class="search-loading" id="loading-indicator">
         <div class="loading-spinner">
             <div class="spinner"></div>
-            <p class="text-muted">Recherche en cours...</p>
+            <p class="text-muted">{{ __('checkin.search_loading') }}</p>
         </div>
     </div>
 
     {{-- Résultats --}}
     <div class="card anim-4">
         <div class="card-header">
-            <h5><i class="fas fa-list-ul"></i> Résultats de recherche</h5>
+            <h5><i class="fas fa-list-ul"></i> {{ __('checkin.search_results') }}</h5>
             @if(isset($search) && $search)
                 <div>
-                    <span class="badge badge-green">{{ $reservations->total() }} résultat(s)</span>
+                    <span class="badge badge-green">{{ $reservations->total() }} {{ __('checkin.results_count', ['count' => $reservations->total()]) }}</span>
                     <a href="{{ route('checkin.search') }}" class="btn btn-sm btn-gray ms-2">
-                        <i class="fas fa-times"></i> Effacer
+                        <i class="fas fa-times"></i> {{ __('checkin.clear_button') }}
                     </a>
                 </div>
             @endif
@@ -659,36 +659,36 @@
                 {{-- État initial --}}
                 <div class="empty-state">
                     <div class="empty-icon"><i class="fas fa-search"></i></div>
-                    <h4>Recherchez une réservation</h4>
-                    <p>Utilisez la barre de recherche ci-dessus</p>
+                    <h4>{{ __('checkin.search_initial_title') }}</h4>
+                    <p>{{ __('checkin.search_initial_subtitle') }}</p>
                     
                     <div class="row g-4 mt-2">
                         <div class="col-md-3">
                             <div class="guide-card">
                                 <i class="fas fa-user"></i>
-                                <h6>Par nom</h6>
-                                <p>Ex: "Dupont"</p>
+                                <h6>{{ __('checkin.search_by_name') }}</h6>
+                                <p>{{ __('checkin.search_by_name_example') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="guide-card">
                                 <i class="fas fa-phone"></i>
-                                <h6>Par téléphone</h6>
-                                <p>Ex: "0123456789"</p>
+                                <h6>{{ __('checkin.search_by_phone') }}</h6>
+                                <p>{{ __('checkin.search_by_phone_example') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="guide-card">
                                 <i class="fas fa-envelope"></i>
-                                <h6>Par email</h6>
-                                <p>Ex: "client@email.com"</p>
+                                <h6>{{ __('checkin.search_by_email') }}</h6>
+                                <p>{{ __('checkin.search_by_email_example') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="guide-card">
                                 <i class="fas fa-door-closed"></i>
-                                <h6>Par chambre</h6>
-                                <p>Ex: "101"</p>
+                                <h6>{{ __('checkin.search_by_room') }}</h6>
+                                <p>{{ __('checkin.search_by_room_example') }}</p>
                             </div>
                         </div>
                     </div>
@@ -698,11 +698,11 @@
                 {{-- Aucun résultat --}}
                 <div class="empty-state">
                     <div class="empty-icon"><i class="fas fa-search-minus"></i></div>
-                    <h4>Aucun résultat trouvé</h4>
-                    <p>Aucune réservation ne correspond à "{{ $search }}"</p>
+                    <h4>{{ __('checkin.no_results_found') }}</h4>
+                    <p>{!! __('checkin.no_results_match', ['search' => $search]) !!}</p>
                     <div class="d-flex gap-2 justify-content-center">
-                        <a href="{{ route('checkin.search') }}" class="btn btn-gray">Nouvelle recherche</a>
-                        <a href="{{ route('checkin.direct') }}" class="btn btn-green">Check-in direct</a>
+                        <a href="{{ route('checkin.search') }}" class="btn btn-gray">{{ __('checkin.new_search') }}</a>
+                        <a href="{{ route('checkin.direct') }}" class="btn btn-green">{{ __('checkin.checkin_direct_button') }}</a>
                     </div>
                 </div>
 
@@ -766,7 +766,7 @@
                                 <div class="col-md-3">
                                     <span class="room-badge mb-2">
                                         <i class="fas fa-door-closed"></i>
-                                        Chambre {{ $transaction->room->number }}
+                                        {{ __('checkin.room_number', ['number' => $transaction->room->number]) }}
                                     </span>
                                     <div class="text-muted small">
                                         <i class="fas fa-bed"></i>
@@ -776,7 +776,7 @@
                                 <div class="col-md-3">
                                     <div class="text-md-end">
                                         <div class="mb-2">
-                                            <small class="text-muted d-block">Arrivée</small>
+                                            <small class="text-muted d-block">{{ __('checkin.arrival_label') }}</small>
                                             <strong>{{ $transaction->check_in->format('d/m/Y H:i') }}</strong>
                                         </div>
                                         
@@ -784,7 +784,7 @@
                                             @if($transaction->status == 'reservation')
                                                 <a href="{{ route('checkin.show', $transaction) }}" 
                                                    class="btn btn-green btn-sm">
-                                                    <i class="fas fa-door-open"></i> Check-in
+                                                    <i class="fas fa-door-open"></i> {{ __('checkin.checkin_button') }}
                                                 </a>
                                                 <button onclick="quickCheckIn({{ $transaction->id }})" 
                                                         class="btn btn-gray btn-sm">
@@ -798,7 +798,7 @@
                                             @else
                                                 <a href="{{ route('transaction.show', $transaction) }}" 
                                                    class="btn btn-gray btn-sm">
-                                                    <i class="fas fa-eye"></i> Détails
+                                                    <i class="fas fa-eye"></i> {{ __('checkin.view_details') }}
                                                 </a>
                                             @endif
                                         </div>
@@ -811,22 +811,22 @@
                                 <div class="col-md-4">
                                     <small class="text-muted">
                                         <i class="fas fa-calendar-alt me-1" style="color:var(--green-600);"></i>
-                                        <strong>Durée:</strong> {{ $transaction->nights }} nuit(s)
+                                        <strong>{{ __('checkin.duration_short') }}</strong> {{ $transaction->nights }} {{ __('checkin.nights_short') }}
                                     </small>
                                 </div>
                                 <div class="col-md-4">
                                     <small class="text-muted">
                                         <i class="fas fa-money-bill-wave me-1" style="color:var(--green-600);"></i>
-                                        <strong>Total:</strong> {{ number_format($totalPrice, 0, ',', ' ') }} FCFA
+                                        <strong>{{ __('checkin.total_short_fcfa') }}</strong> {{ number_format($totalPrice, 0, ',', ' ') }} FCFA
                                     </small>
                                 </div>
                                 <div class="col-md-4">
                                     <small class="text-muted">
                                         <i class="fas fa-credit-card me-1" style="color:var(--green-600);"></i>
-                                        <strong>Payé:</strong> {{ number_format($totalPaid, 0, ',', ' ') }} FCFA
+                                        <strong>{{ __('checkin.paid_short') }}</strong> {{ number_format($totalPaid, 0, ',', ' ') }} FCFA
                                         @if($remaining > 0)
                                             <span class="text-danger ms-1">
-                                                (Solde: {{ number_format($remaining, 0, ',', ' ') }})
+                                                ({{ __('checkin.balance_short') }} {{ number_format($remaining, 0, ',', ' ') }})
                                             </span>
                                         @endif
                                     </small>
@@ -836,14 +836,14 @@
                             @if($transaction->status == 'cancelled' && $transaction->cancel_reason)
                                 <div class="mt-2 small text-muted">
                                     <i class="fas fa-info-circle me-1"></i>
-                                    Raison: {{ $transaction->cancel_reason }}
+                                    {{ __('checkin.cancel_reason') }} {{ $transaction->cancel_reason }}
                                 </div>
                             @endif
                             
                             @if($transaction->status == 'no_show')
                                 <div class="mt-2 small text-muted">
                                     <i class="fas fa-user-slash me-1"></i>
-                                    Client non présenté
+                                    {{ __('checkin.guest_not_shown') }}
                                 </div>
                             @endif
                         </div>
@@ -865,14 +865,14 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="fas fa-lightbulb" style="color:var(--green-600);"></i> Conseils</h5>
+                    <h5><i class="fas fa-lightbulb" style="color:var(--green-600);"></i> {{ __('checkin.tips') }}</h5>
                 </div>
                 <div class="card-body">
                     <ul class="mb-0" style="color:var(--gray-600); font-size:.8rem;">
-                        <li class="mb-2">Utilisez les initiales pour une recherche plus large</li>
-                        <li class="mb-2">Les numéros de téléphone peuvent être saisis sans indicatif</li>
-                        <li class="mb-2">Recherchez par numéro de chambre</li>
-                        <li>Utilisez les filtres rapides pour les besoins courants</li>
+                        <li class="mb-2">{{ __('checkin.tip_use_initials') }}</li>
+                        <li class="mb-2">{{ __('checkin.tip_phone_formats') }}</li>
+                        <li class="mb-2">{{ __('checkin.tip_room_number') }}</li>
+                        <li>{{ __('checkin.tip_use_filters') }}</li>
                     </ul>
                 </div>
             </div>
@@ -880,15 +880,15 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h5><i class="fas fa-clock" style="color:var(--green-600);"></i> Actions</h5>
+                    <h5><i class="fas fa-clock" style="color:var(--green-600);"></i> {{ __('checkin.actions_title') }}</h5>
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
                         <a href="{{ route('checkin.index') }}" class="btn btn-gray">
-                            <i class="fas fa-home"></i> Dashboard check-in
+                            <i class="fas fa-home"></i> {{ __('checkin.dashboard_checkin') }}
                         </a>
                         <a href="{{ route('checkin.direct') }}" class="btn btn-green">
-                            <i class="fas fa-user-plus"></i> Check-in direct
+                            <i class="fas fa-user-plus"></i> {{ __('checkin.checkin_direct_button') }}
                         </a>
                     </div>
                 </div>
@@ -927,7 +927,7 @@ function setFilter(type) {
 }
 
 function quickCheckIn(id) {
-    window.confirmAction('Effectuer un check-in rapide ?', function () {
+    window.confirmAction('{{ __("checkin.quick_checkin_confirm_js") }}', function () {
 
     const loader = document.getElementById('loading-indicator');
     loader.classList.add('active');
@@ -946,17 +946,17 @@ function quickCheckIn(id) {
             // Afficher une notification de succès
             const alert = document.createElement('div');
             alert.className = 'alert alert-green';
-            alert.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message || 'Check-in effectué avec succès'}`;
+            alert.innerHTML = `<i class="fas fa-check-circle"></i> ${data.message || '{{ __("checkin.checkin_success_js") }}'}`;
             document.querySelector('.search-page').prepend(alert);
             setTimeout(() => location.reload(), 1500);
         } else {
-            alert('Erreur: ' + (data.error || 'Échec du check-in'));
+            alert('Error: ' + (data.error || '{{ __("checkin.checkin_failed_js") }}'));
         }
     })
     .catch(error => {
         loader.classList.remove('active');
-        console.error('Erreur:', error);
-        alert('Erreur réseau lors du check-in');
+            console.error('Error:', error);
+            alert('{{ __("checkin.network_error_checkin") }}');
     });
     });
 }

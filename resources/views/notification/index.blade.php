@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Notifications')
+@section('title', __('notification.page_title'))
 @section('content')
 
 <style>
@@ -435,9 +435,9 @@
 <div class="notifications-page">
     <!-- Breadcrumb -->
     <div class="notifications-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('notification.breadcrumb_dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Notifications</span>
+        <span class="current">{{ __('notification.breadcrumb_notifications') }}</span>
     </div>
 
     <!-- Header -->
@@ -445,9 +445,9 @@
         <div class="notifications-brand">
             <div class="notifications-brand-icon"><i class="fas fa-bell"></i></div>
             <div>
-                <h1 class="notifications-header-title">Centre de <em>notifications</em></h1>
+                <h1 class="notifications-header-title">{!! __('notification.header_title') !!}</h1>
                 <p class="notifications-header-sub">
-                    <i class="fas fa-bell me-1"></i> Restez informé des activités importantes
+                    <i class="fas fa-bell me-1"></i> {{ __('notification.header_subtitle') }}
                 </p>
             </div>
         </div>
@@ -455,12 +455,12 @@
             <div class="stats-mini">
                 <div class="stat-mini-item">
                     <span class="stat-mini-dot dot-unread"></span>
-                    <span class="stat-mini-label">Nouvelles</span>
+                    <span class="stat-mini-label">{{ __('notification.unread') }}</span>
                     <span class="stat-mini-value">{{ count($newIds) }}</span>
                 </div>
                 <div class="stat-mini-item">
                     <span class="stat-mini-dot dot-read"></span>
-                    <span class="stat-mini-label">Total</span>
+                    <span class="stat-mini-label">{{ __('notification.total') }}
                     <span class="stat-mini-value">{{ $notifications->count() }}</span>
                 </div>
             </div>
@@ -473,17 +473,17 @@
     <div class="notif-toolbar anim-2">
         <div class="notif-search">
             <i class="fas fa-search"></i>
-            <input type="text" id="notifSearch" placeholder="Rechercher dans les notifications…" autocomplete="off">
+            <input type="text" id="notifSearch" placeholder="{{ __('notification.search_placeholder') }}" autocomplete="off">
         </div>
         <div class="notif-filters" id="notifFilters">
             <button type="button" class="notif-filter active" data-filter="all">
-                <i class="fas fa-layer-group"></i> Toutes <span class="count">{{ $notifications->count() }}</span>
+                <i class="fas fa-layer-group"></i> {{ __('notification.filter_all') }} <span class="count">{{ $notifications->count() }}</span>
             </button>
             <button type="button" class="notif-filter" data-filter="new">
-                <i class="fas fa-circle" style="font-size:.5rem;"></i> Nouvelles <span class="count">{{ $newCount }}</span>
+                <i class="fas fa-circle" style="font-size:.5rem;"></i> {{ __('notification.filter_new') }} <span class="count">{{ $newCount }}</span>
             </button>
             <button type="button" class="notif-filter" data-filter="read">
-                <i class="fas fa-check"></i> Lues <span class="count">{{ $readCount }}</span>
+                <i class="fas fa-check"></i> {{ __('notification.filter_read') }} <span class="count">{{ $readCount }}</span>
             </button>
         </div>
     </div>
@@ -503,30 +503,30 @@
                     @if ($isNew)
                         <span class="notification-card__badge badge-unread">
                             <i class="fas fa-circle me-1" style="font-size:.5rem;"></i>
-                            Nouveau
+                            {{ __('notification.unread_badge') }}
                         </span>
                     @else
                         <span class="notification-card__badge badge-read">
                             <i class="fas fa-check me-1"></i>
-                            Lu
+                            {{ __('notification.read_badge') }}
                         </span>
                     @endif
                 </div>
                 <div class="notification-card__content">
                     <p class="notification-card__message">
-                        {{ $notification->data['message'] ?? 'Notification' }}
+                        {{ $notification->data['message'] ?? __('notification.unread_fallback') }}
                     </p>
                 </div>
                 <div class="notification-card__footer">
                     <a href="{{ $notification->data['url'] ?? '#' }}" class="notification-card__link">
                         <i class="fas fa-eye"></i>
-                        Voir les détails
+                        {{ __('notification.view_details') }}
                     </a>
                     <span class="notification-card__meta">
                         @if ($isNew)
-                            <i class="fas fa-info-circle"></i> Reçue récemment
+                            <i class="fas fa-info-circle"></i> {{ __('notification.received_recently') }}
                         @else
-                            <i class="fas fa-check-circle" style="color:var(--g500);"></i> Déjà consultée
+                            <i class="fas fa-check-circle" style="color:var(--g500);"></i> {{ __('notification.already_read') }}
                         @endif
                     </span>
                 </div>
@@ -536,15 +536,15 @@
                 <div class="empty-icon">
                     <i class="fas fa-bell"></i>
                 </div>
-                <p class="empty-title">Aucune notification</p>
-                <p class="empty-text">Vous n'avez pas encore de notifications</p>
+                <p class="empty-title">{{ __('notification.empty_all_title') }}</p>
+                <p class="empty-text">{{ __('notification.empty_all_text') }}</p>
             </div>
         @endforelse
     </div>
 
     <!-- Aucun résultat de recherche/filtre -->
     <div class="notif-noresult" id="notifNoResult">
-        <i class="fas fa-magnifying-glass me-1"></i> Aucune notification ne correspond à votre recherche.
+        <i class="fas fa-magnifying-glass me-1"></i> {{ __('notification.no_results') }}
     </div>
 </div>
 

@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'page_title'            => 'Avis clients',
+    'heading'               => 'Avis clients',
+    'description'           => 'Modérez les avis déposés depuis votre vitrine. Les avis approuvés y sont publiés automatiquement.',
+    'pending_moderation'    => 'En attente de modération',
+    'btn_approve'           => 'Approuver',
+    'btn_reject'            => 'Rejeter',
+    'btn_delete'            => 'Supprimer',
+    'confirm_delete'        => 'Supprimer définitivement cet avis ?',
+    'reply_summary'         => 'Répondre (publié sous l\'avis)',
+    'reply_placeholder'     => 'Votre réponse…',
+    'btn_save_reply'        => 'Enregistrer la réponse',
+    'empty_pending'         => 'Aucun avis en attente. 🎉',
+    'published'             => 'Publiés',
+    'your_reply'            => 'Votre réponse',
+    'btn_unpublish'         => 'Dépublier',
+    'confirm_unpublish'     => 'Retirer cet avis de la vitrine ?',
+    'btn_edit_reply'        => 'Modifier la réponse',
+    'btn_reply'             => 'Répondre',
+    'btn_save'              => 'Enregistrer',
+    'empty_published'       => 'Aucun avis publié pour le moment.',
+    'rejected'              => 'Rejetés',
+    'btn_approve_anyway'    => 'Approuver finalement',
+    'published_ago'         => 'publié :time',
+];

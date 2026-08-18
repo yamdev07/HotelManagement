@@ -2,6 +2,7 @@
 
 return [
     // Header
+    'title' => 'Dashboard',
     'greeting' => 'Hello',
     'overview' => 'Operations overview',
     'website' => 'Website',

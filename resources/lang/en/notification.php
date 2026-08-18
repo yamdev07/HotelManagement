@@ -13,8 +13,15 @@ return [
     'header_subtitle' => 'Stay informed about important activities',
 
     // Stats
-    'unread' => 'Unread',
+    'unread' => 'New',
+    'total' => 'Total',
     'read' => 'Read',
+
+    // Filters
+    'filter_all' => 'All',
+    'filter_new' => 'New',
+    'filter_read' => 'Read',
+    'search_placeholder' => 'Search notifications…',
 
     // Unread section
     'unread_section' => 'Unread',
@@ -29,6 +36,7 @@ return [
     // Actions
     'view_details' => 'View details',
     'click_to_mark_read' => 'Click to mark as read',
+    'received_recently' => 'Received recently',
     'already_read' => 'Already viewed',
 
     // Empty states
@@ -36,4 +44,5 @@ return [
     'empty_unread_text' => 'You have no new notifications',
     'empty_all_title' => 'No notifications',
     'empty_all_text' => 'You don\'t have any notifications yet',
+    'no_results' => 'No notifications match your search.',
 ];

@@ -13,8 +13,15 @@ return [
     'header_subtitle' => 'Restez informé des activités importantes',
 
     // Stats
-    'unread' => 'Non lues',
+    'unread' => 'Nouvelles',
+    'total' => 'Total',
     'read' => 'Lues',
+
+    // Filters
+    'filter_all' => 'Toutes',
+    'filter_new' => 'Nouvelles',
+    'filter_read' => 'Lues',
+    'search_placeholder' => 'Rechercher dans les notifications…',
 
     // Unread section
     'unread_section' => 'Non lues',
@@ -29,11 +36,13 @@ return [
     // Actions
     'view_details' => 'Voir les détails',
     'click_to_mark_read' => 'Cliquez pour marquer comme lu',
-    'already_read' => 'Déjà consulté',
+    'received_recently' => 'Reçue récemment',
+    'already_read' => 'Déjà consultée',
 
     // Empty states
     'empty_unread_title' => 'Aucune notification non lue',
     'empty_unread_text' => 'Vous n\'avez pas de nouvelles notifications',
     'empty_all_title' => 'Aucune notification',
     'empty_all_text' => 'Vous n\'avez pas encore de notifications',
+    'no_results' => 'Aucune notification ne correspond à votre recherche.',
 ];

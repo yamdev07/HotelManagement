@@ -749,7 +749,7 @@
         'avg_daily_rate' => $room->price ?? 0,
         'occupancy_rate_30d' => 0,
         'next_available' => null,
-        'formatted_next_available' => 'Immédiate',
+        'formatted_next_available' => __('messages.rd_immediate'),
         'last_30_days_revenue' => 0
     ], $roomStats ?? []);
     
@@ -845,7 +845,7 @@
                             <div class="info-value">{{ $room->floor ?? 'N/A' }}</div>
                         </div>
                         <div class="info-row">
-                            <div class="info-label">Surface</div>
+                            <div class="info-label">{{ __('messages.surface') }}</div>
                             <div class="info-value">{{ $room->size ?? 'N/A' }} m²</div>
                         </div>
                         <div class="info-row">
@@ -922,7 +922,7 @@
                         <div style="font-size:.65rem;color:var(--s500);margin-bottom:4px;text-transform:uppercase;">{{ __('messages.next_availability') }}</div>
                         <div style="font-weight:700;color:var(--amber);">{{ $roomStats['next_available']->format('d/m/Y') }}</div>
                     </div>
-                    @elseif(isset($roomStats['formatted_next_available']) && $roomStats['formatted_next_available'] != 'Immédiate')
+                    @elseif(isset($roomStats['formatted_next_available']) && $roomStats['formatted_next_available'] != __('messages.rd_immediate'))
                     <div style="margin-top:16px;padding:12px;background:var(--g50);border:1.5px solid var(--g200);border-radius:var(--rl);text-align:center;">
                         <div style="font-size:.65rem;color:var(--s500);margin-bottom:4px;text-transform:uppercase;">{{ __('messages.available') }}</div>
                         <div style="font-weight:700;color:var(--g600);">{{ __('messages.immediately') }}</div>
@@ -952,7 +952,7 @@
                             {{ strtoupper(substr($currentTransaction->customer->name ?? 'C', 0, 1)) }}
                         </div>
                         <div class="guest-info">
-                            <div class="guest-name">{{ $currentTransaction->customer->name ?? 'Client inconnu' }}</div>
+                            <div class="guest-name">{{ $currentTransaction->customer->name ?? __('messages.unknown_customer') }}</div>
                             <div class="guest-meta">
                                 @if($currentTransaction->customer->email ?? false)
                                 <span><i class="fas fa-envelope" style="color:var(--g500);"></i> {{ $currentTransaction->customer->email }}</span>
@@ -977,11 +977,11 @@
                                 @if($canCheckOut)
                                 <a href="{{ route('transaction.mark-departed', ['transaction' => $currentTransaction->id]) }}" 
                                    class="btn-db btn-db-warning"
-                                   onclick="return confirm('Êtes-vous sûr de vouloir faire le check-out ?');">
+                                   onclick="return confirm('{{ __("messages.rd_confirm_checkout") }}');">
                                     <i class="fas fa-sign-out-alt"></i> Check-out
                                 </a>
                                 @else
-                                <button class="btn-db btn-db-ghost" disabled title="Seul le personnel de réception peut faire le check-out">
+                                <button class="btn-db btn-db-ghost" disabled title="{{ __('messages.rd_only_reception') }}">
                                     <i class="fas fa-sign-out-alt"></i> Check-out
                                 </button>
                                 @endif
@@ -1075,31 +1075,31 @@
                                                 if ($availability && isset($availability['occupied'])) {
                                                     $isOccupied = $availability['occupied'];
                                                     if (isset($availability['reservation_count']) && $availability['reservation_count'] > 0) {
-                                                        $reservationInfo = $availability['reservation_count'] . ' réservation(s)';
+                                                        $reservationInfo = __('messages.rd_reservation_count', ['count' => $availability['reservation_count']]);
                                                     }
                                                 }
                                                 
                                                 $cssClass = 'cal-day--avail';
                                                 $icon = 'fas fa-check';
-                                                $tooltipText = 'Disponible - ' . number_format($room->price, 0, ',', ' ') . ' FCFA/nuit';
+                                                 $tooltipText = __('messages.rd_tooltip_available', ['price' => number_format($room->price, 0, ',', ' ')]);
                                                 
                                                 if ($isOccupied) {
                                                     $cssClass = 'cal-day--occ';
                                                     $icon = 'fas fa-user';
-                                                    $tooltipText = 'Occupée';
+                                                     $tooltipText = __('messages.rd_tooltip_occupied');
                                                     if ($reservationInfo) {
                                                         $tooltipText .= ' - ' . $reservationInfo;
                                                     }
                                                 } elseif ($room->room_status_id != 1) {
                                                     $cssClass = 'cal-day--unavail';
                                                     $icon = 'fas fa-times';
-                                                    $tooltipText = 'Indisponible - ' . ($room->roomStatus->name ?? 'Maintenance');
+                                                     $tooltipText = __('messages.rd_tooltip_unavailable', ['status' => $room->roomStatus->name ?? __('messages.rd_action_maintenance')]);
                                                 }
                                                 
                                                 $isToday = $date->isToday();
                                                 if ($isToday) {
                                                     $cssClass .= ' cal-day--today';
-                                                    $tooltipText .= ' - Aujourd\'hui';
+                                                     $tooltipText .= ' - ' . __('messages.rd_tooltip_today');
                                                 }
                                             @endphp
                                             <td>
@@ -1160,7 +1160,7 @@
                 <div class="card-body">
                     <div class="next-res">
                         <div class="next-res__info">
-                            <h6>{{ $nextReservation->customer->name ?? 'Client inconnu' }}</h6>
+                            <h6>{{ $nextReservation->customer->name ?? __('messages.unknown_customer') }}</h6>
                             <div class="next-res__meta">
                                 <i class="fas fa-calendar" style="color:var(--g500);"></i>
                                 {{ $nextReservation->check_in->format('d/m/Y') }} → {{ $nextReservation->check_out->format('d/m/Y') }}
@@ -1214,13 +1214,13 @@
                         @if($canMaintenance && $room->room_status_id == 1)
                         <a href="{{ route('housekeeping.mark-maintenance', $room->id) }}" class="action-btn action-btn--warning">
                             <div class="action-btn__icon"><i class="fas fa-tools"></i></div>
-                            <div class="action-btn__title">Maintenance</div>
+                            <div class="action-btn__title">{{ __('messages.rd_action_maintenance') }}</div>
                             <div class="action-btn__desc">{{ __('messages.mark_maintenance') }}</div>
                         </a>
                         @else
-                        <button class="action-btn" disabled title="{{ !$canMaintenance ? __('messages.not_authorized') : 'Chambre déjà en maintenance' }}">
+                        <button class="action-btn" disabled title="{{ !$canMaintenance ? __('messages.not_authorized') : __('messages.rd_already_maintenance') }}">
                             <div class="action-btn__icon" style="color:var(--s400);"><i class="fas fa-tools"></i></div>
-                            <div class="action-btn__title">Maintenance</div>
+                            <div class="action-btn__title">{{ __('messages.rd_action_maintenance') }}</div>
                             <div class="action-btn__desc">{{ !$canMaintenance ? __('messages.not_authorized') : __('messages.unavailable') }}</div>
                         </button>
                         @endif
@@ -1232,13 +1232,13 @@
                         @if($canClean && $isDirty)
                         <a href="{{ route('housekeeping.mark-cleaned', $room->id) }}" class="action-btn action-btn--info">
                             <div class="action-btn__icon"><i class="fas fa-broom"></i></div>
-                            <div class="action-btn__title">Nettoyée</div>
+                            <div class="action-btn__title">{{ __('messages.rd_action_cleaned') }}</div>
                             <div class="action-btn__desc">{{ __('messages.mark_cleaned') }}</div>
                         </a>
                         @else
-                        <button class="action-btn" disabled title="{{ !$canClean ? __('messages.not_authorized') : 'Chambre déjà nettoyée' }}">
+                        <button class="action-btn" disabled title="{{ !$canClean ? __('messages.not_authorized') : __('messages.rd_already_cleaned') }}">
                             <div class="action-btn__icon" style="color:var(--s400);"><i class="fas fa-broom"></i></div>
-                            <div class="action-btn__title">Nettoyée</div>
+                            <div class="action-btn__title">{{ __('messages.rd_action_cleaned') }}</div>
                             <div class="action-btn__desc">{{ !$canClean ? __('messages.not_authorized') : __('messages.unavailable') }}</div>
                         </button>
                         @endif
@@ -1262,7 +1262,21 @@
 @endsection
 
 @push('scripts')
+@php
+$jsT = [
+    'occupied_msg' => __('messages.rd_js_occupied_msg'),
+    'view_details_info' => __('messages.rd_js_view_details_info'),
+    'view_transactions' => __('messages.rd_js_view_transactions'),
+    'available_msg' => __('messages.rd_js_available_msg'),
+    'room_label' => __('messages.rd_js_room_label'),
+    'arrival_date' => __('messages.rd_js_arrival_date'),
+    'redirect_info' => __('messages.rd_js_redirect_info'),
+    'cancel' => __('messages.rd_js_cancel'),
+    'continue' => __('messages.rd_js_continue'),
+];
+@endphp
 <script>
+const T = @json($jsT);
 document.addEventListener('DOMContentLoaded', function() {
     // Initialisation des tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[title]'));
@@ -1289,6 +1303,7 @@ function handleCalendarDayClick(cell) {
 
 function showOccupancyDetailsModal(roomId, date, roomNumber) {
     const formattedDate = new Date(date).toLocaleDateString('fr-FR');
+    const occupiedMsg = T.occupied_msg.replace(':number', roomNumber).replace(':date', formattedDate);
     const content = `
         <div class="modal-header" style="background:linear-gradient(135deg, #b91c1c, #991b1b); color:white;">
             <h5 class="modal-title"><i class="fas fa-calendar-times me-2"></i>{{ __('messages.room') }} {{ __('messages.occupied') }}</h5>
@@ -1297,7 +1312,7 @@ function showOccupancyDetailsModal(roomId, date, roomNumber) {
         <div class="modal-body">
             <div class="alert alert-warning" style="background:var(--red-light); border-color:#fecaca; color:var(--red); padding:16px; border-radius:var(--rl); margin-bottom:16px;">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                La chambre <strong>${roomNumber}</strong> est occupée le <strong>${formattedDate}</strong>.
+                ${occupiedMsg}
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
                 <div>
@@ -1305,18 +1320,18 @@ function showOccupancyDetailsModal(roomId, date, roomNumber) {
                     <div class="info-value">${formattedDate}</div>
                 </div>
                 <div>
-                    <div class="info-label">STATUT</div>
+                    <div class="info-label">{{ __('messages.status') }}</div>
                     <span class="badge badge-danger">{{ __('messages.occupied') }}</span>
                 </div>
             </div>
             <div class="alert alert-info" style="background:var(--g50); border-color:var(--g200); color:var(--g700); padding:16px; border-radius:var(--rl);">
                 <i class="fas fa-info-circle me-2" style="color:var(--g600);"></i>
-                Pour voir les détails, consultez la liste des transactions.
+                ${T.view_details_info}
             </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">{{ __('messages.close') }}</button>
-            <a href="/transaction" class="btn-db btn-db-primary"><i class="fas fa-list me-2"></i>Voir transactions</a>
+            <a href="/transaction" class="btn-db btn-db-primary"><i class="fas fa-list me-2"></i>${T.view_transactions}</a>
         </div>
     `;
     showModal(content);
@@ -1330,6 +1345,7 @@ function showReservationModal(roomId, roomNumber, date) {
     const checkInStr = checkInDate.toISOString().split('T')[0];
     const checkOutStr = checkOutDate.toISOString().split('T')[0];
     const formattedDate = checkInDate.toLocaleDateString('fr-FR');
+    const availableMsg = T.available_msg.replace(':number', roomNumber).replace(':date', formattedDate);
     
     const content = `
         <div class="modal-header" style="background:linear-gradient(135deg, var(--g600), var(--g500)); color:white;">
@@ -1339,27 +1355,27 @@ function showReservationModal(roomId, roomNumber, date) {
         <div class="modal-body">
             <div class="alert alert-success" style="background:var(--g50); border-color:var(--g200); color:var(--g700); padding:16px; border-radius:var(--rl); margin-bottom:16px;">
                 <i class="fas fa-check-circle me-2" style="color:var(--g600);"></i>
-                La chambre <strong>${roomNumber}</strong> est disponible pour le <strong>${formattedDate}</strong>.
+                ${availableMsg}
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
                 <div>
-                    <div class="info-label">CHAMBRE</div>
+                    <div class="info-label">${T.room_label}</div>
                     <div class="info-value">${roomNumber}</div>
                 </div>
                 <div>
-                    <div class="info-label">DATE D'ARRIVÉE</div>
+                    <div class="info-label">${T.arrival_date}</div>
                     <div class="info-value">${formattedDate}</div>
                 </div>
             </div>
             <div class="alert alert-info" style="background:var(--g50); border-color:var(--g200); color:var(--g700); padding:16px; border-radius:var(--rl);">
                 <i class="fas fa-info-circle me-2" style="color:var(--g600);"></i>
-                Vous serez redirigé vers le formulaire de réservation.
+                ${T.redirect_info}
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">Annuler</button>
+            <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">${T.cancel}</button>
             <a href="{{ route('transaction.reservation.createIdentity') }}?room_id=${roomId}&check_in=${checkInStr}&check_out=${checkOutStr}" 
-               class="btn-db btn-db-success"><i class="fas fa-book me-2"></i>Continuer</a>
+               class="btn-db btn-db-success"><i class="fas fa-book me-2"></i>${T.continue}</a>
         </div>
     `;
     showModal(content);

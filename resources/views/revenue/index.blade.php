@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Revenus')
+@section('title', __('revenue.page_title'))
 
 @section('content')
 @php $fmt = fn ($n) => number_format((float) $n, 0, ',', ' '); @endphp
@@ -58,38 +58,38 @@ html[data-theme="dark"] .rev-page{
 
 <div class="rev-page">
     <div class="rev-head">
-        <h1><span class="ic"><i class="fas fa-chart-line"></i></span> Revenus</h1>
-        <p>Pilotage financier de votre établissement, encaissements, occupation et tendances.</p>
+        <h1><span class="ic"><i class="fas fa-chart-line"></i></span> {{ __('revenue.heading') }}</h1>
+        <p>{{ __('revenue.description') }}</p>
     </div>
 
     {{-- Chiffres clés --}}
     <div class="stats">
         <div class="stat accent">
-            <div class="lbl"><i class="fas fa-sack-dollar"></i> Aujourd'hui</div>
+            <div class="lbl"><i class="fas fa-sack-dollar"></i> {{ __('revenue.today') }}</div>
             <div class="val">{{ $fmt($revToday) }} <small>{{ $currency }}</small></div>
-            <div class="sub">Encaissé ce jour</div>
+            <div class="sub">{{ __('revenue.collected_today') }}</div>
         </div>
         <div class="stat">
-            <div class="lbl"><i class="fas fa-calendar-days"></i> Ce mois</div>
+            <div class="lbl"><i class="fas fa-calendar-days"></i> {{ __('revenue.this_month') }}</div>
             <div class="val">{{ $fmt($revMonth) }} <small>{{ $currency }}</small></div>
-            <div class="sub">{{ $reservationsMonth }} réservation(s) · {{ $checkinsMonth }} arrivée(s)</div>
+            <div class="sub">{{ __('revenue.reservation_s', ['count' => $reservationsMonth]) }} · {{ __('revenue.checkin_s', ['count' => $checkinsMonth]) }}</div>
         </div>
         <div class="stat">
-            <div class="lbl"><i class="fas fa-bed"></i> Occupation</div>
+            <div class="lbl"><i class="fas fa-bed"></i> {{ __('revenue.occupancy') }}</div>
             <div class="val">{{ $occupancy }}<small>%</small></div>
-            <div class="sub">{{ $occupiedToday }} / {{ $totalRooms }} chambre(s) aujourd'hui</div>
+            <div class="sub">{{ __('revenue.rooms_today', ['occupied' => $occupiedToday, 'total' => $totalRooms]) }}</div>
         </div>
         <div class="stat">
             <div class="lbl"><i class="fas fa-chart-simple"></i> RevPAR</div>
             <div class="val">{{ $fmt($revpar) }} <small>{{ $currency }}</small></div>
-            <div class="sub">Revenu par chambre (ce mois)</div>
+            <div class="sub">{{ __('revenue.revpar_sub') }}</div>
         </div>
     </div>
 
     {{-- Graphe 14 jours --}}
     <div class="panel">
-        <div class="hd"><i class="fas fa-chart-column" style="color:var(--acc)"></i> Encaissements, 14 derniers jours
-            <small>max {{ $fmt($dailyMax) }} {{ $currency }}</small></div>
+        <div class="hd"><i class="fas fa-chart-column" style="color:var(--acc)"></i> {{ __('revenue.chart_14days') }}
+            <small>{{ __('revenue.chart_max', ['amount' => $fmt($dailyMax), 'currency' => $currency]) }}</small></div>
         <div class="bd">
             <div class="chart">
                 @foreach ($daily as $d)
@@ -106,10 +106,10 @@ html[data-theme="dark"] .rev-page{
     <div class="grid2">
         {{-- Répartition moyens de paiement --}}
         <div class="panel">
-            <div class="hd"><i class="fas fa-wallet" style="color:var(--acc)"></i> Moyens de paiement <small>ce mois</small></div>
+            <div class="hd"><i class="fas fa-wallet" style="color:var(--acc)"></i> {{ __('revenue.payment_methods') }} <small>{{ __('revenue.this_month_small') }}</small></div>
             <div class="bd">
                 @if ($mix->isEmpty())
-                    <div class="mix-empty">Aucun encaissement ce mois pour l'instant.</div>
+                    <div class="mix-empty">{{ __('revenue.empty_mix') }}</div>
                 @else
                     <div class="mix">
                         @foreach ($mix as $m)
@@ -128,15 +128,15 @@ html[data-theme="dark"] .rev-page{
 
         {{-- Top chambres --}}
         <div class="panel">
-            <div class="hd"><i class="fas fa-trophy" style="color:var(--acc)"></i> Top chambres <small>ce mois</small></div>
+            <div class="hd"><i class="fas fa-trophy" style="color:var(--acc)"></i> {{ __('revenue.top_rooms') }} <small>{{ __('revenue.this_month_small') }}</small></div>
             <div class="bd">
                 @if ($topRooms->isEmpty())
-                    <div class="top-empty">Pas encore de revenus par chambre ce mois.</div>
+                    <div class="top-empty">{{ __('revenue.empty_top_rooms') }}</div>
                 @else
                     @foreach ($topRooms as $i => $r)
                         <div class="toproom">
                             <span class="rank">{{ $i + 1 }}</span>
-                            <span class="rn">Chambre {{ $r->number }}</span>
+                            <span class="rn">{{ __('revenue.room') }} {{ $r->number }}</span>
                             <span class="rv">{{ $fmt($r->total) }} {{ $currency }}</span>
                         </div>
                     @endforeach
@@ -147,7 +147,7 @@ html[data-theme="dark"] .rev-page{
 
     <div class="panel">
         <div class="bd mini">
-            <span><i class="fas fa-coins" style="color:var(--acc)"></i> Total encaissé (depuis le début) : <b>{{ $fmt($revTotal) }} {{ $currency }}</b></span>
+            <span><i class="fas fa-coins" style="color:var(--acc)"></i> {{ __('revenue.total_collected') }} : <b>{{ $fmt($revTotal) }} {{ $currency }}</b></span>
         </div>
     </div>
 </div>

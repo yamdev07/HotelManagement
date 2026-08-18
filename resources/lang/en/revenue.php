@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'page_title'        => 'Revenue',
+    'heading'           => 'Revenue',
+    'description'       => 'Financial overview of your property, collections, occupancy and trends.',
+    'today'             => 'Today',
+    'collected_today'   => 'Collected today',
+    'this_month'        => 'This month',
+    'reservation_s'     => ':count reservation(s)',
+    'checkin_s'         => ':count arrival(s)',
+    'occupancy'         => 'Occupancy',
+    'rooms_today'       => ':occupied / :total room(s) today',
+    'revpar'            => 'RevPAR',
+    'revpar_sub'        => 'Revenue per room (this month)',
+    'chart_14days'      => 'Collections, last 14 days',
+    'chart_max'         => 'max :amount :currency',
+    'payment_methods'   => 'Payment methods',
+    'this_month_small'  => 'this month',
+    'empty_mix'         => 'No collections this month yet.',
+    'top_rooms'         => 'Top rooms',
+    'empty_top_rooms'   => 'No room revenue yet this month.',
+    'room'              => 'Room',
+    'total_collected'   => 'Total collected (all time)',
+];

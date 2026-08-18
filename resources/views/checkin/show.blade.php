@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Check-in - Réservation')
+@section('title', __('checkin.checkin_reservation'))
 @section('content')
     <style>
         .form-section {
@@ -189,25 +189,25 @@
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item">
-                            <a href="{{ route('dashboard.index') }}">Dashboard</a>
+                            <a href="{{ route('dashboard.index') }}">{{ __('checkin.dashboard') }}</a>
                         </li>
                         <li class="breadcrumb-item">
-                            <a href="{{ route('checkin.index') }}">Check-in</a>
+                            <a href="{{ route('checkin.index') }}">{{ __('checkin.checkin') }}</a>
                         </li>
-                        <li class="breadcrumb-item active">Check-in Réservation #{{ $transaction->id }}</li>
+                        <li class="breadcrumb-item active">{{ __('checkin.checkin_reservation') }} #{{ $transaction->id }}</li>
                     </ol>
                 </nav>
                 
                 <div class="d-flex justify-content-between align-items-center">
                     <h2 class="h4 mb-0">
                         <i class="fas fa-door-open text-primary me-2"></i>
-                        Check-in Réservation #{{ $transaction->id }}
+                        {{ __('checkin.checkin_reservation') }} #{{ $transaction->id }}
                     </h2>
                     <a href="{{ route('checkin.index') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>Retour
+                        <i class="fas fa-arrow-left me-2"></i>{{ __('checkin.back') }}
                     </a>
                 </div>
-                <p class="text-muted">Enregistrez l'arrivée du client et complétez les informations</p>
+                <p class="text-muted">{{ __('checkin.register_arrival_subtitle') }}</p>
             </div>
         </div>
 
@@ -237,7 +237,7 @@
                     <div class="flex-grow-1">
                         <h5 class="alert-heading fw-bold mb-2">
                             <i class="fas fa-exclamation-triangle me-2"></i>
-                            Check-in temporairement impossible
+                            {{ __('checkin.checkin_temporarily_impossible') }}
                         </h5>
                         <p class="mb-2">{{ $checkInBlockedReason ?? $transaction->room->getCheckInErrorMessage() }}</p>
                         
@@ -245,12 +245,12 @@
                             <div class="mt-2">
                                 <button class="btn btn-warning" onclick="notifyHousekeeping({{ $transaction->room->id }})">
                                     <i class="fas fa-bell me-2"></i>
-                                    Notifier le housekeeping en urgence
+                                    {{ __('checkin.notify_urgent_housekeeping') }}
                                 </button>
                             </div>
                             <div class="mt-2 small">
                                 <i class="fas fa-clock me-1"></i>
-                                Client attendu à {{ $transaction->check_in->format('H:i') }}
+                                {{ __('checkin.guest_expected_at', ['time' => $transaction->check_in->format('H:i')]) }}
                             </div>
                         @endif
                     </div>
@@ -263,9 +263,9 @@
         @if(isset($isAvailableForBooking) && $isAvailableForBooking && !($canCheckIn ?? true))
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
-                <strong>Note :</strong> Cette chambre est réservable mais nécessite un nettoyage avant le check-in.
+                <strong>{{ __('checkin.note_label') }}</strong> {{ __('checkin.room_bookable_needs_cleaning') }}
                 @if($isUrgentCleaning ?? false)
-                    <span class="badge bg-warning ms-2">URGENT - Arrivée aujourd'hui</span>
+                    <span class="badge bg-warning ms-2">{{ __('checkin.urgent_arrival_today') }}</span>
                 @endif
             </div>
         @endif
@@ -278,12 +278,12 @@
                         <div class="card-header bg-warning">
                             <h5 class="mb-0 text-dark">
                                 <i class="fas fa-clock me-2"></i>
-                                En attente de nettoyage
+                                {{ __('checkin.waiting_for_cleaning') }}
                             </h5>
                         </div>
                         <div class="card-body blocked-checkin">
                             <i class="fas fa-broom"></i>
-                            <h3>La chambre est en cours de nettoyage</h3>
+                            <h3>{{ __('checkin.room_being_cleaned') }}</h3>
                             <p>{{ $checkInBlockedReason ?? $transaction->room->getCheckInErrorMessage() }}</p>
                             
                             <div class="row justify-content-center">
@@ -291,16 +291,16 @@
                                     <div class="alert alert-light border text-start">
                                         <div class="row">
                                             <div class="col-md-6">
-                                                <h6>Informations client :</h6>
+                                                <h6>{{ __('checkin.customer_info') }}</h6>
                                                 <p class="mb-1"><strong>{{ $transaction->customer->name }}</strong></p>
                                                 <p class="mb-1">{{ $transaction->customer->phone }}</p>
-                                                <p class="mb-0">{{ $transaction->customer->email ?? 'Email non renseigné' }}</p>
+                                                <p class="mb-0">{{ $transaction->customer->email ?? __('checkin.email_not_provided') }}</p>
                                             </div>
                                             <div class="col-md-6">
-                                                <h6>Détails réservation :</h6>
-                                                <p class="mb-1">Chambre {{ $transaction->room->number }}</p>
-                                                <p class="mb-1">Arrivée: {{ $transaction->check_in->format('d/m/Y H:i') }}</p>
-                                                <p class="mb-0">Départ: {{ $transaction->check_out->format('d/m/Y H:i') }}</p>
+                                                <h6>{{ __('checkin.reservation_details') }}</h6>
+                                                <p class="mb-1">{{ __('checkin.room_number', ['number' => $transaction->room->number]) }}</p>
+                                                <p class="mb-1">{{ __('checkin.arrival_time') }} {{ $transaction->check_in->format('d/m/Y H:i') }}</p>
+                                                <p class="mb-0">{{ __('checkin.departure_time') }} {{ $transaction->check_out->format('d/m/Y H:i') }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -309,34 +309,34 @@
                             
                             <div class="mt-4">
                                 <a href="{{ route('checkin.index') }}" class="btn btn-secondary btn-lg">
-                                    <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+                                    <i class="fas fa-arrow-left me-2"></i>{{ __('checkin.back_to_list') }}
                                 </a>
                                 @if($isUrgentCleaning ?? false)
                                     <button class="btn btn-warning btn-lg ms-2" onclick="notifyHousekeeping({{ $transaction->room->id }})">
-                                        <i class="fas fa-bell me-2"></i>Notifier housekeeping
+                                        <i class="fas fa-bell me-2"></i>{{ __('checkin.notify_housekeeping_btn') }}
                                     </button>
                                 @endif
                             </div>
                             
                             @if(!$alternativeRooms->isEmpty())
                                 <hr class="my-4">
-                                <h5 class="mb-3">Chambres alternatives disponibles :</h5>
+                                <h5 class="mb-3">{{ __('checkin.available_alternative_rooms') }}</h5>
                                 <div class="row">
                                     @foreach($alternativeRooms as $altRoom)
                                         <div class="col-md-4 mb-3">
                                             <div class="card h-100">
                                                 <div class="card-body">
-                                                    <h6 class="card-title">Chambre {{ $altRoom->number }}</h6>
+                                                    <h6 class="card-title">{{ __('checkin.room_number', ['number' => $altRoom->number]) }}</h6>
                                                     <p class="small mb-1">{{ $altRoom->type->name ?? 'Standard' }}</p>
-                                                    <p class="small mb-2">{{ Helper::formatCFA($altRoom->price) }}/nuit</p>
+                                                    <p class="small mb-2">{{ Helper::formatCFA($altRoom->price) }}{{ __('checkin.per_night') }}</p>
                                                     @if($altRoom->room_status_id == 6)
-                                                        <span class="badge bg-warning">À nettoyer</span>
+                                                        <span class="badge bg-warning">{{ __('checkin.to_clean') }}</span>
                                                     @else
-                                                        <span class="badge bg-success">Prête</span>
+                                                        <span class="badge bg-success">{{ __('checkin.room_ready') }}</span>
                                                     @endif
                                                     <button class="btn btn-sm btn-outline-primary mt-2 w-100" 
                                                             onclick="selectAlternativeRoomFromBlocked({{ $altRoom->id }})">
-                                                        Sélectionner
+                                                        {{ __('checkin.select_button') }}
                                                     </button>
                                                 </div>
                                             </div>
@@ -357,19 +357,19 @@
                     <div class="form-stepper">
                         <div class="step active" id="step-1">
                             <div class="step-number">1</div>
-                            <div class="step-label">Vérification</div>
+                            <div class="step-label">{{ __('checkin.step_verification') }}</div>
                         </div>
                         <div class="step" id="step-2">
                             <div class="step-number">2</div>
-                            <div class="step-label">Informations</div>
+                            <div class="step-label">{{ __('checkin.step_information') }}</div>
                         </div>
                         <div class="step" id="step-3">
                             <div class="step-number">3</div>
-                            <div class="step-label">Chambre</div>
+                            <div class="step-label">{{ __('checkin.step_room') }}</div>
                         </div>
                         <div class="step" id="step-4">
                             <div class="step-number">4</div>
-                            <div class="step-label">Confirmation</div>
+                            <div class="step-label">{{ __('checkin.step_confirmation') }}</div>
                         </div>
                     </div>
                 </div>
@@ -384,7 +384,7 @@
                         <div class="form-tab active" id="tab-1">
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
-                                    <h5 class="mb-0">Vérification de la Réservation</h5>
+                                    <h5 class="mb-0">{{ __('checkin.verify_reservation') }}</h5>
                                 </div>
                                 <div class="card-body">
                                     <!-- 🔴 Statut de la chambre -->
@@ -392,7 +392,7 @@
                                         <div class="col-12">
                                             <div class="info-box d-flex justify-content-between align-items-center">
                                                 <div>
-                                                    <h6><i class="fas fa-bed me-2"></i>Statut de la chambre</h6>
+                                                    <h6><i class="fas fa-bed me-2"></i>{{ __('checkin.room_status') }}</h6>
                                                     <p class="mb-0">
                                                         <span class="badge bg-{{ $transaction->room->status_color }} fs-6">
                                                             <i class="fas {{ $transaction->room->status_icon }} me-1"></i>
@@ -403,11 +403,11 @@
                                                 <div>
                                                     @if($transaction->room->room_status_id == 1)
                                                         <span class="badge bg-success">
-                                                            <i class="fas fa-check-circle me-1"></i>Prête pour check-in
+                                                            <i class="fas fa-check-circle me-1"></i>{{ __('checkin.ready_for_checkin') }}
                                                         </span>
                                                     @elseif($transaction->room->room_status_id == 6)
                                                         <span class="badge bg-warning">
-                                                            <i class="fas fa-broom me-1"></i>À nettoyer
+                                                            <i class="fas fa-broom me-1"></i>{{ __('checkin.to_clean') }}
                                                         </span>
                                                     @endif
                                                 </div>
@@ -417,24 +417,24 @@
                                     
                                     <div class="alert alert-info">
                                         <i class="fas fa-info-circle me-2"></i>
-                                        Vérifiez les informations de la réservation avant de procéder au check-in.
+                                        {{ __('checkin.verify_reservation_info') }}
                                     </div>
                                     
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="info-box">
-                                                <h6><i class="fas fa-user me-2"></i>Client</h6>
+                                                <h6><i class="fas fa-user me-2"></i>{{ __('checkin.customer') }}</h6>
                                                 <p class="mb-1"><strong>{{ $transaction->customer->name }}</strong></p>
                                                 <p class="mb-1 text-muted small">{{ $transaction->customer->phone }}</p>
-                                                <p class="mb-0 text-muted small">{{ $transaction->customer->email ?? 'Email non renseigné' }}</p>
+                                                <p class="mb-0 text-muted small">{{ $transaction->customer->email ?? __('checkin.email_not_provided') }}</p>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="info-box">
-                                                <h6><i class="fas fa-bed me-2"></i>Chambre Réservée</h6>
-                                                <p class="mb-1"><strong>Chambre {{ $transaction->room->number }}</strong></p>
-                                                <p class="mb-1 text-muted small">{{ $transaction->room->type->name ?? 'Type non spécifié' }}</p>
-                                                <p class="mb-0 text-muted small">{{ $transaction->room->capacity }} personnes • {{ Helper::formatCFA($transaction->room->price) }}/nuit</p>
+                                                <h6><i class="fas fa-bed me-2"></i>{{ __('checkin.reserved_room') }}</h6>
+                                                <p class="mb-1"><strong>{{ __('checkin.room_number', ['number' => $transaction->room->number]) }}</strong></p>
+                                                <p class="mb-1 text-muted small">{{ $transaction->room->type->name ?? __('checkin.type_not_specified') }}</p>
+                                                <p class="mb-0 text-muted small">{{ __('checkin.persons_per_night', ['count' => $transaction->room->capacity, 'price' => Helper::formatCFA($transaction->room->price)]) }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -442,19 +442,19 @@
                                     <div class="row mt-3">
                                         <div class="col-md-6">
                                             <div class="info-box">
-                                                <h6><i class="fas fa-calendar-alt me-2"></i>Dates</h6>
-                                                <p class="mb-1"><strong>Arrivée:</strong> {{ $transaction->check_in->format('d/m/Y H:i') }}</p>
-                                                <p class="mb-1"><strong>Départ:</strong> {{ $transaction->check_out->format('d/m/Y H:i') }}</p>
-                                                <p class="mb-0"><strong>Durée:</strong> {{ $transaction->nights }} nuit(s)</p>
+                                                <h6><i class="fas fa-calendar-alt me-2"></i>{{ __('checkin.dates') }}</h6>
+                                                <p class="mb-1"><strong>{{ __('checkin.arrival_time') }}</strong> {{ $transaction->check_in->format('d/m/Y H:i') }}</p>
+                                                <p class="mb-1"><strong>{{ __('checkin.departure_time') }}</strong> {{ $transaction->check_out->format('d/m/Y H:i') }}</p>
+                                                <p class="mb-0"><strong>{{ __('checkin.duration') }}</strong> {{ $transaction->nights }} {{ __('checkin.nights_unit') }}</p>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="info-box">
-                                                <h6><i class="fas fa-money-bill-wave me-2"></i>Paiement</h6>
-                                                <p class="mb-1"><strong>Total:</strong> {{ Helper::formatCFA($transaction->getTotalPrice()) }}</p>
-                                                <p class="mb-1"><strong>Payé:</strong> {{ Helper::formatCFA($transaction->getTotalPayment()) }}</p>
+                                                <h6><i class="fas fa-money-bill-wave me-2"></i>{{ __('checkin.payment') }}</h6>
+                                                <p class="mb-1"><strong>{{ __('checkin.total_label') }}</strong> {{ Helper::formatCFA($transaction->getTotalPrice()) }}</p>
+                                                <p class="mb-1"><strong>{{ __('checkin.paid_label') }}</strong> {{ Helper::formatCFA($transaction->getTotalPayment()) }}</p>
                                                 <p class="mb-0">
-                                                    <strong>Solde:</strong> 
+                                                    <strong>{{ __('checkin.balance_label') }}</strong> 
                                                     <span class="{{ $transaction->getRemainingPayment() > 0 ? 'text-warning' : 'text-success' }}">
                                                         {{ Helper::formatCFA($transaction->getRemainingPayment()) }}
                                                     </span>
@@ -467,19 +467,19 @@
                                         @if($isRoomAvailable)
                                             <div class="alert alert-success">
                                                 <i class="fas fa-check-circle me-2"></i>
-                                                La chambre réservée est disponible pour le séjour.
+                                                {{ __('checkin.reserved_room_available') }}
                                             </div>
                                             <button type="button" class="btn btn-primary" onclick="nextStep(2)">
-                                                <i class="fas fa-arrow-right me-2"></i>Continuer
+                                                <i class="fas fa-arrow-right me-2"></i>{{ __('checkin.continue_button') }}
                                             </button>
                                         @else
                                             <div class="alert alert-warning">
                                                 <i class="fas fa-exclamation-triangle me-2"></i>
-                                                La chambre réservée n'est pas disponible pour le séjour.
-                                                Vous devrez sélectionner une autre chambre.
+                                                {{ __('checkin.reserved_room_not_available') }}
+                                                {{ __('checkin.must_select_other_room') }}
                                             </div>
                                             <button type="button" class="btn btn-warning" onclick="nextStep(2)">
-                                                <i class="fas fa-arrow-right me-2"></i>Sélectionner une autre chambre
+                                                <i class="fas fa-arrow-right me-2"></i>{{ __('checkin.select_another_room') }}
                                             </button>
                                         @endif
                                     </div>
@@ -491,14 +491,14 @@
                         <div class="form-tab" id="tab-2">
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
-                                    <h5 class="mb-0">Informations Complémentaires</h5>
+                                    <h5 class="mb-0">{{ __('checkin.additional_info') }}</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="form-section">
-                                        <h6><i class="fas fa-users me-2"></i>Occupants</h6>
+                                        <h6><i class="fas fa-users me-2"></i>{{ __('checkin.occupants') }}</h6>
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
-                                                <label for="adults" class="form-label">Adultes *</label>
+                                                <label for="adults" class="form-label">{{ __('checkin.adults_label') }}</label>
                                                 <input type="number" class="form-control @error('adults') is-invalid @enderror" 
                                                        id="adults" name="adults" 
                                                        value="{{ old('adults', $transaction->person_count ?? 1) }}" 
@@ -508,7 +508,7 @@
                                                 @enderror
                                             </div>
                                             <div class="col-md-6 mb-3">
-                                                <label for="children" class="form-label">Enfants (0-12 ans)</label>
+                                                <label for="children" class="form-label">{{ __('checkin.children_label') }}</label>
                                                 <input type="number" class="form-control @error('children') is-invalid @enderror" 
                                                        id="children" name="children" 
                                                        value="{{ old('children', 0) }}" 
@@ -521,13 +521,13 @@
                                     </div>
                                     
                                     <div class="form-section">
-                                        <h6><i class="fas fa-id-card me-2"></i>Pièce d'Identité</h6>
+                                        <h6><i class="fas fa-id-card me-2"></i>{{ __('checkin.id_document') }}</h6>
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
-                                                <label for="id_type" class="form-label">Type de pièce *</label>
+                                                <label for="id_type" class="form-label">{{ __('checkin.id_type_label') }}</label>
                                                 <select class="form-control @error('id_type') is-invalid @enderror" 
                                                         id="id_type" name="id_type" required>
-                                                    <option value="">Sélectionnez...</option>
+                                                    <option value="">{{ __('checkin.select_placeholder') }}</option>
                                                     @foreach($idTypes as $value => $label)
                                                         <option value="{{ $value }}" 
                                                                 {{ old('id_type') == $value ? 'selected' : '' }}>
@@ -540,11 +540,11 @@
                                                 @enderror
                                             </div>
                                             <div class="col-md-6 mb-3">
-                                                <label for="id_number" class="form-label">Numéro de pièce *</label>
+                                                <label for="id_number" class="form-label">{{ __('checkin.id_number_label') }}</label>
                                                 <input type="text" class="form-control @error('id_number') is-invalid @enderror" 
                                                        id="id_number" name="id_number" 
                                                        value="{{ old('id_number') }}" 
-                                                       placeholder="Ex: AB123456" required>
+                                                       placeholder="{{ __('checkin.id_number_placeholder') }}" required>
                                                 @error('id_number')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -552,11 +552,11 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
-                                                <label for="nationality" class="form-label">Nationalité *</label>
+                                                <label for="nationality" class="form-label">{{ __('checkin.nationality_label') }}</label>
                                                 <input type="text" class="form-control @error('nationality') is-invalid @enderror" 
                                                        id="nationality" name="nationality" 
                                                        value="{{ old('nationality') }}" 
-                                                       placeholder="Ex: Française" required>
+                                                       placeholder="{{ __('checkin.nationality_placeholder') }}" required>
                                                 @error('nationality')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
@@ -565,21 +565,21 @@
                                     </div>
                                     
                                     <div class="form-section">
-                                        <h6><i class="fas fa-comment-alt me-2"></i>Autres Informations</h6>
+                                        <h6><i class="fas fa-comment-alt me-2"></i>{{ __('checkin.other_info') }}</h6>
                                         <div class="mb-3">
-                                            <label for="special_requests" class="form-label">Demandes Spéciales</label>
+                                            <label for="special_requests" class="form-label">{{ __('checkin.special_requests') }}</label>
                                             <textarea class="form-control @error('special_requests') is-invalid @enderror" 
                                                       id="special_requests" name="special_requests" 
-                                                      rows="3" placeholder="Préférences alimentaires, accessibilité, autres...">{{ old('special_requests') }}</textarea>
+                                                      rows="3" placeholder="{{ __('checkin.special_requests_placeholder') }}">{{ old('special_requests') }}</textarea>
                                             @error('special_requests')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                         <div class="mb-3">
-                                            <label for="notes" class="form-label">Notes Internes</label>
+                                            <label for="notes" class="form-label">{{ __('checkin.internal_notes') }}</label>
                                             <textarea class="form-control @error('notes') is-invalid @enderror" 
                                                       id="notes" name="notes" 
-                                                      rows="2" placeholder="Notes pour le personnel...">{{ old('notes') }}</textarea>
+                                                      rows="2" placeholder="{{ __('checkin.notes_placeholder') }}">{{ old('notes') }}</textarea>
                                             @error('notes')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -588,10 +588,10 @@
                                     
                                     <div class="d-flex justify-content-between mt-4">
                                         <button type="button" class="btn btn-outline-secondary" onclick="prevStep(1)">
-                                            <i class="fas fa-arrow-left me-2"></i>Retour
+                                            <i class="fas fa-arrow-left me-2"></i>{{ __('checkin.back') }}
                                         </button>
                                         <button type="button" class="btn btn-primary" onclick="nextStep(3)">
-                                            <i class="fas fa-arrow-right me-2"></i>Continuer
+                                            <i class="fas fa-arrow-right me-2"></i>{{ __('checkin.continue_button') }}
                                         </button>
                                     </div>
                                 </div>
@@ -602,15 +602,15 @@
                         <div class="form-tab" id="tab-3">
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
-                                    <h5 class="mb-0">Sélection de la Chambre</h5>
+                                    <h5 class="mb-0">{{ __('checkin.room_selection') }}</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="alert alert-info">
                                         <i class="fas fa-info-circle me-2"></i>
                                         @if($isRoomAvailable)
-                                            La chambre réservée est disponible. Vous pouvez conserver cette chambre ou en sélectionner une autre.
+                                            {{ __('checkin.reserved_room_available_info') }}
                                         @else
-                                            La chambre réservée n'est pas disponible. Veuillez sélectionner une chambre alternative.
+                                            {{ __('checkin.reserved_room_not_available_info') }}
                                         @endif
                                     </div>
                                     
@@ -618,8 +618,8 @@
                                     @if($transaction->room->room_status_id == 6)
                                         <div class="alert alert-warning mb-3">
                                             <i class="fas fa-broom me-2"></i>
-                                            <strong>Attention :</strong> La chambre réservée (Chambre {{ $transaction->room->number }}) est actuellement sale.
-                                            Le check-in ne sera possible qu'après nettoyage.
+                                            <strong>{{ __('checkin.attention_label') }}</strong> {{ __('checkin.reserved_room_dirty', ['number' => $transaction->room->number]) }}
+                                            {{ __('checkin.checkin_after_cleaning') }}
                                         </div>
                                     @endif
                                     
@@ -632,17 +632,17 @@
                                             <label class="form-check-label" for="keep_original">
                                                 <h6 class="mb-1">
                                                     <i class="fas fa-check-circle text-success me-2"></i>
-                                                    Conserver la chambre originale
+                                                    {{ __('checkin.keep_original_room') }}
                                                 </h6>
                                                 <div class="ms-4">
                                                     <p class="mb-1">
-                                                        <strong>Chambre {{ $transaction->room->number }}</strong>
+                                                        <strong>{{ __('checkin.room_number', ['number' => $transaction->room->number]) }}</strong>
                                                         @if($transaction->room->room_status_id == 6)
-                                                            <span class="badge bg-warning ms-2">À nettoyer</span>
+                                                            <span class="badge bg-warning ms-2">{{ __('checkin.to_clean') }}</span>
                                                         @endif
                                                     </p>
-                                                    <p class="mb-1 text-muted small">{{ $transaction->room->type->name ?? 'Type non spécifié' }}</p>
-                                                    <p class="mb-0 text-muted small">{{ $transaction->room->capacity }} personnes • {{ Helper::formatCFA($transaction->room->price) }}/nuit</p>
+                                                    <p class="mb-1 text-muted small">{{ $transaction->room->type->name ?? __('checkin.type_not_specified') }}</p>
+                                                    <p class="mb-0 text-muted small">{{ __('checkin.persons_per_night', ['count' => $transaction->room->capacity, 'price' => Helper::formatCFA($transaction->room->price)]) }}</p>
                                                 </div>
                                             </label>
                                         </div>
@@ -657,23 +657,23 @@
                                         <label class="form-check-label" for="change_room">
                                             <h6 class="mb-1">
                                                 <i class="fas fa-exchange-alt text-primary me-2"></i>
-                                                Changer de chambre
+                                                {{ __('checkin.change_room') }}
                                             </h6>
                                             <div class="ms-4">
-                                                <p class="mb-1">Sélectionnez une chambre alternative</p>
+                                                <p class="mb-1">{{ __('checkin.select_alternative_room') }}</p>
                                             </div>
                                         </label>
                                     </div>
                                     
                                     <!-- Liste des chambres alternatives (MODIFIÉE) -->
                                     <div id="alternative-rooms-container" style="{{ $isRoomAvailable ? 'display: none;' : '' }}">
-                                        <h6 class="mb-3">Chambres disponibles pour cette période :</h6>
+                                        <h6 class="mb-3">{{ __('checkin.available_rooms_for_period') }}</h6>
                                         
                                         @if($alternativeRooms->isEmpty())
                                             <div class="alert alert-warning">
                                                 <i class="fas fa-exclamation-triangle me-2"></i>
-                                                Aucune chambre alternative disponible pour cette période.
-                                                Veuillez vérifier les disponibilités ou ajuster les dates.
+                                                {{ __('checkin.no_alternative_room') }}
+                                                {{ __('checkin.check_availability_dates') }}
                                             </div>
                                         @else
                                             <div class="row">
@@ -690,17 +690,17 @@
                                                                 <div>
                                                                     <h6 class="mb-1">
                                                                         <span class="room-status-indicator {{ $isDirty ? 'room-dirty' : 'room-available' }}"></span>
-                                                                        Chambre {{ $room->number }}
+                                                                        {{ __('checkin.room_number', ['number' => $room->number]) }}
                                                                     </h6>
                                                                     <p class="mb-1 text-muted small">{{ $room->type->name }}</p>
-                                                                    <p class="mb-0 text-muted small">{{ $room->capacity }} personnes • {{ Helper::formatCFA($room->price) }}/nuit</p>
+                                                                    <p class="mb-0 text-muted small">{{ __('checkin.persons_per_night', ['count' => $room->capacity, 'price' => Helper::formatCFA($room->price)]) }}</p>
                                                                     @if($isDirty)
                                                                         <span class="badge bg-warning mt-1">
-                                                                            <i class="fas fa-broom me-1"></i>À nettoyer
+                                                                            <i class="fas fa-broom me-1"></i>{{ __('checkin.to_clean') }}
                                                                         </span>
                                                                     @else
                                                                         <span class="badge bg-success mt-1">
-                                                                            <i class="fas fa-check-circle me-1"></i>Prête
+                                                                            <i class="fas fa-check-circle me-1"></i>{{ __('checkin.room_ready') }}
                                                                         </span>
                                                                     @endif
                                                                 </div>
@@ -719,26 +719,26 @@
                                             <div class="mt-4" id="dirty-room-warning" style="display: none;">
                                                 <div class="alert alert-warning">
                                                     <i class="fas fa-exclamation-triangle me-2"></i>
-                                                    <strong>Attention :</strong> La chambre sélectionnée nécessite un nettoyage.
-                                                    Le check-in ne pourra être effectué qu'après nettoyage par l'équipe housekeeping.
+                                                    <strong>{{ __('checkin.attention_label') }}</strong> {{ __('checkin.selected_room_needs_cleaning') }}
+                                                    {{ __('checkin.checkin_after_housekeeping') }}
                                                 </div>
                                             </div>
                                             
                                             <!-- Affichage différence de prix -->
                                             <div class="mt-4" id="price-difference-info" style="display: none;">
                                                 <div class="alert alert-info">
-                                                    <h6><i class="fas fa-money-bill-wave me-2"></i>Impact sur le prix</h6>
+                                                    <h6><i class="fas fa-money-bill-wave me-2"></i>{{ __('checkin.price_impact') }}</h6>
                                                     <div class="row">
                                                         <div class="col-md-4">
-                                                            <p class="mb-1 small">Ancien total:</p>
+                                                            <p class="mb-1 small">{{ __('checkin.old_total') }}</p>
                                                             <p class="h5">{{ Helper::formatCFA($transaction->getTotalPrice()) }}</p>
                                                         </div>
                                                         <div class="col-md-4">
-                                                            <p class="mb-1 small">Nouveau total:</p>
+                                                            <p class="mb-1 small">{{ __('checkin.new_total') }}</p>
                                                             <p class="h5" id="new-total-price">0 CFA</p>
                                                         </div>
                                                         <div class="col-md-4">
-                                                            <p class="mb-1 small">Différence:</p>
+                                                            <p class="mb-1 small">{{ __('checkin.difference') }}</p>
                                                             <p class="h5" id="price-difference">0 CFA</p>
                                                         </div>
                                                     </div>
@@ -748,7 +748,7 @@
                                                     <input class="form-check-input" type="checkbox" 
                                                            id="confirmed_price_change" name="confirmed_price_change">
                                                     <label class="form-check-label" for="confirmed_price_change">
-                                                        Je confirme le changement de prix
+                                                        {{ __('checkin.confirm_price_change') }}
                                                     </label>
                                                 </div>
                                             </div>
@@ -762,10 +762,10 @@
                                     
                                     <div class="d-flex justify-content-between mt-4">
                                         <button type="button" class="btn btn-outline-secondary" onclick="prevStep(2)">
-                                            <i class="fas fa-arrow-left me-2"></i>Retour
+                                            <i class="fas fa-arrow-left me-2"></i>{{ __('checkin.back') }}
                                         </button>
                                         <button type="button" class="btn btn-primary" onclick="nextStep(4)">
-                                            <i class="fas fa-arrow-right me-2"></i>Continuer
+                                            <i class="fas fa-arrow-right me-2"></i>{{ __('checkin.continue_button') }}
                                         </button>
                                     </div>
                                 </div>
@@ -776,35 +776,35 @@
                         <div class="form-tab" id="tab-4">
                             <div class="card mb-4">
                                 <div class="card-header bg-light">
-                                    <h5 class="mb-0">Confirmation du Check-in</h5>
+                                    <h5 class="mb-0">{{ __('checkin.confirmation_checkin') }}</h5>
                                 </div>
                                 <div class="card-body">
                                     <!-- 🔴 Alerte si chambre sale -->
                                     <div id="confirmation-dirty-warning" style="display: none;" class="alert alert-warning mb-3">
                                         <i class="fas fa-broom me-2"></i>
-                                        <strong>Attention :</strong> La chambre sélectionnée est actuellement sale.
-                                        Le check-in ne pourra être finalisé qu'après nettoyage.
+                                        <strong>{{ __('checkin.attention_label') }}</strong> {{ __('checkin.selected_room_dirty_warning') }}
+                                        {{ __('checkin.checkin_final_after_cleaning') }}
                                     </div>
                                     
                                     <div class="alert alert-success">
                                         <i class="fas fa-clipboard-check fa-2x mb-3"></i>
-                                        <h5>Résumé du Check-in</h5>
-                                        <p class="mb-0">Vérifiez les informations avant de finaliser le check-in</p>
+                                        <h5>{{ __('checkin.checkin_summary') }}</h5>
+                                        <p class="mb-0">{{ __('checkin.verify_before_finalizing') }}</p>
                                     </div>
                                     
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="info-box">
-                                                <h6><i class="fas fa-user me-2"></i>Client</h6>
+                                                <h6><i class="fas fa-user me-2"></i>{{ __('checkin.customer') }}</h6>
                                                 <p class="mb-1" id="summary-client">{{ $transaction->customer->name }}</p>
                                                 <p class="mb-0 text-muted small" id="summary-phone">{{ $transaction->customer->phone }}</p>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="info-box">
-                                                <h6><i class="fas fa-bed me-2"></i>Chambre</h6>
-                                                <p class="mb-1" id="summary-room">Chambre {{ $transaction->room->number }}</p>
-                                                <p class="mb-0 text-muted small" id="summary-room-type">{{ $transaction->room->type->name ?? 'Type non spécifié' }}</p>
+                                                <h6><i class="fas fa-bed me-2"></i>{{ __('checkin.room_heading') }}</h6>
+                                                <p class="mb-1" id="summary-room">{{ __('checkin.room_number', ['number' => $transaction->room->number]) }}</p>
+                                                <p class="mb-0 text-muted small" id="summary-room-type">{{ $transaction->room->type->name ?? __('checkin.type_not_specified') }}</p>
                                                 <p class="mb-0 text-muted small" id="summary-room-status"></p>
                                             </div>
                                         </div>
@@ -813,16 +813,16 @@
                                     <div class="row mt-3">
                                         <div class="col-md-6">
                                             <div class="info-box">
-                                                <h6><i class="fas fa-users me-2"></i>Occupants</h6>
-                                                <p class="mb-1" id="summary-adults">Adultes: 1</p>
-                                                <p class="mb-0" id="summary-children">Enfants: 0</p>
+                                                <h6><i class="fas fa-users me-2"></i>{{ __('checkin.occupants_heading') }}</h6>
+                                                <p class="mb-1" id="summary-adults">{{ __('checkin.adults_summary', ['count' => 1]) }}</p>
+                                                <p class="mb-0" id="summary-children">{{ __('checkin.children_summary', ['count' => 0]) }}</p>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="info-box">
-                                                <h6><i class="fas fa-id-card me-2"></i>Identité</h6>
-                                                <p class="mb-1" id="summary-id-type">Type: -</p>
-                                                <p class="mb-0" id="summary-id-number">Numéro: -</p>
+                                                <h6><i class="fas fa-id-card me-2"></i>{{ __('checkin.identity') }}</h6>
+                                                <p class="mb-1" id="summary-id-type">{{ __('checkin.type_dash') }}</p>
+                                                <p class="mb-0" id="summary-id-number">{{ __('checkin.number_dash') }}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -830,29 +830,28 @@
                                     <div class="row mt-3">
                                         <div class="col-md-12">
                                             <div class="info-box">
-                                                <h6><i class="fas fa-calendar-alt me-2"></i>Séjour</h6>
+                                                <h6><i class="fas fa-calendar-alt me-2"></i>{{ __('checkin.stay') }}</h6>
                                                 <p class="mb-1">
-                                                    <strong>Arrivée:</strong> {{ $transaction->check_in->format('d/m/Y H:i') }}
-                                                    <span class="text-muted">(check-in maintenant)</span>
+                                                    <strong>{{ __('checkin.arrival_time') }}</strong> {{ $transaction->check_in->format('d/m/Y H:i') }}
+                                                    <span class="text-muted">{{ __('checkin.checkin_now') }}</span>
                                                 </p>
-                                                <p class="mb-1"><strong>Départ:</strong> {{ $transaction->check_out->format('d/m/Y H:i') }}</p>
-                                                <p class="mb-0"><strong>Durée:</strong> {{ $transaction->nights }} nuit(s)</p>
+                                                <p class="mb-1"><strong>{{ __('checkin.departure_time') }}</strong> {{ $transaction->check_out->format('d/m/Y H:i') }}</p>
+                                                <p class="mb-0"><strong>{{ __('checkin.duration') }}</strong> {{ $transaction->nights }} {{ __('checkin.nights_unit') }}</p>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div class="alert alert-warning mt-4">
                                         <i class="fas fa-exclamation-triangle me-2"></i>
-                                        <strong>Attention:</strong> En confirmant, le statut de la réservation passera à "active" et 
-                                        la chambre sera marquée comme occupée. Cette action est irréversible.
+                                        <strong>{{ __('checkin.attention_label') }}</strong> {{ __('checkin.confirmation_warning') }}
                                     </div>
                                     
                                     <div class="d-flex justify-content-between mt-4">
                                         <button type="button" class="btn btn-outline-secondary" onclick="prevStep(3)">
-                                            <i class="fas fa-arrow-left me-2"></i>Retour
+                                            <i class="fas fa-arrow-left me-2"></i>{{ __('checkin.back') }}
                                         </button>
                                         <button type="submit" class="btn btn-success" id="confirm-checkin">
-                                            <i class="fas fa-check-circle me-2"></i>Confirmer le Check-in
+                                            <i class="fas fa-check-circle me-2"></i>{{ __('checkin.confirm_checkin_button') }}
                                         </button>
                                     </div>
                                 </div>
@@ -866,42 +865,42 @@
                     <!-- Statut de la réservation -->
                     <div class="card mb-4">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0">Statut Réservation</h5>
+                            <h5 class="mb-0">{{ __('checkin.reservation_status') }}</h5>
                         </div>
                         <div class="card-body">
                             <div class="text-center mb-3">
                                 <div class="display-6 mb-2">#{{ $transaction->id }}</div>
-                                <span class="badge bg-warning fs-6">Réservation</span>
+                                <span class="badge bg-warning fs-6">{{ __('checkin.reservation_badge') }}</span>
                             </div>
                             
                             <!-- 🔴 Statut chambre -->
                             <div class="mb-3 text-center">
                                 <span class="badge bg-{{ $transaction->room->status_color }} fs-6">
                                     <i class="fas {{ $transaction->room->status_icon }} me-1"></i>
-                                    Chambre: {{ $transaction->room->status_label }}
+                                    {{ __('checkin.room_status_label', ['status' => $transaction->room->status_label]) }}
                                 </span>
                                 @if($transaction->room->room_status_id == 6)
                                     <span class="badge bg-warning mt-2 d-block">
-                                        <i class="fas fa-broom me-1"></i>À nettoyer - Check-in bloqué
+                                        <i class="fas fa-broom me-1"></i>{{ __('checkin.dirty_checkin_blocked') }}
                                     </span>
                                 @endif
                             </div>
                             
                             <div class="list-group list-group-flush">
                                 <div class="list-group-item d-flex justify-content-between">
-                                    <span>Date création:</span>
+                                    <span>{{ __('checkin.creation_date') }}</span>
                                     <strong>{{ $transaction->created_at->format('d/m/Y') }}</strong>
                                 </div>
                                 <div class="list-group-item d-flex justify-content-between">
-                                    <span>Arrivée prévue:</span>
+                                    <span>{{ __('checkin.expected_arrival') }}</span>
                                     <strong>{{ $transaction->check_in->format('H:i') }}</strong>
                                 </div>
                                 <div class="list-group-item d-flex justify-content-between">
-                                    <span>Nuits:</span>
+                                    <span>{{ __('checkin.nights_label') }}</span>
                                     <strong>{{ $transaction->nights }}</strong>
                                 </div>
                                 <div class="list-group-item d-flex justify-content-between">
-                                    <span>Total:</span>
+                                    <span>{{ __('checkin.total_short') }}</span>
                                     <strong>{{ Helper::formatCFA($transaction->getTotalPrice()) }}</strong>
                                 </div>
                             </div>
@@ -911,26 +910,26 @@
                     <!-- Actions rapides (MODIFIÉES) -->
                     <div class="card mb-4">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0">Actions Rapides</h5>
+                            <h5 class="mb-0">{{ __('checkin.quick_actions') }}</h5>
                         </div>
                         <div class="card-body">
                             <div class="d-grid gap-2">
                                 @if(!isset($canCheckIn) || $canCheckIn)
                                     <button type="button" class="btn btn-outline-primary" onclick="quickCheckIn()">
-                                        <i class="fas fa-bolt me-2"></i>Check-in Rapide
+                                        <i class="fas fa-bolt me-2"></i>{{ __('checkin.quick_checkin_btn') }}
                                     </button>
                                 @else
                                     <button type="button" class="btn btn-outline-warning" onclick="notifyHousekeeping({{ $transaction->room->id }})">
-                                        <i class="fas fa-bell me-2"></i>Notifier Housekeeping
+                                        <i class="fas fa-bell me-2"></i>{{ __('checkin.notify_housekeeping_title') }}
                                     </button>
                                 @endif
                                 <a href="{{ route('transaction.show', $transaction) }}" 
                                    class="btn btn-outline-info">
-                                    <i class="fas fa-file-invoice me-2"></i>Voir Facture
+                                    <i class="fas fa-file-invoice me-2"></i>{{ __('checkin.view_invoice') }}
                                 </a>
                                 <a href="{{ route('customer.show', $transaction->customer) }}" 
                                    class="btn btn-outline-secondary">
-                                    <i class="fas fa-user me-2"></i>Profil Client
+                                    <i class="fas fa-user me-2"></i>{{ __('checkin.customer_profile') }}
                                 </a>
                             </div>
                         </div>
@@ -939,24 +938,24 @@
                     <!-- Aide (MODIFIÉE) -->
                     <div class="card">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>Aide</h5>
+                            <h5 class="mb-0"><i class="fas fa-question-circle me-2"></i>{{ __('checkin.help') }}</h5>
                         </div>
                         <div class="card-body">
                             <div class="alert alert-{{ (!isset($canCheckIn) || $canCheckIn) ? 'info' : 'warning' }} small mb-0">
                                 @if(!isset($canCheckIn) || $canCheckIn)
-                                    <p class="mb-2"><strong>Procédure de check-in:</strong></p>
+                                    <p class="mb-2"><strong>{{ __('checkin.checkin_procedure') }}</strong></p>
                                     <ol class="mb-0 ps-3">
-                                        <li>Vérifiez l'identité du client</li>
-                                        <li>Complétez les informations requises</li>
-                                        <li>Attribuez une chambre disponible</li>
-                                        <li>Confirmez le check-in</li>
+                                        <li>{{ __('checkin.verify_customer_identity') }}</li>
+                                        <li>{{ __('checkin.complete_required_info') }}</li>
+                                        <li>{{ __('checkin.assign_available_room') }}</li>
+                                        <li>{{ __('checkin.confirm_checkin_step') }}</li>
                                     </ol>
                                 @else
-                                    <p class="mb-2"><strong>Check-in bloqué :</strong></p>
+                                    <p class="mb-2"><strong>{{ __('checkin.checkin_blocked') }}</strong></p>
                                     <p class="mb-2">{{ $checkInBlockedReason ?? $transaction->room->getCheckInErrorMessage() }}</p>
                                     @if($isUrgentCleaning ?? false)
                                         <button class="btn btn-warning btn-sm mt-2 w-100" onclick="notifyHousekeeping({{ $transaction->room->id }})">
-                                            <i class="fas fa-bell me-2"></i>Notifier housekeeping
+                                            <i class="fas fa-bell me-2"></i>{{ __('checkin.notify_housekeeping_btn') }}
                                         </button>
                                     @endif
                                 @endif
@@ -989,14 +988,12 @@
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('❌ Erreur lors de la notification');
+            alert('❌ {{ __("checkin.notification_error") }}');
         });
     }
 
     function selectAlternativeRoomFromBlocked(roomId) {
-        // Rediriger vers une nouvelle réservation avec cette chambre
-        window.confirmAction('Voulez-vous changer pour cette chambre ?', function () {
-            // Logique pour changer de chambre depuis la page bloquée
+        window.confirmAction('{{ __("checkin.change_room_confirm") }}', function () {
             window.location.href = '/checkin/{{ $transaction->id }}/change-room/' + roomId;
         });
     }
@@ -1013,7 +1010,6 @@ let originalTotal = {{ $transaction->getTotalPrice() }};
 let nights = {{ $transaction->nights }};
 
 function updateStepIndicator(step) {
-    // Mettre à jour toutes les étapes
     for (let i = 1; i <= 4; i++) {
         const stepElement = document.getElementById(`step-${i}`);
         const stepNumber = stepElement.querySelector('.step-number');
@@ -1034,49 +1030,41 @@ function updateStepIndicator(step) {
 }
 
 function showTab(tabNumber) {
-    // Cacher tous les onglets
     for (let i = 1; i <= 4; i++) {
         document.getElementById(`tab-${i}`).classList.remove('active');
     }
-    // Afficher l'onglet actif
     document.getElementById(`tab-${tabNumber}`).classList.add('active');
 }
 
 function nextStep(next) {
-    // Validation de l'étape actuelle
     if (currentStep === 2) {
-        // Validation des informations client
         const adults = document.getElementById('adults').value;
         const idType = document.getElementById('id_type').value;
         const idNumber = document.getElementById('id_number').value;
         const nationality = document.getElementById('nationality').value;
         
         if (!adults || !idType || !idNumber || !nationality) {
-            alert('Veuillez remplir tous les champs obligatoires de l\'étape 2');
+            alert('{{ __("checkin.fill_step2_required") }}');
             return;
         }
         
-        // Mettre à jour le résumé
-        document.getElementById('summary-adults').textContent = `Adultes: ${adults}`;
-        document.getElementById('summary-children').textContent = `Enfants: ${document.getElementById('children').value || 0}`;
+        document.getElementById('summary-adults').textContent = `{!! __('checkin.adults_summary', ['count' => '') !!}${adults}`;
+        document.getElementById('summary-children').textContent = `{!! __('checkin.children_summary', ['count' => '') !!}${document.getElementById('children').value || 0}`;
         document.getElementById('summary-id-type').textContent = `Type: ${document.getElementById('id_type').options[document.getElementById('id_type').selectedIndex].text}`;
-        document.getElementById('summary-id-number').textContent = `Numéro: ${idNumber}`;
+        document.getElementById('summary-id-number').textContent = `{!! __('checkin.number_dash') !== 'Numéro: -' ? 'Number: ' : 'Numéro: ' !!}${idNumber}`;
     }
     
     if (currentStep === 3) {
-        // Validation de la sélection de chambre
         const roomOption = document.querySelector('input[name="room_option"]:checked').value;
         
         if (roomOption === 'change') {
             if (!selectedRoomId) {
-                alert('Veuillez sélectionner une chambre alternative');
+                alert('{{ __("checkin.select_alternative_alert") }}');
                 return;
             }
             
-            // 🔴 Vérifier si chambre sale (confirmation SweetAlert : on relance
-            // l'étape une fois confirmée pour poursuivre le flux normalement).
             if (selectedRoomDirty && !nextStep.__dirtyConfirmed) {
-                window.confirmAction('⚠️ La chambre sélectionnée est sale. Le check-in ne sera possible qu\'après nettoyage. Voulez-vous continuer ?', function () {
+                window.confirmAction('{{ __("checkin.dirty_room_checkin_warning") }}', function () {
                     nextStep.__dirtyConfirmed = true;
                     nextStep(next);
                 }, { icon: 'warning' });
@@ -1084,7 +1072,6 @@ function nextStep(next) {
             }
             nextStep.__dirtyConfirmed = false;
 
-            // Vérifier si changement de prix confirmé
             const priceDifferenceElement = document.getElementById('price-difference');
             const priceDifferenceText = priceDifferenceElement.textContent.replace('CFA', '').replace(/\s/g, '');
             const priceDifference = parseInt(priceDifferenceText);
@@ -1092,28 +1079,26 @@ function nextStep(next) {
             if (priceDifference !== 0) {
                 const confirmed = document.getElementById('confirmed_price_change').checked;
                 if (!confirmed) {
-                    alert('Veuillez confirmer le changement de prix avant de continuer');
+                    alert('{{ __("checkin.confirm_price_alert") }}');
                     return;
                 }
             }
         }
         
-        // Mettre à jour le résumé de chambre
         if (roomOption === 'keep') {
-            document.getElementById('summary-room').textContent = `Chambre {{ $transaction->room->number }}`;
-            document.getElementById('summary-room-type').textContent = `{{ $transaction->room->type->name ?? 'Type non spécifié' }}`;
+            document.getElementById('summary-room').textContent = '{!! __("checkin.room_number", ["number" => $transaction->room->number]) !!}';
+            document.getElementById('summary-room-type').textContent = '{{ $transaction->room->type->name ?? __("checkin.type_not_specified") }}';
             document.getElementById('summary-room-status').textContent = '';
             document.getElementById('confirmation-dirty-warning').style.display = 'none';
         } else {
             const selectedRoomElement = document.getElementById(`room-${selectedRoomId}`);
-            const roomNumber = selectedRoomElement.querySelector('h6').textContent.replace('Chambre ', '');
+            const roomNumber = selectedRoomElement.querySelector('h6').textContent.replace('{!! __("checkin.room_number_short") !!} ', '');
             const roomType = selectedRoomElement.querySelector('p.text-muted').textContent;
-            document.getElementById('summary-room').textContent = `Chambre ${roomNumber}`;
+            document.getElementById('summary-room').textContent = `{!! __("checkin.room_number_short") !!} ${roomNumber}`;
             document.getElementById('summary-room-type').textContent = roomType;
             
-            // 🔴 Afficher warning si chambre sale
             if (selectedRoomDirty) {
-                document.getElementById('summary-room-status').textContent = '⚠️ Chambre sale - Check-in après nettoyage';
+                document.getElementById('summary-room-status').textContent = '{{ __("checkin.room_status_dirty") }}';
                 document.getElementById('confirmation-dirty-warning').style.display = 'block';
             } else {
                 document.getElementById('summary-room-status').textContent = '';
@@ -1154,7 +1139,6 @@ function toggleRoomOptions(option) {
         document.getElementById('selected_room_dirty').value = '0';
         selectedRoomDirty = false;
         
-        // Désélectionner toutes les chambres
         document.querySelectorAll('.alternative-room').forEach(room => {
             room.classList.remove('selected');
             const roomId = room.id.replace('room-', '');
@@ -1164,31 +1148,26 @@ function toggleRoomOptions(option) {
 }
 
 function selectAlternativeRoom(roomId, roomPrice, isDirty) {
-    // Désélectionner toutes les chambres
     document.querySelectorAll('.alternative-room').forEach(room => {
         room.classList.remove('selected');
         const id = room.id.replace('room-', '');
         document.getElementById(`check-${id}`).style.display = 'none';
     });
     
-    // Sélectionner la chambre choisie
     document.getElementById(`room-${roomId}`).classList.add('selected');
     document.getElementById(`check-${roomId}`).style.display = 'inline-block';
     
-    // Mettre à jour les champs cachés
     document.getElementById('new_room_id').value = roomId;
     document.getElementById('selected_room_dirty').value = isDirty ? 1 : 0;
     selectedRoomId = roomId;
     selectedRoomDirty = isDirty;
     
-    // Afficher warning si chambre sale
     if (isDirty) {
         document.getElementById('dirty-room-warning').style.display = 'block';
     } else {
         document.getElementById('dirty-room-warning').style.display = 'none';
     }
     
-    // Calculer et afficher la différence de prix
     const newTotal = roomPrice * nights;
     const priceDifference = newTotal - originalTotal;
     
@@ -1208,7 +1187,6 @@ function selectAlternativeRoom(roomId, roomPrice, isDirty) {
     
     document.getElementById('price-difference-info').style.display = 'block';
     
-    // Vérifier la case de confirmation si pas de changement de prix
     if (priceDifference === 0) {
         document.getElementById('confirmed_price_change').checked = true;
     } else {
@@ -1224,7 +1202,7 @@ function formatCFA(amount) {
 }
 
 function quickCheckIn() {
-    window.confirmAction('Effectuer un check-in rapide sans formulaire détaillé ? Le client sera enregistré avec les informations de base et la chambre originale.', function () {
+    window.confirmAction('{{ __("checkin.quick_checkin_long_confirm") }}', function () {
         fetch(`/checkin/{{ $transaction->id }}/quick`, {
             method: 'POST',
             headers: {
@@ -1241,7 +1219,7 @@ function quickCheckIn() {
                 alertDiv.className = 'alert alert-success alert-dismissible fade show';
                 alertDiv.innerHTML = `
                     <i class="fas fa-check-circle me-2"></i>
-                    ${data.message || 'Check-in rapide effectué avec succès!'}
+                    ${data.message || '{{ __("checkin.quick_checkin_success_msg") }}'}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 `;
                 document.querySelector('.container-fluid').prepend(alertDiv);
@@ -1250,33 +1228,29 @@ function quickCheckIn() {
                     window.location.href = '{{ route("checkin.index") }}';
                 }, 2000);
             } else {
-                alert('Erreur: ' + (data.error || 'Échec du check-in rapide'));
+                alert('Error: ' + (data.error || '{{ __("checkin.quick_checkin_failed") }}'));
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('Une erreur est survenue lors du check-in rapide');
+            alert('{{ __("checkin.error_during_quick_checkin") }}');
         });
     });
 }
 
-// Initialiser le stepper
 document.addEventListener('DOMContentLoaded', function() {
     updateStepIndicator(1);
     
-    // Initialiser les valeurs par défaut pour le résumé
     document.getElementById('summary-client').textContent = '{{ $transaction->customer->name }}';
     document.getElementById('summary-phone').textContent = '{{ $transaction->customer->phone }}';
-    document.getElementById('summary-room').textContent = 'Chambre {{ $transaction->room->number }}';
-    document.getElementById('summary-room-type').textContent = '{{ $transaction->room->type->name ?? "Type non spécifié" }}';
+    document.getElementById('summary-room').textContent = '{!! __("checkin.room_number", ["number" => $transaction->room->number]) !!}';
+    document.getElementById('summary-room-type').textContent = '{{ $transaction->room->type->name ?? __("checkin.type_not_specified") }}';
     
-    // Si la chambre n'est pas disponible, forcer la sélection de chambre alternative
     @if(!$isRoomAvailable)
         document.getElementById('change_room').checked = true;
         toggleRoomOptions('change');
     @endif
     
-    // Désactiver la soumission multiple
     const form = document.getElementById('checkin-form');
     const submitButton = document.getElementById('confirm-checkin');
     
@@ -1287,9 +1261,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 return false;
             }
             
-            // Désactiver le bouton et afficher l'indicateur de chargement
             submitButton.disabled = true;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Traitement...';
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> {{ __("checkin.processing") }}';
             form.classList.add('submitting');
             
             return true;

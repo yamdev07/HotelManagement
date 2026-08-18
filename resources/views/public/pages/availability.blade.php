@@ -1,5 +1,5 @@
 @extends('public.layout')
-@section('title', 'Réserver')
+@section('title', __('public_availability.title'))
 
 @push('head')
 <style>
@@ -58,8 +58,8 @@
     <header class="page-head {{ $cover ? 'has-img' : '' }}" @if($cover) style="background-image:url('{{ $cover }}')" @endif>
         @if($cover)<div class="ov"></div>@endif
         <div class="container">
-            <div class="eyebrow mb-2" style="color:#fff;opacity:.85;">Réservation</div>
-            <h1 class="display-serif" style="font-size:clamp(2.2rem,5.5vw,3.6rem);">Trouvez votre chambre</h1>
+            <div class="eyebrow mb-2" style="color:#fff;opacity:.85;">{{ __('public_availability.subtitle') }}</div>
+            <h1 class="display-serif" style="font-size:clamp(2.2rem,5.5vw,3.6rem);">{{ __('public_availability.title') }}</h1>
         </div>
     </header>
 
@@ -69,24 +69,24 @@
             {{-- Barre de recherche --}}
             <form method="GET" action="{{ route('public.hotel.availability', $hotel->slug) }}" class="search-bar">
                 <div class="sb-field">
-                    <label>Arrivée</label>
+                    <label>{{ __('public_booking.check_in') }}</label>
                     <input type="date" name="check_in" min="{{ now()->format('Y-m-d') }}"
                            value="{{ $checkIn ?: now()->format('Y-m-d') }}" required>
                 </div>
                 <div class="sb-field">
-                    <label>Départ</label>
+                    <label>{{ __('public_booking.check_out') }}</label>
                     <input type="date" name="check_out" min="{{ now()->addDay()->format('Y-m-d') }}"
                            value="{{ $checkOut ?: now()->addDay()->format('Y-m-d') }}" required>
                 </div>
                 <div class="sb-field">
-                    <label>Voyageurs</label>
+                    <label>{{ __('public_hero.guests') }}</label>
                     <select name="guests">
                         @for ($i = 1; $i <= 10; $i++)
-                            <option value="{{ $i }}" {{ (int)$guests === $i ? 'selected' : '' }}>{{ $i }} {{ $i > 1 ? 'personnes' : 'personne' }}</option>
+                            <option value="{{ $i }}" {{ (int)$guests === $i ? 'selected' : '' }}>{{ $i }} {{ $i > 1 ? __('public_hero.guests_plural') : __('public_hero.guest') }}</option>
                         @endfor
                     </select>
                 </div>
-                <button type="submit" class="sb-submit"><i class="fas fa-search"></i> Rechercher</button>
+                <button type="submit" class="sb-submit"><i class="fas fa-search"></i> {{ __('public_hero.search') }}</button>
             </form>
 
             @if (! empty($errors) && is_array($errors))
@@ -100,19 +100,19 @@
                 @endphp
 
                 <div class="res-head">
-                    <h2>{{ $rooms->count() }} {{ $rooms->count() > 1 ? 'chambres disponibles' : 'chambre disponible' }}</h2>
+                    <h2>{{ $rooms->count() }} {{ $rooms->count() > 1 ? __('public_availability.rooms_available_plural') : __('public_availability.rooms_available') }}</h2>
                     <div class="meta">
                         <i class="fas fa-calendar-day"></i>
                         {{ \Carbon\Carbon::parse($checkIn)->translatedFormat('d M') }} → {{ \Carbon\Carbon::parse($checkOut)->translatedFormat('d M') }}
-                        · {{ $nights }} nuit{{ $nights > 1 ? 's' : '' }} · {{ $guests }} voyageur{{ $guests > 1 ? 's' : '' }}
+                        · {{ $nights }} {{ __('public_booking.night', $nights) }} · {{ $guests }} {{ __('public_booking.guest', $guests) }}
                     </div>
                 </div>
 
                 @if ($rooms->isEmpty())
                     <div class="empty-book">
                         <div class="ic"><i class="fas fa-bed"></i></div>
-                        <h3>Aucune chambre disponible</h3>
-                        <p>Essayez d'autres dates ou réduisez le nombre de voyageurs.</p>
+                        <h3>{{ __('public_availability.no_room') }}</h3>
+                        <p>{{ __('public_availability.try_other_dates') }}</p>
                     </div>
                 @else
                     <div class="rgrid">
@@ -122,19 +122,19 @@
                                     <span class="cap-badge"><i class="fas fa-user"></i> {{ $room->capacity }}</span>
                                 </div>
                                 <div class="body">
-                                    <div class="rtype">{{ $room->type->name ?? 'Chambre' }}</div>
-                                    <div class="rname">Chambre {{ $room->number }}</div>
+                                    <div class="rtype">{{ $room->type->name ?? __('public_booking.room') }}</div>
+                                    <div class="rname">{{ __('public_booking.room') }} {{ $room->number }}</div>
                                     @if (! empty($room->type->description_fr ?? $room->view))
                                         <div class="rdesc">{{ \Illuminate\Support\Str::limit($room->type->description_fr ?? $room->view, 90) }}</div>
                                     @endif
                                     <div class="price-row">
                                         <div>
-                                            <div class="ppn">{{ number_format($room->price, 0, ',', ' ') }} <small>{{ $hotel->currency }} / nuit</small></div>
-                                            <div class="ptotal">Total séjour : <strong>{{ number_format($room->price * $nights, 0, ',', ' ') }} {{ $hotel->currency }}</strong></div>
+                                            <div class="ppn">{{ number_format($room->price, 0, ',', ' ') }} <small>{{ $hotel->currency }} {{ __('public_booking.per_night') }}</small></div>
+                                            <div class="ptotal">{{ __('public_booking.total_stay') }} : <strong>{{ number_format($room->price * $nights, 0, ',', ' ') }} {{ $hotel->currency }}</strong></div>
                                         </div>
                                     </div>
                                     <a class="cta" href="{{ route('public.hotel.booking', ['slug' => $hotel->slug, 'room' => $room->id, 'check_in' => $checkIn, 'check_out' => $checkOut, 'guests' => $guests]) }}">
-                                        <i class="fas fa-calendar-check"></i> Réserver
+                                        <i class="fas fa-calendar-check"></i> {{ __('public_booking.book_now') }}
                                     </a>
                                     @if ($wa)
                                         <a class="cta wa" target="_blank" rel="noopener" style="margin-top:8px;"
@@ -147,12 +147,12 @@
                         @endforeach
                     </div>
                     <p style="text-align:center; color:var(--ink2); font-size:.82rem; margin-top:26px;">
-                        <i class="fas fa-lock"></i> Paiement en ligne sécurisé bientôt disponible.
+                        <i class="fas fa-lock"></i> {{ __('public_availability.secure_payment_coming') }}
                     </p>
                 @endif
             @else
                 <p style="text-align:center; color:var(--ink2); margin-top:34px;">
-                    Choisissez vos dates ci-dessus pour voir les chambres réellement disponibles.
+                    {{ __('public_availability.choose_dates') }}
                 </p>
             @endif
 

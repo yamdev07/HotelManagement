@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'page_title'        => 'Revenus',
+    'heading'           => 'Revenus',
+    'description'       => 'Pilotage financier de votre établissement, encaissements, occupation et tendances.',
+    'today'             => 'Aujourd\'hui',
+    'collected_today'   => 'Encaissé ce jour',
+    'this_month'        => 'Ce mois',
+    'reservation_s'     => ':count réservation(s)',
+    'checkin_s'         => ':count arrivée(s)',
+    'occupancy'         => 'Occupation',
+    'rooms_today'       => ':occupied / :total chambre(s) aujourd\'hui',
+    'revpar'            => 'RevPAR',
+    'revpar_sub'        => 'Revenu par chambre (ce mois)',
+    'chart_14days'      => 'Encaissements, 14 derniers jours',
+    'chart_max'         => 'max :amount :currency',
+    'payment_methods'   => 'Moyens de paiement',
+    'this_month_small'  => 'ce mois',
+    'empty_mix'         => 'Aucun encaissement ce mois pour l\'instant.',
+    'top_rooms'         => 'Top chambres',
+    'empty_top_rooms'   => 'Pas encore de revenus par chambre ce mois.',
+    'room'              => 'Chambre',
+    'total_collected'   => 'Total encaissé (depuis le début)',
+];

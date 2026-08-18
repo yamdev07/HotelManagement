@@ -1,14 +1,14 @@
-Bonjour {{ $staffName }},
+{{ __('emails.greeting_name', ['name' => $staffName]) }}
 
-Un compte {{ __('staff.role_' . strtolower($role)) }} a été créé pour vous dans l'hôtel {{ $hotelName }}.
+{!! __('emails.staff_account_created', ['role' => __('staff.role_' . strtolower($role)), 'hotel' => $hotelName]) !!}
 
-Vos identifiants de connexion :
-- Email : {{ $email }}
-- Mot de passe : {{ $password }}
-- Rôle : {{ __('staff.role_' . strtolower($role)) }}
+{{ __('emails.your_credentials') }}
+- {{ __('emails.email') }} : {{ $email }}
+- {{ __('emails.password') }} : {{ $password }}
+- {{ __('emails.role') }} : {{ __('staff.role_' . strtolower($role)) }}
 
-Connectez-vous ici : {{ $loginUrl }}
+{{ __('emails.login') }} : {{ $loginUrl }}
 
-Pour votre sécurité, pensez à modifier votre mot de passe après votre première connexion.
+{{ __('emails.security_password_hint') }}
 
 © {{ date('Y') }} {{ config('app.name', 'checkinHub') }}

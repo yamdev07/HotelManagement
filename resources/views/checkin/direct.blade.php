@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Check-in Direct')
+@section('title', __('checkin.direct_checkin_title'))
 @section('content')
 
 <style>
@@ -467,35 +467,6 @@
 .summary-key { color: var(--slate-500); }
 .summary-val { color: var(--slate-900); font-weight: 600; text-align: right; }
 
-.deposit-box {
-    background: var(--amber-50);
-    border: 1.5px solid var(--amber-100);
-    border-radius: var(--radius-md);
-    padding: 16px 20px;
-    margin-bottom: 16px;
-}
-.deposit-box-title {
-    font-size: .78rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: .4px;
-    color: #92400e; margin-bottom: 12px;
-    display: flex; align-items: center; gap: 7px;
-}
-.deposit-check-row {
-    display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
-}
-.deposit-check-row input[type="checkbox"] {
-    margin-top: 2px; accent-color: var(--amber-500); flex-shrink: 0;
-    width: 16px; height: 16px; cursor: pointer;
-}
-.deposit-check-label { font-size: .875rem; color: var(--slate-700); cursor: pointer; }
-.deposit-amount-row {
-    display: flex; align-items: center; gap: 8px;
-    margin-top: 10px; padding-top: 10px;
-    border-top: 1px solid var(--amber-100);
-    font-size: .875rem; font-weight: 600; color: #92400e;
-    display: none;
-}
-
 .warning-box {
     display: flex; gap: 12px; align-items: flex-start;
     background: #fffbeb; border: 1.5px solid #fde68a;
@@ -560,11 +531,11 @@
 
     <!-- Breadcrumb -->
     <nav class="dc-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('checkin.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('checkin.index') }}">Check-in</a>
+        <a href="{{ route('checkin.index') }}">{{ __('checkin.checkin') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Check-in Direct</span>
+        <span class="current">{{ __('checkin.direct_checkin_title') }}</span>
     </nav>
 
     <!-- Header -->
@@ -572,12 +543,12 @@
         <div>
             <h1 class="dc-header-title">
                 <span class="dc-header-icon"><i class="fas fa-user-plus"></i></span>
-                Check-in Direct
+                {{ __('checkin.direct_checkin_title') }}
             </h1>
-            <p class="dc-header-subtitle">Enregistrement sans réservation préalable</p>
+            <p class="dc-header-subtitle">{{ __('checkin.direct_checkin_subtitle') }}</p>
         </div>
         <a href="{{ route('checkin.index') }}" class="btn-back">
-            <i class="fas fa-arrow-left"></i> Retour
+            <i class="fas fa-arrow-left"></i> {{ __('checkin.back') }}
         </a>
     </div>
 
@@ -589,19 +560,19 @@
         <div class="stepper-steps">
             <div class="step-item active" id="step-1">
                 <div class="step-bubble">1</div>
-                <div class="step-label">Client</div>
+                <div class="step-label">{{ __('checkin.step_client') }}</div>
             </div>
             <div class="step-item" id="step-2">
                 <div class="step-bubble">2</div>
-                <div class="step-label">Dates</div>
+                <div class="step-label">{{ __('checkin.step_dates') }}</div>
             </div>
             <div class="step-item" id="step-3">
                 <div class="step-bubble">3</div>
-                <div class="step-label">Chambre</div>
+                <div class="step-label">{{ __('checkin.step_room') }}</div>
             </div>
             <div class="step-item" id="step-4">
                 <div class="step-bubble">4</div>
-                <div class="step-label">Confirmation</div>
+                <div class="step-label">{{ __('checkin.step_confirmation') }}</div>
             </div>
         </div>
     </div>
@@ -617,22 +588,22 @@
                     <div class="dc-card-header-icon" style="background:var(--blue-50);color:var(--blue-600)">
                         <i class="fas fa-user"></i>
                     </div>
-                    <h2 class="dc-card-header-title">Informations Client</h2>
+                    <h2 class="dc-card-header-title">{{ __('checkin.guest_info') }}</h2>
                 </div>
                 <div class="dc-card-body">
 
                     <!-- Recherche client existant -->
                     <div class="search-box">
                         <div class="search-box-title">
-                            <i class="fas fa-search"></i> Rechercher un client existant
+                            <i class="fas fa-search"></i> {{ __('checkin.search_existing_customer') }}
                         </div>
                         <div class="search-row">
                             <input type="text" class="form-control-dc"
                                    id="search-customer"
-                                   placeholder="Nom, téléphone ou email…"
+                                   placeholder="{{ __('checkin.search_placeholder') }}"
                                    autocomplete="off">
                             <button type="button" class="btn-search" onclick="searchCustomers()">
-                                <i class="fas fa-search"></i> Chercher
+                                <i class="fas fa-search"></i> {{ __('checkin.search_button') }}
                             </button>
                         </div>
                         <div class="customer-results" id="customer-results" style="display:none;"></div>
@@ -640,37 +611,37 @@
 
                     <div class="dc-divider">
                         <div class="dc-divider-line"></div>
-                        <span class="dc-divider-label">ou créer un nouveau client</span>
+                        <span class="dc-divider-label">{{ __('checkin.or_create_new') }}</span>
                         <div class="dc-divider-line"></div>
                     </div>
 
                     <div class="form-grid-2">
                         <div class="form-group">
-                            <label class="form-label">Nom complet <span class="req">*</span></label>
+                            <label class="form-label">{{ __('checkin.full_name') }} <span class="req">*</span></label>
                             <input type="text" name="customer_name" id="name" class="form-control-dc @error('customer_name') error @enderror"
-                                   value="{{ old('customer_name') }}" placeholder="Prénom Nom" required>
+                                   value="{{ old('customer_name') }}" placeholder="{{ __('checkin.full_name_placeholder') }}" required>
                             @error('customer_name')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Téléphone <span class="req">*</span></label>
+                            <label class="form-label">{{ __('checkin.phone') }} <span class="req">*</span></label>
                             <input type="text" name="customer_phone" id="phone" class="form-control-dc @error('customer_phone') error @enderror"
-                                   value="{{ old('customer_phone') }}" placeholder="+226 xx xx xx xx" required>
+                                   value="{{ old('customer_phone') }}" placeholder="{{ __('checkin.phone_placeholder') }}" required>
                             @error('customer_phone')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Email</label>
+                            <label class="form-label">{{ __('checkin.email') }}</label>
                             <input type="email" name="customer_email" id="email" class="form-control-dc @error('customer_email') error @enderror"
-                                   value="{{ old('customer_email') }}" placeholder="email@exemple.com">
+                                   value="{{ old('customer_email') }}" placeholder="{{ __('checkin.email_placeholder') }}">
                             @error('customer_email')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
                         
                         <!-- ✅ NOUVEAU CHAMP GENRE AJOUTÉ -->
                         <div class="form-group">
-                            <label class="form-label">Genre <span class="req">*</span></label>
+                            <label class="form-label">{{ __('checkin.gender') }} <span class="req">*</span></label>
                             <select name="gender" id="gender" class="form-control-dc @error('gender') error @enderror" required>
-                                <option value="">-- Sélectionnez --</option>
-                                <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>Homme</option>
-                                <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>Femme</option>
+                                <option value="">{{ __('checkin.select_gender') }}</option>
+                                <option value="Male" {{ old('gender') == 'Male' ? 'selected' : '' }}>{{ __('checkin.male') }}</option>
+                                <option value="Female" {{ old('gender') == 'Female' ? 'selected' : '' }}>{{ __('checkin.female') }}</option>
                             </select>
                             @error('gender')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
@@ -679,7 +650,7 @@
                     <div class="dc-step-nav">
                         <div></div>
                         <button type="button" class="btn-dc-next" onclick="nextStep(2)">
-                            Continuer <i class="fas fa-arrow-right"></i>
+                            {{ __('checkin.continue_button') }} <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
                 </div>
@@ -693,26 +664,26 @@
                     <div class="dc-card-header-icon" style="background:var(--blue-50);color:var(--blue-600)">
                         <i class="fas fa-calendar-alt"></i>
                     </div>
-                    <h2 class="dc-card-header-title">Dates du Séjour</h2>
+                    <h2 class="dc-card-header-title">{{ __('checkin.step_dates_label') }}</h2>
                 </div>
                 <div class="dc-card-body">
                     <div class="form-grid-2" style="margin-bottom:18px">
                         <div class="form-group">
-                            <label class="form-label">Date d'arrivée <span class="req">*</span></label>
+                            <label class="form-label">{{ __('checkin.arrival_date') }} <span class="req">*</span></label>
                             <input type="date" name="check_in" id="check_in"
                                    class="form-control-dc @error('check_in') error @enderror"
                                    value="{{ old('check_in', date('Y-m-d')) }}" required>
                             @error('check_in')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Date de départ <span class="req">*</span></label>
+                            <label class="form-label">{{ __('checkin.departure_date') }} <span class="req">*</span></label>
                             <input type="date" name="check_out" id="check_out"
                                    class="form-control-dc @error('check_out') error @enderror"
                                    value="{{ old('check_out', date('Y-m-d', strtotime('+1 day'))) }}" required>
                             @error('check_out')<div class="form-invalid">{{ $message }}</div>@enderror
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Nombre de personnes <span class="req">*</span></label>
+                            <label class="form-label">{{ __('checkin.number_of_persons') }} <span class="req">*</span></label>
                             <input type="number" name="person_count" id="person_count"
                                    class="form-control-dc @error('person_count') error @enderror"
                                    value="{{ old('person_count', 1) }}" min="1" max="10" required>
@@ -724,7 +695,7 @@
                     <div class="nights-summary">
                         <div class="nights-big">
                             <div class="nights-big-val" id="nights-count">0</div>
-                            <div class="nights-big-label">Nuits</div>
+                            <div class="nights-big-label">{{ __('checkin.nights_summary') }}</div>
                         </div>
                         <div class="nights-dates">
                             <div class="nights-route">
@@ -734,17 +705,17 @@
                             </div>
                             <div style="font-size:.75rem;color:var(--slate-400);margin-top:5px;">
                                 <i class="fas fa-info-circle me-1"></i>
-                                Arrivée - Départ du séjour
+                                {{ __('checkin.stay_arrival_departure') }}
                             </div>
                         </div>
                     </div>
 
                     <div class="dc-step-nav">
                         <button type="button" class="btn-dc-prev" onclick="prevStep(1)">
-                            <i class="fas fa-arrow-left"></i> Retour
+                            <i class="fas fa-arrow-left"></i> {{ __('checkin.back') }}
                         </button>
                         <button type="button" class="btn-dc-next" onclick="nextStep(3)">
-                            Continuer <i class="fas fa-arrow-right"></i>
+                            {{ __('checkin.continue_button') }} <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
                 </div>
@@ -758,20 +729,20 @@
                     <div class="dc-card-header-icon" style="background:var(--green-50);color:var(--green-700)">
                         <i class="fas fa-bed"></i>
                     </div>
-                    <h2 class="dc-card-header-title">Sélection de la Chambre</h2>
+                    <h2 class="dc-card-header-title">{{ __('checkin.room_selection_title') }}</h2>
                 </div>
                 <div class="dc-card-body">
                     <div class="dc-info">
                         <i class="fas fa-info-circle"></i>
-                        Cliquez sur une chambre pour la sélectionner. Les chambres affichées sont disponibles pour vos dates.
+                        {{ __('checkin.click_room_select') }}
                     </div>
 
                     <!-- Filtres -->
                     <div class="rooms-filters">
                         <div class="form-group">
-                            <label class="form-label">Type</label>
+                            <label class="form-label">{{ __('checkin.type_filter') }}</label>
                             <select class="form-control-dc form-control-dc-select" id="filter-type" onchange="filterRooms()">
-                                <option value="">Tous les types</option>
+                                <option value="">{{ __('checkin.all_types') }}</option>
                                 @php $roomTypes = \App\Models\Type::pluck('name', 'id'); @endphp
                                 @foreach($roomTypes as $id => $name)
                                     <option value="{{ $id }}">{{ $name }}</option>
@@ -779,18 +750,18 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Capacité min.</label>
+                            <label class="form-label">{{ __('checkin.min_capacity') }}</label>
                             <select class="form-control-dc form-control-dc-select" id="filter-capacity" onchange="filterRooms()">
-                                <option value="1">1 personne</option>
-                                <option value="2">2 personnes</option>
-                                <option value="3">3 personnes</option>
-                                <option value="4">4+ personnes</option>
+                                <option value="1">1 {{ __('checkin.person') }}</option>
+                                <option value="2">2 {{ __('checkin.persons') }}</option>
+                                <option value="3">3 {{ __('checkin.persons') }}</option>
+                                <option value="4">4+ {{ __('checkin.persons') }}</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Prix max.</label>
+                            <label class="form-label">{{ __('checkin.max_price') }}</label>
                             <select class="form-control-dc form-control-dc-select" id="filter-price" onchange="filterRooms()">
-                                <option value="">Tous les prix</option>
+                                <option value="">{{ __('checkin.all_prices') }}</option>
                                 <option value="50000">50 000 CFA</option>
                                 <option value="100000">100 000 CFA</option>
                                 <option value="150000">150 000 CFA</option>
@@ -805,10 +776,10 @@
                         <div style="width:72px;height:72px;background:var(--slate-100);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--slate-300);margin:0 auto 16px;">
                             <i class="fas fa-bed"></i>
                         </div>
-                        <p style="font-size:.95rem;font-weight:600;color:var(--slate-700)">Aucune chambre disponible</p>
-                        <p style="font-size:.82rem;color:var(--slate-400)">Modifiez vos dates pour trouver des disponibilités</p>
+                        <p style="font-size:.95rem;font-weight:600;color:var(--slate-700)">{{ __('checkin.no_room_available') }}</p>
+                        <p style="font-size:.82rem;color:var(--slate-400)">{{ __('checkin.modify_dates') }}</p>
                         <button type="button" class="btn-dc-prev" style="margin-top:16px;" onclick="prevStep(2)">
-                            <i class="fas fa-arrow-left"></i> Modifier les dates
+                            <i class="fas fa-arrow-left"></i> {{ __('checkin.modify_dates_button') }}
                         </button>
                     </div>
                     @else
@@ -822,7 +793,7 @@
                              id="room-card-{{ $room->id }}">
                             <div class="room-img">
                                 @if($room->first_image_url && $room->first_image_url != asset('img/default/default-room.png'))
-                                    <img src="{{ $room->first_image_url }}" alt="Ch. {{ $room->number }}">
+                                    <img src="{{ $room->first_image_url }}" alt="{{ __('checkin.room_number_short') }} {{ $room->number }}">
                                 @else
                                     <i class="fas fa-bed"></i>
                                 @endif
@@ -830,7 +801,7 @@
                             <div class="room-body">
                                 <div class="room-header">
                                     <div class="room-number">N° {{ $room->number }}</div>
-                                    <div class="room-price">{{ Helper::formatCFA($room->price) }}<span style="font-size:.68rem;font-weight:500;color:var(--slate-400)">/nuit</span></div>
+                                    <div class="room-price">{{ Helper::formatCFA($room->price) }}<span style="font-size:.68rem;font-weight:500;color:var(--slate-400)">{{ __('checkin.per_night') }}</span></div>
                                 </div>
                                 <div class="room-type">{{ $room->type->name ?? 'N/A' }}</div>
                                 <div class="room-features">
@@ -853,23 +824,23 @@
                     <div class="selected-room-box" id="selected-room-box">
                         <div class="selected-room-box-title">
                             <i class="fas fa-check-circle" style="color:var(--green-600)"></i>
-                            Chambre sélectionnée
+                            {{ __('checkin.selected_room') }}
                         </div>
                         <div class="selected-room-grid">
                             <div class="srg-item">
-                                <div class="srg-label">Chambre</div>
+                                <div class="srg-label">{{ __('checkin.room_number_short') }}</div>
                                 <div class="srg-value" id="sel-room-num">·</div>
                             </div>
                             <div class="srg-item">
-                                <div class="srg-label">Type</div>
+                                <div class="srg-label">{{ __('checkin.type_label_short') }}</div>
                                 <div class="srg-value" id="sel-room-type">·</div>
                             </div>
                             <div class="srg-item">
-                                <div class="srg-label">Capacité</div>
+                                <div class="srg-label">{{ __('checkin.capacity_label') }}</div>
                                 <div class="srg-value" id="sel-room-cap">·</div>
                             </div>
                             <div class="srg-item">
-                                <div class="srg-label">Total séjour</div>
+                                <div class="srg-label">{{ __('checkin.total_stay') }}</div>
                                 <div class="srg-value srg-value-price" id="sel-room-total">·</div>
                             </div>
                         </div>
@@ -878,10 +849,10 @@
 
                     <div class="dc-step-nav">
                         <button type="button" class="btn-dc-prev" onclick="prevStep(2)">
-                            <i class="fas fa-arrow-left"></i> Retour
+                            <i class="fas fa-arrow-left"></i> {{ __('checkin.back') }}
                         </button>
                         <button type="button" class="btn-dc-next" id="btn-next-step4" onclick="nextStep(4)" disabled>
-                            Continuer <i class="fas fa-arrow-right"></i>
+                            {{ __('checkin.continue_button') }} <i class="fas fa-arrow-right"></i>
                         </button>
                     </div>
                 </div>
@@ -895,71 +866,71 @@
                     <div class="dc-card-header-icon" style="background:var(--green-50);color:var(--green-700)">
                         <i class="fas fa-clipboard-check"></i>
                     </div>
-                    <h2 class="dc-card-header-title">Confirmation du Check-in</h2>
+                    <h2 class="dc-card-header-title">{{ __('checkin.confirmation_title') }}</h2>
                 </div>
                 <div class="dc-card-body">
 
                     <div class="summary-grid">
                         <div class="summary-box">
                             <div class="summary-box-title" style="color:var(--blue-600)">
-                                <i class="fas fa-user"></i> Client
+                                <i class="fas fa-user"></i> {{ __('checkin.client_summary') }}
                             </div>
-                            <div class="summary-row"><span class="summary-key">Nom</span><span class="summary-val" id="s-name">·</span></div>
-                            <div class="summary-row"><span class="summary-key">Téléphone</span><span class="summary-val" id="s-phone">·</span></div>
-                            <div class="summary-row"><span class="summary-key">Email</span><span class="summary-val" id="s-email">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.name_label') }}</span><span class="summary-val" id="s-name">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.phone_label') }}</span><span class="summary-val" id="s-phone">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.email') }}</span><span class="summary-val" id="s-email">·</span></div>
                             <!-- ✅ AJOUT DU GENRE DANS LE RÉSUMÉ -->
-                            <div class="summary-row"><span class="summary-key">Genre</span><span class="summary-val" id="s-gender">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.gender_label') }}</span><span class="summary-val" id="s-gender">·</span></div>
                         </div>
                         <div class="summary-box">
                             <div class="summary-box-title" style="color:var(--green-700)">
-                                <i class="fas fa-bed"></i> Chambre
+                                <i class="fas fa-bed"></i> {{ __('checkin.room_summary') }}
                             </div>
-                            <div class="summary-row"><span class="summary-key">Numéro</span><span class="summary-val" id="s-room">·</span></div>
-                            <div class="summary-row"><span class="summary-key">Type</span><span class="summary-val" id="s-room-type">·</span></div>
-                            <div class="summary-row"><span class="summary-key">Capacité</span><span class="summary-val" id="s-room-cap">·</span></div>
-                            <div class="summary-row"><span class="summary-key">Prix/nuit</span><span class="summary-val" id="s-price-night" style="color:var(--green-700)">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.number_label') }}</span><span class="summary-val" id="s-room">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.type_label_short') }}</span><span class="summary-val" id="s-room-type">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.capacity_label') }}</span><span class="summary-val" id="s-room-cap">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.price_per_night') }}</span><span class="summary-val" id="s-price-night" style="color:var(--green-700)">·</span></div>
                         </div>
                         <div class="summary-box">
                             <div class="summary-box-title" style="color:var(--blue-600)">
-                                <i class="fas fa-calendar-alt"></i> Séjour
+                                <i class="fas fa-calendar-alt"></i> {{ __('checkin.stay_summary') }}
                             </div>
-                            <div class="summary-row"><span class="summary-key">Arrivée</span><span class="summary-val" id="s-checkin">·</span></div>
-                            <div class="summary-row"><span class="summary-key">Départ</span><span class="summary-val" id="s-checkout">·</span></div>
-                            <div class="summary-row"><span class="summary-key">Durée</span><span class="summary-val" id="s-nights">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.arrival_time') }}</span><span class="summary-val" id="s-checkin">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.departure_time') }}</span><span class="summary-val" id="s-checkout">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.duration_label') }}</span><span class="summary-val" id="s-nights">·</span></div>
                         </div>
                         <div class="summary-box">
                             <div class="summary-box-title" style="color:var(--green-700)">
-                                <i class="fas fa-money-bill-wave"></i> Financier
+                                <i class="fas fa-money-bill-wave"></i> {{ __('checkin.financial') }}
                             </div>
-                            <div class="summary-row"><span class="summary-key">Prix/nuit</span><span class="summary-val" id="s-price2">·</span></div>
-                            <div class="summary-row"><span class="summary-key">Total</span><span class="summary-val" id="s-total" style="color:var(--green-700);font-size:1rem">·</span></div>
-                            <div class="summary-row"><span class="summary-key">Méthode</span><span class="summary-val">Direct</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.price_per_night') }}</span><span class="summary-val" id="s-price2">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.total_label') }}</span><span class="summary-val" id="s-total" style="color:var(--green-700);font-size:1rem">·</span></div>
+                            <div class="summary-row"><span class="summary-key">{{ __('checkin.method_label') }}</span><span class="summary-val">{{ __('checkin.direct_method') }}</span></div>
                         </div>
                     </div>
 
                     <!-- Demandes spéciales -->
                     <div class="form-group" style="margin-bottom:18px">
-                        <label class="form-label">Demandes spéciales / Notes</label>
+                        <label class="form-label">{{ __('checkin.special_requests_notes') }}</label>
                         <textarea name="notes" id="notes" rows="3"
                                   class="form-control-dc" style="height:auto;padding:10px 14px;resize:vertical;"
-                                  placeholder="Préférences ou besoins particuliers du client…"></textarea>
+                                  placeholder="{{ __('checkin.special_requests_placeholder') }}"></textarea>
                     </div>
 
                     <!-- Warning -->
                     <div class="warning-box">
                         <i class="fas fa-exclamation-triangle"></i>
                         <span>
-                            <strong>Important :</strong> Cette action créera une nouvelle réservation et enregistrera 
-                            immédiatement le client dans la chambre. Le statut sera directement <strong>actif</strong>.
+                            <strong>{{ __('checkin.important_label') }}</strong> {{ __('checkin.direct_checkin_warning') }}
+                            <strong>{{ __('checkin.active_status') }}</strong>.
                         </span>
                     </div>
 
                     <div class="dc-step-nav">
                         <button type="button" class="btn-dc-prev" onclick="prevStep(3)">
-                            <i class="fas fa-arrow-left"></i> Retour
+                            <i class="fas fa-arrow-left"></i> {{ __('checkin.back') }}
                         </button>
                         <button type="submit" class="btn-dc-submit" id="confirm-checkin">
-                            <i class="fas fa-check-circle"></i> Confirmer le Check-in
+                            <i class="fas fa-check-circle"></i> {{ __('checkin.confirm_checkin_direct') }}
                         </button>
                     </div>
                 </div>
@@ -1014,7 +985,7 @@ function nextStep(next) {
         const gender = document.getElementById('gender').value;
         
         if (!name || !phone || !gender) {
-            showAlert('Veuillez remplir tous les champs obligatoires (nom, téléphone, genre).', 'error');
+            showAlert('{{ __("checkin.fill_required_fields") }}', 'error');
             return;
         }
     }
@@ -1022,18 +993,18 @@ function nextStep(next) {
         const ci = new Date(document.getElementById('check_in').value);
         const co = new Date(document.getElementById('check_out').value);
         if (isNaN(ci) || isNaN(co) || co <= ci) {
-            showAlert('La date de départ doit être après la date d\'arrivée.', 'error');
+            showAlert('{{ __("checkin.departure_after_arrival") }}', 'error');
             return;
         }
         const persons = parseInt(document.getElementById('person_count').value);
         if (!persons || persons < 1) {
-            showAlert('Au moins 1 personne est requise.', 'error');
+            showAlert('{{ __("checkin.min_one_person") }}', 'error');
             return;
         }
         const diff = co - ci;
         nightsCount = Math.round(diff / 86400000);
         if (nightsCount < 1) {
-            showAlert('La durée minimale du séjour est 1 nuit.', 'error');
+            showAlert('{{ __("checkin.min_stay_1_night") }}', 'error');
             return;
         }
         calcNights();
@@ -1042,7 +1013,7 @@ function nextStep(next) {
     }
     if (currentStep === 3) {
         if (!selectedRoomId) {
-            showAlert('Veuillez sélectionner une chambre.', 'error');
+            showAlert('{{ __("checkin.select_room_alert") }}', 'error');
             return;
         }
         buildSummary();
@@ -1088,9 +1059,9 @@ function selectRoom(id, price, number, type, cap) {
     totalPrice = price * nightsCount;
 
     document.getElementById('selected_room_id').value = id;
-    document.getElementById('sel-room-num').textContent = `Chambre ${number}`;
+    document.getElementById('sel-room-num').textContent = `{!! __('checkin.room_number_short') !!} ${number}`;
     document.getElementById('sel-room-type').textContent = type;
-    document.getElementById('sel-room-cap').textContent = `${cap} personne${cap > 1 ? 's' : ''}`;
+    document.getElementById('sel-room-cap').textContent = `${cap} ${cap > 1 ? '{{ __("checkin.persons") }}' : '{{ __("checkin.person") }}'}`;
     document.getElementById('sel-room-total').textContent = formatCFA(totalPrice);
 
     const box = document.getElementById('selected-room-box');
@@ -1120,24 +1091,22 @@ function buildSummary() {
     const co = new Date(document.getElementById('check_out').value);
     const fmtDate = d => d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 
-    // Récupérer le genre pour l'afficher
     const genderSelect = document.getElementById('gender');
-    const genderText = genderSelect.value === 'Male' ? 'Homme' : (genderSelect.value === 'Female' ? 'Femme' : '·');
+    const genderText = genderSelect.value === 'Male' ? '{{ __("checkin.male") }}' : (genderSelect.value === 'Female' ? '{{ __("checkin.female") }}' : '·');
 
     setText('s-name', document.getElementById('name').value);
     setText('s-phone', document.getElementById('phone').value);
-    setText('s-email', document.getElementById('email').value || 'Non renseigné');
+    setText('s-email', document.getElementById('email').value || '{{ __("checkin.not_provided") }}');
     setText('s-gender', genderText);
-    setText('s-room', `Chambre ${selectedRoomNumber}`);
+    setText('s-room', `{!! __('checkin.room_number_short') !!} ${selectedRoomNumber}`);
     setText('s-room-type', selectedRoomType);
-    setText('s-room-cap', `${selectedRoomCap} personne${selectedRoomCap > 1 ? 's' : ''}`);
+    setText('s-room-cap', `${selectedRoomCap} ${selectedRoomCap > 1 ? '{{ __("checkin.persons") }}' : '{{ __("checkin.person") }}'}`);
     setText('s-price-night', formatCFA(selectedRoomPrice));
     setText('s-checkin', fmtDate(ci));
     setText('s-checkout', fmtDate(co));
-    setText('s-nights', `${nightsCount} nuit${nightsCount > 1 ? 's' : ''}`);
+    setText('s-nights', `${nightsCount} ${nightsCount > 1 ? '{{ __("checkin.nights_unit") }}' : '{{ __("checkin.nights_unit") }}'}`);
     setText('s-price2', formatCFA(selectedRoomPrice));
     setText('s-total', formatCFA(totalPrice));
-    setText('deposit-amount-val', formatCFA(totalPrice * 0.3));
 }
 function setText(id, val) {
     const el = document.getElementById(id);
@@ -1152,17 +1121,17 @@ function formatCFA(n) {
 /* ── Search customers ────────────────────────── */
 function searchCustomers() {
     const q = document.getElementById('search-customer').value.trim();
-    if (q.length < 2) { showAlert('Saisissez au moins 2 caractères.', 'info'); return; }
+    if (q.length < 2) { showAlert('{{ __("checkin.search_min_chars") }}', 'info'); return; }
 
     const res = document.getElementById('customer-results');
     res.style.display = 'block';
-    res.innerHTML = '<div style="padding:14px;text-align:center;font-size:.82rem;color:var(--slate-400)"><i class="fas fa-spinner fa-spin me-2"></i>Recherche…</div>';
+    res.innerHTML = '<div style="padding:14px;text-align:center;font-size:.82rem;color:var(--slate-400)"><i class="fas fa-spinner fa-spin me-2"></i>{{ __("checkin.searching") }}</div>';
 
     fetch(`/api/customers?search=${encodeURIComponent(q)}`)
         .then(r => r.json())
         .then(data => {
             if (!data.length) {
-                res.innerHTML = '<div style="padding:14px;text-align:center;font-size:.82rem;color:var(--slate-400)">Aucun client trouvé</div>';
+                res.innerHTML = '<div style="padding:14px;text-align:center;font-size:.82rem;color:var(--slate-400)">{{ __("checkin.no_customer_found") }}</div>';
                 return;
             }
             res.innerHTML = data.map(c => `
@@ -1171,12 +1140,12 @@ function searchCustomers() {
                         <div class="cri-name">${c.name}</div>
                         <div class="cri-meta">${c.phone}${c.email ? ' · ' + c.email : ''}</div>
                     </div>
-                    <span class="cri-badge">${c.reservation_count || 0} résa</span>
+                    <span class="cri-badge">${c.reservation_count || 0} {{ __("checkin.resa_short") }}</span>
                 </div>
             `).join('');
         })
         .catch(() => {
-            res.innerHTML = '<div style="padding:14px;text-align:center;font-size:.82rem;color:var(--red-500)">Erreur lors de la recherche</div>';
+            res.innerHTML = '<div style="padding:14px;text-align:center;font-size:.82rem;color:var(--red-500)">{{ __("checkin.search_error") }}</div>';
         });
 }
 function esc(s) { return s.replace(/'/g, "\\'"); }
@@ -1224,12 +1193,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('check_out').addEventListener('change', calcNights);
     document.getElementById('person_count').addEventListener('change', calcNights);
 
-    /* Deposit toggle */
-    document.getElementById('pay-deposit').addEventListener('change', function () {
-        document.getElementById('deposit-amount-row').style.display = this.checked ? 'flex' : 'none';
-    });
-
-    /* Prevent double submit - CORRECTION ICI */
+    /* Prevent double submit */
     document.getElementById('direct-checkin-form').addEventListener('submit', function (e) {
         const btn = document.getElementById('confirm-checkin');
         if (btn.disabled) { 
@@ -1237,7 +1201,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return false; 
         }
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Traitement…';
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> {{ __("checkin.processing") }}`;
     });
 });
 </script>

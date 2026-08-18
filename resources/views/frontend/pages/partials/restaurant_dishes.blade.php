@@ -2,10 +2,10 @@
     <section class="menu-section" id="menuSection">
         <div class="container">
             <div class="text-center mb-5" data-aos="fade-up">
-                <span class="section-tag">Notre Carte</span>
-                <h2 class="section-title">Découvrez nos créations</h2>
+                <span class="section-tag">{{ __('frontend_restaurant_dishes.our_menu') }}</span>
+                <h2 class="section-title">{{ __('frontend_restaurant_dishes.discover_creations') }}</h2>
                 <p style="font-size:1rem;color:var(--text-gray);max-width:520px;margin:0 auto;">
-                    Une sélection de plats raffinés préparés avec des produits frais et locaux.
+                    {{ __('frontend_restaurant_dishes.menu_desc') }}
                 </p>
                 <div class="mt-4" data-aos="fade-up" data-aos-delay="40">
                     <a href="#"
@@ -16,16 +16,16 @@
                         onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(92,51,23,0.4)'"
                         onmouseout="this.style.transform='none';this.style.boxShadow='0 6px 20px rgba(92,51,23,0.3)'">
                         <i class="fas fa-globe-africa"></i>
-                        Spécialités Africaines
+                        {{ __('frontend_restaurant_dishes.african_specialties') }}
                         <span
-                            style="background:var(--white, #fff);border-radius:20px;padding:2px 9px;font-size:11px;">Nouveau</span>
+                            style="background:var(--white, #fff);border-radius:20px;padding:2px 9px;font-size:11px;">{{ __('frontend_restaurant_dishes.new') }}</span>
                     </a>
                 </div>
             </div>
 
             {{-- Onglets de catégorie --}}
             <div class="category-tabs-grid mb-5" data-aos="fade-up" data-aos-delay="60">
-                <button class="category-filter active" data-category="all"><i class="fas fa-th me-1"></i>Tout voir</button>
+                <button class="category-filter active" data-category="all"><i class="fas fa-th me-1"></i>{{ __('frontend_restaurant_dishes.see_all') }}</button>
                 @foreach($categories as $category)
                     <button class="category-filter" data-category="{{ $category->slug }}">
                         <i class="fas fa-utensils me-1"></i> {{ $category->name }}
@@ -39,8 +39,8 @@
                     <div style="width:80px;height:80px;border-radius:50%;background:rgba(26,71,42,0.06);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:2rem;color:var(--cactus-green);">
                         <i class="fas fa-search"></i>
                     </div>
-                    <h4 style="font-family:'Playfair Display',serif;color:var(--text-dark);">Aucun plat disponible</h4>
-                    <p style="color:var(--text-gray);">Il n'y a pas de plats dans cette catégorie aujourd'hui.</p>
+                    <h4 style="font-family:'Playfair Display',serif;color:var(--text-dark);">{{ __('frontend_restaurant_dishes.no_dishes') }}</h4>
+                    <p style="color:var(--text-gray);">{{ __('frontend_restaurant_dishes.no_dishes_desc') }}</p>
                 </div>
                 @forelse($menus as $menu)
                     <div class="col-6 col-md-4 col-lg-3 menu-item" data-category="{{ $menu->category?->slug }}" data-aos="fade-up"
@@ -58,7 +58,7 @@
                                 <p class="menu-card-desc">{{ $menu->description }}</p>
                                 <div class="menu-card-footer">
                                     <span class="cat-badge">
-                                        {{ $menu->category?->name ?? 'Sans catégorie' }}
+                                        {{ $menu->category?->name ?? __('frontend_restaurant_dishes.without_category') }}
                                     </span>
                                     @if($showOrderControls ?? true)
                                     <div class="v-qty-controls" data-id="{{ $menu->id }}">
@@ -66,7 +66,7 @@
                                             data-menu-id="{{ $menu->id }}" data-menu-name="{{ $menu->name }}"
                                             data-menu-price="{{ $menu->price }}"
                                             data-menu-image="{{ $menu->image_url }}">
-                                            <i class="fas fa-cart-plus"></i> Commander
+                                             <i class="fas fa-cart-plus"></i> {{ __('frontend_restaurant_dishes.order') }}
                                         </button>
                                         <div class="v-qty-wrapper d-none" id="v-qty-wrapper-{{ $menu->id }}">
                                             <button type="button" class="v-qty-btn v-qminus"
@@ -87,8 +87,8 @@
                             style="width:80px;height:80px;border-radius:50%;background:rgba(26,71,42,0.06);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:2rem;color:var(--cactus-green);">
                             <i class="fas fa-utensils"></i>
                         </div>
-                        <h4 style="font-family:'Playfair Display',serif;color:var(--text-dark);">Menu en préparation</h4>
-                        <p style="color:var(--text-gray);">Notre chef travaille sur de nouvelles créations.</p>
+                        <h4 style="font-family:'Playfair Display',serif;color:var(--text-dark);">{{ __('frontend_restaurant_dishes.menu_in_progress') }}</h4>
+                        <p style="color:var(--text-gray);">{{ __('frontend_restaurant_dishes.menu_in_progress_desc') }}</p>
                     </div>
                 @endforelse
             </div>
@@ -106,8 +106,8 @@
                 <div class="om-header-left">
                     <span class="om-crown"><i class="fas fa-crown"></i></span>
                     <div>
-                        <div class="om-title">Finaliser ma Commande</div>
-                        <div class="om-subtitle">Cactus Palace · Expérience Gastronomique</div>
+                        <div class="om-title">{{ __('frontend_restaurant_dishes.finish_order') }}</div>
+                        <div class="om-subtitle">{{ __('frontend_restaurant_dishes.cactus_experience') }}</div>
                     </div>
                 </div>
                 <button type="button" class="om-close" data-bs-dismiss="offcanvas"><i class="fas fa-times"></i></button>
@@ -117,17 +117,17 @@
                 <div class="om-steps">
                     <div class="om-step active" data-step="1">
                         <div class="om-step-dot">1</div>
-                        <div class="om-step-lbl">Identification</div>
+                        <div class="om-step-lbl">{{ __('frontend_restaurant_dishes.step_identification') }}</div>
                     </div>
                     <div class="om-step-line"></div>
                     <div class="om-step" data-step="2">
                         <div class="om-step-dot">2</div>
-                        <div class="om-step-lbl">Paiement</div>
+                        <div class="om-step-lbl">{{ __('frontend_restaurant_dishes.step_payment') }}</div>
                     </div>
                     <div class="om-step-line"></div>
                     <div class="om-step" data-step="3">
                         <div class="om-step-dot">3</div>
-                        <div class="om-step-lbl">Récapitulatif</div>
+                        <div class="om-step-lbl">{{ __('frontend_restaurant_dishes.step_summary') }}</div>
                     </div>
                 </div>
 
@@ -147,33 +147,33 @@
                         {{-- ── ÉTAPE 1 : Informations ── --}}
                         <div class="om-panel active" id="panel-1">
                             <div class="om-field mb-3">
-                                <label class="om-label" for="f-customer-name">Votre Nom <span class="text-white-50">(Optionnel)</span></label>
+                                <label class="om-label" for="f-customer-name">{{ __('frontend_restaurant_dishes.your_name') }}</label>
                                 <div class="om-input-icon">
                                     <span class="om-icon"><i class="fas fa-user"></i></span>
                                     <input type="text" class="om-input has-icon" id="f-customer-name" placeholder="Ex: Jean Dupont">
                                 </div>
                             </div>
                             <div class="om-field mb-3">
-                                <label class="om-label" for="f-phone">Numéro de Téléphone <span class="text-white-50">(Optionnel)</span></label>
+                                <label class="om-label" for="f-phone">{{ __('frontend_restaurant_dishes.phone_number') }}</label>
                                 <div class="om-input-icon">
                                     <span class="om-icon"><i class="fas fa-phone"></i></span>
                                     <input type="tel" class="om-input has-icon" id="f-phone" placeholder="Ex: +229 01 02 03 04">
                                 </div>
                             </div>
-                            <p class="om-panel-desc mb-3">Où souhaitez-vous être servi ?</p>
+                            <p class="om-panel-desc mb-3">{{ __('frontend_restaurant_dishes.where_served') }}</p>
                             
                             <!-- Choix du lieu de service -->
                             <div class="mb-4 d-flex gap-4">
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="order_location" id="locRoom" value="room" checked>
                                     <label class="form-check-label text-light fw-bold" for="locRoom" style="font-size: 0.85rem;">
-                                        <i class="fas fa-bed me-1 text-gold"></i> En Chambre
+                                        <i class="fas fa-bed me-1 text-gold"></i> {{ __('frontend_restaurant_dishes.in_room') }}
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="order_location" id="locTable" value="table">
                                     <label class="form-check-label text-light fw-bold" for="locTable" style="font-size: 0.85rem;">
-                                        <i class="fas fa-utensils me-1 text-gold"></i> Au Restaurant
+                                        <i class="fas fa-utensils me-1 text-gold"></i> {{ __('frontend_restaurant_dishes.at_restaurant') }}
                                     </label>
                                 </div>
                             </div>
@@ -181,7 +181,7 @@
                             <!-- Champs specifiques Chambre -->
                             <div class="om-grid-2" id="room_service_fields">
                                 <div class="om-field">
-                                    <label class="om-label" for="f-room">N° de chambre <span class="om-req">*</span></label>
+                                    <label class="om-label" for="f-room">{{ __('frontend_restaurant_dishes.room_number') }} <span class="om-req">*</span></label>
                                     <div class="om-input-icon">
                                         <span class="om-icon"><i class="fas fa-door-closed"></i></span>
                                         <input type="text" class="om-input has-icon" id="f-room" placeholder="Ex : 214">
@@ -189,10 +189,10 @@
                                     <div class="om-err" id="err-room"></div>
                                 </div>
                                 <div class="om-field">
-                                    <label class="om-label" for="f-email">Email enregistré <span class="om-req">*</span></label>
+                                    <label class="om-label" for="f-email">{{ __('frontend_restaurant_dishes.registered_email') }} <span class="om-req">*</span></label>
                                     <div class="om-input-icon">
                                         <span class="om-icon"><i class="fas fa-envelope"></i></span>
-                                        <input type="email" class="om-input has-icon" id="f-email" placeholder="Email de réservation">
+                                        <input type="email" class="om-input has-icon" id="f-email" placeholder="{{ __('frontend_restaurant_dishes.email_placeholder') }}">
                                     </div>
                                     <div class="om-err" id="err-email"></div>
                                 </div>
@@ -202,10 +202,10 @@
                             <div class="d-none" id="table_service_fields">
                                 <div class="om-grid-2 mb-3">
                                     <div class="om-field" style="grid-column: span 2;">
-                                        <label class="om-label" for="f-table">N° de Table <span class="om-req">*</span></label>
+                                        <label class="om-label" for="f-table">{{ __('frontend_restaurant_dishes.table_number') }} <span class="om-req">*</span></label>
                                         <div class="om-input-icon">
                                             <span class="om-icon"><i class="fas fa-hashtag"></i></span>
-                                            <input type="text" class="om-input has-icon" id="f-table" placeholder="Votre numéro de table">
+                                            <input type="text" class="om-input has-icon" id="f-table" placeholder="{{ __('frontend_restaurant_dishes.table_number') }}">
                                         </div>
                                         <div class="om-err" id="err-table"></div>
                                     </div>
@@ -214,19 +214,19 @@
                                 <div class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" id="is_resident">
                                     <label class="form-check-label text-gold-light" for="is_resident" style="font-size: 0.8rem; cursor:pointer;">
-                                        Je suis résident à l'hôtel (Facturer sur ma chambre)
+                                        {{ __('frontend_restaurant_dishes.hotel_resident') }}
                                     </label>
                                 </div>
 
                                 <div class="om-grid-2 d-none" id="resident_extra_fields">
                                     <div class="om-field">
-                                        <label class="om-label" for="f-room-alt">N° de chambre <span class="om-req">*</span></label>
+                                        <label class="om-label" for="f-room-alt">{{ __('frontend_restaurant_dishes.room_number') }} <span class="om-req">*</span></label>
                                         <input type="text" class="om-input" id="f-room-alt" placeholder="Ex : 214">
                                         <div class="om-err" id="err-room-alt"></div>
                                     </div>
                                     <div class="om-field">
-                                        <label class="om-label" for="f-email-alt">Email enregistré <span class="om-req">*</span></label>
-                                        <input type="email" class="om-input" id="f-email-alt" placeholder="Email de réservation">
+                                        <label class="om-label" for="f-email-alt">{{ __('frontend_restaurant_dishes.registered_email') }} <span class="om-req">*</span></label>
+                                        <input type="email" class="om-input" id="f-email-alt" placeholder="{{ __('frontend_restaurant_dishes.email_placeholder') }}">
                                         <div class="om-err" id="err-email-alt"></div>
                                     </div>
                                 </div>
@@ -234,8 +234,8 @@
 
                             <div class="om-grid-2 mt-2">
                                 <div class="om-field" style="grid-column: span 2;">
-                                    <label class="om-label" for="f-notes">Notes spéciales (optionnel)</label>
-                                    <textarea class="om-input" id="f-notes" rows="2" placeholder="Allergies, préférences de cuisson..."></textarea>
+                                    <label class="om-label" for="f-notes">{{ __('frontend_restaurant_dishes.special_notes') }}</label>
+                                    <textarea class="om-input" id="f-notes" rows="2" placeholder="{{ __('frontend_restaurant_dishes.notes_placeholder') }}"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -246,29 +246,28 @@
                         {{-- Étape 2: Mode de règlement --}}
                         <div class="om-panel" id="panel-2">
                             <div class="om-panel-title">
-                                <i class="fas fa-credit-card me-1 om-panel-icon"></i> Mode de règlement
+                                <i class="fas fa-credit-card me-1 om-panel-icon"></i> {{ __('frontend_restaurant_dishes.payment_method') }}
                             </div>
-                            <p class="text-white-50 mb-4" style="font-size: 0.9rem;">Comment souhaitez-vous régler votre
-                                commande ?</p>
+                            <p class="text-white-50 mb-4" style="font-size: 0.9rem;">{{ __('frontend_restaurant_dishes.how_pay') }}</p>
 
                             <div class="om-payment-grid"
                                 style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px;">
                                 <label class="om-payment-card active" id="pay-card-cash">
                                     <input type="radio" name="payment_choice" value="cash" checked style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-money-bill-wave"></i></div>
-                                    <div class="om-pc-label">Espèces</div>
+                                    <div class="om-pc-label">{{ __('frontend_restaurant_dishes.cash') }}</div>
                                     <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                 </label>
                                 <label class="om-payment-card" id="pay-card-mobile">
                                     <input type="radio" name="payment_choice" value="mobile_money" style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-mobile-alt"></i></div>
-                                    <div class="om-pc-label">Mobile Money</div>
+                                    <div class="om-pc-label">{{ __('frontend_restaurant_dishes.mobile_money') }}</div>
                                     <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                 </label>
                                 <label class="om-payment-card" id="pay-card-card">
                                     <input type="radio" name="payment_choice" value="card" style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-credit-card"></i></div>
-                                    <div class="om-pc-label">Carte Bancaire</div>
+                                    <div class="om-pc-label">{{ __('frontend_restaurant_dishes.credit_card') }}</div>
                                     <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                 </label>
                                 <label class="om-payment-card" id="pay-card-fedapay">
@@ -280,20 +279,20 @@
                                 <label class="om-payment-card" id="pay-card-transfer">
                                     <input type="radio" name="payment_choice" value="transfer" style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-university"></i></div>
-                                    <div class="om-pc-label">Virement</div>
+                                    <div class="om-pc-label">{{ __('frontend_restaurant_dishes.transfer') }}</div>
                                     <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                 </label>
                                 <label class="om-payment-card" id="pay-card-check">
                                     <input type="radio" name="payment_choice" value="check" style="display:none">
                                     <div class="om-pc-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-                                    <div class="om-pc-label">Chèque</div>
+                                    <div class="om-pc-label">{{ __('frontend_restaurant_dishes.check') }}</div>
                                     <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                 </label>
                                 <div id="room-payment-notice" class="col-span-2 d-none" style="grid-column: span 2;">
                                     <div class="om-payment-card active w-100" style="cursor: default;">
                                         <input type="radio" name="payment_choice" value="room_charge" style="display:none">
                                         <div class="om-pc-icon"><i class="fas fa-hotel"></i></div>
-                                        <div class="om-pc-label">Facture de la chambre</div>
+                                        <div class="om-pc-label">{{ __('frontend_restaurant_dishes.room_bill') }}</div>
                                         <div class="om-pc-status"><i class="fas fa-check-circle"></i></div>
                                     </div>
                                 </div>
@@ -303,7 +302,7 @@
                             <div id="payment-room-hint" class="mt-4 p-3 rounded d-none"
                                 style="background: rgba(46, 125, 50, 0.1); border: 1px dashed #4caf50;">
                                 <p class="mb-0" style="color: #81c784; font-size: 0.85rem;">
-                                    <i class="fas fa-check-circle me-2"></i> Client de l'hôtel détecté. La commande sera ajoutée directement à votre note de chambre.
+                                    <i class="fas fa-check-circle me-2"></i> {{ __('frontend_restaurant_dishes.hotel_guest_detected') }}
                                 </p>
                             </div>
 
@@ -316,28 +315,28 @@
                                 {{-- Gauche: Infos & Paiement --}}
                                 <div class="om-checkout-left">
                                     <div class="om-panel-title">
-                                        <i class="fas fa-id-card me-1 om-panel-icon"></i> Vos Informations
+                                        <i class="fas fa-id-card me-1 om-panel-icon"></i> {{ __('frontend_restaurant_dishes.your_information') }}
                                     </div>
-                                    <div class="om-section-label">Identification</div>
+                                    <div class="om-section-label">{{ __('frontend_restaurant_dishes.identification') }}</div>
                                     <div id="recap-identity" class="om-recap-block">
                                         {{-- Rempli via JS --}}
                                     </div>
 
-                                    <div class="om-section-label mt-4">Paiement</div>
+                                    <div class="om-section-label mt-4">{{ __('frontend_restaurant_dishes.payment') }}</div>
                                     <div id="recap-payment" class="om-recap-block">
                                         {{-- Rempli via JS --}}
                                     </div>
                                     
                                     <div class="mt-4 p-3 rounded" style="background: rgba(212,175,55,0.03); border: 1px solid rgba(212,175,55,0.1);">
                                         <div style="color: #c0b080; font-size: 0.75rem; line-height: 1.5;">
-                                            <i class="fas fa-leaf me-2"></i> Votre commande sera préparée avec soin et livrée dans les plus brefs délais par notre équipe.
+                                            <i class="fas fa-leaf me-2"></i> {{ __('frontend_restaurant_dishes.order_carefully') }}
                                         </div>
                                     </div>
                                 </div>
                                 
                                 {{-- Droite: Contenu du Panier --}}
                                 <div class="om-checkout-right">
-                                    <div class="om-section-label">Plats sélectionnés</div>
+                                    <div class="om-section-label">{{ __('frontend_restaurant_dishes.selected_dishes') }}</div>
                                     <div class="om-recap-items-container">
                                         <div id="recap-items" style="max-height: 300px; overflow-y: auto;">
                                             {{-- Rempli via JS --}}
@@ -345,7 +344,7 @@
                                     </div>
 
                                     <div class="om-recap-total-box mt-4">
-                                        <div class="om-total-subtitle">À régler</div>
+                                        <div class="om-total-subtitle">{{ __('frontend_restaurant_dishes.amount_due') }}</div>
                                         <div id="recap-total" class="om-total-amount">0 FCFA</div>
                                     </div>
                                 </div>
@@ -357,14 +356,14 @@
                     {{-- Pied de modal --}}
                     <div class="om-footer">
                         <button type="button" class="om-btn om-btn-ghost" id="om-prev" style="display:none">
-                            ← Précédent
+                            ← {{ __('frontend_restaurant_dishes.back') }}
                         </button>
-                        <button type="button" class="om-btn om-btn-outline" data-bs-dismiss="modal">Annuler</button>
+                        <button type="button" class="om-btn om-btn-outline" data-bs-dismiss="modal">{{ __('frontend_restaurant_dishes.cancel') }}</button>
                         <button type="button" class="om-btn om-btn-gold" id="om-next">
-                            Suivant →
+                            {{ __('frontend_restaurant_dishes.next') }}
                         </button>
                         <button type="submit" class="om-btn om-btn-gold" id="om-submit" style="display:none">
-                            <i class="fas fa-check me-1"></i> Confirmer
+                            <i class="fas fa-check me-1"></i> {{ __('frontend_restaurant_dishes.confirm') }}
                         </button>
                     </div>
 
@@ -402,11 +401,11 @@
                                 <div class="mt-auto pt-5 border-top">
                                     <div class="d-flex justify-content-between align-items-end">
                                         <div class="price-wrap">
-                                            <span class="text-muted small d-block mb-1 text-uppercase fw-bold" style="letter-spacing: 1px;">Prix Gastronomique</span>
+                                            <span class="text-muted small d-block mb-1 text-uppercase fw-bold" style="letter-spacing: 1px;">{{ __('frontend_restaurant_dishes.dish_price') }}</span>
                                             <span class="h2 fw-bold text-success mb-0" style="color: var(--cactus-green) !important;"><span id="modalDishPrice"></span> <small style="font-size: 14px; font-weight: 600;">FCFA</small></span>
                                         </div>
                                         <button type="button" class="btn btn-outline-success py-2 px-4 shadow-sm fw-bold" data-bs-dismiss="modal" style="border-radius: 12px; border-width: 2px; transition: all 0.3s ease; font-size: 0.9rem;">
-                                            RETOUR AU MENU
+                                            {{ __('frontend_restaurant_dishes.return_to_menu') }}
                                         </button>
                                     </div>
                                 </div>
@@ -1163,11 +1162,11 @@
                     const emailVal = $('#f-email').val().trim();
                     const roomVal = $('#f-room').val().trim();
                     
-                    if (!emailVal) { $('#err-email').text("L'email est requis."); ok = false; }
-                    if (!roomVal) { $('#err-room').text('Le n° de chambre est requis.'); ok = false; }
+                    if (!emailVal) { $('#err-email').text("{{ __('frontend_restaurant_dishes.email_required') }}"); ok = false; }
+                    if (!roomVal) { $('#err-room').text('{{ __("frontend_restaurant_dishes.room_required") }}'); ok = false; }
                     if (!ok) return;
 
-                    const $btn = $('#om-next').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Vérification…');
+                    const $btn = $('#om-next').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> {{ __("frontend_restaurant_dishes.verifying") }}');
                     $.get('/api/restaurant/check-room', { 
                         room_number: roomVal,
                         email: emailVal
@@ -1177,24 +1176,24 @@
                         else { $('#err-room').html(`<span class="text-danger">${res.message}</span>`); }
                     })
                     .fail(function() {
-                        $('#err-room').html('<span class="text-danger">Erreur de vérification.</span>');
+                        $('#err-room').html('<span class="text-danger">{{ __("frontend_restaurant_dishes.verification_error") }}</span>');
                     })
                     .always(function() {
-                        $btn.prop('disabled', false).html('Suivant →');
+                        $btn.prop('disabled', false).html('{{ __("frontend_restaurant_dishes.next_step") }}');
                     });
                 } else {
                     const tableVal = $('#f-table').val().trim();
-                    if (!tableVal) { $('#err-table').text('Le n° de table est requis.'); ok = false; }
+                    if (!tableVal) { $('#err-table').text('{{ __("frontend_restaurant_dishes.table_required") }}'); ok = false; }
                     
                     if ($('#is_resident').is(':checked')) {
                         const emailAlt = $('#f-email-alt').val().trim();
                         const roomAlt = $('#f-room-alt').val().trim();
-                        if (!emailAlt) { $('#err-email-alt').text("L'email est requis."); ok = false; }
-                        if (!roomAlt) { $('#err-room-alt').text('Le n° de chambre est requis.'); ok = false; }
+                        if (!emailAlt) { $('#err-email-alt').text("{{ __('frontend_restaurant_dishes.email_required') }}"); ok = false; }
+                        if (!roomAlt) { $('#err-room-alt').text('{{ __("frontend_restaurant_dishes.room_required") }}'); ok = false; }
                         
                         if (!ok) return;
 
-                        const $btn = $('#om-next').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Vérification…');
+                        const $btn = $('#om-next').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> {{ __("frontend_restaurant_dishes.verifying") }}');
                         $.get('/api/restaurant/check-room', { 
                             room_number: roomAlt,
                             email: emailAlt
@@ -1204,10 +1203,10 @@
                             else { $('#err-room-alt').html(`<span class="text-danger">${res.message}</span>`); }
                         })
                         .fail(function() {
-                            $('#err-room-alt').html('<span class="text-danger">Erreur de vérification.</span>');
+                            $('#err-room-alt').html('<span class="text-danger">{{ __("frontend_restaurant_dishes.verification_error") }}</span>');
                         })
                         .always(function() {
-                            $btn.prop('disabled', false).html('Suivant →');
+                            $btn.prop('disabled', false).html('{{ __("frontend_restaurant_dishes.next_step") }}');
                         });
                     } else {
                         if (!ok) return;
@@ -1281,54 +1280,54 @@
                 if (location === 'room') {
                     const room = $('#f-room').val().trim();
                     const email = $('#f-email').val().trim();
-                    idHtml += `<div class="om-recap-line"><span>Service</span><strong>Room Service</strong></div>`;
-                    idHtml += `<div class="om-recap-line"><span>Chambre</span><strong>${room}</strong></div>`;
-                    if (custName) idHtml += `<div class="om-recap-line"><span>Nom</span><strong>${custName}</strong></div>`;
+                    idHtml += `<div class="om-recap-line"><span>{{ __("frontend_restaurant_dishes.recap_service") }}</span><strong>{{ __("frontend_restaurant_dishes.room_bill") }}</strong></div>`;
+                    idHtml += `<div class="om-recap-line"><span>{{ __("frontend_restaurant_dishes.recap_room") }}</span><strong>${room}</strong></div>`;
+                    if (custName) idHtml += `<div class="om-recap-line"><span>{{ __("frontend_restaurant_dishes.recap_name") }}</span><strong>${custName}</strong></div>`;
                     
-                    $('#hCustomerName').val(custName ? `${custName} (Ch. ${room})` : `Room Service - ${room}`);
+                    $('#hCustomerName').val(custName ? `${custName} (Ch. ${room})` : `{{ __("frontend_restaurant_dishes.room_bill") }} - ${room}`);
                     $('#hEmail').val(email); 
                     $('#hRoom').val(room);
                 } else {
                     const table = $('#f-table').val().trim();
-                    idHtml += `<div class="om-recap-line"><span>Service</span><strong>Table ${table}</strong></div>`;
+                    idHtml += `<div class="om-recap-line"><span>{{ __("frontend_restaurant_dishes.recap_service") }}</span><strong>Table ${table}</strong></div>`;
                     if (isResident) {
                         const roomAlt = $('#f-room-alt').val().trim();
                         const emailAlt = $('#f-email-alt').val().trim();
-                        idHtml += `<div class="om-recap-line"><span>Client</span><strong>Résident (Ch. ${roomAlt})</strong></div>`;
-                        if (custName) idHtml += `<div class="om-recap-line"><span>Nom</span><strong>${custName}</strong></div>`;
+                        idHtml += `<div class="om-recap-line"><span>{{ __("frontend_restaurant_dishes.recap_client") }}</span><strong>{{ __("frontend_restaurant_dishes.recap_resident") }} (Ch. ${roomAlt})</strong></div>`;
+                        if (custName) idHtml += `<div class="om-recap-line"><span>{{ __("frontend_restaurant_dishes.recap_name") }}</span><strong>${custName}</strong></div>`;
                         
-                        $('#hCustomerName').val(custName ? `${custName} (Table ${table} / Ch. ${roomAlt})` : `Table ${table} (Résident Ch. ${roomAlt})`);
+                        $('#hCustomerName').val(custName ? `${custName} (Table ${table} / Ch. ${roomAlt})` : `Table ${table} ({{ __("frontend_restaurant_dishes.recap_resident") }} Ch. ${roomAlt})`);
                         $('#hEmail').val(emailAlt); $('#hRoom').val(roomAlt);
                     } else {
-                        idHtml += `<div class="om-recap-line"><span>Client</span><strong>Extérieur</strong></div>`;
-                        if (custName) idHtml += `<div class="om-recap-line"><span>Nom</span><strong>${custName}</strong></div>`;
+                        idHtml += `<div class="om-recap-line"><span>{{ __("frontend_restaurant_dishes.recap_client") }}</span><strong>{{ __("frontend_restaurant_dishes.recap_exterior") }}</strong></div>`;
+                        if (custName) idHtml += `<div class="om-recap-line"><span>{{ __("frontend_restaurant_dishes.recap_name") }}</span><strong>${custName}</strong></div>`;
                         
-                        $('#hCustomerName').val(custName ? `${custName} (Table ${table})` : `Client Table ${table}`);
+                        $('#hCustomerName').val(custName ? `${custName} (Table ${table})` : `{{ __("frontend_restaurant_dishes.exterior_client") }} ${table}`);
                         $('#hEmail').val(""); $('#hRoom').val('');
                     }
                 }
 
                 if (phone) {
-                    idHtml += `<div class="om-recap-line"><span>Tél</span><strong>${phone}</strong></div>`;
+                    idHtml += `<div class="om-recap-line"><span>{{ __("frontend_restaurant_dishes.recap_phone") }}</span><strong>${phone}</strong></div>`;
                     $('#hPhone').val(phone);
                 }
 
 
-                if (notes) idHtml += `<div class="om-recap-line"><span>Notes</span><strong>${notes}</strong></div>`;
+                if (notes) idHtml += `<div class="om-recap-line"><span>{{ __("frontend_restaurant_dishes.recap_notes") }}</span><strong>${notes}</strong></div>`;
                 $('#recap-identity').html(idHtml);
 
                 // Paiement
                 let payHtml = '';
                 const pMode = (location === 'room' || isResident) ? 'room_charge' : $('input[name="payment_choice"]:checked').val();
-                let pLabel = "Espèces";
-                if(pMode === 'mobile_money') pLabel = "Mobile Money";
-                else if(pMode === 'card') pLabel = "Carte Bancaire";
-                else if(pMode === 'fedapay') pLabel = "Fedapay";
-                else if(pMode === 'transfer') pLabel = "Virement";
-                else if(pMode === 'check') pLabel = "Chèque";
-                else if(pMode === 'room_charge') pLabel = "Facture de la chambre";
+                let pLabel = "{{ __("frontend_restaurant_dishes.cash") }}";
+                if(pMode === 'mobile_money') pLabel = "{{ __("frontend_restaurant_dishes.mobile_money") }}";
+                else if(pMode === 'card') pLabel = "{{ __("frontend_restaurant_dishes.credit_card") }}";
+                else if(pMode === 'fedapay') pLabel = "{{ __("frontend_restaurant_dishes.fedapay") }}";
+                else if(pMode === 'transfer') pLabel = "{{ __("frontend_restaurant_dishes.transfer") }}";
+                else if(pMode === 'check') pLabel = "{{ __("frontend_restaurant_dishes.check") }}";
+                else if(pMode === 'room_charge') pLabel = "{{ __("frontend_restaurant_dishes.room_bill") }}";
 
-                payHtml += `<div class="om-recap-line"><span>Méthode</span><strong>${pLabel}</strong></div>`;
+                payHtml += `<div class="om-recap-line"><span>{{ __("frontend_restaurant_dishes.recap_method") }}</span><strong>${pLabel}</strong></div>`;
                 $('#recap-payment').html(payHtml);
 
                 // Items
@@ -1387,7 +1386,7 @@
 
                 const btn = $('#om-submit');
                 const originalText = btn.html();
-                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Traitement…');
+                btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> {{ __("frontend_restaurant_dishes.processing_order") }}');
 
                 $.ajax({
                     url: $(this).attr('action'),
@@ -1398,8 +1397,8 @@
                     success: function(res) {
                         Swal.fire({ 
                             icon: 'success', 
-                            title: 'Commande confirmée', 
-                            text: 'Votre commande a été transmise avec succès !',
+                            title: '{{ __("frontend_restaurant_dishes.order_success_title") }}', 
+                            text: '{{ __("frontend_restaurant_dishes.order_success_text") }}',
                             confirmButtonColor: '#d4af37' 
                         }).then(() => {
                             const offcanvasElement = document.getElementById('orderModal');
@@ -1410,12 +1409,12 @@
                         });
                     },
                     error: function(xhr) {
-                        let msg = "Une erreur est survenue lors de l'envoi.";
+                        let msg = "{{ __('frontend_restaurant_dishes.order_error_default') }}";
                         if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
                         
                         Swal.fire({ 
                             icon: 'error', 
-                            title: 'Échec de l\'envoi', 
+                            title: '{{ __("frontend_restaurant_dishes.order_error_title") }}', 
                             text: msg,
                             confirmButtonColor: '#d4af37'
                         });
@@ -1455,7 +1454,7 @@
                 $('#modalDishName').text(name);
                 $('#modalDishDesc').text(description || '...');
                 $('#modalDishPrice').text(price);
-                $('#modalDishCategory').text(category || 'Plat');
+                $('#modalDishCategory').text(category || '{{ __("frontend_restaurant_dishes.dish_fallback_category") }}');
                 // Toujours réinitialiser l'état avant d'affecter la nouvelle image
                 $('#modalDishNoImg').addClass('d-none');
                 if (image) {

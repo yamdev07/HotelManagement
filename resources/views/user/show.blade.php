@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Profil Utilisateur - ' . $user->name)
+@section('title', __('user.user_profile') . ' - ' . $user->name)
 
 @section('content')
 
@@ -334,9 +334,9 @@
 <div class="profile-page">
     <!-- Breadcrumb -->
     <div class="profile-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('user.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('user.index') }}">Utilisateurs</a>
+        <a href="{{ route('user.index') }}">{{ __('user.users') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <span class="current">{{ $user->name }}</span>
     </div>
@@ -359,12 +359,12 @@
                     @break
                 @case('Admin')
                     <span class="role-badge badge-admin">
-                        <i class="fas fa-user-shield me-1"></i>Administrateur
+                        <i class="fas fa-user-shield me-1"></i>{{ __('user.role_admin') }}
                     </span>
                     @break
                 @case('Receptionist')
                     <span class="role-badge badge-receptionist">
-                        <i class="fas fa-concierge-bell me-1"></i>Réceptionniste
+                        <i class="fas fa-concierge-bell me-1"></i>{{ __('user.role_receptionist') }}
                     </span>
                     @break
                 @case('Housekeeping')
@@ -380,7 +380,7 @@
             
             <p class="mt-3 mb-0" style="color:rgba(255,255,255,0.8);">
                 <i class="fas fa-user-circle me-1"></i> ID: #{{ $user->id }}
-                • Membre depuis {{ $user->created_at->format('d/m/Y') }}
+                • {{ __('user.member_since') }} {{ $user->created_at->format('d/m/Y') }}
             </p>
         </div>
         
@@ -393,7 +393,7 @@
                         <div class="info-card-body">
                             <h5 class="card-title mb-4" style="color:var(--s800); font-size:.95rem;">
                                 <i class="fas fa-id-card me-2" style="color:var(--g500);"></i>
-                                Informations Personnelles
+                                {{ __('user.personal_information') }}
                             </h5>
                             
                             <div class="row">
@@ -403,11 +403,11 @@
                                             <i class="fas fa-envelope"></i>
                                         </div>
                                         <div>
-                                            <small class="text-muted d-block" style="color:var(--s400);">Email</small>
+                                            <small class="text-muted d-block" style="color:var(--s400);">{{ __('user.email_label') }}</small>
                                             <strong style="color:var(--s800);">{{ $user->email }}</strong>
                                             @if($user->email_verified_at)
                                             <span class="badge-db badge-db-success ms-2">
-                                                <i class="fas fa-check-circle"></i> Vérifié
+                                                <i class="fas fa-check-circle"></i> {{ __('user.verified') }}
                                             </span>
                                             @endif
                                         </div>
@@ -420,8 +420,8 @@
                                             <i class="fas fa-phone"></i>
                                         </div>
                                         <div>
-                                            <small class="text-muted d-block" style="color:var(--s400);">Téléphone</small>
-                                            <strong style="color:var(--s800);">{{ $user->phone ?? 'Non renseigné' }}</strong>
+                                            <small class="text-muted d-block" style="color:var(--s400);">{{ __('user.phone_label') }}</small>
+                                            <strong style="color:var(--s800);">{{ $user->phone ?? __('user.not_specified') }}</strong>
                                         </div>
                                     </div>
                                 </div>
@@ -433,7 +433,7 @@
                                             <i class="fas fa-map-marker-alt"></i>
                                         </div>
                                         <div>
-                                            <small class="text-muted d-block" style="color:var(--s400);">Adresse</small>
+                                            <small class="text-muted d-block" style="color:var(--s400);">{{ __('user.address_label') }}</small>
                                             <strong style="color:var(--s800);">{{ $user->address }}</strong>
                                         </div>
                                     </div>
@@ -445,18 +445,18 @@
                             <div class="mt-4 pt-3" style="border-top:1px solid var(--s100);">
                                 <div class="d-flex gap-2 flex-wrap">
                                     <a href="mailto:{{ $user->email }}" class="btn-db btn-db-outline-primary">
-                                        <i class="fas fa-envelope me-2"></i>Envoyer un email
+                                        <i class="fas fa-envelope me-2"></i>{{ __('user.send_email') }}
                                     </a>
                                     
                                     @if(auth()->user()->role === 'Super' && auth()->user()->id !== $user->id)
                                     <a href="{{ route('user.edit', $user) }}" class="btn-db btn-db-outline-warning">
-                                        <i class="fas fa-edit me-2"></i>Modifier
+                                        <i class="fas fa-edit me-2"></i>{{ __('user.edit_action') }}
                                     </a>
                                     @endif
                                     
                                     @if(auth()->user()->id === $user->id)
                                     <a href="{{ route('profile.edit') }}" class="btn-db btn-db-outline-info">
-                                        <i class="fas fa-user-edit me-2"></i>Mon profil
+                                        <i class="fas fa-user-edit me-2"></i>{{ __('user.my_profile') }}
                                     </a>
                                     @endif
                                 </div>
@@ -470,7 +470,7 @@
                         <div class="info-card-body">
                             <h5 class="card-title mb-4" style="color:var(--s800); font-size:.95rem;">
                                 <i class="fas fa-chart-line me-2" style="color:var(--g500);"></i>
-                                Statistiques Client
+                                {{ __('user.customer_stats') }}
                             </h5>
                             
                             <div class="row g-3">
@@ -479,7 +479,7 @@
                                         <div class="stat-number" style="color:var(--g600);">
                                             {{ $user->customer->transactions->count() ?? 0 }}
                                         </div>
-                                        <div class="stat-label">Réservations</div>
+                                        <div class="stat-label">{{ __('user.reservations') }}</div>
                                     </div>
                                 </div>
                                 
@@ -488,7 +488,7 @@
                                         <div class="stat-number" style="color:var(--g600);">
                                             {{ number_format($user->customer->transactions->sum('total_price') ?? 0, 0) }}
                                         </div>
-                                        <div class="stat-label">FCFA dépensés</div>
+                                        <div class="stat-label">{{ __('user.fcfa_spent') }}</div>
                                     </div>
                                 </div>
                                 
@@ -497,7 +497,7 @@
                                         <div class="stat-number" style="color:var(--g500);">
                                             {{ $user->customer->transactions->where('status', 'active')->count() ?? 0 }}
                                         </div>
-                                        <div class="stat-label">Séjours actifs</div>
+                                        <div class="stat-label">{{ __('user.active_stays') }}</div>
                                     </div>
                                 </div>
                                 
@@ -506,7 +506,7 @@
                                         <div class="stat-number" style="color:var(--g400);">
                                             {{ $user->customer->transactions->where('status', 'completed')->count() ?? 0 }}
                                         </div>
-                                        <div class="stat-label">Séjours terminés</div>
+                                        <div class="stat-label">{{ __('user.completed_stays') }}</div>
                                     </div>
                                 </div>
                             </div>
@@ -520,7 +520,7 @@
                         <div class="info-card-body">
                             <h5 class="card-title mb-4" style="color:var(--s800); font-size:.95rem;">
                                 <i class="fas fa-history me-2" style="color:var(--g500);"></i>
-                                Dernières Activités
+                                {{ __('user.recent_activities') }}
                             </h5>
                             
                             <div class="activity-list">
@@ -554,49 +554,49 @@
                         <div class="info-card-body">
                             <h5 class="card-title mb-3" style="color:var(--s800); font-size:.9rem;">
                                 <i class="fas fa-user-check me-2" style="color:var(--g500);"></i>
-                                Statut du Compte
+                                {{ __('user.account_status') }}
                             </h5>
                             
                             <div style="display:flex; flex-direction:column; gap:12px;">
                                 <div class="d-flex justify-content-between">
-                                    <span style="color:var(--s600);">Statut:</span>
+                                    <span style="color:var(--s600);">{{ __('user.status_label') }}</span>
                                     <span>
                                         @if($user->is_active)
                                         <span class="badge-db badge-db-success">
-                                            <i class="fas fa-check-circle me-1"></i>Actif
+                                            <i class="fas fa-check-circle me-1"></i>{{ __('user.active_label') }}
                                         </span>
                                         @else
                                         <span class="badge-db badge-db-danger">
-                                            <i class="fas fa-times-circle me-1"></i>Inactif
+                                            <i class="fas fa-times-circle me-1"></i>{{ __('user.inactive') }}
                                         </span>
                                         @endif
                                     </span>
                                 </div>
                                 
                                 <div class="d-flex justify-content-between">
-                                    <span style="color:var(--s600);">Email vérifié:</span>
+                                    <span style="color:var(--s600);">{{ __('user.email_verified') }}</span>
                                     <span>
                                         @if($user->email_verified_at)
-                                        <span class="badge-db badge-db-success">Oui</span>
+                                        <span class="badge-db badge-db-success">{{ __('user.yes') }}</span>
                                         @else
-                                        <span class="badge-db badge-db-warning">Non</span>
+                                        <span class="badge-db badge-db-warning">{{ __('user.no') }}</span>
                                         @endif
                                     </span>
                                 </div>
                                 
                                 <div class="d-flex justify-content-between">
-                                    <span style="color:var(--s600);">Dernière connexion:</span>
+                                    <span style="color:var(--s600);">{{ __('user.last_login') }}</span>
                                     <span style="color:var(--s800);">
                                         @if($user->last_login_at)
                                         <small>{{ $user->last_login_at->diffForHumans() }}</small>
                                         @else
-                                        <small class="text-muted">Jamais</small>
+                                        <small class="text-muted">{{ __('user.never') }}</small>
                                         @endif
                                     </span>
                                 </div>
                                 
                                 <div class="d-flex justify-content-between">
-                                    <span style="color:var(--s600);">Créé le:</span>
+                                    <span style="color:var(--s600);">{{ __('user.created_on') }}</span>
                                     <small style="color:var(--s800);">{{ $user->created_at->format('d/m/Y H:i') }}</small>
                                 </div>
                             </div>
@@ -608,7 +608,7 @@
                         <div class="info-card-body">
                             <h5 class="card-title mb-3" style="color:var(--s800); font-size:.9rem;">
                                 <i class="fas fa-shield-alt me-2" style="color:var(--g500);"></i>
-                                Permissions
+                                {{ __('user.permissions') }}
                             </h5>
                             
                             @switch($user->role)
@@ -616,8 +616,8 @@
                                     <div class="alert-db alert-db-danger">
                                         <i class="fas fa-crown"></i>
                                         <div>
-                                            <strong>Super Admin</strong>
-                                            <p class="mb-0 small mt-1">Accès complet à toutes les fonctionnalités</p>
+                                            <strong>{{ __('user.role_admin') }}</strong>
+                                            <p class="mb-0 small mt-1">{{ __('user.super_admin_access') }}</p>
                                         </div>
                                     </div>
                                     @break
@@ -625,8 +625,8 @@
                                     <div class="alert-db alert-db-primary">
                                         <i class="fas fa-user-shield"></i>
                                         <div>
-                                            <strong>Administrateur</strong>
-                                            <p class="mb-0 small mt-1">Gestion complète avec restrictions mineures</p>
+                                            <strong>{{ __('user.role_admin') }}</strong>
+                                            <p class="mb-0 small mt-1">{{ __('user.admin_access') }}</p>
                                         </div>
                                     </div>
                                     @break
@@ -634,8 +634,8 @@
                                     <div class="alert-db alert-db-info">
                                         <i class="fas fa-concierge-bell"></i>
                                         <div>
-                                            <strong>Réceptionniste</strong>
-                                            <p class="mb-0 small mt-1">Accès limité aux opérations de réception</p>
+                                            <strong>{{ __('user.role_receptionist') }}</strong>
+                                            <p class="mb-0 small mt-1">{{ __('user.receptionist_access') }}</p>
                                         </div>
                                     </div>
                                     @break
@@ -644,7 +644,7 @@
                                         <i class="fas fa-broom"></i>
                                         <div>
                                             <strong>Housekeeping</strong>
-                                            <p class="mb-0 small mt-1">Accès aux fonctions de nettoyage uniquement</p>
+                                            <p class="mb-0 small mt-1">{{ __('user.housekeeping_access') }}</p>
                                         </div>
                                     </div>
                                     @break
@@ -652,8 +652,8 @@
                                     <div class="alert-db alert-db-success">
                                         <i class="fas fa-user"></i>
                                         <div>
-                                            <strong>Client</strong>
-                                            <p class="mb-0 small mt-1">Accès à ses propres réservations seulement</p>
+                                            <strong>{{ __('user.role_customer') }}</strong>
+                                            <p class="mb-0 small mt-1">{{ __('user.customer_access') }}</p>
                                         </div>
                                     </div>
                             @endswitch
@@ -666,23 +666,23 @@
                         <div class="info-card-body">
                             <h5 class="card-title mb-3" style="color:var(--s800); font-size:.9rem;">
                                 <i class="fas fa-bolt me-2" style="color:var(--g500);"></i>
-                                Actions Rapides
+                                {{ __('user.quick_actions') }}
                             </h5>
                             
                             <div class="d-grid gap-2">
                                 <button class="btn-db btn-db-outline-danger w-100" 
                                         data-bs-toggle="modal" 
                                         data-bs-target="#resetPasswordModal">
-                                    <i class="fas fa-key me-2"></i>Réinitialiser le mot de passe
+                                    <i class="fas fa-key me-2"></i>{{ __('user.reset_password') }}
                                 </button>
                                 
                                 <button class="btn-db btn-db-outline-warning w-100" 
                                         data-bs-toggle="modal" 
                                         data-bs-target="#toggleStatusModal">
                                     @if($user->is_active)
-                                    <i class="fas fa-user-slash me-2"></i>Désactiver le compte
+                                    <i class="fas fa-user-slash me-2"></i>{{ __('user.deactivate_account') }}
                                     @else
-                                    <i class="fas fa-user-check me-2"></i>Activer le compte
+                                    <i class="fas fa-user-check me-2"></i>{{ __('user.activate_account') }}
                                     @endif
                                 </button>
                             </div>
@@ -702,23 +702,23 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    <i class="fas fa-key me-2"></i>Réinitialiser le mot de passe
+                    <i class="fas fa-key me-2"></i>{{ __('user.reset_password_title') }}
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Êtes-vous sûr de vouloir réinitialiser le mot de passe de <strong>{{ $user->name }}</strong> ?</p>
+                <p>{!! __('user.reset_password_confirm', ['name' => $user->name]) !!}</p>
                 <div class="alert-db alert-db-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    Un email sera envoyé à {{ $user->email }} avec les instructions de réinitialisation.
+                    {{ __('user.reset_email_notice', ['email' => $user->email]) }}
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">{{ __('user.cancel') }}</button>
                 <form action="{{ route('user.password.reset', $user) }}" method="POST">
                     @csrf
                     <button type="submit" class="btn-db btn-db-outline-danger">
-                        <i class="fas fa-key me-1"></i>Réinitialiser
+                        <i class="fas fa-key me-1"></i>{{ __('user.reset') }}
                     </button>
                 </form>
             </div>
@@ -733,38 +733,38 @@
             <div class="modal-header">
                 <h5 class="modal-title">
                     @if($user->is_active)
-                    <i class="fas fa-user-slash me-2"></i>Désactiver le compte
+                    <i class="fas fa-user-slash me-2"></i>{{ __('user.deactivate_title') }}
                     @else
-                    <i class="fas fa-user-check me-2"></i>Activer le compte
+                    <i class="fas fa-user-check me-2"></i>{{ __('user.activate_title') }}
                     @endif
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 @if($user->is_active)
-                <p>Êtes-vous sûr de vouloir désactiver le compte de <strong>{{ $user->name }}</strong> ?</p>
+                <p>{!! __('user.deactivate_confirm', ['name' => $user->name]) !!}</p>
                 <div class="alert-db alert-db-warning">
                     <i class="fas fa-exclamation-triangle me-2"></i>
-                    L'utilisateur ne pourra plus se connecter jusqu'à réactivation.
+                    {{ __('user.deactivate_warning') }}
                 </div>
                 @else
-                <p>Êtes-vous sûr de vouloir activer le compte de <strong>{{ $user->name }}</strong> ?</p>
+                <p>{!! __('user.activate_confirm', ['name' => $user->name]) !!}</p>
                 <div class="alert-db alert-db-success">
                     <i class="fas fa-check-circle me-2"></i>
-                    L'utilisateur pourra à nouveau se connecter.
+                    {{ __('user.activate_notice') }}
                 </div>
                 @endif
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">{{ __('user.cancel') }}</button>
                 <form action="{{ route('user.toggle.status', $user) }}" method="POST">
                     @csrf
                     @method('PATCH')
                     <button type="submit" class="btn-db btn-db-outline-warning">
                         @if($user->is_active)
-                        <i class="fas fa-user-slash me-1"></i>Désactiver
+                        <i class="fas fa-user-slash me-1"></i>{{ __('user.deactivate_action') }}
                         @else
-                        <i class="fas fa-user-check me-1"></i>Activer
+                        <i class="fas fa-user-check me-1"></i>{{ __('user.activate_action') }}
                         @endif
                     </button>
                 </form>
@@ -791,7 +791,7 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function(e) {
             if (button.__ok) { button.__ok = false; return; }
             e.preventDefault();
-            window.confirmAction('Êtes-vous sûr de vouloir effectuer cette action ?', function () {
+            window.confirmAction('{{ __('user.confirm_action') }}', function () {
                 button.__ok = true;
                 if (button.tagName === 'A' && button.getAttribute('href')) { window.location.href = button.href; }
                 else if (button.form) { button.form.submit(); }

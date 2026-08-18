@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Ajouter un Client')
+@section('title', __('customer.page_title_create'))
 @section('content')
 
 <style>

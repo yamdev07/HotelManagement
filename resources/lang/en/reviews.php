@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'page_title'            => 'Guest Reviews',
+    'heading'               => 'Guest Reviews',
+    'description'           => 'Moderate reviews posted from your storefront. Approved reviews are published automatically.',
+    'pending_moderation'    => 'Pending moderation',
+    'btn_approve'           => 'Approve',
+    'btn_reject'            => 'Reject',
+    'btn_delete'            => 'Delete',
+    'confirm_delete'        => 'Permanently delete this review?',
+    'reply_summary'         => 'Reply (published under the review)',
+    'reply_placeholder'     => 'Your reply...',
+    'btn_save_reply'        => 'Save reply',
+    'empty_pending'         => 'No pending reviews. 🎉',
+    'published'             => 'Published',
+    'your_reply'            => 'Your reply',
+    'btn_unpublish'         => 'Unpublish',
+    'confirm_unpublish'     => 'Remove this review from the storefront?',
+    'btn_edit_reply'        => 'Edit reply',
+    'btn_reply'             => 'Reply',
+    'btn_save'              => 'Save',
+    'empty_published'       => 'No published reviews yet.',
+    'rejected'              => 'Rejected',
+    'btn_approve_anyway'    => 'Approve anyway',
+    'published_ago'         => 'published :time',
+];

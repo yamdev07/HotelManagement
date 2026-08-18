@@ -831,7 +831,7 @@
          KPIS (rendus cliquables)
     ═══════════════════════════════════════════════ --}}
     <div class="cal-kpis anim-2">
-        <div class="kpi-card" onclick="filterByStatus('all')" title="Voir toutes les chambres">
+        <div class="kpi-card" onclick="filterByStatus('all')" title="{{ __('messages.cal_view_all_rooms') }}">
             <div class="kpi-icon" style="background:var(--g50);color:var(--g600)">
                 <i class="fas fa-bed"></i>
             </div>
@@ -891,7 +891,7 @@
                         <label>{{ __('messages.room_number') }}</label>
                         <input type="text" name="room_number" class="form-control" 
                                value="{{ request('room_number') }}"
-                               placeholder="Ex: 101, 102..."
+                               placeholder="{{ __('messages.cal_placeholder_room_number') }}"
                                onkeyup="filterByRoomNumber(this.value)">
                     </div>
                     <div class="form-group">
@@ -993,9 +993,9 @@
                                             <div class="room-info">
                                                 <div class="room-type">{{ $roomData['room']->type->name ?? __('messages.type_unknown') }}</div>
                                                 <div class="room-meta">
-                                                    <span><i class="fas fa-users"></i> {{ $roomData['room']->capacity }} pers.</span>
+                                                    <span><i class="fas fa-users"></i> {{ $roomData['room']->capacity }} {{ __('messages.cal_pers_abbrev') }}</span>
                                                 </div>
-                                                <div class="room-price">{{ number_format($roomData['room']->price, 0, ',', ' ') }} FCFA/nuit</div>
+                                                <div class="room-price">{{ number_format($roomData['room']->price, 0, ',', ' ') }} {{ __('messages.cal_fcfa_night') }}</div>
                                                 @if($roomData['room']->room_status_id != 1)
                                                     <span class="room-status-badge">
                                                         {{ $roomData['room']->roomStatus->name ?? __('messages.unavailable') }}
@@ -1040,7 +1040,7 @@
                                             data-is-occupied="{{ $isOccupied ? 'true' : 'false' }}"
                                             data-reservation-count="{{ $reservationCount }}"
                                             data-can-reserve="{{ $canReserve ? 'true' : 'false' }}"
-                                            title="{{ $dateInfo['date']->format('d/m/Y') }} - Chambre {{ $roomData['room']->number }} - {{ $isOccupied ? __('messages.reserved') : __('messages.available') }}">
+                                            title="{{ $dateInfo['date']->format('d/m/Y') }} - {{ __('messages.room') }} {{ $roomData['room']->number }} - {{ $isOccupied ? __('messages.reserved') : __('messages.available') }}">
                                             @if($isOccupied)
                                                 <i class="fas fa-calendar-check" style="color:#b91c1c;"></i>
                                                 @if($reservationCount > 1)
@@ -1103,14 +1103,14 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="detailsModalTitle">Détails</h5>
+                <h5 class="modal-title" id="detailsModalTitle">{{ __('messages.details') }}</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="detailsModalBody">
                 <!-- Contenu dynamique -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn-db btn-db-ghost" data-bs-dismiss="modal">{{ __('messages.close') }}</button>
             </div>
         </div>
     </div>
@@ -1119,7 +1119,62 @@
 @endsection
 
 @push('scripts')
+@php
+$jsT = [
+    'network_error' => __('messages.cal_js_network_error'),
+    'room_info' => __('messages.cal_js_room_info'),
+    'number' => __('messages.cal_js_number'),
+    'type' => __('messages.cal_js_type'),
+    'capacity' => __('messages.cal_js_capacity'),
+    'price_night' => __('messages.cal_js_price_night'),
+    'date' => __('messages.cal_js_date'),
+    'room_reserved' => __('messages.cal_js_room_reserved'),
+    'reservations' => __('messages.cal_js_reservations'),
+    'customer' => __('messages.cal_js_customer'),
+    'arrival' => __('messages.cal_js_arrival'),
+    'departure' => __('messages.cal_js_departure'),
+    'status' => __('messages.cal_js_status'),
+    'in_stay' => __('messages.cal_js_in_stay'),
+    'reserved' => __('messages.cal_js_reserved'),
+    'alert' => __('messages.cal_js_alert'),
+    'conflict_msg' => __('messages.cal_js_conflict_msg'),
+    'search_another' => __('messages.cal_js_search_another'),
+    'reservation_details' => __('messages.cal_js_reservation_details'),
+    'error' => __('messages.cal_js_error'),
+    'error_label' => __('messages.cal_js_error_label'),
+    'available_room' => __('messages.cal_js_available_room'),
+    'reservation_title' => __('messages.cal_js_reservation_title'),
+    'total_price' => __('messages.cal_js_total_price'),
+    'room_available' => __('messages.cal_js_room_available'),
+    'book_room' => __('messages.cal_js_book_room'),
+    'select_period' => __('messages.cal_js_select_period'),
+    'period_selection' => __('messages.cal_js_period_selection'),
+    'selection_active' => __('messages.cal_js_selection_active'),
+    'arrival_date' => __('messages.cal_js_arrival_date'),
+    'departure_date' => __('messages.cal_js_departure_date'),
+    'apply' => __('messages.cal_js_apply'),
+    'arrival_label' => __('messages.cal_js_arrival_label'),
+    'room_label' => __('messages.cal_js_room_label'),
+    'click_departure' => __('messages.cal_js_click_departure'),
+    'cancel' => __('messages.cal_js_cancel'),
+    'same_room' => __('messages.cal_js_same_room'),
+    'departure_after' => __('messages.cal_js_departure_after'),
+    'period_selected' => __('messages.cal_js_period_selected'),
+    'details' => __('messages.cal_js_details'),
+    'type_label' => __('messages.cal_js_type_label'),
+    'period_label' => __('messages.cal_js_period_label'),
+    'duration' => __('messages.cal_js_duration'),
+    'nights' => __('messages.cal_js_nights'),
+    'total' => __('messages.cal_js_total'),
+    'book_period' => __('messages.cal_js_book_period'),
+    'new_selection' => __('messages.cal_js_new_selection'),
+    'select_both' => __('messages.cal_js_select_both'),
+    'click_departure_cal' => __('messages.cal_js_click_departure_cal'),
+    'pers' => __('messages.cal_pers_abbrev'),
+];
+@endphp
 <script>
+const T = @json($jsT);
 // ============ FONCTIONS GLOBALES ============
 
 /**
@@ -1196,7 +1251,7 @@ window.scrollToDate = function(dateString) {
 window.showOccupancyDetails = function(roomId, date) {
     fetch(`/availability/calendar-cell-details?room_id=${roomId}&date=${date}`)
         .then(response => {
-            if (!response.ok) throw new Error('Erreur réseau');
+            if (!response.ok) throw new Error(T.network_error);
             return response.json();
         })
         .then(data => {
@@ -1205,33 +1260,33 @@ window.showOccupancyDetails = function(roomId, date) {
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card">
-                                <h6>Informations Chambre</h6>
-                                <div class="mb-2"><small style="color:var(--s400)">Numéro:</small> <strong class="fs-5">${data.room.number}</strong></div>
-                                <div class="mb-2"><small style="color:var(--s400)">Type:</small> <strong>${data.room.type}</strong></div>
-                                <div class="mb-2"><small style="color:var(--s400)">Capacité:</small> <strong>${data.room.capacity} pers.</strong></div>
-                                <div class="mb-2"><small style="color:var(--s400)">Prix/nuit:</small> <strong>${new Intl.NumberFormat('fr-FR').format(data.room.price)} FCFA</strong></div>
-                                <div class="mb-2"><small style="color:var(--s400)">Date:</small> <strong>${new Date(date).toLocaleDateString('fr-FR')}</strong></div>
+                                <h6>${T.room_info}</h6>
+                                <div class="mb-2"><small style="color:var(--s400)">${T.number}</small> <strong class="fs-5">${data.room.number}</strong></div>
+                                <div class="mb-2"><small style="color:var(--s400)">${T.type}</small> <strong>${data.room.type}</strong></div>
+                                <div class="mb-2"><small style="color:var(--s400)">${T.capacity}</small> <strong>${data.room.capacity} ${T.pers}</strong></div>
+                                <div class="mb-2"><small style="color:var(--s400)">${T.price_night}</small> <strong>${new Intl.NumberFormat('fr-FR').format(data.room.price)} FCFA</strong></div>
+                                <div class="mb-2"><small style="color:var(--s400)">${T.date}</small> <strong>${new Date(date).toLocaleDateString('fr-FR')}</strong></div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle me-2"></i>
-                                Cette chambre est réservée pour cette date.
+                                ${T.room_reserved}
                             </div>
                         </div>
                     </div>
             `;
             
             if (data.reservations && data.reservations.length > 0) {
-                content += `<h6 class="mb-3">Réservations (${data.reservations.length})</h6>
+                content += `<h6 class="mb-3">${T.reservations} (${data.reservations.length})</h6>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Client</th>
-                                <th>Arrivée</th>
-                                <th>Départ</th>
-                                <th>Statut</th>
+                                <th>${T.customer}</th>
+                                <th>${T.arrival}</th>
+                                <th>${T.departure}</th>
+                                <th>${T.status}</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -1239,11 +1294,11 @@ window.showOccupancyDetails = function(roomId, date) {
                 
                 data.reservations.forEach(r => {
                     const statusClass = r.status === 'active' ? 'bg-success' : 'bg-warning';
-                    const statusText = r.status === 'active' ? 'En séjour' : 'Réservée';
+                    const statusText = r.status === 'active' ? T.in_stay : T.reserved;
                     
                     content += `<tr>
                         <td>
-                            <div class="fw-bold">${r.customer.name || 'Client'}</div>
+                            <div class="fw-bold">${r.customer.name || T.customer}</div>
                             <small style="color:var(--s400)">${r.customer.email || ''}</small>
                         </td>
                         <td>${new Date(r.check_in).toLocaleDateString('fr-FR')}</td>
@@ -1262,24 +1317,24 @@ window.showOccupancyDetails = function(roomId, date) {
                 if (data.reservations.length > 1) {
                     content += `<div class="alert alert-danger mt-3">
                         <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>ALERTE:</strong> ${data.reservations.length} réservations en conflit pour cette date !
+                        <strong>${T.alert}</strong> ${T.conflict_msg.replace(':count', data.reservations.length)}
                     </div>`;
                 }
             }
             
             content += `<div class="mt-4 d-grid gap-2">
                 <a href="/availability/search?room_type_id=${data.room.type_id}" class="btn-db btn-db-primary">
-                    <i class="fas fa-search me-2"></i>Chercher une autre chambre
+                    <i class="fas fa-search me-2"></i>${T.search_another}
                 </a>
             </div></div>`;
             
-            window.showModal('Détails de réservation', content);
+            window.showModal(T.reservation_details, content);
         })
         .catch(error => {
             console.error('Erreur:', error);
-            window.showModal('Erreur', `<div class="alert alert-danger">
+            window.showModal(T.error, `<div class="alert alert-danger">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                Erreur: ${error.message}
+                ${T.error_label} ${error.message}
             </div>`);
         });
 };
@@ -1290,7 +1345,7 @@ window.showOccupancyDetails = function(roomId, date) {
 window.showAvailabilityDetails = function(roomId, date) {
     fetch(`/availability/check-availability?room_id=${roomId}&check_in=${date}&check_out=${date}`)
         .then(response => {
-            if (!response.ok) throw new Error('Erreur réseau');
+            if (!response.ok) throw new Error(T.network_error);
             return response.json();
         })
         .then(data => {
@@ -1302,24 +1357,24 @@ window.showAvailabilityDetails = function(roomId, date) {
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <div class="card">
-                                <h6>Informations Chambre</h6>
-                                <div class="mb-2"><small style="color:var(--s400)">Numéro:</small> <strong class="fs-5">${data.room.number}</strong></div>
-                                <div class="mb-2"><small style="color:var(--s400)">Type:</small> <strong>${data.room.type}</strong></div>
-                                <div class="mb-2"><small style="color:var(--s400)">Capacité:</small> <strong>${data.room.capacity} pers.</strong></div>
-                                <div class="mb-2"><small style="color:var(--s400)">Prix/nuit:</small> <strong>${new Intl.NumberFormat('fr-FR').format(data.room.price)} FCFA</strong></div>
+                                <h6>${T.room_info}</h6>
+                                <div class="mb-2"><small style="color:var(--s400)">${T.number}</small> <strong class="fs-5">${data.room.number}</strong></div>
+                                <div class="mb-2"><small style="color:var(--s400)">${T.type}</small> <strong>${data.room.type}</strong></div>
+                                <div class="mb-2"><small style="color:var(--s400)">${T.capacity}</small> <strong>${data.room.capacity} ${T.pers}</strong></div>
+                                <div class="mb-2"><small style="color:var(--s400)">${T.price_night}</small> <strong>${new Intl.NumberFormat('fr-FR').format(data.room.price)} FCFA</strong></div>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="card">
-                                <h6>Réservation</h6>
-                                <div class="mb-2"><small style="color:var(--s400)">Date:</small> <strong>${formattedDate}</strong></div>
+                                <h6>${T.reservation_title}</h6>
+                                <div class="mb-2"><small style="color:var(--s400)">${T.date}</small> <strong>${formattedDate}</strong></div>
                                 <div class="mb-3">
-                                    <small style="color:var(--s400)">Prix total:</small>
+                                    <small style="color:var(--s400)">${T.total_price}</small>
                                     <div class="fs-3 fw-bold" style="color:var(--g600)">${totalPrice} FCFA</div>
                                 </div>
                                 <div class="alert alert-success">
                                     <i class="fas fa-check-circle me-2"></i>
-                                    Chambre disponible
+                                    ${T.room_available}
                                 </div>
                             </div>
                         </div>
@@ -1327,22 +1382,22 @@ window.showAvailabilityDetails = function(roomId, date) {
                     <div class="d-grid gap-2">
                         <a href="/transaction/reservation/createIdentity?room_id=${roomId}&check_in=${date}&check_out=${date}" 
                            class="btn-db btn-db-primary btn-lg">
-                            <i class="fas fa-plus me-2"></i>Réserver cette chambre
+                            <i class="fas fa-plus me-2"></i>${T.book_room}
                         </a>
                         <button type="button" class="btn-db btn-db-ghost" onclick="window.selectDateRangeFromCell('${roomId}', '${date}')">
-                            <i class="fas fa-calendar-range me-2"></i>Sélectionner une période
+                            <i class="fas fa-calendar-range me-2"></i>${T.select_period}
                         </button>
                     </div>
                 </div>
             `;
             
-            window.showModal('Chambre disponible', content);
+            window.showModal(T.available_room, content);
         })
         .catch(error => {
             console.error('Erreur:', error);
-            window.showModal('Erreur', `<div class="alert alert-danger">
+            window.showModal(T.error, `<div class="alert alert-danger">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                Erreur: ${error.message}
+                ${T.error_label} ${error.message}
             </div>`);
         });
 };
@@ -1357,24 +1412,24 @@ window.selectDateRange = function() {
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
     
-    window.showModal('Sélection de période', `
+    window.showModal(T.period_selection, `
         <div class="p-2">
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
-                Mode sélection activé. Cliquez sur la première date, puis sur la dernière.
+                ${T.selection_active}
             </div>
             <div class="row mt-3">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Date d'arrivée</label>
+                    <label class="form-label fw-bold">${T.arrival_date}</label>
                     <input type="date" id="checkInDate" class="form-control" value="${today}" min="${today}">
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label fw-bold">Date de départ</label>
+                    <label class="form-label fw-bold">${T.departure_date}</label>
                     <input type="date" id="checkOutDate" class="form-control" value="${tomorrow}" min="${tomorrow}">
                 </div>
             </div>
             <button class="btn-db btn-db-primary w-100" onclick="window.applyDateSelection()">
-                <i class="fas fa-check me-2"></i>Appliquer
+                <i class="fas fa-check me-2"></i>${T.apply}
             </button>
         </div>
     `);
@@ -1389,15 +1444,15 @@ window.selectDateRangeFromCell = function(roomId, startDate) {
     
     const formattedDate = new Date(startDate).toLocaleDateString('fr-FR');
     
-    window.showModal('Sélection de période', `
+    window.showModal(T.period_selection, `
         <div class="p-2">
             <div class="alert alert-info">
                 <i class="fas fa-info-circle me-2"></i>
-                Arrivée: <strong>${formattedDate}</strong><br>
-                Cliquez sur la date de départ dans le calendrier.
+                ${T.arrival_label} <strong>${formattedDate}</strong><br>
+                Cliquez sur la date de départ.
             </div>
             <button class="btn-db btn-db-ghost w-100" onclick="window.cancelSelection()">
-                <i class="fas fa-times me-2"></i>Annuler
+                <i class="fas fa-times me-2"></i>${T.cancel}
             </button>
         </div>
     `);
@@ -1418,13 +1473,13 @@ window.handlePeriodSelection = function(cell) {
         
         const formattedDate = new Date(window.selectionStart.date).toLocaleDateString('fr-FR');
         
-        window.showModal('Sélection de période', `
+        window.showModal(T.period_selection, `
             <div class="p-2">
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle me-2"></i>
-                    Arrivée: <strong>${formattedDate}</strong><br>
-                    Chambre: <strong>${cell.getAttribute('data-room-number')}</strong><br>
-                    Cliquez sur la date de départ.
+                    ${T.arrival_label} <strong>${formattedDate}</strong><br>
+                    ${T.room_label} <strong>${cell.getAttribute('data-room-number')}</strong><br>
+                    ${T.click_departure_cal}
                 </div>
             </div>
         `);
@@ -1434,7 +1489,7 @@ window.handlePeriodSelection = function(cell) {
         const endDate = cell.getAttribute('data-date');
         
         if (roomId !== window.selectionStart.roomId) {
-            alert('❌ Sélectionnez la même chambre');
+            alert('❌ ' + T.same_room);
             return;
         }
         
@@ -1442,7 +1497,7 @@ window.handlePeriodSelection = function(cell) {
         const endDateObj = new Date(endDate);
         
         if (endDateObj <= startDate) {
-            alert('❌ La date de départ doit être après l\'arrivée');
+            alert('❌ ' + T.departure_after);
             window.resetSelection();
             return;
         }
@@ -1456,25 +1511,25 @@ window.handlePeriodSelection = function(cell) {
         const formattedPrice = new Intl.NumberFormat('fr-FR').format(price);
         const formattedTotal = new Intl.NumberFormat('fr-FR').format(totalPrice);
         
-        window.showModal('Période sélectionnée', `
+        window.showModal(T.period_selected, `
             <div class="p-2">
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <div class="card">
-                            <h6>Détails</h6>
-                            <div class="mb-2"><small style="color:var(--s400)">Chambre:</small> <strong>${cell.getAttribute('data-room-number')}</strong></div>
-                            <div class="mb-2"><small style="color:var(--s400)">Type:</small> <strong>${cell.getAttribute('data-room-type')}</strong></div>
-                            <div class="mb-2"><small style="color:var(--s400)">Prix/nuit:</small> <strong>${formattedPrice} FCFA</strong></div>
+                            <h6>${T.details}</h6>
+                            <div class="mb-2"><small style="color:var(--s400)">${T.room_label}</small> <strong>${cell.getAttribute('data-room-number')}</strong></div>
+                            <div class="mb-2"><small style="color:var(--s400)">${T.type_label}</small> <strong>${cell.getAttribute('data-room-type')}</strong></div>
+                            <div class="mb-2"><small style="color:var(--s400)">${T.price_night}</small> <strong>${formattedPrice} FCFA</strong></div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="card">
-                            <h6>Période</h6>
-                            <div class="mb-2"><small style="color:var(--s400)">Arrivée:</small> <strong>${formattedStart}</strong></div>
-                            <div class="mb-2"><small style="color:var(--s400)">Départ:</small> <strong>${formattedEnd}</strong></div>
-                            <div class="mb-2"><small style="color:var(--s400)">Durée:</small> <strong>${nights} nuit(s)</strong></div>
+                            <h6>${T.period_label}</h6>
+                            <div class="mb-2"><small style="color:var(--s400)">${T.arrival_label}</small> <strong>${formattedStart}</strong></div>
+                            <div class="mb-2"><small style="color:var(--s400)">${T.departure}:</small> <strong>${formattedEnd}</strong></div>
+                            <div class="mb-2"><small style="color:var(--s400)">${T.duration}</small> <strong>${nights} ${T.nights}</strong></div>
                             <div class="mb-2">
-                                <small style="color:var(--s400)">Total:</small>
+                                <small style="color:var(--s400)">${T.total}</small>
                                 <div class="fs-3 fw-bold" style="color:var(--g600)">${formattedTotal} FCFA</div>
                             </div>
                         </div>
@@ -1483,10 +1538,10 @@ window.handlePeriodSelection = function(cell) {
                 <div class="d-grid gap-2">
                     <a href="/transaction/reservation/createIdentity?room_id=${roomId}&check_in=${window.selectionStart.date}&check_out=${endDate}" 
                        class="btn-db btn-db-primary btn-lg">
-                        <i class="fas fa-plus me-2"></i>Réserver cette période
+                        <i class="fas fa-plus me-2"></i>${T.book_period}
                     </a>
                     <button class="btn-db btn-db-ghost" onclick="window.resetSelection()">
-                        <i class="fas fa-redo me-2"></i>Nouvelle sélection
+                        <i class="fas fa-redo me-2"></i>${T.new_selection}
                     </button>
                 </div>
             </div>
@@ -1504,12 +1559,12 @@ window.applyDateSelection = function() {
     const checkOut = document.getElementById('checkOutDate')?.value;
     
     if (!checkIn || !checkOut) {
-        alert('❌ Sélectionnez les deux dates');
+        alert('❌ ' + T.select_both);
         return;
     }
     
     if (new Date(checkOut) <= new Date(checkIn)) {
-        alert('❌ La date de départ doit être après l\'arrivée');
+        alert('❌ ' + T.departure_after);
         return;
     }
     
@@ -1544,12 +1599,12 @@ window.checkAllAvailability = function() {
     const today = new Date().toISOString().split('T')[0];
     const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
     
-    window.promptAction('Date d\'arrivée', function (checkIn) {
+    window.promptAction(T.arrival_date, function (checkIn) {
         if (!checkIn) return;
-        window.promptAction('Date de départ', function (checkOut) {
+        window.promptAction(T.departure_date, function (checkOut) {
             if (!checkOut) return;
             if (new Date(checkOut) <= new Date(checkIn)) {
-                alert('❌ La date de départ doit être après l\'arrivée');
+                alert('❌ ' + T.departure_after);
                 return;
             }
             window.location.href = `/availability/search?check_in=${checkIn}&check_out=${checkOut}`;

@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Gestion des Utilisateurs')
+@section('title', __('user.manage_users'))
 @section('content')
 
 <style>
@@ -433,9 +433,9 @@
 <div class="users-page">
     <!-- Breadcrumb -->
     <div class="users-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('user.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Utilisateurs</span>
+        <span class="current">{{ __('user.users') }}</span>
     </div>
 
     <!-- Header -->
@@ -443,15 +443,15 @@
         <div class="users-brand">
             <div class="users-brand-icon"><i class="fas fa-users-cog"></i></div>
             <div>
-                <h1 class="users-header-title">Gestion des <em>utilisateurs</em></h1>
+                <h1 class="users-header-title">{!! __('user.manage_users_title') !!}</h1>
                 <p class="users-header-sub">
-                    <i class="fas fa-users me-1"></i> Gérez les utilisateurs et clients de l'application
+                    <i class="fas fa-users me-1"></i> {{ __('user.manage_desc') }}
                 </p>
             </div>
         </div>
         <div class="users-header-actions">
             <a href="{{ route('user.create') }}" class="btn-db btn-db-primary">
-                <i class="fas fa-plus-circle me-2"></i> Nouvel utilisateur
+                <i class="fas fa-plus-circle me-2"></i> {{ __('user.new_user') }}
             </a>
         </div>
     </div>
@@ -471,10 +471,10 @@
                 <div class="stat-card-icon"><i class="fas fa-users"></i></div>
             </div>
             <div class="stat-card-value">{{ $totalUsers + $totalCustomers }}</div>
-            <div class="stat-card-label">Utilisateurs totaux</div>
+            <div class="stat-card-label">{{ __('user.total_users') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-user"></i>
-                Tous les comptes
+                {{ __('user.all_accounts') }}
             </div>
         </div>
         
@@ -483,10 +483,10 @@
                 <div class="stat-card-icon"><i class="fas fa-user-tie"></i></div>
             </div>
             <div class="stat-card-value">{{ $totalUsers }}</div>
-            <div class="stat-card-label">Utilisateurs</div>
+            <div class="stat-card-label">{{ __('user.users_label') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-shield-alt"></i>
-                {{ $adminCount }} admin · {{ $receptionistCount + $housekeepingCount }} staff
+                {{ $adminCount }} admin · {{ $receptionistCount + $housekeepingCount }} {{ __('user.staff_label') }}
             </div>
         </div>
         
@@ -495,10 +495,10 @@
                 <div class="stat-card-icon"><i class="fas fa-user"></i></div>
             </div>
             <div class="stat-card-value">{{ $totalCustomers }}</div>
-            <div class="stat-card-label">Clients</div>
+            <div class="stat-card-label">{{ __('user.customers') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-id-card"></i>
-                Comptes clients
+                {{ __('user.customer_accounts') }}
             </div>
         </div>
         
@@ -507,10 +507,10 @@
                 <div class="stat-card-icon"><i class="fas fa-layer-group"></i></div>
             </div>
             <div class="stat-card-value">{{ $users->currentPage() }}</div>
-            <div class="stat-card-label">Page actuelle</div>
+            <div class="stat-card-label">{{ __('user.current_page') }}</div>
             <div class="stat-card-footer">
                 <i class="fas fa-list"></i>
-                {{ $users->perPage() }} par page
+                {{ $users->perPage() }} {{ __('user.per_page') }}
             </div>
         </div>
     </div>
@@ -520,7 +520,7 @@
         <div class="action-left">
             <span class="filter-badge">
                 <i class="fas fa-users"></i>
-                Tous
+                {{ __('user.all') }}
                 <span class="badge-count">{{ $totalUsers + $totalCustomers }}</span>
             </span>
         </div>
@@ -532,7 +532,7 @@
                     <input type="hidden" name="qc" value="{{ request()->input('qc') }}">
                     <input type="text" 
                            class="search-input" 
-                           placeholder="Rechercher un utilisateur..." 
+                           placeholder="{{ __('user.search_user') }}" 
                            name="qu" 
                            value="{{ request()->input('qu') }}"
                            autocomplete="off">
@@ -548,11 +548,11 @@
                 <div class="users-card-header">
                     <h5 class="users-card-title">
                         <i class="fas fa-user-tie"></i>
-                        Utilisateurs
+                        {{ __('user.users_label') }}
                     </h5>
                     <span class="users-card-badge">
                         <i class="fas fa-users"></i>
-                        {{ $users->total() }} enregistrés
+                        {{ $users->total() }} {{ __('user.registered') }}
                     </span>
                 </div>
                 
@@ -563,10 +563,10 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Nom</th>
-                                        <th>Email</th>
-                                        <th>Rôle</th>
-                                        <th class="text-center">Actions</th>
+                                        <th>{{ __('user.name_header') }}</th>
+                                        <th>{{ __('user.email_header') }}</th>
+                                        <th>{{ __('user.role_header') }}</th>
+                                        <th class="text-center">{{ __('user.actions_header') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -605,25 +605,25 @@
                                                 <div class="action-group">
                                                     <a href="{{ route('user.show', ['user' => $user->id]) }}" 
                                                        class="btn-db-icon btn-db-icon-view"
-                                                       title="Voir les détails">
+                                                        title="{{ __('user.view_details') }}">
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     
                                                     <a href="{{ route('user.edit', ['user' => $user->id]) }}" 
                                                        class="btn-db-icon btn-db-icon-edit"
-                                                       title="Modifier">
-                                                        <i class="fas fa-edit"></i>
-                                                    </a>
-                                                    
-                                                    <form class="d-inline" method="POST"
-                                                          id="delete-post-form-{{ $user->id }}"
-                                                          action="{{ route('user.destroy', ['user' => $user->id]) }}">
-                                                        @csrf
-                                                        @method('DELETE')
-                                                        <button type="button" 
-                                                                class="btn-db-icon btn-db-icon-delete"
-                                                                onclick="confirmDelete('{{ $user->name }}', {{ $user->id }}, '{{ $user->role }}')"
-                                                                title="Supprimer">
+                                                       title="{{ __('user.edit_action') }}">
+                                                         <i class="fas fa-edit"></i>
+                                                     </a>
+                                                     
+                                                     <form class="d-inline" method="POST"
+                                                           id="delete-post-form-{{ $user->id }}"
+                                                           action="{{ route('user.destroy', ['user' => $user->id]) }}">
+                                                         @csrf
+                                                         @method('DELETE')
+                                                         <button type="button" 
+                                                                 class="btn-db-icon btn-db-icon-delete"
+                                                                 onclick="confirmDelete('{{ $user->name }}', {{ $user->id }}, '{{ $user->role }}')"
+                                                                 title="{{ __('user.delete') }}">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </form>
@@ -643,10 +643,10 @@
                     @else
                         <div class="empty-state">
                             <div class="empty-icon"><i class="fas fa-user-tie"></i></div>
-                            <p class="empty-title">Aucun utilisateur</p>
-                            <p class="empty-text">Commencez par ajouter votre premier utilisateur.</p>
+                            <p class="empty-title">{{ __('user.no_users') }}</p>
+                            <p class="empty-text">{{ __('user.no_users_text') }}</p>
                             <a href="{{ route('user.create') }}" class="btn-db btn-db-primary">
-                                <i class="fas fa-plus-circle me-2"></i>Ajouter
+                                <i class="fas fa-plus-circle me-2"></i>{{ __('user.add_button') }}
                             </a>
                         </div>
                     @endif
@@ -661,7 +661,7 @@
                 <div class="action-left">
                     <span class="filter-badge">
                         <i class="fas fa-user"></i>
-                        Clients
+                        {{ __('user.customers') }}
                         <span class="badge-count">{{ $customers->total() }}</span>
                     </span>
                 </div>
@@ -673,7 +673,7 @@
                             <input type="hidden" name="qu" value="{{ request()->input('qu') }}">
                             <input type="text" 
                                    class="search-input" 
-                                   placeholder="Rechercher un client..." 
+                                   placeholder="{{ __('user.search_customer') }}" 
                                    name="qc" 
                                    value="{{ request()->input('qc') }}"
                                    autocomplete="off">
@@ -686,11 +686,11 @@
                 <div class="users-card-header">
                     <h5 class="users-card-title">
                         <i class="fas fa-user"></i>
-                        Clients
+                        {{ __('user.customers') }}
                     </h5>
                     <span class="users-card-badge">
                         <i class="fas fa-users"></i>
-                        {{ $customers->total() }} enregistrés
+                        {{ $customers->total() }} {{ __('user.registered') }}
                     </span>
                 </div>
                 
@@ -701,10 +701,10 @@
                                 <thead>
                                     <tr>
                                         <th>#</th>
-                                        <th>Nom</th>
-                                        <th>Email</th>
-                                        <th>Rôle</th>
-                                        <th class="text-center">Actions</th>
+                                        <th>{{ __('user.name_header') }}</th>
+                                        <th>{{ __('user.email_header') }}</th>
+                                        <th>{{ __('user.role_header') }}</th>
+                                        <th class="text-center">{{ __('user.actions_header') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -737,13 +737,13 @@
                                             <td>
                                                 <div class="action-group">
                                                     <span class="btn-db-icon disabled" 
-                                                          title="Détails non disponibles">
+                                                          title="{{ __('user.view_details') }}">
                                                         <i class="fas fa-eye"></i>
                                                     </span>
                                                     
                                                     <a href="{{ route('user.edit', ['user' => $user->id]) }}" 
                                                        class="btn-db-icon btn-db-icon-edit"
-                                                       title="Modifier">
+                                                       title="{{ __('user.edit_action') }}">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
                                                     
@@ -755,7 +755,7 @@
                                                         <button type="button" 
                                                                 class="btn-db-icon btn-db-icon-delete"
                                                                 onclick="confirmDelete('{{ $user->name }}', {{ $user->id }}, 'Customer')"
-                                                                title="Supprimer">
+                                                                title="{{ __('user.delete') }}">
                                                             <i class="fas fa-trash"></i>
                                                         </button>
                                                     </form>
@@ -775,8 +775,8 @@
                     @else
                         <div class="empty-state">
                             <div class="empty-icon"><i class="fas fa-user"></i></div>
-                            <p class="empty-title">Aucun client</p>
-                            <p class="empty-text">Aucun client enregistré pour le moment.</p>
+                            <p class="empty-title">{{ __('user.no_customers') }}</p>
+                            <p class="empty-text">{{ __('user.no_customers_text') }}</p>
                         </div>
                     @endif
                 </div>
@@ -814,12 +814,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function confirmDelete(name, id, role) {
     Swal.fire({
-        title: 'Confirmer la suppression',
-        html: `<strong>${name}</strong> (${role}) sera supprimé définitivement.`,
+        title: @json(__('user.confirm_delete_title')),
+        html: @json(__('user.confirm_delete_html', [':name' => '${name}', ':role' => '${role}'])),
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: '<i class="fas fa-trash me-2"></i>Oui, supprimer',
-        cancelButtonText: '<i class="fas fa-times me-2"></i>Annuler',
+        confirmButtonText: '<i class="fas fa-trash me-2"></i>{{ __('user.yes_delete') }}',
+        cancelButtonText: '<i class="fas fa-times me-2"></i>{{ __('user.cancel') }}',
         reverseButtons: true,
         confirmButtonColor: '#dc3545',
         cancelButtonColor: '#737873'
