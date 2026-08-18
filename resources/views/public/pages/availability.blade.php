@@ -104,7 +104,7 @@
                     <div class="meta">
                         <i class="fas fa-calendar-day"></i>
                         {{ \Carbon\Carbon::parse($checkIn)->translatedFormat('d M') }} → {{ \Carbon\Carbon::parse($checkOut)->translatedFormat('d M') }}
-                        · {{ $nights }} {{ __('public_booking.night', $nights) }} · {{ $guests }} {{ __('public_booking.guest', $guests) }}
+                        · {{ $nights }} {{ __('public_booking.night', ['count' => $nights]) }} · {{ $guests }} {{ __('public_booking.guest', ['count' => $guests]) }}
                     </div>
                 </div>
 

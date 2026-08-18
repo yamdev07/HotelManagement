@@ -54,7 +54,7 @@
                     <div class="ci-recap">
                         <span><i class="fas fa-door-closed"></i> {{ $tx->room->type->name ?? __('public_booking.room') }} · n°{{ $tx->room->number ?? '-' }}</span>
                         <span><i class="fas fa-calendar-day"></i> {{ $ci->translatedFormat('d M') }} → {{ $co->translatedFormat('d M Y') }}</span>
-                        <span><i class="fas fa-user"></i> {{ $tx->person_count }} {{ __('public_booking.guest', $tx->person_count) }}</span>
+                        <span><i class="fas fa-user"></i> {{ $tx->person_count }} {{ __('public_booking.guest', ['count' => $tx->person_count]) }}</span>
                     </div>
                 </div>
             </div>
