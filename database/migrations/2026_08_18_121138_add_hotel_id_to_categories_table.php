@@ -12,15 +12,19 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('categories', function (Blueprint $table) {
-            $table->foreignId('hotel_id')->nullable()->after('id')->constrained('hotels')->nullOnDelete();
+            if (!Schema::hasColumn('categories', 'hotel_id')) {
+                $table->foreignId('hotel_id')->nullable()->after('id')->constrained('hotels')->nullOnDelete();
+            }
         });
     }
 
     public function down(): void
     {
         Schema::table('categories', function (Blueprint $table) {
-            $table->dropForeign(['hotel_id']);
-            $table->dropColumn('hotel_id');
+            if (Schema::hasColumn('categories', 'hotel_id')) {
+                $table->dropForeign(['hotel_id']);
+                $table->dropColumn('hotel_id');
+            }
         });
     }
 };
