@@ -124,6 +124,8 @@
         .afrique-map { position:absolute; top:1.5rem; left:31%; width:min(700px,50vw); height:auto; z-index:0; opacity:.66;
             pointer-events:none; filter:drop-shadow(0 0 24px rgba(124,131,255,.5)); }
         .af-nodes circle { filter:drop-shadow(0 0 5px currentColor); animation:afpulse 3.5s ease-in-out infinite; }
+        .af-star { animation:afstar 3.4s ease-in-out infinite; filter:drop-shadow(0 0 8px rgba(139,107,255,.8)); }
+        @keyframes afstar { 0%,100%{ opacity:1; } 50%{ opacity:.7; } }
         .af-nodes circle:nth-child(2){ animation-delay:.8s; } .af-nodes circle:nth-child(3){ animation-delay:1.6s; }
         .af-nodes circle:nth-child(4){ animation-delay:2.2s; } .af-nodes circle:nth-child(5){ animation-delay:1.1s; }
         @keyframes afpulse { 0%,100%{ opacity:.55; } 50%{ opacity:1; } }
@@ -223,29 +225,40 @@
     <!-- Carte de l'Afrique en pointillés (décor de fond) -->
     <svg class="afrique-map" viewBox="0 0 1000 1000" aria-hidden="true">
         <defs>
-            <pattern id="afdots" width="15" height="15" patternUnits="userSpaceOnUse">
-                <circle cx="2" cy="2" r="1.7" fill="#7c83ff"/>
+            <pattern id="afdots" width="13" height="13" patternUnits="userSpaceOnUse">
+                <circle cx="1.8" cy="1.8" r="1.7" fill="#7c83ff"/>
             </pattern>
+            <radialGradient id="afStar" cx="50%" cy="50%" r="50%">
+                <stop offset="0" stop-color="#ffffff"/><stop offset="22%" stop-color="#c9c3ff"/>
+                <stop offset="55%" stop-color="#8b6bff" stop-opacity=".55"/><stop offset="100%" stop-color="#8b6bff" stop-opacity="0"/>
+            </radialGradient>
             <clipPath id="afclip">
-                <path d="M250,175 L470,120 L620,150 L690,195 L720,300 L760,360 L830,400 L760,460 L720,520 L712,585 L722,660 L688,722 L600,790 L520,802 L470,728 L450,640 L432,558 L400,548 L330,562 L250,548 L210,500 L175,445 L200,372 L216,300 L235,230 Z"/>
-                <path d="M812,628 L838,662 L836,712 L816,744 L800,712 L806,660 Z"/>
+                <path d="M232,205 L300,190 L420,168 L452,158 L500,195 L540,178 L600,175 L650,168 L688,190 L700,220 L712,300 L735,360 L752,388 L800,388 L838,400 L800,445 L740,500 L712,540 L708,585 L712,630 L700,675 L672,720 L620,760 L560,792 L498,800 L455,770 L438,690 L430,620 L438,570 L432,545 L428,520 L440,505 L415,522 L360,535 L315,540 L262,528 L235,505 L215,478 L188,452 L205,400 L215,340 L222,280 L228,235 Z"/>
+                <path d="M792,632 L814,662 L820,708 L806,748 L790,712 L784,668 Z"/>
             </clipPath>
         </defs>
         <g clip-path="url(#afclip)"><rect width="1000" height="1000" fill="url(#afdots)"/></g>
-        <g class="af-lines" stroke="#7c83ff" stroke-width="1.6" opacity=".32" fill="none" stroke-linecap="round">
-            <polyline points="300,300 500,250 650,320 700,480 550,420 300,300"/>
-            <line x1="550" y1="420" x2="520" y2="600"/>
-            <line x1="520" y1="600" x2="480" y2="660"/>
-            <line x1="300" y1="450" x2="300" y2="300"/>
-            <line x1="175" y1="445" x2="300" y2="450"/>
+        <g class="af-lines" stroke="#7c83ff" stroke-width="1.5" opacity=".3" fill="none" stroke-linecap="round">
+            <polyline points="300,300 430,250 560,240 660,320 700,470 640,500 600,560 470,540 340,470 250,420 300,300"/>
+            <line x1="500" y1="380" x2="640" y2="500"/>
+            <line x1="500" y1="380" x2="430" y2="250"/>
+            <line x1="470" y1="540" x2="600" y2="560"/>
+            <line x1="340" y1="470" x2="500" y2="380"/>
+            <line x1="660" y1="320" x2="640" y2="500"/>
         </g>
         <g class="af-nodes">
-            <circle cx="500" cy="250" r="4.6" fill="#b06bff"/>
-            <circle cx="650" cy="320" r="4" fill="#7c83ff"/>
-            <circle cx="700" cy="480" r="4.6" fill="#8b9bff"/>
-            <circle cx="520" cy="600" r="4" fill="#b06bff"/>
-            <circle cx="300" cy="450" r="3.6" fill="#29e0c8"/>
-            <circle cx="175" cy="445" r="4.2" fill="#c9c3ff"/>
+            <circle cx="430" cy="250" r="4.4" fill="#b06bff"/>
+            <circle cx="560" cy="240" r="4" fill="#8b9bff"/>
+            <circle cx="660" cy="320" r="4.2" fill="#7c83ff"/>
+            <circle cx="700" cy="470" r="4" fill="#b06bff"/>
+            <circle cx="340" cy="470" r="3.8" fill="#29e0c8"/>
+            <circle cx="250" cy="420" r="4" fill="#c9c3ff"/>
+            <circle cx="600" cy="560" r="3.6" fill="#8b9bff"/>
+        </g>
+        <g class="af-star" transform="translate(640,500)">
+            <circle r="34" fill="url(#afStar)"/>
+            <path d="M0,-30 L3.5,-5 L30,0 L3.5,5 L0,30 L-3.5,5 L-30,0 L-3.5,-5 Z" fill="#eae7ff" opacity=".9"/>
+            <circle r="5" fill="#ffffff"/>
         </g>
     </svg>
     <div class="container" style="position:relative; z-index:2;">
