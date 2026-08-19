@@ -143,6 +143,16 @@ return [
     'stats_export' => 'Exporter les statistiques',
     'stats_per_day' => '/jour',
 
+    // Subject types
+    'subject_users' => 'Utilisateurs',
+    'subject_customers' => 'Clients',
+    'subject_rooms' => 'Chambres',
+    'subject_transactions' => 'Transactions',
+
+    // Pagination
+    'pagination_of' => 'sur',
+    'pagination_rows' => 'Lignes :',
+
     // System
     'system_system' => 'Système',
     'system_deleted' => 'Supprimé',

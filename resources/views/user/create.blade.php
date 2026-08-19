@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Ajouter un Utilisateur')
+@section('title', __('user.add_user'))
 
 @section('content')
 
@@ -341,11 +341,11 @@
 <div class="add-user-page">
     <!-- Breadcrumb -->
     <div class="add-user-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('user.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('user.index') }}">Utilisateurs</a>
+        <a href="{{ route('user.index') }}">{{ __('user.users') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Ajouter</span>
+        <span class="current">{{ __('user.add') }}</span>
     </div>
 
     <!-- Header -->
@@ -353,15 +353,15 @@
         <div class="add-user-brand">
             <div class="add-user-brand-icon"><i class="fas fa-user-plus"></i></div>
             <div>
-                <h1 class="add-user-header-title">Ajouter un <em>utilisateur</em></h1>
+                <h1 class="add-user-header-title">{!! __('user.add_user_title') !!}</h1>
                 <p class="add-user-header-sub">
-                    <i class="fas fa-users me-1"></i> Créer un nouveau compte utilisateur
+                    <i class="fas fa-users me-1"></i> {{ __('user.create_new_account') }}
                 </p>
             </div>
         </div>
         <div class="add-user-header-actions">
             <a href="{{ route('user.index') }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-arrow-left me-2"></i> Retour
+                <i class="fas fa-arrow-left me-2"></i> {{ __('user.back') }}
             </a>
         </div>
     </div>
@@ -375,8 +375,8 @@
                         <i class="fas fa-user-plus"></i>
                     </div>
                     <div class="add-user-card-header-content">
-                        <h2 class="add-user-card-title">Informations de l'utilisateur</h2>
-                        <p class="add-user-card-subtitle">Veuillez remplir tous les champs obligatoires</p>
+                        <h2 class="add-user-card-title">{{ __('user.user_info') }}</h2>
+                        <p class="add-user-card-subtitle">{{ __('user.fill_required') }}</p>
                     </div>
                 </div>
 
@@ -388,12 +388,12 @@
                         <div class="form-section">
                             <div class="section-header">
                                 <i class="fas fa-user-circle"></i>
-                                <h3>Informations personnelles</h3>
+                                <h3>{{ __('user.personal_info') }}</h3>
                             </div>
 
                             <div class="form-group-modern">
                                 <label for="name" class="form-label-modern">
-                                    Nom complet <span class="required">*</span>
+                                    {{ __('user.full_name') }} <span class="required">*</span>
                                 </label>
                                 <div class="input-with-icon">
                                     <i class="fas fa-user input-icon"></i>
@@ -403,7 +403,7 @@
                                         id="name"
                                         name="name" 
                                         value="{{ old('name') }}"
-                                        placeholder="Ex: Jean Dupont">
+                                        placeholder="{{ __('user.name_placeholder') }}">
                                 </div>
                                 @error('name')
                                     <div class="error-message">
@@ -417,14 +417,14 @@
                         <div class="form-section">
                             <div class="section-header">
                                 <i class="fas fa-lock"></i>
-                                <h3>Identifiants de connexion</h3>
+                                <h3>{{ __('user.login_credentials') }}</h3>
                             </div>
 
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label for="email" class="form-label-modern">
-                                            Adresse email <span class="required">*</span>
+                                            {{ __('user.email_address') }} <span class="required">*</span>
                                         </label>
                                         <div class="input-with-icon">
                                             <i class="fas fa-envelope input-icon"></i>
@@ -447,7 +447,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group-modern">
                                         <label for="password" class="form-label-modern">
-                                            Mot de passe <span class="required">*</span>
+                                            {{ __('user.password') }} <span class="required">*</span>
                                         </label>
                                         <div class="input-with-icon password-field">
                                             <i class="fas fa-key input-icon"></i>
@@ -456,7 +456,7 @@
                                                 class="form-control-modern @error('password') is-invalid @enderror" 
                                                 id="password"
                                                 name="password" 
-                                                placeholder="Minimum 8 caractères">
+                                                placeholder="{{ __('user.min_8_chars') }}">
                                             <button type="button" class="toggle-password" onclick="togglePassword()">
                                                 <i class="fas fa-eye" id="toggleIcon"></i>
                                             </button>
@@ -467,7 +467,7 @@
                                             </div>
                                         @else
                                             <div class="form-hint">
-                                                <i class="fas fa-info-circle"></i> Minimum 8 caractères
+                                                <i class="fas fa-info-circle"></i> {{ __('user.min_8_chars') }}
                                             </div>
                                         @enderror
                                     </div>
@@ -479,12 +479,12 @@
                         <div class="form-section">
                             <div class="section-header">
                                 <i class="fas fa-user-tag"></i>
-                                <h3>Rôle et permissions</h3>
+                                <h3>{{ __('user.role_permissions') }}</h3>
                             </div>
 
                             <div class="form-group-modern">
                                 <label for="role" class="form-label-modern">
-                                    Rôle de l'utilisateur <span class="required">*</span>
+                                    {{ __('user.user_role') }} <span class="required">*</span>
                                 </label>
                                 <div class="input-with-icon">
                                     <i class="fas fa-briefcase input-icon"></i>
@@ -492,27 +492,27 @@
                                         id="role" 
                                         name="role" 
                                         class="form-select-modern @error('role') is-invalid @enderror">
-                                        <option value="" selected disabled>-- Sélectionner un rôle --</option>
+                                        <option value="" selected disabled>{{ __('user.select_role') }}</option>
                                         <option value="Admin" @if(old('role') == 'Admin') selected @endif>
-                                            👑 Administrateur
+                                            {{ __('user.role_admin') }}
                                         </option>
                                         <option value="Receptionist" @if(old('role') == 'Receptionist') selected @endif>
-                                            🎯 Réceptionniste
+                                            {{ __('user.role_receptionist') }}
                                         </option>
                                         @if(auth()->user()->canUseModule('housekeeping'))
                                         <option value="Housekeeping" @if(old('role') == 'Housekeeping') selected @endif>
-                                            🧹 Femme de ménage
+                                            {{ __('user.role_housekeeping') }}
                                         </option>
                                         @endif
                                         <option value="Customer" @if(old('role') == 'Customer') selected @endif>
-                                            👤 Client
+                                            {{ __('user.role_customer') }}
                                         </option>
                                         @if(auth()->user()->canUseModule('restaurant'))
                                         <option value="Servant" @if(old('role') == 'Servant') selected @endif>
-                                            🍳 Serveur
+                                            {{ __('user.role_servant') }}
                                         </option>
                                         <option value="Cuisiner" @if(old('role') == 'Cuisiner') selected @endif>
-                                            👨‍🍳 Cuisinier
+                                            {{ __('user.role_cook') }}
                                         </option>
                                         @endif
                                     </select>
@@ -536,10 +536,10 @@
                         <!-- Actions -->
                         <div class="form-actions">
                             <button type="button" class="btn-db btn-db-secondary" onclick="window.history.back()">
-                                <i class="fas fa-times me-2"></i> Annuler
+                                <i class="fas fa-times me-2"></i> {{ __('user.cancel') }}
                             </button>
                             <button type="submit" class="btn-db btn-db-primary" id="submitBtn">
-                                <i class="fas fa-check me-2"></i> Créer l'utilisateur
+                                <i class="fas fa-check me-2"></i> {{ __('user.create_user') }}
                             </button>
                         </div>
                     </form>
@@ -552,11 +552,11 @@
                     <i class="fas fa-lightbulb"></i>
                 </div>
                 <div class="info-card-content">
-                    <h4>Conseils de sécurité</h4>
+                    <h4>{{ __('user.security_tips') }}</h4>
                     <ul>
-                        <li>Utilisez un mot de passe fort et unique</li>
-                        <li>Attribuez le rôle approprié selon les responsabilités</li>
-                        <li>Vérifiez l'adresse email avant la création</li>
+                        <li>{{ __('user.tip_strong_password') }}</li>
+                        <li>{{ __('user.tip_assign_role') }}</li>
+                        <li>{{ __('user.tip_verify_email') }}</li>
                     </ul>
                 </div>
             </div>
@@ -571,12 +571,12 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Descriptions des rôles
     const roleDescriptions = {
-        'Admin': 'Accès complet au système avec tous les privilèges administratifs. Peut gérer les utilisateurs, les réservations, et configurer le système.',
-        'Receptionist': 'Gère les réservations, l\'accueil des clients, et les opérations quotidiennes de la réception.',
-        'Housekeeping': 'Responsable de l\'entretien des chambres et du nettoyage de l\'établissement.',
-        'Customer': 'Accès limité pour effectuer des réservations et consulter son historique.',
-        'Servant': 'Accès dédié aux modules Restaurant et Caisse pour la prise de commande et les encaissements.',
-        'Cuisiner': 'Accès identique au Serveur : modules Restaurant et Caisse pour la préparation et le suivi des commandes.'
+        'Admin': '{{ __('user.role_description_admin') }}',
+        'Receptionist': '{{ __('user.role_description_receptionist') }}',
+        'Housekeeping': '{{ __('user.role_description_housekeeping') }}',
+        'Customer': '{{ __('user.role_description_customer') }}',
+        'Servant': '{{ __('user.role_description_servant') }}',
+        'Cuisiner': '{{ __('user.role_description_cook') }}'
     };
     
     // Afficher la description du rôle
@@ -631,7 +631,7 @@ function togglePassword() {
 document.getElementById('userForm')?.addEventListener('submit', function(e) {
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Création...';
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> {{ __('user.creating') }}';
 });
 </script>
 @endsection

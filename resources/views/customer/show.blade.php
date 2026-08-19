@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Profil Client - ' . $customer->name)
+@section('title', __('customer.page_title_show', ['name' => $customer->name]))
 @section('content')
 
 <style>
@@ -863,8 +863,8 @@
                                     <div class="res-room">
                                         <div class="res-room-icon"><i class="fas fa-bed"></i></div>
                                         <div class="res-room-info">
-                                            <h6>Chambre {{ $t->room->number ?? 'N/A' }}</h6>
-                                            <small>{{ $t->room->type->name ?? 'Standard' }}</small>
+                                            <h6>{{ __('customer.room') }} {{ $t->room->number ?? 'N/A' }}</h6>
+                                            <small>{{ $t->room->type->name ?? __('customer.standard') }}</small>
                                         </div>
                                     </div>
                                     <span class="res-status status-completed"><i class="fas fa-check-circle"></i> {{ __('customer.status_completed') }}</span>
@@ -883,11 +883,11 @@
                                     
                                     <div class="res-details mb-3">
                                         <div class="res-detail-item">
-                                            <span class="res-detail-label">Nuits</span>
+                                            <span class="res-detail-label">{{ __('customer.nights') }}</span>
                                             <span class="res-detail-value">{{ $nights }}</span>
                                         </div>
                                         <div class="res-detail-item">
-                                            <span class="res-detail-label">Total</span>
+                                            <span class="res-detail-label">{{ __('customer.total_label') }}</span>
                                             <span class="res-detail-value">{{ number_format($t->total_price, 0, ',', ' ') }} <small>FCFA</small></span>
                                         </div>
                                     </div>

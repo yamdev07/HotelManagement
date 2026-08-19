@@ -1,12 +1,12 @@
-Réinitialisation du mot de passe · {{ config('app.name', 'checkinHub') }}
+{{ __('emails.password_reset_title') }} · {{ config('app.name', 'checkinHub') }}
 
-Bonjour,
+{{ __('emails.greeting') }}
 
-Vous avez demandé la réinitialisation de votre mot de passe.
+{{ __('emails.password_reset_request_text') }}
 
-Ouvrez ce lien pour choisir un nouveau mot de passe (valable {{ $expire }} minutes) :
+{{ __('emails.open_link_to_reset', ['minutes' => $expire]) }}
 {{ $resetUrl }}
 
-Si vous n'êtes pas à l'origine de cette demande, ignorez cet email : votre mot de passe restera inchangé.
+{{ __('emails.password_reset_ignore') }}
 
 © {{ date('Y') }} {{ config('app.name', 'checkinHub') }}

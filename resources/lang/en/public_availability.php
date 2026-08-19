@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Book',
+    'reservation' => 'Reservation',
+    'find_room' => 'Find your room',
+    'arrival' => 'Arrival',
+    'departure' => 'Departure',
+    'guests' => 'Guests',
+    'guest' => 'guest',
+    'guests_plural' => 'guests',
+    'search' => 'Search',
+    'rooms_available' => 'rooms available',
+    'room_available' => 'room available',
+    'nights' => 'nights',
+    'night' => 'night',
+    'travelers' => 'travelers',
+    'traveler' => 'traveler',
+    'no_room_available' => 'No room available',
+    'try_other_dates' => 'Try different dates or reduce the number of travelers.',
+    'select_dates' => 'Select your dates above to see actually available rooms.',
+    'secure_payment' => 'Secure online payment coming soon.',
+    'book' => 'Book',
+    'via_whatsapp' => 'Via WhatsApp',
+];

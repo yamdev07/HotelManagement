@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Modifier le client - ' . $customer->name)
+@section('title', __('customer.page_title_edit', ['name' => $customer->name]))
 @section('content')
 
 <style>
@@ -629,7 +629,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (this.files && this.files[0]) {
                 fileName.textContent = this.files[0].name;
             } else {
-                fileName.textContent = 'Aucun fichier choisi';
+                fileName.textContent = '{{ __("customer.no_file_chosen") }}';
             }
         });
     }

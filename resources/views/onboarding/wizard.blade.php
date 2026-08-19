@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bienvenue · personnalisez votre site</title>
+    <title>{{ __('onboarding.page_title') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,9 +22,9 @@
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="text-center mb-4">
-                <span class="step-badge"><i class="fas fa-wand-magic-sparkles me-1"></i> Dernière étape</span>
-                <h2 class="fw-bold mt-3">Personnalisez votre site</h2>
-                <p class="text-secondary">Choisissez vos couleurs, votre nom et votre logo. Tout s'applique immédiatement.</p>
+                <span class="step-badge"><i class="fas fa-wand-magic-sparkles me-1"></i> {{ __('onboarding.last_step') }}</span>
+                <h2 class="fw-bold mt-3">{{ __('onboarding.title') }}</h2>
+                <p class="text-secondary">{{ __('onboarding.subtitle') }}</p>
             </div>
 
             @if (session('success'))
@@ -38,9 +38,8 @@
                 <div class="alert alert-warning d-flex align-items-start gap-2" style="border-radius:14px;">
                     <i class="fas fa-envelope-circle-check mt-1 fs-5"></i>
                     <div>
-                        <strong>Vos identifiants de connexion ont été envoyés à {{ session('credentials_email') }}.</strong><br>
-                        <span class="text-muted">⚠️ Pensez à vérifier votre dossier <strong>spam / courrier indésirable</strong> : le message peut s'y trouver.
-                        Marquez-le comme « non spam » pour recevoir nos prochains emails dans votre boîte principale.</span>
+                        <strong>{{ __('onboarding.credentials_sent', ['email' => session('credentials_email')]) }}</strong><br>
+                        <span class="text-muted">{!! __('onboarding.check_spam') !!}</span>
                     </div>
                 </div>
             @endif
@@ -53,11 +52,11 @@
             <div class="alert alert-light border d-flex align-items-start gap-2">
                 <i class="fas fa-circle-info text-primary mt-1"></i>
                 <div class="small mb-0">
-                    Vous pourrez <strong>changer d'offre à tout moment</strong> (passer de Starter à Pro ou Business)
+                    {!! __('onboarding.change_plan_info') !!}
                     @if (\Illuminate\Support\Facades\Route::has('billing.show'))
-                        depuis <strong>Mon abonnement</strong>, une fois connecté.
+                        {!! __('onboarding.from_billing') !!}
                     @else
-                        depuis votre espace, une fois connecté.
+                        {!! __('onboarding.from_account') !!}
                     @endif
                 </div>
             </div>
@@ -69,35 +68,35 @@
                         <div class="row g-4">
                             <div class="col-lg-7">
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold">Nom affiché sur le site *</label>
+                                    <label class="form-label fw-semibold">{{ __('onboarding.site_name_label') }}</label>
                                     <input type="text" name="name" id="f-name" class="form-control form-control-lg"
                                            value="{{ old('name', $hotel->name) }}" required>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold">Slogan</label>
+                                    <label class="form-label fw-semibold">{{ __('onboarding.slogan') }}</label>
                                     <input type="text" name="tagline" id="f-tagline" class="form-control"
-                                           value="{{ old('tagline', $hotel->tagline) }}" placeholder="Ex : Votre confort, notre priorité">
+                                           value="{{ old('tagline', $hotel->tagline) }}" placeholder="{{ __('onboarding.slogan_placeholder') }}">
                                 </div>
                                 <div class="row g-3 mb-3">
                                     <div class="col-6">
-                                        <label class="form-label fw-semibold">Couleur principale</label>
+                                        <label class="form-label fw-semibold">{{ __('onboarding.primary_color') }}</label>
                                         <input type="color" name="primary_color" id="f-primary" class="form-control form-control-color w-100"
                                                value="{{ old('primary_color', $hotel->primaryColor()) }}">
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label fw-semibold">Couleur secondaire</label>
+                                        <label class="form-label fw-semibold">{{ __('onboarding.secondary_color') }}</label>
                                         <input type="color" name="secondary_color" id="f-secondary" class="form-control form-control-color w-100"
                                                value="{{ old('secondary_color', $hotel->secondaryColor()) }}">
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label class="form-label fw-semibold">Logo</label>
+                                    <label class="form-label fw-semibold">{{ __('onboarding.logo') }}</label>
                                     <input type="file" name="logo" id="f-logo" class="form-control" accept="image/*">
                                 </div>
                             </div>
 
                             <div class="col-lg-5">
-                                <label class="form-label fw-semibold">Aperçu</label>
+                                <label class="form-label fw-semibold">{{ __('onboarding.preview') }}</label>
                                 <div class="preview">
                                     <div class="preview-hero" id="pv-hero" style="background: linear-gradient(135deg, {{ $hotel->primaryColor() }}, {{ $hotel->secondaryColor() }});">
                                         <div class="text-center">
@@ -108,7 +107,7 @@
                                         </div>
                                     </div>
                                     <div class="p-3 bg-white">
-                                        <button type="button" class="btn btn-sm btn-go" id="pv-btn" style="--c: {{ $hotel->primaryColor() }}">Réserver</button>
+                                        <button type="button" class="btn btn-sm btn-go" id="pv-btn" style="--c: {{ $hotel->primaryColor() }}">{{ __('onboarding.book_now') }}</button>
                                     </div>
                                 </div>
                             </div>
@@ -116,15 +115,15 @@
 
                         <div class="mt-4 d-grid">
                             <button type="submit" class="btn btn-lg text-white" style="background: var(--brandbtn, #4f46e5)" id="submit-btn">
-                                <i class="fas fa-check me-2"></i> Valider et accéder à mon espace
+                                <i class="fas fa-check me-2"></i> {{ __('onboarding.validate_access') }}
                             </button>
                         </div>
                         {{-- Issue #156 : pouvoir quitter / changer de compte sans être piégé ici --}}
                         <p class="text-center text-secondary small mt-3 mb-0">
-                            <a href="{{ route('landing') }}" class="text-decoration-none me-3"><i class="fas fa-arrow-left me-1"></i>Retour au site</a>
+                            <a href="{{ route('landing') }}" class="text-decoration-none me-3"><i class="fas fa-arrow-left me-1"></i>{{ __('onboarding.back_to_site') }}</a>
                             <a href="#" class="text-decoration-none text-danger"
                                onclick="event.preventDefault(); document.getElementById('ob-logout').submit();">
-                                <i class="fas fa-arrow-right-from-bracket me-1"></i>Me déconnecter (finir plus tard)
+                                <i class="fas fa-arrow-right-from-bracket me-1"></i>{{ __('onboarding.logout_later') }}
                             </a>
                         </p>
                     </form>
@@ -143,7 +142,7 @@
     const logo = document.getElementById('f-logo');
 
     const sync = () => {
-        document.getElementById('pv-name').textContent = name.value || 'Votre hôtel';
+        document.getElementById('pv-name').textContent = name.value || '{{ __('onboarding.your_hotel') }}';
         document.getElementById('pv-tagline').textContent = tagline.value || '';
         document.getElementById('pv-hero').style.background = `linear-gradient(135deg, ${primary.value}, ${secondary.value})`;
         document.getElementById('pv-btn').style.setProperty('--c', primary.value);

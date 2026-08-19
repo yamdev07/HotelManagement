@@ -1,14 +1,14 @@
-Bienvenue sur {{ config('app.name', 'checkinHub') }}
+{{ __('emails.welcome_on', ['app_name' => config('app.name', 'checkinHub')]) }}
 
-Votre établissement {{ $hotelName }} est prêt.
+{{ __('emails.hotel_establishment_ready', ['hotel' => $hotelName]) }}
 
-Vos accès administrateur :
-- Email : {{ $email }}
-- Mot de passe : {{ $password }}
+{{ __('emails.your_admin_credentials') }}
+- {{ __('emails.email') }} : {{ $email }}
+- {{ __('emails.password') }} : {{ $password }}
 
-Connexion : {{ $loginUrl }}
+{{ __('emails.login_link') }} {{ $loginUrl }}
 
-Pour votre sécurité, pensez à modifier votre mot de passe après votre première connexion.
+{{ __('emails.security_password_hint') }}
 
 ·
 {{ config('app.name', 'checkinHub') }}

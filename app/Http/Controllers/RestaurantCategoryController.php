@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class RestaurantCategoryController extends Controller
 {
@@ -17,13 +18,16 @@ class RestaurantCategoryController extends Controller
 
     public function store(Request $request)
     {
+        $hotelId = auth()->user()->hotel_id;
+
         $request->validate([
-            'name' => 'required|string|max:255|unique:categories',
+            'name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')->where('hotel_id', $hotelId)],
         ]);
 
         Category::create([
             'name' => $request->name,
             'slug' => Str::slug($request->name),
+            'hotel_id' => $hotelId,
         ]);
 
         return redirect()->back()->with('success', 'Catégorie ajoutée avec succès.');
@@ -32,9 +36,10 @@ class RestaurantCategoryController extends Controller
     public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
+        $hotelId = auth()->user()->hotel_id;
 
         $request->validate([
-            'name' => 'required|string|max:255|unique:categories,name,'.$id,
+            'name' => ['required', 'string', 'max:255', Rule::unique('categories', 'name')->where('hotel_id', $hotelId)->ignore($id)],
         ]);
 
         $category->update([

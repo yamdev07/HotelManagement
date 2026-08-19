@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Plateforme · @yield('title', 'Tableau de bord')</title>
+    <title>{{ __('platform.platform') }} · @yield('title', __('platform.dashboard_title'))</title>
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -120,19 +120,19 @@
         {{ config('app.name', 'checkinHub') }}
     </div>
 
-    <div class="sect">Plateforme</div>
+    <div class="sect">{{ __('platform.platform') }}</div>
     <a href="{{ route('platform.hotels.index') }}" class="nav-i {{ request()->routeIs('platform.hotels.index') || request()->routeIs('platform.hotels.show') || request()->routeIs('platform.hotels.edit') ? 'active' : '' }}">
-        <i class="fas fa-gauge-high"></i> Tableau de bord
+        <i class="fas fa-gauge-high"></i> {{ __('platform.dashboard') }}
     </a>
     <a href="{{ route('platform.hotels.index') }}" class="nav-i">
-        <i class="fas fa-hotel"></i> Hôtels
+        <i class="fas fa-hotel"></i> {{ __('platform.hotels') }}
     </a>
     <a href="{{ route('platform.hotels.create') }}" class="nav-i {{ request()->routeIs('platform.hotels.create') ? 'active' : '' }}">
-        <i class="fas fa-plus-circle"></i> Nouvel hôtel
+        <i class="fas fa-plus-circle"></i> {{ __('platform.new_hotel') }}
     </a>
 
-    <div class="sect">Compte</div>
-    <a href="{{ url('/') }}" target="_blank" class="nav-i"><i class="fas fa-globe"></i> Voir le site</a>
+    <div class="sect">{{ __('platform.account') }}</div>
+    <a href="{{ url('/') }}" target="_blank" class="nav-i"><i class="fas fa-globe"></i> {{ __('platform.view_the_site') }}</a>
 
     <div class="foot">
         <div class="usr">
@@ -145,7 +145,7 @@
         <form action="{{ route('logout') }}" method="POST" class="mt-2">
             @csrf
             <button class="btn btn-sm w-100 text-start" style="color:#aab2c5;background:var(--white, #fff);border:none;border-radius:10px;padding:.55rem .8rem;">
-                <i class="fas fa-arrow-right-from-bracket me-2"></i> Déconnexion
+                <i class="fas fa-arrow-right-from-bracket me-2"></i> {{ __('platform.logout') }}
             </button>
         </form>
     </div>
@@ -158,9 +158,9 @@
     <div class="topbar">
         <div class="d-flex align-items-center gap-2">
             <button class="btn-toggle" id="toggle"><i class="fas fa-bars"></i></button>
-            <h1>@yield('title', 'Tableau de bord')</h1>
+            <h1>@yield('title', __('platform.dashboard_title'))</h1>
         </div>
-        <a href="{{ route('platform.hotels.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> Nouvel hôtel</a>
+        <a href="{{ route('platform.hotels.create') }}" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> {{ __('platform.new_hotel') }}</a>
     </div>
 
     <div class="content">

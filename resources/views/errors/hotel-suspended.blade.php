@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Compte suspendu</title>
+    <title>{{ __('errors.account_suspended') }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -14,42 +14,40 @@
                 <div class="mb-3">
                     <i class="fas fa-lock fa-3x text-danger"></i>
                 </div>
-                <h3 class="mb-3">Accès suspendu</h3>
+                <h3 class="mb-3">{{ __('errors.access_suspended') }}</h3>
                 @php $hotel = auth()->user()?->hotel; @endphp
                 <p class="text-muted mb-3">
                     @auth
-                        L'accès de <strong>{{ $hotel?->name ?? 'votre établissement' }}</strong>
-                        est actuellement suspendu.
+                        {!! __('errors.access_suspended_text', ['hotel' => $hotel?->name ?? __('errors.access_suspended_default')]) !!}
                     @endauth
                     @if ($hotel && $hotel->isSubscriptionExpired())
-                        <br>Votre abonnement a expiré le
-                        <strong>{{ $hotel->subscription_ends_at->format('d/m/Y') }}</strong>.
+                        <br>{!! __('errors.subscription_expired', ['date' => $hotel->subscription_ends_at->format('d/m/Y')]) !!}
                     @endif
                 </p>
 
                 @if ($hotel && $hotel->suspension_reason)
                     <div class="alert alert-warning text-start small">
-                        <i class="fas fa-circle-info me-1"></i> <strong>Motif :</strong> {{ $hotel->suspension_reason }}
+                        <i class="fas fa-circle-info me-1"></i> <strong>{{ __('errors.reason') }}</strong> {{ $hotel->suspension_reason }}
                     </div>
                 @endif
 
-                <p class="text-muted mb-4">Merci de régulariser votre situation pour réactiver votre espace.</p>
+                <p class="text-muted mb-4">{{ __('errors.resolve_message') }}</p>
 
                 @if ($hotel && $hotel->is_active && $hotel->isSubscriptionExpired())
                     {{-- Abonnement expiré : l'hôtelier peut payer en ligne pour réactiver --}}
                     <a href="{{ route('billing.show') }}" class="btn btn-primary btn-lg w-100 mb-3">
-                        <i class="fas fa-credit-card me-1"></i> Renouveler mon abonnement
+                        <i class="fas fa-credit-card me-1"></i> {{ __('errors.renew_subscription') }}
                     </a>
                 @else
                     <p class="small text-muted">
-                        Contactez l'administrateur de la plateforme pour toute question.
+                        {{ __('errors.contact_admin') }}
                     </p>
                 @endif
 
                 <form action="{{ route('logout') }}" method="POST" class="mt-2">
                     @csrf
                     <button type="submit" class="btn btn-outline-secondary">
-                        <i class="fas fa-sign-out-alt me-1"></i> Se déconnecter
+                        <i class="fas fa-sign-out-alt me-1"></i> {{ __('errors.logout') }}
                     </button>
                 </form>
             </div>

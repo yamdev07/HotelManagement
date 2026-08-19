@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Codes promo')
+@section('title', __('promo.page_title'))
 
 @section('content')
 @php $fmt = fn ($n) => number_format((float) $n, 0, ',', ' '); @endphp
@@ -48,55 +48,55 @@ html[data-theme="dark"] .promo-page{
 
 <div class="promo-page">
     <div class="promo-head">
-        <h1><span class="ic"><i class="fas fa-tags"></i></span> Codes promo</h1>
-        <p>Créez des réductions que vos clients saisissent sur le site de réservation (ex. <strong>-10 %</strong>, early bird, séjour long).</p>
+        <h1><span class="ic"><i class="fas fa-tags"></i></span> {{ __('promo.heading') }}</h1>
+        <p>{!! __('promo.description') !!}</p>
     </div>
 
     @if (session('success'))<div class="flash"><i class="fas fa-circle-check"></i> {{ session('success') }}</div>@endif
 
     {{-- Création --}}
     <div class="panel">
-        <div class="hd"><i class="fas fa-plus" style="color:var(--acc)"></i> Nouveau code</div>
+        <div class="hd"><i class="fas fa-plus" style="color:var(--acc)"></i> {{ __('promo.new_code') }}</div>
         <div class="bd">
             <form method="POST" action="{{ route('promo.store') }}">
                 @csrf
                 <div class="f-grid">
                     <div class="f" style="grid-column:span 2">
-                        <label>Code</label>
+                        <label>{{ __('promo.label_code') }}</label>
                         <input type="text" name="code" value="{{ old('code') }}" placeholder="BIENVENUE10" maxlength="40" required style="text-transform:uppercase">
                         @error('code')<div class="err">{{ $message }}</div>@enderror
                     </div>
                     <div class="f">
-                        <label>Type</label>
+                        <label>{{ __('promo.label_type') }}</label>
                         <select name="type" id="promoType">
-                            <option value="percent" {{ old('type') === 'fixed' ? '' : 'selected' }}>Pourcentage</option>
-                            <option value="fixed" {{ old('type') === 'fixed' ? 'selected' : '' }}>Montant fixe</option>
+                            <option value="percent" {{ old('type') === 'fixed' ? '' : 'selected' }}>{{ __('promo.type_percent') }}</option>
+                            <option value="fixed" {{ old('type') === 'fixed' ? 'selected' : '' }}>{{ __('promo.type_fixed') }}</option>
                         </select>
                     </div>
                     <div class="f">
-                        <label>Valeur <span id="promoUnit">(%)</span></label>
+                        <label>{{ __('promo.label_value') }} <span id="promoUnit">(%)</span></label>
                         <input type="number" name="value" value="{{ old('value') }}" step="0.01" min="0.01" placeholder="10" required>
                         @error('value')<div class="err">{{ $message }}</div>@enderror
                     </div>
                     <div class="f">
-                        <label>Nuits min.</label>
+                        <label>{{ __('promo.label_min_nights') }}</label>
                         <input type="number" name="min_nights" value="{{ old('min_nights', 1) }}" min="1" max="60">
                     </div>
                     <div class="f">
-                        <label>Usages max</label>
-                        <input type="number" name="max_uses" value="{{ old('max_uses') }}" min="1" placeholder="illimité">
+                        <label>{{ __('promo.label_max_uses') }}</label>
+                        <input type="number" name="max_uses" value="{{ old('max_uses') }}" min="1" placeholder="{{ __('promo.placeholder_unlimited') }}">
                     </div>
                     <div class="f">
-                        <label>Début (option.)</label>
+                        <label>{{ __('promo.label_starts') }}</label>
                         <input type="date" name="starts_at" value="{{ old('starts_at') }}">
                     </div>
                     <div class="f">
-                        <label>Fin (option.)</label>
+                        <label>{{ __('promo.label_ends') }}</label>
                         <input type="date" name="ends_at" value="{{ old('ends_at') }}">
                         @error('ends_at')<div class="err">{{ $message }}</div>@enderror
                     </div>
                     <div class="f-add">
-                        <button type="submit" class="btn"><i class="fas fa-plus"></i> Créer le code</button>
+                        <button type="submit" class="btn"><i class="fas fa-plus"></i> {{ __('promo.btn_create') }}</button>
                     </div>
                 </div>
             </form>
@@ -105,35 +105,35 @@ html[data-theme="dark"] .promo-page{
 
     {{-- Liste --}}
     <div class="panel">
-        <div class="hd"><i class="fas fa-list" style="color:var(--ink3)"></i> Vos codes ({{ $codes->count() }})</div>
+        <div class="hd"><i class="fas fa-list" style="color:var(--ink3)"></i> {{ __('promo.your_codes') }} ({{ $codes->count() }})</div>
         <div class="bd" style="overflow-x:auto">
             @if ($codes->isEmpty())
-                <div class="empty">Aucun code pour l'instant. Créez-en un ci-dessus.</div>
+                <div class="empty">{{ __('promo.empty') }}</div>
             @else
                 <table class="ptable">
                     <thead><tr>
-                        <th>Code</th><th>Réduction</th><th>Conditions</th><th>Validité</th><th>Usage</th><th>Statut</th><th></th>
+                        <th>{{ __('promo.th_code') }}</th><th>{{ __('promo.th_discount') }}</th><th>{{ __('promo.th_conditions') }}</th><th>{{ __('promo.th_validity') }}</th><th>{{ __('promo.th_usage') }}</th><th>{{ __('promo.th_status') }}</th><th></th>
                     </tr></thead>
                     <tbody>
                     @foreach ($codes as $c)
                         <tr>
                             <td><span class="code">{{ $c->code }}</span></td>
                             <td><span class="disc">{{ $c->label() }}{{ $c->type === 'fixed' ? ' '.($currentHotel->currency ?? 'XOF') : '' }}</span></td>
-                            <td>{{ $c->min_nights > 1 ? $c->min_nights.' nuits min.' : '-' }}</td>
+                            <td>{{ $c->min_nights > 1 ? $c->min_nights.' '.__('promo.nights_min') : '-' }}</td>
                             <td>
                                 @if ($c->starts_at || $c->ends_at)
                                     {{ $c->starts_at?->format('d/m/y') ?? '…' }} → {{ $c->ends_at?->format('d/m/y') ?? '…' }}
                                 @else, @endif
                             </td>
                             <td>{{ $c->used_count }}{{ $c->max_uses ? ' / '.$c->max_uses : '' }}</td>
-                            <td><span class="pill {{ $c->is_active ? 'on' : 'off' }}">{{ $c->is_active ? 'Actif' : 'Inactif' }}</span></td>
+                            <td><span class="pill {{ $c->is_active ? 'on' : 'off' }}">{{ $c->is_active ? __('promo.active') : __('promo.inactive') }}</span></td>
                             <td>
                                 <div class="act">
                                     <form method="POST" action="{{ route('promo.toggle', $c) }}">@csrf
-                                        <button class="iconbtn" title="{{ $c->is_active ? 'Désactiver' : 'Activer' }}"><i class="fas fa-{{ $c->is_active ? 'pause' : 'play' }}"></i></button>
+                                        <button class="iconbtn" title="{{ $c->is_active ? __('promo.btn_deactivate') : __('promo.btn_activate') }}"><i class="fas fa-{{ $c->is_active ? 'pause' : 'play' }}"></i></button>
                                     </form>
-                                    <form method="POST" action="{{ route('promo.destroy', $c) }}" onsubmit="return confirm('Supprimer ce code ?')">@csrf @method('DELETE')
-                                        <button class="iconbtn danger" title="Supprimer"><i class="fas fa-trash-can"></i></button>
+                                    <form method="POST" action="{{ route('promo.destroy', $c) }}" onsubmit="return confirm('{{ __('promo.confirm_delete') }}')">@csrf @method('DELETE')
+                                        <button class="iconbtn danger" title="{{ __('promo.btn_delete') }}"><i class="fas fa-trash-can"></i></button>
                                     </form>
                                 </div>
                             </td>
@@ -149,7 +149,7 @@ html[data-theme="dark"] .promo-page{
 <script>
 (function () {
     var t = document.getElementById('promoType'), u = document.getElementById('promoUnit');
-    if (t && u) t.addEventListener('change', function () { u.textContent = t.value === 'fixed' ? '(montant)' : '(%)'; });
+    if (t && u) t.addEventListener('change', function () { u.textContent = t.value === 'fixed' ? '{{ __('promo.unit_fixed') }}' : '(%)'; });
 })();
 </script>
 @endsection

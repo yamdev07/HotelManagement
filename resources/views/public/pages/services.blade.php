@@ -1,13 +1,13 @@
 @extends('public.layout')
-@section('title', 'Services')
+@section('title', __('public_services.title'))
 
 @section('content')
     @php $cover = $hotel->coverUrl(); $services = $hotel->siteServices(); @endphp
     <header class="page-head {{ $cover ? 'has-img' : '' }}" @if($cover) style="background-image:url('{{ $cover }}')" @endif>
         @if($cover)<div class="ov"></div>@endif
         <div class="container">
-            <div class="eyebrow mb-2" style="color:#fff;opacity:.85;">L'art de recevoir</div>
-            <h1 class="display-serif" style="font-size:clamp(2.4rem,6vw,4rem);">Nos services</h1>
+            <div class="eyebrow mb-2" style="color:#fff;opacity:.85;">{{ __('public_services.subtitle') }}</div>
+            <h1 class="display-serif" style="font-size:clamp(2.4rem,6vw,4rem);">{{ __('public_services.our_services') }}</h1>
         </div>
     </header>
 

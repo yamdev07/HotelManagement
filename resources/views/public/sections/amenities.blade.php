@@ -3,8 +3,8 @@
 <section class="section" id="services">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <div class="eyebrow mb-2">L'art de recevoir</div>
-            <h2 class="display-serif" style="font-size:clamp(2rem,4vw,3.2rem);">Nos services & équipements</h2>
+            <div class="eyebrow mb-2">{{ __('public.amenities_art') }}</div>
+            <h2 class="display-serif" style="font-size:clamp(2rem,4vw,3.2rem);">{{ __('public.amenities_title') }}</h2>
             <div class="hero-divider" style="background:var(--c);opacity:.5;"></div>
         </div>
         <div class="row g-4">
@@ -21,7 +21,7 @@
             @endforeach
         </div>
         <div class="text-center mt-5" data-aos="fade-up">
-            <a href="{{ route('public.hotel.services', $hotel->slug) }}" class="btn-c">Tous nos services</a>
+            <a href="{{ route('public.hotel.services', $hotel->slug) }}" class="btn-c">{{ __('public.amenities_all') }}</a>
         </div>
     </div>
 </section>

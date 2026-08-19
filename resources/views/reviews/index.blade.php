@@ -1,6 +1,6 @@
 @extends('template.master')
 
-@section('title', 'Avis clients')
+@section('title', __('reviews.page_title'))
 
 @section('content')
 <style>
@@ -42,8 +42,8 @@ details.rev-reply textarea{width:100%;margin-top:8px;border:1.5px solid var(--li
 
 <div class="rev-page">
     <div class="head">
-        <h1><span class="ic"><i class="fas fa-star"></i></span> Avis clients</h1>
-        <p>Modérez les avis déposés depuis votre vitrine. Les avis approuvés y sont publiés automatiquement.</p>
+        <h1><span class="ic"><i class="fas fa-star"></i></span> {{ __('reviews.heading') }}</h1>
+        <p>{{ __('reviews.description') }}</p>
     </div>
 
     @if (session('success'))
@@ -56,7 +56,7 @@ details.rev-reply textarea{width:100%;margin-top:8px;border:1.5px solid var(--li
 
     {{-- En attente --}}
     <div class="panel">
-        <div class="hd"><i class="fas fa-clock" style="color:var(--gold)"></i> En attente de modération <span class="badge">{{ $pending->count() }}</span></div>
+        <div class="hd"><i class="fas fa-clock" style="color:var(--gold)"></i> {{ __('reviews.pending_moderation') }} <span class="badge">{{ $pending->count() }}</span></div>
         <div class="bd">
             @forelse ($pending as $r)
                 <div class="rev-item">
@@ -65,59 +65,59 @@ details.rev-reply textarea{width:100%;margin-top:8px;border:1.5px solid var(--li
                     <div class="meta"><strong>{{ $r->author_name }}</strong>@if($r->author_city)· {{ $r->author_city }}@endif · {{ $r->created_at->diffForHumans() }}</div>
                     <div class="actions">
                         <form method="POST" action="{{ route('reviews.approve', $r) }}">@csrf
-                            <button class="rev-btn ok"><i class="fas fa-check"></i> Approuver</button>
+                            <button class="rev-btn ok"><i class="fas fa-check"></i> {{ __('reviews.btn_approve') }}</button>
                         </form>
                         <form method="POST" action="{{ route('reviews.reject', $r) }}">@csrf
-                            <button class="rev-btn bad"><i class="fas fa-times"></i> Rejeter</button>
+                            <button class="rev-btn bad"><i class="fas fa-times"></i> {{ __('reviews.btn_reject') }}</button>
                         </form>
                         <form method="POST" action="{{ route('reviews.destroy', $r) }}">@csrf @method('DELETE')
                             <button class="rev-btn" onclick="return confirm('Supprimer définitivement cet avis ?')"><i class="fas fa-trash"></i></button>
                         </form>
                     </div>
                     <details class="rev-reply">
-                        <summary><i class="fas fa-reply"></i> Répondre (publié sous l'avis)</summary>
+                        <summary><i class="fas fa-reply"></i> {{ __('reviews.reply_summary') }}</summary>
                         <form method="POST" action="{{ route('reviews.reply', $r) }}">@csrf
-                            <textarea name="reply" rows="2" maxlength="1000" placeholder="Votre réponse…" required>{{ $r->reply }}</textarea>
-                            <button class="rev-btn ok mt-2" type="submit"><i class="fas fa-paper-plane"></i> Enregistrer la réponse</button>
+                            <textarea name="reply" rows="2" maxlength="1000" placeholder="{{ __('reviews.reply_placeholder') }}" required>{{ $r->reply }}</textarea>
+                            <button class="rev-btn ok mt-2" type="submit"><i class="fas fa-paper-plane"></i> {{ __('reviews.btn_save_reply') }}</button>
                         </form>
                     </details>
                 </div>
             @empty
-                <div class="rev-empty">Aucun avis en attente. 🎉</div>
+                <div class="rev-empty">{{ __('reviews.empty_pending') }}</div>
             @endforelse
         </div>
     </div>
 
     {{-- Approuvés --}}
     <div class="panel">
-        <div class="hd"><i class="fas fa-check-circle" style="color:var(--ok)"></i> Publiés <span class="badge">{{ $approved->count() }}</span></div>
+        <div class="hd"><i class="fas fa-check-circle" style="color:var(--ok)"></i> {{ __('reviews.published') }} <span class="badge">{{ $approved->count() }}</span></div>
         <div class="bd">
             @forelse ($approved as $r)
                 <div class="rev-item">
                     <div class="stars">{{ $stars($r->rating) }}</div>
                     <div class="txt">“{{ $r->comment }}”</div>
-                    <div class="meta"><strong>{{ $r->author_name }}</strong>@if($r->author_city)· {{ $r->author_city }}@endif · publié {{ optional($r->approved_at)->diffForHumans() }}</div>
+                    <div class="meta"><strong>{{ $r->author_name }}</strong>@if($r->author_city)· {{ $r->author_city }}@endif · {{ __('reviews.published_ago', ['time' => optional($r->approved_at)->diffForHumans()]) }}</div>
                     @if ($r->reply)
-                        <div class="rev-reply-box"><div class="lbl">Votre réponse</div>{{ $r->reply }}</div>
+                        <div class="rev-reply-box"><div class="lbl">{{ __('reviews.your_reply') }}</div>{{ $r->reply }}</div>
                     @endif
                     <div class="actions">
                         <form method="POST" action="{{ route('reviews.reject', $r) }}">@csrf
-                            <button class="rev-btn bad" onclick="return confirm('Retirer cet avis de la vitrine ?')"><i class="fas fa-eye-slash"></i> Dépublier</button>
+                            <button class="rev-btn bad" onclick="return confirm('{{ __('reviews.confirm_unpublish') }}')"><i class="fas fa-eye-slash"></i> {{ __('reviews.btn_unpublish') }}</button>
                         </form>
                         <form method="POST" action="{{ route('reviews.destroy', $r) }}">@csrf @method('DELETE')
                             <button class="rev-btn" onclick="return confirm('Supprimer définitivement cet avis ?')"><i class="fas fa-trash"></i></button>
                         </form>
                     </div>
                     <details class="rev-reply">
-                        <summary><i class="fas fa-reply"></i> {{ $r->reply ? 'Modifier la réponse' : 'Répondre' }}</summary>
+                        <summary><i class="fas fa-reply"></i> {{ $r->reply ? __('reviews.btn_edit_reply') : __('reviews.btn_reply') }}</summary>
                         <form method="POST" action="{{ route('reviews.reply', $r) }}">@csrf
-                            <textarea name="reply" rows="2" maxlength="1000" placeholder="Votre réponse…" required>{{ $r->reply }}</textarea>
-                            <button class="rev-btn ok mt-2" type="submit"><i class="fas fa-paper-plane"></i> Enregistrer</button>
+                            <textarea name="reply" rows="2" maxlength="1000" placeholder="{{ __('reviews.reply_placeholder') }}" required>{{ $r->reply }}</textarea>
+                            <button class="rev-btn ok mt-2" type="submit"><i class="fas fa-paper-plane"></i> {{ __('reviews.btn_save') }}</button>
                         </form>
                     </details>
                 </div>
             @empty
-                <div class="rev-empty">Aucun avis publié pour le moment.</div>
+                <div class="rev-empty">{{ __('reviews.empty_published') }}</div>
             @endforelse
         </div>
     </div>
@@ -125,7 +125,7 @@ details.rev-reply textarea{width:100%;margin-top:8px;border:1.5px solid var(--li
     {{-- Rejetés --}}
     @if ($rejected->isNotEmpty())
         <div class="panel">
-            <div class="hd"><i class="fas fa-ban" style="color:var(--bad)"></i> Rejetés <span class="badge">{{ $rejected->count() }}</span></div>
+            <div class="hd"><i class="fas fa-ban" style="color:var(--bad)"></i> {{ __('reviews.rejected') }} <span class="badge">{{ $rejected->count() }}</span></div>
             <div class="bd">
                 @foreach ($rejected as $r)
                     <div class="rev-item">
@@ -134,10 +134,10 @@ details.rev-reply textarea{width:100%;margin-top:8px;border:1.5px solid var(--li
                         <div class="meta"><strong>{{ $r->author_name }}</strong>@if($r->author_city)· {{ $r->author_city }}@endif</div>
                         <div class="actions">
                             <form method="POST" action="{{ route('reviews.approve', $r) }}">@csrf
-                                <button class="rev-btn ok"><i class="fas fa-check"></i> Approuver finalement</button>
+                                <button class="rev-btn ok"><i class="fas fa-check"></i> {{ __('reviews.btn_approve_anyway') }}</button>
                             </form>
                             <form method="POST" action="{{ route('reviews.destroy', $r) }}">@csrf @method('DELETE')
-                                <button class="rev-btn" onclick="return confirm('Supprimer définitivement cet avis ?')"><i class="fas fa-trash"></i></button>
+                            <button class="rev-btn" onclick="return confirm('{{ __('reviews.confirm_delete') }}')"><i class="fas fa-trash"></i></button>
                             </form>
                         </div>
                     </div>

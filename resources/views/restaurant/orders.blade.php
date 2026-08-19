@@ -400,7 +400,7 @@ function downloadQRCode() {
     // Charger le logo
     var logoImg = new Image();
     logoImg.crossOrigin = 'anonymous';
-    logoImg.src = '{{ asset('img/logo_cactus.png') }}';
+    logoImg.src = '{{ auth()->user()->hotel?->logoUrl() ?? asset("img/logo_cactus.png") }}';
 
     logoImg.onload = function() {
         // Dessiner le logo
@@ -414,7 +414,7 @@ function downloadQRCode() {
         ctx.fillStyle = '#FFFFFF';
         ctx.font = 'bold 24px Playfair Display, serif';
         ctx.textAlign = 'center';
-        ctx.fillText('LE CACTUS HOTEL', width / 2, logoY + logoHeight + 35);
+        ctx.fillText('{{ addslashes(auth()->user()->hotel?->name ?? "HOTEL") }}', width / 2, logoY + logoHeight + 35);
 
         // Sous-titre
         ctx.fillStyle = '#C9A961';

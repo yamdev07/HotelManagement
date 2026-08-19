@@ -50,7 +50,7 @@
 
     <div class="hero-cine-inner">
         <div class="hero-badge" data-aos="fade-down">
-            @if($hotel->address)<i class="fas fa-location-dot"></i> {{ $hotel->address }}@else <i class="fas fa-star"></i> Bienvenue @endif
+            @if($hotel->address)<i class="fas fa-location-dot"></i> {{ $hotel->address }}@else <i class="fas fa-star"></i> {{ __('public.hero_welcome') }} @endif
         </div>
         <h1 class="display-serif" data-aos="fade-up" data-aos-delay="100">{{ $hotel->name }}</h1>
         <div class="hero-divider" data-aos="fade" data-aos-delay="250" style="background:#fff;box-shadow:0 0 18px rgba(255,255,255,.6);"></div>
@@ -61,27 +61,27 @@
         @if ($hotel->show_rooms)
         <form class="hero-search" method="GET" action="{{ route('public.hotel.availability', $hotel->slug) }}" data-aos="fade-up" data-aos-delay="380">
             <div class="hs-field">
-                <label><i class="fas fa-calendar-day me-1"></i> Arrivée</label>
+                <label><i class="fas fa-calendar-day me-1"></i> {{ __('public.hero_arrival') }}</label>
                 <input type="date" name="check_in" min="{{ now()->format('Y-m-d') }}" value="{{ now()->format('Y-m-d') }}" required>
             </div>
             <div class="hs-field">
-                <label><i class="fas fa-calendar-check me-1"></i> Départ</label>
+                <label><i class="fas fa-calendar-check me-1"></i> {{ __('public.hero_departure') }}</label>
                 <input type="date" name="check_out" min="{{ now()->addDay()->format('Y-m-d') }}" value="{{ now()->addDay()->format('Y-m-d') }}" required>
             </div>
             <div class="hs-field">
-                <label><i class="fas fa-user-group me-1"></i> Voyageurs</label>
+                <label><i class="fas fa-user-group me-1"></i> {{ __('public.hero_guests') }}</label>
                 <select name="guests">
-                    @for ($i = 1; $i <= 8; $i++)<option value="{{ $i }}">{{ $i }} {{ $i > 1 ? 'personnes' : 'personne' }}</option>@endfor
+                    @for ($i = 1; $i <= 8; $i++)<option value="{{ $i }}">{{ $i }} {{ $i > 1 ? __('public.hero_guests_plural') : __('public.hero_guest') }}</option>@endfor
                 </select>
             </div>
-            <button type="submit" class="hs-btn"><i class="fas fa-search"></i> Rechercher</button>
+            <button type="submit" class="hs-btn"><i class="fas fa-search"></i> {{ __('public.hero_search') }}</button>
         </form>
         @endif
 
         <div class="hero-quicklinks" data-aos="fade" data-aos-delay="480">
-            @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}">Voir les chambres</a>@endif
-            <a href="#apropos">Découvrir l'hôtel</a>
-            @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}">Nous contacter</a>@endif
+            @if ($hotel->show_rooms)<a href="{{ route('public.hotel.rooms', $hotel->slug) }}">{{ __('public.hero_view_rooms') }}</a>@endif
+            <a href="#apropos">{{ __('public.hero_discover_hotel') }}</a>
+            @if ($hotel->show_contact)<a href="{{ route('public.hotel.contact', $hotel->slug) }}">{{ __('public.hero_contact_us') }}</a>@endif
         </div>
     </div>
 

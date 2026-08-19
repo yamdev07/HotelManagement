@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', $room->name . ' · Cactus Palace 5 Étoiles')
+@section('title', $room->name . ' · ' . __('frontend_room_details.hero_badge'))
 
 @push('styles')
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -347,23 +347,23 @@
             <div class="col-lg-9" data-aos="fade-up" data-aos-duration="800">
                 <div class="hero-eyebrow">
                     <i class="fas fa-star" style="font-size:9px;"></i>
-                    Chambre · Cactus Palace 5 Étoiles
+                    {{ __('frontend_room_details.hero_badge') }}
                     <i class="fas fa-star" style="font-size:9px;"></i>
                 </div>
                 <h1>
                     {{ $room->name }}<br>
-                    <em>{{ $room->type->name ?? 'Suite Premium' }}</em>
+                    <em>{{ $room->type->name ?? __('frontend_room_details.default_type') }}</em>
                 </h1>
                 <div class="hero-badges">
                     <div class="hero-badge-item">
-                        <i class="fas fa-users"></i>{{ $room->capacity }} personne{{ $room->capacity > 1 ? 's' : '' }}
+                        <i class="fas fa-users"></i>{{ $room->capacity }} {{ __('frontend_rooms.persons') }}{{ $room->capacity > 1 ? 's' : '' }}
                     </div>
                     <div class="hero-badge-item">
                         <i class="fas fa-expand-arrows-alt"></i>{{ $room->size ?? '25' }} m²
                     </div>
                     @if($room->floor)
                     <div class="hero-badge-item">
-                        <i class="fas fa-building"></i>Étage {{ $room->floor }}
+                        <i class="fas fa-building"></i>{{ __('frontend_room_details.floor') }} {{ $room->floor }}
                     </div>
                     @endif
                     @if($room->view)
@@ -374,7 +374,7 @@
                 </div>
                 <div class="availability-badge {{ $room->is_available_today ? 'avail' : 'unavail' }}">
                     <span class="dot"></span>
-                    {{ $room->is_available_today ? 'Disponible aujourd\'hui' : 'Non disponible ce jour' }}
+                        {{ $room->is_available_today ? __('frontend_room_details.available_now') : __('frontend_room_details.unavailable_now') }}
                 </div>
             </div>
         </div>
@@ -406,7 +406,7 @@
                         <div class="gallery-availability">
                             <span class="availability-badge {{ $room->is_available_today ? 'avail' : 'unavail' }}" style="font-size:12px;padding:6px 14px;">
                                 <span class="dot"></span>
-                                {{ $room->is_available_today ? 'Disponible' : 'Non disponible' }}
+                                {{ $room->is_available_today ? __('frontend_room_details.available') : __('frontend_room_details.unavailable') }}
                             </span>
                         </div>
 
@@ -442,11 +442,11 @@
                 <div class="rd-card mt-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="rd-card-title">
                         <i class="fas fa-align-left"></i>
-                        Description
+                        {{ __('frontend_room_details.description') }}
                         <div class="title-line"></div>
                     </div>
-                    <p class="room-lead">{{ $room->name }} · {{ $room->type->name ?? 'Chambre Standard' }}</p>
-                    <p class="room-body-text">{{ $room->type->description_fr ?? 'Profitez d\'un séjour exceptionnel dans cette chambre luxueuse dotée de tous les équipements haut de gamme.' }}</p>
+                    <p class="room-lead">{{ $room->name }} · {{ $room->type->name ?? __('frontend_room_details.default_type_2') }}</p>
+                    <p class="room-body-text">{{ $room->type->description_fr ?? __('frontend_room_details.default_desc2') }}</p>
                     @if($room->description)
                     <p class="room-body-text mt-2">{{ $room->description }}</p>
                     @endif
@@ -457,7 +457,7 @@
                 <div class="rd-card" data-aos="fade-up" data-aos-delay="150">
                     <div class="rd-card-title">
                         <i class="fas fa-concierge-bell"></i>
-                        Équipements & Services
+                        {{ __('frontend_room_details.facilities') }}
                         <div class="title-line"></div>
                     </div>
                     <div class="row g-3">
@@ -484,7 +484,7 @@
                 <div class="rd-card" data-aos="fade-up" data-aos-delay="200">
                     <div class="rd-card-title">
                         <i class="fas fa-info-circle"></i>
-                        Informations détaillées
+                        {{ __('frontend_room_details.detailed_info') }}
                         <div class="title-line"></div>
                     </div>
                     <div class="row g-3">
@@ -492,28 +492,28 @@
                             <div style="text-align:center;padding:16px;background:var(--light-bg);border-radius:12px;border:1px solid var(--border-color);">
                                 <i class="fas fa-users" style="color:var(--cactus-green);font-size:1.4rem;margin-bottom:8px;display:block;"></i>
                                 <div style="font-weight:700;color:var(--text-dark);font-size:1.1rem;">{{ $room->capacity }}</div>
-                                <div style="font-size:0.8rem;color:var(--text-gray);">Personnes</div>
+                                <div style="font-size:0.8rem;color:var(--text-gray);">{{ __('frontend_room_details.persons') }}</div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
                             <div style="text-align:center;padding:16px;background:var(--light-bg);border-radius:12px;border:1px solid var(--border-color);">
                                 <i class="fas fa-expand-arrows-alt" style="color:var(--cactus-green);font-size:1.4rem;margin-bottom:8px;display:block;"></i>
                                 <div style="font-weight:700;color:var(--text-dark);font-size:1.1rem;">{{ $room->size ?? '25' }} m²</div>
-                                <div style="font-size:0.8rem;color:var(--text-gray);">Superficie</div>
+                                <div style="font-size:0.8rem;color:var(--text-gray);">{{ __('frontend_room_details.area') }}</div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
                             <div style="text-align:center;padding:16px;background:var(--light-bg);border-radius:12px;border:1px solid var(--border-color);">
                                 <i class="fas fa-building" style="color:var(--cactus-green);font-size:1.4rem;margin-bottom:8px;display:block;"></i>
                                 <div style="font-weight:700;color:var(--text-dark);font-size:1.1rem;">{{ $room->floor ?? 'RDC' }}</div>
-                                <div style="font-size:0.8rem;color:var(--text-gray);">Étage</div>
+                                <div style="font-size:0.8rem;color:var(--text-gray);">{{ __('frontend_room_details.floor') }}</div>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
                             <div style="text-align:center;padding:16px;background:var(--light-bg);border-radius:12px;border:1px solid var(--border-color);">
                                 <i class="fas fa-door-open" style="color:var(--cactus-green);font-size:1.4rem;margin-bottom:8px;display:block;"></i>
                                 <div style="font-weight:700;color:var(--text-dark);font-size:1.1rem;">{{ $room->number }}</div>
-                                <div style="font-size:0.8rem;color:var(--text-gray);">Numéro</div>
+                                <div style="font-size:0.8rem;color:var(--text-gray);">{{ __('frontend_room_details.number') }}</div>
                             </div>
                         </div>
                     </div>
@@ -526,15 +526,15 @@
                     <div class="booking-card">
                         {{-- Header --}}
                         <div class="booking-header">
-                            <div class="bh-eyebrow">Réservation</div>
-                            <h4>Réserver cette chambre</h4>
-                            <p>Séjournez dans l'excellence</p>
+                            <div class="bh-eyebrow">{{ __('frontend_room_details.booking_title') }}</div>
+                            <h4>{{ __('frontend_room_details.book_room') }}</h4>
+                            <p>{{ __('frontend_room_details.stay_excellence') }}</p>
                         </div>
 
                         {{-- Price --}}
                         <div class="booking-price-box">
                             <span class="price">{{ $room->type->formatted_price ?? 'N/A' }}</span>
-                            <span class="per-night">par nuit</span>
+                            <span class="per-night">{{ __('frontend_room_details.per_night') }}</span>
                         </div>
 
                         {{-- Form --}}
@@ -543,44 +543,44 @@
                                 <input type="hidden" name="room_id" value="{{ $room->id }}">
 
                                 <div class="mb-3">
-                                    <label class="booking-label">Dates de séjour</label>
+                                    <label class="booking-label">{{ __('frontend_room_details.stay_dates') }}</label>
                                     <div class="row g-2">
                                         <div class="col-6">
                                             <input type="date" class="booking-input" name="check_in" id="check_in"
                                                    value="{{ date('Y-m-d', strtotime('+1 day')) }}"
                                                    min="{{ date('Y-m-d') }}">
-                                            <div style="font-size:11px;color:var(--text-gray);margin-top:4px;">Arrivée</div>
+                                            <div style="font-size:11px;color:var(--text-gray);margin-top:4px;">{{ __('frontend_room_details.arrival') }}</div>
                                         </div>
                                         <div class="col-6">
                                             <input type="date" class="booking-input" name="check_out" id="check_out"
                                                    value="{{ date('Y-m-d', strtotime('+2 day')) }}"
                                                    min="{{ date('Y-m-d', strtotime('+1 day')) }}">
-                                            <div style="font-size:11px;color:var(--text-gray);margin-top:4px;">Départ</div>
+                                            <div style="font-size:11px;color:var(--text-gray);margin-top:4px;">{{ __('frontend_room_details.departure') }}</div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="mb-4">
-                                    <label class="booking-label" for="adults">Nombre de personnes</label>
+                                    <label class="booking-label" for="adults">{{ __('frontend_room_details.num_persons') }}</label>
                                     <select class="booking-input" name="adults" id="adults" style="cursor:pointer;">
                                         @for($i = 1; $i <= $room->capacity; $i++)
                                         <option value="{{ $i }}" {{ $i == min(2, $room->capacity) ? 'selected' : '' }}>
-                                            {{ $i }} personne{{ $i > 1 ? 's' : '' }}
+                                            {{ $i }} {{ __('frontend_rooms.persons') }}{{ $i > 1 ? 's' : '' }}
                                         </option>
                                         @endfor
                                     </select>
                                 </div>
 
                                 <button type="submit" class="btn-book-now">
-                                    <i class="fas fa-calendar-check"></i> Réserver maintenant
+                                    <i class="fas fa-calendar-check"></i> {{ __('frontend_room_details.book_now') }}
                                 </button>
                                 <a href="{{ route('frontend.contact') }}?room_id={{ $room->id }}" class="btn-contact-us">
-                                    <i class="fas fa-envelope"></i> Nous contacter
+                                    <i class="fas fa-envelope"></i> {{ __('frontend_room_details.contact_us') }}
                                 </a>
 
                                 <p class="text-center mt-3 mb-0" style="font-size:12px;color:var(--text-gray);">
                                     <i class="fas fa-lock me-1" style="color:var(--cactus-green);"></i>
-                                    Réservation 100% sécurisée
+                                    {{ __('frontend_room_details.secure_booking') }}
                                 </p>
                             </form>
                         </div>
@@ -589,19 +589,19 @@
                         <div class="booking-footer">
                             <div class="info-row">
                                 <i class="fas fa-clock"></i>
-                                <span>Check-in : 15h00 - 22h00</span>
+                                <span>{{ __('frontend_room_details.checkin_time') }}</span>
                             </div>
                             <div class="info-row">
                                 <i class="fas fa-clock"></i>
-                                <span>Check-out : avant 13h00</span>
+                                <span>{{ __('frontend_room_details.checkout_time') }}</span>
                             </div>
                             <div class="info-row">
                                 <i class="fas fa-wifi"></i>
-                                <span>Wi-Fi haut débit gratuit</span>
+                                <span>{{ __('frontend_room_details.wifi_free') }}</span>
                             </div>
                             <div class="info-row">
                                 <i class="fas fa-undo"></i>
-                                <span>Annulation gratuite 48h avant</span>
+                                <span>{{ __('frontend_room_details.free_cancel') }}</span>
                             </div>
                         </div>
                     </div>
@@ -617,8 +617,8 @@
 <section class="related-section">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <span style="display:inline-block;padding:5px 18px;background:rgba(26,71,42,0.08);color:var(--cactus-green);border-radius:50px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;">Suggestions</span>
-            <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.5rem);color:var(--text-dark);margin:0;">Chambres similaires</h2>
+            <span style="display:inline-block;padding:5px 18px;background:rgba(26,71,42,0.08);color:var(--cactus-green);border-radius:50px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;">{{ __('frontend_room_details.suggestions') }}</span>
+            <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3vw,2.5rem);color:var(--text-dark);margin:0;">{{ __('frontend_room_details.similar_rooms') }}</h2>
         </div>
         <div class="row g-4">
             @foreach($relatedRooms as $relatedRoom)
@@ -634,19 +634,19 @@
                         @endphp
                         <img src="{{ $relatedImage }}" alt="{{ $relatedRoom->name }}">
                         <span class="related-badge {{ $relatedRoom->is_available_today ? 'avail' : 'unavail' }}">
-                            {{ $relatedRoom->is_available_today ? 'Disponible' : 'Sur demande' }}
+                            {{ $relatedRoom->is_available_today ? __('frontend_room_details.available') : __('frontend_room_details.on_request') }}
                         </span>
                     </div>
                     <div class="related-body">
                         <h5>{{ $relatedRoom->name }}</h5>
-                        <div class="related-type">{{ $relatedRoom->type->name ?? 'Standard' }} · {{ $relatedRoom->capacity }} pers.</div>
+                        <div class="related-type">{{ $relatedRoom->type->name ?? 'Standard' }} · {{ $relatedRoom->capacity }} {{ __('frontend_rooms.persons_short') }}</div>
                         <div class="related-footer">
                             <div>
                                 <span class="related-price">{{ number_format($relatedRoom->price, 0, ',', ' ') }} FCFA</span><br>
-                                <small>par nuit</small>
+                                <small>{{ __('frontend_room_details.per_night_short') }}</small>
                             </div>
                             <a href="{{ route('frontend.room.details', $relatedRoom->id) }}" class="btn-related-view">
-                                <i class="fas fa-eye"></i> Voir
+                                <i class="fas fa-eye"></i> {{ __('frontend_room_details.view') }}
                             </a>
                         </div>
                     </div>

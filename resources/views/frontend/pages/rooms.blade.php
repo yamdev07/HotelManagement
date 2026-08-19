@@ -1,6 +1,6 @@
 @extends('frontend.layouts.master')
 
-@section('title', 'Chambres & Suites · Cactus Palace 5 Étoiles')
+@section('title', __('frontend_rooms.hero_badge'))
 
 @push('styles')
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
@@ -688,35 +688,33 @@
     <div class="container">
         <div class="row align-items-center py-5">
             <div class="col-lg-8" data-aos="fade-right">
-                <div class="hero-eyebrow">
+                    <div class="hero-eyebrow">
                     <i class="fas fa-star" style="font-size:10px;"></i>
-                    Hôtel 5 Étoiles · Cotonou, Bénin
+                    {!! __('frontend_rooms.hero_badge') !!}
                     <i class="fas fa-star" style="font-size:10px;"></i>
                 </div>
                 <h1>
-                    Chambres &<br>
-                    <em>Suites d'Exception</em>
+                    {!! __('frontend_rooms.hero_title') !!}
                 </h1>
                 <p class="hero-lead">
-                    Chaque chambre du Cactus Palace est pensée comme un sanctuaire de confort ·
-                    matériaux nobles, literie premium et atmosphère apaisante pour un repos parfait.
+                    {{ __('frontend_rooms.hero_lead') }}
                 </p>
                 <div class="hero-counters">
                     <div class="hero-counter">
                         <div class="number">{{ $totalRooms ?? 0 }}</div>
-                        <div class="label">Chambres</div>
+                        <div class="label">{{ __('frontend_rooms.rooms_label') }}</div>
                     </div>
                     <div class="hero-counter">
                         <div class="number">{{ $availableCount ?? 0 }}</div>
-                        <div class="label">Disponibles</div>
+                        <div class="label">{{ __('frontend_rooms.available_label') }}</div>
                     </div>
                     <div class="hero-counter">
                         <div class="number">{{ $distinctTypes ?? 0 }}</div>
-                        <div class="label">Catégories</div>
+                        <div class="label">{{ __('frontend_rooms.categories_label') }}</div>
                     </div>
                     <div class="hero-counter">
                         <div class="number">4.8★</div>
-                        <div class="label">Satisfaction</div>
+                        <div class="label">{{ __('frontend_rooms.satisfaction_label') }}</div>
                     </div>
                 </div>
             </div>
@@ -731,9 +729,9 @@
         <form action="{{ route('frontend.rooms') }}" method="GET" id="filterForm">
             <div class="row g-3 align-items-end">
                 <div class="col-lg-3 col-md-6">
-                    <label for="type" class="form-label"><i class="fas fa-layer-group me-2"></i>Catégorie</label>
+                    <label for="type" class="form-label"><i class="fas fa-layer-group me-2"></i>{{ __('frontend_rooms.category') }}</label>
                     <select class="form-select" id="type" name="type">
-                        <option value="">Toutes les catégories</option>
+                        <option value="">{{ __('frontend_rooms.all_categories') }}</option>
                         @foreach($types as $type)
                             <option value="{{ $type->id }}" {{ request('type') == $type->id ? 'selected' : '' }}>
                                 {{ $type->name }} ({{ $type->rooms_count ?? 0 }})
@@ -742,34 +740,34 @@
                     </select>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <label for="capacity" class="form-label"><i class="fas fa-users me-2"></i>Occupants</label>
+                    <label for="capacity" class="form-label"><i class="fas fa-users me-2"></i>{{ __('frontend_rooms.occupants') }}</label>
                     <select class="form-select" id="capacity" name="capacity">
-                        <option value="">Toute capacité</option>
+                        <option value="">{{ __('frontend_rooms.all_capacity') }}</option>
                         @for($i = 1; $i <= 5; $i++)
                             @php $count = $roomsByCapacity[$i] ?? 0; @endphp
                             <option value="{{ $i }}" {{ request('capacity') == $i ? 'selected' : '' }}>
-                                {{ $i }} personne{{ $i > 1 ? 's' : '' }} ({{ $count }})
+                                {{ $i }} {{ __('frontend_rooms.persons') }}{{ $i > 1 ? 's' : '' }} ({{ $count }})
                             </option>
                         @endfor
-                        <option value="6" {{ request('capacity') == 6 ? 'selected' : '' }}>6+ personnes</option>
+                        <option value="6" {{ request('capacity') == 6 ? 'selected' : '' }}>6+ {{ __('frontend_rooms.persons') }}</option>
                     </select>
                 </div>
                 <div class="col-lg-3 col-md-6">
-                    <label for="price_range" class="form-label"><i class="fas fa-tag me-2"></i>Budget / nuit</label>
+                    <label for="price_range" class="form-label"><i class="fas fa-tag me-2"></i>{{ __('frontend_rooms.budget_night') }}</label>
                     <select class="form-select" id="price_range" name="price_range">
-                        <option value="">Tous les tarifs</option>
-                        <option value="0-50000"      {{ request('price_range')=='0-50000'      ?'selected':'' }}>Moins de 50 000 FCFA ({{ $priceRanges['0-50000'] ?? 0 }})</option>
-                        <option value="50000-100000"  {{ request('price_range')=='50000-100000' ?'selected':'' }}>50k · 100k FCFA ({{ $priceRanges['50000-100000'] ?? 0 }})</option>
-                        <option value="100000-150000" {{ request('price_range')=='100000-150000'?'selected':'' }}>100k · 150k FCFA ({{ $priceRanges['100000-150000'] ?? 0 }})</option>
-                        <option value="150000-200000" {{ request('price_range')=='150000-200000'?'selected':'' }}>150k · 200k FCFA ({{ $priceRanges['150000-200000'] ?? 0 }})</option>
-                        <option value="200000+"       {{ request('price_range')=='200000+'      ?'selected':'' }}>Plus de 200k FCFA ({{ $priceRanges['200000+'] ?? 0 }})</option>
+                        <option value="">{{ __('frontend_rooms.all_prices') }}</option>
+                        <option value="0-50000"      {{ request('price_range')=='0-50000'      ?'selected':'' }}>{{ __('frontend_rooms.price_range_under_50k') }} ({{ $priceRanges['0-50000'] ?? 0 }})</option>
+                        <option value="50000-100000"  {{ request('price_range')=='50000-100000' ?'selected':'' }}>{{ __('frontend_rooms.price_range_50k_100k') }} ({{ $priceRanges['50000-100000'] ?? 0 }})</option>
+                        <option value="100000-150000" {{ request('price_range')=='100000-150000'?'selected':'' }}>{{ __('frontend_rooms.price_range_100k_150k') }} ({{ $priceRanges['100000-150000'] ?? 0 }})</option>
+                        <option value="150000-200000" {{ request('price_range')=='150000-200000'?'selected':'' }}>{{ __('frontend_rooms.price_range_150k_200k') }} ({{ $priceRanges['150000-200000'] ?? 0 }})</option>
+                        <option value="200000+"       {{ request('price_range')=='200000+'      ?'selected':'' }}>{{ __('frontend_rooms.price_range_over_200k') }} ({{ $priceRanges['200000+'] ?? 0 }})</option>
                     </select>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <label class="form-label" style="opacity:0;">Actions</label>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn-filter flex-fill justify-content-center">
-                            <i class="fas fa-search"></i> Rechercher
+                            <i class="fas fa-search"></i> {{ __('frontend_rooms.search') }}
                         </button>
                         <a href="{{ route('frontend.rooms') }}" class="btn-filter btn-filter-reset" style="padding:11px 16px;">
                             <i class="fas fa-redo"></i>
@@ -785,19 +783,19 @@
 @if(request()->hasAny(['type', 'capacity', 'price_range']))
 <div class="active-filters">
     <div class="container d-flex align-items-center gap-3 flex-wrap">
-        <span style="font-size:12px;color:var(--text-gray);text-transform:uppercase;letter-spacing:1px;">Filtres actifs :</span>
+        <span style="font-size:12px;color:var(--text-gray);text-transform:uppercase;letter-spacing:1px;">{{ __('frontend_rooms.active_filters') }}</span>
         @if(request('type'))
             <span class="filter-chip"><i class="fas fa-layer-group" style="font-size:10px;"></i>{{ \App\Models\Type::find(request('type'))->name ?? '' }}</span>
         @endif
         @if(request('capacity'))
-            <span class="filter-chip"><i class="fas fa-users" style="font-size:10px;"></i>{{ request('capacity') }} personne(s)</span>
+            <span class="filter-chip"><i class="fas fa-users" style="font-size:10px;"></i>{{ request('capacity') }} {{ __('frontend_rooms.persons') }}(s)</span>
         @endif
         @if(request('price_range'))
             <span class="filter-chip"><i class="fas fa-tag" style="font-size:10px;"></i>{{ request('price_range') }} FCFA</span>
         @endif
-        <strong style="color:var(--cactus-green);font-size:13px;">{{ $rooms->total() }} résultat(s)</strong>
+        <strong style="color:var(--cactus-green);font-size:13px;">{{ $rooms->total() }} {{ __('frontend_rooms.results') }}</strong>
         <a href="{{ route('frontend.rooms') }}" style="font-size:12px;color:var(--text-gray);text-decoration:none;margin-left:auto;">
-            <i class="fas fa-times me-1"></i>Effacer tout
+            <i class="fas fa-times me-1"></i>{{ __('frontend_rooms.clear_all') }}
         </a>
     </div>
 </div>
@@ -810,19 +808,19 @@
         {{-- Sort + View bar --}}
         <div class="sort-view-bar">
             <p class="results-count mb-0">
-                <strong>{{ $rooms->total() }}</strong> chambre{{ $rooms->total() > 1 ? 's' : '' }} trouvée{{ $rooms->total() > 1 ? 's' : '' }}
+                <strong>{{ $rooms->total() }}</strong> {{ __('frontend_rooms.found') }}
             </p>
             <div class="d-flex align-items-center gap-3">
                 <div class="sort-group">
-                    <span>Trier</span>
-                    <button class="btn-sort sort-btn" data-sort="price_asc">Prix ↑</button>
-                    <button class="btn-sort sort-btn" data-sort="price_desc">Prix ↓</button>
-                    <button class="btn-sort sort-btn" data-sort="capacity_desc">Capacité</button>
-                    <button class="btn-sort sort-btn" data-sort="name_asc">A-Z</button>
+                    <span>{{ __('frontend_rooms.sort') }}</span>
+                    <button class="btn-sort sort-btn" data-sort="price_asc">{{ __('frontend_rooms.sort_price_asc') }}</button>
+                    <button class="btn-sort sort-btn" data-sort="price_desc">{{ __('frontend_rooms.sort_price_desc') }}</button>
+                    <button class="btn-sort sort-btn" data-sort="capacity_desc">{{ __('frontend_rooms.sort_capacity') }}</button>
+                    <button class="btn-sort sort-btn" data-sort="name_asc">{{ __('frontend_rooms.sort_az') }}</button>
                 </div>
                 <div class="d-flex gap-1">
-                    <button class="btn-view view-btn active" data-view="grid" title="Vue grille"><i class="fas fa-th-large"></i></button>
-                    <button class="btn-view view-btn" data-view="list" title="Vue liste"><i class="fas fa-list"></i></button>
+                    <button class="btn-view view-btn active" data-view="grid" title="{{ __('frontend_rooms.view_grid') }}"><i class="fas fa-th-large"></i></button>
+                    <button class="btn-view view-btn" data-view="list" title="{{ __('frontend_rooms.view_list') }}"><i class="fas fa-list"></i></button>
                 </div>
             </div>
         </div>
@@ -857,14 +855,14 @@
                         {{-- Status badge --}}
                         <span class="room-badge-status {{ $room->is_available_today ? 'available' : 'unavailable' }}">
                             @if($room->is_available_today)
-                                <i class="fas fa-circle" style="font-size:7px;color:var(--g600);margin-right:4px;"></i>Disponible
+                                <i class="fas fa-circle" style="font-size:7px;color:var(--g600);margin-right:4px;"></i>{{ __('frontend_rooms.available_today') }}
                             @else
-                                <i class="fas fa-circle" style="font-size:7px;color:#dc2626;margin-right:4px;"></i>Occupée
+                                <i class="fas fa-circle" style="font-size:7px;color:#dc2626;margin-right:4px;"></i>{{ __('frontend_rooms.unavailable_today') }}
                             @endif
                         </span>
 
                         {{-- Type badge --}}
-                        <span class="room-badge-type">{{ $room->type->name ?? 'Standard' }}</span>
+                        <span class="room-badge-type">{{ $room->type->name ?? __('frontend_rooms.standard_type') }}</span>
 
                         {{-- Favorite --}}
                         <button class="room-fav-btn favorite-btn" data-room-id="{{ $room->id }}" tabindex="-1">
@@ -879,15 +877,15 @@
 
                     {{-- Body --}}
                     <div class="room-card-body">
-                        <div class="room-number-label">Chambre {{ $room->number }}</div>
+                        <div class="room-number-label">{{ __('frontend_rooms.room_number') }} {{ $room->number }}</div>
                         <h3 class="room-name">{{ $room->name }}</h3>
-                        <p class="room-desc">{{ $room->type->description_fr ?? 'Chambre élégante dotée d\'équipements haut de gamme pour un séjour inoubliable.' }}</p>
+                        <p class="room-desc">{{ $room->type->description_fr ?? __('frontend_rooms.default_description') }}</p>
 
                         {{-- Specs --}}
                         <div class="room-specs">
                             <div class="room-spec">
                                 <i class="fas fa-users"></i>
-                                <span>{{ $room->capacity }} pers.</span>
+                                <span>{{ $room->capacity }} {{ __('frontend_rooms.persons_short') }}</span>
                             </div>
                             <div class="room-spec">
                                 <i class="fas fa-expand-arrows-alt"></i>
@@ -895,7 +893,7 @@
                             </div>
                             <div class="room-spec">
                                 <i class="fas fa-building"></i>
-                                <span>Étage {{ $room->floor ?? 'RDC' }}</span>
+                                <span>{{ __('frontend_rooms.floor') }} {{ $room->floor ?? 'RDC' }}</span>
                             </div>
                             @if($room->view)
                             <div class="room-spec">
@@ -924,21 +922,21 @@
                         <div class="room-footer">
                             <div class="room-price">
                                 <div class="amount">{{ $room->type->formatted_price ?? 'N/A' }}</div>
-                                <div class="per-night">par nuit</div>
+                                <div class="per-night">{{ __('frontend_rooms.per_night') }}</div>
                                 @if(!$room->is_available_today && $room->next_available_date)
                                 <div class="room-next-avail">
                                     <i class="fas fa-calendar-alt"></i>
-                                    Dispo le {{ \Carbon\Carbon::parse($room->next_available_date)->format('d/m/Y') }}
+                                    {{ __('frontend_rooms.available_on') }} {{ \Carbon\Carbon::parse($room->next_available_date)->format('d/m/Y') }}
                                 </div>
                                 @endif
                             </div>
                             <div class="room-actions">
                                 <a href="{{ route('frontend.room.details', $room->id) }}" class="btn-room-detail">
-                                    <i class="fas fa-eye"></i> Voir
+                                    <i class="fas fa-eye"></i> {{ __('frontend_rooms.view') }}
                                 </a>
                                 @if($room->is_available_today)
                                 <a href="{{ route('frontend.reservation') }}?room_id={{ $room->id }}" class="btn-room-book">
-                                    <i class="fas fa-calendar-check"></i> Réserver
+                                    <i class="fas fa-calendar-check"></i> {{ __('frontend_rooms.book') }}
                                 </a>
                                 @endif
                             </div>
@@ -950,14 +948,14 @@
             <div class="col-12">
                 <div class="empty-state">
                     <div class="icon-wrap"><i class="fas fa-bed"></i></div>
-                    <h4>Aucune chambre trouvée</h4>
-                    <p>Aucune chambre ne correspond à vos critères de recherche.<br>Essayez d'élargir vos filtres.</p>
+                    <h4>{{ __('frontend_rooms.no_results') }}</h4>
+                    <p>{!! __('frontend_rooms.no_results_desc') !!}</p>
                     <div class="d-flex justify-content-center gap-3 flex-wrap">
                         <a href="{{ route('frontend.rooms') }}" class="btn-room-detail">
-                            <i class="fas fa-redo"></i> Voir toutes les chambres
+                            <i class="fas fa-redo"></i> {{ __('frontend_rooms.view_all') }}
                         </a>
                         <a href="{{ route('frontend.contact') }}" class="btn-room-book">
-                            <i class="fas fa-headset"></i> Contacter le service client
+                            <i class="fas fa-headset"></i> {{ __('frontend_rooms.contact_service') }}
                         </a>
                     </div>
                 </div>
@@ -981,29 +979,29 @@
             <div class="col-lg-3 col-6">
                 <div class="stat-block">
                     <div class="stat-num">{{ $totalRooms ?? 0 }}</div>
-                    <div class="stat-label">Chambres & Suites</div>
-                    <div class="stat-desc">Pour tous vos séjours</div>
+                    <div class="stat-label">{{ __('frontend_rooms.rooms_suites') }}</div>
+                    <div class="stat-desc">{{ __('frontend_rooms.for_all_stays') }}</div>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
                 <div class="stat-block">
                     <div class="stat-num">{{ $availableCount ?? 0 }}</div>
-                    <div class="stat-label">Disponibles ce soir</div>
-                    <div class="stat-desc">Prêtes à vous accueillir</div>
+                    <div class="stat-label">{{ __('frontend_rooms.available_tonight') }}</div>
+                    <div class="stat-desc">{{ __('frontend_rooms.ready_to_welcome') }}</div>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
                 <div class="stat-block">
                     <div class="stat-num">{{ $distinctTypes ?? 0 }}</div>
-                    <div class="stat-label">Catégories</div>
-                    <div class="stat-desc">Standard à Suite Royale</div>
+                    <div class="stat-label">{{ __('frontend_rooms.categories_count') }}</div>
+                    <div class="stat-desc">{{ __('frontend_rooms.standard_to_royal') }}</div>
                 </div>
             </div>
             <div class="col-lg-3 col-6">
                 <div class="stat-block">
                     <div class="stat-num">4.8<span style="font-size:1.5rem;">★</span></div>
-                    <div class="stat-label">Satisfaction client</div>
-                    <div class="stat-desc">Note moyenne 2024</div>
+                    <div class="stat-label">{{ __('frontend_rooms.satisfaction_client') }}</div>
+                    <div class="stat-desc">{{ __('frontend_rooms.avg_rating') }}</div>
                 </div>
             </div>
         </div>
@@ -1016,19 +1014,18 @@
         <div class="row align-items-center">
             <div class="col-lg-7">
                 <span style="display:inline-block;padding:6px 18px;background:rgba(201,169,97,0.15);border:1px solid rgba(201,169,97,0.35);border-radius:50px;color:var(--gold-accent);font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:18px;">
-                    Besoin d'aide ?
+                    {{ __('frontend_rooms.need_help') }}
                 </span>
-                <h2>Trouvez la chambre<br>parfaite pour vous</h2>
+                <h2>{!! __('frontend_rooms.find_perfect_room') !!}</h2>
                 <p>
-                    Notre service client est disponible 24h/24 pour vous conseiller
-                    et vous aider à choisir le séjour qui correspond à vos envies et votre budget.
+                    {{ __('frontend_rooms.find_desc') }}
                 </p>
                 <div class="d-flex flex-wrap gap-3">
                     <a href="{{ route('frontend.reservation') }}" class="btn-cta-gold">
-                        <i class="fas fa-calendar-check"></i> Réserver maintenant
+                        <i class="fas fa-calendar-check"></i> {{ __('frontend_rooms.book_now') }}
                     </a>
                     <a href="{{ route('frontend.contact') }}" class="btn-cta-white">
-                        <i class="fas fa-headset"></i> Service client
+                        <i class="fas fa-headset"></i> {{ __('frontend_rooms.customer_service') }}
                     </a>
                 </div>
             </div>
@@ -1039,7 +1036,7 @@
                     <div style="color:rgba(255,255,255,0.5);font-size:0.85rem;">Haie Vive, Cotonou · Bénin</div>
                     <div style="margin-top:16px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.1);font-size:12px;color:rgba(255,255,255,0.5);">
                         <i class="fas fa-phone me-2" style="color:var(--gold-accent);"></i>
-                        Réservations & informations
+                        {{ __('frontend_rooms.reservations_info') }}
                     </div>
                 </div>
             </div>

@@ -66,20 +66,20 @@
             color: #fff; border-bottom: 1px solid var(--gold-accent);
             border-radius: 0 0 40px 40px;
             box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-            transition: all 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
             overflow: hidden;
             will-change: padding, background, box-shadow;
         }
 
         .menu-header .header-content {
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: all 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
             gap: 15px;
         }
 
         .menu-header img { 
             height: 70px; width: auto; 
-            transition: all 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
             filter: brightness(10);
         }
 
@@ -87,7 +87,7 @@
             font-family: 'Playfair Display', serif;
             font-size: 3.2rem; font-weight: 800; color: var(--white);
             margin: 0; letter-spacing: 6px;
-            transition: all 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
         .menu-header hr {
@@ -96,23 +96,23 @@
             transition: all 0.4s ease;
         }
 
-        /* Scrolled State - Transitions everything precisely */
+        /* Scrolled State - Subtle transition */
         .menu-header.scrolled {
-            padding: 12px 0;
-            border-radius: 0;
+            padding: 16px 0;
+            border-radius: 0 0 20px 20px;
             background: rgba(15, 41, 24, 0.98);
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
 
         .menu-header.scrolled .header-content {
-            flex-direction: row; gap: 20px;
+            flex-direction: column; gap: 5px;
         }
 
-        .menu-header.scrolled img { height: 42px; }
-        .menu-header.scrolled h1 { font-size: 1.6rem; letter-spacing: 4px; }
-        .menu-header.scrolled hr { opacity: 0; width: 0; margin: 0; }
+        .menu-header.scrolled img { height: 55px; }
+        .menu-header.scrolled h1 { font-size: 2.4rem; letter-spacing: 5px; }
+        .menu-header.scrolled hr { width: 30px; }
 
         .menu-qr-wrapper { opacity: 0; transition: opacity 1s; }
         .menu-qr-wrapper.loaded { opacity: 1; }
@@ -162,9 +162,9 @@
     {{-- Ecran d'Entrée --}}
     <div id="entry-screen">
         <div class="entry-content text-center">
-            <img src="{{ asset('img/logo_cactus.png') }}" class="entry-logo mb-4">
+            <img src="{{ $hotel->logoUrl() ?? asset('img/logo_cactus.png') }}" class="entry-logo mb-4">
             <h2 class="entry-sub">BIENVENUE AU</h2>
-            <h1 class="entry-title mb-5">RESTAURANT<br><span style="color:var(--gold-accent)">CACTUS</span></h1>
+            <h1 class="entry-title mb-5">RESTAURANT<br><span style="color:var(--gold-accent)">{{ $hotel->name }}</span></h1>
             <button id="start-menu-btn" class="btn-start">
                 <span>ALLER AU MENU</span>
                 <i class="fas fa-arrow-right ms-2"></i>
@@ -174,8 +174,8 @@
 
     {{-- Splash Screen (caché au début) --}}
     <div id="splash-screen" style="display: none;">
-        <img src="{{ asset('img/logo_cactus.png') }}" alt="Logo" class="splash-logo" style="filter: brightness(10)">
-        <div class="splash-hotel-name">LE CACTUS HOTEL</div>
+        <img src="{{ $hotel->logoUrl() ?? asset('img/logo_cactus.png') }}" alt="Logo" class="splash-logo" style="filter: brightness(10)">
+        <div class="splash-hotel-name">{{ $hotel->name }}</div>
         <div class="splash-title">MENU</div>
         <div class="category-sequence" id="cat-seq"></div>
     </div>
@@ -183,7 +183,7 @@
     <div class="menu-qr-wrapper" id="menu-wrap">
         <header class="menu-header">
             <div class="header-content">
-                <img src="{{ asset('img/logo_cactus.png') }}">
+                <img src="{{ $hotel->logoUrl() ?? asset('img/logo_cactus.png') }}">
                 <div class="title-wrap">
                     <h1>MENU</h1>
                     <hr>

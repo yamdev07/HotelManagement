@@ -1,0 +1,25 @@
+<?php
+
+return [
+    'title' => 'Réserver',
+    'reservation' => 'Réservation',
+    'find_room' => 'Trouvez votre chambre',
+    'arrival' => 'Arrivée',
+    'departure' => 'Départ',
+    'guests' => 'Voyageurs',
+    'guest' => 'personne',
+    'guests_plural' => 'personnes',
+    'search' => 'Rechercher',
+    'rooms_available' => 'chambres disponibles',
+    'room_available' => 'chambre disponible',
+    'nights' => 'nuits',
+    'night' => 'nuit',
+    'travelers' => 'voyageurs',
+    'traveler' => 'voyageur',
+    'no_room_available' => 'Aucune chambre disponible',
+    'try_other_dates' => 'Essayez d\'autres dates ou réduisez le nombre de voyageurs.',
+    'select_dates' => 'Choisissez vos dates ci-dessus pour voir les chambres réellement disponibles.',
+    'secure_payment' => 'Paiement en ligne sécurisé bientôt disponible.',
+    'book' => 'Réserver',
+    'via_whatsapp' => 'Via WhatsApp',
+];

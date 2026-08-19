@@ -1,5 +1,5 @@
 @extends('public.layout')
-@section('title', 'Votre réservation')
+@section('title', __('public_booking.title'))
 
 @push('head')
 <style>
@@ -57,9 +57,9 @@
     <section class="section" style="padding-top:120px;">
         <div class="container bk-wrap">
             <a href="{{ route('public.hotel.availability', ['slug' => $hotel->slug, 'check_in' => $checkIn, 'check_out' => $checkOut, 'guests' => $guests]) }}" class="bk-back">
-                <i class="fas fa-arrow-left"></i> Retour aux chambres
+                <i class="fas fa-arrow-left"></i> {{ __('public_booking.back_to_rooms') }}
             </a>
-            <h1 class="display-serif" style="font-size:clamp(1.8rem,4.5vw,2.6rem); margin-bottom:22px;">Finaliser votre réservation</h1>
+            <h1 class="display-serif" style="font-size:clamp(1.8rem,4.5vw,2.6rem); margin-bottom:22px;">{{ __('public_booking.finalize') }}</h1>
 
             @if (session('booking_error'))
                 <div class="bk-alert"><i class="fas fa-triangle-exclamation"></i> {{ session('booking_error') }}</div>
@@ -68,58 +68,58 @@
             <div class="bk-grid">
                 {{-- Formulaire voyageur --}}
                 <div class="bk-card">
-                    <div class="hd"><i class="fas fa-user"></i> Vos coordonnées</div>
+                    <div class="hd"><i class="fas fa-user"></i> {{ __('public_booking.your_details') }}</div>
                     <div class="bk-body">
                         <form id="bookingForm" method="POST" action="{{ route('public.hotel.booking.store', [$hotel->slug, $roomModel->id]) }}">
                             @csrf
                             <input type="hidden" name="promo_code" value="{{ $promo?->code ?? '' }}">
 
                             <div class="bk-field">
-                                <label>Nom complet *</label>
-                                <input type="text" name="name" value="{{ old('name') }}" placeholder="Prénom Nom" maxlength="255" required>
+                                <label>{{ __('public_booking.full_name') }} *</label>
+                                <input type="text" name="name" value="{{ old('name') }}" placeholder="{{ __('public_booking.name_placeholder') }}" maxlength="255" required>
                                 @error('name')<div class="fe">{{ $message }}</div>@enderror
                             </div>
                             <div class="bk-field">
-                                <label>Email *</label>
-                                <input type="email" name="email" value="{{ old('email') }}" placeholder="vous@exemple.com" required>
+                                <label>{{ __('public_booking.email') }} *</label>
+                                <input type="email" name="email" value="{{ old('email') }}" placeholder="{{ __('public_booking.email_placeholder') }}" required>
                                 @error('email')<div class="fe">{{ $message }}</div>@enderror
                             </div>
                             <div class="bk-field">
-                                <label>Téléphone / WhatsApp *</label>
-                                <input type="tel" name="phone" value="{{ old('phone') }}" placeholder="+229 01 02 03 04" pattern="[0-9+\s().\-]{6,20}" required>
+                                <label>{{ __('public_booking.phone') }} *</label>
+                                <input type="tel" name="phone" value="{{ old('phone') }}" placeholder="{{ __('public_booking.phone_placeholder') }}" pattern="[0-9+\s().\-]{6,20}" required>
                                 @error('phone')<div class="fe">{{ $message }}</div>@enderror
                             </div>
 
-                            <button type="submit" class="bk-submit"><i class="fas fa-check-circle"></i> Confirmer ma réservation</button>
-                            <p class="bk-note"><i class="fas fa-lock"></i> Réservation sans engagement · l'hôtel vous contacte pour l'acompte (paiement en ligne bientôt).</p>
+                            <button type="submit" class="bk-submit"><i class="fas fa-check-circle"></i> {{ __('public_booking.confirm') }}</button>
+                            <p class="bk-note"><i class="fas fa-lock"></i> {{ __('public_booking.note') }}</p>
                         </form>
                     </div>
                 </div>
 
                 {{-- Récapitulatif --}}
                 <div class="bk-card">
-                    <div class="hd"><i class="fas fa-receipt"></i> Récapitulatif</div>
+                    <div class="hd"><i class="fas fa-receipt"></i> {{ __('public_booking.summary') }}</div>
                     <div class="bk-body">
                         <div class="sum-room">
                             <div class="thumb" style="background-image:url('{{ $roomModel->firstImage() }}')"></div>
                             <div>
-                                <div class="rt">{{ $roomModel->type->name ?? 'Chambre' }}</div>
-                                <div class="rn">Chambre {{ $roomModel->number }}</div>
-                                <div class="rc"><i class="fas fa-user"></i> {{ $guests }} voyageur{{ $guests > 1 ? 's' : '' }} · capacité {{ $roomModel->capacity }}</div>
+                                <div class="rt">{{ $roomModel->type->name ?? __('public_booking.room') }}</div>
+                                <div class="rn">{{ __('public_booking.room') }} {{ $roomModel->number }}</div>
+                                <div class="rc"><i class="fas fa-user"></i> {{ $guests }} {{ __('public_booking.guest', $guests) }} · {{ __('public_booking.capacity') }} {{ $roomModel->capacity }}</div>
                             </div>
                         </div>
 
                         <div class="sum-dates">
                             <div class="sd-field">
-                                <label>Arrivée</label>
+                                <label>{{ __('public_booking.check_in') }}</label>
                                 <input type="date" name="check_in" form="bookingForm" id="bkCheckIn" value="{{ $checkIn }}" min="{{ now()->format('Y-m-d') }}" required>
                             </div>
                             <div class="sd-field">
-                                <label>Départ</label>
+                                <label>{{ __('public_booking.check_out') }}</label>
                                 <input type="date" name="check_out" form="bookingForm" id="bkCheckOut" value="{{ $checkOut }}" min="{{ now()->addDay()->format('Y-m-d') }}" required>
                             </div>
                             <div class="sd-field">
-                                <label>Voyageurs</label>
+                                <label>{{ __('public_hero.guests') }}</label>
                                 <select name="guests" form="bookingForm" id="bkGuests">
                                     @for ($i = 1; $i <= $roomModel->capacity; $i++)<option value="{{ $i }}" {{ (int)$guests === $i ? 'selected' : '' }}>{{ $i }}</option>@endfor
                                 </select>
@@ -138,17 +138,17 @@
                             <input type="hidden" name="check_in" id="bkPromoCi" value="{{ $checkIn }}">
                             <input type="hidden" name="check_out" id="bkPromoCo" value="{{ $checkOut }}">
                             <input type="hidden" name="guests" id="bkPromoGuests" value="{{ $guests }}">
-                            <input type="text" name="promo" value="{{ $promoRaw ?? '' }}" placeholder="Code promo" maxlength="40" style="text-transform:uppercase">
-                            <button type="submit">{{ ($discount ?? 0) > 0 ? 'Modifier' : 'Appliquer' }}</button>
+                            <input type="text" name="promo" value="{{ $promoRaw ?? '' }}" placeholder="{{ __('public_booking.promo_placeholder') }}" maxlength="40" style="text-transform:uppercase">
+                            <button type="submit">{{ ($discount ?? 0) > 0 ? __('public_booking.promo_modify') : __('public_booking.promo_apply') }}</button>
                         </form>
                         @if (! empty($promoError))
                             <div class="promo-err"><i class="fas fa-circle-exclamation"></i> {{ $promoError }}</div>
                         @elseif (($discount ?? 0) > 0)
-                            <div class="promo-ok"><i class="fas fa-circle-check"></i> Code appliqué : vous économisez {{ number_format($discount, 0, ',', ' ') }} {{ $hotel->currency }} !</div>
+                            <div class="promo-ok"><i class="fas fa-circle-check"></i> {{ __('public_booking.promo_applied', ['amount' => number_format($discount, 0, ',', ' '), 'currency' => $hotel->currency]) }}</div>
                         @endif
 
                         <div class="sum-total">
-                            <span class="lbl">Total du séjour</span>
+                            <span class="lbl">{{ __('public_booking.total_stay') }}</span>
                             <span class="val">
                                 @if (($discount ?? 0) > 0)<span style="font-size:.9rem;font-weight:600;color:#9aa1ad;text-decoration:line-through;margin-right:6px">{{ number_format($total, 0, ',', ' ') }}</span>@endif
                                 <span id="bkTotal">{{ number_format($finalTotal ?? $total, 0, ',', ' ') }}</span> {{ $hotel->currency }}
@@ -156,8 +156,8 @@
                         </div>
 
                         <div class="sum-deposit">
-                            <i class="fas fa-coins"></i> Acompte suggéré (15 %) : <b><span id="bkDeposit">{{ number_format($deposit, 0, ',', ' ') }}</span> {{ $hotel->currency }}</b><br>
-                            Le solde se règle à l'arrivée.
+                            <i class="fas fa-coins"></i> {{ __('public_booking.suggested_deposit') }} : <b><span id="bkDeposit">{{ number_format($deposit, 0, ',', ' ') }}</span> {{ $hotel->currency }}</b><br>
+                            {{ __('public_booking.balance_due') }}
                         </div>
                     </div>
                 </div>

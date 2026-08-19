@@ -1,16 +1,16 @@
 @php
     $faq = [
-        ['À quelle heure se font le check-in et le check-out ?', "L'arrivée se fait à partir de 14h et le départ jusqu'à 12h. Des arrangements sont possibles selon les disponibilités."],
-        ['Le petit-déjeuner est-il inclus ?', "Selon la formule choisie. N'hésitez pas à nous contacter pour connaître les détails de votre réservation."],
-        ['Proposez-vous un parking ?', "Oui, un stationnement sécurisé est à la disposition de nos clients."],
-        ['Comment réserver ?', "Contactez-nous par téléphone ou par email, nous nous occupons du reste avec plaisir."],
+        [__('public.faq_q1'), __('public.faq_a1')],
+        [__('public.faq_q2'), __('public.faq_a2')],
+        [__('public.faq_q3'), __('public.faq_a3')],
+        [__('public.faq_q4'), __('public.faq_a4')],
     ];
 @endphp
 <section class="section" id="faq" style="background:var(--bg2);">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <div class="eyebrow mb-2">Questions fréquentes</div>
-            <h2 class="display-serif" style="font-size:clamp(2rem,4vw,3.2rem);">Tout ce qu'il faut savoir</h2>
+            <div class="eyebrow mb-2">{{ __('public.faq_title') }}</div>
+            <h2 class="display-serif" style="font-size:clamp(2rem,4vw,3.2rem);">{{ __('public.faq_subtitle') }}</h2>
             <div class="hero-divider" style="background:var(--c);opacity:.5;"></div>
         </div>
         <div class="accordion accordion-flush mx-auto" id="faqAcc" style="max-width:760px;" data-aos="fade-up">

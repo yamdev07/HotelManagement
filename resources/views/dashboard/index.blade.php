@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Dashboard')
+@section('title', __('dashboard.title'))
 @section('content')
 
 <style>

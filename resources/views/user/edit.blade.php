@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'Modifier Utilisateur')
+@section('title', __('user.edit_user'))
 @section('content')
 
 <style>
@@ -251,13 +251,13 @@
 <div class="edit-user-page">
     <!-- Breadcrumb -->
     <div class="edit-user-breadcrumb anim-1">
-        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> Dashboard</a>
+        <a href="{{ route('dashboard.index') }}"><i class="fas fa-home fa-xs"></i> {{ __('user.dashboard') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <a href="{{ route('user.index') }}">Utilisateurs</a>
+        <a href="{{ route('user.index') }}">{{ __('user.users') }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
         <a href="{{ route('user.show', $user->id) }}">{{ $user->name }}</a>
         <span class="sep"><i class="fas fa-chevron-right fa-xs"></i></span>
-        <span class="current">Modifier</span>
+        <span class="current">{{ __('user.edit_breadcrumb') }}</span>
     </div>
 
     <!-- Header -->
@@ -265,15 +265,15 @@
         <div class="edit-user-brand">
             <div class="edit-user-brand-icon"><i class="fas fa-user-edit"></i></div>
             <div>
-                <h1 class="edit-user-header-title">Modifier <em>l'utilisateur</em></h1>
+                <h1 class="edit-user-header-title">{!! __('user.edit_user_title') !!}</h1>
                 <p class="edit-user-header-sub">
-                    <i class="fas fa-user me-1"></i> {{ $user->name }} · Mise à jour des informations
+                    <i class="fas fa-user me-1"></i> {{ $user->name }} · {{ __('user.update_info') }}
                 </p>
             </div>
         </div>
         <div class="edit-user-header-actions">
             <a href="{{ route('user.show', $user->id) }}" class="btn-db btn-db-ghost">
-                <i class="fas fa-eye me-2"></i> Voir le profil
+                <i class="fas fa-eye me-2"></i> {{ __('user.view_profile') }}
             </a>
         </div>
     </div>
@@ -283,7 +283,7 @@
         <div class="alert-db alert-db-danger anim-2">
             <i class="fas fa-exclamation-circle" style="font-size:1.2rem;"></i>
             <div style="flex:1">
-                <strong>Veuillez corriger les erreurs suivantes :</strong>
+                <strong>{{ __('user.fix_errors') }}</strong>
                 <ul>
                     @foreach ($errors->all() as $error)
                         <li>{{ $error }}</li>
@@ -299,7 +299,7 @@
         <div class="edit-user-card-header">
             <h5 class="edit-user-card-title">
                 <i class="fas fa-info-circle"></i>
-                Informations de l'utilisateur
+                {{ __('user.user_info') }}
             </h5>
         </div>
         <div class="edit-user-card-body">
@@ -312,11 +312,11 @@
                     <div class="form-group">
                         <label for="name" class="form-label">
                             <i class="fas fa-user"></i>
-                            Nom complet <span class="required">*</span>
+                            {{ __('user.full_name') }} <span class="required">*</span>
                         </label>
                         <input type="text" class="form-control @error('name') is-invalid @enderror" 
                                id="name" name="name" value="{{ $user->name }}"
-                               placeholder="Nom de l'utilisateur">
+                               placeholder="{{ __('user.user_name_placeholder') }}">
                         @error('name')
                             <div class="text-danger">
                                 <i class="fas fa-exclamation-circle"></i> {{ $message }}
@@ -328,7 +328,7 @@
                     <div class="form-group">
                         <label for="email" class="form-label">
                             <i class="fas fa-envelope"></i>
-                            Email <span class="required">*</span>
+                            {{ __('user.email') }} <span class="required">*</span>
                         </label>
                         <input type="email" class="form-control @error('email') is-invalid @enderror" 
                                id="email" name="email" value="{{ $user->email }}"
@@ -344,28 +344,28 @@
                     <div class="form-group">
                         <label for="role" class="form-label">
                             <i class="fas fa-shield-alt"></i>
-                            Rôle <span class="required">*</span>
+                            {{ __('user.role') }} <span class="required">*</span>
                         </label>
                         <select id="role" name="role" class="form-select @error('role') is-invalid @enderror">
-                            <option selected disabled hidden>-- Sélectionner un rôle --</option>
+                            <option selected disabled hidden>{{ __('user.select_role') }}</option>
                             @if (in_array($user->role, ['Super', 'Admin']))
-                                <option value="Super" @if ($user->role == 'Super') selected @endif>Super Admin</option>
-                                <option value="Admin" @if ($user->role == 'Admin') selected @endif>Administrateur</option>
+                                <option value="Super" @if ($user->role == 'Super') selected @endif>{{ __('user.role_super_admin') }}</option>
+                                <option value="Admin" @if ($user->role == 'Admin') selected @endif>{{ __('user.role_admin_label') }}</option>
                             @endif
                             @if ($user->role == 'Customer')
-                                <option value="Customer" @if ($user->role == 'Customer') selected @endif>Client</option>
+                                <option value="Customer" @if ($user->role == 'Customer') selected @endif>{{ __('user.role_customer_label') }}</option>
                             @endif
                             @if ($user->role == 'Receptionist')
-                                <option value="Receptionist" @if ($user->role == 'Receptionist') selected @endif>Réceptionniste</option>
+                                <option value="Receptionist" @if ($user->role == 'Receptionist') selected @endif>{{ __('user.role_receptionist_label') }}</option>
                             @endif
                             @if ($user->role == 'Housekeeping')
-                                <option value="Housekeeping" @if ($user->role == 'Housekeeping') selected @endif>Housekeeping</option>
+                                <option value="Housekeeping" @if ($user->role == 'Housekeeping') selected @endif>{{ __('user.role_housekeeping_label') }}</option>
                             @endif
                             @if ($user->role == 'Servant')
-                                <option value="Servant" @if ($user->role == 'Servant') selected @endif>Serveur</option>
+                                <option value="Servant" @if ($user->role == 'Servant') selected @endif>{{ __('user.role_servant_label') }}</option>
                             @endif
                             @if ($user->role == 'Cuisiner')
-                                <option value="Cuisiner" @if ($user->role == 'Cuisiner') selected @endif>Cuisinier</option>
+                                <option value="Cuisiner" @if ($user->role == 'Cuisiner') selected @endif>{{ __('user.role_cook_label') }}</option>
                             @endif
                         </select>
                         @error('role')
@@ -374,7 +374,7 @@
                             </div>
                         @enderror
                         <div class="form-hint" style="font-size:.65rem; color:var(--s400); margin-top:4px;">
-                            <i class="fas fa-info-circle"></i> Le rôle détermine les permissions de l'utilisateur
+                            <i class="fas fa-info-circle"></i> {{ __('user.role_hint') }}
                         </div>
                     </div>
                 </div>
@@ -382,10 +382,10 @@
                 <!-- Actions -->
                 <div class="actions-bar">
                     <a href="{{ route('user.index') }}" class="btn-db btn-db-ghost">
-                        <i class="fas fa-times me-2"></i> Annuler
+                        <i class="fas fa-times me-2"></i> {{ __('user.cancel') }}
                     </a>
                     <button type="submit" class="btn-db btn-db-primary">
-                        <i class="fas fa-save me-2"></i> Mettre à jour
+                        <i class="fas fa-save me-2"></i> {{ __('user.update') }}
                     </button>
                 </div>
             </form>

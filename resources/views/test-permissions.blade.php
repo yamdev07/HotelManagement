@@ -11,26 +11,26 @@
         <h1>Test Permissions</h1>
         <div class="card">
             <div class="card-header">
-                <h5>Utilisateur connecté</h5>
+                <h5>{{ __('messages.connected_user') }}</h5>
             </div>
             <div class="card-body">
-                <p><strong>Nom :</strong> {{ $user->name }}</p>
-                <p><strong>Email :</strong> {{ $user->email }}</p>
-                <p><strong>Rôle :</strong> {{ $user->role }}</p>
+                <p><strong>{{ __('messages.name_label') }}</strong> {{ $user->name }}</p>
+                <p><strong>{{ __('messages.email_label') }}</strong> {{ $user->email }}</p>
+                <p><strong>{{ __('messages.role_label') }}</strong> {{ $user->role }}</p>
                 <p><strong>ID :</strong> {{ $user->id }}</p>
             </div>
         </div>
 
         <div class="card mt-3">
             <div class="card-header">
-                <h5>Routes de test</h5>
+                <h5>{{ __('messages.test_routes') }}</h5>
             </div>
             <div class="card-body">
                 <ul class="list-group">
                     @foreach($tests as $name => $url)
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             {{ $name }}
-                            <a href="{{ $url }}" class="btn btn-sm btn-outline-primary" target="_blank">Tester</a>
+                            <a href="{{ $url }}" class="btn btn-sm btn-outline-primary" target="_blank">{{ __('messages.test') }}</a>
                         </li>
                     @endforeach
                 </ul>
@@ -38,7 +38,7 @@
         </div>
 
         <div class="mt-3">
-            <a href="{{ route('dashboard.index') }}" class="btn btn-secondary">Retour au tableau de bord</a>
+            <a href="{{ route('dashboard.index') }}" class="btn btn-secondary">{{ __('messages.back_to_dashboard') }}</a>
         </div>
     </div>
 </body>

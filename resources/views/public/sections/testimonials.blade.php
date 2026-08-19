@@ -2,8 +2,8 @@
 <section class="section dark-sec" id="avis">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <div class="eyebrow mb-2">Témoignages</div>
-            <h2 class="display-serif text-white" style="font-size:clamp(2rem,4vw,3.2rem);">Ils ont séjourné chez nous</h2>
+            <div class="eyebrow mb-2">{{ __('public.reviews_title') }}</div>
+            <h2 class="display-serif text-white" style="font-size:clamp(2rem,4vw,3.2rem);">{{ __('public.reviews_subtitle') }}</h2>
 
             @if (($reviewsCount ?? 0) > 0 && ($reviewsAvg ?? null))
                 <div class="rev-avg" data-aos="fade-up">
@@ -13,7 +13,7 @@
                             <i class="fa{{ $s <= round($reviewsAvg) ? 's' : 'r' }} fa-star"></i>
                         @endfor
                     </span>
-                    <span class="rev-avg-count">{{ $reviewsCount }} avis</span>
+                    <span class="rev-avg-count">{{ $reviewsCount }} {{ __('public.reviews_count') }}</span>
                 </div>
             @endif
 
@@ -42,7 +42,7 @@
 
                             @if ($review->reply)
                                 <div class="rev-reply">
-                                    <div class="rev-reply-label"><i class="fas fa-reply me-1"></i>Réponse de l'établissement</div>
+                                    <div class="rev-reply-label"><i class="fas fa-reply me-1"></i>{{ __('public.reviews_reply') }}</div>
                                     {{ $review->reply }}
                                 </div>
                             @endif
@@ -60,13 +60,13 @@
             </div>
         @else
             <p class="text-center serif" style="opacity:.7;font-size:1.15rem;" data-aos="fade-up">
-                Aucun avis pour le moment, soyez le premier à partager votre expérience.
+                {{ __('public.reviews_none') }}
             </p>
         @endif
 
         {{-- Formulaire de dépôt d'avis --}}
         <div class="rev-form-wrap" data-aos="fade-up">
-            <h3 class="display-serif text-white text-center mb-4" style="font-size:clamp(1.5rem,3vw,2.1rem);">Laissez votre avis</h3>
+            <h3 class="display-serif text-white text-center mb-4" style="font-size:clamp(1.5rem,3vw,2.1rem);">{{ __('public.reviews_leave') }}</h3>
             <form method="POST" action="{{ route('public.hotel.review.store', $hotel->slug) }}" class="rev-form" id="reviewForm">
                 @csrf
                 <div class="rev-stars-input" role="radiogroup" aria-label="Note">
@@ -79,19 +79,19 @@
 
                 <div class="row g-3 mt-1">
                     <div class="col-sm-6">
-                        <input type="text" name="author_name" class="rev-field" placeholder="Votre nom" maxlength="120" value="{{ old('author_name') }}" required>
+                        <input type="text" name="author_name" class="rev-field" placeholder="{{ __('public.reviews_name') }}" maxlength="120" value="{{ old('author_name') }}" required>
                         @error('author_name')<div class="rev-err">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-sm-6">
-                        <input type="text" name="author_city" class="rev-field" placeholder="Votre ville (optionnel)" maxlength="120" value="{{ old('author_city') }}">
+                        <input type="text" name="author_city" class="rev-field" placeholder="{{ __('public.reviews_city') }}" maxlength="120" value="{{ old('author_city') }}">
                     </div>
                 </div>
 
-                <textarea name="comment" class="rev-field mt-3" rows="4" placeholder="Partagez votre expérience…" maxlength="1000" required>{{ old('comment') }}</textarea>
+                <textarea name="comment" class="rev-field mt-3" rows="4" placeholder="{{ __('public.reviews_comment') }}" maxlength="1000" required>{{ old('comment') }}</textarea>
                 @error('comment')<div class="rev-err">{{ $message }}</div>@enderror
 
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn-c"><i class="fas fa-paper-plane me-2"></i>Publier mon avis</button>
+                    <button type="submit" class="btn-c"><i class="fas fa-paper-plane me-2"></i>{{ __('public.reviews_submit') }}</button>
                 </div>
             </form>
         </div>

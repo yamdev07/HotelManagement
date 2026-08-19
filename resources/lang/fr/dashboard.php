@@ -2,6 +2,7 @@
 
 return [
     // Header
+    'title' => 'Tableau de bord',
     'greeting' => 'Bonjour',
     'overview' => 'Vue d\'ensemble des opérations',
     'website' => 'Site web',

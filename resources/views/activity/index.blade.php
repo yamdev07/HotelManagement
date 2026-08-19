@@ -1,5 +1,5 @@
 @extends('template.master')
-@section('title', 'activity.page_title_activity_log')
+@section('title', __('activity.page_title_activity_log'))
 @section('content')
 
 <style>
@@ -748,10 +748,10 @@
                     <label class="form-label">{{ __('activity.filter_subject') }}</label>
                     <select name="subject_type" class="form-select">
                         <option value="">{{ __('activity.filter_all') }}</option>
-                        <option value="App\Models\User" {{ request('subject_type') == 'App\Models\User' ? 'selected' : '' }}>Utilisateurs</option>
-                        <option value="App\Models\Customer" {{ request('subject_type') == 'App\Models\Customer' ? 'selected' : '' }}>Clients</option>
-                        <option value="App\Models\Room" {{ request('subject_type') == 'App\Models\Room' ? 'selected' : '' }}>Chambres</option>
-                        <option value="App\Models\Transaction" {{ request('subject_type') == 'App\Models\Transaction' ? 'selected' : '' }}>Transactions</option>
+                        <option value="App\Models\User" {{ request('subject_type') == 'App\Models\User' ? 'selected' : '' }}>{{ __('activity.subject_users') }}</option>
+                        <option value="App\Models\Customer" {{ request('subject_type') == 'App\Models\Customer' ? 'selected' : '' }}>{{ __('activity.subject_customers') }}</option>
+                        <option value="App\Models\Room" {{ request('subject_type') == 'App\Models\Room' ? 'selected' : '' }}>{{ __('activity.subject_rooms') }}</option>
+                        <option value="App\Models\Transaction" {{ request('subject_type') == 'App\Models\Transaction' ? 'selected' : '' }}>{{ __('activity.subject_transactions') }}</option>
                     </select>
                 </div>
                 
@@ -922,7 +922,7 @@
         <div style="padding: 16px 22px; border-top: 1.5px solid var(--gray-200);">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                 <div style="font-size:.75rem; color:var(--gray-500);">
-                    {{ $activities->firstItem() }} - {{ $activities->lastItem() }} sur {{ $activities->total() }}
+                    {{ $activities->firstItem() }} - {{ $activities->lastItem() }} {{ __('activity.pagination_of') }} {{ $activities->total() }}
                 </div>
                 
                 <ul class="pagination-modern">
@@ -948,7 +948,7 @@
                 </ul>
                 
                 <div class="d-flex align-items-center gap-2">
-                    <span style="font-size:.7rem; color:var(--gray-500);">Lignes:</span>
+                    <span style="font-size:.7rem; color:var(--gray-500);">{{ __('activity.pagination_rows') }}</span>
                     <select class="per-page-select" onchange="changePerPage(this)">
                         <option value="10" {{ $activities->perPage() == 10 ? 'selected' : '' }}>10</option>
                         <option value="25" {{ $activities->perPage() == 25 ? 'selected' : '' }}>25</option>
@@ -1019,11 +1019,11 @@ function showActivityDetails(id) {
                     <div style="display:grid; grid-template-columns:100px 1fr; gap:8px;">
                         <span class="text-muted">ID:</span><span>${data.id}</span>
                         <span class="text-muted">Date:</span><span>${data.created_at}</span>
-                        <span class="text-muted">Événement:</span><span><span class="badge ${data.event_color === 'success' ? 'badge-green' : (data.event_color === 'danger' ? 'badge-red' : 'badge-gray')}">${data.event_label}</span></span>
+                        <span class="text-muted">{{ __('activity.event') }}:</span><span><span class="badge ${data.event_color === 'success' ? 'badge-green' : (data.event_color === 'danger' ? 'badge-red' : 'badge-gray')}">${data.event_label}</span></span>
                         <span class="text-muted">IP:</span><span>${data.ip_address || 'N/A'}</span>
                     </div>
                 </div>
-                <h6 class="fw-bold mb-2">Propriétés</h6>
+                <h6 class="fw-bold mb-2">{{ __('activity.properties') }}</h6>
                 <pre>${JSON.stringify(data.properties, null, 2)}</pre>
             `;
             new bootstrap.Modal(document.getElementById('activityModal')).show();
