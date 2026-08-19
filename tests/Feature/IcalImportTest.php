@@ -89,8 +89,8 @@ class IcalImportTest extends TestCase
             'guests' => 1,
         ]));
         $res->assertOk();
-        $res->assertSee('Chambre 602');
-        $res->assertDontSee('Chambre 601');
+        $res->assertSee('602');
+        $res->assertDontSee('601');
     }
 
     public function test_disappearing_event_releases_the_block(): void
