@@ -59,7 +59,7 @@ class FedaPayService
         $create = $this->client()->post($this->baseUrl().'/transactions', [
             'description' => $description,
             'amount' => $amount,
-            'currency' => ['iso' => $currency],
+            'currency' => ['iso' => $this->normalizeCurrency($currency)],
             'callback_url' => $callbackUrl,
             'customer' => [
                 'firstname' => $firstname,
@@ -117,6 +117,20 @@ class FedaPayService
     public function isApproved(int $transactionId): bool
     {
         return $this->transactionStatus($transactionId) === 'approved';
+    }
+
+    /**
+     * Normalise la devise vers un code ISO accepté par FedaPay.
+     * L'app stocke souvent "CFA"/"FCFA" ; FedaPay attend "XOF" (BCEAO) ou "XAF" (BEAC).
+     */
+    protected function normalizeCurrency(string $currency): string
+    {
+        $c = strtoupper(trim($currency));
+
+        return match ($c) {
+            'CFA', 'FCFA', 'F CFA', 'FRANC CFA' => 'XOF',
+            default => $c,
+        };
     }
 
     /** @return array{0:string,1:string} [prénom, nom] */
