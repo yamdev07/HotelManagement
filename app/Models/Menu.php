@@ -23,7 +23,7 @@ class Menu extends Model
 
     public function getImageUrlAttribute(): string
     {
-        $default = 'https://i.pinimg.com/736x/fc/7a/4a/fc7a4ad5e3299c1dac28baa60eef6111.jpg';
+        $default = asset('img/default/default-dish.svg');
 
         if (! $this->image) {
             return $default;

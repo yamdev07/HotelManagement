@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600" role="img" aria-label="Pas de photo du plat">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#eef1f6"/>
+      <stop offset="1" stop-color="#dfe4ee"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <g fill="none" stroke="#9aa6c2" stroke-width="10" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="400" cy="270" r="120"/>
+    <circle cx="400" cy="270" r="78" stroke-width="6" stroke-dasharray="2 16"/>
+    <!-- fourchette -->
+    <path d="M250 150 v60 a18 18 0 0 0 36 0 v-60 M268 150 v230" stroke-width="9"/>
+    <!-- couteau -->
+    <path d="M540 150 c26 0 34 40 34 80 c0 26 -14 40 -34 44 v106" stroke-width="9"/>
+  </g>
+  <text x="400" y="470" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="700" fill="#6b7793" letter-spacing="1">Pas de photo</text>
+  <text x="400" y="512" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="24" fill="#9aa6c2" letter-spacing="3">MENU</text>
+</svg>
