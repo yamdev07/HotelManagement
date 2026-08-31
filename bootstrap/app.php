@@ -43,6 +43,25 @@ $app->singleton(
 
 /*
 |--------------------------------------------------------------------------
+| Dossier public sur hébergement scindé (app dans private/, web root dans web/)
+|--------------------------------------------------------------------------
+|
+| Sur ce type d'hébergement, la racine servie ("web/") est à côté du dossier
+| de l'application ("private/"). Par défaut public_path() pointe vers
+| private/public, qui n'est PAS servi : les images de chambres uploadées via
+| public_path() n'étaient donc pas accessibles. Si un dossier "web" existe à
+| côté de la racine de l'app, on l'utilise comme dossier public. En local ce
+| dossier n'existe pas, donc le comportement par défaut est conservé.
+|
+*/
+
+$webRoot = dirname($app->basePath()).DIRECTORY_SEPARATOR.'web';
+if (is_dir($webRoot)) {
+    $app->usePublicPath($webRoot);
+}
+
+/*
+|--------------------------------------------------------------------------
 | Return The Application
 |--------------------------------------------------------------------------
 |
