@@ -105,7 +105,7 @@
                             <div>
                                 <div class="rt">{{ $roomModel->type->name ?? __('public_booking.room') }}</div>
                                 <div class="rn">{{ __('public_booking.room') }} {{ $roomModel->number }}</div>
-                                <div class="rc"><i class="fas fa-user"></i> {{ $guests }} {{ __('public_booking.guest', $guests) }} · {{ __('public_booking.capacity') }} {{ $roomModel->capacity }}</div>
+                                <div class="rc"><i class="fas fa-user"></i> {{ __('public_booking.guest', ['count' => $guests]) }} · {{ __('public_booking.capacity') }} {{ $roomModel->capacity }}</div>
                             </div>
                         </div>
 
