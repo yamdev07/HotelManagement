@@ -278,6 +278,36 @@ echo (is_link($link) && @realpath($link) === $target
     ? "   OK : web/storage -> private/storage/app/public\n"
     : "   ⚠️ Lien incorrect : à créer à la main (WinSCP > New > Link).\n")."\n";
 
+// 5b) Lien web/img/room -> private/public/img/room
+// Les images de chambre sont ecrites par l'app dans public_path('img/room/...')
+// = private/public/img/room, qui n'est PAS servi depuis web/. On lie donc ce
+// dossier dans le web root pour que les photos uploadees soient accessibles.
+echo "5b) Lien web/img/room (photos de chambres)...\n";
+$roomTarget = __DIR__.'/../private/public/img/room';
+if (! is_dir($roomTarget)) {
+    @mkdir($roomTarget, 0755, true);
+}
+$roomTarget = realpath($roomTarget);
+$roomLink = __DIR__.'/img/room';
+if ($roomTarget) {
+    if (! is_dir(dirname($roomLink))) {
+        @mkdir(dirname($roomLink), 0755, true); // web/img si absent
+    }
+    $resolved = @realpath($roomLink);
+    $correct = is_link($roomLink) && $resolved === $roomTarget;
+    if (! $correct) {
+        if (file_exists($roomLink) && ! is_link($roomLink)) {
+            @rename($roomLink, __DIR__.'/img/room_old_'.date('Ymd_His')); // sauvegarde d'un vrai dossier
+        } elseif (is_link($roomLink)) {
+            @unlink($roomLink); // lien casse/mauvaise cible
+        }
+        @symlink($roomTarget, $roomLink);
+    }
+}
+echo (is_link($roomLink) && @realpath($roomLink) === $roomTarget
+    ? "   OK : web/img/room -> private/public/img/room\n"
+    : "   ⚠️ Lien incorrect : à créer à la main (WinSCP > New > Link).\n")."\n";
+
 echo "===== TERMINÉ =====\n";
 echo "➡️  Connecte-toi : /login  ($SU_EMAIL / $SU_PASS)\n";
 echo "⚠️  SUPPRIME MAINTENANT ce fichier web/setup.php !\n";
