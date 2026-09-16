@@ -53,6 +53,8 @@ return [
     'action_reset' => 'Réinitialiser',
     'action_edit' => 'Modifier',
     'action_save' => 'Enregistrer',
+    'stat_total' => 'Total de l\'équipe',
+    'validation_errors_title' => 'Veuillez corriger les points suivants :',
 
     // Password reset
     'password_new_placeholder' => 'Nouveau mot de passe (8+, lettres + chiffres)',

@@ -53,6 +53,8 @@ return [
     'action_reset' => 'Reset',
     'action_edit' => 'Edit',
     'action_save' => 'Save',
+    'stat_total' => 'Team total',
+    'validation_errors_title' => 'Please fix the following:',
 
     // Password reset
     'password_new_placeholder' => 'New password (8+, letters + numbers)',
