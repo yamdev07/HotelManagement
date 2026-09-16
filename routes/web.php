@@ -232,6 +232,7 @@ Route::middleware(['auth', 'checkrole:Super,Admin'])->group(function () {
 Route::middleware(['auth', 'checkrole:Super,Admin'])->prefix('personnel')->name('staff.')->group(function () {
     Route::get('/', [\App\Http\Controllers\StaffController::class, 'index'])->name('index');
     Route::post('/', [\App\Http\Controllers\StaffController::class, 'store'])->name('store');
+    Route::put('/{user}', [\App\Http\Controllers\StaffController::class, 'update'])->name('update');
     Route::post('/{user}/reinitialiser', [\App\Http\Controllers\StaffController::class, 'resetPassword'])->name('reset');
     Route::delete('/{user}', [\App\Http\Controllers\StaffController::class, 'destroy'])->name('destroy');
 });

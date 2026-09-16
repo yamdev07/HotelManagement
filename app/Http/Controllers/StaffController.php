@@ -124,6 +124,29 @@ class StaffController extends Controller
         return back()->with('success', __('staff.alert_success_created', ['name' => $data['name']]));
     }
 
+    public function update(Request $request, User $user)
+    {
+        $this->assertOwned($user);
+
+        $data = $request->validate([
+            'name'  => ['required', 'string', 'max:255', new SafeName],
+            'email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'role'  => ['required', Rule::in(array_keys($this->manageableRoles()))],
+        ], [], [
+            'name' => __('staff.validation_name'), 'email' => __('staff.validation_email'), 'role' => __('staff.validation_role'),
+        ]);
+
+        $user->update([
+            'name'  => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'role'  => $data['role'],
+        ]);
+
+        return back()->with('success', __('staff.alert_success_updated', ['name' => $data['name']]));
+    }
+
     public function resetPassword(Request $request, User $user)
     {
         $this->assertOwned($user);

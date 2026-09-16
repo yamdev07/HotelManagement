@@ -51,6 +51,8 @@ return [
     'action_reset_password' => 'Reset Password',
     'action_delete' => 'Delete',
     'action_reset' => 'Reset',
+    'action_edit' => 'Edit',
+    'action_save' => 'Save',
 
     // Password reset
     'password_new_placeholder' => 'New password (8+, letters + numbers)',
@@ -66,6 +68,7 @@ return [
     'alert_success_created' => 'Staff member ":name" created. They can log in with their email and the password you set.',
     'alert_success_reset' => 'Password for :name has been reset.',
     'alert_success_deleted' => 'Member ":name" has been deleted.',
+    'alert_success_updated' => 'Member ":name" has been updated.',
     'alert_error_no_hotel' => 'No establishment associated with your account.',
     'alert_error_unauthorized' => 'Unauthorized action.',
 

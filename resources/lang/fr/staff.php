@@ -51,6 +51,8 @@ return [
     'action_reset_password' => 'Réinitialiser le mot de passe',
     'action_delete' => 'Supprimer',
     'action_reset' => 'Réinitialiser',
+    'action_edit' => 'Modifier',
+    'action_save' => 'Enregistrer',
 
     // Password reset
     'password_new_placeholder' => 'Nouveau mot de passe (8+, lettres + chiffres)',
@@ -66,6 +68,7 @@ return [
     'alert_success_created' => 'Membre du personnel « :name » créé. Il se connecte avec son email et le mot de passe que vous avez défini.',
     'alert_success_reset' => 'Mot de passe de :name réinitialisé.',
     'alert_success_deleted' => 'Membre « :name » supprimé.',
+    'alert_success_updated' => 'Membre « :name » mis à jour.',
     'alert_error_no_hotel' => 'Aucun établissement associé à votre compte.',
     'alert_error_unauthorized' => 'Action non autorisée.',
 

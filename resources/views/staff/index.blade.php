@@ -140,10 +140,28 @@
                         </td>
                         <td><span class="sp-role" style="color:{{ $roleMeta[$m->role][2] ?? 'var(--g600)' }};background:var(--g50);">{{ $roleMeta[$m->role][0] ?? $m->role }}</span></td>
                         <td class="text-end text-nowrap">
+                            <button class="btn-db btn-db-ghost btn-sm" title="{{ __('staff.action_edit') }}" onclick="document.getElementById('ed-{{ $m->id }}').classList.toggle('d-none')"><i class="fas fa-pen"></i></button>
                             <button class="btn-db btn-db-ghost btn-sm" title="{{ __('staff.action_reset_password') }}" onclick="document.getElementById('rp-{{ $m->id }}').classList.toggle('d-none')"><i class="fas fa-key"></i></button>
                             <form action="{{ route('staff.destroy', $m) }}" method="POST" class="d-inline" onsubmit="return confirm('{{ __('staff.confirm_delete', ['name' => $m->name]) }}')">
                                 @csrf @method('DELETE')
                                 <button class="btn-db btn-db-ghost btn-sm sp-danger" title="{{ __('staff.action_delete') }}"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr id="ed-{{ $m->id }}" class="d-none sp-reset">
+                        <td></td>
+                        <td colspan="3">
+                            <form action="{{ route('staff.update', $m) }}" method="POST" class="d-flex gap-2 align-items-center flex-wrap">
+                                @csrf @method('PUT')
+                                <input type="text" name="name" class="search-input" style="max-width:200px" value="{{ old('name', $m->name) }}" placeholder="{{ __('staff.form_full_name') }}" required>
+                                <input type="email" name="email" class="search-input" style="max-width:220px" value="{{ old('email', $m->email) }}" placeholder="{{ __('staff.form_email') }}" required>
+                                <input type="text" name="phone" class="search-input" style="max-width:160px" value="{{ old('phone', $m->phone) }}" placeholder="{{ __('staff.form_phone') }}">
+                                <select name="role" class="search-input" style="max-width:180px" required>
+                                    @foreach ($roles as $key => $label)
+                                        <option value="{{ $key }}" {{ old('role', $m->role) === $key ? 'selected' : '' }}>{{ $roleMeta[$key][0] ?? $label }}</option>
+                                    @endforeach
+                                </select>
+                                <button class="btn-db btn-db-primary btn-sm text-nowrap"><i class="fas fa-check"></i> {{ __('staff.action_save') }}</button>
                             </form>
                         </td>
                     </tr>
