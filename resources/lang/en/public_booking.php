@@ -13,6 +13,7 @@ return [
     'confirm_booking' => 'Confirm my reservation',
     'booking_note' => 'Booking without commitment · the hotel contacts you for the deposit (online payment soon).',
     'summary' => 'Summary',
+    'errors_title' => 'Please fix the following:',
     'room_default' => 'Room',
     'room' => 'Room',
     'night' => ':count night(s)',

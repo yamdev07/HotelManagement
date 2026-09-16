@@ -13,6 +13,7 @@ return [
     'confirm_booking' => 'Confirmer ma réservation',
     'booking_note' => 'Réservation sans engagement · l\'hôtel vous contacte pour l\'acompte (paiement en ligne bientôt).',
     'summary' => 'Récapitulatif',
+    'errors_title' => 'Veuillez corriger les points suivants :',
     'room_default' => 'Chambre',
     'room' => 'Chambre',
     'night' => ':count nuit(s)',

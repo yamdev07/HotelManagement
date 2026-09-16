@@ -47,6 +47,7 @@
     .bk-submit { width:100%; background:var(--c); color:#fff; border:0; border-radius:12px; padding:14px; font-weight:800; font-size:1rem; cursor:pointer; margin-top:6px; display:inline-flex; align-items:center; justify-content:center; gap:9px; }
     .bk-submit:hover { filter:brightness(1.06); }
     .bk-alert { background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; border-radius:12px; padding:12px 15px; margin-bottom:16px; font-size:.9rem; }
+    .bk-invalid, .bk-invalid:focus { border-color:#dc2626 !important; box-shadow:0 0 0 3px rgba(220,38,38,.16) !important; }
     .bk-note { font-size:.78rem; color:#9aa1ad; text-align:center; margin-top:12px; }
     .bk-back { display:inline-flex; align-items:center; gap:7px; color:#6b7280; text-decoration:none; font-size:.86rem; margin-bottom:14px; }
     .bk-back:hover { color:var(--c); }
@@ -64,6 +65,18 @@
             @if (session('booking_error'))
                 <div class="bk-alert"><i class="fas fa-triangle-exclamation"></i> {{ session('booking_error') }}</div>
             @endif
+
+            @if ($errors->any())
+                <div class="bk-alert">
+                    <i class="fas fa-circle-exclamation"></i>
+                    <strong>{{ __('public_booking.errors_title') }}</strong>
+                    <ul style="margin:6px 0 0; padding-left:20px;">
+                        @foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <div id="bkClientError" class="bk-alert" style="display:none;"></div>
 
             <div class="bk-grid">
                 {{-- Formulaire voyageur --}}
@@ -192,6 +205,52 @@
         ci.addEventListener('change', recompute);
         co.addEventListener('change', recompute);
         if (gu) gu.addEventListener('change', function () { if (pGu) pGu.value = gu.value; });
+    })();
+    </script>
+
+    <script>
+    // Signale clairement le champ fautif au lieu de "remonter en haut" sans explication.
+    (function () {
+        var form = document.getElementById('bookingForm');
+        if (!form) return;
+        function labelFor(el) {
+            var map = {
+                name: @json(__('public_booking.full_name')),
+                email: @json(__('public_booking.email')),
+                phone: @json(__('public_booking.phone')),
+                check_in: @json(__('public_booking.check_in')),
+                check_out: @json(__('public_booking.check_out')),
+                guests: @json(__('public_hero.guests'))
+            };
+            return map[el.name] || el.name;
+        }
+        form.addEventListener('submit', function (e) {
+            var firstInvalid = null;
+            Array.prototype.forEach.call(form.elements, function (el) {
+                if (el.willValidate && !el.validity.valid && !firstInvalid) firstInvalid = el;
+            });
+            if (firstInvalid) {
+                e.preventDefault();
+                Array.prototype.forEach.call(form.elements, function (el) {
+                    if (el.classList) el.classList.remove('bk-invalid');
+                });
+                firstInvalid.classList.add('bk-invalid');
+                try { firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (x) {}
+                try { firstInvalid.focus({ preventScroll: true }); } catch (x) {}
+                var msg = firstInvalid.validationMessage || '';
+                var box = document.getElementById('bkClientError');
+                if (box) {
+                    box.innerHTML = '<i class="fas fa-circle-exclamation"></i> <strong>' + labelFor(firstInvalid) + '</strong> : ' + msg;
+                    box.style.display = 'block';
+                }
+                if (typeof firstInvalid.reportValidity === 'function') firstInvalid.reportValidity();
+            }
+        });
+        Array.prototype.forEach.call(form.elements, function (el) {
+            if (!el.addEventListener) return;
+            el.addEventListener('input', function () { el.classList.remove('bk-invalid'); });
+            el.addEventListener('change', function () { el.classList.remove('bk-invalid'); });
+        });
     })();
     </script>
 @endsection
