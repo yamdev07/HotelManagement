@@ -352,31 +352,33 @@
     </div>
 </header>
 
+@php
+    // Vrais chiffres de la plateforme (route publique = aucun tenant → comptage global).
+    // Mis en cache 10 min pour ne pas requêter à chaque visite.
+    try {
+        $kpi = \Illuminate\Support\Facades\Cache::remember('landing_kpis', 600, function () {
+            return [
+                'hotels'   => \App\Models\Hotel::count(),
+                'rooms'    => \App\Models\Room::count(),
+                'bookings' => \App\Models\Transaction::count(),
+            ];
+        });
+    } catch (\Throwable $e) {
+        $kpi = ['hotels' => 0, 'rooms' => 0, 'bookings' => 0];
+    }
+    // On n'affiche QUE les compteurs réellement positifs : jamais de « 0 » qui casse la crédibilité.
+    $stats = array_values(array_filter([
+        ['target'=>(int) $kpi['hotels'],                   'suffix'=>'', 'label'=>__('landing_v2.stat_hotels'),    'icon'=>'fa-hotel'],
+        ['target'=>(int) count(config('plans.countries')), 'suffix'=>'', 'label'=>__('landing_v2.stat_countries'), 'icon'=>'fa-earth-africa'],
+        ['target'=>(int) $kpi['rooms'],                    'suffix'=>'', 'label'=>__('landing_v2.stat_rooms'),     'icon'=>'fa-bed'],
+        ['target'=>(int) $kpi['bookings'],                 'suffix'=>'', 'label'=>__('landing_v2.stat_bookings'),  'icon'=>'fa-calendar-check'],
+    ], fn ($s) => $s['target'] > 0));
+@endphp
+@if (count($stats))
 <!-- STATS (chiffres animés) -->
 <section class="py-5">
     <div class="container">
-        <div class="row g-4 text-center">
-            @php
-                // Vrais chiffres de la plateforme (route publique = aucun tenant → comptage global).
-                // Mis en cache 10 min pour ne pas requêter à chaque visite.
-                try {
-                    $kpi = \Illuminate\Support\Facades\Cache::remember('landing_kpis', 600, function () {
-                        return [
-                            'hotels'   => \App\Models\Hotel::count(),
-                            'rooms'    => \App\Models\Room::count(),
-                            'bookings' => \App\Models\Transaction::count(),
-                        ];
-                    });
-                } catch (\Throwable $e) {
-                    $kpi = ['hotels' => 0, 'rooms' => 0, 'bookings' => 0];
-                }
-                $stats = [
-                    ['target'=>$kpi['hotels'],                    'suffix'=>'', 'label'=>__('landing_v2.stat_hotels'), 'icon'=>'fa-hotel'],
-                    ['target'=>count(config('plans.countries')),  'suffix'=>'', 'label'=>__('landing_v2.stat_countries'),      'icon'=>'fa-earth-africa'],
-                    ['target'=>$kpi['rooms'],                     'suffix'=>'', 'label'=>__('landing_v2.stat_rooms'),       'icon'=>'fa-bed'],
-                    ['target'=>$kpi['bookings'],                  'suffix'=>'', 'label'=>__('landing_v2.stat_bookings'), 'icon'=>'fa-calendar-check'],
-                ];
-            @endphp
+        <div class="row g-4 text-center justify-content-center">
             @foreach ($stats as $i => $s)
                 <div class="col-6 col-lg-3" data-aos="fade-up" data-aos-delay="{{ $i*100 }}">
                     <div class="glass p-4 h-100">
@@ -389,6 +391,7 @@
         </div>
     </div>
 </section>
+@endif
 
 <!-- FEATURES (bento) -->
 <section class="section" id="features">
@@ -642,6 +645,11 @@
             const obs = new IntersectionObserver((es) => es.forEach(e => { if (e.isIntersecting) { run(e.target); obs.unobserve(e.target); } }), { threshold: .6 });
             counters.forEach(c => obs.observe(c));
         } else { counters.forEach(c => c.textContent = fmt(+c.dataset.target, +(c.dataset.decimals || 0))); }
+        // Filet de sécurité : si un compteur est resté à « 0 » alors qu'il a une vraie cible
+        // (observer non déclenché, etc.), on affiche la valeur pour ne jamais laisser un 0.
+        setTimeout(() => counters.forEach(c => {
+            if ((c.textContent || '').trim() === '0' && +c.dataset.target > 0) c.textContent = fmt(+c.dataset.target, +(c.dataset.decimals || 0));
+        }), 2400);
     })();
 
     // Prix par pays
