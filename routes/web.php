@@ -58,6 +58,8 @@ Route::get('/', function () {
     return view('landing-v2');
 })->name('landing');
 Route::view('/v1', 'landing')->name('landing.v1');
+// Démo produit (parcours complet en 6 étapes)
+Route::view('/demo', 'demo')->name('demo');
 // Guide d'utilisation / documentation (accessible à tous)
 Route::view('/guide', 'guide')->name('guide');
 

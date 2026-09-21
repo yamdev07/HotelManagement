@@ -263,7 +263,7 @@
                         <i class="fas fa-rocket me-1"></i> {{ __('landing_v2.hero_cta_start') }}
                         <span style="display:block;font-size:.7rem;font-weight:400;opacity:.85">{{ __('landing_v2.hero_cta_start_sub', ['text' => config('plans.trial_days', 14)]) }}</span>
                     </a>
-                    <a href="#features" class="btn-ghost btn-lg d-inline-flex align-items-center gap-2" style="line-height:1.15;">
+                    <a href="{{ route('demo') }}" class="btn-ghost btn-lg d-inline-flex align-items-center gap-2" style="line-height:1.15;">
                         <i class="fas fa-circle-play fs-5"></i>
                         <span style="text-align:left">{{ __('landing_v2.hero_cta_demo') }}<span style="display:block;font-size:.7rem;font-weight:400;opacity:.7">{{ __('landing_v2.hero_cta_demo_sub') }}</span></span>
                     </a>
