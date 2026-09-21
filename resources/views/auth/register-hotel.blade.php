@@ -52,55 +52,8 @@
                     <form action="{{ route('hotel.register.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                            <h6 class="fw-semibold text-uppercase text-secondary small mb-0">{{ __('register.step_1') }}</h6>
-                            <div class="d-flex align-items-center gap-2">
-                                <label class="small text-secondary mb-0"><i class="fas fa-earth-africa me-1"></i>{{ __('register.country_label') }}</label>
-                                <select name="country" id="country-select" class="form-select form-select-sm" style="width:auto;">
-                                    @foreach ($countries as $code => $c)
-                                        <option value="{{ $code }}" {{ old('country', $defaultCountry) === $code ? 'selected' : '' }}>{{ $c['name'] }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row g-3 mb-4">
-                            @foreach ($plans as $key => $tier)
-                                <div class="col-md-4">
-                                    <label class="plan-card d-block p-3 {{ $selectedPlan === $key ? 'selected' : '' }}" data-plan="{{ $key }}" data-base="{{ $tier['price'] }}">
-                                        <input type="radio" name="plan" value="{{ $key }}" {{ $selectedPlan === $key ? 'checked' : '' }}>
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <span class="fw-bold">{{ $tier['name'] }}</span>
-                                            @if (! empty($tier['popular']))<span class="badge bg-primary">{{ __('register.popular') }}</span>@endif
-                                        </div>
-                                        <div class="plan-price"><span class="price-amount">{{ number_format($tier['price'], 0, ',', ' ') }}</span> <small class="text-secondary fw-normal price-cur" style="font-size:.8rem">XOF/{{ __('register.month') }}</small></div>
-                                        @php $taglines = ['starter' => __('flash.plan_starter_tagline'), 'pro' => __('flash.plan_pro_tagline'), 'business' => __('flash.plan_business_tagline')]; @endphp
-                                        <div class="small text-secondary">{{ $taglines[$key] ?? $tier['tagline'] }}</div>
-                                    </label>
-                                </div>
-                            @endforeach
-                        </div>
-
-                        <h6 class="fw-semibold text-uppercase text-secondary small mb-3">{{ __('register.step_2') }}</h6>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-8">
-                                <label class="form-label">{{ __('register.field_company_name') }}</label>
-                                <input type="text" name="company_name" class="form-control form-control-lg @error('company_name') is-invalid @enderror" value="{{ old('company_name') }}" placeholder="{{ __('register.placeholder_company') }}" maxlength="255" required>
-                                @error('company_name')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">{{ __('register.field_phone') }}</label>
-                                <input type="tel" name="contact_phone" class="form-control form-control-lg @error('contact_phone') is-invalid @enderror" value="{{ old('contact_phone') }}" placeholder="Ex : +229 01 02 03 04" pattern="[0-9+\s().\-]{6,20}" maxlength="20" inputmode="tel">
-                                @error('contact_phone')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">{{ __('register.field_logo') }}</label>
-                                <input type="file" name="logo" class="form-control @error('logo') is-invalid @enderror" accept=".jpg,.jpeg,.png,.webp,.svg,image/*">
-                                <small class="text-muted">JPG, PNG, WEBP ou SVG · 4 Mo max.</small>
-                                @error('logo')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
-                            </div>
-                        </div>
-
-                        <h6 class="fw-semibold text-uppercase text-secondary small mb-3">{{ __('register.step_3') }}</h6>
+                        {{-- Étape 1 : le compte (on demande d'abord qui vous êtes, pas de choix de plan) --}}
+                        <h6 class="fw-semibold text-uppercase text-secondary small mb-3"><i class="fas fa-user me-1"></i> {{ __('register.section_account') }}</h6>
                         <div class="row g-3 mb-4">
                             <div class="col-md-6">
                                 <label class="form-label">{{ __('register.field_full_name') }}</label>
@@ -113,7 +66,36 @@
                                 @error('admin_email')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                                 <small class="text-muted">{{ __('register.field_email_hint') }}</small>
                             </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ __('register.field_phone') }}</label>
+                                <input type="tel" name="contact_phone" class="form-control @error('contact_phone') is-invalid @enderror" value="{{ old('contact_phone') }}" placeholder="Ex : +229 01 02 03 04" pattern="[0-9+\s().\-]{6,20}" maxlength="20" inputmode="tel">
+                                @error('contact_phone')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                            </div>
                         </div>
+
+                        {{-- Étape 2 : l'hôtel (la formule est choisie automatiquement selon le nombre de chambres) --}}
+                        <h6 class="fw-semibold text-uppercase text-secondary small mb-3"><i class="fas fa-hotel me-1"></i> {{ __('register.section_hotel') }}</h6>
+                        <div class="row g-3 mb-2">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ __('register.field_company_name') }}</label>
+                                <input type="text" name="company_name" class="form-control form-control-lg @error('company_name') is-invalid @enderror" value="{{ old('company_name') }}" placeholder="{{ __('register.placeholder_company') }}" maxlength="255" required>
+                                @error('company_name')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label"><i class="fas fa-earth-africa me-1"></i>{{ __('register.country_label') }}</label>
+                                <select name="country" id="country-select" class="form-select form-select-lg">
+                                    @foreach ($countries as $code => $c)
+                                        <option value="{{ $code }}" {{ old('country', $defaultCountry) === $code ? 'selected' : '' }}>{{ $c['name'] }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ __('register.field_rooms') }}</label>
+                                <input type="number" name="nb_rooms" class="form-control form-control-lg @error('nb_rooms') is-invalid @enderror" value="{{ old('nb_rooms') }}" min="1" max="2000" placeholder="Ex : 12" inputmode="numeric">
+                                @error('nb_rooms')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+                        <p class="small text-secondary mb-4"><i class="fas fa-wand-magic-sparkles me-1"></i> {{ __('register.plan_auto_note') }}</p>
 
                         <button type="submit" class="btn btn-brand btn-lg w-100">
                             <i class="fas fa-rocket me-2"></i> {{ __('register.submit') }}

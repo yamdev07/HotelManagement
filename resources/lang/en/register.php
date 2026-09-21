@@ -22,6 +22,10 @@ return [
     'field_full_name' => 'Full name *',
     'field_email' => 'Email *',
     'field_email_hint' => 'Your credentials will be sent to this address.',
+    'section_account' => 'Create my account',
+    'section_hotel' => 'My hotel',
+    'field_rooms' => 'Number of rooms',
+    'plan_auto_note' => 'The right plan is selected automatically based on your number of rooms. During the trial every feature is unlocked; you pick your subscription at the end.',
 
     // Submit
     'submit' => 'Start my free trial',

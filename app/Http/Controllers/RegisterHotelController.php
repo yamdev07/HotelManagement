@@ -42,6 +42,7 @@ class RegisterHotelController extends Controller
             // SafeName (issue #192, plus strict que NoEmoji) + regex téléphone.
             'company_name'  => ['required', 'string', 'max:255', new \App\Rules\SafeName],
             'plan'          => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.tiers')))],
+            'nb_rooms'      => ['nullable', 'integer', 'min:1', 'max:2000'],
             'country'       => ['nullable', 'string', 'in:'.implode(',', array_keys(config('plans.countries')))],
             'contact_phone' => ['nullable', 'string', 'regex:/^[0-9+\s().\-]{6,20}$/'],
             // 'file' plutôt que 'image' : 'image' (getimagesize) rejette les SVG.
@@ -66,7 +67,7 @@ class RegisterHotelController extends Controller
         // on met à jour l'hôtel avec les nouvelles infos et on le reconnecte.
         $existingUser = User::where('email', $data['admin_email'])->first();
         if ($existingUser) {
-            $plan = $data['plan'] ?? config('plans.default', 'starter');
+            $plan = $data['plan'] ?? $this->planForRooms($data['nb_rooms'] ?? null);
             $tier = config('plans.tiers')[$plan];
             $country = $data['country'] ?? config('plans.default_country', 'BJ');
             $currency = config('plans.countries.'.$country.'.currency', 'XOF');
@@ -94,7 +95,7 @@ class RegisterHotelController extends Controller
                 ->with('credentials_email', $existingUser->email);
         }
 
-        $plan = $data['plan'] ?? config('plans.default', 'starter');
+        $plan = $data['plan'] ?? $this->planForRooms($data['nb_rooms'] ?? null);
         $tier = config('plans.tiers')[$plan];
         $country = $data['country'] ?? config('plans.default_country', 'BJ');
         $currency = config('plans.countries.'.$country.'.currency', 'XOF');
@@ -157,6 +158,37 @@ class RegisterHotelController extends Controller
         return redirect()->route('onboarding.show')
             ->with('success', __('flash.register_trial_started', ['days' => config('plans.trial_days', 14)]))
             ->with('credentials_email', $admin->email);
+    }
+
+    /**
+     * Sélectionne automatiquement la formule adaptée au nombre de chambres :
+     * on prend le plus petit palier dont la limite couvre l'établissement.
+     * Sans nombre de chambres, on retombe sur la formule par défaut.
+     */
+    private function planForRooms(?int $rooms): string
+    {
+        if (! $rooms || $rooms < 1) {
+            return config('plans.default', 'starter');
+        }
+
+        $tiers = config('plans.tiers');
+        // Trié par limite croissante ; une limite nulle = illimitée (le plus haut palier).
+        uasort($tiers, function ($a, $b) {
+            $la = $a['room_limit'] ?? PHP_INT_MAX;
+            $lb = $b['room_limit'] ?? PHP_INT_MAX;
+
+            return $la <=> $lb;
+        });
+
+        $fallback = array_key_last($tiers);
+        foreach ($tiers as $key => $tier) {
+            $limit = $tier['room_limit'] ?? PHP_INT_MAX;
+            if ($rooms <= $limit) {
+                return $key;
+            }
+        }
+
+        return $fallback;
     }
 
     private function uniqueSlug(string $name): string

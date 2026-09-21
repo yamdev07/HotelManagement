@@ -22,6 +22,10 @@ return [
     'field_full_name' => 'Nom complet *',
     'field_email' => 'Email *',
     'field_email_hint' => 'Vos identifiants seront envoyés à cette adresse.',
+    'section_account' => 'Créer mon compte',
+    'section_hotel' => 'Mon hôtel',
+    'field_rooms' => 'Nombre de chambres',
+    'plan_auto_note' => 'La formule adaptée est choisie automatiquement selon votre nombre de chambres. Pendant l\'essai, toutes les fonctionnalités sont disponibles ; vous choisirez votre abonnement à la fin.',
 
     // Submit
     'submit' => 'Démarrer mon essai gratuit',
