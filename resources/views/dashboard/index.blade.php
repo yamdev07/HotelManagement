@@ -365,6 +365,9 @@ html[data-theme="dark"] .db-page .btn-db-icon:hover { color: var(--acc); border-
         </div>
     </div>
 
+    {{-- ─── CHECKLIST D'ACTIVATION (masquée à 100 %) ── --}}
+    @include('partials.setup-checklist')
+
     {{-- ─── STAT CARDS ──────────────────────────── --}}
     <div class="stats-grid anim-2">
 
