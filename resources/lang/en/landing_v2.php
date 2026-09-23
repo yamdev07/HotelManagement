@@ -131,4 +131,5 @@ return [
     // Footer
     'footer_rights' => 'Hotel management, reinvented.',
     'footer_login' => 'Log in',
+    'footer_security' => 'Security & data',
 ];

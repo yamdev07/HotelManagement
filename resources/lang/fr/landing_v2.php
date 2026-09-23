@@ -131,4 +131,5 @@ return [
     // Footer
     'footer_rights' => 'La gestion hôtelière réinventée.',
     'footer_login' => 'Connexion',
+    'footer_security' => 'Sécurité & données',
 ];

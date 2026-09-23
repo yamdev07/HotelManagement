@@ -627,7 +627,11 @@
 <footer class="py-5">
     <div class="container d-flex flex-wrap justify-content-between align-items-center gap-3">
         <span class="brand-logo">check<span>inHub</span></span>
-        <span class="text-muted2 small">&copy; {{ now()->year }} checkinHub. {{ __('landing_v2.footer_rights') }}</span>
+        <div class="d-flex flex-wrap align-items-center gap-3 small">
+            <a href="{{ route('securite') }}" class="text-muted2"><i class="fas fa-shield-halved me-1"></i>{{ __('landing_v2.footer_security') }}</a>
+            <a href="{{ route('demo') }}" class="text-muted2"><i class="fas fa-circle-play me-1"></i>{{ __('landing_v2.hero_cta_demo') }}</a>
+            <span class="text-muted2">&copy; {{ now()->year }} checkinHub</span>
+        </div>
         <a href="{{ route('login.index') }}" class="btn-ghost">{{ __('landing_v2.footer_login') }}</a>
     </div>
 </footer>
