@@ -102,4 +102,30 @@ class TrialLifecycleEmailTest extends TestCase
         Mail::assertNotSent(TrialLifecycleMail::class);
         Carbon::setTestNow();
     }
+
+    public function test_day_14_sends_trial_end_when_trial_over(): void
+    {
+        Mail::fake();
+        Carbon::setTestNow('2026-01-01 09:00:00');
+        $this->makeTrialHotel(); // essai jusqu'au 2026-01-15
+
+        Carbon::setTestNow('2026-01-15 09:00:00'); // J+14, essai qui se termine
+        $this->artisan('trial:send-lifecycle')->assertSuccessful();
+
+        Mail::assertSent(TrialLifecycleMail::class, fn ($m) => $m->stage === 'trial_end');
+        Carbon::setTestNow();
+    }
+
+    public function test_day_30_sends_review(): void
+    {
+        Mail::fake();
+        Carbon::setTestNow('2026-01-01 09:00:00');
+        $this->makeTrialHotel();
+
+        Carbon::setTestNow('2026-01-31 09:00:00'); // J+30
+        $this->artisan('trial:send-lifecycle')->assertSuccessful();
+
+        Mail::assertSent(TrialLifecycleMail::class, fn ($m) => $m->stage === 'review');
+        Carbon::setTestNow();
+    }
 }

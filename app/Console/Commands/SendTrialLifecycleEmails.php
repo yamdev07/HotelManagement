@@ -29,7 +29,7 @@ class SendTrialLifecycleEmails extends Command
 
         Hotel::query()
             ->whereNotNull('created_at')
-            ->where('created_at', '>=', now()->subDays(15))
+            ->where('created_at', '>=', now()->subDays(31))
             ->chunkById(100, function ($hotels) use ($today, &$sent) {
                 foreach ($hotels as $hotel) {
                     $days = Carbon::parse($hotel->created_at)->startOfDay()->diffInDays($today);
@@ -40,6 +40,11 @@ class SendTrialLifecycleEmails extends Command
 
                     // L'étape "ending" ne concerne que les essais réellement en cours de fin.
                     if ($stage === 'ending' && ! $this->trialEndingSoon($hotel)) {
+                        continue;
+                    }
+
+                    // "trial_end" seulement si l'essai est terminé et non converti en abonnement payé.
+                    if ($stage === 'trial_end' && ! $this->trialJustEnded($hotel)) {
                         continue;
                     }
 
@@ -88,6 +93,13 @@ class SendTrialLifecycleEmails extends Command
         return $hotel->subscription_ends_at
             && $hotel->subscription_ends_at->isFuture()
             && $hotel->subscription_ends_at->lessThan(now()->addDays(6));
+    }
+
+    /** L'essai est arrivé à terme et l'hôtel n'a pas (encore) souscrit un abonnement longue durée. */
+    private function trialJustEnded(Hotel $hotel): bool
+    {
+        return $hotel->subscription_ends_at === null
+            || $hotel->subscription_ends_at->lessThan(now()->addDays(3));
     }
 
     private function recipient(Hotel $hotel): ?string

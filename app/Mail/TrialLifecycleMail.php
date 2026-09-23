@@ -21,6 +21,8 @@ class TrialLifecycleMail extends Mailable
         3  => 'tips',
         7  => 'usage',
         11 => 'ending',
+        14 => 'trial_end',
+        30 => 'review',
     ];
 
     public function __construct(
@@ -93,6 +95,39 @@ class TrialLifecycleMail extends Mailable
                 'cta' => 'Choisir mon abonnement',
                 'url' => $dashboard,
             ],
+            'trial_end' => [
+                'subject' => 'Votre essai checkinHub est terminé',
+                'heading' => 'Votre essai est terminé',
+                'lines' => [
+                    'Votre période d\'essai gratuite vient de se terminer. Vos données (réservations, clients, caisse) sont conservées.',
+                    'Pour continuer à gérer votre hôtel sans interruption, choisissez votre formule et réglez en ligne (Mobile Money & carte).',
+                    'Besoin d\'un délai ou d\'un conseil ? Répondez à cet email, on s\'arrange.',
+                ],
+                'cta' => 'Choisir mon abonnement',
+                'url' => $dashboard,
+            ],
+            'review' => [
+                'subject' => 'Votre bilan checkinHub à 30 jours',
+                'heading' => 'Votre premier mois en chiffres',
+                'lines' => [
+                    'En un mois, vous avez traité '.$this->bookingsCount().' réservation(s) avec checkinHub. Bravo !',
+                    'Pensez à explorer les fonctionnalités que vous n\'utilisez pas encore : housekeeping, rapports, restaurant, mini-site.',
+                    'Un objectif pour le mois prochain ? Dites-le nous sur WhatsApp, on vous aide à en tirer le maximum.',
+                ],
+                'cta' => 'Voir mon tableau de bord',
+                'url' => $dashboard,
+            ],
         ];
+    }
+
+    /** Nombre de réservations de l'hôtel (sans le scope tenant). */
+    private function bookingsCount(): int
+    {
+        try {
+            return \App\Models\Transaction::withoutGlobalScopes()
+                ->where('hotel_id', $this->hotel->id)->count();
+        } catch (\Throwable $e) {
+            return 0;
+        }
     }
 }
