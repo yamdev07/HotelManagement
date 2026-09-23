@@ -504,7 +504,7 @@
                 @endphp
                 <div class="col-md-6 col-lg-4" data-aos="fade-up" data-aos-delay="{{ $loop->index*120 }}">
                     <div class="price-card {{ $pop ? 'pop' : '' }} p-4 h-100" data-base="{{ $tier['price'] }}">
-                        @if ($pop)<span class="chip mb-2" style="border-color:var(--brand);color:var(--head)"><i class="fas fa-star" style="color:var(--accent)"></i> {{ __('flash.plan_popular') }}</span>@endif
+                        @if ($pop)<span class="chip mb-2" style="border-color:var(--brand);color:var(--head)"><i class="fas fa-star" style="color:var(--accent)"></i> {{ __('landing_v2.pricing_recommended', ['min' => $min, 'max' => $max]) }}</span>@endif
                         <h4 class="fw-bold">{{ $tier['name'] }}</h4>
                         <p class="text-muted2 small">{{ $taglines[$key] ?? $tier['tagline'] }}</p>
                         <div class="chip mb-2" style="color:var(--head)"><i class="fas fa-bed" style="color:var(--brand)"></i> {{ $rooms }}@if ($max === null) · illimité @endif</div>
@@ -520,6 +520,58 @@
                     </div>
                 </div>
             @endforeach
+        </div>
+
+        {{-- Comparatif détaillé des offres --}}
+        @php
+            $cmpTiers = config('plans.tiers');
+            $cmpHas = fn ($t, $m) => in_array($m, $t['modules'] ?? [], true);
+            $cmpRows = [
+                ['label' => __('landing_v2.compare_rooms'),        'val' => fn ($t) => $t['room_limit'] ? $t['room_limit'] : __('landing_v2.compare_unlimited')],
+                ['label' => __('landing_v2.compare_team'),         'val' => fn ($t) => true],
+                ['label' => __('landing_v2.compare_bookings'),     'val' => fn ($t) => true],
+                ['label' => __('landing_v2.compare_cash'),         'val' => fn ($t) => true],
+                ['label' => __('landing_v2.compare_clients'),      'val' => fn ($t) => true],
+                ['label' => __('landing_v2.compare_site'),         'val' => fn ($t) => true],
+                ['label' => __('landing_v2.compare_online_pay'),   'val' => fn ($t) => true],
+                ['label' => __('landing_v2.compare_restaurant'),   'val' => fn ($t) => $cmpHas($t, 'restaurant')],
+                ['label' => __('landing_v2.compare_housekeeping'), 'val' => fn ($t) => $cmpHas($t, 'housekeeping')],
+                ['label' => __('landing_v2.compare_reports'),      'val' => fn ($t) => $cmpHas($t, 'reports')],
+                ['label' => __('landing_v2.compare_support'),      'val' => fn ($t) => __('landing_v2.compare_support_'.$t['key'])],
+            ];
+        @endphp
+        <div class="glass p-2 p-md-4 mt-5" data-aos="fade-up" style="overflow-x:auto;">
+            <h4 class="fw-bold text-center mb-4">{{ __('landing_v2.compare_title') }}</h4>
+            <table class="cmp-table" style="width:100%;border-collapse:collapse;min-width:560px;">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;padding:12px 14px;color:var(--muted2);font-weight:600;">&nbsp;</th>
+                        @foreach ($cmpTiers as $t)
+                            <th style="text-align:center;padding:12px 14px;">
+                                <div class="fw-bold" style="color:var(--head)">{{ $t['name'] }}</div>
+                                <div class="small text-muted2">{{ number_format($t['price'],0,',',' ') }} XOF</div>
+                            </th>
+                        @endforeach
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($cmpRows as $row)
+                        <tr style="border-top:1px solid var(--border)">
+                            <td style="text-align:left;padding:12px 14px;color:var(--txt);font-weight:500;">{{ $row['label'] }}</td>
+                            @foreach ($cmpTiers as $t)
+                                @php $v = ($row['val'])($t); @endphp
+                                <td style="text-align:center;padding:12px 14px;">
+                                    @if (is_bool($v))
+                                        @if ($v)<i class="fas fa-check" style="color:var(--accent)"></i>@else<i class="fas fa-minus" style="color:var(--muted2);opacity:.5"></i>@endif
+                                    @else
+                                        <span style="color:var(--head);font-weight:600">{{ $v }}</span>
+                                    @endif
+                                </td>
+                            @endforeach
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
 </section>
