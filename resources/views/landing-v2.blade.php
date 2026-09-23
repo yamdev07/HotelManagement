@@ -450,27 +450,24 @@
 <section class="section" id="temoignages">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <span class="chip mb-2">{{ __('landing_v2.testimonials_badge') }}</span>
-            <h2 class="fw-bold">{{ __('landing_v2.testimonials_title_1') }} <span class="grad-text">{{ __('landing_v2.testimonials_title_2') }}</span></h2>
+            <span class="chip mb-2">{{ __('landing_v2.clients_badge') }}</span>
+            <h2 class="fw-bold">{{ __('landing_v2.clients_title_1') }} <span class="grad-text">{{ __('landing_v2.clients_title_2') }}</span></h2>
         </div>
-        <div class="row g-4">
-            @php $temoins = [
-                [__('landing_v2.testimonial_1_name'),__('landing_v2.testimonial_1_role'),__('landing_v2.testimonial_1_quote')],
-                [__('landing_v2.testimonial_2_name'),__('landing_v2.testimonial_2_role'),__('landing_v2.testimonial_2_quote')],
-                [__('landing_v2.testimonial_3_name'),__('landing_v2.testimonial_3_role'),__('landing_v2.testimonial_3_quote')],
-            ]; @endphp
-            @foreach ($temoins as $i => $t)
-                <div class="col-md-4" data-aos="fade-up" data-aos-delay="{{ $i*120 }}">
-                    <div class="glass p-4 h-100">
-                        <div class="mb-2" style="color:var(--accent)">
-                            <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
-                        </div>
-                        <p class="mb-4">“{{ $t[2] }}”</p>
-                        <div class="d-flex align-items-center gap-3 mt-auto">
-                            <div class="ico" style="width:44px;height:44px;font-family:'Space Grotesk';font-weight:700">{{ substr($t[0], 0, 1) }}</div>
-                            <div>
-                                <div class="fw-semibold">{{ $t[0] }}</div>
-                                <div class="text-muted2 small">{{ $t[1] }}</div>
+        @php $clients = [
+            ['Cactus Hotel', 'Haie Vive, Cotonou'],
+            ['Morada Lodge', 'Covè'],
+        ]; @endphp
+        <div class="row g-4 justify-content-center">
+            @foreach ($clients as $i => $c)
+                <div class="col-md-5" data-aos="fade-up" data-aos-delay="{{ $i*120 }}">
+                    <div class="glass p-4 h-100 d-flex align-items-center gap-3">
+                        <div class="ico" style="width:56px;height:56px;flex:none"><i class="fas fa-hotel"></i></div>
+                        <div>
+                            <div class="fw-semibold fs-5">{{ $c[0] }}</div>
+                            <div class="text-muted2 small"><i class="fas fa-location-dot me-1"></i>{{ $c[1] }} · {{ __('landing_v2.client_country') }}</div>
+                            <div class="mt-2 d-flex gap-2 flex-wrap">
+                                <span class="chip" style="font-size:.72rem"><i class="fas fa-bed me-1"></i>{{ __('landing_v2.client_rooms_range') }}</span>
+                                <span class="chip" style="font-size:.72rem"><i class="fas fa-circle-check me-1" style="color:var(--accent)"></i>{{ __('landing_v2.client_tag') }}</span>
                             </div>
                         </div>
                     </div>

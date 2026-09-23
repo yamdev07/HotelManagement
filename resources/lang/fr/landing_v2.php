@@ -64,6 +64,12 @@ return [
 
     // Testimonials
     'testimonials_badge' => 'Témoignages',
+    'clients_badge' => 'Nos clients',
+    'clients_title_1' => 'Ils nous font',
+    'clients_title_2' => 'confiance',
+    'client_country' => 'Bénin',
+    'client_rooms_range' => '10 à 20 chambres',
+    'client_tag' => 'Client checkinHub',
     'testimonials_title_1' => 'Ils gèrent leur hôtel avec',
     'testimonials_title_2' => 'checkinHub',
     'testimonial_1_name' => 'Aïcha D.',
