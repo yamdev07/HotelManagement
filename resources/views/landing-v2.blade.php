@@ -695,5 +695,6 @@
     document.readyState==='loading' ? document.addEventListener('DOMContentLoaded',build) : build();
 })();
 </script>
+@include('partials.whatsapp-fab')
 </body>
 </html>

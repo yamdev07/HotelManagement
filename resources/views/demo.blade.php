@@ -113,5 +113,6 @@
             <a href="{{ route('landing') }}" style="color:var(--muted)"><i class="fas fa-arrow-left"></i> Retour à l'accueil</a>
         </div>
     </div>
+    @include('partials.whatsapp-fab')
 </body>
 </html>

@@ -52,6 +52,8 @@ return [
         'phone_id' => env('WHATSAPP_PHONE_ID'),
         'api_version' => env('WHATSAPP_API_VERSION', 'v21.0'),
         'default_country' => env('WHATSAPP_DEFAULT_COUNTRY', '229'), // Bénin par défaut
+        // Numéro WhatsApp commercial/support affiché sur la vitrine (bouton flottant).
+        'support' => env('WHATSAPP_SUPPORT', '0152415241'),
     ],
 
     /*
