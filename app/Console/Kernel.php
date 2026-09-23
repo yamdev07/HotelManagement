@@ -36,6 +36,11 @@ class Kernel extends ConsoleKernel
         // ✅ Vérifier les no-show tous les jours à 02:00
         $schedule->command('hotel:process-no-shows')->dailyAt('02:00');
 
+        // ✅ Emails du cycle d'essai (J+1, J+3, J+7, J+11) tous les jours à 08:00
+        $schedule->command('trial:send-lifecycle')
+            ->dailyAt('08:00')
+            ->withoutOverlapping();
+
         // ✅ Nettoyer les vieux logs toutes les semaines
         $schedule->command('model:prune')->weekly();
     }
