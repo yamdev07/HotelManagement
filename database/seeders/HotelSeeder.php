@@ -16,7 +16,7 @@ class HotelSeeder extends Seeder
         Hotel::firstOrCreate(
             ['slug' => 'hotel-par-defaut'],
             [
-                'name' => config('app.name', 'MyHotel'),
+                'name' => config('app.name', 'checkinHub'),
                 'currency' => 'CFA',
                 'timezone' => config('app.timezone', 'Africa/Lagos'),
                 'is_active' => true,
