@@ -330,6 +330,12 @@
     background: var(--s800); color: white;
     border: none;
 }
+/* Mode sombre : numéro du type*/
+html[data-theme="dark"] .badge--dark {
+    background: rgba(255, 255, 255, .12);
+    color: #eef2ee;
+    border: 1px solid rgba(255, 255, 255, .2);
+}
 .badge--popular {
     background: var(--g100); color: var(--g700);
     border: 1px solid var(--g200);

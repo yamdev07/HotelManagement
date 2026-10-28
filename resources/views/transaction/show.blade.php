@@ -621,6 +621,50 @@
     background: var(--gray-50);
     border-top: 1px solid var(--gray-200);
 }
+/* Mode sombre : badges, bandeaux et textes secondaires */
+html[data-theme="dark"] .info-badge {
+    background: rgba(59, 130, 246, .15);
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, .35);
+}
+html[data-theme="dark"] .alert-status-reservation { background: rgba(245, 158, 11, .12); }
+html[data-theme="dark"] .alert-status-active      { background: rgba(46, 133, 64, .15); }
+html[data-theme="dark"] .alert-status-completed   { background: rgba(59, 130, 246, .12); }
+html[data-theme="dark"] .alert-status-cancelled   { background: rgba(220, 38, 38, .15); }
+
+html[data-theme="dark"] .room-badge-large {
+    background: rgba(46, 133, 64, .18);
+    color: #86efac;
+    border-color: rgba(46, 133, 64, .4);
+}
+
+html[data-theme="dark"] .status-reservation,
+html[data-theme="dark"] .badge-late,
+html[data-theme="dark"] .badge-pending {
+    background: rgba(245, 158, 11, .18);
+    color: #fcd34d;
+    border-color: rgba(245, 158, 11, .4);
+}
+html[data-theme="dark"] .status-active {
+    background: rgba(46, 133, 64, .2);
+    color: #86efac;
+    border-color: rgba(46, 133, 64, .4);
+}
+html[data-theme="dark"] .status-completed,
+html[data-theme="dark"] .badge-early {
+    background: rgba(59, 130, 246, .18);
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, .4);
+}
+html[data-theme="dark"] .status-cancelled {
+    background: rgba(220, 38, 38, .2);
+    color: #fca5a5;
+    border-color: rgba(248, 113, 113, .4);
+}
+
+html[data-theme="dark"] .detail-page .text-muted {
+    color: #9ca3af !important;
+}
 </style>
 
 <div class="detail-page">

@@ -449,6 +449,17 @@
     background: var(--s100); color: var(--s600);
     border: 1px solid var(--s200);
 }
+/* Mode sombre : badges de statut lisibles */
+html[data-theme="dark"] .badge--warning {
+    background: rgba(255, 193, 7, .18);
+    color: #ffd966;
+    border-color: rgba(255, 193, 7, .4);
+}
+html[data-theme="dark"] .badge--danger {
+    background: rgba(220, 38, 38, .2);
+    color: #fca5a5;
+    border-color: rgba(248, 113, 113, .4);
+}
 
 /* ══════════════════════════════════════════════
    EMPTY STATE

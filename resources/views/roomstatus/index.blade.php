@@ -467,6 +467,63 @@
     .status-table{ display: block; overflow-x: auto; }
     .status-table td{ padding: 12px; }
 }
+/* ── Mode sombre : Badges de statut */
+.dark .status-badge--occupied,
+html[data-theme="dark"] .status-badge--occupied,
+body[data-theme="dark"] .status-badge--occupied,
+.dark-mode .status-badge--occupied {
+    background: rgba(220, 38, 38, .18) !important;
+    color: #fca5a5 !important;
+    border-color: rgba(248, 113, 113, .35) !important;
+}
+
+.dark .status-badge--maintenance,
+html[data-theme="dark"] .status-badge--maintenance,
+body[data-theme="dark"] .status-badge--maintenance,
+.dark-mode .status-badge--maintenance {
+    background: rgba(245, 158, 11, .18) !important;
+    color: #fcd34d !important;
+    border-color: rgba(245, 158, 11, .35) !important;
+}
+
+.dark .status-badge--reserved,
+html[data-theme="dark"] .status-badge--reserved,
+body[data-theme="dark"] .status-badge--reserved,
+.dark-mode .status-badge--reserved {
+    background: rgba(99, 102, 241, .18) !important;
+    color: #a5b4fc !important;
+    border-color: rgba(99, 102, 241, .35) !important;
+}
+
+.dark .status-badge--available,
+.dark .status-badge--cleaning,
+html[data-theme="dark"] .status-badge--available,
+html[data-theme="dark"] .status-badge--cleaning,
+body[data-theme="dark"] .status-badge--available,
+body[data-theme="dark"] .status-badge--cleaning,
+.dark-mode .status-badge--available,
+.dark-mode .status-badge--cleaning {
+    background: rgba(46, 133, 64, .2) !important;
+    color: #86efac !important;
+    border-color: rgba(46, 133, 64, .4) !important;
+}
+
+.dark .status-badge--out-of-order,
+html[data-theme="dark"] .status-badge--out-of-order,
+body[data-theme="dark"] .status-badge--out-of-order,
+.dark-mode .status-badge--out-of-order {
+    background: rgba(255, 255, 255, .08) !important;
+    color: #cbd5e1 !important;
+    border-color: rgba(255, 255, 255, .15) !important;
+}
+.dark .code-badge,
+html[data-theme="dark"] .code-badge,
+body[data-theme="dark"] .code-badge,
+.dark-mode .code-badge {
+    background: rgba(255, 255, 255, .08) !important;
+    color: #cbd5e1 !important;
+    border-color: rgba(255, 255, 255, .15) !important;
+}
 </style>
 
 <div class="status-page">

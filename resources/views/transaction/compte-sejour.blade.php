@@ -20,6 +20,25 @@
 .folio-page .btn-success { background: var(--g600) !important; border-color: var(--g600) !important; }
 .folio-page .btn-success:hover { background: var(--g700) !important; border-color: var(--g700) !important; }
 .folio-page .btn-outline-secondary { color: var(--s600); border-color: var(--s300); }
+/* Mode sombre : en-têtes de cartes et textes secondaires */
+html[data-theme="dark"] .folio-page .card-header.bg-warning,
+html[data-theme="dark"] .folio-page .card-header.bg-info,
+html[data-theme="dark"] .folio-page .card-header.bg-dark,
+html[data-theme="dark"] .folio-page .card-header.bg-light {
+    background: rgba(255, 255, 255, .06) !important;
+    color: #eef2ee !important;
+}
+html[data-theme="dark"] .folio-page .card-header .badge,
+html[data-theme="dark"] .folio-page .card-header .badge.bg-light {
+    background: rgba(255, 255, 255, .12) !important;
+    color: #eef2ee !important;
+}
+html[data-theme="dark"] .folio-page .text-muted {
+    color: #9ca3af !important;
+}
+html[data-theme="dark"] .folio-page .form-control::placeholder {
+    color: #9ca3af;
+}
 </style>
 <div class="folio-page">
 <div class="d-flex justify-content-between align-items-center mb-3">

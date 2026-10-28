@@ -513,7 +513,32 @@
     font-size: .65rem;
     font-weight: 600;
 }
-
+/* Mode sombre : badges de date et de statut */
+html[data-theme="dark"] .di-upcoming,
+html[data-theme="dark"] .badge-reservation {
+    background: rgba(245, 158, 11, .18);
+    color: #fcd34d;
+}
+html[data-theme="dark"] .di-overdue {
+    background: rgba(220, 38, 38, .2);
+    color: #fca5a5;
+}
+html[data-theme="dark"] .di-pending {
+    background: rgba(14, 165, 233, .18);
+    color: #7dd3fc;
+}
+html[data-theme="dark"] .di-late,
+html[data-theme="dark"] .badge-late {
+    background: rgba(249, 115, 22, .18);
+    color: #fdba74;
+}
+html[data-theme="dark"] .unpaid-alert {
+    background: rgba(220, 38, 38, .15);
+    border-left-color: #f87171;
+}
+html[data-theme="dark"] .unpaid-alert a {
+    color: #fca5a5;
+}
 /* ── Action buttons ── */
 .action-buttons {
     display: flex;

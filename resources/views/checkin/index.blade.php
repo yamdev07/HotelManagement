@@ -729,6 +729,44 @@
     align-items: center;
     gap: 3px;
 }
+/* Mode sombre */
+html[data-theme="dark"] .unpaid-alert {
+    background: rgba(220, 38, 38, .15);
+    color: #fca5a5;
+    border-left-color: #f87171;
+}
+html[data-theme="dark"] .tag-urgent {
+    background: rgba(220, 38, 38, .2);
+    color: #fca5a5;
+}
+html[data-theme="dark"] .ci-alert-warning {
+    background: rgba(255, 193, 7, .15);
+    border-color: rgba(255, 193, 7, .4);
+    color: #ffd966;
+}
+html[data-theme="dark"] .ci-alert-warning strong,
+html[data-theme="dark"] .ci-alert-warning small {
+    color: #ffd966;
+}
+html[data-theme="dark"] .res-row.dirty-room {
+    background-color: rgba(255, 193, 7, .12);
+}
+html[data-theme="dark"] .res-row.dirty-room:hover {
+    background-color: rgba(255, 193, 7, .2);
+}
+html[data-theme="dark"] .res-row.cleaning-room {
+    background-color: rgba(23, 162, 184, .15);
+}
+html[data-theme="dark"] .res-row.cleaning-room:hover {
+    background-color: rgba(23, 162, 184, .22);
+}
+html[data-theme="dark"] .ci-card-header.warning,
+html[data-theme="dark"] .dep-row.urgent-cleaning {
+    background: rgba(255, 193, 7, .12);
+}
+html[data-theme="dark"] .dep-row.urgent-cleaning:hover {
+    background: rgba(255, 193, 7, .2);
+}
 
 /* ══════════════════════════════════════════════
    DEPARTURE ROWS
