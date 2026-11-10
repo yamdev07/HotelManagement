@@ -28,13 +28,25 @@ class PaymentService
         $activeSession = $this->requireActiveSession();
 
         $amount = (float) $data['amount'];
-        $remaining = $transaction->getRemainingPayment();
-
-        if ($amount > $remaining + 100) {
-            throw PaymentException::amountExceedsBalance($remaining);
-        }
 
         return DB::transaction(function () use ($transaction, $data, $amount, $activeSession) {
+            // Verrou anti double encaissement.
+            //
+            // Le solde etait lu AVANT l'ouverture de la transaction SQL : deux
+            // caissiers encaissant en meme temps lisaient le meme solde et
+            // pouvaient tous deux etre acceptes, faisant depasser le montant du.
+            // On reverrouille la reservation et on recalcule le solde ICI : la
+            // seconde requete attend la premiere, puis voit le solde reel.
+            $transaction = Transaction::whereKey($transaction->id)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $remaining = $transaction->getRemainingPayment();
+
+            if ($amount > $remaining + 100) {
+                throw PaymentException::amountExceedsBalance($remaining);
+            }
+
             $method = PaymentMethod::from($data['payment_method']);
             $reference = $this->generateReference($method, $transaction);
             $description = $this->buildDescription($data);
@@ -81,7 +93,21 @@ class PaymentService
      */
     public function cancel(Payment $payment, string $reason): Payment
     {
-        if (! $payment->status === PaymentStatus::Completed->value && Auth::user()?->role !== 'Super') {
+        // Regle metier, portee par le message de l'exception :
+        // « Un paiement complete ne peut etre annule que par un administrateur. »
+        //
+        // L'ecriture precedente etait « ! $payment->status === ... » : en PHP le
+        // « ! » s'applique AVANT le « === », donc la condition valait
+        // (!"completed") === "completed", soit false === "completed", toujours
+        // faux. Le garde-fou ne se declenchait jamais et n'importe qui pouvait
+        // annuler un paiement deja encaisse.
+        if ($payment->status === PaymentStatus::Completed->value && Auth::user()?->role !== 'Super') {
+            throw PaymentException::cannotCancelCompletedPayment();
+        }
+
+        // Un paiement deja annule ne doit pas l'etre une seconde fois :
+        // sans ce garde-fou, chaque annulation rejoue les effets financiers.
+        if ($payment->status === PaymentStatus::Cancelled->value) {
             throw PaymentException::cannotCancelCompletedPayment();
         }
 
